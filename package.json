@@ -1,0 +1,20 @@
+{
+  "name": "@ttt/dcc-api",
+  "version": "0.0.1",
+  "description": "NodeJS Websocket Server that processes DCC commands and sends them via Serial over USB to an Arduino Mega running DCC-EX EX-CommandStation.",
+  "main": "index.mjs",
+  "author": "Josh McDannel",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "start": "node ./index.mjs"
+  },
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "serialport": "^11.0.0",
+    "signale": "^1.4.0",
+    "wait-on": "^7.0.1",
+    "ws": "^8.13.0"
+  }
+}
