@@ -35,7 +35,7 @@ const handleConnection = (ws, resolve) => {
   server.on('close', handleClose);
   server.on('message', dcc.handleMessage);
   server.send(MSG_CONNECTED);
-  processQueeue();
+  queue.length && processQueeue();
   resolve(ws);
 }
 
