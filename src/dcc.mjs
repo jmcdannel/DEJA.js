@@ -52,14 +52,32 @@ const handleMessage = async (msg) => {
     case 'throttle':
       sendSpeed(payload);
       break;
+    case 'output':
+        sendOutput(payload);
+      break;
     case 'function':
       log.star('sendFunction',payload);
       sendFunction(payload);
       break;
     default:
       //noop
+      log.warn('[DCC] Unknown action in `handleMessage`', action, payload);
   }
 };
+
+const initializeOutput = async (payload) => {
+  log.star('initializeOutput', payload);
+  payload.map(async out => {
+    const cmd = `Z ${out.id} ${out.pin} 1`;
+    await send(cmd);
+  });
+}
+
+const sendOutput = async (payload) => {
+  log.star('sendOutput', payload);
+  const cmd = `Z ${payload.pin} ${payload.state ? 1 : 0}`;
+  await send(cmd);
+}
 
 const connect = async (payload) => {
   try {

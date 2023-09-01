@@ -5,7 +5,7 @@ import dcc from './dcc.mjs';
 let server;
 let queue = [];
 const port = 8082; // TODO: move to config
-const serverId = 'EX-JS-API-WebsocketServer'; // TODO: move to config
+const serverId = 'EX-JS-API-WebSocketServer'; // TODO: move to config
 
 const MSG_CONNECTED = JSON.stringify({
   action: 'socketConnected',
@@ -13,7 +13,7 @@ const MSG_CONNECTED = JSON.stringify({
 });
 
 async function processQueeue() {
-  log.log('[EX-JS-API] processQueeue', queue);
+  log.log('[EX-JS-API] Process queeue', queue);
   queue.map(async (data) => {
     await server.send(JSON.stringify(data));
   });
@@ -21,7 +21,7 @@ async function processQueeue() {
 }
 
 const handleClose = () => {
-  log.info('[EX-JS-API] connection closed', serverId);
+  log.info('[EX-JS-API] Connection closed', serverId);
 }
 
 const handleError = err => {
@@ -29,7 +29,7 @@ const handleError = err => {
 }
 
 const handleConnection = (ws, resolve) => {
-  log.success('[EX-JS-API] new client connected', serverId);
+  log.success('[EX-JS-API] New client connected', serverId);
   server = ws;
   server.onerror = handleError;
   server.on('close', handleClose);
