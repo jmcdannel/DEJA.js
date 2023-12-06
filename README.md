@@ -1,10 +1,21 @@
 # EX-JS-API
 NodeJS Rest API and WebSocket server that connects to a DCC-EX EX-Command Station via USB Serial.
 
+## Usage
+
+```Bash
+$ yarn
+$ yarn start
+```
+
+## Example(s)
+
+```JavaScript
+// TODO
+```
 
 ## Command Reference
 
-connect | @payload: {Object} `{ serial: String }` | serial: Path to serial port
 | action  | payload | example | meta  | desc  | notes  |
 |---|---|---|---|---|---|
 | connect  | {Object} @serial: String  | `{ serial: '/devv/ttyusb2301' }`  | Required  | serial: Path to serial port  |   |
@@ -14,3 +25,8 @@ connect | @payload: {Object} `{ serial: String }` | serial: Path to serial port
 | output  |   |   |   |  |  |
 | function  |   |   |   |   | |
 | tbd  |   |   |   | |   |
+
+## Roadmap
+
+- [ ] TypeScript
+- [ ] Unit Tests

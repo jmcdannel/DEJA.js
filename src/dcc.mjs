@@ -23,6 +23,9 @@ const handleMessage = async (msg) => {
     case 'throttle':
       sendSpeed(payload);
       break;
+    case 'turnout':
+      sendTurnout(payload);
+      break;
     case 'output':
       sendOutput(payload);
       break;
@@ -86,6 +89,12 @@ const sendSpeed = async ({ address, speed }) => {
   const absSpeed = Math.abs(speed);
   log.star('[DCC] Throttle', address, speed, direction);
   const cmd = `t 01 ${address} ${absSpeed} ${direction}`;
+  await send(cmd);
+};
+
+const sendTurnout = async ({ turnoutId, state }) => {
+  log.star('[DCC] Turnout', turnoutId, state);
+  const cmd = `T ${turnoutId} ${state ? 1 : 0}`;
   await send(cmd);
 };
 
