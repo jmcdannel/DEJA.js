@@ -14,6 +14,9 @@ const handleMessage = async (msg) => {
     case 'connect':
       connect(payload);
       break;
+    case 'dcc':
+      send(payload);
+      break;
     case 'listPorts':
       listPorts();
       break;
@@ -88,7 +91,7 @@ const sendSpeed = async ({ address, speed }) => {
   const direction = speed > 0 ? 1 : 0;
   const absSpeed = Math.abs(speed);
   log.star('[DCC] Throttle', address, speed, direction);
-  const cmd = `t 01 ${address} ${absSpeed} ${direction}`;
+  const cmd = `t ${address} ${absSpeed} ${direction}`;
   await send(cmd);
 };
 
