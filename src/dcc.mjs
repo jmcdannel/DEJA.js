@@ -57,6 +57,11 @@ const send = async (data) => {
   }
 };
 
+const handleDccMessage = async (payload) => {
+  log.complete('handleDccMessage:', payload)
+  server.send({ action: 'broadcast', payload });
+};
+
 const connect = async (payload) => {
   try {
     log.star('[DCC] connect', payload);
@@ -66,13 +71,13 @@ const connect = async (payload) => {
       isConnected = true;
       return Promise.resolve(true);
     } else {
-      port = await serial.connect({ path, baudRate });
+      port = await serial.connect({ path, baudRate, handleDccMessage });
       await server.send({ 'action': 'connected', payload: { path, baudRate } });
       isConnected = true;
       return Promise.resolve(port);
     }
   } catch (err) {
-    log.fatal('[DCC] Error opening port: ', err.message);
+    log.fatal('[DCC] Error opening port: ', err);
   }
 };
 

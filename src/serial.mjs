@@ -1,42 +1,56 @@
 import { SerialPort } from 'serialport';
+
 import log from './utils/logger.mjs';
 
 let isConnected = false;
 let port;
 
-const connect = ({ path, baudRate }) => {
+const connect = ({ path, baudRate, handleDccMessage }) => {
+  try {
   if (isConnected) {
-    return Promise.resolve(port);
-  } else {
-    return new Promise(function(resolve, reject) {
+      return Promise.resolve(port);
+    } else {
+      return new Promise(function(resolve, reject) {
 
-      if (!path) reject({ message: '[SERIAL] No serial port specified' });
+        if (!path) reject({ message: '[SERIAL] No serial port specified' });
 
-      log.await('[SERIAL] Attempting to connect to:', path);
+        log.await('[SERIAL] Attempting to connect to:', path);
 
-      const handleOpen = err => {
-        if (err) {
-          reject(`[SERIAL] Error opening port: ${err.message}`);
-          return;
+        const handleOpen = err => {
+          if (err) {
+            reject(`[SERIAL] Error opening port: ${err.message}`);
+            return;
+          }
+          log.complete('[SERIAL] Open');
+
+          isConnected = true;
         }
-        log.complete('[SERIAL] Open');
 
-        isConnected = true;
-      }
+        const handleOpened = async () => {
+          log.start('[SERIAL] Serial port opened', path, baudRate);
+          resolve(port);
+        }
+        
+        // Create a port
+        port = new SerialPort({ path, baudRate, autoOpen: false });
+        port.setEncoding('utf8');
+        port.on('open', handleOpened);
+        // Read data that is available but keep the stream in "paused mode"
+        // port.on('readable', function () {
+        //   log.fav('readable:', port.read())
+        // })
 
-      const handleOpened = async () => {
-        log.start('[SERIAL] Serial port opened', path, baudRate);
-        resolve(port);
-      }
-      
-      // Create a port
-      port = new SerialPort({ path, baudRate, autoOpen: false });
-      port.open(handleOpen);
-      port.on('open', handleOpened);
+        // // Switches the port into "flowing mode"
+        port.on('data', handleDccMessage);
+        
+        port.open(handleOpen);
 
-      log.info('[SERIAL] Port Status', port.isOpen, port.settings);
+        log.info('[SERIAL] Port Status', port.isOpen, port.settings);
 
-    });
+      });
+    }
+  } catch (err) {
+    log.fatal('[SERIAL] Error opening port: ', err);
   }
 }
 
