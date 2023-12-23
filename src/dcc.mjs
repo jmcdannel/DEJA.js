@@ -58,7 +58,7 @@ const send = async (data) => {
 };
 
 const handleDccMessage = async (payload) => {
-  log.complete('handleDccMessage:', payload)
+  log.complete('handleDccMessage: broadcast', payload)
   server.send({ action: 'broadcast', payload });
 };
 
@@ -71,7 +71,7 @@ const connect = async (payload) => {
       isConnected = true;
       return Promise.resolve(true);
     } else {
-      port = await serial.connect({ path, baudRate, handleDccMessage });
+      port = await serial.connect({ path, baudRate, handleMessage: handleDccMessage });
       await server.send({ 'action': 'connected', payload: { path, baudRate } });
       isConnected = true;
       return Promise.resolve(port);

@@ -1,11 +1,11 @@
 import { SerialPort } from 'serialport';
-
+import { ReadlineParser } from '@serialport/parser-readline'
 import log from './utils/logger.mjs';
 
 let isConnected = false;
 let port;
 
-const connect = ({ path, baudRate, handleDccMessage }) => {
+const connect = ({ path, baudRate, handleMessage }) => {
   try {
   if (isConnected) {
       return Promise.resolve(port);
@@ -35,13 +35,17 @@ const connect = ({ path, baudRate, handleDccMessage }) => {
         port = new SerialPort({ path, baudRate, autoOpen: false });
         port.setEncoding('utf8');
         port.on('open', handleOpened);
+
+        const parser = port.pipe(new ReadlineParser())
+        parser.on('data', handleMessage);
+        // parser.on('data', handleMessage);
         // Read data that is available but keep the stream in "paused mode"
         // port.on('readable', function () {
         //   log.fav('readable:', port.read())
         // })
 
         // // Switches the port into "flowing mode"
-        port.on('data', handleDccMessage);
+        // port.on('data', handleMessage);
         
         port.open(handleOpen);
 
