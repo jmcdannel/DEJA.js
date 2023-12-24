@@ -64,7 +64,7 @@ const send = (data) => {
     if (err) {
       return log.error('[SERIAL] Error on write: ', err.message);
     }
-    // log.log('data written', data);
+    log.log('data written', data);
   });
 };
 

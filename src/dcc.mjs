@@ -66,10 +66,9 @@ const connect = async (payload) => {
   try {
     log.star('[DCC] connect', payload);
     const path = payload.serial;
-    if (isConnected) {
+    if (isConnected && port) {
       await server.send({ 'action': 'connected', payload: { path, baudRate } });
-      isConnected = true;
-      return Promise.resolve(true);
+      return Promise.resolve(port);
     } else {
       port = await serial.connect({ path, baudRate, handleMessage: handleDccMessage });
       await server.send({ 'action': 'connected', payload: { path, baudRate } });
