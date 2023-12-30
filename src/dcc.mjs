@@ -59,6 +59,9 @@ const send = async (data) => {
 
 const handleDccMessage = async (payload) => {
   log.complete('handleDccMessage: broadcast', payload)
+  if (payload.startsWith('<p')) {
+    console.log('POWER STATUS',  payload)
+  }
   server.send({ action: 'broadcast', payload });
 };
 
@@ -87,7 +90,7 @@ const listPorts = async () => {
 };
 
 const power = async (state) => {
-  await send(parseInt(state));
+  await send(state);
   log.star('[DCC] Power', state);
 };
 

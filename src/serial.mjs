@@ -38,14 +38,6 @@ const connect = ({ path, baudRate, handleMessage }) => {
 
         const parser = port.pipe(new ReadlineParser())
         parser.on('data', handleMessage);
-        // parser.on('data', handleMessage);
-        // Read data that is available but keep the stream in "paused mode"
-        // port.on('readable', function () {
-        //   log.fav('readable:', port.read())
-        // })
-
-        // // Switches the port into "flowing mode"
-        // port.on('data', handleMessage);
         
         port.open(handleOpen);
 
