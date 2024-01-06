@@ -1,6 +1,6 @@
 import serial from './serial.mjs';
 import getPorts from './utils/listPorts.mjs';
-import server from './server.mjs'; // TODO: refactor to use event emitter
+import { broadcast } from './broadcast.mjs'; // TODO: refactor to use event emitter
 import log from './utils/logger.mjs';
 
 let port; // serial port instance
@@ -8,8 +8,9 @@ let isConnected = false; // serial port connection status
 const baudRate = 115200; // TODO: move to config
 
 const handleMessage = async (msg) => {
+  log.note('[DCC] handleMessage', msg);
+  try {
   const { action, payload } = JSON.parse(msg);
-  log.note('[DCC] handleMessage', action, payload);
   switch (action) {
     case 'connect':
       connect(payload);
@@ -39,6 +40,9 @@ const handleMessage = async (msg) => {
     default:
       //noop
       log.warn('[DCC] Unknown action in `handleMessage`', action, payload);
+    }
+  } catch (err) {
+    log.fatal('[DCC] Error handling message:', err);
   }
 };
 
@@ -57,24 +61,17 @@ const send = async (data) => {
   }
 };
 
-const handleDccMessage = async (payload) => {
-  log.complete('handleDccMessage: broadcast', payload)
-  if (payload.startsWith('<p')) {
-    console.log('POWER STATUS',  payload)
-  }
-  server.send({ action: 'broadcast', payload });
-};
-
 const connect = async (payload) => {
   try {
     log.star('[DCC] connect', payload);
     const path = payload.serial;
     if (isConnected && port) {
-      await server.send({ 'action': 'connected', payload: { path, baudRate } });
+      await broadcast({ 'action': 'connected', payload: { path, baudRate } });
       return Promise.resolve(port);
     } else {
-      port = await serial.connect({ path, baudRate, handleMessage: handleDccMessage });
-      await server.send({ 'action': 'connected', payload: { path, baudRate } });
+      const handleMessage = async (payload) => await broadcast({ action: 'broadcast', payload });
+      port = await serial.connect({ path, baudRate, handleMessage });
+      await broadcast({ 'action': 'connected', payload: { path, baudRate } });
       isConnected = true;
       return Promise.resolve(port);
     }
@@ -85,7 +82,7 @@ const connect = async (payload) => {
 
 const listPorts = async () => {
   const payload = await getPorts();
-  await server.send({ 'action': 'listPorts', payload });
+  await broadcast({ 'action': 'listPorts', payload });
   log.star('[DCC] List ports', payload);
 };
 
