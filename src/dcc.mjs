@@ -50,12 +50,13 @@ const send = async (data) => {
   try {
     const cmd = `<${data}>\n`
     log.await('[DCC] Writing to port', data);
-    await port.write(cmd, err => {
-      if (err) {
-        return log.error('[DCC] Error on write:', err.message);
-      }
-      log.complete('[DCC] Data written to port', cmd);
-    });
+    // await port.write(cmd, err => {
+    //   if (err) {
+    //     return log.error('[DCC] Error on write:', err.message);
+    //   }
+    //   log.complete('[DCC] Data written to port', cmd);
+    // });
+    serial.send(cmd);
   } catch (err) {
     log.fatal('[DCC] Error writting to port:', err);
   }
@@ -106,7 +107,7 @@ const sendTurnout = async ({ turnoutId, state }) => {
 };
 
 const sendFunction = async ({ address, func, state }) => {
-  log.star('[DCC]  Function', address, func);
+  log.star('[DCC] Function', address, func);
   const cmd = `F ${address} ${func} ${state ? 1 : 0}`;
   await send(cmd);
 };

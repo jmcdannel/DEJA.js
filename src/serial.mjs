@@ -7,7 +7,7 @@ let port;
 
 const connect = ({ path, baudRate, handleMessage }) => {
   try {
-  if (isConnected) {
+    if (isConnected) {
       return Promise.resolve(port);
     } else {
       return new Promise(function(resolve, reject) {
@@ -51,13 +51,18 @@ const connect = ({ path, baudRate, handleMessage }) => {
 }
 
 const send = (data) => {
-  log.await('[SERIAL] writing to port', JSON.stringify(data));
-  port.write(`${JSON.stringify(data)}\n`, err => {
-    if (err) {
-      return log.error('[SERIAL] Error on write: ', err.message);
-    }
+  try {
+    log.await('[SERIAL] writing to port', JSON.stringify(data));
+    port.write(data, err => {
+      if (err) {
+        return log.error('[SERIAL] Error on write: ', err.message);
+      }
+      log.log('data written', data);
+    });
     log.log('data written', data);
-  });
+  } catch (err) {
+    log.fatal('[SERIAL] Error writing to port:', err);
+  }
 };
 
 export default {
