@@ -37,6 +37,9 @@ const handleMessage = async (msg) => {
       log.star('sendFunction',payload);
       sendFunction(payload);
       break;
+    case 'status':
+      log.star('status',payload);
+      break;
     default:
       //noop
       log.warn('[DCC] Unknown action in `handleMessage`', action, payload);

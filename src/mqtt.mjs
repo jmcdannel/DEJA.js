@@ -21,7 +21,7 @@ const connect = () => {
   mqttClient.on('connect', () => {
     log.log('mqttClient connection successful')
     mqttClient.publish('DCCEX.js', 'Hello mqtt')
-    mqttClient.subscribe('ttt-dispatcher', handleSubscribeError)
+    // mqttClient.subscribe('ttt-dispatcher', handleSubscribeError)
     mqttClient.subscribe('ttt-dcc', handleSubscribeError)
   })
 
@@ -38,7 +38,7 @@ const connect = () => {
 
   // https://github.com/mqttjs/MQTT.js#event-message
   mqttClient.on('message', (topic, message) => {
-    console.log(`mqttClient received message: ${message} from topic: ${topic}`)
+    // console.log(`mqttClient received message: ${message} from topic: ${topic}`)
     dcc.handleMessage(message.toString());
   })
 };
