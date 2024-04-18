@@ -53,13 +53,12 @@ const connect = ({ path, baudRate, handleMessage }) => {
 const send = (data) => {
   try {
     log.await('[SERIAL] writing to port', JSON.stringify(data));
-    port.write(data, err => {
+    isConnected && port.write(data, err => {
       if (err) {
         return log.error('[SERIAL] Error on write: ', err.message);
       }
       log.log('data written', data);
     });
-    log.log('data written', data);
   } catch (err) {
     log.fatal('[SERIAL] Error writing to port:', err);
   }

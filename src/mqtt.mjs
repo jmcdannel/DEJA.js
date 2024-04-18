@@ -2,8 +2,10 @@ import mqtt from "mqtt";
 import log from './utils/logger.mjs';
 import dcc from './dcc.mjs';
 
-const mqttBroker = 'mqtt://joshs-mac-mini.local'
-const mqttPort = 5005;
+// const mqttBroker = 'mqtt://joshs-mac-mini.local'
+// const mqttPort = 5005;
+const mqttBroker = process.env.VITE_MQTT_BROKER
+const mqttPort = 8081
 
 let mqttClient;
 
@@ -20,9 +22,12 @@ const connect = () => {
   // https://github.com/mqttjs/MQTT.js#event-connect
   mqttClient.on('connect', () => {
     log.log('mqttClient connection successful')
-    mqttClient.publish('DCCEX.js', 'Hello mqtt')
+    // mqttClient.publish('@ttt/DCCEX.js', '{ msg: "Hello mqtt" }')
+    mqttClient.publish('@ttt/DCCEX.js', JSON.stringify({ action: 'ack', payload: 'Hello mqtt' }))
     // mqttClient.subscribe('ttt-dispatcher', handleSubscribeError)
+    // mqttClient.subscribe('@ttt/dccex', handleSubscribeError)
     mqttClient.subscribe('ttt-dcc', handleSubscribeError)
+
   })
 
   // https://github.com/mqttjs/MQTT.js#event-error
@@ -32,13 +37,13 @@ const connect = () => {
   })
 
   // https://github.com/mqttjs/MQTT.js#event-reconnect
-  mqttClient.on('reconnect', () => {
-    log.log('mqttClient reconnecting')
-  })
+  // mqttClient.on('reconnect', () => {
+  //   log.log('mqttClient reconnecting')
+  // })
 
   // https://github.com/mqttjs/MQTT.js#event-message
   mqttClient.on('message', (topic, message) => {
-    // console.log(`mqttClient received message: ${message} from topic: ${topic}`)
+    console.log(`mqttClient received message: ${message} from topic: ${topic}`)
     dcc.handleMessage(message.toString());
   })
 };

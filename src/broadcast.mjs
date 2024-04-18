@@ -5,7 +5,7 @@ import log from './utils/logger.mjs';
 
 export const broadcast = async (data) => {
   try {
-    mqtt.send('DCCEX.js', JSON.stringify(data));
+    mqtt.send('@ttt/DCCEX.js', JSON.stringify(data));
     await server.send(data);
   } catch (err) {
     log.fatal('[BROADCAST] Error sending broadcast:', err);
