@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "start": "node ./index.mjs"
+    "start": "node --env-file .env ./index.mjs"
   },
   "type": "module",
   "dependencies": {
