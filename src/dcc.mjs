@@ -18,6 +18,9 @@ const handleMessage = async (msg) => {
     case 'dcc':
       send(payload);
       break;
+    case 'getStatus':
+      getStatus();
+      break;
     case 'listPorts':
       listPorts();
       break;
@@ -88,6 +91,11 @@ const listPorts = async () => {
   const payload = await getPorts();
   await broadcast({ 'action': 'listPorts', payload });
   log.star('[DCC] List ports', payload);
+};
+
+const getStatus = async () => {
+  await broadcast({ action: 'status', payload: { isConnected }});
+  log.star('[DCC] getStatus',{ action: 'status', payload: { isConnected }});
 };
 
 const power = async (state) => {
