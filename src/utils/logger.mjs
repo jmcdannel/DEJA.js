@@ -1,6 +1,10 @@
-import signale from 'signale';
+import signale from 'signale'
 
-// const log = new signale.Signale({ logLevel: 'info' });
-const log = new signale.Signale();
+const opts = {
+  logLevel: 'info',
+  scope: 'DEJA.JS',
+}
 
-export default log;
+export const log = new signale.Signale(opts)
+
+export default log
