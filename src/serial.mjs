@@ -9,14 +9,7 @@ function handleOpen(err) {
     log.error('[SERIAL] Error opening port:', err.message)
     return
   }
-  log.complete('[SERIAL] Open')
   log.info('[SERIAL] Port Status', port.isOpen, port.settings)
-  isConnected = true
-}
-
-function handleOpened(resolve) {
-  log.start('[SERIAL] Serial port opened', path, baudRate)
-  resolve(port)
 }
 
 const connect = ({ path, baudRate, handleMessage }) => {
@@ -30,7 +23,10 @@ const connect = ({ path, baudRate, handleMessage }) => {
         // Create a port
         port = new SerialPort({ path, baudRate, autoOpen: false })
         port.setEncoding('utf8')
-        port.on('open', handleOpened)
+        port.on('open', () => {
+          log.complete('[SERIAL] Port opened:', path)
+          resolve(port)
+        })
         const parser = port.pipe(new ReadlineParser())
         parser.on('data', handleMessage)
         port.open(handleOpen)
@@ -45,7 +41,7 @@ function handleSend(err) {
   if (err) {
     log.error('[SERIAL] Error on write:', err?.message)
   } else {
-    log.complete('[SERIAL] Data written to port', cmd)
+    log.complete('[SERIAL] Data written to port')
   }
 }
 
