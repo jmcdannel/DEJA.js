@@ -1,48 +1,39 @@
-import { SerialPort } from 'serialport';
+import { SerialPort } from 'serialport'
 import { ReadlineParser } from '@serialport/parser-readline'
-import log from './utils/logger.mjs';
+import log from './utils/logger.mjs'
 
-let isConnected = false;
-let port;
+let port
+
+function handleOpen(err) {
+  if (err) {
+    log.error('[SERIAL] Error opening port:', err.message)
+    return
+  }
+  log.complete('[SERIAL] Open')
+  log.info('[SERIAL] Port Status', port.isOpen, port.settings)
+  isConnected = true
+}
+
+function handleOpened(resolve) {
+  log.start('[SERIAL] Serial port opened', path, baudRate)
+  resolve(port)
+}
 
 const connect = ({ path, baudRate, handleMessage }) => {
   try {
-    if (isConnected) {
-      return Promise.resolve(port);
+    if (port) {
+      return Promise.resolve(port)
     } else {
-      return new Promise(function(resolve, reject) {
-
-        if (!path) reject({ message: '[SERIAL] No serial port specified' });
-
-        log.await('[SERIAL] Attempting to connect to:', path);
-
-        const handleOpen = err => {
-          if (err) {
-            reject(`[SERIAL] Error opening port: ${err.message}`);
-            return;
-          }
-          log.complete('[SERIAL] Open');
-
-          isConnected = true;
-        }
-
-        const handleOpened = async () => {
-          log.start('[SERIAL] Serial port opened', path, baudRate);
-          resolve(port);
-        }
-        
+      return new Promise(function (resolve, reject) {
+        if (!path) reject({ message: '[SERIAL] No serial port specified' })
+        log.await('[SERIAL] Attempting to connect to:', path)
         // Create a port
-        port = new SerialPort({ path, baudRate, autoOpen: false });
-        port.setEncoding('utf8');
-        port.on('open', handleOpened);
-
+        port = new SerialPort({ path, baudRate, autoOpen: false })
+        port.setEncoding('utf8')
+        port.on('open', handleOpened)
         const parser = port.pipe(new ReadlineParser())
-        parser.on('data', handleMessage);
-        
-        port.open(handleOpen);
-
-        log.info('[SERIAL] Port Status', port.isOpen, port.settings);
-
+        parser.on('data', handleMessage)
+        port.open(handleOpen)
       });
     }
   } catch (err) {
@@ -50,15 +41,18 @@ const connect = ({ path, baudRate, handleMessage }) => {
   }
 }
 
+function handleSend(err) {
+  if (err) {
+    log.error('[SERIAL] Error on write:', err?.message)
+  } else {
+    log.complete('[SERIAL] Data written to port', cmd)
+  }
+}
+
 const send = (data) => {
   try {
     log.await('[SERIAL] writing to port', JSON.stringify(data));
-    isConnected && port.write(data, err => {
-      if (err) {
-        return log.error('[SERIAL] Error on write: ', err.message);
-      }
-      log.log('data written', data);
-    });
+    port && port.write(data, handleSend);
   } catch (err) {
     log.fatal('[SERIAL] Error writing to port:', err);
   }
@@ -66,5 +60,5 @@ const send = (data) => {
 
 export default {
   connect,
-  send
-}
+  send,
+};

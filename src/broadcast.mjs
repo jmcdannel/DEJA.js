@@ -1,16 +1,16 @@
+import server from './server.mjs' // TODO: refactor to use event emitter
+import mqtt from './mqtt.mjs'
+import log from './utils/logger.mjs'
 
-import server from './server.mjs'; // TODO: refactor to use event emitter
-import mqtt from './mqtt.mjs';
-import log from './utils/logger.mjs';
-
-const layoutId = process.env.LAYOUT_ID
+const ENABLE_MQTT = process.env.ENABLE_MQTT || true;
+const ENABLE_WS = process.env.ENABLE_WS || true;
 
 export const broadcast = async (data) => {
   try {
-    mqtt.send(`@ttt/DCCEX.js/${layoutId}`, JSON.stringify(data));
-    await server.send(data);
+    ENABLE_MQTT && await mqtt.send(JSON.stringify(data))
+    ENABLE_WS && await server.send(data)
   } catch (err) {
-    log.fatal('[BROADCAST] Error sending broadcast:', err);
+    log.fatal('[DEJA.js] Error sending broadcast:', err)
   }
 }
 
