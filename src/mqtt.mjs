@@ -6,7 +6,7 @@ const layoutId = process.env.LAYOUT_ID
 const mqttBroker = process.env.VITE_MQTT_BROKER
 const mqttPort = process.env.VITE_MQTT_PORT
 const subscriptionTopics = [`@ttt/dcc/${layoutId}`]
-const publishTopics = [`@ttt/DCCEX.js/${layoutId}`]
+const publishTopics = [`@ttt/DEJA.js/${layoutId}`]
 
 let mqttClient = null
 
@@ -19,7 +19,7 @@ const handleSubscribeError = (error) => {
 
 function handleConnect() {
   try {
-    log.start('MQTT client connected')
+    log.start('MQTT client connected', layoutId)
     subscriptionTopics.map((topic) =>
       mqttClient.subscribe(topic, handleSubscribeError)
     );
