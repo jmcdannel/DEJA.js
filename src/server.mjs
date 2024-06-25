@@ -14,7 +14,7 @@ const MSG_CONNECTED = JSON.stringify({
 })
 
 const handleClose = (server) => {
-  log.info('[Connection closed', serverId)
+  log.info('[Connection closed', serverId, layoutId)
   let position = connections.indexOf(server) // get the client's position in the array
   server && connections.splice(position, 1)
 }
