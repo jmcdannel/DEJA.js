@@ -90,7 +90,7 @@ const connect = async (payload) => {
 
 const listPorts = async () => {
   const payload = await getPorts()
-  await broadcast({ action: 'listPorts', payload })
+  await broadcast({ action: 'portList', payload })
   log.star('List ports', payload)
 }
 
