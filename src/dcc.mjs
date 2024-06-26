@@ -74,14 +74,14 @@ const connect = async (payload) => {
   try {
     log.star('connect', payload)
     const path = payload.serial
-    if (isConnected && port) {
+    if (isConnected) {
       await broadcast({ action: 'connected', payload: { path, baudRate } })
-      return Promise.resolve(port)
+      return isConnected
     } else {
       await serial.connect({ path, baudRate, handleMessage: handleConnectionMessage })
       await broadcast({ action: 'connected', payload: { path, baudRate } })
       isConnected = true
-      return Promise.resolve(isConnected)
+      return isConnected
     }
   } catch (err) {
     log.fatal('Error opening port: ', err)
