@@ -10,6 +10,7 @@ function handleOpen(err) {
     return
   }
   log.info('[SERIAL] Port Status', port.isOpen, port.settings)
+  return true
 }
 
 const connect = ({ path, baudRate, handleMessage }) => {
