@@ -74,9 +74,9 @@ const connect = async (payload) => {
   try {
     log.star('connect', payload)
     const path = payload.serial
-    if (isConnected && port) {
+    if (isConnected) {
       await broadcast({ action: 'connected', payload: { path, baudRate } })
-      return Promise.resolve(port)
+      return Promise.resolve(isConnected)
     } else {
       await serial.connect({ path, baudRate, handleMessage: handleConnectionMessage })
       await broadcast({ action: 'connected', payload: { path, baudRate } })
@@ -90,7 +90,7 @@ const connect = async (payload) => {
 
 const listPorts = async () => {
   const payload = await getPorts()
-  await broadcast({ action: 'listPorts', payload })
+  await broadcast({ action: 'portList', payload })
   log.star('List ports', payload)
 }
 

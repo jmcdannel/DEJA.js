@@ -90,6 +90,9 @@ const send = (message) => {
   try {
     mqttClient &&
       publishTopics.map((topic) => mqttClient.publish(topic, message))
+    log.log(
+      `MQTT mqttClient sent message: ${message} from topic: ${publishTopics.join(', ')}`
+    )
   } catch (err) {
     log.error('MQTT Error sending message:', err)
   }
