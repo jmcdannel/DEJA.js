@@ -6,7 +6,7 @@ const layoutId = process.env.LAYOUT_ID
 const mqttBroker = process.env.VITE_MQTT_BROKER
 const mqttPort = process.env.VITE_MQTT_PORT
 const subscriptionTopics = [`@ttt/dcc/${layoutId}`]
-const publishTopics = [`@ttt/DCCEX.js/${layoutId}`]
+const publishTopics = [`@ttt/DEJA.js/${layoutId}`]
 
 let mqttClient = null
 
@@ -88,6 +88,7 @@ const disconnect = () => {
 
 const send = (message) => {
   try {
+    log.log('[MQTT]', message, publishTopics)
     mqttClient &&
       publishTopics.map((topic) => mqttClient.publish(topic, message))
   } catch (err) {
