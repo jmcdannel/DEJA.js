@@ -79,7 +79,7 @@ const connect = async (payload) => {
       await broadcast({ action: 'connected', payload: { path, baudRate } })
       return Promise.resolve(port)
     } else {
-      port = await serial.connect({ path, baudRate, handleConnectionMessage })
+      port = await serial.connect({ path, baudRate, handleMessage: handleConnectionMessage })
       await broadcast({ action: 'connected', payload: { path, baudRate } })
       isConnected = true
       return Promise.resolve(port)
@@ -91,7 +91,7 @@ const connect = async (payload) => {
 
 const listPorts = async () => {
   const payload = await getPorts()
-  await broadcast({ action: 'listPorts', payload })
+  await broadcast({ action: 'portList', payload })
   log.star('[DCC] List ports', payload)
 }
 
