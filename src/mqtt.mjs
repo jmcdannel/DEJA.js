@@ -15,14 +15,14 @@ const handleSubscribeError = (error) => {
     log.error('MQTT subscribe to topics error', error)
     return
   }
-};
+}
 
 function handleConnect() {
   try {
     log.start('MQTT client connected', layoutId)
     subscriptionTopics.map((topic) =>
       mqttClient.subscribe(topic, handleSubscribeError)
-    );
+    )
     publishTopics.map((topic) =>
       mqttClient.publish(
         topic,
@@ -45,9 +45,7 @@ function handleError(error) {
 
 function handleMessage(topic, message) {
   try {
-    log.log(
-      `MQTT mqttClient received message: ${message} from topic: ${topic}`
-    )
+    log.log(`MQTT mqttClient received message: ${message} from topic: ${topic}`)
     dcc.handleMessage(message.toString())
   } catch (error) {
     log.error('MQTT Error in onMessage:', error)
@@ -75,7 +73,7 @@ const connect = () => {
   } catch (err) {
     log.error('MQTT Error connecting:', err)
   }
-};
+}
 
 // Function to disconnect from MQTT broker
 const disconnect = () => {
@@ -84,7 +82,7 @@ const disconnect = () => {
   } catch (err) {
     log.error('MQTT Error disconnecting:', err)
   }
-};
+}
 
 const send = (message) => {
   try {
@@ -96,6 +94,6 @@ const send = (message) => {
   } catch (err) {
     log.error('MQTT Error sending message:', err)
   }
-};
+}
 
 export default { connect, send, disconnect }

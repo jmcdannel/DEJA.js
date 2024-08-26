@@ -31,10 +31,10 @@ const connect = ({ path, baudRate, handleMessage }) => {
         const parser = port.pipe(new ReadlineParser())
         parser.on('data', handleMessage)
         port.open(handleOpen)
-      });
+      })
     }
   } catch (err) {
-    log.fatal('[SERIAL] Error opening port: ', err);
+    log.fatal('[SERIAL] Error opening port: ', err)
   }
 }
 
@@ -48,14 +48,14 @@ function handleSend(err) {
 
 const send = (data) => {
   try {
-    log.await('[SERIAL] writing to port', JSON.stringify(data));
-    port && port.write(data, handleSend);
+    log.await('[SERIAL] writing to port', JSON.stringify(data))
+    port && port.write(data, handleSend)
   } catch (err) {
-    log.fatal('[SERIAL] Error writing to port:', err);
+    log.fatal('[SERIAL] Error writing to port:', err)
   }
-};
+}
 
 export default {
   connect,
   send,
-};
+}

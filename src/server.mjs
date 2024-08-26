@@ -2,9 +2,9 @@ import { WebSocketServer } from 'ws'
 import log from './utils/logger.mjs'
 import dcc from './dcc.mjs'
 
-const layoutId = process.env.LAYOUT_ID;
+const layoutId = process.env.LAYOUT_ID
 const port = process.env.VITE_WS_PORT || 8082
-const serverId =  process.env.VITE_WS_ID ||'DEJA.js'
+const serverId = process.env.VITE_WS_ID || 'DEJA.js'
 
 const connections = []
 
@@ -21,7 +21,7 @@ const handleClose = (server) => {
 
 const handleError = (err) => {
   log.error('WS unexpected error occurred', err)
-};
+}
 
 const handleConnection = (ws) => {
   try {
@@ -41,10 +41,10 @@ const handleConnection = (ws) => {
 
 export const send = async (data) => {
   try {
-    await connections.map(ws => ws.send(JSON.stringify(data)))
+    await connections.map((ws) => ws.send(JSON.stringify(data)))
   } catch (err) {
     log.error('[Error sending data to WS server:', err)
-  }    
+  }
 }
 
 export const connect = async () => {
@@ -57,7 +57,7 @@ export const connect = async () => {
       log.error('error', err)
       reject(err)
     }
-  });
-};
+  })
+}
 
 export default { connect, send }

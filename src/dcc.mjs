@@ -13,7 +13,7 @@ const getPorts = async () => {
   } catch (err) {
     log.fatal(err)
   }
-};
+}
 
 const handleMessage = async (msg) => {
   log.note('handleMessage', msg)
@@ -22,32 +22,32 @@ const handleMessage = async (msg) => {
     switch (action) {
       case 'connect':
         await connect(payload)
-        break;
+        break
       case 'dcc':
         await send(payload)
-        break;
+        break
       case 'listPorts':
         await listPorts()
-        break;
+        break
       case 'power':
         await power(payload)
-        break;
+        break
       case 'throttle':
         await sendSpeed(payload)
-        break;
+        break
       case 'turnout':
         await sendTurnout(payload)
-        break;
+        break
       case 'output':
         await sendOutput(payload)
-        break;
+        break
       case 'function':
         await sendFunction(payload)
-        break;
+        break
       case 'getStatus':
       case 'status':
         await getStatus()
-        break;
+        break
       default:
         //noop
         log.warn('Unknown action in `handleMessage`', action, payload)
@@ -58,7 +58,7 @@ const handleMessage = async (msg) => {
 }
 
 const handleConnectionMessage = async (payload) =>
-  await broadcast({ action: 'broadcast', payload });
+  await broadcast({ action: 'broadcast', payload })
 
 const send = async (data) => {
   try {
@@ -78,7 +78,11 @@ const connect = async (payload) => {
       await broadcast({ action: 'connected', payload: { path, baudRate } })
       return isConnected
     } else {
-      await serial.connect({ path, baudRate, handleMessage: handleConnectionMessage })
+      await serial.connect({
+        path,
+        baudRate,
+        handleMessage: handleConnectionMessage,
+      })
       await broadcast({ action: 'connected', payload: { path, baudRate } })
       isConnected = true
       return isConnected
