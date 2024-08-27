@@ -45,8 +45,9 @@
   VITE_WS_ID=DEJA.js
   ```
 
+## ❗❗❗ 📣 📣 📣 ❗❗❗ 
+## Replace `your-layout-name` with a descriptive name of your layout. Only use lowercase letter, numbers, and dashed. No spaces. No special characters. No emoji.
 
-Replace `your-layout-name` with a descriptive name of your layout. Only use lowercase letter, numbers, and dashed. No spaces. No special characters. No emoji.
 #### 🤌 GOOD Examples 
 `LAYOUTID=[my-basement-empire]`
 
@@ -54,18 +55,16 @@ Replace `your-layout-name` with a descriptive name of your layout. Only use lowe
 
 `LAYOUTID=[something-unique]`
 
-`LAYOUTID=['apple-munchkin-fairy']`
+`LAYOUTID=[apple-munchkin-fairy]`
 
 #### 💩 BAD Examples 
-`LAYOUTID=[My B@sement Empire!]`
+`LAYOUTID=[My B@sement "Empire"!]`
 
 `LAYOUTID=[ID_cross]`
 
 `LAYOUTID=[my-basement-empire]` (already used!)
 
 `LAYOUTID=['🍎👶🧚']`
-
-
 
 ### 🧩 Usage
 
