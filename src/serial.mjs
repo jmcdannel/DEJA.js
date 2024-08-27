@@ -9,9 +9,8 @@ function handleOpen(err) {
     log.error('[SERIAL] Error opening port:', err.message)
     return
   }
-  log.complete('[SERIAL] Open')
   log.info('[SERIAL] Port Status', port.isOpen, port.settings)
-  // isConnected = true
+  return true
 }
 
 const connect = ({ path, baudRate, handleMessage }) => {
@@ -25,14 +24,17 @@ const connect = ({ path, baudRate, handleMessage }) => {
         // Create a port
         port = new SerialPort({ path, baudRate, autoOpen: false })
         port.setEncoding('utf8')
-        port.on('open', () => resolve(port))
+        port.on('open', () => {
+          log.complete('[SERIAL] Port opened:', path)
+          resolve(port)
+        })
         const parser = port.pipe(new ReadlineParser())
         parser.on('data', handleMessage)
         port.open(handleOpen)
-      });
+      })
     }
   } catch (err) {
-    log.fatal('[SERIAL] Error opening port: ', err);
+    log.fatal('[SERIAL] Error opening port: ', err)
   }
 }
 
@@ -46,14 +48,14 @@ function handleSend(err) {
 
 const send = (data) => {
   try {
-    log.await('[SERIAL] writing to port', JSON.stringify(data));
-    port && port.write(data, handleSend);
+    log.await('[SERIAL] writing to port', JSON.stringify(data))
+    port && port.write(data, handleSend)
   } catch (err) {
-    log.fatal('[SERIAL] Error writing to port:', err);
+    log.fatal('[SERIAL] Error writing to port:', err)
   }
-};
+}
 
 export default {
   connect,
   send,
-};
+}
