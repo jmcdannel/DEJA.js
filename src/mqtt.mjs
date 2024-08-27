@@ -86,6 +86,7 @@ const disconnect = () => {
 
 const send = (message) => {
   try {
+    log.log('[MQTT]', message, publishTopics)
     mqttClient &&
       publishTopics.map((topic) => mqttClient.publish(topic, message))
     log.log(

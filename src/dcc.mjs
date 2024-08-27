@@ -78,11 +78,7 @@ const connect = async (payload) => {
       await broadcast({ action: 'connected', payload: { path, baudRate } })
       return isConnected
     } else {
-      await serial.connect({
-        path,
-        baudRate,
-        handleMessage: handleConnectionMessage,
-      })
+      port = await serial.connect({ path, baudRate, handleMessage: handleConnectionMessage })
       await broadcast({ action: 'connected', payload: { path, baudRate } })
       isConnected = true
       return isConnected
@@ -95,7 +91,7 @@ const connect = async (payload) => {
 const listPorts = async () => {
   const payload = await getPorts()
   await broadcast({ action: 'portList', payload })
-  log.star('List ports', payload)
+  log.star('[DCC] List ports', payload)
 }
 
 const getStatus = async () => {
