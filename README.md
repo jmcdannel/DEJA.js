@@ -6,7 +6,7 @@
 
 ## What is DEJA.js
 
-- 🧠 NodeJS application that runs on a 💻 Mac/PC/Linux/Raspberry Pi that is connection to a [DCC-EX EX-CommandStation](https://dcc-ex.com/ex-commandstation/index.html)
+- 🧠 NodeJS application that runs on a 💻 Mac/PC/Linux/Raspberry Pi that is connected to a [DCC-EX EX-CommandStation](https://dcc-ex.com/ex-commandstation/index.html)
 - 🔥 Use [🛰️ DEJA Throttle](https://github.com/jmcdannel/DEJAThrottle) to connect to DEJA.js and send DCC Loco commands to your track
 - 🌎 DEJA.js is written in JavaScript - the most popular programming language in the world<sup>*</sup>
 - ✨ Replace JMRI. DEJA.js is 🌟 modern, ⚡ blazing fast, it's requirements are simple 🎯, and you'll never look back 👀!
