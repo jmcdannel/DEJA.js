@@ -67,9 +67,9 @@ const connect = () => {
     mqttClient.on('message', handleMessage)
 
     // https://github.com/mqttjs/MQTT.js#event-reconnect
-    // mqttClient.on('reconnect', () => {
-    //   log.log('mqttClient reconnecting')
-    // })
+    mqttClient.on('reconnect', () => {
+      log.log('mqttClient reconnecting')
+    })
   } catch (err) {
     log.error('MQTT Error connecting:', err)
   }

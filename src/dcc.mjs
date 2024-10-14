@@ -72,13 +72,13 @@ const send = async (data) => {
 
 const connect = async (payload) => {
   try {
-    log.star('connect', payload)
+    log.star('[DCC] connect', payload)
     const path = payload.serial
     if (isConnected) {
       await broadcast({ action: 'connected', payload: { path, baudRate } })
       return isConnected
     } else {
-      port = await serial.connect({ path, baudRate, handleMessage: handleConnectionMessage })
+      await serial.connect({ path, baudRate, handleMessage: handleConnectionMessage })
       await broadcast({ action: 'connected', payload: { path, baudRate } })
       isConnected = true
       return isConnected
@@ -96,7 +96,7 @@ const listPorts = async () => {
 
 const getStatus = async () => {
   await broadcast({ action: 'status', payload: { isConnected } })
-  log.star('getStatus', { action: 'status', payload: { isConnected } })
+  log.star('[DCC] getStatus', { action: 'status', payload: { isConnected } })
 }
 
 const power = async (state) => {

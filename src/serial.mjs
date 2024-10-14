@@ -19,7 +19,7 @@ const connect = ({ path, baudRate, handleMessage }) => {
       return Promise.resolve(port)
     } else {
       return new Promise(function (resolve, reject) {
-        if (!path) reject({ message: '[SERIAL] No serial port specified' })
+        if (!path) reject({ message: '[SERIAL] No serial port specified: ' + path })
         log.await('[SERIAL] Attempting to connect to:', path, typeof handleMessage)
         // Create a port
         port = new SerialPort({ path, baudRate, autoOpen: false })
