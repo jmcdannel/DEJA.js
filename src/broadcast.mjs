@@ -12,6 +12,7 @@ export const broadcast = async (data) => {
     ENABLE_MQTT && (await mqtt.send(JSON.stringify(data)))
     ENABLE_WS && (await server.send(data))
     ENABLE_DEJACLOUD && (await dejaCloud.send(data))
+    log.enable('[broadcast]', data)
   } catch (err) {
     log.fatal('[DEJA.js] Error sending broadcast:', err)
   }
