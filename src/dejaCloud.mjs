@@ -1,3 +1,5 @@
+import serial from './serial.mjs'
+import { broadcast } from './broadcast.mjs'
 import { 
   collection, 
   onSnapshot,
@@ -12,9 +14,12 @@ import {
 } from 'firebase/firestore'
 import log from './utils/logger.mjs'
 import dcc from './dcc.mjs'
+import { getCommand } from './effects.mjs'
 import { db } from './firebase.mjs'
 
 const layoutId = process.env.LAYOUT_ID
+const baudRate = 115200
+const devices = []
 
 function handleDccCommands(snapshot) {
   log.note('handleDccCommands')
@@ -26,6 +31,39 @@ function handleDccCommands(snapshot) {
       dcc.handleMessage(JSON.stringify({ action, payload }))
     }
   })
+}
+
+async function handleDejaCommands(snapshot) {
+  log.note('handleDejaCommands')
+  snapshot.docChanges().forEach(async (change) => {
+    if (change.type === "added") {
+      const { action, payload } = change.doc.data()
+      log.log("handleDejaCommands: ", action, payload)
+      // dcc.handleMessage(JSON.stringify({ action, payload }))
+      switch (action) {
+        case 'connect':
+          await connectDevice(payload)
+          break
+        case 'effects':
+          await handleEffectCommand(payload)
+          break
+        default:
+          //noop
+          log.warn('Unknown action in `handleMessage`', action, payload)
+      }
+    }
+  })
+}
+
+async function handleEffectCommand(payload) {
+  const command = await getCommand(payload)
+  log.log('handleEffectCommand', payload, command, devices?.[command.iFaceId])
+  const device = devices?.[command.iFaceId]
+  if (device?.isConnected) {
+    await device.send(device.port, JSON.stringify([command]))
+  } else {
+    log.error('Device not connected', command.iFaceId)
+  }
 }
 
 function handleThrottleCommands(snapshot) {
@@ -77,6 +115,31 @@ function handleThrottleCommands(snapshot) {
 
   })
 }
+const handleConnectionMessage = async (payload) =>
+  await broadcast({ action: 'broadcast', payload })
+
+async function connectDevice({ device, serial: path }) {
+  try {
+    log.star('[dejaCloud] connect', device, path)
+    if (devices[device]) {
+      await broadcast({ action: 'connected', payload: { device, path, baudRate } })
+      return devices[device].isConnected
+    } else {
+      const port = await serial.connect({ path, baudRate, handleMessage: handleConnectionMessage })
+      await broadcast({ action: 'connected', payload: { device, path, baudRate } })
+      
+      devices[device] = {
+        isConnected: true,
+        send: serial.send,
+        port
+      }
+      return devices[device]
+    }
+  } catch (err) {
+    log.fatal('Error connectDevice: ', err)
+  }
+
+}
 
 export async function listen() {
   log.start( "Listen for dccCommands", layoutId)
@@ -89,6 +152,14 @@ export async function listen() {
       limit(10)
     ),
     handleDccCommands
+  )
+  onSnapshot(
+    query(
+      collection(db, `layouts/${layoutId}/dejaCommands`),
+      orderBy("timestamp", "desc"),
+      limit(10)
+    ),
+    handleDejaCommands
   )
   onSnapshot(
     query(
@@ -119,7 +190,11 @@ export async function send(data) {
         }
         break
       case 'connected':
-        await updateDoc(doc(db, 'layouts', layoutId), { 'dccEx.lastConnected': serverTimestamp(), 'dccEx.client': 'dejaJS' }, { merge: true })
+        log.log('dejaClound.connected!!', data)
+        if (payload.device === 'dccex') {
+          await updateDoc(doc(db, 'layouts', layoutId), { 'dccEx.lastConnected': serverTimestamp(), 'dccEx.client': 'dejaJS' }, { merge: true })
+        }
+        await updateDoc(doc(db, `layouts/${layoutId}/devices`, payload.device), { isConnected: true, lastConnected: serverTimestamp(), client: 'dejaJS', port: payload.path }, { merge: true })
         break
       default:
         //noop
@@ -130,8 +205,11 @@ export async function send(data) {
   }
 
 }
-
 async function wipe() {
+  Promise.all([wipeDcc(), wipeDeja(), wipeThrottles()])
+}
+
+async function wipeDcc() {
   log.complete("wipe dccCommands", layoutId)
   const querySnapshot = await getDocs(
     query(
@@ -144,8 +222,43 @@ async function wipe() {
   })
 }
 
+async function wipeDeja() {
+  log.complete("wipe dejaCommands", layoutId)
+  const querySnapshot = await getDocs(
+    query(
+      collection(db, `layouts/${layoutId}/dejaCommands`),
+      orderBy("timestamp", "asc")
+    )
+  )
+  querySnapshot.forEach((doc) => {
+    deleteDoc(doc.ref)
+  })
+}
+
+async function wipeThrottles() {
+  log.complete("wipe throttles", layoutId)
+  const querySnapshot = await getDocs(
+    query(
+      collection(db, `layouts/${layoutId}/throttles`),
+      orderBy("timestamp", "asc")
+    )
+  )
+  querySnapshot.forEach((doc) => {
+    deleteDoc(doc.ref)
+  })
+}
+
 async function reset() {
+  // TODO: reset all thr
+  await resetDevices()
   await updateDoc(doc(db, 'layouts', layoutId), { 'dccEx.lastConnected': null, 'dccEx.client': null }, { merge: true })
+}
+
+async function resetDevices() {
+  const querySnapshot = await getDocs(collection(db, `layouts/${layoutId}/devices`))
+  querySnapshot.forEach((doc) => {
+    updateDoc(doc.ref, { isConnected: false, lastConnected: null, client: null })
+  })
 }
 
 export async function connect() {

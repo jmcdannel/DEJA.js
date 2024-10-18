@@ -5,6 +5,9 @@ import log from './utils/logger.mjs'
 
 let isConnected = false // serial port connection status
 const baudRate = 115200
+let com = {
+  isConnected: false
+}
 
 const getPorts = async () => {
   try {
@@ -64,7 +67,7 @@ const send = async (data) => {
   try {
     const cmd = `<${data}>\n`
     log.await('Writing to port', data)
-    serial.send(cmd)
+    serial.send(com.port, cmd)
   } catch (err) {
     log.fatal('Error writting to port:', err)
   }
@@ -73,15 +76,16 @@ const send = async (data) => {
 const connect = async (payload) => {
   try {
     log.star('[DCC] connect', payload)
-    const path = payload.serial
+    const { serial: path, device } = payload
     if (isConnected) {
       await broadcast({ action: 'connected', payload: { path, baudRate } })
       return isConnected
     } else {
-      await serial.connect({ path, baudRate, handleMessage: handleConnectionMessage })
-      await broadcast({ action: 'connected', payload: { path, baudRate } })
+      const port = await serial.connect({ path, baudRate, handleMessage: handleConnectionMessage })
+      await broadcast({ action: 'connected', payload: { path, baudRate, device } })
       isConnected = true
-      return isConnected
+      com = { isConnected, port }
+      return com
     }
   } catch (err) {
     log.fatal('Error opening port: ', err)
@@ -132,4 +136,5 @@ const sendOutput = async (payload) => {
 
 export default {
   handleMessage,
+  dccSerial: com
 }
