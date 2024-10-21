@@ -5,7 +5,6 @@ import { FaUsb, FaCloud, FaPowerOff } from 'vue3-icons/fa6'
 import { useStorage, watchImmediate } from '@vueuse/core'
 import useSerial from '../hooks/useSerial'
 import { db } from "../firebase"
-import { VaAspectRatio, VaAvatar, VaChip } from 'vuestic-ui'
 import CommandStationLCD from './CommandStationLCD.vue'
 import CommandStationTracks from './CommandStationTracks.vue'
 import CommandStationStats from './CommandStationStats.vue'

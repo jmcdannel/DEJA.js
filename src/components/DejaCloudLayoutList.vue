@@ -12,10 +12,10 @@ const layouts = useCollection(user.value ? layoutsQuery : null)
 
 <template>
   <main class="" v-if="user && layouts?.length > 0">
-    <ul class="flex flex-col" v-if="Array.isArray(layouts) && layouts.length > 0">
+    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" v-if="Array.isArray(layouts) && layouts.length > 0">
       <li class="mb-2" v-for="layout in layouts" :key="layout.layoutId">
         <button 
-          class="border bg-transparent border-cyan-800 text-cyan-400 py-1 px-2 font-normal text-sm rounded-md hover:bg-cyan-900 hover:bg-opacity-20 flex items-center"
+          class="block w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
           @click="$emit('selected', layout)" >{{ layout.layoutId }}
         </button>
       </li>

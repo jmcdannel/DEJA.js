@@ -1,4 +1,4 @@
-import { ref, unref } from "vue"
+import { ref, unref } from 'vue'
 import {
   doc,
   collection,
@@ -9,15 +9,17 @@ import {
   getDocs,
   limit,
   orderBy,
-} from "firebase/firestore"
-import { useCollection } from "vuefire"
-import { useToast } from "vuestic-ui"
-import { db } from "../firebase"
-import useSerial from "../hooks/useSerial"
+} from 'firebase/firestore'
+import { useCollection } from 'vuefire'
+import { db } from '../firebase'
+import useSerial from '../hooks/useSerial'
 
 export function useDejaCloudDccConnector() {
   const serial = useSerial(() => {})
-  const { notify } = useToast()
+  // const { notify } = useToast()
+  const notify = () => {
+    console.log('notify', arguments)
+  }
 
   let handleCount = 0
   let listenCount = 0
@@ -29,8 +31,8 @@ export function useDejaCloudDccConnector() {
     handleCount++
     if (handleCount > 0) {
       snapshot.docChanges().forEach((change) => {
-        if (change.type === "added") {
-          console.log("New: ", change.doc.data())
+        if (change.type === 'added') {
+          console.log('New: ', change.doc.data())
           parseDejaCommand(change.doc.data())
         }
       })
@@ -40,7 +42,7 @@ export function useDejaCloudDccConnector() {
   function handleThrottleCommands(snapshot) {
     snapshot.docChanges().forEach(async (change) => {
       console.log(
-        "Throttle change",
+        'Throttle change',
         change.type,
         change.doc.data(),
         locos.value
@@ -56,7 +58,7 @@ export function useDejaCloudDccConnector() {
             ?.consist || []
         : []
       console.log(
-        "Consist",
+        'Consist',
         consist,
         throttleCmd,
         unref(locos.value).find((loco) => loco.locoId == throttleCmd.address),
@@ -87,10 +89,10 @@ export function useDejaCloudDccConnector() {
   const send = async (data) => {
     try {
       const cmd = `<${data}>\n`
-      console.log("Writing to ports", data)
+      console.log('Writing to ports', data)
       serial.send(cmd)
     } catch (err) {
-      console.error("Error writting to port:", err)
+      console.error('Error writting to port:', err)
     }
   }
 
@@ -98,21 +100,21 @@ export function useDejaCloudDccConnector() {
     try {
       const cmd = JSON.parse(payload)
       switch (action) {
-        case "power":
+        case 'power':
           await power(cmd)
           break
-        case "function":
+        case 'function':
           await sendFunction(cmd)
           break
-        case "getStatus":
-        case "status":
+        case 'getStatus':
+        case 'status':
           await getStatus()
           break
+        // case "output":
+        //   await sendOutput(cmd)
+        //   break
         // case "turnout":
         //   // await sendTurnout(payload)
-        //   break
-        // case "output":
-        //   // await sendOutput(payload)
         //   break
         // case "throttle":
         //   await sendSpeed(cmd)
@@ -128,55 +130,55 @@ export function useDejaCloudDccConnector() {
         //   break
         default:
           //noop
-          console.warn("Unknown action in `handleMessage`", action, payload)
+          console.warn('Unknown action in `handleMessage`', action, payload)
       }
     } catch (err) {
-      console.error("Error handling message:", err)
+      console.error('Error handling message:', err)
     }
   }
 
   const getStatus = async () => {
-    await send("s")
-    notify({ message: "Status reuested", position: "bottom-right" })
+    await send('s')
+    notify({ message: 'Status reuested', position: 'bottom-right' })
   }
 
   const power = async (state) => {
-    console.log("Powering", state, state.toString().startsWith("1"))
+    console.log('Powering', state, state.toString().startsWith('1'))
     await send(state)
     notify(
-      state.toString().startsWith("1")
-        ? { message: "ON", color: "success", position: "bottom-right" }
-        : { message: "OFF", color: "danger", position: "bottom-right" }
+      state.toString().startsWith('1')
+        ? { message: 'ON', color: 'success', position: 'bottom-right' }
+        : { message: 'OFF', color: 'danger', position: 'bottom-right' }
     )
   }
 
   const sendSpeed = async ({ address, speed }) => {
-    console.log("sendSpeed", address, speed)
+    console.log('sendSpeed', address, speed)
     const direction = speed > 0 ? 1 : 0
     const absSpeed = Math.abs(speed)
     const cmd = `t ${address} ${absSpeed} ${direction}`
     await send(cmd)
     notify({
       message: `Locomotive ${address} set to speed ${absSpeed}`,
-      color: "info",
-      position: "bottom-right",
+      color: 'info',
+      position: 'bottom-right',
     })
   }
 
   const sendFunction = async ({ address, func, state }) => {
-    console.log("sendFunction", address, func)
+    console.log('sendFunction', address, func)
     const cmd = `F ${address} ${func} ${state ? 1 : 0}`
     await send(cmd)
     notify({
-      message: `Locomotive ${address} function ${func} ${state ? "ON" : "OFF"}`,
-      color: state ? "#03fcc2" : "#9e9e9e",
-      position: "bottom-right",
+      message: `Locomotive ${address} function ${func} ${state ? 'ON' : 'OFF'}`,
+      color: state ? '#03fcc2' : '#9e9e9e',
+      position: 'bottom-right',
     })
   }
 
   async function listen(layoutId: string) {
     console.log(
-      "Listen for dccCommands",
+      'Listen for dccCommands',
       layoutId,
       currentLayoutId,
       handleCount,
@@ -188,7 +190,7 @@ export function useDejaCloudDccConnector() {
     onSnapshot(
       query(
         collection(db, `layouts/${layoutId}/dccCommands`),
-        orderBy("timestamp", "desc"),
+        orderBy('timestamp', 'desc'),
         limit(10)
       ),
       handleDccCommands
@@ -196,7 +198,7 @@ export function useDejaCloudDccConnector() {
     onSnapshot(
       query(
         collection(db, `layouts/${layoutId}/throttles`),
-        orderBy("timestamp", "desc"),
+        orderBy('timestamp', 'desc'),
         limit(10)
       ),
       handleThrottleCommands
@@ -205,7 +207,7 @@ export function useDejaCloudDccConnector() {
     currentLayoutId = layoutId
     listenCount++
     console.log(
-      "Listening for dccCommands",
+      'Listening for dccCommands',
       layoutId,
       currentLayoutId,
       handleCount,
@@ -214,11 +216,11 @@ export function useDejaCloudDccConnector() {
   }
 
   async function clear(layoutId: string, count = 10) {
-    console.log("Clearing dccCommands", layoutId)
+    console.log('Clearing dccCommands', layoutId)
     const querySnapshot = await getDocs(
       query(
         collection(db, `layouts/${layoutId}/dccCommands`),
-        orderBy("timestamp", "asc"),
+        orderBy('timestamp', 'asc'),
         limit(count)
       )
     )
@@ -228,11 +230,11 @@ export function useDejaCloudDccConnector() {
   }
 
   async function wipe(layoutId: string) {
-    console.log("wipe dccCommands", layoutId)
+    console.log('wipe dccCommands', layoutId)
     const querySnapshot = await getDocs(
       query(
         collection(db, `layouts/${layoutId}/dccCommands`),
-        orderBy("timestamp", "asc")
+        orderBy('timestamp', 'asc')
       )
     )
     querySnapshot.forEach((doc) => {

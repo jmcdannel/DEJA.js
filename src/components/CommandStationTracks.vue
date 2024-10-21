@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { VaAvatar } from 'vuestic-ui'
 import { FaPowerOff } from 'vue3-icons/fa6'
 
 defineProps({
