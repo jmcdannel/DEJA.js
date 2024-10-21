@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useMenu } from '@/core/Menu/useMenu'
+import { useMenu } from '@/Core/Menu/useMenu'
 
 const { getMenuItem } = useMenu()
 
