@@ -24,6 +24,7 @@ export async function getCommand(efx) {
       case 'frog':
       case 'relay':
       case 'pin':
+      case 'led':
       case 'power':
         return pinCommand(efx)
       // case 'ialed':
@@ -43,7 +44,7 @@ export async function getCommand(efx) {
         break
     }
   } catch (err) {
-    log.error('[COMMANDS] turnoutCommand', err)
+    log.error('[EFFECTS] getCommand', err)
   }
 }
 

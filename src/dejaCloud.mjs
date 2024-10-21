@@ -15,6 +15,7 @@ import {
 import log from './utils/logger.mjs'
 import dcc from './dcc.mjs'
 import { getCommand } from './effects.mjs'
+import { turnoutCommand } from './turnouts.mjs'
 import { db } from './firebase.mjs'
 
 const layoutId = process.env.LAYOUT_ID
@@ -46,6 +47,9 @@ async function handleDejaCommands(snapshot) {
           break
         case 'effects':
           await handleEffectCommand(payload)
+          break        
+        case 'turnouts':
+          await handleTurnoutCommand(payload)
           break
         default:
           //noop
@@ -55,14 +59,25 @@ async function handleDejaCommands(snapshot) {
   })
 }
 
+async function handleTurnoutCommand(payload) {
+  const commands = await turnoutCommand(payload)
+  log.log('handleTurnoutCommand', payload, commands)
+  const device = devices?.[payload.interface]
+  if (device?.isConnected) {
+    await device.send(device.port, JSON.stringify([commands]))
+  } else {
+    log.error('Device not connected', commands)
+  }
+}
+
 async function handleEffectCommand(payload) {
   const command = await getCommand(payload)
-  log.log('handleEffectCommand', payload, command, devices?.[command.iFaceId])
-  const device = devices?.[command.iFaceId]
+  log.log('handleEffectCommand', payload, command)
+  const device = devices?.[payload.interface]
   if (device?.isConnected) {
     await device.send(device.port, JSON.stringify([command]))
   } else {
-    log.error('Device not connected', command.iFaceId)
+    log.error('Device not connected', command?.iFaceId)
   }
 }
 
