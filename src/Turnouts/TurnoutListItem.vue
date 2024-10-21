@@ -1,0 +1,90 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { useTurnouts } from '@/Turnouts/useTurnouts'
+
+const { switchTurnout } = useTurnouts()
+
+defineEmits(['edit'])
+const props = defineProps({
+  turnout: Object,
+  turnoutId: String,
+})
+
+const turnoutState = ref(props.turnout?.state || true)
+
+function handleSwitch() {
+  switchTurnout({...props.turnout, id: props.turnoutId, state: turnoutState.value})
+  // turnoutState.value = !turnoutState.value
+}
+
+</script>
+<template> 
+  <v-card
+    class="mx-auto w-full h-full justify-between flex flex-col bg-zinc-500  bg-opacity-20"
+    variant="outlined"
+    density="compact"
+    color="yellow"
+  >
+  <v-card-item class="font-weight-black bg-yellow-300 text-gray-900">
+    <v-card-title class="font-weight-black">
+      {{ turnout?.name }}
+    </v-card-title>
+  </v-card-item>
+    <v-card-text 
+      class="min-h-8 flex py-2 justify-space-between bg-blend-lighten bg-opacity-30"
+      variant=""
+      >
+      <div class="grid grid-cols-2 gap-2">
+        <v-chip-group column>
+          <v-chip
+            size="small"
+            class=""
+            icon="mdi-directions-fork"
+          >{{ turnout?.type || 'Effect' }}</v-chip>          
+          <v-chip
+            size="small"
+            class=""
+            prepend-icon="mdi-memory"
+          >
+            {{ turnout?.interface }}
+          </v-chip>
+          <v-chip
+            v-if="turnout?.effectId"
+            size="small"
+            class=""
+            prepend-icon="mdi-rocket-launch"
+          >
+            {{ turnout?.effectId }}
+          </v-chip>
+        </v-chip-group>
+        <div class="flex flex-col items-center justify-center">
+          <v-switch
+            v-model="turnoutState"
+            @change="handleSwitch"
+            color="yellow"
+            hide-details
+          ></v-switch>
+        </div>
+      </div>
+    </v-card-text>
+    <v-spacer></v-spacer>
+    <v-card-actions>
+      <v-btn
+        class="ma-2"
+        icon="mdi-delete"
+        variant="tonal"
+        size="small"
+        disabled
+      ></v-btn>
+      <v-spacer></v-spacer>
+
+      <v-btn
+        text="Edit"
+        variant="tonal"
+        prepend-icon="mdi-pencil"
+        size="small"
+        @click="$emit('edit', turnout)"
+      ></v-btn>
+    </v-card-actions>
+  </v-card>
+</template>
