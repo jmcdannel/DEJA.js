@@ -8,19 +8,13 @@ async function handleTurnout(turnout) {
     log.error('[COMMANDS] turnoutCommand', err)
   }
 }
-export async function turnoutCommand(turnout) {
+export function turnoutCommand(turnout) {
   try {
     let commands = []
-    if (turnout?.effectId) {
-      // const efx = await getEffectById(turnout.config.effectId)
-      // efx.state = turnout.state
-      // const efxCommands =  await effectCommand(efx)
-      // commands = [...commands, ...efxCommands]
-    }
     switch(turnout?.type) {
       case 'kato':
         commands.push({
-          iFaceId: turnout.interface,
+          device: turnout.device,
           action: 'turnout', 
           payload: { 
             turnout: turnout.turnoutIdx, 
@@ -30,7 +24,7 @@ export async function turnoutCommand(turnout) {
         break
       case 'servo':
         commands.push({
-          iFaceId: turnout.interface,
+          device: turnout.device,
           action: 'servo', 
           payload: { 
             servo: turnout.servo, 

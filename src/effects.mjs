@@ -1,6 +1,7 @@
 import log from './utils/logger.mjs'
+
 const pinCommand = effect => ({ 
-  iFaceId: effect?.interface,
+  device: effect?.device,
   action: 'pin', 
   payload: { 
     pin: effect?.pin,
@@ -13,11 +14,11 @@ async function handleEffect(efx) {
     const command = await getCommand(efx)
     return command
   } catch (err) {
-    log.error('[COMMANDS] turnoutCommand', err)
+    log.error('[effects] handleEffect', err)
   }
 }
 
-export async function getCommand(efx) {
+export function getEffectCommand(efx) {
   try {    
     switch(efx?.type) {
       case 'light':
@@ -36,9 +37,6 @@ export async function getCommand(efx) {
       // case 'signal':
       //   const signalCommands = await signalCommand(effect)
       //   return signalCommands;
-      // case 'macro':
-      //   const macroCommands = await macroCommand(effect)
-      //   return macroCommands;
       default: 
         // no op
         break
@@ -49,6 +47,6 @@ export async function getCommand(efx) {
 }
 
 export default {
-  getCommand,
+  getEffectCommand,
   handleEffect
 }

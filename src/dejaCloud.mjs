@@ -6,6 +6,7 @@ import {
   query,
   doc,
   deleteDoc,
+  getDoc,
   getDocs,
   updateDoc,
   serverTimestamp,
@@ -14,8 +15,9 @@ import {
 } from 'firebase/firestore'
 import log from './utils/logger.mjs'
 import dcc from './dcc.mjs'
-import { getCommand } from './effects.mjs'
+import { getEffectCommand } from './effects.mjs'
 import { turnoutCommand } from './turnouts.mjs'
+import { getMacroCommand } from './macro.mjs'
 import { db } from './firebase.mjs'
 
 const layoutId = process.env.LAYOUT_ID
@@ -47,7 +49,10 @@ async function handleDejaCommands(snapshot) {
           break
         case 'effects':
           await handleEffectCommand(payload)
-          break        
+          break
+        case 'macro':
+          await handleMacroCommand(payload)
+          break
         case 'turnouts':
           await handleTurnoutCommand(payload)
           break
@@ -60,24 +65,39 @@ async function handleDejaCommands(snapshot) {
 }
 
 async function handleTurnoutCommand(payload) {
-  const commands = await turnoutCommand(payload)
-  log.log('handleTurnoutCommand', payload, commands)
-  const device = devices?.[payload.interface]
+  log.log('handleTurnoutCommand', payload)
+  const device = devices?.[payload.device]
   if (device?.isConnected) {
+    const commands = turnoutCommand(payload)
     await device.send(device.port, JSON.stringify([commands]))
   } else {
     log.error('Device not connected', commands)
   }
 }
 
+async function handleMacroCommand({ macro}) {
+  log.log('handleMacroCommand', macro)
+  
+  Object.keys(macro).forEach(async (deviceId) => {
+    const device = devices?.[deviceId]
+    if (device?.isConnected) {
+      const commands = getMacroCommand(macro[deviceId]?.effects, macro[deviceId]?.turnouts)
+      log.log('macro commands', commands, deviceId)
+      await device.send(device.port, JSON.stringify(commands))
+    } else {
+      log.error('Device not connected',device , devices, deviceId)
+    }
+  })
+}
+
 async function handleEffectCommand(payload) {
-  const command = await getCommand(payload)
+  const command = getEffectCommand(payload)
   log.log('handleEffectCommand', payload, command)
-  const device = devices?.[payload.interface]
+  const device = devices?.[payload.device]
   if (device?.isConnected) {
     await device.send(device.port, JSON.stringify([command]))
   } else {
-    log.error('Device not connected', command?.iFaceId)
+    log.error('Device not connected', command?.device)
   }
 }
 
@@ -154,6 +174,51 @@ async function connectDevice({ device, serial: path }) {
     log.fatal('Error connectDevice: ', err)
   }
 
+}
+
+export async function load() {
+  // const layout = await loadLayout()
+  const devices = await loadDevices()
+  await autoConnect(devices)
+}
+
+async function autoConnect(devices) {
+  devices.map(device => {
+    log.log('Auto connect device', device.autoConnect, { device: device.id, serial: device.port })
+    if (device.autoConnect && device.port) {
+      connectDevice({ device: device.id, serial: device.port })
+    }
+  })
+}
+
+async function loadLayout() {
+  try {
+    const layoutRef = doc(db, `layouts`, layoutId)
+    const docSnap = await getDoc(layoutRef)
+    
+    if (docSnap.exists()) {
+      return { ...docSnap.data(), id: docSnap.id }
+    } else {
+      console.error('No such document!')
+    }
+    return data
+  } catch (error) {
+    log.error('Error loading layout', error)
+  }
+}
+
+async function loadDevices() {
+  try {
+    const devices = await collection(db, `layouts/${layoutId}/devices`)
+    const querySnapshot = await getDocs(devices)
+    const devicesData = []
+    querySnapshot.forEach((doc) => {
+      devicesData.push({ ...doc.data(), id: doc.id })
+    })
+    return devicesData
+  } catch (error) {
+    log.error('Error loading layout', error)
+  }
 }
 
 export async function listen() {
@@ -282,6 +347,7 @@ export async function connect() {
     await wipe()
     await reset()
     await listen()
+    await load()
     log.success('Connected to DejaCloud', layoutId)
     return true
   } catch (error) {
