@@ -6,9 +6,6 @@ import {
 import { useLocos } from '@/Roster/useLocos'
 
 const emit = defineEmits(['close'])
-const props = defineProps({
-  layoutId: String
-})
 
 const { roadnames, createLoco } = useLocos()
 
@@ -24,11 +21,11 @@ async function submit (e) {
   loading.value = true
 
   const results = await e
-  console.log(results)
+  console.log('add loco', results)
 
   const newAddress = parseInt(address.value as unknown as string) 
-  if (!!newAddress && props.layoutId) {
-    await createLoco(props.layoutId, newAddress, name.value, roadname.value || undefined)
+  if (!!newAddress) {
+    await createLoco( newAddress, name.value, roadname.value || undefined)
   }
 
   loading.value = false

@@ -18,7 +18,6 @@ const locoTypes = [
 const { colors, getColor } = useColors()
 
 const props = defineProps({
-  layoutId: String,
   loco: Object
 })
 const emit = defineEmits(['close'])
@@ -43,9 +42,9 @@ async function submit (e) {
   console.log(results)
 
   const newAddress = parseInt(address.value as unknown as string) 
-  console.log('handleSave', newAddress, props.layoutId, props.loco?.id)
-  if (!!newAddress && props.layoutId && props.loco?.id) {
-    await updateLoco(props.layoutId, props.loco.id, newAddress, name.value, roadnameVal.value || undefined)
+  console.log('handleSave', newAddress, props.loco?.id)
+  if (!!newAddress && props.loco?.id) {
+    await updateLoco(props.loco.id, newAddress, name.value, roadnameVal.value || undefined)
   }
 
   loading.value = false

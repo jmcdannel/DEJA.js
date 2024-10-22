@@ -20,8 +20,8 @@ function handleEdit(loco) {
 <template>
   <ModuleTitle menu="Roster" />
   <Transition name="slide">
-    <AddLoco v-if="showAddLoco" @close="showAddLoco = false" :layoutId="layoutId" />
-    <EditLoco v-else-if="showEditLoco" @close="showEditLoco = false" :layoutId="layoutId" :loco="editLoco" />
+    <AddLoco v-if="showAddLoco" @close="showAddLoco = false" />
+    <EditLoco v-else-if="showEditLoco" @close="showEditLoco = false" :loco="editLoco" />
     <RosterList v-else-if="!showAddLoco && !showEditLoco" @edit="handleEdit" @add="showAddLoco = true" :allowEdit="!showEditLoco">
       <template #prepend>
         <AddTile color="pink" @click="showAddLoco = true" />

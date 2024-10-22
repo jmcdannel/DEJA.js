@@ -76,16 +76,6 @@ export function useLocos() {
   function getLocos() {
     const result = useCollection(locosCol)
     return result
-    // try {
-    //   // const locosRef = collection(db, `layouts/${_layoutId}/locos`)
-    //   const locos = useCollection(() =>
-    //     collection(db, `layouts/${layoutId.value}/locos`)
-    //   )
-    //   console.log('getLocos', locos, layoutId.value)
-    //   return locos
-    // } catch (e) {
-    //   console.error('Error getting locos', e)
-    // }
   }
 
   function getLoco(id) {
@@ -101,7 +91,6 @@ export function useLocos() {
   }
 
   async function updateLoco(
-    _layoutId: string,
     id: string,
     locoId: number,
     name: string | undefined,
@@ -119,7 +108,7 @@ export function useLocos() {
         loco.meta = { roadname }
       }
 
-      const locoDoc = doc(db, `layouts/${_layoutId}/locos`, id)
+      const locoDoc = doc(db, `layouts/${layoutId.value}/locos`, id)
       await setDoc(locoDoc, { ...loco }, { merge: true })
       console.log('loco written with ID: ', id)
       return locoId
@@ -149,7 +138,6 @@ export function useLocos() {
   }
 
   async function createLoco(
-    _layoutId: string,
     locoId: number,
     name: string | undefined,
     roadname: string | undefined
@@ -166,7 +154,7 @@ export function useLocos() {
         loco.meta = { roadname }
       }
       const newLocoDoc = await addDoc(
-        collection(db, `layouts/${_layoutId}/locos`),
+        collection(db, `layouts/${layoutId.value}/locos`),
         loco
       )
       console.log('loco written with ID: ', newLocoDoc)
