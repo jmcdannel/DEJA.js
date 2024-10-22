@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useTimeoutFn } from '@vueuse/core'
+import { useEfx } from '@/Effects/useEfx'
 import { useTurnouts } from '@/Turnouts/useTurnouts'
 
 const { switchTurnout } = useTurnouts()
+const { runEffect, getEffect } = useEfx()
 
 defineEmits(['edit'])
 const props = defineProps({
@@ -12,9 +15,14 @@ const props = defineProps({
 
 const turnoutState = ref(props.turnout?.state || true)
 
-function handleSwitch() {
-  switchTurnout({...props.turnout, id: props.turnoutId, state: turnoutState.value})
-  // turnoutState.value = !turnoutState.value
+async function handleSwitch() {
+  await switchTurnout({...props.turnout, id: props.turnoutId, state: turnoutState.value})
+  if (props.turnout?.effectId) {
+    useTimeoutFn(async () => {
+      const effect = await getEffect(props.turnout?.effectId)
+      await runEffect({...effect, state: turnoutState.value})
+    }, 2000)
+  }
 }
 
 </script>
@@ -46,7 +54,7 @@ function handleSwitch() {
             class=""
             prepend-icon="mdi-memory"
           >
-            {{ turnout?.interface }}
+            {{ turnout?.device }}
           </v-chip>
           <v-chip
             v-if="turnout?.effectId"

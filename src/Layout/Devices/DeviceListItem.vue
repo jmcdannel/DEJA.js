@@ -5,7 +5,7 @@ import { useColors } from '@/Core/UI/useColors'
 import { useLayout } from '@/Layout/useLayout'
 
 const { sendDejaCommand } = useDejaJS()
-const { deviceTypes, connectDevice } = useLayout()
+const { deviceTypes, connectDevice, autoConnectDevice } = useLayout()
 const { colors, DEFAULT_COLOR } = useColors()
 
 const props = defineProps({
@@ -14,6 +14,7 @@ const props = defineProps({
 })
 
 const serial = ref(props?.device?.port || '')
+const autoConnect = ref(props?.device?.autoConnect || false)
 const color = ref(colors[DEFAULT_COLOR])
 
 const deviceType = computed(() => deviceTypes.find((type) => type.value === props?.device?.type))
@@ -32,6 +33,11 @@ watch(() => deviceType.value?.color, (newVal) => {
 async function handleConnect (event: Event) {
   console.log('handleConnect', props.device, serial.value)
   connectDevice(serial.value, props.device)
+}
+
+async function handelAutoConnect (checked: boolean) {
+  console.log('handelAutoConnect', props.device,checked)
+  props.device?.id && await autoConnectDevice(props.device?.id, checked)
 }
 
 </script>
@@ -114,6 +120,14 @@ async function handleConnect (event: Event) {
         prepend-icon="mdi-usb"
         disabled
       ></v-btn>
+      <v-switch 
+        v-if="device?.isConnected"
+        @update:modelValue="handelAutoConnect"
+        v-model="autoConnect"
+        color="green"
+        label="Auto Connect"
+        hide-details
+      ></v-switch>
     </v-card-actions>
   </v-card>
 </template>

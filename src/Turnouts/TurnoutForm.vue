@@ -9,7 +9,7 @@ const props = defineProps<{
   turnout: Object
 }>()
 const emit = defineEmits(['close'])
-const DEFAULT_INTERFACE = 'dccex'
+const DEFAULT_DEVICE = 'dccex'
 const DEFAULT_TYPE = 'kato'
 
 const { getEffects } = useEfx()
@@ -24,7 +24,7 @@ const name = ref(props.turnout?.name || '')
 const desc = ref(props.turnout?.desc || '')
 const index = ref(props.turnout?.turnoutIdx || '')
 const effectId = ref(props.turnout?.effectId || '')
-const iface = ref(props.turnout?.iface || DEFAULT_INTERFACE)
+const device = ref(props.turnout?.device || DEFAULT_DEVICE)
 const straight = ref(props.turnout?.straight || '')
 const divergent = ref(props.turnout?.divergent || '')
 const turnoutType = ref(DEFAULT_TYPE)
@@ -39,12 +39,12 @@ const effectOptions = effects?.value.map((efx) => ({
 }))
 
 watch(name, autoId)
-watch(iface, autoId)
+watch(device, autoId)
 watch(index, autoId)
 
 function autoId() {
-  turnoutId.value = name.value && iface.value && index.value 
-    ? `${slugify(name.value)}-${slugify(index.value)}-${slugify(iface.value)}` 
+  turnoutId.value = name.value && device.value && index.value 
+    ? `${slugify(name.value)}-${slugify(index.value)}-${slugify(device.value)}` 
     : ''
 }
 
@@ -53,7 +53,7 @@ async function submit (e) {
   const results = await e
   if (results.valid) {
     const turnout = {
-      ['interface']: iface.value,
+      device: device.value,
       name: name.value,
       desc: desc.value,
       turnoutIdx: index.value,
@@ -85,7 +85,7 @@ function reset(){
   desc.value = ''
   index.value = ''
   effectId.value = ''
-  iface.value = DEFAULT_INTERFACE
+  device.value = DEFAULT_DEVICE
   straight.value = ''
   divergent.value = ''
   turnoutType.value = DEFAULT_TYPE
@@ -120,9 +120,9 @@ function slugify(str: string) {
       </v-btn>
     </v-btn-toggle>
     <v-divider class="my-4 border-yellow-500"></v-divider>
-    <v-label class="m-2">Interface</v-label>
+    <v-label class="m-2">Device</v-label>
     <v-divider class="my-4 border-yellow-500"></v-divider>
-    <v-btn-toggle v-model="iface" divided class="flex-wrap h-auto" size="x-large">
+    <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large">
         <v-btn v-for="device in devices" :value="device.id" :key="device.id" 
           class="min-h-48 min-w-48 border"
           color="yellow" >

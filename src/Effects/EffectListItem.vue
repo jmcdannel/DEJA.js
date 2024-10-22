@@ -4,7 +4,7 @@ import { useEfx } from '@/Effects/useEfx'
 import { useColors } from '@/Core/UI/useColors'
 
 const { colors, DEFAULT_COLOR } = useColors()
-const { efxTypes, runEffect } = useEfx()
+const { efxTypes, runEffect, deleteEfx } = useEfx()
 
 const props = defineProps({
   efx: Object,
@@ -12,6 +12,8 @@ const props = defineProps({
 })
 
 const active = ref(false)
+const confirmDelete = ref(false)
+
 
 const efxType = computed(() => efxTypes.find((type) => type.value === props?.efx?.type))
 const color = computed(() => colors[efxType?.value?.color || DEFAULT_COLOR])
@@ -65,7 +67,7 @@ async function handleEfx (event: Event) {
             :color="color.value"
             prepend-icon="mdi-memory"
           >
-            {{ efx?.interface }}
+            {{ efx?.device }}
           </v-chip>
         </v-chip-group>
         <div class="flex flex-col items-center justify-center">
@@ -84,11 +86,28 @@ async function handleEfx (event: Event) {
     <v-spacer></v-spacer>
     <v-card-actions>
       <v-btn
+        v-if="!confirmDelete"
         class="ma-2"
         icon="mdi-delete"
         variant="tonal"
         size="small"
+        @click="confirmDelete = true"
       ></v-btn>
+      <template v-else>
+        <v-btn
+          class="ma-2"
+          text="Cancel"
+          variant="outlined"
+          size="small"
+          @click="confirmDelete = false" />
+        <v-btn
+          class="ma-2"
+          text="Confirm"
+          variant="tonal"
+          size="small"
+          prepend-icon="mdi-delete"
+          @click="deleteEfx(efx?.id)" />
+      </template>
       <v-spacer></v-spacer>
 
       <v-btn

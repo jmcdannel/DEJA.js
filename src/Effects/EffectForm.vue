@@ -5,21 +5,20 @@ import { useLayout } from '@/Layout/useLayout'
 import { useSound } from '@vueuse/sound'
 import { useWebSocket } from '@vueuse/core'
 import { BsCpu } from 'vue3-icons/bs'
+import ViewJson from '@/Core/UI/ViewJson.vue'
 import MacroForm from '@/Effects/MacroForm.vue'
-//http://192.168.86.249:5173/
-// const { status, data, send, open, close } = useWebSocket('ws://192.168.86.249:8082')
 
 const props = defineProps<{
   efx: Object
 }>()
 
 const emit = defineEmits(['close'])
-const DEFAULT_INTERFACE = 'dccex'
+const DEFAULT_DEVICE = 'dccex'
 
 const { getDevices } = useLayout()
 const { setEfx, efxTypes, getEfxType, DEFAULT_TYPE } = useEfx()
 
-const efxInterface = ref(props.efx?.interface || DEFAULT_INTERFACE)
+const device = ref(props.efx?.device || DEFAULT_DEVICE)
 const name = ref(props.efx?.name || '')
 const pin = ref(props.efx?.pin || '')
 const macroOn = ref(props.efx?.on || [])
@@ -52,15 +51,23 @@ async function submit () {
   loading.value = true
 
   const newEfx = {
-    ['interface']: efxInterface.value,
     name: name.value,
-    ['type']: efxType.value
+    type: efxType.value
   }
-  if (pinTypes.includes(efxType.value)){
+  // set device
+  if (efxObj.value?.require.includes('device')) {
+    newEfx.device = device.value
+  }
+  //  set pin
+  if (efxObj.value?.require.includes('pin')) {
     newEfx.pin = parseInt(pin.value)
-  } else if (efxType.value === 'sound') {
+  }
+  //  set sound
+  if (efxObj.value?.require.includes('sound')) {
     newEfx.sound = sound.value
-  } else if (efxType.value === 'macro') {
+  }
+  //  set macro
+  if (efxType.value === 'macro') {
     newEfx.on = macroOn.value
     newEfx.off = macroOff.value
   }
@@ -84,22 +91,6 @@ const newSound = useSound(sound.value || '')
 function playSound() {
   console.log('playSound', sound.value, newSound)
   soundObj.value?.play()
-  // const mysound = new Audio('/sounds/departing-train.wav');
-
-  // // Function to play the sound
-  // function playSound() {
-  //   mysound.play();
-  // }
-
-  // // Function to stop the sound
-  // function stopSound() {
-  //   mysound.pause();
-  //   mysound.currentTime = 0; // Reset the sound to the beginning
-  // }
-
-  // // Example usage
-  // playSound(); // Call this function to play the sound
-  // // stopSound();
 }
 function stopSound() {
   console.log('playSound', sound.value)
@@ -110,7 +101,6 @@ function stopSound() {
 </script>
 <template>
   <v-form validate-on="submit lazy" @submit.prevent="submit">
-    {{ efx }}
     <v-divider class="my-4 border-fuchsia-500"></v-divider>
     <v-label class="m-2 text-fuchsia-400 text-2xl">{{ efx ? 'Edit' : 'Add'}} Effect</v-label>
     <v-divider class="my-4 border-fuchsia-500"></v-divider>
@@ -126,22 +116,27 @@ function stopSound() {
       </v-btn>
     </v-btn-toggle>
     <v-divider class="my-4 border-fuchsia-500"></v-divider>
-    <v-label class="m-2">Interface</v-label>
-    <v-divider class="my-4 border-fuchsia-500"></v-divider>
-    <v-btn-toggle v-model="efxInterface" divided class="flex-wrap h-auto" size="x-large">
-        <v-btn v-for="device in devices" :value="device.id" :key="device.id" 
-          class="min-h-48 min-w-48 border"
-          color="purple" >
-          <!-- <v-icon :icon="efxOpt.icon" :color="efxOpt.color"></v-icon> -->
-          <div class="flex flex-col justify-center items-center">
-            <BsCpu class="w-16 h-16 stroke-none "></BsCpu>
-            <div class="mt-4">{{ device.id }}</div>
-          </div>        
-        </v-btn>
-    </v-btn-toggle>
+
+    <!-- device -->
+    <template v-if="efxObj?.require?.includes('device')">
+      <v-label class="m-2">Device</v-label>
+      <v-divider class="my-4 border-fuchsia-500"></v-divider>
+      <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large">
+          <v-btn v-for="deviceOpt in devices" :value="deviceOpt.id" :key="deviceOpt.id" 
+            class="min-h-48 min-w-48 border"
+            color="purple" >
+            <!-- <v-icon :icon="efxOpt.icon" :color="efxOpt.color"></v-icon> -->
+            <div class="flex flex-col justify-center items-center">
+              <component :is="deviceOpt.icon" class="w-16 h-16 stroke-none "></component>
+              <div class="mt-4">{{ deviceOpt.id }}</div>
+            </div>        
+          </v-btn>
+      </v-btn-toggle>
+    </template>
     <v-divider class="my-4 border-fuchsia-500"></v-divider>
 
-    <template v-if="pinTypes.includes(efxType)">
+    <!-- pin -->
+    <template v-if="efxObj?.require?.includes('pin')">
       <v-text-field
         v-model="pin"
         label="Pin"
@@ -152,10 +147,11 @@ function stopSound() {
       <template #append>
         <component v-if="efxObj?.icon" :is="efxObj?.icon" :color="efxObj?.color" class="w-16 h-16 stoke-none"></component>
       </template>
-    </v-text-field>
-    
+    </v-text-field>    
     </template>
-    <template v-else-if="efxType === 'sound'">
+
+    <!-- sound -->
+    <template v-else-if="efxObj?.require?.includes('sound')">
       <div class="flex items-center">
         <v-text-field
           v-model="sound"
@@ -169,10 +165,14 @@ function stopSound() {
         </div>
       </div>
     </template>
+
+    <!-- macro -->
     <template v-else-if="efxType === 'macro'">
       <MacroForm @change="handleMacro" :on="macroOn" :off="macroOff"></MacroForm>
     </template>
     <v-divider class="my-4 border-fuchsia-500"></v-divider>
+
+    <!-- name -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <v-text-field
         v-model="name"
@@ -183,7 +183,6 @@ function stopSound() {
     </div>
     
     <v-divider class="my-4"></v-divider>
-    <!-- <v-icon :icon="efxType?.icon"></v-icon> -->
     <div class="grid grid-cols-2 gap-8 my-4">   
       <v-btn
         class="mt-2"
@@ -203,13 +202,7 @@ function stopSound() {
       ></v-btn>  
     </div>
   </v-form>
+  <ViewJson :json="efx" label="Efx" />
+  <ViewJson :json="efxObj" label="efxObj" />
+  <ViewJson :json="efxTypes" label="efxTypes" />
 </template>
-<style>
-  input[type="text"] {
-    background-color: var(--bg-color);
-  }
-  input[type="text"]:focus {
-    box-shadow: none;
-  }
-
-</style>

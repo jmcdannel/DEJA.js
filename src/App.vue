@@ -1,19 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { initFlowbite } from 'flowbite'
 import { useStorage } from '@vueuse/core'
 import { useCurrentUser } from 'vuefire'
-import DejaConnect from './components/DejaConnect.vue'
+
+import DCCLogger from '@/DCCEX/Log/DCCLogger.vue'
+
+// Pages
 import Login from '@/User/Login/Login.vue'
-import Header from './Core/Header/Header.vue'
-import SelectLayout from './Core/Header/SelectLayout.vue';
-import AppMenu from './Core/Header/AppMenu.vue';
-import UserProfileMenu from './Core/Header/UserProfile.vue';
-import Sidebar from './Core/Sidebar/Sidebar.vue'
-import Search from './Core/Search/Search.vue'
-import Menu from '@/Core/Menu/Menu.vue'
-import ToggleSidebar from '../Sidebar/ToggleSidebar.vue'
-import ToggleSearch from '../Search/ToggleSearch.vue'
 import Dashboard from './Dashboard/Dashboard.vue'
 import DCCEX from './DCCEX/DCCEX.vue'
 import Layout from './Layout/Layout.vue'
@@ -24,8 +17,15 @@ import RoutesList from './Routes/RoutesList.vue'
 import SignalsList from './Signals/SignalList.vue'
 import Settings from './Settings/Settings.vue'
 import UserProfile from './User/Profile/UserProfile.vue'
-import DeviceStatus from '@/Core/Header/DeviceStatus.vue'
-import DCCLogger from '@/DCCEX/Log/DCCLogger.vue'
+
+// Components
+import Header from './Core/Header/Header.vue'
+import AppMenu from './Core/Header/AppMenu.vue';
+import UserProfileMenu from './Core/Header/UserProfile.vue';
+import Sidebar from './Core/Sidebar/Sidebar.vue'
+import Search from './Core/Search/Search.vue'
+import Menu from '@/Core/Menu/Menu.vue'
+import DeviceStatus from '@/Layout/Devices/DeviceStatus.vue'
 import DCCLogStatus from '@/DCCEX/Log/DCCLogStatus.vue'
 import LayoutStatus from '@/Layout/LayoutStatus.vue'
 
@@ -35,9 +35,7 @@ const enableLogging = useStorage('@DEJA/pref/ws-logging', false)
 const user = useCurrentUser()
 
 const view = useStorage('@DEJA/cloud/view', 'Effects')
-onMounted(() => {
-  initFlowbite()
-})
+
 const theme = ref('dark')
 const drawer = ref(null)
 const mobile = ref(null)
@@ -50,7 +48,6 @@ function handleMenu(item:string) {
 function handleLayoutSelect(_layoutId) {
   layoutId.value = _layoutId
 }
-console.log('enableLogging', enableLogging)
 
 </script>
 <template>

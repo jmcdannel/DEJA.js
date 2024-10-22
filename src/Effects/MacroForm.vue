@@ -32,12 +32,16 @@ function handleAddOn(effects, turnouts) {
   onChips.value = onChips.value.concat(effects.map((e) => ({
     id: e.id,
     name: e.name,
-    type: 'effect'
+    device: e.device,
+    type: 'effect',
+    state: true,
   })))
   onChips.value = onChips.value.concat(turnouts.map((t) => ({
     id: t.id,
     name: t.name,
-    type: 'turnout'
+    device: t.device,
+    type: 'turnout',
+    state: true,
   })))
   emitChanges()
   ondialog.value = false
@@ -48,12 +52,16 @@ function handleAddOff(effects, turnouts) {
   offChips.value = offChips.value.concat(effects.map((e) => ({
     id: e.id,
     name: e.name,
-    type: 'effect'
+    device: e.device,
+    type: 'effect',
+    state: false,
   })))
   offChips.value = offChips.value.concat(turnouts.map((t) => ({
     id: t.id,
     name: t.name,
-    type: 'turnout'
+    device: t.device,
+    type: 'turnout',
+    state: false,
   })))
   emitChanges()
   offdialog.value = false
@@ -80,15 +88,31 @@ function emitChanges() {
       <v-chip-group column multiple 
         color="purple" 
         variant="flat"
-        @update:modelValue="handleOnUpdate"
         :model-value="onChips" >
         <v-chip v-for="chip in onChips" :key="chip.id" :value="chip.id"          
           size="small"
           color="primary"
           variant="outlined"
-          :prepend-icon="chip.type === 'effect' ? 'mdi-rocket-launch' : 'mdi-directions-fork'"
           selected
-        >{{ chip.name }}</v-chip>
+        >        
+          <template #prepend>
+            <v-icon 
+              @click="chip.state = !chip.state"
+              class="mr-2"
+              :icon="chip.type === 'effect' ? 'mdi-rocket-launch' : 'mdi-directions-fork'" 
+              :color="chip.state ? 'green' : 'red'">
+            </v-icon>
+          </template>  
+          <template #append>
+            <v-icon 
+              @click="handleOnUpdate([chip.id])"
+              class="ml-2"
+              icon="mdi-delete"
+              color="grey">
+            </v-icon>
+          </template>
+        {{ chip.name }}
+        </v-chip>
       </v-chip-group>
     </v-card-text>
   </v-card>
@@ -104,7 +128,6 @@ function emitChanges() {
     <v-chip-group column multiple 
       color="purple" 
       variant="flat"
-      @update:modelValue="handleOffUpdate"
       :model-value="offChips" >
       <v-chip v-for="chip in offChips" :key="chip.id" :value="chip.id"          
         size="small"
@@ -112,7 +135,25 @@ function emitChanges() {
         variant="outlined"
         :prepend-icon="chip.type === 'effect' ? 'mdi-rocket-launch' : 'mdi-directions-fork'"
         selected
-      >{{ chip.name }}</v-chip>
+      >
+        <template #prepend>
+          <v-icon 
+            @click="chip.state = !chip.state"
+            class="mr-2"
+            :icon="chip.type === 'effect' ? 'mdi-rocket-launch' : 'mdi-directions-fork'" 
+            :color="chip.state ? 'green' : 'red'">
+          </v-icon>
+        </template>  
+        <template #append>
+          <v-icon 
+            @click="handleOffUpdate([chip.id])"
+            class="ml-2"
+            icon="mdi-delete"
+            color="grey">
+          </v-icon>
+        </template>
+        {{ chip.name }}
+      </v-chip>
     </v-chip-group>
   </v-card-text>
 </v-card>
@@ -121,13 +162,13 @@ function emitChanges() {
     v-model="ondialog"
     width="auto"
   >
-   <MacroAdd @close="ondialog = false" @add="handleAddOn" />
+   <MacroAdd @close="ondialog = false" @add="handleAddOn" defaultState="on" />
   </v-dialog>
   <v-dialog
     v-model="offdialog"
     width="auto"
   >
-   <MacroAdd @close="offdialog = false" @add="handleAddOff" />
+   <MacroAdd @close="offdialog = false" @add="handleAddOff" defaultState="off" />
   </v-dialog>
 
 

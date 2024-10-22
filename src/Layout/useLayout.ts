@@ -8,7 +8,7 @@ import {
   addDoc,
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
-import { useCollection, useDocument } from 'vuefire'
+import { useCollection, useDocument, useCurrentUser } from 'vuefire'
 import { db } from '@/firebase'
 import { useDcc } from '@/DCCEX/useDcc'
 import { useDejaJS } from '@/DejaJS/useDejaJS'
@@ -30,6 +30,7 @@ export const useLayout = () => {
     },
   ]
 
+  const user = useCurrentUser()
   const { sendDccCommand } = useDcc()
   const { sendDejaCommand } = useDejaJS()
   const layoutId = useStorage('@DEJA/cloud/layoutId', 'betatrack')
@@ -66,11 +67,28 @@ export const useLayout = () => {
     const docSnap = await getDoc(deviceRef)
 
     if (docSnap.exists()) {
-      console.log('Document data:', docSnap.data(), docSnap.id, docSnap.ref)
       return { ...docSnap.data(), id: docSnap.id }
     } else {
       // docSnap.data() will be undefined in this case
       console.error('No such document!')
+    }
+  }
+
+  async function createLayout(id, layout) {
+    console.log('createLayout', layout)
+    try {
+      await setDoc(doc(db, `layouts`, id), {
+        ...layout,
+        owner: user.value?.email,
+        dcc: {
+          client: 'dejaJs',
+        },
+        created: serverTimestamp(),
+        timestamp: serverTimestamp(),
+      })
+      return true
+    } catch (e) {
+      console.error('Error adding throttle: ', e)
     }
   }
 
@@ -81,7 +99,6 @@ export const useLayout = () => {
         ...device,
         timestamp: serverTimestamp(),
       })
-      console.log('device written with ID: ', id, layoutId.value)
       return true
     } catch (e) {
       console.error('Error adding throttle: ', e)
@@ -112,12 +129,24 @@ export const useLayout = () => {
     }
   }
 
+  async function autoConnectDevice(id, autoConnect) {
+    console.log('enableAutoConnect', id, autoConnect)
+    try {
+      const deviceDoc = doc(db, `layouts/${layoutId.value}/devices`, id)
+      await setDoc(deviceDoc, { autoConnect: !!autoConnect }, { merge: true })
+    } catch (e) {
+      console.error('Error updating consist: ', e)
+    }
+  }
+
   return {
     getLayout,
     getLayouts,
+    createLayout,
     getDevice,
     getDevices,
     createDevice,
+    autoConnectDevice,
     deviceTypes,
     connectDevice,
   }

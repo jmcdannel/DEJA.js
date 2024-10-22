@@ -1,5 +1,11 @@
 import { computed } from 'vue'
-import { collection, serverTimestamp, setDoc, doc } from 'firebase/firestore'
+import {
+  collection,
+  serverTimestamp,
+  setDoc,
+  doc,
+  getDoc,
+} from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
 import { db } from '@/firebase'
@@ -22,13 +28,26 @@ export function useTurnouts() {
     return turnouts
   }
 
+  async function getTurnout(id: string) {
+    const deviceRef = doc(db, `layouts/${layoutId.value}/turnouts`, id)
+    const docSnap = await getDoc(deviceRef)
+
+    if (docSnap.exists()) {
+      return { ...docSnap.data(), id: docSnap.id }
+    } else {
+      console.error('No such document!')
+    }
+  }
+
   async function switchTurnout(turnout) {
     console.log('switchTurnout SEND', turnout, turnout?.id)
 
     try {
-      const device = await getDevice(turnout['interface'])
+      const device = await getDevice(turnout['device'])
       console.log('device', device, device?.type)
-
+      // if (turnout?.effectId) {
+      //   await runEffect(await turnout.effectId)
+      // }
       if (device?.type === 'dcc-ex') {
         sendDccCommand({
           action: 'turnout',
@@ -40,8 +59,6 @@ export function useTurnouts() {
           payload: { ...turnout, id: turnout?.id },
         })
       }
-
-      console.log('Document written with ID: ', turnout, device)
     } catch (e) {
       console.error('Error adding document: ', e)
     }
@@ -55,7 +72,7 @@ export function useTurnouts() {
         timestamp: serverTimestamp(),
       })
       // T 200 SERVO 200 200 300 2
-      const device = await getDevice(turnout['interface'])
+      const device = await getDevice(turnout['device'])
       console.log('device', device, device?.type)
 
       if (device?.type === 'dcc-ex') {
@@ -64,7 +81,6 @@ export function useTurnouts() {
           payload: `T ${turnout.turnoutIdx} SERVO ${turnout.turnoutIdx} ${turnout.straight} ${turnout.divergent} 2`,
         })
       }
-      console.log('efx written with ID: ', layoutId.value)
       return true
     } catch (e) {
       console.error('Error adding throttle: ', e)
@@ -73,6 +89,7 @@ export function useTurnouts() {
 
   return {
     getTurnouts,
+    getTurnout,
     switchTurnout,
     setTurnout,
   }

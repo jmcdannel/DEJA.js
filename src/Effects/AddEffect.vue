@@ -11,12 +11,12 @@ import MacroForm from '@/Effects/MacroForm.vue'
 
 console.log(status.value)
 const emit = defineEmits(['close'])
-const DEFAULT_INTERFACE = 'dccex'
+const DEFAULT_DEVICE = 'dccex'
 
 const { getDevices } = useLayout()
 const { createEfx, efxTypes, getEfxType, DEFAULT_TYPE } = useEfx()
 
-const efxInterface = ref(DEFAULT_INTERFACE)
+const device = ref(DEFAULT_DEVICE)
 const name = ref('')
 const pin = ref('')
 const sound = ref('')
@@ -47,7 +47,7 @@ async function submit () {
   loading.value = true
 
   const efx = {
-    ['interface']: efxInterface.value,
+    device: device.value,
     name: name.value,
     pin: pin.value,
     ['type']: efxType.value
@@ -107,9 +107,9 @@ function stopSound() {
       </v-btn>
     </v-btn-toggle>
     <v-divider class="my-4 border-fuchsia-500"></v-divider>
-    <v-label class="m-2">Interface</v-label>
+    <v-label class="m-2">Device</v-label>
     <v-divider class="my-4 border-fuchsia-500"></v-divider>
-    <v-btn-toggle v-model="efxInterface" divided class="flex-wrap h-auto" size="x-large">
+    <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large">
         <v-btn v-for="device in devices" :value="device.id" :key="device.id" 
           class="min-h-48 min-w-48 border"
           color="purple" >
