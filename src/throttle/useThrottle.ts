@@ -97,26 +97,26 @@ export const useThrottle = () => {
     consistLoco: ConsistLoco
   ): number | undefined {
     if (!consistLoco.trim) {
-      return newSpeed
+      return consistLoco.direction ? newSpeed : -newSpeed
     }
     let consistSpeed = newSpeed
     if (consistLoco.direction) {
       consistSpeed =
         newSpeed > 0
           ? consistSpeed + consistLoco.trim
-          : consistSpeed - consistLoco.trim
+          : -consistSpeed - consistLoco.trim
     } else {
       consistSpeed =
         newSpeed > 0
           ? consistSpeed - consistLoco.trim
-          : consistSpeed + consistLoco.trim
+          : -consistSpeed + consistLoco.trim
     }
 
-    if (newSpeed > 0 && consistSpeed <= 0) {
-      consistSpeed = 1
-    } else if (newSpeed < 0 && consistSpeed >= 0) {
-      consistSpeed = -1
-    }
+    // if (newSpeed > 0 && consistSpeed <= 0) {
+    //   consistSpeed = 1
+    // } else if (newSpeed < 0 && consistSpeed >= 0) {
+    //   consistSpeed = -1
+    // }
 
     return consistSpeed
   }

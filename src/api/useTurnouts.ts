@@ -14,7 +14,7 @@ import { useDcc } from '@/api/dccApi'
 import { useDejaJs } from '@/api/useDejaJs'
 
 export function useTurnouts() {
-  const layoutId = useStorage('@DEJA/cloud/layoutId', 'betatrack')
+  const layoutId = useStorage('@DEJA/layoutId')
   const { getDevice } = useLayout()
   const { sendDccCommand } = useDcc()
   const { send: sendDejaCommand } = useDejaJs()

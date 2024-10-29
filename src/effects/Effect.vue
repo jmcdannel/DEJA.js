@@ -1,16 +1,12 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
 import { useEfx } from '@/api/useEfx'
 
-const { efxTypes, runEffect } = useEfx()
+const { runEffect } = useEfx()
 
 const props = defineProps({
   efx: Object,
   efxId: String,
 })
-
-
-const efxType = computed(() => efxTypes.find((type) => type.value === props?.efx?.type))
 
 async function handleEfx (event: Event) {
   console.log('handleEfx', props.efx, props.efx?.id, event, event?.target?.checked)

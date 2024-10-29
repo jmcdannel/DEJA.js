@@ -24,13 +24,11 @@ const router = createRouter({
       path: '/effects',
       name: 'effects',
       component: () => import('../views/EffectsView.vue'),
-      props: { dejaCloud: false },
     },
     {
       path: '/turnouts',
       name: 'turnouts',
       component: () => import('../views/TurnoutsView.vue'),
-      props: { dejaCloud: false },
     },
     {
       path: '/throttle/:address',

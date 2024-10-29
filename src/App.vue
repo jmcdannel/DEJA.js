@@ -65,7 +65,7 @@
       <RouterView />
       <ThrottleNav v-if="!!user && !!layoutId" />
     </main>
-    <FooterView></FooterView>
+    <FooterView v-if="!!user"></FooterView>
   </main>
 </template>
 <style>

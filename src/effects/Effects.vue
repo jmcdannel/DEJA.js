@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { ref }  from 'vue'
 import { useEfx } from '@/api/useEfx'
 import EffectItem from '@/effects/Effect.vue'
-
 const emit = defineEmits(['edit'])
 
 const { getEffects } = useEfx()
 const list = getEffects()
+// const list = ref([])
 
 function handleEdit(item) {
   console.log('handleEdit', item)

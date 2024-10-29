@@ -101,7 +101,7 @@
       <ul class="flex flex-wrap justify-center mx-2 items-center max-w-48 sm:max-w-48 md:max-w-48">
         <li v-for="(locoFunc, locoIdx) in loco.functions" :key="locoFunc.id" class="basis-1/2 sm:basis-1/2 md:basis-1/3">
           <!-- <pre>{{ locoFunc }}</pre> -->
-          <Function :func="locoFunc" :address="44" class="w-full" :class="getRoundedClasses(locoIdx)" />
+          <Function :func="locoFunc" :address="loco.locoId" class="w-full" :class="getRoundedClasses(locoIdx)" />
         </li>
         <li class="basis-1/2 md:basis-1/3">
           <button @click="openAllFunctions()" :class="getRoundedClasses(8)"
@@ -110,7 +110,7 @@
           </button>  
         </li>
         <li v-for="(locoFunc, locoIdx) in availableFunctions" :key="locoFunc.id" class="basis-1/2 sm:basis-1/2 md:basis-1/3">
-          <Function :func="locoFunc" :address="44" class="w-full" :class="getRoundedClasses(locoIdx + loco?.functions?.length)" />
+          <Function :func="locoFunc" :address="loco.locoId" class="w-full" :class="getRoundedClasses(locoIdx + loco?.functions?.length)" />
         </li>
       </ul>
       <!-- <div class="flex justify-center">
