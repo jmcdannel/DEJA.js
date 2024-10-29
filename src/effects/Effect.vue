@@ -25,7 +25,7 @@ async function handleEfx (event: Event) {
 <template>
   <div class="card card-compact shadow-xl w-full my-1 bg-gradient-to-r from-rose-950 to-slate-900 border border-rose-500">
     <div class="card-body flex flex-row items-center justify-center">
-      <component :is="efxType?.icon" class="w-6 h-6 stroke-none"></component>
+      <!-- <component :is="efxType?.icon" class="w-6 h-6 stroke-none"></component> -->
       <h2 class="flex-grow text-xl font-bold">{{efx?.name}}</h2>
       <!-- <p>{{ efxId }}</p> -->
       <div class="form-control">

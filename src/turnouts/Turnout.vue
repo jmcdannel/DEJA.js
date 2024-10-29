@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
 import { useTurnouts } from '@/api/useTurnouts'
 import { MdOutlineForkLeft } from 'vue3-icons/md'
-import { useEfx } from '@/api/useEfx'
+// import { useEfx } from '@/api/useEfx'
 
 const { switchTurnout } = useTurnouts()
-const { runEffect, getEffect } = useEfx()
+// const { runEffect, getEffect } = useEfx()
 
 const props = defineProps({
   turnout: Object,
@@ -19,8 +18,8 @@ async function handleTurnouts (event: Event) {
   await switchTurnout({...props.turnout, id: props.turnoutId, state: event?.target?.checked})
   if (props.turnout?.effectId) {
     useTimeoutFn(async () => {
-      const effect = await getEffect(props.turnout?.effectId)
-      await runEffect({...effect, state: event?.target?.checked})
+      // const effect = await getEffect(props.turnout?.effectId)
+      // await runEffect({...effect, state: event?.target?.checked})
     }, 2000)
   }
 }

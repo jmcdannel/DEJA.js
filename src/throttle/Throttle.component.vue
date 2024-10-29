@@ -98,7 +98,7 @@
   }
 
   const showSlider = (props.viewAs === 'Split' && breakpoints.greaterOrEqual('md')) || (breakpoints.greaterOrEqual('sm'))
-  const showFunctions = (props.viewAs === 'Split' && breakpoints.greaterOrEqual('md')) || props.viewAs
+  const showFunctions = (props.viewAs === 'Split' && breakpoints.greaterOrEqual('sm')) || props.viewAs
 
   
 </script>
