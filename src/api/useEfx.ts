@@ -11,8 +11,8 @@ import { useCollection } from 'vuefire'
 import { db } from '@/firebase'
 import { useLayout } from '@/api/useLayout'
 // import { useTurnouts } from '@/api/useTurnouts'
-// import { useDcc } from '@/api/dccApi'
-// import { useDejaJs } from '@/api/useDejaJs'
+import { useDcc } from '@/api/dccApi'
+import { useDejaJs } from '@/api/useDejaJs'
 // import { useEfxIcon } from '@/api/useEfxIcon'
 
 export const useEfx = () => {
@@ -20,8 +20,8 @@ export const useEfx = () => {
   // const dccApi = useDcc()
   const { getDevice, getDevices } = useLayout()
   // const { getTurnout } = useTurnouts()
-  // const { sendDccCommand } = useDcc()
-  // const { send: sendDejaCommand } = useDejaJs()
+  const { sendDccCommand } = useDcc()
+  const { send: sendDejaCommand } = useDejaJs()
   // const { getIconComponent } = useEfxIcon()
 
   const efxCol = computed(() =>
@@ -140,16 +140,9 @@ export const useEfx = () => {
       console.log('device', device, device?.type)
 
       if (device?.type === 'dcc-ex') {
-        // dccApi.sendOutput(efx.pin, efx.state)
+        dccApi.sendOutput(efx.pin, efx.state)
       } else if (device?.type === 'deja-arduino') {
-        // sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
-      }
-
-      if (device?.type === 'dcc-ex') {
-        // dccApi.sendDccCommand({ action: 'output', payload: efx })
-        // dccApi.sendOutput(efx.pin, efx.state)
-      } else if (device?.type === 'deja-arduino') {
-        // sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
+        sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
       }
     } catch (e) {
       console.error('Error adding document: ', e)
