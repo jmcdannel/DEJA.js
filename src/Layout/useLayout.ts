@@ -113,11 +113,13 @@ export const useLayout = () => {
         device: device?.id || 'unknown',
       }
 
-      if (device?.type === 'dcc-ex') {
-        sendDccCommand({ action: 'connect', payload })
-      } else if (device?.type === 'deja-arduino') {
-        sendDejaCommand({ action: 'connect', payload })
-      }
+      // if (device?.type === 'dcc-ex') {
+      //   sendDccCommand({ action: 'connect', payload })
+      // } else if (device?.type === 'deja-arduino') {
+      //   sendDejaCommand({ action: 'connect', payload })
+      // }
+
+      sendDejaCommand({ action: 'connect', payload })
 
       // await addDoc(
       //   collection(db, `layouts/${layoutId.value}/dccCommands`),

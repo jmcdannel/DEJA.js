@@ -121,7 +121,7 @@ async function handelAutoConnect (checked: boolean) {
         disabled
       ></v-btn>
       <v-switch 
-        v-if="device?.isConnected"
+        v-if="device?.isConnected || device?.autoConnect"
         @update:modelValue="handelAutoConnect"
         v-model="autoConnect"
         color="green"
