@@ -6,7 +6,7 @@ import log from './utils/logger.mjs'
 let isConnected = false // serial port connection status
 const baudRate = 115200
 let com = {
-  isConnected: false
+  isConnected: false,
 }
 
 const getPorts = async () => {
@@ -81,8 +81,15 @@ const connect = async (payload) => {
       await broadcast({ action: 'connected', payload: { path, baudRate } })
       return isConnected
     } else {
-      const port = await serial.connect({ path, baudRate, handleMessage: handleConnectionMessage })
-      await broadcast({ action: 'connected', payload: { path, baudRate, device } })
+      const port = await serial.connect({
+        path,
+        baudRate,
+        handleMessage: handleConnectionMessage,
+      })
+      await broadcast({
+        action: 'connected',
+        payload: { path, baudRate, device },
+      })
       isConnected = true
       com = { isConnected, port }
       return com
@@ -90,6 +97,13 @@ const connect = async (payload) => {
   } catch (err) {
     log.fatal('Error opening port: ', err)
   }
+}
+
+const setConnection = async (port) => {
+  console.log('setConnection', port)
+  com = { isConnected: true, port }
+  isConnected = true
+  return com
 }
 
 const listPorts = async () => {
@@ -136,5 +150,6 @@ const sendOutput = async (payload) => {
 
 export default {
   handleMessage,
-  dccSerial: com
+  setConnection,
+  dccSerial: com,
 }
