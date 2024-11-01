@@ -53,8 +53,8 @@
 </script>
 
 <template>
-  <template v-if="layoutId && connectionType === 'dejaJS'">
-    <!-- <DejaJsConnect /> -->
+  <template v-if="user && layoutId && connectionType === 'dejaJS'">
+    <DejaJsConnect />
   </template>
   <template v-if="user && layoutId">
     <DejaCloudConnect />
