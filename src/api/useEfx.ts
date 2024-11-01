@@ -17,10 +17,10 @@ import { useDejaJs } from '@/api/useDejaJs'
 
 export const useEfx = () => {
   const layoutId = useStorage('@DEJA/layoutId')
-  // const dccApi = useDcc()
+  const dccApi = useDcc()
   const { getDevice, getDevices } = useLayout()
   // const { getTurnout } = useTurnouts()
-  const { sendDccCommand } = useDcc()
+  // const { sendDccCommand } = useDcc()
   const { send: sendDejaCommand } = useDejaJs()
   // const { getIconComponent } = useEfxIcon()
 
