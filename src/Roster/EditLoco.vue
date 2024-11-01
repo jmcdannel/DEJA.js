@@ -54,10 +54,8 @@ async function submit (e) {
 </script>
 <template>
   <v-divider class="my-8 border-pink-500"></v-divider>
-  <h2 class="text-lg mb-8 bg-gradient-to-r from-pink-700 to-pink-400 p-3">
-    <v-icon icon="mdi-train" class="mr-2"></v-icon>
-    Edit Loco
-  </h2>
+  <v-label class="m-2 text-pink-400 text-2xl">Edit Loco</v-label>
+  <v-divider class="my-4 border-pink-500"></v-divider>
   <v-form validate-on="submit lazy" @submit.prevent="submit">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
       <v-text-field
@@ -118,18 +116,19 @@ async function submit (e) {
       ></v-btn>  
     </div>
   </v-form>  
+  
   <v-divider class="my-8 border-pink-500"></v-divider>
-  <h2 class="text-lg mb-8 bg-gradient-to-r from-pink-700 to-pink-400 p-3">
-    <v-icon icon="mdi-train" class="mr-2"></v-icon>
-    Consist
-  </h2>
+  <v-label class="m-2 text-pink-400 text-2xl">Consist</v-label>
+  <v-divider class="my-4 border-pink-500"></v-divider>
+
   <EditConsist :loco="locoDoc" :color="color" />
+
   <v-divider class="my-8 border-pink-500"></v-divider>
-  <h2 class="text-lg mb-8 bg-gradient-to-r from-pink-700 to-pink-400 p-3">
-    <v-icon icon="mdi-cogs" class="mr-2"></v-icon>
-    Functions
-  </h2>
+  <v-label class="m-2 text-pink-400 text-2xl">Functions</v-label>
+  <v-divider class="my-4 border-pink-500"></v-divider>
+
   <Functions :loco="locoDoc" :color="color" />
+
   <ViewJson :json="loco" label="RAW Loco Data"></ViewJson>
   <ViewJson :json="loco?.consist" label="RAW Cosist Data"></ViewJson>
 </template>

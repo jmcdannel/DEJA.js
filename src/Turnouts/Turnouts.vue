@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import TurnoutsList from '@/Turnouts/TurnoutsList.vue'
-import AddTurnout from '@/Turnouts/AddTurnout.vue'
 import TurnoutForm from '@/Turnouts/TurnoutForm.vue'
 import Addtile from '@/Core/UI/AddTile.vue'
 
