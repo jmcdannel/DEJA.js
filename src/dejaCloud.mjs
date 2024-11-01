@@ -178,8 +178,8 @@ async function connectDevice({ device, serial: path }) {
         send: serial.send,
         port,
       }
-
-      if (devices[device].type === 'dcc-ex') {
+      const layoutDevice = devices.find(({ id }) => id === device)
+      if (layoutDevice?.type === 'dcc-ex') {
         dcc.setConnection(port)
       }
 

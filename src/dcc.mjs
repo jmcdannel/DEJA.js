@@ -100,7 +100,7 @@ const connect = async (payload) => {
 }
 
 const setConnection = async (port) => {
-  console.log('setConnection', port)
+  console.log('setConnection', !!port)
   com = { isConnected: true, port }
   isConnected = true
   return com
