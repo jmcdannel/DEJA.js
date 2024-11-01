@@ -1,8 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { 
-  BsCloudPlusFill
-} from 'vue3-icons/bs'
 import { useLayout } from '@/Layout/useLayout'
 
 const emit = defineEmits(['close'])
@@ -23,7 +20,7 @@ const rules = {
 
 const { createDevice, deviceTypes } = useLayout()
 
-const connectionTypes = ['usb', 'wifi']
+const connectionTypes = ['usb', 'wifi', 'bluetooth']
 
 async function submit (e) {
   loading.value = true

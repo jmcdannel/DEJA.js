@@ -16,6 +16,7 @@ const props = defineProps({
 const serial = ref(props?.device?.port || '')
 const autoConnect = ref(props?.device?.autoConnect || false)
 const color = ref(colors[DEFAULT_COLOR])
+const wifiAutoConnect = ref(true)
 
 const deviceType = computed(() => deviceTypes.find((type) => type.value === props?.device?.type))
 // const color = colors[deviceType.color || DEFAULT_COLOR]
@@ -69,6 +70,7 @@ async function handelAutoConnect (checked: boolean) {
         :color="color.value"
       >{{ device?.connection || 'Device' }}</v-chip>
       <v-chip
+        v-if="device?.port"
         size="small"
         class=" ma-1 inline-flex"
         :color="color.value"
@@ -77,6 +79,7 @@ async function handelAutoConnect (checked: boolean) {
         {{ device?.port || '--' }}
       </v-chip>
       <v-chip
+        v-if="device?.connection === 'usb'"
         size="small"
         class=" ma-1 inline-flex"
         :variant="device?.isConnected ? 'elevated' : 'outlined'"
@@ -93,7 +96,7 @@ async function handelAutoConnect (checked: boolean) {
       </v-chip>
       <v-spacer class="mt-4"></v-spacer>
       <v-combobox
-        v-if="!device?.isConnected"
+        v-if="!device?.isConnected && device?.connection === 'usb'"
         label="USB Port"
         v-model="serial"
         variant="outlined"
@@ -105,7 +108,7 @@ async function handelAutoConnect (checked: boolean) {
     </v-card-text>
     <v-card-actions>
       <v-btn
-         v-if="!device?.isConnected"
+         v-if="!device?.isConnected && device?.connection === 'usb'"
         text="Connect"
         :color="color.value"
         variant="elevated"
@@ -113,7 +116,7 @@ async function handelAutoConnect (checked: boolean) {
         @click="handleConnect"
       ></v-btn>
       <v-btn
-         v-else
+         v-else-if="device?.connection === 'usb'"
         text="Reset"
         :color="color.value"
         variant="outlined"
@@ -127,6 +130,14 @@ async function handelAutoConnect (checked: boolean) {
         color="green"
         label="Auto Connect"
         hide-details
+      ></v-switch>
+      <v-switch 
+        v-else-if="device?.connection === 'wifi'"
+        color="green"
+        label="Auto Connect"
+        v-model="wifiAutoConnect"
+        hide-details
+        class="pointer-events-none"
       ></v-switch>
     </v-card-actions>
   </v-card>

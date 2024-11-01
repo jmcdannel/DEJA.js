@@ -24,9 +24,15 @@ export const useLayout = () => {
     },
     {
       value: 'deja-arduino',
-      label: 'DJEA Adrduino (MEGA)',
+      label: 'DEJA Arduino (MEGA)',
       icon: 'mdi-usb',
       color: 'lime',
+    },
+    {
+      value: 'deja-mqtt',
+      label: 'DEJA MQTT (Pico W)',
+      icon: 'mdi-wifi',
+      color: 'blue',
     },
   ]
 
