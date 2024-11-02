@@ -108,25 +108,25 @@ export const useEfx = () => {
 
   // const DEFAULT_TYPE = getEfxType('pin')
 
-  // async function setEfx(efxId, efx) {
-  //   console.log('createEfx', name)
-  //   try {
-  //     // const newDoc = await collection(db, `layouts/${layoutId.value}/effects`)
-  //     //   .doc(efx.id)
-  //     //   .set(newEfx)
-  //     const id = efxId
-  //       ? efxId
-  //       : slugify(`${efx['devcice'] || 'macro'}-${efx.type}-${efx.name}`)
-  //     await setDoc(doc(db, `layouts/${layoutId.value}/effects`, id), {
-  //       ...efx,
-  //       timestamp: serverTimestamp(),
-  //     })
-  //     console.log('efx written with ID: ', layoutId.value)
-  //     return true
-  //   } catch (e) {
-  //     console.error('Error adding throttle: ', e)
-  //   }
-  // }
+  async function setEfx(efxId, efx) {
+    console.log('createEfx', name)
+    try {
+      // const newDoc = await collection(db, `layouts/${layoutId.value}/effects`)
+      //   .doc(efx.id)
+      //   .set(newEfx)
+      const id = efxId
+        ? efxId
+        : slugify(`${efx['devcice'] || 'macro'}-${efx.type}-${efx.name}`)
+      await setDoc(doc(db, `layouts/${layoutId.value}/effects`, id), {
+        ...efx,
+        timestamp: serverTimestamp(),
+      })
+      console.log('efx written with ID: ', layoutId.value)
+      return true
+    } catch (e) {
+      console.error('Error adding throttle: ', e)
+    }
+  }
 
   async function runEffect(efx) {
     console.log('dejaCloud runEffect', efx, efx?.id)
@@ -142,7 +142,15 @@ export const useEfx = () => {
       if (device?.type === 'dcc-ex') {
         dccApi.sendOutput(efx.pin, efx.state)
       } else if (device?.type === 'deja-arduino') {
-        sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
+        // sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
+        await setDoc(
+          doc(db, `layouts/${layoutId.value}/effects`, efx.id),
+          {
+            state: efx.state,
+            timestamp: serverTimestamp(),
+          },
+          { merge: true }
+        )
       }
     } catch (e) {
       console.error('Error adding document: ', e)
@@ -233,15 +241,15 @@ export const useEfx = () => {
   //   }
   // }
 
-  // function slugify(str: string) {
-  //   str = str.replace(/^\s+|\s+$/g, '') // trim leading/trailing white space
-  //   str = str.toLowerCase() // convert string to lowercase
-  //   str = str
-  //     .replace(/[^a-z0-9 -]/g, '') // remove any non-alphanumeric characters
-  //     .replace(/\s+/g, '-') // replace spaces with hyphens
-  //     .replace(/-+/g, '-') // remove consecutive hyphens
-  //   return str
-  // }
+  function slugify(str: string) {
+    str = str.replace(/^\s+|\s+$/g, '') // trim leading/trailing white space
+    str = str.toLowerCase() // convert string to lowercase
+    str = str
+      .replace(/[^a-z0-9 -]/g, '') // remove any non-alphanumeric characters
+      .replace(/\s+/g, '-') // replace spaces with hyphens
+      .replace(/-+/g, '-') // remove consecutive hyphens
+    return str
+  }
 
   return {
     // setEfx,

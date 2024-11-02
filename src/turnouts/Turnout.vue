@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
 import { useTurnouts } from '@/api/useTurnouts'
 import { MdOutlineForkLeft } from 'vue3-icons/md'
@@ -11,6 +12,9 @@ const props = defineProps({
   turnout: Object,
   turnoutId: String,
 })
+
+
+const state = ref(props.turnout?.state)
 
 async function handleTurnouts (event: Event) {
   console.log('handleTurnouts', props.turnout, props.turnout?.id, event, event?.target?.checked)
@@ -30,12 +34,13 @@ async function handleTurnouts (event: Event) {
     <div class="card-body flex flex-row items-center justify-center">
       <MdOutlineForkLeft class="w-6 h-6 stroke-none"></MdOutlineForkLeft>
       <h2 class="flex-grow text-xl font-bold">{{turnout?.name}}</h2>
-      <div class="form-control">
+      <v-switch v-model="state" @change="handleTurnouts" />
+      <!-- <div class="form-control">
         <label class="label cursor-pointer">
           <span class="label-text sr-only">Toggle Turnout</span>
           <input type="checkbox" class="toggle toggle-primary bg-yellow-500 hover:bg-indigo-500" @click="handleTurnouts" />
         </label>
-      </div>
+      </div> -->
       <!-- <p>{{ turnout?.type }}</p>
       <p>{{ turnout?.device }}</p> -->
     </div>

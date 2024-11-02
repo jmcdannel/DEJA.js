@@ -54,6 +54,14 @@ export function useTurnouts() {
           payload: { turnoutId: turnout.turnoutIdx, state: !turnout.state },
         })
       } else if (device?.type === 'deja-arduino') {
+        await setDoc(
+          doc(db, `layouts/${layoutId.value}/turnouts`, turnout.id),
+          {
+            state: turnout.state,
+            timestamp: serverTimestamp(),
+          },
+          { merge: true }
+        )
         sendDejaCommand({
           action: 'turnouts',
           payload: { ...turnout, id: turnout?.id },
