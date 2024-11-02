@@ -72,8 +72,17 @@ async function handleTurnoutCommand(payload) {
     const commands = turnoutCommand(payload)
     await device.send(device.port, JSON.stringify([commands]))
   } else {
-    log.error('Device not connected', commands)
+    log.error('Device not connected', device)
   }
+}
+
+async function handleTurnoutChange(snapshot) {
+  snapshot.docChanges().forEach(async (change) => {
+    if (change.type === 'modified') {
+      console.log('handleTurnoutChange', change.type, change.doc.data())
+      await handleTurnoutCommand(change.doc.data())
+    }
+  })
 }
 
 async function handleMacroCommand({ macro }) {
@@ -159,6 +168,7 @@ function handleThrottleCommands(snapshot) {
     )
   })
 }
+
 const handleConnectionMessage = async (payload) =>
   await broadcast({ action: 'broadcast', payload })
 
@@ -250,7 +260,6 @@ async function loadDevices() {
 export async function listen() {
   log.start('Listen for dccCommands', layoutId)
 
-  // await wipe(layoutId)
   onSnapshot(
     query(
       collection(db, `layouts/${layoutId}/dccCommands`),
@@ -282,7 +291,13 @@ export async function listen() {
     ),
     handleEffectChange
   )
-  // locos.value = useCollection(collection(db, `layouts/${layoutId}/locos`))
+  onSnapshot(
+    query(
+      collection(db, `layouts/${layoutId}/turnouts`),
+      orderBy('timestamp', 'desc')
+    ),
+    handleTurnoutChange
+  )
 }
 
 export async function send(data) {
