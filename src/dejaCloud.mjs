@@ -105,6 +105,15 @@ async function handleEffectCommand(payload) {
   }
 }
 
+async function handleEffectChange(snapshot) {
+  snapshot.docChanges().forEach(async (change) => {
+    if (change.type === 'modified') {
+      console.log('handleEffectChange', change.type, change.doc.data())
+      await handleEffectCommand(change.doc.data())
+    }
+  })
+}
+
 function handleThrottleCommands(snapshot) {
   log.note('handleThrottleCommands')
   snapshot.docChanges().forEach(async (change) => {
@@ -265,6 +274,13 @@ export async function listen() {
       limit(10)
     ),
     handleThrottleCommands
+  )
+  onSnapshot(
+    query(
+      collection(db, `layouts/${layoutId}/effects`),
+      orderBy('timestamp', 'desc')
+    ),
+    handleEffectChange
   )
   // locos.value = useCollection(collection(db, `layouts/${layoutId}/locos`))
 }
