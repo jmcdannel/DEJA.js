@@ -15,6 +15,7 @@ import {
 } from 'firebase/firestore'
 import log from './utils/logger.mjs'
 import dcc from './dcc.mjs'
+import mqtt from './mqtt.mjs'
 import { getEffectCommand } from './effects.mjs'
 import { turnoutCommand } from './turnouts.mjs'
 import { getMacroCommand } from './macro.mjs'
@@ -22,7 +23,7 @@ import { db } from './firebase.mjs'
 
 const layoutId = process.env.LAYOUT_ID
 const baudRate = 115200
-const serialConnections = []
+const connections = []
 let devices = []
 
 function handleDccCommands(snapshot) {
@@ -66,14 +67,28 @@ async function handleDejaCommands(snapshot) {
 }
 
 async function handleTurnoutCommand(payload) {
-  log.log('handleTurnoutCommand', payload)
-  const device = serialConnections?.[payload.device]
-  if (device?.isConnected) {
-    const commands = turnoutCommand(payload)
-    await device.send(device.port, JSON.stringify([commands]))
-  } else {
-    log.error('Device not connected', device)
+  const conn = connections?.[payload.device]
+  if (!conn?.isConnected) {
+    log.error('Device not connected', payload.device)
+    return
   }
+  const command = turnoutCommand(payload)
+  const layoutDevice = devices.find(({ id }) => id === payload.device)
+  log.log('handleTurnoutCommand', payload, command, conn, layoutDevice)
+  if (layoutDevice?.connection === 'usb') {
+    await conn.send(conn.port, JSON.stringify([command]))
+  } else if (layoutDevice?.connection === 'wifi') {
+    await conn.send(conn.topic, JSON.stringify(command))
+  }
+
+  // log.log('handleTurnoutCommand', payload)
+  // const conn = connections?.[payload.device]
+  // if (conn?.isConnected) {
+  //   const commands = turnoutCommand(payload)
+  //   await conn.send(conn.port, JSON.stringify([commands]))
+  // } else {
+  //   log.error('Device not connected', conn)
+  // }
 }
 
 async function handleTurnoutChange(snapshot) {
@@ -89,28 +104,33 @@ async function handleMacroCommand({ macro }) {
   log.log('handleMacroCommand', macro)
 
   Object.keys(macro).forEach(async (deviceId) => {
-    const device = serialConnections?.[deviceId]
-    if (device?.isConnected) {
+    const conn = connections?.[deviceId]
+    if (conn?.isConnected) {
       const commands = getMacroCommand(
         macro[deviceId]?.effects,
         macro[deviceId]?.turnouts
       )
       log.log('macro commands', commands, deviceId)
-      await device.send(device.port, JSON.stringify(commands))
+      await conn.send(device.port, JSON.stringify(commands))
     } else {
-      log.error('Device not connected', device, serialConnections, deviceId)
+      log.error('Device not connected', conn, connections, deviceId)
     }
   })
 }
 
 async function handleEffectCommand(payload) {
+  const conn = connections?.[payload.device]
+  if (!conn?.isConnected) {
+    log.error('Device not connected', payload.device)
+    return
+  }
   const command = getEffectCommand(payload)
-  log.log('handleEffectCommand', payload, command)
-  const device = serialConnections?.[payload.device]
-  if (device?.isConnected) {
-    await device.send(device.port, JSON.stringify([command]))
-  } else {
-    log.error('Device not connected', command?.device)
+  const layoutDevice = devices.find(({ id }) => id === payload.device)
+  log.log('handleEffectCommand', payload, command, conn, layoutDevice)
+  if (layoutDevice?.connection === 'usb') {
+    await conn.send(device.port, JSON.stringify([command]))
+  } else if (layoutDevice?.connection === 'wifi') {
+    await conn.send(conn.topic, JSON.stringify(command))
   }
 }
 
@@ -172,40 +192,102 @@ function handleThrottleCommands(snapshot) {
 const handleConnectionMessage = async (payload) =>
   await broadcast({ action: 'broadcast', payload })
 
-async function connectDevice({ device, serial: path }) {
+async function connectDevice(payload) {
   try {
-    log.star('[dejaCloud] connect', device, path)
-    if (serialConnections[device]) {
+    const layoutDevice = devices.find(({ id }) => id === payload.device)
+    if (layoutDevice?.connection === 'usb') {
+      await connectUsbDevice(payload, layoutDevice?.type)
+    } else if (layoutDevice?.connection === 'wifi') {
+      await connectMqttDevice(payload, layoutDevice)
+    }
+  } catch (err) {
+    log.fatal('Error connectDevice: ', err)
+  }
+}
+
+async function connectUsbDevice({ device, serial: path }, deviceType) {
+  try {
+    if (connections[device]) {
       await broadcast({
         action: 'connected',
         payload: { device, path, baudRate },
       })
-      return serialConnections[device].isConnected
+      return connections[device].isConnected
     } else {
       const port = await serial.connect({
         path,
         baudRate,
         handleMessage: handleConnectionMessage,
       })
-      await broadcast({
-        action: 'connected',
-        payload: { device, path, baudRate },
-      })
+      // await broadcast({
+      //   action: 'connected',
+      //   payload: { device, path, baudRate },
+      // })
+      await updateDoc(
+        doc(db, `layouts/${layoutId}/devices`, device),
+        {
+          isConnected: true,
+          lastConnected: serverTimestamp(),
+          client: 'dejaJS',
+          port: path,
+        },
+        { merge: true }
+      )
 
-      serialConnections[device] = {
+      connections[device] = {
         isConnected: true,
         send: serial.send,
         port,
       }
-      const layoutDevice = devices.find(({ id }) => id === device)
-      if (layoutDevice?.type === 'dcc-ex') {
+      if (deviceType === 'dcc-ex') {
         dcc.setConnection(port)
       }
 
-      return serialConnections[device]
+      return connections[device]
     }
   } catch (err) {
-    log.fatal('Error connectDevice: ', err)
+    log.fatal('Error connectUsbDevice: ', err)
+  }
+}
+
+async function connectMqttDevice({ device }) {
+  try {
+    if (connections[device]) {
+      await broadcast({
+        action: 'connected',
+        payload: { device },
+      })
+      return connections[device].isConnected
+    } else {
+      const topic = `DEJA/${layoutId}/${device}`
+      mqtt.subscribe(topic)
+
+      // await broadcast({
+      //   action: 'connected',
+      //   payload: { device, topic },
+      // })
+
+      await updateDoc(
+        doc(db, `layouts/${layoutId}/devices`, device),
+        {
+          isConnected: true,
+          lastConnected: serverTimestamp(),
+          client: 'dejaJS',
+          topic,
+        },
+        { merge: true }
+      )
+
+      connections[device] = {
+        isConnected: true,
+        send: mqtt.publish,
+        topic,
+      }
+
+      return connections[device]
+    }
+  } catch (err) {
+    log.fatal('Error connectMqttDevice: ', err)
   }
 }
 
