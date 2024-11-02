@@ -16,7 +16,7 @@ import { useDejaJs } from '@/api/useDejaJs'
 export function useTurnouts() {
   const layoutId = useStorage('@DEJA/layoutId')
   const { getDevice } = useLayout()
-  const { sendDccCommand } = useDcc()
+  const dccApi = useDcc()
   const { send: sendDejaCommand } = useDejaJs()
 
   const turnoutsCol = computed(() =>
@@ -49,11 +49,15 @@ export function useTurnouts() {
       //   await runEffect(await turnout.effectId)
       // }
       if (device?.type === 'dcc-ex') {
-        sendDccCommand({
-          action: 'turnout',
-          payload: { turnoutId: turnout.turnoutIdx, state: !turnout.state },
-        })
-      } else if (device?.type === 'deja-arduino') {
+        // sendDccCommand({
+        //   action: 'turnout',
+        //   payload: { turnoutId: turnout.turnoutIdx, state: !turnout.state },
+        // })
+        dccApi.setTurnout(turnout.turnoutIdx, !turnout.state)
+      } else if (
+        device?.type === 'deja-arduino' ||
+        device?.type === 'deja-mqtt'
+      ) {
         await setDoc(
           doc(db, `layouts/${layoutId.value}/turnouts`, turnout.id),
           {
@@ -62,10 +66,10 @@ export function useTurnouts() {
           },
           { merge: true }
         )
-        sendDejaCommand({
-          action: 'turnouts',
-          payload: { ...turnout, id: turnout?.id },
-        })
+        // sendDejaCommand({
+        //   action: 'turnouts',
+        //   payload: { ...turnout, id: turnout?.id },
+        // })
       }
     } catch (e) {
       console.error('Error adding document: ', e)
@@ -83,12 +87,12 @@ export function useTurnouts() {
       const device = await getDevice(turnout['device'])
       console.log('device', device, device?.type)
 
-      if (device?.type === 'dcc-ex') {
-        sendDccCommand({
-          action: 'dcc',
-          payload: `T ${turnout.turnoutIdx} SERVO ${turnout.turnoutIdx} ${turnout.straight} ${turnout.divergent} 2`,
-        })
-      }
+      // if (device?.type === 'dcc-ex') {
+      //   sendDccCommand({
+      //     action: 'dcc',
+      //     payload: `T ${turnout.turnoutIdx} SERVO ${turnout.turnoutIdx} ${turnout.straight} ${turnout.divergent} 2`,
+      //   })
+      // }
       return true
     } catch (e) {
       console.error('Error adding throttle: ', e)
