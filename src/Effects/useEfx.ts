@@ -159,6 +159,8 @@ export const useEfx = () => {
         sendDccCommand({ action: 'output', payload: efx })
       } else if (device?.type === 'deja-arduino') {
         sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
+      } else if (device?.type === 'deja-mqtt') {
+        sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
       }
     } catch (e) {
       console.error('Error adding document: ', e)

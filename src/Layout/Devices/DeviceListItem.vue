@@ -79,12 +79,37 @@ async function handelAutoConnect (checked: boolean) {
         {{ device?.port || '--' }}
       </v-chip>
       <v-chip
+        v-if="device?.topic"
+        size="small"
+        class=" ma-1 inline-flex"
+        :color="color.value"
+        prepend-icon="mdi-wifi"
+      >
+        {{ device?.topic || '--' }}
+      </v-chip>
+      <v-chip
         v-if="device?.connection === 'usb'"
         size="small"
         class=" ma-1 inline-flex"
         :variant="device?.isConnected ? 'elevated' : 'outlined'"
         :color="color.value"
         prepend-icon="mdi-memory"
+      >
+        <template #append>
+          <span v-if="device?.isConnected" class="ml-2 relative flex h-3 w-3">
+            <span class="absolute inline-flex h-full w-full rounded-full bg-green-600 animate-ping opacity-75"></span>
+            <span class="relative inline-flex h-full w-full rounded-full bg-green-600"></span>
+          </span>
+        </template>
+        {{ device?.isConnected ? 'Connected' : 'Disconnected' }}
+      </v-chip>
+      <v-chip
+        v-if="device?.connection === 'wifi'"
+        size="small"
+        class=" ma-1 inline-flex"
+        :variant="device?.isConnected ? 'elevated' : 'outlined'"
+        :color="color.value"
+        prepend-icon="mdi-wifi"
       >
         <template #append>
           <span v-if="device?.isConnected" class="ml-2 relative flex h-3 w-3">
@@ -108,7 +133,7 @@ async function handelAutoConnect (checked: boolean) {
     </v-card-text>
     <v-card-actions>
       <v-btn
-         v-if="!device?.isConnected && device?.connection === 'usb'"
+         v-if="!device?.isConnected"
         text="Connect"
         :color="color.value"
         variant="elevated"
@@ -116,7 +141,6 @@ async function handelAutoConnect (checked: boolean) {
         @click="handleConnect"
       ></v-btn>
       <v-btn
-         v-else-if="device?.connection === 'usb'"
         text="Reset"
         :color="color.value"
         variant="outlined"

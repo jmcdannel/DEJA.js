@@ -58,6 +58,11 @@ export function useTurnouts() {
           action: 'turnouts',
           payload: { ...turnout, id: turnout?.id },
         })
+      } else if (device?.type === 'deja-mqtt') {
+        sendDejaCommand({
+          action: 'turnouts',
+          payload: { ...turnout, id: turnout?.id },
+        })
       }
     } catch (e) {
       console.error('Error adding document: ', e)
