@@ -6,10 +6,7 @@
 </script>
 
 <template>
-  <main class="flex flex-col p-8 w-full viaduct-background bg-opacity-50 bg-fixed overflow-auto">
-    <h2 class="mb-4 placeholder:font-extrabold text-transparent text-4xl bg-clip-text bg-gradient-to-r from-purple-300 to-pink-600">
-      <strong class="text-3xl">Turnouts</strong>
-    </h2>
+  <main class="flex flex-col flex-grow p-4 w-full forest-background bg-opacity-50 bg-fixed overflow-auto">
     <template v-if="user">
       <Turnouts />
     </template>

@@ -23,11 +23,11 @@ async function handleEfx (event: Event) {
 
 </script>
 <template>
-  <div v-if="efx" class="card card-compact shadow-xl w-full my-1 bg-gradient-to-r from-rose-950 to-slate-900 border border-rose-500">
-    <div class="card-body flex flex-row items-center justify-center">
+  <div class="shadow-xl my-1 p-[1px] bg-gradient-to-r from-indigo-400 to-pink-900 rounded-full">
+    <div class="flex flex-row items-center justify-center bg-gray-900 bg-opacity-95 rounded-full px-2">
       <!-- <component :is="efxType?.icon" class="w-6 h-6 stroke-none"></component> -->
-      <h2 class="flex-grow text-xl font-bold">{{efx?.name}}</h2>
-      <v-switch v-model="state" @change="handleEfx" />
+      <h4 class="flex-grow text-md font-bold">{{efx?.name}}</h4>
+      <v-switch v-model="state" @change="handleEfx" hide-details />
       <!-- <p>{{ efxId }}</p> -->
       <!-- <div class="form-control">
         <label class="label cursor-pointer">

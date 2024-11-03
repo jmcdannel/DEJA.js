@@ -8,7 +8,7 @@ const throttles = getThrottles()
 </script>
 
 <template>
-  <template v-if="throttles">
+  <template v-if="throttles?.length">
     <div class="py-4 p-2 flex justify-between">
       <nav class="grid grid-flow-col gap-4">
         <button 
@@ -28,9 +28,7 @@ const throttles = getThrottles()
       </nav>
 
       <!-- <v-spacer></v-spacer> -->
-      <aside class="relative w-10 h-10 ">
         <ThrottleMenu />
-      </aside>
     </div>
   </template>
 </template>

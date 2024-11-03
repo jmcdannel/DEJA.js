@@ -13,7 +13,7 @@ const router = createRouter({
     {
       path: '/locos',
       name: 'roster',
-      component: HomeView,
+      component: () => import('../views/RosterView.vue'),
     },
     {
       path: '/connect',

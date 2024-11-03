@@ -10,6 +10,7 @@
   import HeaderView from '@/views/HeaderView.vue'
   import FooterView from '@/views/FooterView.vue'
   import ThrottleNav from '@/throttle/ThrottleNav.vue'
+  import ContextMenu from '@/core/ContextMenu.vue'
   import DejaJsConnect from '@/core/DejaJsConnect.component.vue'
   import DejaCloudConnect from '@/deja-cloud/DejaCloudConnect.vue'
   import { useDejaCloudStore } from '@/deja-cloud/dejaCloudStore'
@@ -53,20 +54,23 @@
 </script>
 
 <template>
-  <template v-if="user && layoutId && connectionType === 'dejaJS'">
-    <DejaJsConnect />
-  </template>
-  <template v-if="user && layoutId">
-    <DejaCloudConnect />
-  </template>
-  <main class="flex flex-col h-screen mx-auto">
-    <HeaderView />
-    <main class="flex-grow flex flex-col mb-16 min-h-0">
-      <RouterView />
-      <ThrottleNav v-if="!!user && !!layoutId" />
-    </main>
-    <FooterView v-if="!!user"></FooterView>
-  </main>
+  <v-app theme="dark">
+      <template v-if="user && layoutId && connectionType === 'dejaJS'">
+        <DejaJsConnect />
+      </template>
+      <template v-if="user && layoutId">
+        <DejaCloudConnect />
+      </template>
+      <main class="flex flex-col h-screen w-full mx-auto relative">
+        <HeaderView />
+        <v-container class="flex-grow flex flex-col mb-16 min-h-0 p-0">
+          <!-- <ContextMenu /> -->
+          <RouterView />
+          <ThrottleNav v-if="!!user && !!layoutId" />
+        </v-container>
+        <FooterView v-if="!!user"></FooterView>
+      </main>
+  </v-app>
 </template>
 <style>
   .fade-enter-active,

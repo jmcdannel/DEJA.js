@@ -118,7 +118,7 @@
       </div>
     </template>
     <template v-else-if="viewAs === 'Grid'">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+      <div class="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
         <ThrottleTile 
           v-for="throttle in throttles"
           :key="throttle.id"

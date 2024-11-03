@@ -18,31 +18,22 @@
     isEmulated
   } = storeToRefs(connStore)
 
-
-  console.log(
-    connStore,
-    layoutId,
-    isDejaJS,
-    isDejaServer,
-    isSerial,
-    isEmulated)
-
-
 </script>
 <template>
-  <main class="flex flex-col p-8 w-full viaduct-background bg-opacity-50 bg-fixed overflow-auto">
+  <main class="flex flex-col flex-grow p-8 w-full viaduct-background bg-opacity-50 bg-fixed overflow-auto">
     <template v-if="isDejaJS || isEmulated || isSerial || isDejaServer">
       <header class="flex justify-between items-center">
         <h2 class="text-transparent text-xl bg-clip-text bg-gradient-to-r from-cyan-300 to-violet-600 my-4">
-            Welcome to DEJA Throttle
+            Welcome to <br>
+            <span class="text-4xl font-bold uppercase">DEJA Throttle</span>
         </h2>
         <aside>
           <LayoutChip />
-          <v-divider />
+          <v-divider class="m-4" />
           <ConnectionChip />
         </aside>
     </header>
-      <h2 class="mt-4 text-transparent text-4xl bg-clip-text bg-gradient-to-r from-purple-300 to-pink-600">
+      <!-- <h2 class="mt-4 text-transparent text-4xl bg-clip-text bg-gradient-to-r from-purple-300 to-pink-600">
         Select
         Your<br>
         <strong class="text-7xl uppercase">Loco</strong>
@@ -52,7 +43,7 @@
       </template>
       <template v-else>
         <Roster />
-      </template>
+      </template> -->
     </template>
     <template v-else>
       <h2 class="text-transparent text-xl bg-clip-text bg-gradient-to-r from-cyan-300 to-violet-600 my-4">

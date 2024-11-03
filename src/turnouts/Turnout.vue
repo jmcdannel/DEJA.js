@@ -13,7 +13,6 @@ const props = defineProps({
   turnoutId: String,
 })
 
-
 const state = ref(props.turnout?.state)
 
 async function handleTurnouts (event: Event) {
@@ -30,19 +29,13 @@ async function handleTurnouts (event: Event) {
 
 </script>
 <template>
-  <div class="card card-compact shadow-xl w-full my-1 border-opacity-50 bg-gradient-to-r from-indigo-950 to-slate-900 border border-indigo-500">
-    <div class="card-body flex flex-row items-center justify-center">
+  <div class="shadow-xl my-1 p-[1px] bg-gradient-to-r from-indigo-400 to-pink-900 rounded-full">
+    <div class="flex flex-row items-center justify-center bg-gray-900 bg-opacity-95 rounded-full px-2">
       <MdOutlineForkLeft class="w-6 h-6 stroke-none"></MdOutlineForkLeft>
-      <h2 class="flex-grow text-xl font-bold">{{turnout?.name}}</h2>
-      <v-switch v-model="state" @change="handleTurnouts" />
-      <!-- <div class="form-control">
-        <label class="label cursor-pointer">
-          <span class="label-text sr-only">Toggle Turnout</span>
-          <input type="checkbox" class="toggle toggle-primary bg-yellow-500 hover:bg-indigo-500" @click="handleTurnouts" />
-        </label>
-      </div> -->
-      <!-- <p>{{ turnout?.type }}</p>
-      <p>{{ turnout?.device }}</p> -->
+      <h4 class="flex-grow text-md font-bold">{{turnout?.name}}</h4>
+      <aside>
+        <v-switch v-model="state" @change="handleTurnouts" hide-details />
+      </aside>
     </div>
   </div>
 </template>

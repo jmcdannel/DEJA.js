@@ -11,12 +11,12 @@ import { AiFillControl } from 'vue3-icons/ai'
     <slot></slot>
     <div class="btm-nav mx-auto">
       <router-link
-        :to="`/`"
+        :to="`/locos`"
         custom
         v-slot="{ navigate }"
       >
         <button class="text-primary" :class="{ active: ($route?.name === 'home' || $route?.name === 'throttle') }" @click="navigate" role="link">
-          <AiFillControl  class="w-6 h-6" />
+          <AiFillControl  class="w-6 h-6 text-pink-500 " />
         </button>
       </router-link>
       <router-link
@@ -25,7 +25,7 @@ import { AiFillControl } from 'vue3-icons/ai'
         v-slot="{ navigate }"
       >
         <button class="text-primary" :class="{ active: ($route?.name === 'effects') }" @click="navigate" role="link">
-          <BsFillRocketTakeoffFill  class="w-6 h-6" />
+          <BsFillRocketTakeoffFill  class="w-6 h-6 text-purple-500 stroke-none" />
         </button>
       </router-link>
       <router-link
@@ -34,7 +34,7 @@ import { AiFillControl } from 'vue3-icons/ai'
         v-slot="{ navigate }"
       >
         <button class="text-primary" :class="{ active: ($route?.name === 'turnouts') }" @click="navigate" role="link">
-          <MdOutlineForkLeft  class="w-6 h-6" />
+          <MdOutlineForkLeft  class="w-6 h-6 text-yellow-400 stroke-none" />
         </button>
       </router-link>
       <router-link

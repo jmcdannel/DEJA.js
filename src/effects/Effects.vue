@@ -2,21 +2,37 @@
 import { ref }  from 'vue'
 import { useEfx } from '@/api/useEfx'
 import EffectItem from '@/effects/Effect.vue'
-const emit = defineEmits(['edit'])
+import EffectFilters from '@/turnouts/TurnoutFilters.vue'
+
+const showFilters = ref(false)
+const deviceFilters = ref([])
 
 const { getEffects } = useEfx()
 const list = getEffects()
-// const list = ref([])
 
-function handleEdit(item) {
-  console.log('handleEdit', item)
-  emit('edit', item)
+function handleDeviceFilter(devices) {
+  console.log('handleDeviceFilter', devices)
+  deviceFilters.value = devices
+}
+
+function filter(efxList) {
+  if (deviceFilters.value.length) {
+    return efxList.filter(efx => deviceFilters.value.includes(efx.device))
+  }
+  return efxList
 }
 
 </script>
 <template>
-  <div class="flex flex-col overflow-auto flex-grow w-full">
-    <EffectItem v-for="item in list"
-      :key="item.id" :efx="item" :efxId="item.id" @edit="handleEdit"></EffectItem>
+  <header class="flex justify-between items-center">
+    <h2 class="mb-4 placeholder:font-extrabold text-transparent text-4xl bg-clip-text bg-gradient-to-r from-purple-300 to-pink-600">
+      <strong class="text-3xl text-purple-400">Effects</strong>
+    </h2>  
+    <v-btn @click="showFilters = !showFilters" color="secondary" icon="mdi-filter"></v-btn>
+  </header>
+  <EffectFilters @devices="handleDeviceFilter" :class="showFilters ? 'visible' : 'hidden'"></EffectFilters>
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 w-full">
+    <EffectItem v-for="item in filter(list)"
+      :key="item.id" :efx="item" :efxId="item.id"></EffectItem>
   </div>
 </template>
