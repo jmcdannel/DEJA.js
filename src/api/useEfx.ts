@@ -13,7 +13,7 @@ import { useLayout } from '@/api/useLayout'
 // import { useTurnouts } from '@/api/useTurnouts'
 import { useDcc } from '@/api/dccApi'
 import { useDejaJs } from '@/api/useDejaJs'
-// import { useEfxIcon } from '@/api/useEfxIcon'
+import { useEfxIcon } from '@/api/useEfxIcon'
 
 export const useEfx = () => {
   const layoutId = useStorage('@DEJA/layoutId')
@@ -22,7 +22,7 @@ export const useEfx = () => {
   // const { getTurnout } = useTurnouts()
   // const { sendDccCommand } = useDcc()
   const { send: sendDejaCommand } = useDejaJs()
-  // const { getIconComponent } = useEfxIcon()
+  const { getIconComponent } = useEfxIcon()
 
   const efxCol = computed(() =>
     layoutId.value ? collection(db, `layouts/${layoutId.value}/effects`) : null
@@ -45,66 +45,66 @@ export const useEfx = () => {
     }
   }
 
-  // const efxTypes = [
-  //   {
-  //     value: 'light',
-  //     label: 'Light',
-  //     icon: getIconComponent('headlight'),
-  //     color: 'yellow',
-  //   },
-  //   {
-  //     value: 'led',
-  //     label: 'LED',
-  //     icon: getIconComponent('led'),
-  //     color: 'lime',
-  //   },
-  //   {
-  //     value: 'streetlight',
-  //     label: 'Street Light',
-  //     icon: getIconComponent('streetlight'),
-  //     color: 'yellow',
-  //   },
-  //   {
-  //     value: 'relay',
-  //     label: 'Relay',
-  //     icon: getIconComponent('relay'),
-  //     color: 'indigo',
-  //   },
-  //   {
-  //     value: 'frog',
-  //     label: 'Frog Juicer',
-  //     icon: getIconComponent('frog'),
-  //     color: 'green',
-  //   },
-  //   {
-  //     value: 'power',
-  //     label: 'Power',
-  //     icon: getIconComponent('power'),
-  //     color: 'red',
-  //   },
-  //   {
-  //     value: 'pin',
-  //     label: 'PIN',
-  //     icon: getIconComponent('pin'),
-  //     color: 'orange',
-  //   },
-  //   {
-  //     value: 'sound',
-  //     label: 'Sound',
-  //     icon: getIconComponent('sound'),
-  //     color: 'cyan',
-  //   },
-  //   {
-  //     value: 'macro',
-  //     label: 'Macro',
-  //     icon: getIconComponent('magic'),
-  //     color: 'purple',
-  //   },
-  // ]
+  const efxTypes = [
+    {
+      value: 'light',
+      label: 'Light',
+      icon: getIconComponent('headlight'),
+      color: 'yellow',
+    },
+    {
+      value: 'led',
+      label: 'LED',
+      icon: getIconComponent('led'),
+      color: 'lime',
+    },
+    {
+      value: 'streetlight',
+      label: 'Street Light',
+      icon: getIconComponent('streetlight'),
+      color: 'yellow',
+    },
+    {
+      value: 'relay',
+      label: 'Relay',
+      icon: getIconComponent('relay'),
+      color: 'indigo',
+    },
+    {
+      value: 'frog',
+      label: 'Frog Juicer',
+      icon: getIconComponent('frog'),
+      color: 'green',
+    },
+    {
+      value: 'power',
+      label: 'Power',
+      icon: getIconComponent('power'),
+      color: 'red',
+    },
+    {
+      value: 'pin',
+      label: 'PIN',
+      icon: getIconComponent('pin'),
+      color: 'orange',
+    },
+    {
+      value: 'sound',
+      label: 'Sound',
+      icon: getIconComponent('sound'),
+      color: 'cyan',
+    },
+    {
+      value: 'macro',
+      label: 'Macro',
+      icon: getIconComponent('magic'),
+      color: 'purple',
+    },
+  ]
 
-  // function getEfxType(value: string) {
-  //   return efxTypes.find((item) => item.value === value)
-  // }
+  function getEfxType(value: string) {
+    return efxTypes.find((item) => item.value === value)
+  }
 
   // const DEFAULT_TYPE = getEfxType('pin')
 
@@ -254,7 +254,7 @@ export const useEfx = () => {
   return {
     // setEfx,
     // efxTypes,
-    // getEfxType,
+    getEfxType,
     // DEFAULT_TYPE,
     runEffect,
     getEffects,

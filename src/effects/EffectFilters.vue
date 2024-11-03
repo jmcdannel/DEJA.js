@@ -12,7 +12,7 @@ const devices = getDevices()
   <div class="flex flex-row">
     <div>
       <span>Device</span>
-      <v-chip-group v-model="selectedDevices" @update:modelValue="$emit('devices', selectedDevices)" multiple>
+      <v-chip-group v-model="selectedDevices" @update:modelValue="$emit('devices', selectedDevices)" multiple column>
         <v-chip v-for="device in devices" :key="device.id" :value="device.id" color="pink" size="small">{{ device.id }}</v-chip>
       </v-chip-group>
     </div>

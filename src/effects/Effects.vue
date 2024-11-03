@@ -2,7 +2,7 @@
 import { ref }  from 'vue'
 import { useEfx } from '@/api/useEfx'
 import EffectItem from '@/effects/Effect.vue'
-import EffectFilters from '@/turnouts/TurnoutFilters.vue'
+import EffectFilters from '@/effects/EffectFilters.vue'
 
 const showFilters = ref(false)
 const deviceFilters = ref([])
@@ -31,7 +31,7 @@ function filter(efxList) {
     <v-btn @click="showFilters = !showFilters" color="secondary" icon="mdi-filter"></v-btn>
   </header>
   <EffectFilters @devices="handleDeviceFilter" :class="showFilters ? 'visible' : 'hidden'"></EffectFilters>
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 w-full">
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 w-full">
     <EffectItem v-for="item in filter(list)"
       :key="item.id" :efx="item" :efxId="item.id"></EffectItem>
   </div>
