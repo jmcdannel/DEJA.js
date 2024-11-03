@@ -6,7 +6,7 @@
 </script>
 
 <template>
-  <main class="flex flex-col flex-grow p-8 w-full viaduct-background bg-opacity-50 bg-fixed overflow-auto">
+  <main class="flex flex-col flex-grow p-4 md:p-8 w-full viaduct-background bg-opacity-50 bg-fixed overflow-auto">
    <template v-if="user">
       <Effects />
     </template>
