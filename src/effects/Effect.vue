@@ -42,7 +42,7 @@ async function handleEfx (event: Event) {
       :class="isRunning ? 'bg-opacity-40' : 'bg-opacity-95'">
       <v-progress-linear :class="isRunning ? 'visible' : 'invisible'" color="deep-purple" indeterminate></v-progress-linear>
       <section class="p-4">
-        <component :is="efxType?.icon" class="w-6 h-6 stroke-none" :color="efxType?.color"></component>
+        <component :is="efxType?.icon" class="w-10 h-10 stroke-none" :color="efxType?.color"></component>
         <!-- <v-switch v-model="state" @change="handleEfx" hide-details /> -->
       </section>
       <h4 class="flex-grow text-md font-bold p-4">{{efx?.name}}</h4>
