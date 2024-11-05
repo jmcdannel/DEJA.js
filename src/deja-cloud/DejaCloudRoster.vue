@@ -50,17 +50,15 @@ async function handleAdd() {
         <button 
           v-for="loco in locos" 
           :key="loco.locoId" 
-          class="m-2
-          "
+          class="m-2"
           @click="handleThrottle(loco.locoId)" 
-          role="link"><v-avatar color="primary" :size="72" class="mr-2">{{  loco.locoId }}</v-avatar>
+          role="link"><v-avatar color="primary" :size="128" class="mr-2">{{  loco.locoId }}</v-avatar>
         </button>
         <button 
           v-if="allowAdd"
-          class="m-2
-          "
-          @click="showAdd != showAdd" 
-          role="link"><v-avatar color="pink" :size="72" class="mr-2"><v-icon icon="mdi-plus"></v-icon></v-avatar>
+          class="m-2"
+          @click="showAdd = !showAdd" 
+          role="link"><v-avatar color="pink" :size="128" class="mr-2"><v-icon icon="mdi-plus"></v-icon></v-avatar>
         </button>
       </nav>
       <template v-else>
@@ -111,15 +109,15 @@ async function handleAdd() {
             hover:text-primary 
           "
           @click="showAdd = !showAdd" 
-          role="link">
-          
+          role="link">          
           <span><v-avatar color="pink" :size="24" class="mr-2"><v-icon icon="mdi-plus"></v-icon></v-avatar>
             Add New Locomotive
           </span>
         </button>
       </template>
     </article>
-    <aside v-if="showAdd && showAdd">
+    <v-expand-transition>
+    <aside v-if="showAdd">
       <form class="border border-red-600 rounded-xl border-opacity-40 p-6 bg-gray-950 bg-opacity-60">
         <legend class="p-2 text-xl text-primary">New Loco</legend>
         <div class="p-2 flex flex-row items-center">
@@ -131,5 +129,6 @@ async function handleAdd() {
         </div>
       </form>
     </aside>
+    </v-expand-transition>
   </main>
 </template>
