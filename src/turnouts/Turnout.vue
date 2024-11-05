@@ -3,10 +3,8 @@ import { ref } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
 import { useTurnouts } from '@/api/useTurnouts'
 import { MdOutlineForkLeft } from 'vue3-icons/md'
-// import { useEfx } from '@/api/useEfx'
 
 const { switchTurnout } = useTurnouts()
-// const { runEffect, getEffect } = useEfx()
 
 const props = defineProps({
   turnout: Object,
@@ -14,27 +12,32 @@ const props = defineProps({
 })
 
 const state = ref(props.turnout?.state)
+const isRunning = ref(false)
 
 async function handleTurnouts (event: Event) {
   console.log('handleTurnouts', props.turnout, props.turnout?.id, event, event?.target?.checked)
-
+  const { isPending } = useTimeoutFn(() => {
+    isRunning.value = false
+  }, 3000)
+  isRunning.value = isPending.value
   await switchTurnout({...props.turnout, id: props.turnoutId, state: event?.target?.checked})
-  if (props.turnout?.effectId) {
-    useTimeoutFn(async () => {
-      // const effect = await getEffect(props.turnout?.effectId)
-      // await runEffect({...effect, state: event?.target?.checked})
-    }, 2000)
-  }
 }
 
 </script>
 <template>
-  <div class="shadow-xl my-1 p-[1px] bg-gradient-to-r from-indigo-400 to-pink-900 rounded-full">
-    <div class="flex flex-row items-center justify-center bg-gray-900 bg-opacity-95 rounded-full px-2">
+  <div 
+    class="shadow-xl my-1 p-[1px] rounded-full"
+    :class="isRunning ? 'bg-gradient-to-r from-indigo-400 to-pink-900 ' : 'bg-yellow-500'"
+    >
+    <div 
+      class="flex flex-row items-center justify-center rounded-full px-2 bg-gray-900 "
+      :class="isRunning ? 'shadow-inner shadow-pink-500 bg-opacity-80' : 'bg-opacity-95'"
+      >
       <MdOutlineForkLeft class="w-6 h-6 stroke-none"></MdOutlineForkLeft>
-      <h4 class="flex-grow text-md font-bold">{{turnout?.name}}</h4>
+      <h4 class="text-md font-bold mr-2">{{turnout?.name}}</h4>
+      <p class="text-xs text-yellow-400 flex-grow">{{ turnout.desc }}</p>
       <aside>
-        <v-switch v-model="state" @change="handleTurnouts" hide-details />
+        <v-switch v-model="state" @change="handleTurnouts" :disabled="isRunning" :loading="isRunning" hide-details />
       </aside>
     </div>
   </div>

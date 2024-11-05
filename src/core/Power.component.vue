@@ -18,6 +18,7 @@
   const dccApi = useDcc()
   const power = ref(null)
   const enabled = computed(() => dccExConnected || isEmulated || isSerial)
+  const locked = ref(false)
 
   watch(power, async (newPower) => {
     console.log('power', newPower)
@@ -27,9 +28,11 @@
     if (newPower && isSupported.value && !isActive.value) {
         console.log('locking screen')
         await request('screen')
+        locked.value = true
       } else if (!newPower && isActive.value) {
         console.log('unlocking screen')
         await release()
+        locked.value = false
       } else {
         console.log('screen lock noop', isSupported.value, isActive.value)
       }
@@ -41,19 +44,17 @@
     :disabled="!enabled"
     class="btn btn-ghost btn-circle relative"
     :class="{
-      'text-gray-500': !enabled || power === null,
-      'text-success': enabled && power,
-      'text-error': enabled && !power,  
+      'text-gray-500': power === null,
+      'text-success': power === true,
+      'text-error': power === false,  
     }">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" />
-      </svg>
+    <v-icon icon="mdi-power" size="x-large"></v-icon>
       <span 
         class="w-1 h-1 rounded-full absolute -top-1"
         :class="{
-          'bg-gray-500 animate-bounce': !enabled || power === null,
-          'bg-success animate-ping': enabled && power,
-          'bg-error': enabled && !power,  
+          'bg-success': locked,
+          'bg-gray-500 animate-bounce': !locked && power === null,
+          'bg-error': !locked,  
         }"
       ></span>
     </button>

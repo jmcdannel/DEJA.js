@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useTimeoutFn } from '@vueuse/core'
+
 import { useEfx } from '@/api/useEfx'
 
 const { runEffect, getEfxType } = useEfx()
@@ -11,10 +13,17 @@ const props = defineProps({
 
 const state = ref(props.efx?.state)
 const efxType = ref(getEfxType(props.efx?.type))
+const isRunning = ref(false)
 
 async function handleEfx (event: Event) {
+  if (isRunning.value) return
   const target = event.target as HTMLInputElement
-  console.log('handleEfx', props.efx, props.efx?.id, event, target.checked)  
+  console.log('handleEfx', props.efx, props.efx?.id, event, target.checked)
+
+  const { isPending } = useTimeoutFn(() => {
+    isRunning.value = false
+  }, 3000)
+  isRunning.value = isPending.value
   await runEffect({
       ...props.efx,
       id: props.efxId,
@@ -24,20 +33,20 @@ async function handleEfx (event: Event) {
 
 </script>
 <template>
-  <div class="shadow-xl my-1 p-[1px] bg-gradient-to-r from-indigo-400 to-pink-900 rounded-full">
-    <div class="flex flex-row items-center justify-center bg-gray-900 bg-opacity-95 rounded-full px-2">
-      <component :is="efxType?.icon" class="w-6 h-6 stroke-none mr-2" :color="efxType?.color"></component>
-      <h4 class="flex-grow text-md font-bold">{{efx?.name}}</h4>
-      <v-switch v-model="state" @change="handleEfx" hide-details />
-      <!-- <p>{{ efxId }}</p> -->
-      <!-- <div class="form-control">
-        <label class="label cursor-pointer">
-          <span class="label-text sr-only">Remember me</span>
-          <input type="checkbox" class="toggle toggle-primary bg-rose-500 hover:bg-red-400" @click="handleEfx" />
-        </label>
-      </div> -->
-      <!-- <p>{{ efxType?.label }}</p>
-      <p>{{ efx?.device }}</p> -->
+  <div 
+    class="border-[1px] border-gray-800 "
+    :class="isRunning ? '' : 'cursor-pointer'"
+    @click="handleEfx">
+    <div 
+      class="flex flex-col items-center justify-center bg-gray-900 "
+      :class="isRunning ? 'bg-opacity-40' : 'bg-opacity-95'">
+      <v-progress-linear :class="isRunning ? 'visible' : 'invisible'" color="deep-purple" indeterminate></v-progress-linear>
+      <section class="p-4">
+        <component :is="efxType?.icon" class="w-10 h-10 stroke-none" :color="efxType?.color"></component>
+        <!-- <v-switch v-model="state" @change="handleEfx" hide-details /> -->
+      </section>
+      <h4 class="flex-grow text-md font-bold p-4">{{efx?.name}}</h4>
+      <!-- <pre>{{ isRunning }}</pre> -->
     </div>
   </div>
 </template>
