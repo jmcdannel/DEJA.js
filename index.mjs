@@ -10,8 +10,8 @@ const ENABLE_DEJACLOUD = process.env.ENABLE_DEJACLOUD === 'true' || false
 async function main() {
   try {
     log.start('Running', '[MAIN]', ENABLE_MQTT, ENABLE_WS, ENABLE_DEJACLOUD)
-    ENABLE_MQTT && (await mqtt.connect())
     ENABLE_DEJACLOUD && (await dejaCloud.connect())
+    ENABLE_MQTT && (await mqtt.connect())
     ENABLE_WS && (await server.connect())
   } catch (err) {
     log.fatal(err)

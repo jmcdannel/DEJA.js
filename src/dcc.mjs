@@ -53,7 +53,7 @@ const handleMessage = async (msg) => {
         break
       default:
         //noop
-        log.warn('Unknown action in `handleMessage`', action, payload)
+        log.warn('Unknown action in `dcc handleMessage`', action, payload)
     }
   } catch (err) {
     log.fatal('Error handling message:', err)
@@ -148,8 +148,25 @@ const sendOutput = async (payload) => {
   await send(cmd)
 }
 
+export async function handleDccChange(snapshot) {
+  try {
+    log.note('handleDccChange')
+    snapshot.docChanges().forEach((change) => {
+      if (change.type === 'added') {
+        const { action, payload: payloadRaw } = change.doc.data()
+        const payload = JSON.parse(payloadRaw)
+        log.log('handleDccCommands: ', action, payload)
+        handleMessage(JSON.stringify({ action, payload }))
+      }
+    })
+  } catch (err) {
+    log.fatal('Error handling dcc command:', err)
+  }
+}
+
 export default {
   handleMessage,
   setConnection,
+  handleDccChange,
   dccSerial: com,
 }
