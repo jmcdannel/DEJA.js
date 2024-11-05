@@ -15,6 +15,7 @@ export function getEffectCommand(efx) {
   try {
     switch (efx?.type) {
       case 'light':
+      case 'streetlight':
       case 'frog':
       case 'relay':
       case 'pin':
