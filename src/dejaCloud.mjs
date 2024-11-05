@@ -128,7 +128,7 @@ async function handleEffectCommand(payload) {
   const layoutDevice = devices.find(({ id }) => id === payload.device)
   log.log('handleEffectCommand', payload, command, conn, layoutDevice)
   if (layoutDevice?.connection === 'usb') {
-    await conn.send(device.port, JSON.stringify([command]))
+    await conn.send(conn.port, JSON.stringify([command]))
   } else if (layoutDevice?.connection === 'wifi') {
     await conn.send(conn.topic, JSON.stringify(command))
   }

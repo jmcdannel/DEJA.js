@@ -9,7 +9,7 @@ const ENABLE_DEJACLOUD = process.env.ENABLE_DEJACLOUD === 'true' || false
 
 export const broadcast = async (data) => {
   try {
-    ENABLE_MQTT && (await mqtt.send(JSON.stringify(data)))
+    // ENABLE_MQTT && (await mqtt.send(JSON.stringify(data)))
     ENABLE_WS && (await server.send(data))
     ENABLE_DEJACLOUD && (await dejaCloud.send(data))
     log.enable('[broadcast]', data)

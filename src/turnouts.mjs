@@ -27,9 +27,9 @@ export function turnoutCommand(turnout) {
           device: turnout.device,
           action: 'servo',
           payload: {
-            servo: turnout.turnoutIdx,
-            value: turnout.state ? turnout.straight : turnout.divergent,
-            current: !turnout.state ? turnout.straight : turnout.divergent,
+            servo: parseInt(turnout.turnoutIdx),
+            value: parseInt(turnout.state ? turnout.straight : turnout.divergent, 10),
+            current: parseInt(!turnout.state ? turnout.straight : turnout.divergent, 10),
           },
         })
         break
