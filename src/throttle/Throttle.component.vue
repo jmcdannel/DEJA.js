@@ -98,7 +98,7 @@
   }
 
   const showSlider = (props.viewAs === 'Split' && breakpoints.greaterOrEqual('md')) || (breakpoints.greaterOrEqual('sm'))
-  const showFunctions = (props.viewAs === 'Split' && breakpoints.greaterOrEqual('sm')) || props.viewAs
+  const showFunctions = (props.viewAs === 'Split' && breakpoints.greaterOrEqual('sm')) || props.viewAs !== 'Split'
 
   
 </script>
@@ -116,14 +116,12 @@
       </template>
       <template v-slot:center>
         <Consist v-if="loco" :loco="loco" />        
-        <CurrentSpeed :speed="currentSpeed" class="block sm:hidden" />
       </template>
       <template v-slot:right>
         <ThrottleActionMenu 
           @clear="clearLoco" 
           @settings="openFunctionSettings" 
           @functions="openFunctions" 
-          class="hidden sm:inline-block" 
         />
       </template>
     </ThrottleHeader>
@@ -132,16 +130,10 @@
         <ThrottleSliderControls :speed="currentSpeed" @update:currentSpeed="setSliderSpeed" @stop="handleStop" />  
       </section>
       <section v-if="loco && showFunctions" class="w-full flex flex-col flex-grow h-full overflow-hidden items-center justify-between flex-1/2 sm:flex-1">
-        <ThrottleActionMenu 
-          @clear="clearLoco" 
-          @settings="openFunctionSettings" 
-          @functions="openFunctions" 
-          class="block sm:hidden flex flex-col" 
-        />
         <Functions :loco="loco" ref="functionsCmp" />
       </section>
       <section class="flex flex-col items-center justify-between flex-1/2 sm:flex-1">
-        <CurrentSpeed :speed="currentSpeed" class="hidden sm:flex" />
+        <CurrentSpeed :speed="currentSpeed" />
         <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="adjustSpeed" @stop="handleStop" />
       </section>
     </section>
