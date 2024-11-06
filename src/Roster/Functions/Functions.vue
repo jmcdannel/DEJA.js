@@ -2,48 +2,67 @@
 import { ref } from 'vue'
 import { useFunctions } from '@/Roster/Functions/useFunctions'
 import ViewJson from '@/Core/UI/ViewJson.vue'
-import Func from '@/Roster/Functions/Function.vue'
 import EditFunc from '@/Roster/Functions/EditFunction.vue'
-import { useFunctionIcon } from '@/Roster/Functions/useFunctionIcon'
 
 const props = defineProps({
-  loco: Object
+  loco: Object,
 })
+const locoFunctions = ref(props.loco?.functions)
+const locoId = ref(props.loco?.id)
+const isModified = ref(false)
+const { defaultFunctions, updateFunctions } = useFunctions()
 
-const { getIconComponent } = useFunctionIcon()
-const editMode = ref(false)
-const editFunc = ref(null)
-const editDefaultFunc = ref(null)
-
-const { defaultFunctions } = useFunctions()
-
-function handleEdit(id) {
-  console.log('handleEdit', id)
-  editFunc.value = props.loco?.functions?.find(lf => lf.id === id)
-  editDefaultFunc.value = defaultFunctions.find(df => df.id === id)
+async function handleSave() {
+  console.log('handleSave', locoId.value, locoFunctions.value)
+  if (locoId.value) {
+    await updateFunctions(locoId.value, locoFunctions.value)
+  }
 }
 
-function handleCancel() {
-  console.log('handleCancel')
-  editFunc.value = null
-  editDefaultFunc.value = null
+async function handleEdit(func) {
+  console.log('handleSave', func)
+  const existing = locoFunctions.value?.find(lf => lf.id === func?.id)
+  locoFunctions.value = existing 
+    ? (locoFunctions.value || []).map(lf => {
+        if (lf.id === func?.id) {
+          return {
+            ...lf,
+            ...func
+          }
+        }
+        return lf
+      })
+    : [...(locoFunctions.value || []), { ...existing, ...func }]
+  isModified.value = true
+  
+  console.log('handleEdit', locoFunctions.value, func, existing)
 }
 
 </script>
 <template>
-  <EditFunc v-if="editDefaultFunc" :loco="loco" :config="editDefaultFunc" :func="editFunc" @cancel="handleCancel" />
-  <template v-else>
-    <v-btn v-if="editMode" class="m-1" color="pink-accent-1" prepend-icon="mdi-pencil" @click="editMode = false">Cancel Edit Mode</v-btn>
-    <v-btn v-else class="m-1" color="pink" prepend-icon="mdi-pencil" @click="editMode = true">Enable Edit Mode</v-btn>
-    <templat v-for="defaultFunc in defaultFunctions" :key="defaultFunc.label">
-      <Func @edit="handleEdit" :config="defaultFunc" :editMode="editMode" :func="loco?.functions?.find(lf => lf.id === defaultFunc.id)" />
-    </templat>
-
-  </template>
+  <v-btn class="m-2" color="pink" @click="handleSave" :disabled="!isModified">
+    <v-icon>mdi-content-save</v-icon>
+    Save
+  </v-btn>
+  <v-btn class="m-2" color="pink" variant="tonal">
+    All <v-icon>mdi-eye</v-icon>     
+  </v-btn>
+  <v-btn class="m-2" color="pink" variant="tonal">
+    All <v-icon>mdi-eye-off</v-icon>     
+  </v-btn>
+  <EditFunc 
+    v-for="defaultFunc in defaultFunctions" 
+    :key="defaultFunc.label" 
+    :locoFunction="locoFunctions?.find(lf => lf.id === defaultFunc.id)" 
+    :defaultFunction="defaultFunc" 
+    @edit="handleEdit"
+  />
   <!-- <template v-for="defaultFunc in defaultFunctions" :key="defaultFunc.label">
     <ViewJson :json="defaultFunc" label="RAW DEFAULT"></ViewJson>
     <ViewJson :json="loco?.functions.find(lf => lf.id === defaultFunc.id)" label="RAW LOCO"></ViewJson>
   </template> -->
-  <ViewJson :json="loco?.functions" label="RAW Functions Data"></ViewJson>
+  <pre>locoId: {{ locoId }}</pre>
+  <ViewJson :json="loco.functions" label="RAW loco Data"></ViewJson>
+  <ViewJson :json="locoFunctions" label="RAW locoFunctions Data"></ViewJson>
   <ViewJson :json="defaultFunctions" label="RAW DEFAULT FUNCTIONS"></ViewJson>
 </template>

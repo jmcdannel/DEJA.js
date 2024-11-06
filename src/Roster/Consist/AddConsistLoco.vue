@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-
+defineEmits(['add'])
 const props = defineProps({
   alocos: Array,
   loco: Object,

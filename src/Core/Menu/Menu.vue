@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { useMenu } from '@/Core/Menu/useMenu'
   import { useColors } from '@/Core/UI/useColors'
-
+defineEmits(['change'])
   defineProps({ 
     view: String
   })
@@ -15,7 +15,7 @@
     <v-list-item v-for="item in menu" 
       :key="item.label" 
       :title="item.label"
-      :class="`${colors[item.color]?.text}`"
+      :class="`${colors?.[item.color]?.text}`"
       :active="view === item.label"
       @click="$emit('change', item.label)"
       link

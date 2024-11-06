@@ -40,12 +40,15 @@ const icons = [
 ]
 export function useFunctionIcon() {
   console.log('useFunctionIcon')
+
+  const DEFAULT_ICON = RiTrainWifiFill
+
   function getIconComponent(name: string) {
     if (!name) {
       return
     }
     const icon = icons.find((icon) => icon.name === name)
-    return icon ? icon.icon : RiTrainWifiFill
+    return icon ? icon.icon : DEFAULT_ICON
   }
 
   function getAllIcons() {
@@ -55,6 +58,7 @@ export function useFunctionIcon() {
   return {
     getIconComponent,
     getAllIcons,
+    DEFAULT_ICON,
   }
 }
 export default useFunctionIcon

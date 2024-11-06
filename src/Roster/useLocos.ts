@@ -127,16 +127,6 @@ export function useLocos() {
     }
   }
 
-  async function updateFunctions(id: string, functions) {
-    console.log('updateFunctions', id, functions)
-    try {
-      const locoDoc = doc(db, `layouts/${layoutId.value}/locos`, id)
-      await setDoc(locoDoc, { functions }, { merge: true })
-    } catch (e) {
-      console.error('Error updating functions: ', e)
-    }
-  }
-
   async function createLoco(
     locoId: number,
     name: string | undefined,
@@ -171,7 +161,6 @@ export function useLocos() {
     updateLoco,
     deleteLoco,
     updateConsist,
-    updateFunctions,
     roadnames,
     getRoadname,
   }

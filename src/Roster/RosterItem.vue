@@ -6,9 +6,7 @@ import {
 import { useLocos } from '@/Roster/useLocos'
 import { useColors } from '@/Core/UI/useColors'
 
-const { colors, DEFAULT_COLOR } = useColors()
-const { getRoadname, deleteLoco } = useLocos()
-
+defineEmits(['edit'])
 const props = defineProps({
   loco: Object,
   allowEdit: {
@@ -16,6 +14,9 @@ const props = defineProps({
     default: true
   }
 })
+const { colors, DEFAULT_COLOR } = useColors()
+const { getRoadname, deleteLoco } = useLocos()
+
 const confirmDelete = ref(false)
 const roadname = computed(() => getRoadname(props?.loco?.meta?.roadname))
 const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
@@ -61,7 +62,6 @@ const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
           :color="color?.value || 'primary'"
           :content="loco?.consist?.length + 1 || 0">
           <v-chip variant="outlined"
-            @click="show = !show"
             :color="color?.value || 'primary'">
             Consist
             <template #prepend>

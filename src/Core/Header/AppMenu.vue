@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useMenu } from '@/Core/Menu/useMenu'
-
+defineEmits(['menu'])
 const { menu } = useMenu()
 
 </script>

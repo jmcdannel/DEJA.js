@@ -97,14 +97,13 @@ async function submit (e) {
           filter
         ></v-chip>
     </v-chip-group>
-    <div class="grid grid-cols-2 gap-8 my-4">   
+    <div class=" my-4">   
       <v-btn
         class="mt-2"
         text="Close"
         type="button"
         variant="tonal"
         @click="$emit('close')"
-        block
       ></v-btn>
       <v-btn
         :loading="loading"
@@ -112,7 +111,6 @@ async function submit (e) {
         text="Submit"
         type="submit"
         color="pink"
-        block
       ></v-btn>  
     </div>
   </v-form>  
@@ -127,7 +125,7 @@ async function submit (e) {
   <v-label class="m-2 text-pink-400 text-2xl">Functions</v-label>
   <v-divider class="my-4 border-pink-500"></v-divider>
 
-  <Functions :loco="locoDoc" :color="color" />
+  <Functions v-if="locoDoc" :loco="locoDoc" />
 
   <ViewJson :json="loco" label="RAW Loco Data"></ViewJson>
   <ViewJson :json="loco?.consist" label="RAW Cosist Data"></ViewJson>

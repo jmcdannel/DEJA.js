@@ -1,66 +1,39 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useLocos } from '@/Roster/useLocos'
+import { computed, ref, watch } from 'vue'
 import { useFunctionIcon } from '@/Roster/Functions/useFunctionIcon'
-import { BsMenuButtonWideFill } from 'vue3-icons/bs';
-
-const emit = defineEmits(['cancel'])
+const emit = defineEmits(['edit'])
 const props = defineProps({
-  loco: Object,
-  func: Object,
-  config: Object
+  defaultFunction: Object,
+  locoFunction: Object
 })
 
-const customLabel = ref(props.func?.label)
-const isFav = ref(!!props.func?.isFavorite)
-const customIcon = ref(props.func?.icon)
+const func = ref({ ...props.defaultFunction, ...props.locoFunction })
+const customLabel = ref(func.value?.label)
+const isFav = ref(func.value?.isFavorite)
+const customIcon = ref(func.value?.icon)
+const showPresets = ref(false)
 
-const {  updateFunctions } = useLocos()
-const { getIconComponent, getAllIcons } = useFunctionIcon()
+const { getIconComponent, getAllIcons, DEFAULT_ICON } = useFunctionIcon()
 
 const allIcons = computed(() => getAllIcons())
 
 const iconCmp = computed(() => customIcon.value ? getIconComponent(customIcon.value)
-  : null)
+  : DEFAULT_ICON)
 
-async function handleSave() {
-  console.log('handleSave', props.config.id, !!isFav.value, customLabel.value, customIcon.value)
-  const existing = props.loco?.functions?.find(f => f.id === props.config.id)
-  const newFunc = {
-    isFavorite: isFav.value,
-    label: customLabel.value,
-    icon: customIcon.value
-  }
-  let newFunctions = existing 
-    ? (props.loco?.functions || []).map(f => {
-        if (f.id === props.config.id) {
-          return {
-            ...f,
-            ...newFunc
-          }
-        }
-        return f
-      })
-    : [...(props.loco?.functions || []), { ...props.config, ...existing, ...newFunc }]
-  
-  
-  console.log('handleSave', newFunctions, newFunc, existing)
-  await updateFunctions(props.loco.id, newFunctions)
-  emit('cancel')
-  
-}
-function filterFunctions(f: LocoFunction) {
-  return (f.label.trim() !== '' && f.label !== `F${f.id}`) || f.isFavorite || !!f.icon
-}
+watch(isFav, (value) => {
+  func.value.isFavorite = value
+  emit('edit', func.value)
+})
 
-function handleUpdateFunctions(functions: LocoFunction[]) {
-  console.log('handleUpdateFunctions', functions.filter(filterFunctions))
-  if (props?.loco?.id) {
-    updateFunctions(props.loco.id, functions.filter(filterFunctions))      
-    // availableFunctions.value = getAvailableFunctions()
-    emit('saveLoco', props.loco)
-  }
-}
+watch(customLabel, (value) => {
+  func.value.label = value
+  emit('edit', func.value)
+})
+
+watch(customIcon, (value) => {
+  func.value.icon = value
+  emit('edit', func.value)
+})
 
 </script>
 <template>
@@ -68,18 +41,31 @@ function handleUpdateFunctions(functions: LocoFunction[]) {
     <div class="flex justify-between items-center">
       <v-btn 
         class="m-2" 
-        :icon="isFav ? 'mdi-star' : 'mdi-star-outline'" 
+        :icon="isFav ? 'mdi-eye' : 'mdi-eye-off'" 
         :color="isFav ? 'yellow' : 'gray'" 
         variant="tonal" 
         size="small"
-        @click="isFav = !isFav"
+        @click="isFav =!isFav"
       >
       </v-btn>
-      <v-btn class="m-2" variant="tonal" color="pink" size="large">
-        <component :is="iconCmp" class="mr-2"></component>
-        {{  customLabel || config?.label }}
+      <v-btn
+        class="m-2"
+        variant="tonal"
+        color="pink"
+        size="large"
+        @click="showPresets = !showPresets"
+        >
+        <component :is="iconCmp" class="mr-2 stroke-none w-8 h-8"></component>
       </v-btn>
-      <v-spacer></v-spacer>
+      <v-btn 
+        class="m-2" 
+        icon="mdi-play" 
+        color="pink"
+        variant="tonal" 
+        size="large"
+      >
+      </v-btn>
+      {{  func?.label }}
       <v-text-field
         v-model="customLabel"
         label="Label"
@@ -88,8 +74,10 @@ function handleUpdateFunctions(functions: LocoFunction[]) {
         class="flex-inline m-2"
         hide-details
       ></v-text-field>
+      <v-spacer></v-spacer>
+      <pre class="text-xs">{{ JSON.stringify(func) }}</pre>
     </div>
-    <v-sheet>
+    <v-sheet v-if="showPresets">
       <v-btn v-for="icon in allIcons" :key="icon" 
         class="m-2" color="pink-darken-3" 
         :variant="customIcon === icon.name ? 'elevated' : 'tonal'"
@@ -100,7 +88,7 @@ function handleUpdateFunctions(functions: LocoFunction[]) {
       </v-btn>
     </v-sheet>
 
-    <v-sheet class="flex">
+    <!-- <v-sheet class="flex">
       <v-btn @click="$emit('cancel')" class="m-2" color="rose" variant="tonal">
         Cancel
       </v-btn>
@@ -109,7 +97,7 @@ function handleUpdateFunctions(functions: LocoFunction[]) {
         <v-icon>mdi-content-save</v-icon>
         Save
       </v-btn>
-    </v-sheet>
+    </v-sheet> -->
   </v-sheet>
   
   <v-divider class="my-4"></v-divider>
