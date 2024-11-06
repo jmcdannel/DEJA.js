@@ -8,7 +8,7 @@ const { switchTurnout } = useTurnouts()
 
 const props = defineProps({
   turnout: Object,
-  turnoutId: String,
+  turnoutId: String
 })
 
 const state = ref(props.turnout?.state)
@@ -30,7 +30,7 @@ async function handleTurnouts (event: Event) {
     :class="isRunning ? 'bg-gradient-to-r from-indigo-400 to-pink-900 ' : 'bg-yellow-500'"
     >
     <div 
-      class="flex flex-row items-center justify-center rounded-full px-2 bg-gray-900 "
+      class="flex flex-row items-center justify-center rounded-full px-2 bg-gray-900"
       :class="isRunning ? 'shadow-inner shadow-pink-500 bg-opacity-80' : 'bg-opacity-95'"
       >
       <MdOutlineForkLeft class="w-6 h-6 stroke-none"></MdOutlineForkLeft>

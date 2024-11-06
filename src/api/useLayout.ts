@@ -69,11 +69,11 @@ export const useLayout = () => {
     const docSnap = await getDoc(deviceRef)
 
     if (docSnap.exists()) {
-      console.log('Document data:', docSnap.data(), docSnap.id, docSnap.ref)
+      console.log('DgetDevice:', docSnap.data(), docSnap.id, docSnap.ref)
       return { ...docSnap.data(), id: docSnap.id }
     } else {
       // docSnap.data() will be undefined in this case
-      console.error('No such document!')
+      console.error('getDevice: No such document!')
     }
   }
 

@@ -2,8 +2,8 @@
   import { storeToRefs } from 'pinia'
   import { useCurrentUser } from 'vuefire'
   import { useConnectionStore } from '@/connections/connectionStore'
-  import Roster from '@/core/Roster.vue'
-  import DejaCloudRoster from '@/deja-cloud/DejaCloudRoster.vue'
+  import RosterList from '@/roster/RosterList.vue'
+  import Roster from '@/roster/Roster.vue'
   
   const user = useCurrentUser()
   const connStore = useConnectionStore()
@@ -18,7 +18,7 @@
       <strong class="text-7xl uppercase">Loco</strong>
     </h2>
     <template v-if="!!user && layoutId">
-      <DejaCloudRoster />
+      <RosterList />
     </template>
     <template v-else>
       <!-- <Roster /> -->

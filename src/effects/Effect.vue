@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
 
 import { useEfx } from '@/api/useEfx'
@@ -11,15 +11,12 @@ const props = defineProps({
   efxId: String,
 })
 
-const state = ref(props.efx?.state)
+const state = ref(props.efx?.state || false)
 const efxType = ref(getEfxType(props.efx?.type))
 const isRunning = ref(false)
 
-async function handleEfx (event: Event) {
-  if (isRunning.value) return
-  const target = event.target as HTMLInputElement
-  console.log('handleEfx', props.efx, props.efx?.id, event, target.checked)
-
+watch(state, async (val) => {
+  console.log('state', val)
   const { isPending } = useTimeoutFn(() => {
     isRunning.value = false
   }, 3000)
@@ -27,26 +24,27 @@ async function handleEfx (event: Event) {
   await runEffect({
       ...props.efx,
       id: props.efxId,
-      state: target.checked
+      state: state.value
   })
-}
+})
 
 </script>
 <template>
-  <div 
-    class="border-[1px] border-gray-800 "
-    :class="isRunning ? '' : 'cursor-pointer'"
-    @click="handleEfx">
+  <button 
+    class="border-[1px] border-gray-800 border-solid "
+    :class="isRunning ? 'bg-gradient-to-r from-indigo-400 to-pink-900' : 'cursor-pointer'"
+    :disabled="isRunning"
+    @click="state = !state">
     <div 
       class="flex flex-col items-center justify-center bg-gray-900 "
-      :class="isRunning ? 'bg-opacity-40' : 'bg-opacity-95'">
+      :class="isRunning || state ? 'shadow-inner shadow-pink-500 bg-opacity-80' : 'bg-opacity-95'">
       <v-progress-linear :class="isRunning ? 'visible' : 'invisible'" color="deep-purple" indeterminate></v-progress-linear>
       <section class="p-4">
         <component :is="efxType?.icon" class="w-10 h-10 stroke-none" :color="efxType?.color"></component>
         <!-- <v-switch v-model="state" @change="handleEfx" hide-details /> -->
       </section>
       <h4 class="flex-grow text-md font-bold p-4">{{efx?.name}}</h4>
-      <!-- <pre>{{ isRunning }}</pre> -->
+      <!-- <pre>{{ state }}</pre> -->
     </div>
-  </div>
+  </button>
 </template>

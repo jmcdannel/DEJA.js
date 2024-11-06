@@ -25,8 +25,8 @@ watch(isConnected, (val) => {
     conn.connectDccEx()
   }
   if (props?.device?.type === 'dcc-ex') {
-    conn.connectDccEx()
-    conn.connect(props?.device?.client, conn.layoutId)
+    // conn.connectDccEx()
+    // conn.connect(props?.device?.client, conn.layoutId)
   }
 
 

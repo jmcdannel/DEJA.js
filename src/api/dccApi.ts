@@ -82,7 +82,7 @@ export function useDcc() {
       )
       // console.log('Document written with ID: ', command)
     } catch (e) {
-      console.error('Error adding document: ', e)
+      console.error('sendDccCommand: ', e)
     }
   }
 
@@ -112,7 +112,7 @@ export function useDcc() {
         )
         dejaCloud.send({ action, payload })
       } else {
-        console.error('[DISCONNECTED] !send', action, payload, connStore)
+        console.error('[DISCONNECTED] !send', action, payload)
       }
     } catch (err) {
       console.error('[DCC API].send', err)

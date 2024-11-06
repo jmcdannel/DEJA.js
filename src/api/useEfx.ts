@@ -140,7 +140,7 @@ export const useEfx = () => {
       console.log('device', device, device?.type)
 
       if (device?.type === 'dcc-ex') {
-        dccApi.sendOutput(efx.pin, efx.state)
+        dccApi.sendOutput(efx.pin, !!efx.state)
       } else if (device?.type === 'deja-arduino') {
         // sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
         await setDoc(
@@ -153,7 +153,7 @@ export const useEfx = () => {
         )
       }
     } catch (e) {
-      console.error('Error adding document: ', e)
+      console.error('runEffect: ', e, efx)
     }
   }
 
