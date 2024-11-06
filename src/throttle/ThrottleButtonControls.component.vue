@@ -44,7 +44,7 @@
   }
 
   const btnClasses = 'btn btn-accent relative h-auto mx-auto md:w-24 '
-  const iconClasses = `h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-12 lg:w-12 relative ${props.horizontal ? '-rotate-90' : ''}`
+  const iconClasses = `h-4 w-8 sm:h-5 sm:w-10 md:h-6 md:w-12 lg:h-12 lg:w-12 relative ${props.horizontal ? '-rotate-90' : ''}`
 
 </script>
 <template>

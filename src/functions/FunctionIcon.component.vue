@@ -14,6 +14,6 @@
 
 </script>
 <template>
-  <component :is="iconCmp" class="h-8 w-8" />
+  <component :is="iconCmp" class="h-8 w-8 stroke-none" />
    <!-- <pre v-if="icon">{{ functionIcons.getIconComponent(icon) }}</pre> -->
 </template>

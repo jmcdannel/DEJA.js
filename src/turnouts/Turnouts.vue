@@ -31,7 +31,7 @@ function filter(turnouts) {
     <v-btn @click="showFilters = !showFilters" color="secondary" icon="mdi-filter"></v-btn>
   </header>
   <TurnoutFilters @devices="handleDeviceFilter" :class="showFilters ? 'visible' : 'hidden'"></TurnoutFilters>
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 w-full">
+  <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 w-full">
     <Turnout v-for="item in filter(list)"
       :key="item.id" :turnout="item" :turnoutId="item?.id"></Turnout>
   </div>

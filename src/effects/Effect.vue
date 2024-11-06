@@ -31,12 +31,12 @@ watch(state, async (val) => {
 </script>
 <template>
   <button 
-    class="border-[1px] border-gray-800 border-solid "
+    class="border-[1px] border-gray-800 border-solid w-full h-full "
     :class="isRunning ? 'bg-gradient-to-r from-indigo-400 to-pink-900' : 'cursor-pointer'"
     :disabled="isRunning"
     @click="state = !state">
     <div 
-      class="flex flex-col items-center justify-center bg-gray-900 "
+      class="flex flex-col items-center justify-center bg-gray-900  w-full h-full "
       :class="isRunning || state ? 'shadow-inner shadow-pink-500 bg-opacity-80' : 'bg-opacity-95'">
       <v-progress-linear :class="isRunning ? 'visible' : 'invisible'" color="deep-purple" indeterminate></v-progress-linear>
       <section class="p-4">

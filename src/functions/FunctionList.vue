@@ -28,7 +28,8 @@
         justify-center 
         space-between
         p-1
-        basis-1/2
+        basis-full
+        md:basis-1/2
         ">
           <Function :func="func" :address="loco.locoId" class="w-full justify-start" show-label show-default-icon />
       </li>
