@@ -3,7 +3,7 @@
   import { useCurrentUser } from 'vuefire'
   import { useConnectionStore } from '@/connections/connectionStore'
   import RosterList from '@/roster/RosterList.vue'
-  import Roster from '@/roster/Roster.vue'
+  import Roster from '@/core/Roster.vue'
   
   const user = useCurrentUser()
   const connStore = useConnectionStore()
