@@ -29,11 +29,11 @@ async function handleSwitch() {
 <template> 
   <v-card
     class="mx-auto w-full h-full justify-between flex flex-col bg-zinc-500  bg-opacity-20"
-    variant="outlined"
+    variant="tonal"
     density="compact"
-    color="yellow"
+    :color="turnout?.color || 'yellow'"
   >
-  <v-card-item class="font-weight-black bg-yellow-300 text-gray-900">
+  <v-card-item class="font-weight-black">
     <v-card-title class="font-weight-black">
       {{ turnout?.name }}
     </v-card-title>
@@ -56,20 +56,18 @@ async function handleSwitch() {
           >
             {{ turnout?.device }}
           </v-chip>
-          <v-chip
+          <v-label
             v-if="turnout?.effectId"
-            size="small"
-            class=""
-            prepend-icon="mdi-rocket-launch"
+            class="text-xs"
           >
             {{ turnout?.effectId }}
-          </v-chip>
+          </v-label>
         </v-chip-group>
         <div class="flex flex-col items-center justify-center">
           <v-switch
             v-model="turnoutState"
             @change="handleSwitch"
-            color="yellow"
+            :color="turnout?.color || 'yellow'"
             hide-details
           ></v-switch>
         </div>

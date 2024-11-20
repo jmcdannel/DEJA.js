@@ -10,6 +10,7 @@ import {
 import { useStorage } from '@vueuse/core'
 import { useCollection, useDocument, useCurrentUser } from 'vuefire'
 import { db } from '@/firebase'
+import { ITag } from '@/Common/Tags/types'
 import { useDcc } from '@/DCCEX/useDcc'
 import { useDejaJS } from '@/DejaJS/useDejaJS'
 
@@ -147,6 +148,47 @@ export const useLayout = () => {
     }
   }
 
+  async function setTags(tags: ITag[]) {
+    try {
+      if (layoutDoc.value) {
+        console.log('setTags', layoutId.value, tags)
+        await setDoc(layoutDoc.value, { tags }, { merge: true })
+      }
+    } catch (e) {
+      console.error('Error updating consist: ', e)
+    }
+  }
+
+  async function setTag(tag: ITag) {
+    try {
+      if (layoutDoc.value) {
+        const layout = useDocument(layoutDoc)
+        console.log('setTags', layoutId.value, layout, tag)
+        await setDoc(
+          layoutDoc.value,
+          { tags: [...(layout.value?.tags || []), tag] },
+          { merge: true }
+        )
+      }
+    } catch (e) {
+      console.error('Error updating consist: ', e)
+    }
+  }
+
+  async function getTagsByIds(ids: string[]): Promise<ITag[]> {
+    if (layoutDoc.value) {
+      const docSnap = await getDoc(layoutDoc.value)
+
+      if (docSnap.exists()) {
+        const layout = docSnap.data()
+        if (layout?.tags) {
+          return layout.tags.filter((tag: ITag) => ids.includes(tag.id))
+        }
+      }
+    }
+    return []
+  }
+
   return {
     getLayout,
     getLayouts,
@@ -157,6 +199,9 @@ export const useLayout = () => {
     autoConnectDevice,
     deviceTypes,
     connectDevice,
+    setTags,
+    setTag,
+    getTagsByIds,
   }
 }
 

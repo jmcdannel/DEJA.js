@@ -1,11 +1,5 @@
 export function useColors() {
-  // slate gray zinz neutral stone red orange amber yellow lime green emerald teal cyan sky blue indigo violet purple fuchsia pink rose
-  // const colorVals =
-  //   'slate gray zinz neutral stone red orange amber yellow lime green emerald teal cyan sky blue indigo violet purple fuchsia pink rose'.split(
-  //     ' '
-  //   )
-
-  const DEFAULT_COLOR = 'slate'
+  const DEFAULT_COLOR = 'blue'
   const colorList = [
     {
       value: 'slate',
@@ -169,10 +163,13 @@ export function useColors() {
     },
   ]
 
-  const colors = colorList.reduce((acc, color) => {
-    acc[color.value] = color
-    return acc
-  }, {})
+  const colors = colorList.reduce(
+    (acc: { [key: string]: (typeof colorList)[0] }, color) => {
+      acc[color.value] = color
+      return acc
+    },
+    {}
+  )
 
   function getColor(color: string) {
     return colors[color] || colors[DEFAULT_COLOR]

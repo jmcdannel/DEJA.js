@@ -5,6 +5,7 @@ import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 // import DeviceList from './Devices/DeviceList.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import PortList from '@/Layout/PortList.vue'
+import LayoutTags from '@/Layout/LayoutTags.vue'
 import DeviceListItem from '@/Layout//Devices/DeviceListItem.vue'
 import AddDeviceItem from '@/Layout//Devices/AddDeviceItem.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
@@ -53,6 +54,7 @@ const showAdd = ref(false)
       </v-card-text>
     </v-card>
     <PortList :ports="layout?.ports" />
+    <LayoutTags />
   </div>
   <ViewJson :json="layout" label="RAW Layout Data"></ViewJson>
   <ViewJson :json="devices" label="RAW Device Data"></ViewJson>

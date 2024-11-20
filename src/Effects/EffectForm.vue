@@ -3,10 +3,10 @@ import { ref, watch } from 'vue'
 import { useEfx } from '@/Effects/useEfx'
 import { useLayout } from '@/Layout/useLayout'
 import { useSound } from '@vueuse/sound'
-import { useWebSocket } from '@vueuse/core'
-import { BsCpu } from 'vue3-icons/bs'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import MacroForm from '@/Effects/MacroForm.vue'
+import ColorPicker from '@/Common/Color/ColorPicker.vue'
+import TagForm from '@/Common/Tags/TagForm.vue'
 
 const props = defineProps<{
   efx: Object
@@ -26,7 +26,9 @@ const macroOff = ref(props.efx?.off || [])
 const sound = ref('')
 const soundObj = ref(null as null | HTMLAudioElement)
 const efxType = ref(props.efx?.type || DEFAULT_TYPE?.value as string | undefined)
-const efxObj = ref(props.efx?.type ?  getEfxType(props.efx?.type) : DEFAULT_TYPE)
+const efxTypeObj = ref(props.efx?.type ?  getEfxType(props.efx?.type) : DEFAULT_TYPE)
+const efxColor = ref(props.efx?.color)
+const tags = ref<string[]>(props.efx?.tags || [])
 const loading = ref(false)
 const rules = {
   required: [(val) => !!val || 'Required.']
@@ -44,7 +46,7 @@ watch(sound, (newSound) => {
 
 watch(efxType, (newType) => {
   console.log('efxType', newType)
-  efxObj.value = getEfxType(newType)
+  efxTypeObj.value = getEfxType(newType)
 })
 
 async function submit () {
@@ -52,18 +54,20 @@ async function submit () {
 
   const newEfx = {
     name: name.value,
-    type: efxType.value
+    type: efxType.value,
+    color: efxColor.value,
+    tags: tags.value
   }
   // set device
-  if (efxObj.value?.require.includes('device')) {
+  if (efxTypeObj.value?.require.includes('device')) {
     newEfx.device = device.value
   }
   //  set pin
-  if (efxObj.value?.require.includes('pin')) {
+  if (efxTypeObj.value?.require.includes('pin')) {
     newEfx.pin = parseInt(pin.value)
   }
   //  set sound
-  if (efxObj.value?.require.includes('sound')) {
+  if (efxTypeObj.value?.require.includes('sound')) {
     newEfx.sound = sound.value
   }
   //  set macro
@@ -71,6 +75,7 @@ async function submit () {
     newEfx.on = macroOn.value
     newEfx.off = macroOff.value
   }
+
   await setEfx(props.efx?.id, newEfx)
 
   console.log(props.efx, newEfx)
@@ -83,8 +88,6 @@ function handleMacro({on, off}) {
   macroOn.value = on
   macroOff.value = off
 }
-
-const pinTypes = ['light', 'led', 'streetlight', 'relay', 'frog', 'power', 'pin']
 
 const newSound = useSound(sound.value || '')
 
@@ -118,7 +121,7 @@ function stopSound() {
     <v-divider class="my-4 border-fuchsia-500"></v-divider>
 
     <!-- device -->
-    <template v-if="efxObj?.require?.includes('device')">
+    <template v-if="efxTypeObj?.require?.includes('device')">
       <v-label class="m-2">Device</v-label>
       <v-divider class="my-4 border-fuchsia-500"></v-divider>
       <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large">
@@ -136,7 +139,7 @@ function stopSound() {
     <v-divider class="my-4 border-fuchsia-500"></v-divider>
 
     <!-- pin -->
-    <template v-if="efxObj?.require?.includes('pin')">
+    <template v-if="efxTypeObj?.require?.includes('pin')">
       <v-text-field
         v-model="pin"
         label="Pin"
@@ -145,13 +148,13 @@ function stopSound() {
         max-width="200"
       >
       <template #append>
-        <component v-if="efxObj?.icon" :is="efxObj?.icon" :color="efxObj?.color" class="w-16 h-16 stoke-none"></component>
+        <component v-if="efxTypeObj?.icon" :is="efxTypeObj?.icon" :color="efxTypeObj?.color" class="w-16 h-16 stoke-none"></component>
       </template>
     </v-text-field>    
     </template>
 
     <!-- sound -->
-    <template v-else-if="efxObj?.require?.includes('sound')">
+    <template v-else-if="efxTypeObj?.require?.includes('sound')">
       <div class="flex items-center">
         <v-text-field
           v-model="sound"
@@ -181,16 +184,20 @@ function stopSound() {
         :rules="rules.required"
       ></v-text-field>
     </div>
-    
+
+    <!-- color -->
+    <v-divider class="my-4 border-fuchsia-500"></v-divider>
+    <ColorPicker v-model="efxColor" :additionalSources="[{ id: 'iconColor', label: 'Use Icon Color', color: efxTypeObj?.color}]"></ColorPicker>
     <v-divider class="my-4"></v-divider>
-    <div class="grid grid-cols-2 gap-8 my-4">   
+    <TagForm v-model="tags" :tags="tags"></TagForm>
+    <v-divider class="my-4 border-yellow-500"></v-divider>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 my-4">   
       <v-btn
         class="mt-2"
         text="Close"
         type="button"
         variant="tonal"
         @click="$emit('close')"
-        block
       ></v-btn>
       <v-btn
         :loading="loading"
@@ -198,11 +205,10 @@ function stopSound() {
         text="Submit"
         type="submit"
         color="purple"
-        block
       ></v-btn>  
     </div>
+    <ViewJson :json="efx" label="Efx" />
+    <ViewJson :json="efxObj" label="efxObj" />
+    <ViewJson :json="efxTypes" label="efxTypes" />
   </v-form>
-  <ViewJson :json="efx" label="Efx" />
-  <ViewJson :json="efxObj" label="efxObj" />
-  <ViewJson :json="efxTypes" label="efxTypes" />
 </template>

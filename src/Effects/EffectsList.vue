@@ -36,11 +36,4 @@ function handleEdit(item) {
     </v-col>
     </v-row>
   </v-container>
-  <!-- <div class="relative text- grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4"> -->
-  <!-- <div class="relative flex flex-wrap justify-start">
-    <slot name="prepend"></slot>
-    <template v-if="list?.length">
-      
-    </template>    
-  </div> -->
 </template>

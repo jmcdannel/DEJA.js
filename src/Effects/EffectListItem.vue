@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { useEfx } from '@/Effects/useEfx'
 import { useColors } from '@/Core/UI/useColors'
 
-const { colors, DEFAULT_COLOR } = useColors()
+const { DEFAULT_COLOR } = useColors()
 const { efxTypes, runEffect, deleteEfx } = useEfx()
 
 const props = defineProps({
@@ -16,7 +16,7 @@ const confirmDelete = ref(false)
 
 
 const efxType = computed(() => efxTypes.find((type) => type.value === props?.efx?.type))
-const color = computed(() => colors[efxType?.value?.color || DEFAULT_COLOR])
+const color = ref(props.efx?.color || efxType.value?.color || DEFAULT_COLOR)
 
 async function handleEfx (event: Event) {
   console.log('handleEfx', props.efx, props.efx?.id, event, event?.target?.checked)
@@ -31,9 +31,8 @@ async function handleEfx (event: Event) {
 <template>
   <v-card
     class="mx-auto w-full h-full justify-between flex flex-col"
-    :class="color.border"
-    :color="color.value"
-    variant="outlined"
+    :color="color"
+    variant="tonal"
     density="compact"
   >
     <template #title>
@@ -41,30 +40,25 @@ async function handleEfx (event: Event) {
     </template>
     <template #append>
       <v-avatar
-        :color="color.value"
+        :color="color"
       >{{ efx?.pin }}</v-avatar>
     </template>
     <v-card-text 
       class="min-h-8 flex border-t-2 py-2 justify-space-between"
-      :class="color.border"
       variant="flat">
       <div class="grid grid-cols-2 gap-2">
         <v-chip-group column>
+          <v-label class="text-xs">{{ efxId }}</v-label>
           <v-chip
             size="small"
             class=""
-            :color="color.value"
-          >{{ efxId }}</v-chip>
-          <v-chip
-            size="small"
-            class=""
-            :color="color.value"
+            :color="color"
           >{{ efxType?.label || 'Effect' }}</v-chip>
           
           <v-chip
             size="small"
             class=""
-            :color="color.value"
+            :color="color"
             prepend-icon="mdi-memory"
           >
             {{ efx?.device }}
@@ -73,11 +67,10 @@ async function handleEfx (event: Event) {
         <div class="flex flex-col items-center justify-center">
           <v-icon 
             :icon="efxType?.icon || 'mdi-help'"
-            class="text-5xl m-3"
-            :class="color.text"></v-icon>
+            class="text-5xl m-3"></v-icon>
           <v-switch
             hide-details
-            :color="color.value"
+            :color="color"
             @click="handleEfx"
           ></v-switch>
         </div>

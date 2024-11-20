@@ -5,27 +5,17 @@ import EffectForm from '@/Effects/EffectForm.vue'
 import EffectsList from '@/Effects/EffectsList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 
-const showForm = ref(false)
 const editEffect = ref(null)
+const newEfx = {}
 
-function handleEdit(efx) {
-  console.log('handleEdit', efx)
-  editEffect.value = efx
-  showForm.value = true
-}
-
-function handleClose() {
-  showForm.value = false
-  editEffect.value = null
-}
 </script>
 <template>
   <ModuleTitle menu="Effects" />
   <Transition name="slide">
-    <EffectForm v-if="showForm" v-show="showForm" @close="handleClose" :efx="editEffect" />
-    <EffectsList v-else @edit="handleEdit">
+    <EffectForm v-if="editEffect" v-show="editEffect" @close="editEffect = null" :efx="editEffect" />
+    <EffectsList v-else @edit="efx => editEffect = efx">
       <template #prepend>
-        <AddTile @click="showForm = true" color="purple" />
+        <AddTile @click="editEffect = {...newEfx}" color="purple" />
       </template>
     </EffectsList>
   </Transition>

@@ -4,9 +4,13 @@ import { useTurnouts } from '@/Turnouts/useTurnouts'
 import { useLayout } from '@/Layout/useLayout'
 import { useEfx } from '@/Effects/useEfx'
 import { BsCpu } from 'vue3-icons/bs'
+import { ITurnout } from '@/Turnouts/types'
+import { slugify } from '@/Common/Utils'
+import ColorPicker from '@/Common/Color/ColorPicker.vue'
+import TagForm from '@/Common/Tags/TagForm.vue'
 
 const props = defineProps<{
-  turnout: Object
+  turnout: ITurnout
 }>()
 const emit = defineEmits(['close'])
 const DEFAULT_DEVICE = 'dccex'
@@ -25,9 +29,12 @@ const desc = ref(props.turnout?.desc || '')
 const index = ref(props.turnout?.turnoutIdx || '')
 const effectId = ref(props.turnout?.effectId || '')
 const device = ref(props.turnout?.device || DEFAULT_DEVICE)
-const straight = ref(props.turnout?.straight || '')
-const divergent = ref(props.turnout?.divergent || '')
-const turnoutType = ref(DEFAULT_TYPE)
+const straight = ref<number | undefined>(props.turnout?.straight)
+const divergent = ref<number | undefined>(props.turnout?.divergent)
+const color = ref(props.turnout?.color)
+const ttags = ref<string[]>(props.turnout?.tags || [])
+const tags = ref<string[]>(props.turnout?.tags || [])
+const turnoutType = ref(props.turnout?.type || DEFAULT_TYPE)
 const loading = ref(false)
 const rules = {
   required: [(val) => !!val || 'Required.']
@@ -52,19 +59,24 @@ async function submit (e) {
   loading.value = true
   const results = await e
   if (results.valid) {
-    const turnout = {
+    const turnout: ITurnout = {
+      id: props.turnout?.id || turnoutId.value,
       device: device.value,
       name: name.value,
       desc: desc.value,
-      turnoutIdx: index.value,
-      effectId: effectId.value?.value || null,
-      ['type']: turnoutType.value,
+      turnoutIdx: parseInt(index.value as string),
+      type: turnoutType.value,
+      // tags: tags.value,
       state: false,
-      straight: straight.value,
-      divergent: divergent.value
+      // color: color.value,
+      straight: straight.value ? Number(straight.value) : undefined,
+      divergent: divergent.value ? Number(divergent.value) : undefined
+    }
+    if (effectId.value) {
+      turnout.effectId = effectId.value
     }
     await setTurnout(props.turnout?.id || turnoutId.value, turnout)
-    console.log(turnout)
+    console.log(turnout, tags.value)
     loading.value = false
     reset()
     emit('close')
@@ -83,6 +95,8 @@ function reset(){
   turnoutId.value = ''
   name.value = ''
   desc.value = ''
+  color.value = ''
+  tags.value = []
   index.value = ''
   effectId.value = ''
   device.value = DEFAULT_DEVICE
@@ -91,18 +105,6 @@ function reset(){
   turnoutType.value = DEFAULT_TYPE
 }
 
-function slugify(str: string) {
-  str = str.replace(/^\s+|\s+$/g, '') // trim leading/trailing white space
-  str = str.toLowerCase() // convert string to lowercase
-  str = str
-    .replace(/[^a-z0-9 -]/g, '') // remove any non-alphanumeric characters
-    .replace(/\s+/g, '-') // replace spaces with hyphens
-    .replace(/-+/g, '-') // remove consecutive hyphens
-  return str
-}
-
-
-  const turnoutTypes = ['kato', 'servo']
 </script>
 <template>
   <v-form validate-on="submit lazy" @submit.prevent="submit">
@@ -110,7 +112,7 @@ function slugify(str: string) {
     <v-label class="m-2 text-yellow-400 text-2xl">{{ props.turnout ? 'Edit' : 'Add'}} Turnout</v-label>
     <v-divider class="my-4 border-yellow-500"></v-divider>
     <v-btn-toggle v-model="turnoutType" divided class="flex-wrap h-auto" size="x-large" mandatory>
-      <v-btn v-for="opt in turnoutTypes" :value="opt" :key="opt"
+      <v-btn v-for="opt in ['kato', 'servo']" :value="opt" :key="opt"
         class="min-h-48 min-w-48 border"
         color="yellow">
         <div class="flex flex-col">
@@ -197,8 +199,13 @@ function slugify(str: string) {
       ></v-combobox>
     </div>
     
-    <v-divider class="my-4"></v-divider>
-    <!-- <v-icon :icon="efxType?.icon"></v-icon> -->
+    <v-divider class="my-4 border-yellow-500"></v-divider>
+    <ColorPicker v-model="color"></ColorPicker>
+    <v-divider class="my-4 border-yellow-500"></v-divider>
+    <TagForm v-model="tags" :tags="ttags"></TagForm>
+    <v-divider class="my-4 border-yellow-500"></v-divider>
+    <pre>{{ tags }}</pre>
+    <pre>{{ ttags }}</pre>
     <div class="grid grid-cols-2 gap-8 my-4">   
       <v-btn
         class="mt-2"
@@ -206,7 +213,6 @@ function slugify(str: string) {
         type="button"
         variant="tonal"
         @click="handleClose"
-        block
       ></v-btn>
       <v-btn
         :loading="loading"
@@ -214,7 +220,6 @@ function slugify(str: string) {
         text="Submit"
         type="submit"
         color="yellow"
-        block
       ></v-btn>  
     </div>
   </v-form>
