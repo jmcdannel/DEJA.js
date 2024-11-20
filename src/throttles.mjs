@@ -1,5 +1,27 @@
+import { collection, getDocs } from 'firebase/firestore'
+import { db } from './firebase.mjs'
 import log from './utils/logger.mjs'
 import dcc from './dcc.mjs'
+
+const layoutId = process.env.LAYOUT_ID
+let locos = []
+
+async function getLocos() {
+  try {
+    if (locos.length === 0) {
+      const locosCol = await collection(db, `layouts/${layoutId}/locos`)
+      const querySnapshot = await getDocs(locosCol)
+      const locosData = []
+      querySnapshot.forEach((doc) => {
+        locosData.push({ ...doc.data(), id: doc.id })
+      })
+      locos = locosData
+    }
+    return locos
+  } catch (error) {
+    log.error('Error loading locos', error)
+  }
+}
 
 export async function handleThrottleChange(snapshot) {
   log.note('handleThrottleChange')
@@ -10,40 +32,62 @@ export async function handleThrottleChange(snapshot) {
         ? change.doc.data().speed
         : -change.doc.data().speed,
     }
-    console.log('Throttle change', change.type, change.doc.data(), throttleCmd)
-    // const consist = locos?.value
-    //   ? unref(locos.value).find((loco) => loco.locoId == throttleCmd.address)
-    //       ?.consist || []
-    //   : []
-    // console.log(
-    //   "Consist",
-    //   consist,
-    //   throttleCmd,
-    //   unref(locos.value).find((loco) => loco.locoId == throttleCmd.address),
-    //   locos.value
-    // )
-    // if (consist.length > 0) {
-    //   consist.forEach(async (consistLoco) => {
-    //     let consistSpeed
-    //     if (consistLoco.direction) {
-    //       // forward
-    //       consistSpeed = throttleCmd.speed + consistLoco.trim
-    //     } else {
-    //       // backward
-    //       consistSpeed = throttleCmd.speed - consistLoco.trim
-    //     }
-    //     const consistCmd = {
-    //       address: consistLoco.address,
-    //       speed: consistSpeed,
-    //     }
-    //     await sendSpeed(consistCmd)
-    //   })
-    // }
+    const _locos = await getLocos()
+    const loco = _locos.find((loco) => loco.locoId == throttleCmd.address)
+    console.log(
+      'Throttle change',
+      change.type,
+      change.doc.data(),
+      throttleCmd,
+      loco
+    )
+    if (loco?.consist.length > 0) {
+      loco?.consist.forEach(async (consistLoco) => {
+        let consistSpeed
+        if (throttleCmd.speed > 0) {
+          //moving forward
+          if (consistLoco.direction) {
+            // facing forward
+            consistSpeed = throttleCmd.speed + consistLoco.trim
+            if (consistSpeed < 0) {
+              consistSpeed = 1
+            }
+          } else {
+            // facing backward
+            consistSpeed = throttleCmd.speed - consistLoco.trim
+            if (consistSpeed > 0) {
+              consistSpeed = -1
+            }
+          }
+        } else {
+          //moving backward
+          if (consistLoco.direction) {
+            // facing forward
+            consistSpeed = throttleCmd.speed - consistLoco.trim
+            if (consistSpeed > 0) {
+              consistSpeed = -1
+            }
+          } else {
+            // facing backward
+            consistSpeed = throttleCmd.speed + consistLoco.trim
+            if (consistSpeed < 0) {
+              consistSpeed = 1
+            }
+          }
+        }
+        const consistCmd = {
+          address: consistLoco.address,
+          speed: consistSpeed,
+        }
+        await dcc.sendSpeed(consistCmd)
+      })
+    }
 
     // await sendSpeed(throttleCmd)
-    await dcc.handleMessage(
-      JSON.stringify({ action: 'throttle', payload: throttleCmd })
-    )
+    await dcc.sendSpeed(throttleCmd)
+    // await dcc.handleMessage(
+    //   JSON.stringify({ action: 'throttle', payload: throttleCmd })
+    // )
   })
 }
 
