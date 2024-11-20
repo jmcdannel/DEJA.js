@@ -1,27 +1,50 @@
 <script lang="ts" setup>
-  import { ref } from 'vue';
-  import { 
-    FaChevronCircleLeft,
-    FaChevronCircleRight,
-    FaMinus,
-    FaPlus,
-    FaTimesCircle,
-  } from "vue3-icons/fa";
+import { ref } from 'vue';
+import { 
+  FaChevronCircleLeft,
+  FaChevronCircleRight,
+  FaMinus,
+  FaPlus,
+  FaTimesCircle,
+} from "vue3-icons/fa";
 
-  import Modal from '@/core/Modal.component.vue'
+import { useDejaCloud } from '@/deja-cloud/useDejaCloud'
 
-  const props = defineProps({
-    loco: {
-      type: Object,
-      required: false
+import ConsistAddLoco from './ConsistAddLoco.component.vue'
+import Modal from '@/core/Modal.component.vue'
+
+const props = defineProps({
+  loco: {
+    type: Object,
+    required: false
+  }
+})
+
+const addLocoRef = ref<HTMLDialogElement | null>(null)
+const modalRef = ref<HTMLDialogElement | null>(null)
+
+const { updateConsist } = useDejaCloud()
+
+defineExpose({
+  showModal: () => modalRef?.value?.showModal()
+})
+
+function openAddLoco() {
+  addLocoRef?.value?.showModal()
+}
+
+const handleAddLoco = (newAddress: string) => {
+  if (props.loco) {
+    const newLoco = {
+      address: parseInt(newAddress),
+      direction: true,
+      trim: 0
     }
-  })
-  
-  const modalRef = ref<HTMLDialogElement | null>(null);
-
-  defineExpose({
-    showModal: () => modalRef?.value?.showModal()
-  })
+    const newConsist = [...(props.loco.consist || []), newLoco]
+    console.log('newConsist', newConsist, props.loco, props.loco?.id)
+    updateConsist(props.loco.id, newConsist)
+  }
+}
 
 </script>
 <template>
@@ -64,6 +87,21 @@
           <FaTimesCircle alt="clear layout" class="h-3 w-3" @click="$emit('removeLoco', cloco)" />
         </button>
       </li>
+      <li class="bg-green-500
+        flex 
+        justify-center 
+        align-middle 
+        space-between
+        rounded-full
+        p-1
+        mr-1
+        my-1
+        ">
+        <button class="btn btn-circle text-black btn-outline btn-xs" @click="openAddLoco">
+          <FaPlus alt="add loco to consist" class="h-3 w-3" />
+        </button>
+      </li>
     </ul>
   </Modal>
+  <ConsistAddLoco ref="addLocoRef" @add-loco="handleAddLoco" />
 </template>
