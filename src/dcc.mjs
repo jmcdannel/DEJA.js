@@ -167,6 +167,7 @@ export async function handleDccChange(snapshot) {
 export default {
   handleMessage,
   setConnection,
+  sendSpeed,
   handleDccChange,
   dccSerial: com,
 }
