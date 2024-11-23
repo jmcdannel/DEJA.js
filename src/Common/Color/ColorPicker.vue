@@ -1,76 +1,156 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import {  onMounted, ref, watch } from 'vue'
+import type { ITag } from '@/Common/Tags/types'
+import { useLayout } from '@/Layout/useLayout'
 
-const DEFAULT_COLOR = 'blue'
+defineEmits(['select', 'cancel'])
+const model = defineModel<string>()
 
-interface IColorSource {
-  id: string
-  label: string
-  disabled?: boolean
-  color?: () => string | string
-}
+const { getTags } = useLayout()
 
-const defualtColorSources = [
-  { id: 'primary', label: 'Use Theme Color - Primary', color: 'primary' },
-  { id: 'tag', label: 'Tag', disabled: true },
-  { id: 'custom', label: 'Custom', color: () => customColor.value },
-] as IColorSource[]
+const current = ref<string>(model.value || '')
+const layoutTags = ref<ITag[]>([])
 
-const model = defineModel()
-const props = defineProps<{
-  additionalSources?: IColorSource[] | undefined
-}>()
+// list of vuestic colors
+const themeColors = [
+  'primary',
+  'success',
+  'info',
+  'warning',
+  'error',
+  'neutral',
+  'red',
+  'pink',
+  'purple',
+  'deep-purple',
+  'indigo',
+  'blue',
+  'light-blue',
+  'cyan',
+  'teal',
+  'green',
+  'light-green',
+  'lime',
+  'yellow',
+  'amber',
+  'orange',
+  'deep-orange',
+  'brown',
+  'blue-grey',
+  'grey',
+  'black',
+  'white',
+  'transparent',
+]
 
-const colorSources = ref(props.additionalSources 
-  ? props.additionalSources.concat(defualtColorSources) 
-  : defualtColorSources)
-const colorSource = ref(model.value ? 'custom' : colorSources.value[0].id)
-const customColor = ref<string>(typeof model.value === 'string' ? model.value : DEFAULT_COLOR)
+const showCustomColor = ref(false)
+const customSwatches = ref<string[]>([])
+const customColor = ref<string>("")
 
-const color = computed(() => {
-  const source = colorSources.value.find((source) => source.id === colorSource.value)
-  if (source?.color) {
-    return typeof source.color === 'function' ? source.color() : source.color
-  }
+onMounted(async () => {
+  layoutTags.value = await getTags()
 })
 
-watch(colorSource, (value) => {
-  const source = colorSources.value.find((source) => source.id === value)  
-  if (source?.color) {
-    model.value = typeof source.color === 'function' ? source.color() : source.color
-  }
-})
-
-watch(customColor, (value) => {
-  if (colorSource.value === 'custom') {
+watch(current, (value) => {
+  console.log('current', value)
+  if (value !== 'custom') {
     model.value = value
   }
 })
 
+function handleSelectCustomColor() {
+  showCustomColor.value = false
+  model.value = customColor.value
+  if (!customSwatches.value.includes(customColor.value)) {
+    customSwatches.value.push(customColor.value)
+    current.value = customColor.value
+  }
+}
+
 </script>
 <template>
-  <v-card-title>
-    <v-avatar :color="color" size="48">
-      <v-icon>mdi-palette</v-icon>
-    </v-avatar>
-    <v-label class="ml-4 text-lg">Color</v-label>
-  </v-card-title>
-  <v-radio-group v-model="colorSource">
-    <v-radio 
-      v-for="source in colorSources" 
-      :key="source.id" 
-      :label="source.label" 
-      :value="source.id" 
-      :disabled="source.disabled"
-    >
-    </v-radio>
-  </v-radio-group>
-  <v-color-picker 
-    v-if="colorSource === 'custom'" 
-    v-model="customColor"
-    hide-canvas 
-    hide-inputs 
-    show-swatches
-  >
-  </v-color-picker>
+  <v-card class="mx-auto w-full h-full justify-between flex flex-col bg-neutral-500"
+    variant="tonal"
+    density="compact"
+    :color="model || 'purple'">
+    <v-card-item class="font-weight-black">
+      <v-card-title class="font-weight-black">
+        Color Picker {{ current }} - {{ model }}
+      </v-card-title>
+    </v-card-item>
+    <v-card-text>
+      <v-btn-toggle v-model="current" divided class="flex-wrap h-auto">
+        <v-btn v-for="tag in layoutTags" :value="tag.color" :key="tag.id"
+          class="min-h-[10rem] min-w-[10rem] border"
+          variant="flat"
+          :color="tag.color">
+          <div class="flex flex-col justify-center items-center">
+            <v-icon :color="current === tag.color ? 'white' : tag.color" size="48">mdi-palette</v-icon>
+            <div class="mt-4 text-xs">{{ tag.name }}</div>
+          </div>      
+        </v-btn>
+        <v-btn v-for="themeColor in themeColors" :value="themeColor" :key="themeColor"
+          class="min-h-[10rem] min-w-[10rem] border"
+          variant="flat"
+          :color="themeColor">
+          <div class="flex flex-col justify-center items-center">
+            <v-icon :color="current === themeColor ? 'white' : themeColor" size="48">mdi-palette</v-icon>
+            <div class="mt-4 text-xs">{{ themeColor }}</div>
+          </div>
+        </v-btn>
+        <v-btn v-for="swatch in customSwatches" :value="swatch" :key="swatch"
+          class="min-h-[10rem] min-w-[10rem] border"
+          variant="flat"
+          :color="swatch">
+          <div class="flex flex-col justify-center items-center">
+            <v-icon :color="current === swatch ? 'white' : swatch" size="48">mdi-palette</v-icon>
+            <div class="mt-4 text-xs">{{ swatch }}</div>
+          </div>      
+        </v-btn>
+        <v-btn
+          value="custom"
+          @click="showCustomColor = true"
+          class="min-h-[10rem] min-w-[10rem] border bg-gradient-to-br from-green-500 via-violet-500 to-red-500">        
+          <div class="relative flex flex-col justify-center items-center">
+            <v-icon size="48">mdi-palette</v-icon>
+            <div class="mt-4 text-xs">Custom</div>
+          </div>        
+        </v-btn>
+      </v-btn-toggle>
+    </v-card-text>
+    <v-card-actions>
+      <v-btn
+        class="text-white"
+        prepend-icon="mdi-cancel"
+        variant="plain"
+        @click="$emit('cancel')">
+        Cacnel
+      </v-btn>
+      <v-btn
+        prepend-icon="mdi-check"
+        :color="model"
+        variant="flat"
+        @click="$emit('select')">
+        Save Color
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+  <v-dialog max-width="500" v-model="showCustomColor">
+    <v-card>
+      <v-card-title>Custom Color</v-card-title>
+      <v-card-text>
+        <v-color-picker 
+          v-model="customColor"
+          hide-canvas 
+          hide-inputs 
+          show-swatches
+        >
+        </v-color-picker>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn @click="showCustomColor = false" icon="mdi-cancel"></v-btn>
+        <v-btn color="success" variant="tonal" icon="mdi-check" @click="handleSelectCustomColor"></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>

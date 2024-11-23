@@ -2,29 +2,25 @@
 import { onMounted, ref } from 'vue'
 import { ITag } from '@/Common/Tags/types'
 import { useLayout } from '@/Layout/useLayout'
+import Tag from './Tag.vue'
 
 const model = defineModel()
-const props = defineProps<{
-  tags: string[]
-}>()
 
-const { getTagsByIds, getLayout } = useLayout()
-const layout = getLayout()
-const tags = ref<ITag[]>([])
-const selectedTags = ref<ITag[]>(Array.isArray(model.value) ? model.value : [])
+const { getTags } = useLayout()
+const layoutTags = ref<ITag[]>([])
 
 onMounted(async () => {
-  if (props.tags) {
-    const _tags = await getTagsByIds(props.tags) || []
-    tags.value = _tags
-  }
+  layoutTags.value = await getTags()
 })
 
 </script>
 <template>
-  <v-chip-group v-if="layout" v-model="selectedTags" multiple>
-    <v-chip v-for="tag in layout?.tags" :key="tag.id" :value="tag.id" color="yellow" class="mr-2">
-      {{ tag.name }}
-    </v-chip>
+  <v-chip-group v-model="model" multiple>
+    <Tag 
+      v-for="tag in layoutTags" 
+      :key="tag.id" 
+      :tag="tag" 
+      class="mr-2" 
+    />
   </v-chip-group>
 </template>

@@ -30,6 +30,12 @@ export const useLayout = () => {
       color: 'lime',
     },
     {
+      value: 'deja-arduino-led',
+      label: 'DEJA LED Arduino',
+      icon: 'mdi-led-strip',
+      color: 'teal',
+    },
+    {
       value: 'deja-mqtt',
       label: 'DEJA MQTT (Pico W)',
       icon: 'mdi-wifi',
@@ -148,6 +154,20 @@ export const useLayout = () => {
     }
   }
 
+  async function getTags() {
+    if (layoutDoc.value) {
+      const docSnap = await getDoc(layoutDoc.value)
+
+      if (docSnap.exists()) {
+        const layout = docSnap.data()
+        if (layout?.tags) {
+          return layout.tags
+        }
+      }
+    }
+    return []
+  }
+
   async function setTags(tags: ITag[]) {
     try {
       if (layoutDoc.value) {
@@ -199,6 +219,7 @@ export const useLayout = () => {
     autoConnectDevice,
     deviceTypes,
     connectDevice,
+    getTags,
     setTags,
     setTag,
     getTagsByIds,

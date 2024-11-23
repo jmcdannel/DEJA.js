@@ -8,6 +8,8 @@ import {
   FaVolumeUp,
   FaMicrophoneAlt,
 } from 'vue3-icons/fa'
+import { PiSparkleDuotone } from 'vue3-icons/pi'
+
 import { GiBusStop, GiStreetLight } from 'vue3-icons/gi'
 import {
   PiPower,
@@ -26,6 +28,7 @@ import { RiTrainWifiFill } from 'vue3-icons/ri'
 const DEFAULT_ICON = RiTrainWifiFill
 
 const icons = [
+  { name: 'ialed', icon: PiSparkleDuotone },
   { name: 'light', icon: PiHeadlightsFill },
   { name: 'led', icon: TbBrightnessDownFilled },
   { name: 'streetlight', icon: GiStreetLight },
