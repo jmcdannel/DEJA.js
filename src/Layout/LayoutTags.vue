@@ -13,6 +13,7 @@ function handleClose () {
   <v-card 
     class="mx-auto w-full h-full justify-between flex flex-col border-t-4 border-b-4"
     :prepend-icon="'mdi-usb'"
+    color="light-blue"
     title="Tags"
     variant="tonal"
     density="compact">

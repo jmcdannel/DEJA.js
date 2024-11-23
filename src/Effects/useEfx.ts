@@ -46,6 +46,13 @@ export const useEfx = () => {
 
   const efxTypes = [
     {
+      value: 'ialed',
+      label: 'IALED',
+      icon: getIconComponent('ialed'),
+      color: 'teal',
+      require: ['device', 'strip', 'pattern', 'range', 'config'],
+    },
+    {
       value: 'light',
       label: 'Light',
       icon: getIconComponent('headlight'),
@@ -160,6 +167,8 @@ export const useEfx = () => {
       } else if (device?.type === 'deja-arduino') {
         sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
       } else if (device?.type === 'deja-mqtt') {
+        sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
+      } else if (device.type === 'deja-arduino-led') {
         sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
       }
     } catch (e) {

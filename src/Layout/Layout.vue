@@ -35,7 +35,10 @@ const showAdd = ref(false)
   </div>
   <AddDeviceItem :show="showAdd" @close="showAdd = false" class="mt-4" />
   <hr class="my-8 border-sky-500" />
+  <LayoutTags />
+  <hr class="my-8 border-sky-500" />
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <PortList :ports="layout?.ports" />
     <v-card 
       class="mx-auto w-full h-full justify-between flex flex-col border-t-4 border-b-4"
       :prepend-icon="'mdi-usb'"
@@ -53,8 +56,6 @@ const showAdd = ref(false)
         </v-list>
       </v-card-text>
     </v-card>
-    <PortList :ports="layout?.ports" />
-    <LayoutTags />
   </div>
   <ViewJson :json="layout" label="RAW Layout Data"></ViewJson>
   <ViewJson :json="devices" label="RAW Device Data"></ViewJson>
