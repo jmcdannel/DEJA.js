@@ -3,9 +3,11 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useDejaJS } from '@/DejaJS/useDejaJS'
 import { useColors } from '@/Core/UI/useColors'
 import { useLayout } from '@/Layout/useLayout'
+import { useTurnouts } from '@/Turnouts/useTurnouts'
 
 const { sendDejaCommand } = useDejaJS()
 const { deviceTypes, connectDevice, autoConnectDevice } = useLayout()
+const { getTurnouts } = useTurnouts()
 const { colors, DEFAULT_COLOR } = useColors()
 
 const props = defineProps({
@@ -13,6 +15,7 @@ const props = defineProps({
   ports: Array,
 })
 
+const turnouts = ref(getTurnouts())
 const serial = ref(props?.device?.port || '')
 const autoConnect = ref(props?.device?.autoConnect || false)
 const color = ref(colors[DEFAULT_COLOR])
@@ -130,6 +133,12 @@ async function handelAutoConnect (checked: boolean) {
         :items="ports"
         :disabled="device?.isConnected"
       ></v-combobox>
+      <ul>
+        <li v-for="turnout in turnouts.filter(t => t.device === device?.id)" :key="turnout.id">
+          {{ turnout.name }}
+        </li>
+      </ul>
+
     </v-card-text>
     <v-card-actions>
       <v-btn
