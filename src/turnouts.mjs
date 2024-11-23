@@ -12,13 +12,7 @@ export async function handleTurnout(turnout) {
     const layoutDevice = layout
       .devices()
       ?.find(({ id }) => id === turnout.device)
-    log.log(
-      'handleTurnoutCommand',
-      turnout,
-      command,
-      conn?.isConnected,
-      layoutDevice
-    )
+    log.log('handleTurnout', turnout, command, conn?.isConnected, layoutDevice)
     if (layoutDevice?.connection === 'usb') {
       await conn.send(conn.port, JSON.stringify([command]))
     } else if (layoutDevice?.connection === 'wifi') {

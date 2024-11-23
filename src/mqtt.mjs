@@ -5,8 +5,8 @@ import dcc from './dcc.mjs'
 const layoutId = process.env.LAYOUT_ID
 const mqttBroker = process.env.VITE_MQTT_BROKER
 const mqttPort = process.env.VITE_MQTT_PORT
-const subscriptionTopics = [`DEJA/${layoutId}`]
-const publishTopics = [`DEJA/${layoutId}`]
+const subscriptionTopics = []
+const publishTopics = []
 
 let mqttClient = null
 
@@ -46,7 +46,7 @@ function handleError(error) {
 function handleMessage(topic, message) {
   try {
     log.log(`MQTT mqttClient received message: ${message} from topic: ${topic}`)
-    dcc.handleMessage(message.toString())
+    // dcc.handleMessage(message.toString())
   } catch (error) {
     log.error('MQTT Error in onMessage:', error)
   }
@@ -109,6 +109,7 @@ const subscribe = (topic, keepAlive = true) => {
 
 const publish = (topic, message, keepAlive = true) => {
   try {
+    log.log('mqtt pub', topic, message)
     mqttClient.publish(topic, message)
     if (keepAlive && !publishTopics.includes(topic)) {
       publishTopics.push(topic)
