@@ -12,15 +12,18 @@ function handleOpen(err) {
 }
 
 const connect = ({ path, baudRate, handleMessage }) => {
-
   try {
-
     if (!path) {
       return Promise.reject(path)
     } else {
       return new Promise(function (resolve, reject) {
-        if (!path) reject({ message: '[SERIAL] No serial port specified: ' + path })
-        log.await('[SERIAL] Attempting to connect to:', path, typeof handleMessage)
+        if (!path)
+          reject({ message: '[SERIAL] No serial port specified: ' + path })
+        log.await(
+          '[SERIAL] Attempting to connect to:',
+          path,
+          typeof handleMessage
+        )
         // Create a port
         const port = new SerialPort({ path, baudRate, autoOpen: false })
         port.setEncoding('utf8')
@@ -48,7 +51,7 @@ function handleSend(err) {
 
 const send = (_port, data) => {
   try {
-    log.await('[SERIAL] writing to port', JSON.stringify(data))
+    log.await('[SERIAL] writing to port', data)
     _port && _port.write(data, handleSend)
   } catch (err) {
     log.fatal('[SERIAL] Error writing to port:', err)

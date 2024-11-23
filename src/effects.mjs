@@ -11,6 +11,17 @@ const pinCommand = (effect) => ({
   },
 })
 
+const ialedCommand = (effect) => {
+  const pin = effect?.pin
+  const pattern = effect?.state ? effect?.pattern : 'off'
+  const range = effect?.range
+  const config = effect?.config
+
+  const command = `${pin}, ${pattern}, ${range}, ${config}\n`
+
+  return command
+}
+
 export function getEffectCommand(efx) {
   try {
     switch (efx?.type) {
@@ -22,8 +33,8 @@ export function getEffectCommand(efx) {
       case 'led':
       case 'power':
         return pinCommand(efx)
-      // case 'ialed':
-      //   return [ialedCommand(effect)]
+      case 'ialed':
+        return ialedCommand(efx)
       // case 'serial-ialed':
       //   return [ialedCommand(effect)]
       // case 'sound':
@@ -74,8 +85,16 @@ export async function handleEffect(payload) {
     conn?.isConnected,
     layoutDevice
   )
-  if (layoutDevice?.connection === 'usb') {
+  if (
+    layoutDevice?.connection === 'usb' &&
+    layoutDevice?.type === 'deja-arduino'
+  ) {
     await conn.send(conn.port, JSON.stringify([command]))
+  } else if (
+    layoutDevice?.connection === 'usb' &&
+    layoutDevice?.type === 'deja-arduino-led'
+  ) {
+    await conn.send(conn.port, command)
   } else if (layoutDevice?.connection === 'wifi') {
     await conn.send(conn.topic, JSON.stringify(command))
   }
