@@ -11,6 +11,10 @@ export interface Loco {
   consist: ConsistLoco[]
   functions: LocoFunction[]
   id?: string
+  meta?: {
+    color?: string
+    roadname?: string
+  }
 }
 export interface Throttle {
   id?: number

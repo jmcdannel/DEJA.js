@@ -33,6 +33,15 @@
           <ConnectionChip />
         </aside>
     </header>
+
+    <div>
+      <v-btn
+        class="w-16 !h-16"
+        color="primary"
+        rounded="circle">
+      12
+      </v-btn>
+    </div>
       <!-- <h2 class="mt-4 text-transparent text-4xl bg-clip-text bg-gradient-to-r from-purple-300 to-pink-600">
         Select
         Your<br>

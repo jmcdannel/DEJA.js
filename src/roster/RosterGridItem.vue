@@ -8,6 +8,11 @@ defineProps({
   <button 
     class="m-2"
     @click="$emit('selected', loco.locoId)" 
-    role="link"><v-avatar color="primary" :size="96" class="mr-2">{{  loco.locoId }}</v-avatar>
+    role="link">
+      <v-avatar       
+        :color="loco?.meta?.color || 'primary'"
+        :size="96" 
+        class="mr-2">{{  loco.locoId }}
+      </v-avatar>
   </button>
 </template>

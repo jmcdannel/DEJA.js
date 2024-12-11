@@ -6,7 +6,6 @@
 
   import ThrottleComponent from '@/throttle/Throttle.component.vue'
   import ThrottleTile from '@/throttle/ThrottleTile.vue'
-  import ThrottleAvatar from '@/throttle/ThrottleAvatar.vue'
 
   import { useLocos } from '@/api/useLocos'
   import { useDejaCloud } from '@/deja-cloud/useDejaCloud'

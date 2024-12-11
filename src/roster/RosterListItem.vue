@@ -12,18 +12,15 @@ defineProps({
       btn-outline 
       flex
       justify-between
-      bg-indigo-950 
       bg-opacity-30 
       border-primary 
       text-primary 
       w-full 
       my-1
-      hover:bg-indigo-950 
-      hover:border-cyan-900
       hover:bg-opacity-60 
-      hover:text-primary 
     "
     @click="$emit('selected', loco.locoId)" 
+    :color="loco?.meta?.color || 'primary'"
     role="link">        
     <span><v-avatar color="primary" :size="24" class="mr-2">{{  loco.locoId }}</v-avatar>
       {{ loco?.name || loco?.locoId }}

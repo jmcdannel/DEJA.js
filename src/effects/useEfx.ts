@@ -13,7 +13,7 @@ import { useLayout } from '@/api/useLayout'
 // import { useTurnouts } from '@/api/useTurnouts'
 import { useDcc } from '@/api/dccApi'
 import { useDejaJs } from '@/api/useDejaJs'
-import { useEfxIcon } from '@/api/useEfxIcon'
+import { useEfxIcon } from '@/effects/useEfxIcon'
 
 export const useEfx = () => {
   const layoutId = useStorage('@DEJA/layoutId')
@@ -46,6 +46,13 @@ export const useEfx = () => {
   }
 
   const efxTypes = [
+    {
+      value: 'ialed',
+      label: 'IALED',
+      icon: getIconComponent('ialed'),
+      color: 'teal',
+      require: ['device', 'strip', 'pattern', 'range', 'config'],
+    },
     {
       value: 'light',
       label: 'Light',

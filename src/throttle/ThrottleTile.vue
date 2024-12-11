@@ -1,13 +1,10 @@
 <script setup lang="ts">
   import { ref, watch, type PropType } from 'vue'
-  import { debounce } from 'vue-debounce'
+  import ThrottleAvatar from '@/throttle/ThrottleAvatar.vue'
   import ThrottleButtonControls from './ThrottleButtonControls.component.vue'
   import CurrentSpeed from './CurrentSpeed.component.vue'
-  import type { Loco, LocoFunction, ConsistLoco, Throttle } from './types';
+  import type { Loco, Throttle } from './types';
   import { useThrottle } from './useThrottle'
-
-  const DEBOUNCE_DELAY = 100 // debounce speed changes by 100ms to prevent too many requests
-  const SWITCH_DIR_DELAY = 1000 // delay in ms to switch direction - occurs when slider goes from positive to negative value - which an occur quickly
 
   const props = defineProps({
     throttle: {
@@ -23,11 +20,11 @@
   const emit = defineEmits(['release'])
 
   const { updateSpeed } = useThrottle()
+  function getSignedSpeed({speed, direction}) {
+    return speed && !!direction ? speed : -speed || 0
+  }
 
-  const functionsCmp = ref(null)
-  const currentSpeed = ref(props.throttle?.speed || 0)
-
-  const setSpeed = debounce((val: number): void => { currentSpeed.value = val; }, `${DEBOUNCE_DELAY}ms`)
+  const currentSpeed = ref(getSignedSpeed(props.throttle))
 
   watch(currentSpeed, sendLocoSpeed)
 
@@ -39,39 +36,20 @@
     currentSpeed.value = currentSpeed.value + val
   }
 
-  async function clearLoco() {
-    console.log('clearLoco', props.throttle)
-    await handleStop()
-    emit('release', props.throttle?.address)
-  }
 
   async function sendLocoSpeed(newSpeed:number, oldSpeed:number) {
     console.log('sendLocoSpeed', { newSpeed, oldSpeed }, props.throttle?.address, props.throttle)
     updateSpeed(props.throttle?.address, props?.loco?.consist, newSpeed, oldSpeed)
   }
 
-  function openFunctions() {
-    functionsCmp.value && functionsCmp.value.openAll()
-  }
-
-  function openFunctionSettings() {
-    functionsCmp.value && functionsCmp.value.openSettings()
-  }
   
 </script>
 <template>
-  <main class="rounded-2xl shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border " v-if="throttle">
-    <!-- <pre>locoDocId:{{locoDocId}}</pre>-->
-    <!-- <pre>loco:{{loco.functions}}</pre>  -->
-    
+  <main class="my-2 rounded-2xl shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border " v-if="throttle">
     <section class="p-4 flex flex-row flex-wrap items-center justify-between overflow-auto">
-        <CurrentSpeed :speed="currentSpeed" class="order-0" />
-        <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="adjustSpeed" @stop="handleStop" horizontal class="order-2 sm:order-1 w-full sm:w-auto"  />
-        <div class="avatar placeholder order-1 sm:order-2">
-          <div class="bg-sky-500 text-neutral-content rounded-full w-12 md:w-24">
-            <span class="text-xl md:text-4xl bold">{{ throttle.address || '?' }}</span>
-          </div>
-        </div>
+        <CurrentSpeed :speed="currentSpeed" />
+        <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="adjustSpeed" @stop="handleStop" horizontal class=""  />
+        <ThrottleAvatar :throttle="throttle" :loco="loco" />
       </section>
   </main>  
 </template>

@@ -5,6 +5,15 @@ import ThrottleMenu from '@/throttle/ThrottleMenu.vue'
 const { getThrottles } = useLocos()
 const throttles = getThrottles()
 
+function getSignedSpeed({speed, direction}) {
+    return speed && !!direction ? speed : -speed || 0
+  }
+function getColor(speed: number) {
+  if (speed === 0) return 'black'
+  if (speed < 0) return 'red'
+  return 'green'
+}
+
 </script>
 
 <template>
@@ -19,7 +28,7 @@ const throttles = getThrottles()
           @click="$router.push({ name: 'cloud-throttle', params: { address: throttle.id } })"
           >
           <v-badge
-            :color="throttle.speed > 0 ? 'success' : 'error'"
+            :color="getColor(getSignedSpeed(throttle))"
             :content="throttle.speed.toString()"
           >
             <v-avatar size="default" color="primary">{{ throttle?.id }}</v-avatar>

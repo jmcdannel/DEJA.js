@@ -40,7 +40,6 @@
   const breakpoints = useBreakpoints(breakpointsTailwind)
   const { updateSpeed } = useThrottle()
   function getSignedSpeed({speed, direction}) {
-    console.log('getSignedSpeed', speed, direction)
     return speed && !!direction ? speed : -speed || 0
   }
 

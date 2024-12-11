@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref }  from 'vue'
-import { useEfx } from '@/api/useEfx'
+import { useEfx } from '@/effects/useEfx'
 import EffectItem from '@/effects/Effect.vue'
 import EffectFilters from '@/effects/EffectFilters.vue'
 
