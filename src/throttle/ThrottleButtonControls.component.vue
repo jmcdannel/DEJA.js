@@ -1,15 +1,6 @@
 <script setup lang="ts">
   import { defineEmits } from 'vue'
-  import chevronUpIconSvg from '@/assets/icons/chevron-up.svg'
-  import chevronDownIconSvg from '@/assets/icons/chevron-down.svg'
-  import chevronDoubleUpIconSvg from '@/assets/icons/chevron-double-up.svg'
-  import chevronDoubleDownIconSvg from '@/assets/icons/chevron-double-down.svg'
-  import plusIconSvg from '@/assets/icons/plus.svg'
-  import minusIconSvg from '@/assets/icons/minus.svg'
-  import plusThickIconSvg from '@/assets/icons/plus-thick.svg'
-  import minusThickIconSvg from '@/assets/icons/minus-thick.svg'
-  import stopIconSvg from '@/assets/icons/stop.svg'
-
+  
   const props  = defineProps({
     speed: {
       type: Number,
