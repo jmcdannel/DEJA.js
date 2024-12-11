@@ -5,6 +5,7 @@ export interface IEfx {
   on?: any[]
   off?: any[]
   type?: string
+  state?: boolean
   color?: string
   pattern?: string
   range?: string

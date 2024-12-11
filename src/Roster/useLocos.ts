@@ -90,28 +90,17 @@ export function useLocos() {
     await deleteLoco(doc(db, `layouts/${layoutId.value}/locos`, id))
   }
 
-  async function updateLoco(
-    id: string,
-    locoId: number,
-    name: string | undefined,
-    roadname: string | undefined
-  ) {
-    console.log('updateLoco', locoId)
+  async function updateLoco(id: string, loco) {
+    console.log('updateLoco', loco)
     try {
-      const loco = {
-        name,
-        locoId,
-        meta: {},
-        timestamp: serverTimestamp(),
-      }
-      if (roadname) {
-        loco.meta = { roadname }
-      }
-
       const locoDoc = doc(db, `layouts/${layoutId.value}/locos`, id)
-      await setDoc(locoDoc, { ...loco }, { merge: true })
+      await setDoc(
+        locoDoc,
+        { ...loco, timestamp: serverTimestamp() },
+        { merge: true }
+      )
       console.log('loco written with ID: ', id)
-      return locoId
+      return loco.locoId
     } catch (e) {
       console.error('Error adding throttle: ', e)
     }

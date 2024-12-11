@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import {
-  BsFillTrainFreightFrontFill,
-} from 'vue3-icons/bs'
-import { useDocument } from 'vuefire'
 import { useLocos } from '@/Roster/useLocos'
 import { useColors } from '@/Core/UI/useColors'
 import ViewJson from '@/Core/UI/ViewJson.vue';
 import EditConsist from '@/Roster/Consist/EditConsist.vue'
 import Functions from '@/Roster/Functions/Functions.vue'
+import ColorPicker from '@/Common/Color/ColorPicker.vue'
 
 const locoTypes = [
   'Steam',
@@ -22,18 +19,20 @@ const props = defineProps({
 })
 const emit = defineEmits(['close'])
 const { roadnames, getLoco, updateLoco, getRoadname } = useLocos()
-console.log('typeof lco', props.loco, typeof props.loco)
+
 const locoDoc = getLoco(props.loco?.id ? props.loco.id : null)
 
+const editColor = ref(false)
 const address = ref(props.loco?.locoId || null)
 const name = ref(props.loco?.name || '')
 const roadname = ref(getRoadname(props.loco?.meta?.roadname) || null)
 const roadnameVal = ref(roadname.value?.value)
+const color = ref(props.loco?.meta?.color || roadname?.value?.color || 'pink')  
 const loading = ref(false)
 const rules = {
   required: [(val) => !!val || 'Required.']
 }
-const color = getColor(roadname?.value?.color)
+// const color = getColor(roadname?.value?.color)
 
 async function submit (e) {
   loading.value = true
@@ -41,10 +40,17 @@ async function submit (e) {
   const results = await e
   console.log(results)
 
-  const newAddress = parseInt(address.value as unknown as string) 
-  console.log('handleSave', newAddress, props.loco?.id)
-  if (!!newAddress && props.loco?.id) {
-    await updateLoco(props.loco.id, newAddress, name.value, roadnameVal.value || undefined)
+  if (!!address && props.loco?.id) {
+    const loco = {
+      locoId: address.value,
+      name: name.value,
+      meta: {
+        color: color.value,
+        roadname: roadnameVal.value || undefined
+      }
+    }
+
+    await updateLoco(props.loco.id, loco)
   }
 
   loading.value = false
@@ -64,7 +70,7 @@ async function submit (e) {
         variant="outlined"
         prepend-icon="mdi-train"
         hint="2/4-digit DCC address"
-        color="pink"
+        :color="color"
         class="mr-4"
         :rules="rules.required"
         clearable
@@ -77,7 +83,7 @@ async function submit (e) {
         v-model="name"
         label="Name"
         variant="outlined"
-        color="pink"
+        :color="color"
         class="col-span-2"
         clearable
       >
@@ -93,10 +99,27 @@ async function submit (e) {
         <v-chip
           v-for="road in roadnames" :key="road.value" :value="road.value" :text="road.label"
           variant="outlined"
-          :class="`${getColor(road.color)?.border}`"
           filter
         ></v-chip>
     </v-chip-group>
+
+    <!-- color -->
+    <section class="h-auto  my-4">
+      <v-btn
+        class="min-h-48 min-w-48 border flex"
+        :color="color"
+        @click="editColor = true" >
+        <!-- <v-icon :icon="efxOpt.icon" :color="efxOpt.color"></v-icon> -->
+        <div class="relative flex flex-col justify-center items-center">
+          <v-icon size="64">mdi-palette</v-icon>
+          <div class="mt-4">Color [{{ color }}]</div>
+        </div>        
+      </v-btn>
+    </section>
+    <v-dialog max-width="80vw" v-model="editColor">
+      <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.loco?.meta?.color ?? 'pink'"></ColorPicker>
+    </v-dialog>
+
     <div class=" my-4">   
       <v-btn
         class="mt-2"
@@ -110,7 +133,7 @@ async function submit (e) {
         class="mt-2"
         text="Submit"
         type="submit"
-        color="pink"
+        :color="color"
       ></v-btn>  
     </div>
   </v-form>  
