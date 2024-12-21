@@ -5,6 +5,8 @@
     FaChevronCircleRight,
   } from "vue3-icons/fa";
 
+  defineEmits(['toggleDir'])
+
   const props = defineProps({
     cloco: {
       type: Object,

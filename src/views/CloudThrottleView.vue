@@ -84,9 +84,15 @@
 
 <template>
   <!-- <ThrottleMenu /> -->
-  <template v-if="locos?.length  && throttles?.length">
+  <template v-if="locos?.length  && throttles?.length && currentThrottle">
     <template v-if="viewAs === 'Array' || viewAs === 'Split'">
-        <div 
+      <ThrottleComponent
+          :throttle="currentThrottle" 
+          :loco="getLoco(currentThrottle.address)"
+          :viewAs="viewAs"
+          @release="handleRelease"
+        />
+        <!-- <div 
           class="flex-grow carousel w-full"          
           ref="carouselElement">
           <div 
@@ -102,7 +108,7 @@
               @release="handleRelease"
             />
           </div>
-        </div>
+        </div> -->
     </template>
     <template v-else-if="viewAs === 'List'">      
       <div class="flex-grow flex flex-col relative overflow-auto">

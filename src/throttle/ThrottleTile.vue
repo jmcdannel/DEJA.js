@@ -19,7 +19,7 @@
 
   const emit = defineEmits(['release'])
 
-  const { updateSpeed } = useThrottle()
+  const { updateSpeed, releaseThrottle } = useThrottle()
   function getSignedSpeed({speed, direction}) {
     return speed && !!direction ? speed : -speed || 0
   }
@@ -42,14 +42,18 @@
     updateSpeed(props.throttle?.address, props?.loco?.consist, newSpeed, oldSpeed)
   }
 
+  function handleRelease() {
+    props.throttle?.id && releaseThrottle(props.throttle.id)
+  }
+
   
 </script>
 <template>
   <main class="my-2 rounded-2xl shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border " v-if="throttle">
-    <section class="p-4 flex flex-row flex-wrap items-center justify-between overflow-auto">
+    <section class="p-1 flex flex-row flex-wrap items-center justify-between overflow-auto">
         <CurrentSpeed :speed="currentSpeed" />
         <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="adjustSpeed" @stop="handleStop" horizontal class=""  />
-        <ThrottleAvatar :throttle="throttle" :loco="loco" />
+        <ThrottleAvatar :throttle="throttle" :loco="loco" @release="handleRelease" />
       </section>
   </main>  
 </template>

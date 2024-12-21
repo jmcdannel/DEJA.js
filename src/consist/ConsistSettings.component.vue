@@ -29,6 +29,8 @@ defineExpose({
   showModal: () => modalRef?.value?.showModal()
 })
 
+defineEmits(['toggleDir', 'adjustTrim', 'removeLoco'])
+
 function openAddLoco() {
   addLocoRef?.value?.showModal()
 }

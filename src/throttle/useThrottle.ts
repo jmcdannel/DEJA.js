@@ -1,5 +1,5 @@
 import { storeToRefs } from 'pinia'
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
+import { deleteDoc, doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { useDcc } from '@/api/dccApi'
 import { db } from '@/firebase'
 import { useConnectionStore } from '@/connections/connectionStore'
@@ -12,11 +12,11 @@ export const useThrottle = () => {
   const connStore = useConnectionStore()
   const { layoutId } = storeToRefs(connStore)
 
-  async function acquireThrottle(address) {
+  async function acquireThrottle(address: string | number) {
     console.log('useThrottle aquireThrottle', address)
     try {
       const data = {
-        address: parseInt(address),
+        address: parseInt(address.toString()),
         speed: 0,
         direction: false,
         timestamp: serverTimestamp(),
@@ -29,6 +29,17 @@ export const useThrottle = () => {
       return newThrottleDoc
     } catch (e) {
       console.error('Error adding throttle: ', e)
+    }
+  }
+
+  async function releaseThrottle(throttleId: number) {
+    try {
+      console.log('dejaCloud releaseThrottle', throttleId)
+      await deleteDoc(
+        doc(db, `layouts/${layoutId.value}/throttles`, throttleId.toString())
+      )
+    } catch (e) {
+      console.error('Error releasing throttle: ', e)
     }
   }
 
@@ -122,8 +133,9 @@ export const useThrottle = () => {
   }
 
   return {
-    updateSpeed,
     acquireThrottle,
+    releaseThrottle,
+    updateSpeed,
   }
 }
 
