@@ -2,7 +2,6 @@
 import { useDcc } from '@/DCCEX/useDcc'
 
 const { sendDccCommand } = useDcc()
-//send({ action: 'listPorts', payload: {} })
 
 defineProps({
   ports: Array
