@@ -46,6 +46,10 @@
     props.throttle?.id && releaseThrottle(props.throttle.id)
   }
 
+  function handleSelect() {
+    emit('select', props.throttle?.address)
+  }
+
   
 </script>
 <template>
@@ -53,7 +57,7 @@
     <section class="p-1 flex flex-row flex-wrap items-center justify-between overflow-auto">
         <CurrentSpeed :speed="currentSpeed" />
         <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="adjustSpeed" @stop="handleStop" horizontal class=""  />
-        <ThrottleAvatar :throttle="throttle" :loco="loco" @release="handleRelease" />
+        <ThrottleAvatar :throttle="throttle" :loco="loco" @release="handleRelease" @select="handleSelect" />
       </section>
   </main>  
 </template>

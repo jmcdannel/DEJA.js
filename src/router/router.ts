@@ -42,6 +42,11 @@ const router = createRouter({
       component: () => import('../views/CloudThrottleView.vue'),
     },
     {
+      path: '/throttle-list',
+      name: 'throttle-list',
+      component: () => import('../views/ThrottleList.vue'),
+    },
+    {
       path: '/connect/dejajs',
       name: 'dejajs',
       component: () => import('../connections/deja/DejaJs.vue'),

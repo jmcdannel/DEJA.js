@@ -44,6 +44,10 @@
     functionsCmp.value && functionsCmp.value.showModal()
   }
 
+  function openThrottle() {
+    emit('select', props.throttle?.address)
+  }
+
   // function openFunctionSettings() {
   //   functionsCmp.value && functionsCmp.value.openSettings()
   // }
@@ -71,24 +75,11 @@
             {{throttle.address.toString()}}
           </v-badge>
         </v-btn>
-        <!-- <v-badge
-          :color="loco?.meta?.color || 'primary'"
-          :content="loco?.consist?.length || 0"
-          >
-
-          <v-btn
-            v-bind="activatorProps"
-            rounded="circle"
-            class="!h-16 w-16 md:!h-20 md:w-20 "
-            :color="loco?.meta?.color || 'primary'"
-            :text="throttle.address.toString()"
-          ></v-btn>
-        </v-badge> -->
       </template>
 
       <v-btn key="1" :color="loco?.meta?.color || 'primary'" icon="mdi-parking" @click="clearLoco"></v-btn>
       <v-btn key="2" :color="loco?.meta?.color || 'primary'" icon="mdi-train" @click="openFunctions"></v-btn>
-      <v-btn key="3" :color="loco?.meta?.color || 'primary'" icon="mdi-fullscreen"></v-btn>
+      <v-btn key="3" :color="loco?.meta?.color || 'primary'" icon="mdi-fullscreen" @click="openThrottle"></v-btn>
       <v-btn key="4" :color="loco?.meta?.color || 'primary'" icon="$error"></v-btn>
     </v-speed-dial>
     <!-- <v-overlay

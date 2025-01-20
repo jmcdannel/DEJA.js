@@ -1,14 +1,10 @@
 <script lang="ts" setup>
 import { useLocos } from '@/api/useLocos'
-import { useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 const $router = useRouter()
 
-import ThrottleMenu from '@/throttle/ThrottleMenu.vue'
-
 const { getThrottles } = useLocos()
 const throttles = getThrottles()
-const viewAs = useStorage('@DEJA/prefs/throttleView', 'Array')
 
 function getSignedSpeed({speed, direction}) {
     return speed && !!direction ? speed : -speed || 0
@@ -20,8 +16,11 @@ function getColor(speed: number) {
 }
 
 function handleThrottleClick(throttle) {
-  viewAs.value = 'Array'
   $router.push({ name: 'cloud-throttle', params: { address: throttle.id } })
+}
+
+function handleListCkick() {
+  $router.push({ name: 'throttle-list' })
 }
 
 </script>
@@ -45,10 +44,7 @@ function handleThrottleClick(throttle) {
           </v-badge>
         </button>
       </nav>
-
-      <!-- <v-spacer></v-spacer> -->
-        <ThrottleMenu />
-        <v-btn key="3" @click="viewAs = 'List'" icon="mdi-view-sequential-outline"></v-btn>
+        <v-btn key="3" @click="handleListCkick" icon="mdi-view-sequential-outline"></v-btn>
     </div>
   </template>
 </template>

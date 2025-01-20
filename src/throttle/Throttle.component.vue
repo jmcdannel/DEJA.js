@@ -102,7 +102,7 @@
   
 </script>
 <template>
-  <main v-if="throttle" class="card w-full shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
+  <main v-if="throttle" class="card flex-1 w-full shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
     <!-- <pre>locoDocId:{{locoDocId}}</pre>-->
     <!-- <pre>loco:{{loco.functions}}</pre>  -->
     <!-- <pre>throttleSpeed {{ throttleSpeed }}</pre>
