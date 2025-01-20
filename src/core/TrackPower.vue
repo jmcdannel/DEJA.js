@@ -48,7 +48,7 @@
       'text-success': power === true,
       'text-error': power === false,  
     }">
-    <v-icon icon="mdi-power" size="x-large"></v-icon>
+    <v-icon icon="mdi-fence-electric" size="x-large"></v-icon>
       <span 
         class="w-1 h-1 rounded-full absolute -top-1"
         :class="{

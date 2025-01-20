@@ -1,6 +1,8 @@
 <script setup lang="ts">
   import Title from '@/core/Title.component.vue';
-  import Power from '@/core/Power.component.vue';
+  import Power from '@/core/Power.vue';
+  import TrackPower from '@/core/TrackPower.vue';
+  import EvergencyStop from '@/core/EmergencyStop.vue';
   import StatusMenu from '@/core/StatusMenu/StatusMenu.component.vue';
 
 </script>
@@ -13,7 +15,9 @@
       </div>
       <div class="navbar-end">
         <StatusMenu /> 
+        <TrackPower />
         <Power />
+        <EvergencyStop />
       </div>
     </div>
   </header>

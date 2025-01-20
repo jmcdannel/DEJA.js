@@ -45,6 +45,11 @@ export const useEfx = () => {
     }
   }
 
+  async function getEffectsByType(efxType: string) {
+    const efxs = await getEffects()
+    return efxs.value.filter((efx) => efx.type === efxType)
+  }
+
   const efxTypes = [
     {
       value: 'ialed',
@@ -266,6 +271,7 @@ export const useEfx = () => {
     runEffect,
     getEffects,
     getEffect,
+    getEffectsByType,
   }
 }
 
