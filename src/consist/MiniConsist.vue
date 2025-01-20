@@ -116,7 +116,7 @@
           cursor-pointer
           space-between"
           @click="openSettings">
-      <template v-for="(cloco, index) in loco?.consist" :key="cloco">
+      <template v-if="loco?.consist?.length" v-for="(cloco, index) in loco?.consist" :key="cloco">
         <li 
           :class="`${leftOffsetClasses[index * 2] || '-left-22'} ${opacityClasses[80-(index+1) * 10] || 'opacity-20'}`"
           class="my-1 relative">
@@ -126,6 +126,15 @@
           <div class="ml-1 avatar placeholder">
             <div class=" rounded-full w-8 bg-sky-500 text-white">
               <span class="text-sm">{{ cloco?.address }}</span>
+            </div> 
+          </div>
+        </li>
+      </template>
+      <template v-else>
+        <li class="my-1 relative">
+          <div class="ml-1 avatar placeholder">
+            <div class=" rounded-full w-8 bg-sky-500 text-white">
+              <span class="text-sm">+</span>
             </div> 
           </div>
         </li>
