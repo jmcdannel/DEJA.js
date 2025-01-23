@@ -12,7 +12,6 @@ const props = defineProps({
       current-speed 
       min-w-16
       lg:min-w-24
-      shadow-lg 
       shadow-blue-500/50 
       text-center 
       text-xl
@@ -27,7 +26,6 @@ const props = defineProps({
       to-pink-600">{{ speed }}</span>
   </div>
 </template>
-
 <style scoped>
   .current-speed {
     box-shadow: inset 0 0 12px 12px rgba(0,0,0,.5);

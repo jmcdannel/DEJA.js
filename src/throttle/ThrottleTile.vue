@@ -2,7 +2,7 @@
   import { ref, watch, type PropType } from 'vue'
   import ThrottleAvatar from '@/throttle/ThrottleAvatar.vue'
   import ThrottleButtonControls from './ThrottleButtonControls.component.vue'
-  import CurrentSpeed from './CurrentSpeed.component.vue'
+  import CurrentSpeed from './CurrentSpeed.vue'
   import type { Loco, Throttle } from './types';
   import { useThrottle } from './useThrottle'
 

@@ -1,8 +1,8 @@
 <script async setup lang="ts">
   import { computed, watch, ref } from 'vue'
   import { useRoute } from 'vue-router'
-  import { useStorage } from '@vueuse/core'
   import router from '../router'
+  import type { Loco, Throttle } from '@/throttle/types'
 
   import ThrottleComponent from '@/throttle/Throttle.component.vue'
 
@@ -13,19 +13,17 @@
   const { releaseThrottle } = useDejaCloud()
   const { getThrottles, getLocos } = useLocos()
 
-  const viewAs = useStorage('@DEJA/prefs/throttleView', 'Array')
-
   const address = ref(parseInt(route.params.address?.toString()))
   const throttles = getThrottles()
   const locos = getLocos()
-  const currentThrottle = computed(() => throttles?.value.find((throttle) => throttle.address === address.value))
+
+  const currentThrottle = computed<Throttle|null>(() => (throttles?.value.find((throttle) => throttle.address === address.value) as Throttle) || null)
   
   watch(
     () => route.params.address,
     (newId, oldId) => {
-      console.log('watch oute.params.address', newId, oldId)
+      console.log('watch oute.params.address', newId, oldId, currentThrottle.value)
       address.value = parseInt(newId?.toString())
-      currentThrottle.value = throttles?.value.find((throttle) => throttle.address === address.value)
     }
   )
 
@@ -41,15 +39,18 @@
     return locos?.value.find((loco) => loco.locoId === locoAddress)
   }
 
+  const loco = computed<Loco|null>(() => currentThrottle?.value && (getLoco(currentThrottle.value?.address) as Loco) || null)
+
+console.log('currentThrottle', currentThrottle.value)
 </script>
 
 <template>
   <!-- <ThrottleMenu /> -->
-  <template v-if="locos?.length  && throttles?.length && currentThrottle">
+  <template v-if="currentThrottle && loco">
+    <!-- <pre>{{ currentThrottle }}</pre> -->
     <ThrottleComponent
-      :throttle="currentThrottle" 
-      :loco="getLoco(currentThrottle.address)"
-      :viewAs="viewAs"
+      :throttle="currentThrottle"
+      :loco="loco"
       @release="handleRelease"
     />
   </template>

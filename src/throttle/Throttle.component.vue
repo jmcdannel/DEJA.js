@@ -1,7 +1,6 @@
 <script setup lang="ts">
   import { ref, watch, type PropType } from 'vue'
   import { debounce } from 'vue-debounce'
-  import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
   import { MdLocalParking } from "vue3-icons/md"
   import { RiTrainWifiFill } from 'vue3-icons/ri'  
   import { 
@@ -9,7 +8,7 @@
   } from 'vue3-icons/io'
   import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.component.vue'
   import ThrottleSliderControls from '@/throttle/ThrottleSliderControls.component.vue'
-  import CurrentSpeed from '@/throttle/CurrentSpeed.component.vue'
+  import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
   import ThrottleHeader from '@/throttle/ThrottleHeader.component.vue'
   import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
   import Consist from '@/consist/Consist.component.vue'
@@ -37,9 +36,9 @@
 
   const emit = defineEmits(['release'])
 
-  const breakpoints = useBreakpoints(breakpointsTailwind)
   const { updateSpeed } = useThrottle()
-  function getSignedSpeed({speed, direction}) {
+  function getSignedSpeed({speed, direction}: { speed: number, direction: boolean }): number {
+    console.log('getSignedSpeed', speed, direction)
     return speed && !!direction ? speed : -speed || 0
   }
 
@@ -58,9 +57,14 @@
     sendLocoSpeed(newCurrentSpeed, oldCurrentSpeed)
   })
   // watch(throttleSpeed, sendLocoSpeed)
-  // watch(() => props.throttle?.speed, (newSpeed, oldSpeed) => {
-  //   currentSpeed.value = newSpeed
-  // })
+  watch(() => props.throttle, (newThrottle, oldThrottle) => {
+    console.log('watch = props.throttle?.speed', props.throttle, throttleSpeed.value, { newThrottle, oldThrottle })
+    const newCurrentSpeed = getSignedSpeed(newThrottle)
+    currentSpeed.value = newCurrentSpeed
+    // throttleSpeed.value = newCurrentSpeed
+    // throttleDir.value = newCurrentSpeed > -1
+    // currentSpeed.value = newCurrentSpeed
+  })
 
   console.log('Throttle.component', { props, currentSpeed })
 
@@ -96,13 +100,9 @@
     functionsCmp.value && functionsCmp.value.openSettings()
   }
 
-  const showSlider = (props.viewAs === 'Split' && breakpoints.greaterOrEqual('md')) || (breakpoints.greaterOrEqual('sm'))
-  const showFunctions = (props.viewAs === 'Split' && breakpoints.greaterOrEqual('sm')) || props.viewAs !== 'Split'
-
-  
 </script>
 <template>
-  <main v-if="throttle" class="card flex-1 w-full shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
+  <main v-if="throttle" class="card overflow-hidden flex-1 w-full shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
     <!-- <pre>locoDocId:{{locoDocId}}</pre>-->
     <!-- <pre>loco:{{loco.functions}}</pre>  -->
     <!-- <pre>throttleSpeed {{ throttleSpeed }}</pre>
@@ -125,13 +125,13 @@
       </template>
     </ThrottleHeader>
     <section class="throttle w-full h-full flex flex-row justify-around flex-grow pt-72 -mt-72">
-      <section v-if="showSlider" class="px-1 text-center flex-1">
-        <ThrottleSliderControls :speed="currentSpeed" @update:currentSpeed="setSliderSpeed" @stop="handleStop" />  
+      <section class="px-1 text-center flex-1 hidden sm:block">
+        <ThrottleSliderControls :speed="currentSpeed" @update:currentSpeed="setSliderSpeed" @stop="handleStop" />
       </section>
-      <section v-if="loco && showFunctions" class="w-full flex flex-col flex-grow h-full overflow-hidden items-center justify-between flex-1/2 sm:flex-1">
+      <section v-if="loco" class="w-full flex flex-col flex-grow h-full overflow-y-auto items-center justify-between flex-1/2 sm:flex-1">
         <Functions :loco="loco" ref="functionsCmp" />
       </section>
-      <section class="flex flex-col items-center justify-between flex-1/2 sm:flex-1">
+      <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
         <CurrentSpeed :speed="currentSpeed" />
         <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="adjustSpeed" @stop="handleStop" />
       </section>
