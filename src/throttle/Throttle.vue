@@ -1,23 +1,25 @@
 <script setup lang="ts">
   import { ref, watch, type PropType } from 'vue'
   import { debounce } from 'vue-debounce'
-  import { MdLocalParking } from "vue3-icons/md"
-  import { RiTrainWifiFill } from 'vue3-icons/ri'  
-  import { 
-    IoIosCog,
-  } from 'vue3-icons/io'
   import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.component.vue'
   import ThrottleSliderControls from '@/throttle/ThrottleSliderControls.component.vue'
   import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
   import ThrottleHeader from '@/throttle/ThrottleHeader.component.vue'
   import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
+  import LocoAvatar from '@/core/LocoAvatar/LocoAvatar.vue'
   import Consist from '@/consist/Consist.component.vue'
   import MiniConsist from '@/consist/MiniConsist.vue'
   import Functions from '@/functions/Functions.component.vue'
   import type { Loco, Throttle } from './types';
-  import { useThrottle } from './useThrottle'
+  import { useThrottle } from '@/throttle/useThrottle'
+  import { useDejaCloud } from '@/deja-cloud/useDejaCloud'
 
   const DEBOUNCE_DELAY = 100 // debounce speed changes by 100ms to prevent too many requests
+
+  function getSignedSpeed({speed, direction}: { speed: number, direction: boolean }): number {
+    console.log('getSignedSpeed', speed, direction)
+    return speed && !!direction ? speed : -speed || 0
+  }
 
   const props = defineProps({
     throttle: {
@@ -37,11 +39,11 @@
   const emit = defineEmits(['release'])
 
   const { updateSpeed } = useThrottle()
-  function getSignedSpeed({speed, direction}: { speed: number, direction: boolean }): number {
-    console.log('getSignedSpeed', speed, direction)
-    return speed && !!direction ? speed : -speed || 0
-  }
+  const { updateConsist } = useDejaCloud()
+  const settingsRef = ref<HTMLDialogElement | null>(null)
+  const addLocoRef = ref<HTMLDialogElement | null>(null)
 
+  const consistCmp = ref(null)
   const functionsCmp = ref(null)
   const currentSpeed = ref(getSignedSpeed(props.throttle)) // +/-
   const throttleSpeed = ref(currentSpeed.value)
@@ -96,47 +98,56 @@
     functionsCmp.value && functionsCmp.value.openAll()
   }
 
+  function openConsist() {
+    consistCmp.value && consistCmp.value.openSettings()
+  }
+
   function openFunctionSettings() {
     functionsCmp.value && functionsCmp.value.openSettings()
   }
 
 </script>
 <template>
-  <main v-if="throttle" class="card overflow-hidden flex-1 w-full shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
-    <!-- <pre>locoDocId:{{locoDocId}}</pre>-->
-    <!-- <pre>loco:{{loco.functions}}</pre>  -->
-    <!-- <pre>throttleSpeed {{ throttleSpeed }}</pre>
-    <pre>throttleDir {{ throttleDir }}</pre>
-    <pre>currentSpeed {{ currentSpeed }}</pre>
-    <pre>props.throttle {{ props.throttle }}</pre> -->
-    <ThrottleHeader :address="throttle.address">
-      <template v-slot:left>
-        <MiniConsist v-if="loco" :loco="loco" />
-      </template>
-      <template v-slot:center>
-        <Consist v-if="loco" :loco="loco" />        
-      </template>
-      <template v-slot:right>
-        <ThrottleActionMenu 
-          @clear="clearLoco" 
-          @settings="openFunctionSettings" 
-          @functions="openFunctions" 
-        />
-      </template>
-    </ThrottleHeader>
-    <section class="throttle w-full h-full flex flex-row justify-around flex-grow pt-72 -mt-72">
-      <section class="px-1 text-center flex-1 hidden sm:block">
-        <ThrottleSliderControls :speed="currentSpeed" @update:currentSpeed="setSliderSpeed" @stop="handleStop" />
+  <div class="p-2 flex-1 flex">
+    <main v-if="throttle" class="p-2 card overflow-hidden w-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
+      <!-- <pre>locoDocId:{{locoDocId}}</pre>-->
+      <!-- <pre>loco:{{loco.functions}}</pre>  -->
+      <!-- <pre>throttleSpeed {{ throttleSpeed }}</pre>
+      <pre>throttleDir {{ throttleDir }}</pre>
+      <pre>currentSpeed {{ currentSpeed }}</pre>
+      <pre>props.throttle {{ props.throttle }}</pre> -->
+      <ThrottleHeader :address="throttle.address">
+        <template v-slot:left>
+          <LocoAvatar :loco="loco" :size="48" />
+          <MiniConsist v-if="loco" :loco="loco" />
+        </template>
+        <template v-slot:center>
+          {{ loco?.name }}
+        </template>
+        <template v-slot:right>
+          <ThrottleActionMenu 
+            @clear="clearLoco" 
+            @settings="openFunctionSettings" 
+            @functions="openFunctions" 
+            @consist="openConsist"
+          />
+        </template>
+      </ThrottleHeader>
+      <section class="throttle w-full h-full flex flex-row justify-around flex-grow pt-72 -mt-72">
+        <section class="px-1 text-center flex-1 hidden sm:block">
+          <ThrottleSliderControls :speed="currentSpeed" @update:currentSpeed="setSliderSpeed" @stop="handleStop" />
+        </section>
+        <section v-if="loco" class="w-full flex flex-col flex-grow h-full overflow-y-auto items-center justify-between flex-1/2 sm:flex-1">
+          <Functions :loco="loco" ref="functionsCmp" />
+        </section>
+        <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
+          <CurrentSpeed :speed="currentSpeed" />
+          <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="adjustSpeed" @stop="handleStop" />
+        </section>
       </section>
-      <section v-if="loco" class="w-full flex flex-col flex-grow h-full overflow-y-auto items-center justify-between flex-1/2 sm:flex-1">
-        <Functions :loco="loco" ref="functionsCmp" />
-      </section>
-      <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
-        <CurrentSpeed :speed="currentSpeed" />
-        <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="adjustSpeed" @stop="handleStop" />
-      </section>
-    </section>
-  </main>  
+    </main>
+  </div>
+  <Consist v-if="loco" :loco="loco" ref="consistCmp" />
 </template>
 <style scroped>
   .bg-gradient-border {

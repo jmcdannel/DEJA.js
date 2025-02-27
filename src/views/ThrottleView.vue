@@ -3,7 +3,7 @@
   import { useRoute } from 'vue-router'
 
   import { useThrottleStore } from "@/throttle/throttleStore"
-  import ThrottleComponent from '@/throttle/Throttle.component.vue'
+  import ThrottleComponent from '@/throttle/Throttle.vue'
   import type { Throttle } from '@/throttle/types'
 
   const route = useRoute()

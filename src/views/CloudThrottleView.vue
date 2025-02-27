@@ -4,7 +4,7 @@
   import router from '../router'
   import type { Loco, Throttle } from '@/throttle/types'
 
-  import ThrottleComponent from '@/throttle/Throttle.component.vue'
+  import ThrottleComponent from '@/throttle/Throttle.vue'
 
   import { useLocos } from '@/api/useLocos'
   import { useDejaCloud } from '@/deja-cloud/useDejaCloud'

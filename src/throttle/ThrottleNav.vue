@@ -1,12 +1,15 @@
 <script lang="ts" setup>
+import type { Loco, Throttle } from '@/throttle/types'
 import { useLocos } from '@/api/useLocos'
 import { useRouter } from 'vue-router'
+import LocoAvatar from '@/core/LocoAvatar/LocoAvatar.vue'
 const $router = useRouter()
 
-const { getThrottles } = useLocos()
+const { getLocos, getThrottles } = useLocos()
+const locos = getLocos()
 const throttles = getThrottles()
 
-function getSignedSpeed({speed, direction}) {
+function getSignedSpeed({speed, direction}: Throttle) {
     return speed && !!direction ? speed : -speed || 0
   }
 function getColor(speed: number) {
@@ -15,7 +18,7 @@ function getColor(speed: number) {
   return 'green'
 }
 
-function handleThrottleClick(throttle) {
+function handleThrottleClick(throttle: Throttle) {
   $router.push({ name: 'cloud-throttle', params: { address: throttle.id } })
 }
 
@@ -26,25 +29,25 @@ function handleListCkick() {
 </script>
 
 <template>
-  <template v-if="throttles?.length">
-    <div class="py-4 p-2 flex justify-between">
-      <nav class="grid grid-flow-col gap-4">
-        <button 
-          v-for="throttle in throttles"
-          :key="throttle.id"
-          class="text-primary" 
-          :class="{ active: ($route?.name === 'home' || $route?.name === 'throttle') }"
-          @click="handleThrottleClick(throttle)"
-          >
-          <v-badge
-            :color="getColor(getSignedSpeed(throttle))"
-            :content="throttle.speed.toString()"
-          >
-            <v-avatar size="default" color="primary">{{ throttle?.id }}</v-avatar>
-          </v-badge>
-        </button>
-      </nav>
-        <v-btn key="3" @click="handleListCkick" icon="mdi-view-sequential-outline"></v-btn>
+  <template v-if="throttles?.length && locos?.length">
+    <div class="p-2 flex justify-between">
+      <v-slide-group show-arrows>
+        <v-slide-group-item
+          v-for="throttle in throttles" 
+          :key="throttle.id">
+          <div class="p-1">
+            <LocoAvatar
+              class="m-2"
+              :loco="locos.find(loco => loco.locoId === throttle.address) as Loco"
+              :throttle="throttle as Throttle"
+              :showCard="true"
+              :size="48"
+            />
+          </div>
+        </v-slide-group-item>
+      </v-slide-group>
+
+      <v-btn :size="48" @click="handleListCkick" icon="mdi-view-sequential-outline" variant="tonal" color="cyan"></v-btn>
     </div>
   </template>
 </template>

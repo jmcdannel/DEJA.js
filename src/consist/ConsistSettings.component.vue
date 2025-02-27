@@ -45,6 +45,7 @@ const handleAddLoco = (newAddress: string) => {
     const newConsist = [...(props.loco.consist || []), newLoco]
     console.log('newConsist', newConsist, props.loco, props.loco?.id)
     updateConsist(props.loco.id, newConsist)
+    addLocoRef?.value?.closeModal()
   }
 }
 
@@ -105,5 +106,5 @@ const handleAddLoco = (newAddress: string) => {
       </li>
     </ul>
   </Modal>
-  <ConsistAddLoco ref="addLocoRef" @add-loco="handleAddLoco" />
+  <ConsistAddLoco ref="addLocoRef" @selected="handleAddLoco" />
 </template>

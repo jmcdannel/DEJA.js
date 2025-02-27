@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { ref } from 'vue'
+  import { ref, type PropType } from 'vue'
   import { 
     IoIosCog,
   } from "vue3-icons/io";
@@ -10,14 +10,21 @@
 
   import type { ConsistLoco, Loco } from '@/throttle/types'
   import { useDejaCloud } from '@/deja-cloud/useDejaCloud'
-
   import ConsistSettings from './ConsistSettings.component.vue'
   import ConsistAddLoco from './ConsistAddLoco.component.vue'
   import ConsistLocoItem from './ConsistLoco.component.vue'
 
-  const props = defineProps<{
-    loco: Object
-  }>()
+
+  defineExpose({
+    openSettings: () => settingsRef?.value?.showModal()
+  })
+
+  const props = defineProps({
+    loco: {
+      type: Object as PropType<Loco>,
+      required: true
+    }
+  })
 
   const { updateConsist } = useDejaCloud()
   
@@ -32,12 +39,15 @@
     addLocoRef?.value?.showModal()
   }
 
+  function handleLoco() {
+    console.log('handleLoco')
+  }
+
   function handleRemoveLoco(cloco: ConsistLoco) {
     if (props.loco) {
       const newConsist = (props.loco.consist || [])
         .filter((l:ConsistLoco) => l.address !== cloco.address)
-      console.log('newConsist', newConsist)
-      updateConsist(props.loco.id, newConsist)
+      props.loco.id && updateConsist(props.loco.id, newConsist)
     }
   }
 
@@ -49,12 +59,12 @@
         }
         return l
       })
-      console.log('newConsist', newConsist)
-      updateConsist(props.loco.id, newConsist)
+      props.loco.id && updateConsist(props.loco.id, newConsist)
     }
   }
 
   const handleAddLoco = (newAddress: string) => {
+    console.log('handleAddLoco', newAddress)
     if (props.loco) {
       const newLoco = {
         address: parseInt(newAddress),
@@ -62,8 +72,8 @@
         trim: 0
       }
       const newConsist = [...(props.loco.consist || []), newLoco]
-      console.log('newConsist', newConsist, props.loco, props.loco?.id)
-      updateConsist(props.loco.id, newConsist)
+      props.loco.id && updateConsist(props.loco.id, newConsist)
+      addLocoRef?.value?.closeModal()
     }
   }
 
@@ -75,45 +85,16 @@
         }
         return l
       })
-      console.log('newConsist', newConsist)
-      updateConsist(props.loco.id, newConsist)
+      props.loco.id && updateConsist(props.loco.id, newConsist)
     }
-  }
-
-  const opacityClasses = {
-    10: 'opacity-10',
-    20: 'opacity-20',
-    30: 'opacity-30',
-    40: 'opacity-40',
-    50: 'opacity-50',
-    60: 'opacity-60',
-    70: 'opacity-70',
-    80: 'opacity-80',
-    90: 'opacity-90',
-    100: 'opacity-100',
-  }
-
-  const leftOffsetClasses ={
-    0: '-left-0',
-    2: '-left-2',
-    4: '-left-4',
-    6: '-left-6',
-    8: '-left-8',
-    10: '-left-10',
-    12: '-left-12',
-    14: '-left-14',
-    16: '-left-16',
-    18: '-left-18',
-    20: '-left-20'
   }
 
 </script>
 <template>  
     <ol 
-      class="hidden sm:flex bg-gradient-to-r from-pink-500 to-indigo-80
+      class="hidden sm:flex bg-gradient-to-r from-pink-500 to-indigo-800
       flex-row
-      mr-2
-      mt-2
+      m-2
       px-1      
       rounded-3xl">
       <template v-if="loco?.consist?.length > 0">
@@ -196,5 +177,5 @@
     @adjust-trim="handleAdjustTrim"
     :loco="loco"
   />
-  <ConsistAddLoco ref="addLocoRef" @add-loco="handleAddLoco" />
+  <ConsistAddLoco ref="addLocoRef" @selected="handleAddLoco" />
 </template>

@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import type { PropType } from 'vue'
+import type { Loco } from '@/throttle/types'
+
 defineEmits(['selected'])
 defineProps({
-  loco: Object
+  loco: {
+    type: Object as PropType<Loco>,
+    required: true
+  }
 })
 </script>
 <template>
