@@ -33,6 +33,7 @@ defineProps({
     offset-y="5"
     >
     <v-btn
+      class="opacity-50"
       :color="loco?.meta?.color || color"
       rounded="circle"
       :size="size"
@@ -43,6 +44,7 @@ defineProps({
     />
   </v-badge>
   <v-btn v-else
+    class="opacity-50"
     :color="loco?.meta?.color || color"
     rounded="circle"
     :size="size"

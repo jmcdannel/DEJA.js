@@ -39,9 +39,6 @@
   const emit = defineEmits(['release'])
 
   const { updateSpeed } = useThrottle()
-  const { updateConsist } = useDejaCloud()
-  const settingsRef = ref<HTMLDialogElement | null>(null)
-  const addLocoRef = ref<HTMLDialogElement | null>(null)
 
   const consistCmp = ref(null)
   const functionsCmp = ref(null)
@@ -53,14 +50,12 @@
 
   watch(currentSpeed, (newCurrentSpeed, oldCurrentSpeed) => {
     // throttleSpeed.value = newCurrentSpeed
-    console.log('watch = currentspeed', props.throttle, throttleSpeed.value, { newCurrentSpeed, oldCurrentSpeed })
     throttleSpeed.value = newCurrentSpeed
     throttleDir.value = newCurrentSpeed > -1
     sendLocoSpeed(newCurrentSpeed, oldCurrentSpeed)
   })
   // watch(throttleSpeed, sendLocoSpeed)
   watch(() => props.throttle, (newThrottle, oldThrottle) => {
-    console.log('watch = props.throttle?.speed', props.throttle, throttleSpeed.value, { newThrottle, oldThrottle })
     const newCurrentSpeed = getSignedSpeed(newThrottle)
     currentSpeed.value = newCurrentSpeed
     // throttleSpeed.value = newCurrentSpeed
@@ -79,18 +74,15 @@
   }
 
   function setSliderSpeed(val: number): void { // handle slider changes
-    console.log('setSliderSpeed', val)
     setSpeed(parseInt(val.toString())) // debounced speed changes
   }
 
   async function clearLoco() {
-    console.log('clearLoco', props.throttle)
     await handleStop()
     emit('release', props.throttle?.address)
   }
 
   async function sendLocoSpeed(newSpeed:number, oldSpeed:number) {
-    console.log('sendLocoSpeed', { newSpeed, oldSpeed }, props.throttle?.address, props.throttle)
     updateSpeed(props.throttle?.address, props.loco?.consist, newSpeed, oldSpeed)
   }
 
@@ -118,7 +110,7 @@
       <pre>props.throttle {{ props.throttle }}</pre> -->
       <ThrottleHeader :address="throttle.address">
         <template v-slot:left>
-          <LocoAvatar :loco="loco" :size="48" />
+          <LocoAvatar :loco="loco as Loco" :size="48" />
           <MiniConsist v-if="loco" :loco="loco" />
         </template>
         <template v-slot:center>
@@ -126,8 +118,7 @@
         </template>
         <template v-slot:right>
           <ThrottleActionMenu 
-            @clear="clearLoco" 
-            @settings="openFunctionSettings" 
+            @park="clearLoco" 
             @functions="openFunctions" 
             @consist="openConsist"
           />

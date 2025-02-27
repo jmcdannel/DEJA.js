@@ -106,6 +106,7 @@ function handleStop() {
           :loco="loco"
           :size="size"
           :text="loco.locoId?.toString() || '?'"
+          :variant="variant"
           @click="handleLocoClick"
         />
       </template>

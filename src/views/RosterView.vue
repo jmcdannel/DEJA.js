@@ -11,7 +11,7 @@
   
 </script>
 <template>
-  <main class="flex flex-col flex-grow p-4 md:p-8 w-full viaduct-background bg-opacity-50 bg-fixed overflow-auto">
+  <main class="flex flex-col flex-grow p-4 md:p-8 w-full forest-background bg-opacity-10 bg-fixed overflow-auto">
     <h2 class="placeholder:font-extrabold text-transparent text-4xl bg-clip-text bg-gradient-to-r from-purple-300 to-pink-600">
       Select
       Your<br>

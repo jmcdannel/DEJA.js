@@ -42,7 +42,9 @@ const showAdd = ref(false)
         :key="loco.locoId" 
         :loco="loco as Loco"
         @selected="handleThrottle"
-        :showMenu="false" />
+        :showMenu="false" 
+        variant="flat"
+      />
       <v-btn v-if="allowAdd"
         @click="showAdd = !showAdd" 
         color="pink"
