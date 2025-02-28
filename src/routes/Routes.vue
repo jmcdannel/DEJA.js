@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import TamarackJunction from './maps/tam/TamarackJunction.vue'
+// import TamarackJunction from './maps/tam/TamarackJunction.vue'
 
 function findClickableParent(target) {
   const clickableContainers = ['Routes', 'Turnouts', 'TurnoutLabels']
@@ -44,7 +44,7 @@ async function handleMapClick(e: MouseEvent) {
 <template>
   <div class="map-container">
     <!-- <img :src="tamarackJunction" alt="Tamarack Junction Map" @click="handleMapClick" /> -->
-    <TamarackJunction @click="handleMapClick" />
+    <!-- <TamarackJunction @click="handleMapClick" /> -->
   </div>
 </template>
 <style scoped>
