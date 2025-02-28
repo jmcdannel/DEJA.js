@@ -4,27 +4,18 @@
   import { useModal, useToast } from 'vuestic-ui'
 
   import { 
-    BsFillLightningCharge,
-    BsFillLightningChargeFill,
     BsUsbSymbol,
     BsCloud,
     BsCloudFill,
-    BsDatabaseGear,
     BsCpu,
-    BsUsbPlug,
-    BsUsbPlugFill,
     BsCupHotFill,
-    Bs
   } from 'vue3-icons/bs'
-  import { BiServer, BiSolidServer } from "vue3-icons/bi"
   import { useConnectionStore } from '@/connections/connectionStore'
   import StatusMenuItem from '@/core/StatusMenu/StatusMenuItem.component.vue'
   import DejaSignout from '@/deja-cloud/DejaSignout.vue'
   import DejaUser from '@/deja-cloud/DejaUser.vue'
-  import LayoutChip from '@/core/LayoutChip.vue'
   import useSerial from '@/api/serialApi'
   import router from '@/router' 
-import { templateRef } from '@vueuse/core'
  
   const { confirm } = useModal()
   const { init } = useToast()
@@ -32,10 +23,8 @@ import { templateRef } from '@vueuse/core'
   const user = useCurrentUser()
   const connStore = useConnectionStore()
   const { 
-    layoutId, 
     isEmulated, 
     isSerial,
-    isDejaJS,
     isDejaServer
   } = storeToRefs(connStore)  
 
@@ -62,27 +51,6 @@ import { templateRef } from '@vueuse/core'
       connStore.disconnect()
     } else {
       connStore.connect('emulator')
-    }
-  }
-
-  async function handleDejaServer() {
-    console.log('handleDejaServer', isDejaServer.value, !!user.value, user)
-    if (!!user.value) {
-      router.push({ name: 'deja-server' })
-    } else {
-      console.log('login to deja cloud first')
-      const result = await confirm({
-        message: 'You must login to Deja Cloud first.',
-        title: 'DEJA Cloud',
-        okText: "Login",
-        cancelText: "Cancel",
-      })
-
-      if (result) {
-        router.push({ name: 'deja-cloud' })
-      } else {
-        init('DEJA Server Cancelled')
-      }
     }
   }
 
