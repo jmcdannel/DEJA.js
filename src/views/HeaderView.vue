@@ -8,17 +8,15 @@
 </script>
 
 <template>
-  <header>
-    <div class="navbar bg-base-100">
-      <div class="navbar-start">
-       <Title />
-      </div>
-      <div class="navbar-end">
-        <StatusMenu /> 
-        <TrackPower />
-        <Power />
-        <EvergencyStop />
-      </div>
-    </div>
-  </header>
+  <v-app-bar color="indigo-darken-4" dark>
+    <template #title>
+      <Title />
+    </template>
+    <template #append>
+      <StatusMenu /> 
+      <TrackPower />
+      <Power />
+      <EvergencyStop />
+    </template>
+  </v-app-bar>
 </template>

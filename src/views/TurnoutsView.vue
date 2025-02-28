@@ -6,7 +6,7 @@
 </script>
 
 <template>
-  <main class="flex flex-col flex-grow p-4 w-full forest-background bg-opacity-50 bg-fixed overflow-auto">
+  <main class="min-h-screen forest-background bg-opacity-50 bg-fixed overflow-auto">
     <template v-if="user">
       <Turnouts />
     </template>

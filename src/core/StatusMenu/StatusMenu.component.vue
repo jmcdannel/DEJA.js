@@ -91,33 +91,30 @@ import DejaUser from '@/deja-cloud/DejaUser.vue'
 </script>
 
 <template>
-  <main class="flex ">
-    <div class="dropdown dropdown-oepn dropdown-end">
-      <div tabindex="0" role="button" class="btn m-1">
-        <ul class="flex items-center justify-center">
-          <li class="mx-1">
-            <BsCloudFill v-if="isDejaServer" class="w-4 h-4 text-success stroke-none" />
-            <BsFillLightningChargeFill v-else-if="isDejaJS" class="w-4 h-4 text-success  stroke-none" />
-            <BsUsbSymbol v-else-if="isSerial" class="w-4 h-4 text-success  stroke-none" />
-            <BsCupHotFill v-else-if="isEmulated" class="w-4 h-4 text-success  stroke-none" />
-            <BsFillLightningChargeFill v-else class="w-4 h-4 text-error" />
-          </li>
-          <li class="mx-1">
-            <BsCpu v-if="(dccExConnected || isEmulated || isSerial)" class="w-4 h-4 text-success stroke-none" />
-            <BsCpu v-else class="w-4 h-4 text-error" />
-          </li>
-          <li class="mx-1">
-            <v-avatar :size="16" v-if="user" class="w-4 h-4 text-success">
-              <v-img  :src="user?.photoURL" />
-            </v-avatar>
-            <BsCloud v-else class="w-4 h-4 text-gray-400" />
-          </li>
-        </ul>
-      </div>
-      <div
-        tabindex="0"
-        class="dropdown-content z-20 w-auto">
-        <div class="stats stats-vertical shadow bg-slate-900">
+  <main class="flex items-center justify-center">
+    <v-btn variant="tonal" color="light-blue" @click="$router.push({ name: 'connect' })">
+      <ul class="flex items-center justify-center">
+        <li class="mx-1">
+          <BsCloudFill v-if="isDejaServer" class="w-4 h-4 text-success stroke-none" />
+          <BsFillLightningChargeFill v-else-if="isDejaJS" class="w-4 h-4 text-success  stroke-none" />
+          <BsUsbSymbol v-else-if="isSerial" class="w-4 h-4 text-success  stroke-none" />
+          <BsCupHotFill v-else-if="isEmulated" class="w-4 h-4 text-success  stroke-none" />
+          <BsFillLightningChargeFill v-else class="w-4 h-4 text-error" />
+        </li>
+        <li class="mx-1">
+          <BsCpu v-if="(dccExConnected || isEmulated || isSerial)" class="w-4 h-4 text-success stroke-none" />
+          <BsCpu v-else class="w-4 h-4 text-error" />
+        </li>
+        <li class="mx-1">
+          <v-avatar :size="16" v-if="user" class="w-4 h-4 text-success">
+            <v-img  :src="user?.photoURL" />
+          </v-avatar>
+          <BsCloud v-else class="w-4 h-4 text-gray-400" />
+        </li>
+      </ul>
+    </v-btn>
+    
+        <!-- <div class="stats stats-vertical shadow bg-slate-900">
 
           <template v-if="!(isDejaServer || isDejaJS || isEmulated || isSerial)">
             <StatusMenuItem 
@@ -233,9 +230,7 @@ import DejaUser from '@/deja-cloud/DejaUser.vue'
               </template>
             </StatusMenuItem>
 
-        </div>
-      </div>
-    </div>
+        </div> -->
     
     <!-- <button
       @click="$router.push({ name: 'connect' })"

@@ -6,11 +6,20 @@ import { useEfx } from '@/effects/useEfx'
 import EffectItem from '@/effects/Effect.vue'
 import EffectFilters from '@/effects/EffectFilters.vue'
 
+const showViewMenu = ref(false)
 const showFilters = ref(false)
+const viewAs = useStorage('@DEJA/prefs/effectsView', ['grid'])
 const selectedDevices = useStorage('effects-filter-devices', [])
 
 const { getEffects } = useEfx()
 const list = getEffects()
+
+const VIEW_OPTIONS = [
+  { title: 'Grid', value: 'grid' },
+  { title: 'List', value: 'list' },
+  { title: 'Compact', value: 'card' },
+  { title: 'Button', value: 'button' },
+]
 
 function filter(efxList: IEfx[]) {
   if (selectedDevices.value.length) {
@@ -21,15 +30,33 @@ function filter(efxList: IEfx[]) {
 
 </script>
 <template>
-  <header class="flex justify-between items-center">
-    <h2 class="mb-4 placeholder:font-extrabold text-transparent text-4xl bg-clip-text bg-gradient-to-r from-purple-300 to-pink-600">
-      <strong class="text-3xl text-purple-400">Effects</strong>
-    </h2>  
-    <v-btn @click="showFilters = !showFilters" color="purple" variant="tonal" icon="mdi-filter"></v-btn>
-  </header>
+  <v-toolbar 
+    class="bg-clip-text bg-gradient-to-r from-purple-300 to-pink-600"  
+    color="purple" 
+    variant="tonal"
+  >
+    <v-toolbar-title class="text-3xl text-purple-400">Effects</v-toolbar-title>
+    <v-spacer></v-spacer>
+    <v-toolbar-items color="purple">
+      <v-btn @click="showViewMenu = !showViewMenu" icon="mdi-eye"></v-btn>
+      <v-btn @click="showFilters = !showFilters" icon="mdi-filter"></v-btn>
+    </v-toolbar-items>
+  </v-toolbar>
+  <v-dialog v-model="showViewMenu" max-width="290">
+    <v-card title="View As" color="purple-darken-4" variant="elevated">
+      <v-list :items="VIEW_OPTIONS" v-model:selected="viewAs" select-strategy="single-independent">
+      </v-list>
+    </v-card>
+  </v-dialog>
   <EffectFilters v-model:show="showFilters" v-model:selected="selectedDevices"></EffectFilters>
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 w-full">
-    <EffectItem v-for="item in filter(list)"
-      :key="item.id" :efx="item" :efxId="item.id"></EffectItem>
+  <!-- <pre>{{ viewAs }}</pre> -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 w-full gap-x-4">
+    <EffectItem 
+      v-for="item in filter(list)"
+      :key="item.id" 
+      :efx="item" 
+      :efxId="item.id"
+      :viewAs="viewAs"
+    />
   </div>
 </template>

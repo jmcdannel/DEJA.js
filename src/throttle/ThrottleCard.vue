@@ -87,6 +87,12 @@
         icon="mdi-parking"
         variant="tonal"
       />
+      <v-btn 
+        @click="$emit('fullscreen')"
+        :color="loco?.meta?.color || 'primary'" 
+        icon="mdi-fullscreen"
+        variant="tonal"
+      />
     </v-card-actions>
   </v-card>
 </template>

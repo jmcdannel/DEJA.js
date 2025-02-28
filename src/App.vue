@@ -9,7 +9,6 @@
   import { db,firebaseApp } from '@/firebase'
   import HeaderView from '@/views/HeaderView.vue'
   import FooterView from '@/views/FooterView.vue'
-  import ThrottleNav from '@/throttle/ThrottleNav.vue'
   import ContextMenu from '@/core/ContextMenu.vue'
   import DejaJsConnect from '@/core/DejaJsConnect.component.vue'
   import DejaCloudConnect from '@/deja-cloud/DejaCloudConnect.vue'
@@ -54,23 +53,27 @@
 </script>
 
 <template>
-  <v-app theme="dark">
+  <v-responsive>
+    <v-app theme="dark">
       <template v-if="user && layoutId && connectionType === 'dejaJS'">
         <DejaJsConnect />
       </template>
       <template v-if="user && layoutId">
         <DejaCloudConnect />
       </template>
-      <main class="flex flex-col h-screen w-full mx-auto relative">
-        <HeaderView />
-        <v-container class="flex-grow flex flex-col mb-16 min-h-0 p-0">
+      <HeaderView />
+      <v-main>
+        <v-container class="p-0 min-h-full flex flex-col" fluid>
+          <!-- <main class="flex flex-col h-screen w-full mx-auto relative"> -->
+          <!-- <v-container class="flex-grow flex flex-col mb-16 min-h-0 p-0" fluid> -->
           <!-- <ContextMenu /> -->
           <RouterView />
-          <ThrottleNav v-if="!!user && !!layoutId" />
+          <!-- </main> -->
         </v-container>
-        <FooterView v-if="!!user"></FooterView>
-      </main>
-  </v-app>
+      </v-main>
+      <FooterView v-if="!!user" :layoutId="layoutId"></FooterView>
+    </v-app>
+  </v-responsive>
 </template>
 <style>
   .fade-enter-active,

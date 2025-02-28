@@ -3,9 +3,7 @@
   import { useRoute } from 'vue-router'
   import router from '../router'
   import type { Loco, Throttle } from '@/throttle/types'
-
   import ThrottleComponent from '@/throttle/Throttle.vue'
-
   import { useLocos } from '@/api/useLocos'
   import { useDejaCloud } from '@/deja-cloud/useDejaCloud'
 
@@ -22,13 +20,11 @@
   watch(
     () => route.params.address,
     (newId, oldId) => {
-      console.log('watch oute.params.address', newId, oldId, currentThrottle.value)
       address.value = parseInt(newId?.toString())
     }
   )
 
   async function handleRelease(address: number) {
-    console.log('handleRelease', address)
     if (address) {
       await releaseThrottle(address)
       router.push({ name: 'home' })
@@ -41,13 +37,10 @@
 
   const loco = computed<Loco|null>(() => currentThrottle?.value && (getLoco(currentThrottle.value?.address) as Loco) || null)
 
-console.log('currentThrottle', currentThrottle.value)
 </script>
 
 <template>
-  <!-- <ThrottleMenu /> -->
   <template v-if="currentThrottle && loco">
-    <!-- <pre>{{ currentThrottle }}</pre> -->
     <ThrottleComponent
       :throttle="currentThrottle"
       :loco="loco"

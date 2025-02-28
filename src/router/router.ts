@@ -26,6 +26,11 @@ const router = createRouter({
       component: () => import('../views/EffectsView.vue'),
     },
     {
+      path: '/routes',
+      name: 'routes',
+      component: () => import('../views/RoutesView.vue'),
+    },
+    {
       path: '/turnouts',
       name: 'turnouts',
       component: () => import('../views/TurnoutsView.vue'),

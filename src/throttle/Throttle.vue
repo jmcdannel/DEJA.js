@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { ref, watch, type PropType } from 'vue'
+  import type { Loco, Throttle } from './types';
   import { debounce } from 'vue-debounce'
   import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.component.vue'
   import ThrottleSliderControls from '@/throttle/ThrottleSliderControls.component.vue'
@@ -10,9 +11,7 @@
   import Consist from '@/consist/Consist.component.vue'
   import MiniConsist from '@/consist/MiniConsist.vue'
   import Functions from '@/functions/Functions.component.vue'
-  import type { Loco, Throttle } from './types';
   import { useThrottle } from '@/throttle/useThrottle'
-  import { useDejaCloud } from '@/deja-cloud/useDejaCloud'
 
   const DEBOUNCE_DELAY = 100 // debounce speed changes by 100ms to prevent too many requests
 
@@ -28,7 +27,7 @@
     },
     loco: {
       type: Object as PropType<Loco>,
-      required: false
+      required: true
     },
     viewAs: {
       type: String,
@@ -100,8 +99,7 @@
 
 </script>
 <template>
-  <div class="p-2 flex-1 flex">
-    <main v-if="throttle" class="p-2 card overflow-hidden w-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
+    <main v-if="throttle" class="p-2 card overflow-hidden w-full h-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
       <!-- <pre>locoDocId:{{locoDocId}}</pre>-->
       <!-- <pre>loco:{{loco.functions}}</pre>  -->
       <!-- <pre>throttleSpeed {{ throttleSpeed }}</pre>
@@ -137,7 +135,6 @@
         </section>
       </section>
     </main>
-  </div>
   <Consist v-if="loco" :loco="loco" ref="consistCmp" />
 </template>
 <style scroped>
