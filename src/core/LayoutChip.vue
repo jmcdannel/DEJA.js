@@ -18,12 +18,13 @@ function handleLayoutClick() {
 <template>
   <v-chip v-if="layoutId" 
     :color="dccExConnected ? 'success' : 'warning'" 
-    class="cursor-pointer"
     :class="dccExConnected ? '' : 'animate-pulse'"
-    closable 
-    @click="handleLayoutClick">
-    <BsCpu class="mr-2" />
-    {{  layoutId }}
-    <FiRefreshCcw class="ml-2" />
+    @click="handleLayoutClick"
+    size="large"
+    :text="layoutId"
+    variant="tonal">
+    <template #prepend>
+      <v-icon icon="mdi-chip" />
+    </template>
   </v-chip>
 </template>

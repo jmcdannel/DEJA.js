@@ -1,7 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import { signOut } from 'firebase/auth'
 import { useCurrentUser, useFirebaseAuth } from 'vuefire'
-import { VaButton } from 'vuestic-ui'
 import { useConnectionStore } from '@/connections/connectionStore'
 
 const auth = useFirebaseAuth()
@@ -10,13 +9,18 @@ const connStore = useConnectionStore()
 
 function handleSignOut() {
   connStore.disconnect()
-  signOut(auth).catch((reason) => {
+  auth && signOut(auth).catch((reason) => {
     console.error('Failed signOut', reason)
-    error.value = reason
   })
 }
 </script>
 
 <template>
-  <v-btn @click="handleSignOut" preset="primary"  :disabled="!user">Sign out</v-btn>
+  <v-btn 
+    @click="handleSignOut" 
+    variant="outlined" 
+    color="error" 
+    :disabled="!user" 
+    text="Sign out" 
+  />
 </template>

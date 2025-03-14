@@ -4,7 +4,7 @@
   const emit = defineEmits(['connect', 'disconnect'])
   const props = defineProps({
     icon: {
-      type: Function,
+      type: String,
       required: true
     },
     isConnected: {
@@ -37,31 +37,66 @@
 
   function getStatusColor() {
     if (props.disabled) {
-      return 'text-gray-500'
+      return 'neutral'
     } else if (props.isConnected) {
-      return 'text-success'
+      return 'success'
     } else {
-      return 'text-error'
+      return 'error'
     }
   } 
 
 </script>
 
 <template>
-  <div class="stat">
-    <div class="stat-figure">      
-       <component :is="icon" class="h-8 w-8 stroke-none mx-1" :class="getStatusColor()" />
+  <v-card>
+    <template #actions>
+      <v-btn v-if="isConnected" 
+        @click="$emit('disconnect')" 
+        :prepend-icon="icon" 
+        color="error" 
+        :disabled="disabled" 
+        text="Disconnect"
+        variant="outlined" />
+      <v-btn v-else 
+        @click="$emit('connect')" 
+        :prepend-icon="icon" 
+        color="success" 
+        :disabled="disabled" 
+        text="Connect"
+        variant="outlined" />
+    </template>
+    <template #append>
+      <v-icon v-if="icon" :icon="icon" :color="getStatusColor()" size="48" />
+    </template>
+    <template #prepend>
+
+    </template>
+    <template #image>
+    </template>
+    <template #item>
+      <slot></slot>
+    </template>
+    <template #text>
+      <slot name="desc"></slot>
+    </template>
+    <template #title>
+      {{ itemLabel }}
+    </template>
+    <template #subtitle>
+
+    </template>
+  </v-card>
+  <!-- <div class="grid grid-cols-1 gap-4 p-4 rounded-lg shadow-md bg-slate-900 bg-opacity-80">
+    <div class=" col-start-2 row-span-3 row-start-1 self-center place-content-center place-items-center ">      
+     
     </div>
-    <div class="stat-title text-sky-500 font-bold">{{ itemLabel }}</div>
-    <div class="stat-value"><slot></slot></div>
-    <div class="stat-desc text-wrap pr-24"><slot name="desc"></slot></div>
+    <div class="text-sky-500 font-bold">{{ itemLabel }}</div>
+    <div class="text-4xl font-bold"><slot></slot></div>
+    <div class="text-wrap pr-12"><slot name="desc"></slot></div>
     <div class="stat-actions">      
       <slot name="actions">
-        <button @click="handleAction" class="btn btn-sm btn-outline btn-primary">
-          <component :is="icon" class="h-3 w-3 stroke-none mx-1" :class="getStatusColor()" />
-          {{ isConnected ? 'Disconnect' : 'Connect' }}
-        </button>
+        
       </slot>
     </div>
-  </div>
+  </div> -->
 </template>

@@ -15,12 +15,12 @@ const props = defineProps({
 
 const isConnected = ref(props?.device?.isConnected)
 
-onMounted(() => {
-  console.log('device', props?.device)
-})
+// onMounted(() => {
+//   console.log('device', props?.device)
+// })
 
 watch(isConnected, (val) => {
-  console.log('isConnected', val, props?.deviceId)
+  // console.log('isConnected', val, props?.deviceId)
   if (props?.device?.type === 'dcc-ex') {
     conn.connectDccEx()
   }

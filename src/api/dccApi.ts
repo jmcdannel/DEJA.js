@@ -95,15 +95,7 @@ export function useDcc() {
         console.log('[SERIAL] send', action, payload)
         serialApi.send(action, payload)
         return
-      } else if (isDejaJS.value || mqttConnected.value) {
-        console.log(
-          '[dejaJsApi] send',
-          `@ttt/dcc/${layoutId.value}`,
-          action,
-          payload
-        )
-        dejaJsApi.send({ action, payload })
-      } else if (isDejaServer.value) {
+      } else if (isDejaJS.value || mqttConnected.value || isDejaServer.value) {
         console.log(
           '[dejaCloud] send',
           `@ttt/dcc/${layoutId.value}`,
