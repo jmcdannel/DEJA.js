@@ -1,10 +1,36 @@
-import { collection, getDocs } from 'firebase/firestore'
+import {
+  collection,
+  onSnapshot,
+  getDocs,
+  query,
+  limit,
+  orderBy,
+} from 'firebase/firestore'
 import { db } from './firebase.mjs'
 import log from './utils/logger.mjs'
 import dcc from './dcc.mjs'
 
 const layoutId = process.env.LAYOUT_ID
 let locos = []
+
+async function init() {
+  onSnapshot(query(collection(db, `layouts/${layoutId}/locos`)), (snapshot) => {
+    snapshot.docChanges().forEach(async (change) => {
+      const loco = change.doc.data()
+      // log.log('Loco change', change.type, loco)
+      if (change.type === 'added') {
+        locos.push({ ...loco, id: change.doc.id })
+      } else if (change.type === 'modified') {
+        const index = locos.findIndex((l) => l.id === change.doc.id)
+        locos[index] = { ...loco, id: change.doc.id }
+      } else if (change.type === 'removed') {
+        locos = locos.filter((l) => l.id !== change.doc.id)
+      }
+    })
+    // console.log('Locos', JSON.stringify(locos, null, 2))
+  })
+  console.log('Throttles listening for loco changes')
+}
 
 async function getLocos() {
   try {
@@ -90,6 +116,8 @@ export async function handleThrottleChange(snapshot) {
     // )
   })
 }
+
+init()
 
 export default {
   handleThrottleChange,
