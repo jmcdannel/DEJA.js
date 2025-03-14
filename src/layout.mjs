@@ -199,13 +199,13 @@ async function wipeDeja() {
 }
 
 async function wipeThrottles() {
-  log.complete('wipe throttles', layoutId)
-  const querySnapshot = await getDocs(
-    collection(db, `layouts/${layoutId}/throttles`)
-  )
-  querySnapshot.forEach((doc) => {
-    deleteDoc(doc.ref)
-  })
+  // log.complete('wipe throttles', layoutId)
+  // const querySnapshot = await getDocs(
+  //   collection(db, `layouts/${layoutId}/throttles`)
+  // )
+  // querySnapshot.forEach((doc) => {
+  //   deleteDoc(doc.ref)
+  // })
 }
 
 export async function reset() {

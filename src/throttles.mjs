@@ -41,7 +41,7 @@ export async function handleThrottleChange(snapshot) {
       throttleCmd,
       loco
     )
-    if (loco?.consist.length > 0) {
+    if (loco?.consist?.length > 0) {
       loco?.consist.forEach(async (consistLoco) => {
         let consistSpeed
         if (throttleCmd.speed > 0) {
