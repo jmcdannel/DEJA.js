@@ -153,7 +153,11 @@ export const useEfx = () => {
 
       if (device?.type === 'dcc-ex') {
         dccApi.sendOutput(efx.pin, !!efx.state)
-      } else if (device?.type === 'deja-arduino') {
+      } else if (
+        device?.type === 'deja-arduino' ||
+        device?.type === 'deja-mqtt'
+      ) {
+        console.log('setDoc effects', efx.id, efx.state)
         // sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
         await setDoc(
           doc(db, `layouts/${layoutId.value}/effects`, efx.id),
