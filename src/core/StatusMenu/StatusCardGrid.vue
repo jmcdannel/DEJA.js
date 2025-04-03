@@ -147,6 +147,5 @@ const handleEmulator = () => {
       </StatusMenuItem>
     </template>
 
-<pre>{{ layout }}</pre>
     </div>
 </template>
