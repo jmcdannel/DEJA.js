@@ -1,6 +1,17 @@
+
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  updateDoc,
+} from 'firebase/firestore'
+import { db } from './firebase.mjs'
 import log from './utils/logger.mjs'
 import layout from './layout.mjs'
 import { getMacroCommand } from './macro.mjs'
+import { getTurnout } from './turnouts.mjs'
+
+const layoutId = process.env.LAYOUT_ID
 
 const pinCommand = (effect) => ({
   device: effect?.device,
@@ -20,6 +31,17 @@ const ialedCommand = (effect) => {
   const command = `${pin}, ${pattern}, ${range}, ${config}\n`
 
   return command
+}
+
+async function getEffect(id) {
+  const deviceRef = doc(db, `layouts/${layout.id}/effects`, id)
+  const docSnap = await getDoc(deviceRef)
+
+  if (docSnap.exists()) {
+    return { ...docSnap.data(), id: docSnap.id }
+  } else {
+    console.error('No such document!')
+  }
 }
 
 export function getEffectCommand(efx) {
@@ -51,29 +73,63 @@ export function getEffectCommand(efx) {
   }
 }
 
-export async function handleMacro({ macro }) {
-  log.log('handleMacroCommand', macro)
+const MACRO_DELAY = 1500
 
-  Object.keys(macro).forEach(async (deviceId) => {
-    const conn = layout.connections()?.[deviceId]
-    if (conn?.isConnected) {
-      const commands = getMacroCommand(
-        macro[deviceId]?.effects,
-        macro[deviceId]?.turnouts
-      )
-      log.log('macro commands', commands, deviceId)
-      await conn.send(conn.port, JSON.stringify(commands))
-    } else {
-      log.error('Device not connected', conn, layout.connections, deviceId)
+export const asyncTimeout = (ms) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+};
+
+async function handleMacroItem(item, state) {
+  let result
+  if (item.type === 'turnout') {
+    result = await updateDoc(
+      doc(db, `layouts/${layoutId}/turnouts`, item.id),
+        { state },
+        { merge: true }
+     )
+  } else if (item.type === 'effect') {
+    result = await updateDoc(
+      doc(db, `layouts/${layoutId}/effects`, item.id),
+        { state },
+        { merge: true }
+     )
+  }
+  console.log("handleMacroItem", result, item)
+}
+
+export async function handleMacro(efx) {
+  try {
+    // const macroItemPromises = efx?.on?.map(async (item) => await handleMacroItem(item, efx.state))
+    for(let i = 0; i < efx?.on.length; i++) {
+      const item = efx?.on[i]
+      await Promise.all([
+        handleMacroItem(item, efx.state),
+        asyncTimeout(MACRO_DELAY)
+      ])
     }
-  })
+    for(let i = 0; i < efx?.off.length; i++) {
+      const item = efx?.off[i]
+      
+      await Promise.all([
+        handleMacroItem(item, !efx.state),
+        asyncTimeout(MACRO_DELAY)
+      ])
+    }
+  } catch (e) {
+    console.error('Error adding document: ', e)
+  }
 }
 
 export async function handleEffect(payload) {
   log.log(layout.connections())
+  if (payload.type === 'route' || payload.type === 'macro') {
+    return await handleMacro(payload)
+  }
   const conn = layout.connections()?.[payload.device]
   if (!conn?.isConnected) {
-    log.error('Device not connected', payload.device)
+    log.error('Device not connected', payload.device, payload)
     return
   }
   const command = getEffectCommand(payload)

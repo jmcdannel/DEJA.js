@@ -26,13 +26,20 @@ export async function handleBroadcastActions(data) {
             {
               'dccEx.lastConnected': serverTimestamp(),
               'dccEx.client': 'dejaJS',
+              pong: serverTimestamp(),
+              timestamp: serverTimestamp(),
             },
             { merge: true }
           )
         } else {
           await updateDoc(
             doc(db, 'layouts', layoutId),
-            { 'dccEx.lastConnected': null, 'dccEx.client': null },
+            {
+              'dccEx.lastConnected': null,
+              'dccEx.client': 'dejaJS',
+              pong: serverTimestamp(),
+              timestamp: serverTimestamp(),
+            },
             { merge: true }
           )
         }

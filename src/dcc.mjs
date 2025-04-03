@@ -49,6 +49,7 @@ const handleMessage = async (msg) => {
         break
       case 'getStatus':
       case 'status':
+      case 'ping':
         await getStatus()
         break
       default:
@@ -113,7 +114,10 @@ const listPorts = async () => {
 }
 
 const getStatus = async () => {
-  await broadcast({ action: 'status', payload: { isConnected } })
+  await broadcast({
+    action: 'status',
+    payload: { isConnected, client: 'dejaJS' },
+  })
   log.star('[DCC] getStatus', { action: 'status', payload: { isConnected } })
 }
 
