@@ -13,7 +13,7 @@ import Layout from './Layout/Layout.vue'
 import Roster from './Roster/Roster.vue'
 import Effects from './Effects/Effects.vue'
 import Turnouts from './Turnouts/Turnouts.vue'
-import RoutesList from './Routes/RoutesList.vue'
+import Routes from './Routes/Routes.vue'
 import SignalsList from './Signals/SignalList.vue'
 import Settings from './Settings/Settings.vue'
 import UserProfile from './User/Profile/UserProfile.vue'
@@ -85,7 +85,7 @@ function handleLayoutSelect(_layoutId) {
             <Effects v-if="view == 'Effects'" />
             <Turnouts v-if="view == 'Turnouts'" />
             <SignalsList v-if="view == 'Signals'" :layoutId="layoutId" />
-            <RoutesList v-if="view == 'Routes'" :layoutId="layoutId" />
+            <Routes v-if="view == 'Routes'" />
             <Settings v-if="view == 'Settings'" />
             <UserProfile v-if="view == 'Profile'" />
             <Settings v-if="view == 'Emulator'" />

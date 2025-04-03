@@ -126,9 +126,6 @@ export const useEfx = () => {
   async function setEfx(efxId, efx) {
     console.log('setEfx', efx)
     try {
-      // const newDoc = await collection(db, `layouts/${layoutId.value}/effects`)
-      //   .doc(efx.id)
-      //   .set(newEfx)
       const id = efxId
         ? efxId
         : slugify(`${efx['device'] || 'macro'}-${efx.type}-${efx.name}`)
@@ -155,8 +152,16 @@ export const useEfx = () => {
     console.log('dejaCloud runEffect', efx, efx?.id)
 
     try {
-      if (efx?.type === 'macro') {
-        await runMacro(efx)
+      if (efx?.type === 'macro' || efx?.type === 'route') {
+        // await runMacro(efx)
+        await setDoc(
+          doc(db, `layouts/${layoutId.value}/effects`, efx.id),
+          {
+            state: efx.state,
+            timestamp: serverTimestamp(),
+          },
+          { merge: true }
+        )
         return
       }
       const device = await getDevice(efx['device'])
@@ -165,9 +170,27 @@ export const useEfx = () => {
       if (device?.type === 'dcc-ex') {
         sendDccCommand({ action: 'output', payload: efx })
       } else if (device?.type === 'deja-arduino') {
-        sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
+        // sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
+        await setDoc(
+          doc(db, `layouts/${layoutId.value}/effects`, efx.id),
+          {
+            state: efx.state,
+            timestamp: serverTimestamp(),
+          },
+          { merge: true }
+        )
+        return
       } else if (device?.type === 'deja-mqtt') {
-        sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
+        // sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
+        await setDoc(
+          doc(db, `layouts/${layoutId.value}/effects`, efx.id),
+          {
+            state: efx.state,
+            timestamp: serverTimestamp(),
+          },
+          { merge: true }
+        )
+        return
       } else if (device.type === 'deja-arduino-led') {
         sendDejaCommand({ action: 'effects', payload: { ...efx, id: efx?.id } })
       }
