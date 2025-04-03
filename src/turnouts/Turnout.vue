@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
-import { useTurnouts } from '@/api/useTurnouts'
+import { useTurnouts } from '@/turnouts/useTurnouts'
 import { MdOutlineForkLeft } from 'vue3-icons/md'
 
 const { switchTurnout } = useTurnouts()

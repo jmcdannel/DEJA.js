@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import type { Turnout as ITurnout } from '@/turnouts/types'
 import { useStorage } from '@vueuse/core'
-import { useTurnouts } from '@/api/useTurnouts'
+import { useTurnouts } from '@/turnouts/useTurnouts'
 import Turnout from '@/turnouts/Turnout.vue'
 import TurnoutFilters from '@/turnouts/TurnoutFilters.vue'
 

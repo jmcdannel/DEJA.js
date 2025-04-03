@@ -141,11 +141,19 @@ export const useEfx = () => {
   }
 
   async function runEffect(efx) {
-    console.log('dejaCloud runEffect', efx, efx?.id)
+    console.log('dejaCloud runEffect', efx.state, efx?.id, efx?.type, efx)
 
     try {
-      if (efx?.type === 'macro') {
+      if (efx?.type === 'macro' || efx?.type === 'route') {
         // await runMacro(efx)
+        await setDoc(
+          doc(db, `layouts/${layoutId.value}/effects`, efx.id),
+          {
+            state: efx.state,
+            timestamp: serverTimestamp(),
+          },
+          { merge: true }
+        )
         return
       }
       const device = await getDevice(efx['device'])
@@ -170,6 +178,17 @@ export const useEfx = () => {
       }
     } catch (e) {
       console.error('runEffect: ', e, efx)
+    }
+  }
+
+  async function runMacro(efx) {
+    try {      
+      sendDejaCommand({
+        action: 'macro',
+        payload: { macro: efx, id: efx?.id },
+      })
+    } catch (e) {
+      console.error('Error adding document: ', e)
     }
   }
 
