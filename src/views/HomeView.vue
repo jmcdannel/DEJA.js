@@ -1,15 +1,5 @@
 <script setup lang="ts">
-  import { storeToRefs } from 'pinia'
-  import { useConnectionStore } from '@/connections/connectionStore'
   import StatusCardGrid from '@/core/StatusMenu/StatusCardGrid.vue'
-
-  const connStore = useConnectionStore()
-  const { 
-    isDejaJS,
-    isDejaServer,
-    isSerial,
-    isEmulated
-  } = storeToRefs(connStore)
 
 </script>
 <template>
@@ -23,6 +13,5 @@
       </h2>
     </header>
     <StatusCardGrid />
-    <pre>{{ connStore }}</pre>
   </main>
 </template>
