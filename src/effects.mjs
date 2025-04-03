@@ -28,7 +28,8 @@ const ialedCommand = (effect) => {
   const range = effect?.range
   const config = effect?.config
 
-  const command = `${pin}, ${pattern}, ${range}, ${config}\n`
+  const command = `${pin}, ${pattern}, all, ${config}\n`
+  // const command = `${pin}, ${pattern}, ${range}, ${config}\n`
 
   return command
 }
