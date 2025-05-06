@@ -27,13 +27,12 @@ defineProps({
 </script>
 <template>
   <v-badge v-if="loco?.consist?.length && showConsist" 
-    color="rgba(200,200,200,0.4)"
+    color="primary"
     :content="loco?.consist?.length || 0"
     offset-x="5"
     offset-y="5"
     >
     <v-btn
-      class="opacity-50"
       :color="loco?.meta?.color || color"
       rounded="circle"
       :size="size"
@@ -44,7 +43,6 @@ defineProps({
     />
   </v-badge>
   <v-btn v-else
-    class="opacity-50"
     :color="loco?.meta?.color || color"
     rounded="circle"
     :size="size"

@@ -63,18 +63,21 @@
       contained
       >
       <template v-slot:activator="{ props: activatorProps }">
-
-        <v-btn 
-          v-bind="activatorProps" 
-          rounded="circle"
-          variant="tonal"
-          :color="loco?.meta?.color || 'primary'"
-          class="text-none !h-16 w-16 md:!h-20 md:w-20" 
-          stacked>
-          <v-badge :color="loco?.meta?.color || 'primary'" offset-x="-8" offset-y="-8" :content="loco?.consist?.length || 0">
-            {{throttle.address.toString()}}
-          </v-badge>
-        </v-btn>
+        <v-badge 
+          :color="'primary'" 
+          :content="loco?.consist?.length || 0"        
+          offset-x="4"
+          offset-y="4">
+          <v-btn 
+            v-bind="activatorProps" 
+            rounded="circle"
+            variant="flat"
+            :color="loco?.meta?.color || 'primary'"
+            class="text-none !h-16 w-16 md:!h-20 md:w-20" 
+            stacked>
+              {{throttle.address.toString()}}
+          </v-btn>
+        </v-badge>
       </template>
 
       <v-btn key="1" :color="loco?.meta?.color || 'primary'" icon="mdi-parking" @click="clearLoco"></v-btn>

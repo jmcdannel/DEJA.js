@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { ref, watch, type PropType } from 'vue'
   import ThrottleAvatar from '@/throttle/ThrottleAvatar.vue'
+  import LocoAvatar from '@/core/LocoAvatar/LocoAvatar.vue'
   import ThrottleButtonControls from './ThrottleButtonControls.component.vue'
   import CurrentSpeed from './CurrentSpeed.vue'
   import type { Loco, Throttle } from './types';
@@ -17,7 +18,7 @@
     }
   })
 
-  const emit = defineEmits(['release'])
+  const emit = defineEmits(['release', 'select'])
 
   const { updateSpeed, releaseThrottle } = useThrottle()
   function getSignedSpeed({speed, direction}) {
@@ -39,7 +40,7 @@
 
   async function sendLocoSpeed(newSpeed:number, oldSpeed:number) {
     console.log('sendLocoSpeed', { newSpeed, oldSpeed }, props.throttle?.address, props.throttle)
-    updateSpeed(props.throttle?.address, props?.loco?.consist, newSpeed, oldSpeed)
+    updateSpeed(props.throttle?.address, props?.loco?.consist || [], newSpeed, oldSpeed)
   }
 
   function handleRelease() {
@@ -58,6 +59,13 @@
         <CurrentSpeed :speed="currentSpeed" />
         <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="adjustSpeed" @stop="handleStop" horizontal class=""  />
         <ThrottleAvatar :throttle="throttle" :loco="loco" @release="handleRelease" @select="handleSelect" />
+        <!-- <LocoAvatar
+          :loco="loco as Loco"
+          :throttle="throttle as Throttle"
+          :showMenu="true"
+          :size="48"
+          variant="flat"
+        /> -->
       </section>
   </main>  
 </template>

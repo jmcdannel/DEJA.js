@@ -36,24 +36,24 @@ const showAdd = ref(false)
     <RosterViewMenu />
     <v-spacer class="my-4"></v-spacer>
     <template v-if="viewAs == 'grid'">
-      <div class="flex flex-wrap gap-2">
-      <LocoAvatar
-        v-for="loco in locos" 
-        :key="loco.locoId" 
-        :loco="loco as Loco"
-        @selected="handleThrottle"
-        :showMenu="false" 
-        variant="flat"
-      />
-      <v-btn v-if="allowAdd"
-        @click="showAdd = !showAdd" 
-        color="pink"
-        icon="mdi-plus"
-        role="link"
-        size="72"
-        variant="tonal">
-      </v-btn>
-    </div>
+      <div class="flex flex-wrap gap-2 sm:gap-4 md:gap-10">
+        <LocoAvatar
+          v-for="loco in locos" 
+          :key="loco.locoId" 
+          :loco="loco as Loco"
+          @selected="handleThrottle"
+          :showMenu="false" 
+          variant="flat"
+        />
+        <v-btn v-if="allowAdd"
+          @click="showAdd = !showAdd" 
+          color="pink"
+          icon="mdi-plus"
+          role="link"
+          size="72"
+          variant="tonal">
+        </v-btn>
+      </div>
     </template>
     <template v-else>
       <RosterListItem v-for="loco in locos" :key="loco.locoId" :loco="loco" @selected="handleThrottle" />
