@@ -76,14 +76,15 @@ export const useThrottle = () => {
         consist &&
           consist.forEach((cloco) => {
             const clocoSpeed = calculateConsistSpeed(newSpeed, cloco)
-            dccApi.sendDccCommand({
-              action: 'throttle',
-              payload: {
-                address: cloco.address,
-                speed: clocoSpeed,
-                direction: clocoSpeed || 0 < 0 ? false : true,
-              },
-            })
+            dccApi.setSpeed(address, clocoSpeed)
+            // dccApi.sendDccCommand({
+            //   action: 'throttle',
+            //   payload: {
+            //     address: cloco.address,
+            //     speed: clocoSpeed,
+            //     direction: clocoSpeed || 0 < 0 ? false : true,
+            //   },
+            // })
           })
       }, delay)
     }
@@ -93,13 +94,14 @@ export const useThrottle = () => {
     dccApi.setSpeed(address, 0)
     consist &&
       consist.forEach((cloco) => {
-        dccApi.sendDccCommand({
-          action: 'throttle',
-          payload: {
-            address: cloco.address,
-            speed: 0,
-          },
-        })
+        dccApi.setSpeed(cloco.address, 0)
+        // dccApi.sendDccCommand({
+        //   action: 'throttle',
+        //   payload: {
+        //     address: cloco.address,
+        //     speed: 0,
+        //   },
+        // })
       })
   }
 
