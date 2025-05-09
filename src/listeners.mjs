@@ -1,6 +1,7 @@
 import log from './utils/logger.mjs'
 import {
   collection,
+  deleteDoc,
   onSnapshot,
   query,
   limit,
@@ -42,6 +43,9 @@ async function handleDejaCommands(snapshot) {
             log.warn('Unknown action in `deja.handleMessage`', action, payload)
         }
       }
+      // delete deja command document
+      await deleteDoc(change.doc.ref)
+
     })
   } catch (err) {
     log.fatal('Error handling deja command:', err)
@@ -51,7 +55,7 @@ async function handleDejaCommands(snapshot) {
 export async function listen() {
   log.start('Listen for dccCommands', layoutId)
 
-  const dccCommandsRef = ref(rtdb, 'dccCommands');
+  const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId}`);
   onChildAdded(dccCommandsRef, (data) => {
     log.log('dccCommands', data.key, data.val());
     handleDccChange(data);

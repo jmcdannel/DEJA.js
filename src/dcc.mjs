@@ -10,6 +10,7 @@ const baudRate = 115200
 let com = {
   isConnected: false,
 }
+const layoutId = process.env.LAYOUT_ID
 
 const getPorts = async () => {
   try {
@@ -169,7 +170,7 @@ export async function handleDccChange(snapshot) {
     const { action, payload } = snapshot.val()
     log.log('handleDccCommands: ', action, payload, snapshot.key)
     await handleMessage(JSON.stringify({ action, payload: JSON.parse(payload) }))
-    snapshot.key && remove(ref(rtdb, `dccCommands/${snapshot.key}`))
+    snapshot.key && remove(ref(rtdb, `dccCommands/${layoutId}/${snapshot.key}`))
   } catch (err) {
     log.fatal('Error handling dcc command:', err)
   }
