@@ -1,4 +1,6 @@
 import { SerialPort } from 'serialport'
+import { ref, remove } from 'firebase/database'
+import { rtdb } from './firebase.mjs'
 import serial from './serial.mjs'
 import { broadcast } from './broadcast.mjs'
 import log from './utils/logger.mjs'
@@ -19,9 +21,9 @@ const getPorts = async () => {
 }
 
 const handleMessage = async (msg) => {
-  log.note('handleMessage', msg)
   try {
     const { action, payload } = JSON.parse(msg)
+    log.note('handleMessage', action, payload, msg)
     switch (action) {
       case 'connect':
         await connect(payload)
@@ -140,8 +142,9 @@ const sendTurnout = async ({ turnoutId, state }) => {
   await send(cmd)
 }
 
-const sendFunction = async ({ address, func, state }) => {
-  log.star('Function', address, func)
+const sendFunction = async (payload) => {
+  const { address, func, state } = payload
+  log.star('Function', payload, typeof payload, address, func)
   const cmd = `F ${address} ${func} ${state ? 1 : 0}`
   await send(cmd)
 }
@@ -155,14 +158,18 @@ const sendOutput = async (payload) => {
 export async function handleDccChange(snapshot) {
   try {
     log.note('handleDccChange')
-    snapshot.docChanges().forEach((change) => {
-      if (change.type === 'added') {
-        const { action, payload: payloadRaw } = change.doc.data()
-        const payload = JSON.parse(payloadRaw)
-        log.log('handleDccCommands: ', action, payload)
-        handleMessage(JSON.stringify({ action, payload }))
-      }
-    })
+    // snapshot.docChanges().forEach((change) => {
+    //   if (change.type === 'added') {
+    //     const { action, payload: payloadRaw } = change.doc.data()
+    //     const payload = JSON.parse(payloadRaw)
+    //     log.log('handleDccCommands: ', action, payload)
+    //     handleMessage(JSON.stringify({ action, payload }))
+    //   }
+    // })
+    const { action, payload } = snapshot.val()
+    log.log('handleDccCommands: ', action, payload, snapshot.key)
+    await handleMessage(JSON.stringify({ action, payload: JSON.parse(payload) }))
+    snapshot.key && remove(ref(rtdb, `dccCommands/${snapshot.key}`))
   } catch (err) {
     log.fatal('Error handling dcc command:', err)
   }

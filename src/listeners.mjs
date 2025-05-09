@@ -6,7 +6,8 @@ import {
   limit,
   orderBy,
 } from 'firebase/firestore'
-import { db } from './firebase.mjs'
+import { ref, onChildAdded } from 'firebase/database'
+import { db, rtdb } from './firebase.mjs'
 import { handleTurnoutChange, handleTurnout } from './turnouts.mjs'
 import { handleEffectChange, handleEffect, handleMacro } from './effects.mjs'
 import { handleDccChange } from './dcc.mjs'
@@ -50,14 +51,19 @@ async function handleDejaCommands(snapshot) {
 export async function listen() {
   log.start('Listen for dccCommands', layoutId)
 
-  onSnapshot(
-    query(
-      collection(db, `layouts/${layoutId}/dccCommands`),
-      orderBy('timestamp', 'desc'),
-      limit(10)
-    ),
-    handleDccChange
-  )
+  const dccCommandsRef = ref(rtdb, 'dccCommands');
+  onChildAdded(dccCommandsRef, (data) => {
+    log.log('dccCommands', data.key, data.val());
+    handleDccChange(data);
+  });
+  // onSnapshot(
+  //   query(
+  //     collection(db, `layouts/${layoutId}/dccCommands`),
+  //     orderBy('timestamp', 'desc'),
+  //     limit(10)
+  //   ),
+  //   handleDccChange
+  // )
   onSnapshot(
     query(
       collection(db, `layouts/${layoutId}/dejaCommands`),
