@@ -81,8 +81,8 @@ export function useDcc() {
       //   collection(db, `layouts/${layoutId.value}/dccCommands`),
       //   command
       // )
-      const dccCommandsRef = ref(rtdb, 'dccCommands');
-      const newCommandRef = push(dccCommandsRef);
+      const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId}`)
+      const newCommandRef = push(dccCommandsRef)
       set(newCommandRef, command);
       
     } catch (e) {
