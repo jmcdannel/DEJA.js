@@ -1,6 +1,6 @@
-import { collection, serverTimestamp, addDoc } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
-import { db } from '@/firebase'
+import { ref, push, set, serverTimestamp } from 'firebase/database'
+import { rtdb } from '@/firebase'
 
 export const useDcc = () => {
   const layoutId = useStorage('@DEJA/cloud/layoutId', 'betatrack')
@@ -66,10 +66,9 @@ export const useDcc = () => {
         timestamp: serverTimestamp(),
       }
 
-      await addDoc(
-        collection(db, `layouts/${layoutId.value}/dccCommands`),
-        command
-      )
+      const dccCommandsRef = ref(rtdb, 'dccCommands')
+      const newCommandRef = push(dccCommandsRef)
+      set(newCommandRef, command)
       // console.log('Document written with ID: ', command)
     } catch (e) {
       console.error('Error adding document: ', e)
