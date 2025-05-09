@@ -14,7 +14,8 @@ import {
 } from 'firebase/firestore'
 import { storeToRefs } from 'pinia'
 import { useDocument, useCollection, firestoreDefaultConverter } from 'vuefire'
-import { db } from '@/firebase'
+import { ref, push, set } from 'firebase/database'
+import { db, rtdb } from '@/firebase'
 import type {
   Loco,
   LocoFunction,
@@ -38,11 +39,15 @@ export function useDejaCloud() {
       case 'macro':
         sendDejaCommand({ action, payload })
         break
-      case 'throttle':
-        sendThrottleUpdate({ action, payload })
-        break
+        case 'throttle':
+          sendThrottleUpdate({ action, payload })
+          break
+        case 'dcc':
+        case 'function':
+          sendDccCommand({ action, payload })
+          break
       default:
-        sendDccCommand({ action, payload })
+        // sendDccCommand({ action, payload })
         break
     }
   }
@@ -313,10 +318,13 @@ export function useDejaCloud() {
         timestamp: serverTimestamp(),
       }
 
-      await addDoc(
-        collection(db, `layouts/${layoutId.value}/dccCommands`),
-        command
-      )
+      // await addDoc(
+      //   collection(db, `layouts/${layoutId.value}/dccCommands`),
+      //   command
+      // )
+      const dccCommandsRef = ref(rtdb, 'dccCommands');
+      const newCommandRef = push(dccCommandsRef);
+      set(newCommandRef, command);
       // console.log('Document written with ID: ', command)
     } catch (e) {
       console.error('Error adding document: ', e)

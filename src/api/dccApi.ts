@@ -1,6 +1,7 @@
 import { storeToRefs } from 'pinia'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '@/firebase'
+import { ref, push, set } from 'firebase/database'
+import { db, rtdb } from '@/firebase'
 import { useSerial } from '@/api/serialApi'
 import { useDejaJs } from '@/api/useDejaJs'
 import { useConnectionStore } from '@/connections/connectionStore'
@@ -76,11 +77,14 @@ export function useDcc() {
         timestamp: serverTimestamp(),
       }
 
-      await addDoc(
-        collection(db, `layouts/${layoutId.value}/dccCommands`),
-        command
-      )
-      // console.log('Document written with ID: ', command)
+      // await addDoc(
+      //   collection(db, `layouts/${layoutId.value}/dccCommands`),
+      //   command
+      // )
+      const dccCommandsRef = ref(rtdb, 'dccCommands');
+      const newCommandRef = push(dccCommandsRef);
+      set(newCommandRef, command);
+      
     } catch (e) {
       console.error('sendDccCommand: ', e)
     }
