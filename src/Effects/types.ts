@@ -8,6 +8,8 @@ export interface IEfx {
   state?: boolean
   color?: string
   pattern?: string
+  point1?: string
+  point2?: string
   range?: string
   config?: string
   tags?: string[]

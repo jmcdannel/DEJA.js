@@ -21,10 +21,10 @@ const confirmDelete = ref(false)
 const roadname = computed(() => getRoadname(props?.loco?.meta?.roadname))
 const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
 
- watch(() => props.loco?.roadname, (value) => {
-   roadname.value = getRoadname(value?.meta?.roadname)
-   color.value = colors[roadname?.color || DEFAULT_COLOR]
- })
+//  watch(() => props.loco?.roadname, (value) => {
+//    roadname.value = getRoadname(value?.meta?.roadname)
+//    color.value = colors[roadname?.color || DEFAULT_COLOR]
+//  })
 
  async function handleDelete() {
   console.log('handleDelete', props.loco.id)
@@ -41,16 +41,16 @@ const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
     :class="`${color?.border}`"
   >
     <template #append>
-      <v-avatar size="large" :color="color.value" :class="color.bg">{{ loco?.locoId }}</v-avatar>
+      <v-avatar size="large" :color="props?.loco?.meta?.color || color.value">{{ loco?.locoId }}</v-avatar>
     </template>
     <v-card-text class="min-h-16 flex flex-wrap">
         <v-badge
           class="m-2"
-          :color="color?.value || 'primary'"
+          :color="props?.loco?.meta?.color || color.value || 'primary'"
           :content="loco?.functions?.length || 0"
           >
           <v-chip variant="outlined"
-            :color="color?.value || 'primary'">
+            :color="props?.loco?.meta?.color || color.value || 'primary'">
             Functions
             <template #prepend>
               <BsBezier2 class="mr-2"></BsBezier2>
@@ -59,10 +59,10 @@ const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
         </v-badge>
         <v-badge 
           class="m-2"
-          :color="color?.value || 'primary'"
+          :color="props?.loco?.meta?.color || color.value || 'primary'"
           :content="loco?.consist?.length + 1 || 0">
           <v-chip variant="outlined"
-            :color="color?.value || 'primary'">
+            :color="props?.loco?.meta?.color || color.value || 'primary'">
             Consist
             <template #prepend>
               <v-icon class="mr-2" icon="mdi-cogs"></v-icon>
@@ -73,7 +73,7 @@ const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
     <v-spacer></v-spacer>
     <v-card-actions>
       <v-btn
-        :class="`${color?.text}`"
+        :color="props?.loco?.meta?.color || color.value || 'primary'"
         text="Edit"
         variant="tonal"
        @click="$emit('edit', loco)"
