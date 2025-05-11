@@ -45,7 +45,6 @@ async function handleDejaCommands(snapshot) {
       }
       // delete deja command document
       await deleteDoc(change.doc.ref)
-
     })
   } catch (err) {
     log.fatal('Error handling deja command:', err)
@@ -55,11 +54,11 @@ async function handleDejaCommands(snapshot) {
 export async function listen() {
   log.start('Listen for dccCommands', layoutId)
 
-  const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId}`);
+  const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId}`)
   onChildAdded(dccCommandsRef, (data) => {
-    log.log('dccCommands', data.key, data.val());
-    handleDccChange(data);
-  });
+    log.log('listen.dccCommands', data.key, data.val())
+    handleDccChange(data)
+  })
   // onSnapshot(
   //   query(
   //     collection(db, `layouts/${layoutId}/dccCommands`),

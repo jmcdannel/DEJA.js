@@ -1,7 +1,4 @@
-import {
-  doc,
-  getDoc,
-} from 'firebase/firestore'
+import { doc, getDoc } from 'firebase/firestore'
 import { db } from './firebase.mjs'
 import log from './utils/logger.mjs'
 import layout from './layout.mjs'
@@ -90,10 +87,16 @@ export async function handleTurnoutChange(snapshot) {
   snapshot.docChanges().forEach(async (change) => {
     if (change.type === 'added') {
       turnoutStates[change.doc.id] = change.doc.data()?.state
-      console.log('turnoutStates', turnoutStates)
+      // console.log('turnoutStates', turnoutStates)
     }
     if (change.type === 'modified') {
-      console.log('handleTurnoutChange', change.type, change.doc.id, turnoutStates[change.doc.id], change.doc.data()?.state)
+      console.log(
+        'handleTurnoutChange',
+        change.type,
+        change.doc.id,
+        turnoutStates[change.doc.id],
+        change.doc.data()?.state
+      )
       if (turnoutStates[change.doc.id] !== change.doc.data()?.state) {
         turnoutStates[change.doc.id] = change.doc.data()?.state
         await handleTurnout(change.doc.data())

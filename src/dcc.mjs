@@ -168,8 +168,10 @@ export async function handleDccChange(snapshot) {
     //   }
     // })
     const { action, payload } = snapshot.val()
-    log.log('handleDccCommands: ', action, payload, snapshot.key)
-    await handleMessage(JSON.stringify({ action, payload: JSON.parse(payload) }))
+    log.log('handleDccChange: ', action, payload, snapshot.key)
+    await handleMessage(
+      JSON.stringify({ action, payload: JSON.parse(payload) })
+    )
     snapshot.key && remove(ref(rtdb, `dccCommands/${layoutId}/${snapshot.key}`))
   } catch (err) {
     log.fatal('Error handling dcc command:', err)

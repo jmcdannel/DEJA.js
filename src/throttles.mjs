@@ -98,6 +98,8 @@ export async function handleThrottleChange(snapshot) {
             consistSpeed = throttleCmd.speed + consistLoco.trim
             if (consistSpeed < 0) {
               consistSpeed = 1
+            } else {
+              consistSpeed = 0
             }
           }
         }
@@ -105,6 +107,7 @@ export async function handleThrottleChange(snapshot) {
           address: consistLoco.address,
           speed: consistSpeed,
         }
+        console.log('Consist loco', consistLoco, throttleCmd, consistCmd, loco)
         await dcc.sendSpeed(consistCmd)
       })
     }
