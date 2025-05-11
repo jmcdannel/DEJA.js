@@ -30,6 +30,7 @@
   watch(currentSpeed, sendLocoSpeed)
 
   async function handleStop() {
+    console.log('handleStop', props.throttle?.address, props.throttle)
     currentSpeed.value = 0
   }
 

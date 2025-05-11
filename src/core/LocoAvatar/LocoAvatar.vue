@@ -92,7 +92,7 @@ function handleStop() {
 
 </script>
 <template>
-  <div class="relative flex">
+  <div class="relative flex" v-if="loco">
     <v-speed-dial
       v-model="isMenuOpen"
       location="top center"

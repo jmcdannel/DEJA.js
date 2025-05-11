@@ -39,13 +39,13 @@ export function useDejaCloud() {
       case 'macro':
         sendDejaCommand({ action, payload })
         break
-        case 'throttle':
-          sendThrottleUpdate({ action, payload })
-          break
-        case 'dcc':
-        case 'function':
-          sendDccCommand({ action, payload })
-          break
+      case 'throttle':
+        sendThrottleUpdate({ action, payload })
+        break
+      case 'dcc':
+      case 'function':
+        sendDccCommand({ action, payload })
+        break
       default:
         // sendDccCommand({ action, payload })
         break
@@ -322,9 +322,9 @@ export function useDejaCloud() {
       //   collection(db, `layouts/${layoutId.value}/dccCommands`),
       //   command
       // )
-      const dccCommandsRef = ref(rtdb, 'dccCommands');
-      const newCommandRef = push(dccCommandsRef);
-      set(newCommandRef, command);
+      const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId.value}`)
+      const newCommandRef = push(dccCommandsRef)
+      set(newCommandRef, command)
       // console.log('Document written with ID: ', command)
     } catch (e) {
       console.error('Error adding document: ', e)

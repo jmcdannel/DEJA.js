@@ -54,7 +54,7 @@
   
 </script>
 <template>
-  <div class="relative">
+  <div class="relative" v-if="loco">
     <v-speed-dial
       v-model="isOpen"
       location="left center"

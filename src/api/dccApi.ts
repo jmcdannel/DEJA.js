@@ -24,7 +24,7 @@ export function useDcc() {
   async function setPower(payload: object) {
     try {
       console.log('[DCC API].setPower', payload)
-      await send('power', payload)
+      await send('dcc', payload)
     } catch (err: any) {
       console.error('[DCC API].setPower', err)
       throw new Error(err)
@@ -83,8 +83,7 @@ export function useDcc() {
       // )
       const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId}`)
       const newCommandRef = push(dccCommandsRef)
-      set(newCommandRef, command);
-      
+      set(newCommandRef, command)
     } catch (e) {
       console.error('sendDccCommand: ', e)
     }

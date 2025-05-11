@@ -27,6 +27,7 @@
   }
 
   function getLoco(locoAddress: number) {
+    console.log('getLoco', locoAddress, locos?.value)
     return locos?.value.find((loco) => loco.locoId === locoAddress)
   }
 
@@ -46,4 +47,7 @@
       />
     </div>
   </template>
+  <!-- <pre>
+    {{ throttles }}
+  </pre> -->
 </template>
