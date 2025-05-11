@@ -66,7 +66,7 @@ export const useDcc = () => {
         timestamp: serverTimestamp(),
       }
 
-      const dccCommandsRef = ref(rtdb, 'dccCommands')
+      const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId.value}`)
       const newCommandRef = push(dccCommandsRef)
       set(newCommandRef, command)
       // console.log('Document written with ID: ', command)
