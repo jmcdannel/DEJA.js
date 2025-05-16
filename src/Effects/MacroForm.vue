@@ -27,8 +27,8 @@ function handleOffUpdate(e) {
   emitChanges()  
 }
 
-function handleAddOn(effects, turnouts) {
-  console.log('handleAddOn', effects, turnouts)
+function handleAddOn(effects, turnouts, throttles) {
+  console.log('handleAddOn', effects, turnouts, throttles)
   onChips.value = onChips.value.concat(effects.map((e) => ({
     id: e.id,
     name: e.name,
@@ -43,12 +43,18 @@ function handleAddOn(effects, turnouts) {
     type: 'turnout',
     state: true,
   })))
+  onChips.value = onChips.value.concat(throttles.map((t) => ({
+    id: t.locoId,
+    type: 'throttle',
+    speed: parseInt(t.speed),
+    direction: t.direction,
+  })))
   emitChanges()
   ondialog.value = false
 }
 
-function handleAddOff(effects, turnouts) {
-  console.log('handleAddOff', effects, turnouts)
+function handleAddOff(effects, turnouts, throttles) {
+  console.log('handleAddOff', effects, turnouts, throttles)
   offChips.value = offChips.value.concat(effects.map((e) => ({
     id: e.id,
     name: e.name,
@@ -72,6 +78,32 @@ function emitChanges() {
     on: onChips.value,
     off: offChips.value
   })
+}
+
+function getIconByType(type) {
+  switch (type) {
+    case 'effect':
+      return 'mdi-rocket-launch'
+    case 'turnout':
+      return 'mdi-directions-fork'
+    case 'throttle':
+      return 'mdi-speedometer'
+    default:
+      return 'mdi-help-circle'
+  }
+}
+
+function getChipLabel(chip) {
+  switch (chip.type) {
+    case 'effect':
+      return chip.name
+    case 'turnout':
+      return chip.name
+    case 'throttle':
+      return `${chip.id} - [${chip.speed}]`
+    default:
+      return chip.name
+  }
 }
 
 </script>
@@ -99,8 +131,8 @@ function emitChanges() {
             <v-icon 
               @click="chip.state = !chip.state"
               class="mr-2"
-              :icon="chip.type === 'effect' ? 'mdi-rocket-launch' : 'mdi-directions-fork'" 
-              :color="chip.state ? 'green' : 'red'">
+              :icon="getIconByType(chip.type)"
+              :color="chip.state || chip.direction ? 'green' : 'red'">
             </v-icon>
           </template>  
           <template #append>
@@ -111,7 +143,7 @@ function emitChanges() {
               color="grey">
             </v-icon>
           </template>
-        {{ chip.name }}
+        {{ getChipLabel(chip) }}
         </v-chip>
       </v-chip-group>
     </v-card-text>
@@ -133,14 +165,13 @@ function emitChanges() {
         size="small"
         color="primary"
         variant="outlined"
-        :prepend-icon="chip.type === 'effect' ? 'mdi-rocket-launch' : 'mdi-directions-fork'"
         selected
       >
         <template #prepend>
           <v-icon 
             @click="chip.state = !chip.state"
             class="mr-2"
-            :icon="chip.type === 'effect' ? 'mdi-rocket-launch' : 'mdi-directions-fork'" 
+            :icon="getIconByType(chip.type)"
             :color="chip.state ? 'green' : 'red'">
           </v-icon>
         </template>  
@@ -152,7 +183,7 @@ function emitChanges() {
             color="grey">
           </v-icon>
         </template>
-        {{ chip.name }}
+        {{ getChipLabel(chip) }}
       </v-chip>
     </v-chip-group>
   </v-card-text>
