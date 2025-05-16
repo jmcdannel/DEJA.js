@@ -90,7 +90,8 @@ async function submit (e) {
     reset()
     emit('close')
   } else {
-    reset()
+    // reset()
+    console.log('invalid form', results)
     loading.value = false
   }
 }
