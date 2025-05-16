@@ -1,13 +1,8 @@
-
-import {
-  doc,
-  getDoc,
-  serverTimestamp,
-  updateDoc,
-} from 'firebase/firestore'
+import { doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { db } from './firebase.mjs'
 import log from './utils/logger.mjs'
 import layout from './layout.mjs'
+import dcc from './dcc.mjs'
 import { getMacroCommand } from './macro.mjs'
 import { getTurnout } from './turnouts.mjs'
 
@@ -78,53 +73,64 @@ const MACRO_DELAY = 1500
 
 export const asyncTimeout = (ms) => {
   return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-};
+    setTimeout(resolve, ms)
+  })
+}
 
-async function handleMacroItem(item, state) {
-  let result
+async function handleMacroItem(item, state, macroState) {
   if (item.type === 'turnout') {
-    result = await updateDoc(
+    await updateDoc(
       doc(db, `layouts/${layoutId}/turnouts`, item.id),
-        { state },
-        { merge: true }
-     )
+      { state },
+      { merge: true }
+    )
   } else if (item.type === 'effect') {
-    result = await updateDoc(
+    await updateDoc(
       doc(db, `layouts/${layoutId}/effects`, item.id),
-        { state },
-        { merge: true }
-     )
+      { state },
+      { merge: true }
+    )
+  } else if (item.type === 'throttle' && macroState === state) {
+    console.log('handleMacroItem throttle', item)
+    await updateDoc(
+      doc(db, `layouts/${layoutId}/throttles`, item.id.toString()),
+      {
+        speed: parseInt(item.speed),
+        direction: item.direction === 'forward' ? true : false,
+        timestamp: serverTimestamp(),
+      },
+      { merge: true }
+    )
+    console.log('handleMacroItem throttle DONE')
   }
-  console.log("handleMacroItem", result, item)
+  console.log('handleMacroItem', item)
 }
 
 export async function handleMacro(efx) {
   try {
     // const macroItemPromises = efx?.on?.map(async (item) => await handleMacroItem(item, efx.state))
-    for(let i = 0; i < efx?.on.length; i++) {
+    for (let i = 0; i < efx?.on?.length; i++) {
       const item = efx?.on[i]
       await Promise.all([
-        handleMacroItem(item, efx.state),
-        asyncTimeout(MACRO_DELAY)
+        handleMacroItem(item, efx.state, true),
+        asyncTimeout(MACRO_DELAY),
       ])
     }
-    for(let i = 0; i < efx?.off.length; i++) {
+    for (let i = 0; i < efx?.off?.length; i++) {
       const item = efx?.off[i]
-      
+
       await Promise.all([
-        handleMacroItem(item, !efx.state),
-        asyncTimeout(MACRO_DELAY)
+        handleMacroItem(item, !efx.state, false),
+        asyncTimeout(MACRO_DELAY),
       ])
     }
   } catch (e) {
-    console.error('Error adding document: ', e)
+    console.error('Error handling macro: ', e)
   }
 }
 
 export async function handleEffect(payload) {
-  log.log(layout.connections())
+  // log.log(layout.connections())
   if (payload.type === 'route' || payload.type === 'macro') {
     return await handleMacro(payload)
   }

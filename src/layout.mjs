@@ -19,11 +19,13 @@ const baudRate = 115200
 const layoutId = process.env.LAYOUT_ID
 const _connections = {}
 let _devices = []
+let sensors = []
 
 export async function load() {
   log.start('Load layout', layoutId)
   const layout = await loadLayout()
   const devices = await loadDevices()
+  sensors = await loadSensors()
   _devices = devices
   await autoConnect(devices)
   return layout
@@ -59,15 +61,29 @@ async function loadLayout() {
 
 async function loadDevices() {
   try {
-    const devicesCol = await collection(db, `layouts/${layoutId}/devices`)
-    const querySnapshot = await getDocs(devicesCol)
-    const devicesData = []
+    const col = await collection(db, `layouts/${layoutId}/devices`)
+    const querySnapshot = await getDocs(col)
+    const data = []
     querySnapshot.forEach((doc) => {
-      devicesData.push({ ...doc.data(), id: doc.id })
+      data.push({ ...doc.data(), id: doc.id })
     })
-    return devicesData
+    return data
   } catch (error) {
-    log.error('Error loading layout', error)
+    log.error('Error loading devices', error)
+  }
+}
+
+async function loadSensors() {
+  try {
+    const col = await collection(db, `layouts/${layoutId}/sensors`)
+    const querySnapshot = await getDocs(col)
+    const data = []
+    querySnapshot.forEach((doc) => {
+      data.push({ ...doc.data(), id: doc.id })
+    })
+    return data
+  } catch (error) {
+    log.error('Error loading sensors', error)
   }
 }
 
@@ -171,6 +187,22 @@ async function connectMqttDevice({ device }) {
 }
 
 async function handleConnectionMessage(payload) {
+  if (payload?.startsWith('{ "sensor')) {
+    const data = JSON.parse(payload)
+    const sensorId = sensors.find((sensor) => sensor.index === data.sensor)?.id
+    log.debug('handleConnectionMessage', data, payload, sensorId)
+    if (sensorId) {
+      await updateDoc(
+        doc(db, `layouts/${layoutId}/sensors`, sensorId),
+        {
+          state: data.state,
+        },
+        { merge: true }
+      )
+    } else {
+      log.error('Sensor not found', data, sensors)
+    }
+  }
   await broadcast({ action: 'broadcast', payload })
 }
 

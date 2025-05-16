@@ -182,6 +182,7 @@ export default {
   handleMessage,
   setConnection,
   sendSpeed,
+  sendCommand: send,
   handleDccChange,
   dccSerial: com,
 }

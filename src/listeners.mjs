@@ -1,11 +1,15 @@
 import log from './utils/logger.mjs'
 import {
   collection,
+  doc,
   deleteDoc,
   onSnapshot,
   query,
   limit,
   orderBy,
+  serverTimestamp,
+  setDoc,
+  where,
 } from 'firebase/firestore'
 import { ref, onChildAdded } from 'firebase/database'
 import { db, rtdb } from './firebase.mjs'
@@ -51,6 +55,24 @@ async function handleDejaCommands(snapshot) {
   }
 }
 
+async function handleSensorChange(snapshot) {
+  snapshot.docChanges().forEach(async (change) => {
+    const sensor = change.doc.data()
+    if (change.type === 'modified') {
+      log.log('Sensor modified', sensor.effectId, Boolean(sensor.state))
+      await setDoc(
+        doc(db, `layouts/${layoutId}/effects`, sensor.effectId),
+        {
+          state: Boolean(!sensor.state),
+          timestamp: serverTimestamp(),
+        },
+        { merge: true }
+      )
+      return
+    }
+  })
+}
+
 export async function listen() {
   log.start('Listen for dccCommands', layoutId)
 
@@ -78,8 +100,7 @@ export async function listen() {
   onSnapshot(
     query(
       collection(db, `layouts/${layoutId}/throttles`),
-      orderBy('timestamp', 'desc'),
-      limit(10)
+      orderBy('timestamp', 'desc')
     ),
     handleThrottleChange
   )
@@ -96,6 +117,14 @@ export async function listen() {
       orderBy('timestamp', 'desc')
     ),
     handleTurnoutChange
+  )
+
+  onSnapshot(
+    query(
+      collection(db, `layouts/${layoutId}/sensors`),
+      where('enabled', '==', true)
+    ),
+    handleSensorChange
   )
 }
 
