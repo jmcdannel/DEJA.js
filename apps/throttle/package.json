@@ -2,8 +2,7 @@
   "name": "deja-throttle",
   "private": true,
   "engines": {
-    "node": ">=20",
-    "pnpm": ">=7"
+    "pnpm": ">=9"
   },
   "version": "0.1.0alpha",
   "scripts": {
