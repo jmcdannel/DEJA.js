@@ -1,36 +1,22 @@
 {
-  "name": "@ttt/dcc-api",
-  "version": "0.0.1",
-  "description": "NodeJS Websocket Server that processes DCC commands and sends them via Serial over USB to an Arduino Mega running DCC-EX EX-CommandStation.",
-  "main": "index.mjs",
-  "author": "Josh McDannel",
-  "license": "MIT",
-  "private": false,
+  "name": "deja",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
   "scripts": {
-    "start": "node --env-file .env ./index.mjs",
-    "lint": "eslint",
-    "format": "prettier --write ."
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types"
   },
-  "type": "module",
-  "dependencies": {
-    "@serialport/parser-readline": "^12.0.0",
-    "dotenv": "^16.3.1",
-    "mqtt": "^5.3.4",
-    "serialport": "^12.0.0",
-    "signale": "^1.4.0",
-    "wait-on": "^7.0.1",
-    "ws": "^8.13.0"
-  },
+  "keywords": [],
+  "author": "",
   "devDependencies": {
-    "@eslint/js": "^9.5.0",
-    "eslint": "^9.5.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.1.3",
-    "firebase": "^10.14.1",
-    "globals": "^15.6.0",
-    "prettier": "^3.3.2"
+    "turbo": "^2.5.3"
   },
+  "packageManager": "pnpm@9.0.0",
   "engines": {
-    "node": ">= 20"
+    "node": ">=18"
   }
 }
