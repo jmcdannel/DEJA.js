@@ -1,9 +1,6 @@
 {
   "name": "deja-throttle",
   "private": true,
-  "engines": {
-    "pnpm": ">=9"
-  },
   "version": "0.1.0alpha",
   "scripts": {
     "start": "vite --host",
