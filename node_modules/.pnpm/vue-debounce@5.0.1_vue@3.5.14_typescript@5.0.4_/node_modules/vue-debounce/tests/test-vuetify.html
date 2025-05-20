@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Testing HTML</title>
+  </head>
+
+  <body>
+    <div id="app">
+      <v-app>
+        <v-main>
+          <v-container fluid>
+            Vuetify Text Field with blurr override
+            <v-text-field outlined :value="textFieldValue" :debounce-events="['blur']" v-debounce:1s="updateTextFieldValue">
+            </v-text-field>
+            Updated Value: {{ textFieldValue }}
+          </v-container>
+        </v-main>
+      </v-app>
+    </div>
+    <!-- <div id="app">
+      <!-- <label>Test Defaults</label>
+      <input type="text" v-debounce="foo" />
+      <br />
+      <label>Curried Test (1s)</label>
+      <input type="text" debounce-events="click,keydown" v-debounce:1s="testFn('testing')" />
+      <br />
+      <br />
+      <label>Curried Lock Test (700ms)</label>
+      <input type="text" v-debounce:700ms.lock="setterTst('I Set')" />
+      <br />
+      <br /> -->
+      <!-- <label>Blur Test</label>
+      <input type="text" v-debounce="updateTextFieldValue" /> -->
+    </div> -->
+
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://unpkg.com/vuetify@2.6.4/dist/vuetify.js"></script>
+    <script src="../dist/vue-debounce.min.js"></script>
+    <script>
+      Vue.use(vueDebounce.default, { defaultTime: '2s', fireOnEmpty: true })
+      new Vue({
+        el: '#app',
+        vuetify: new Vuetify(),
+        data () {
+          return {
+            textFieldValue: 'initial value'
+          }
+        },
+        methods: {
+          updateTextFieldValue (newVal, type) {
+            console.log('RADDA RADDA')
+            this.textFieldValue = newVal
+          }
+        }
+      })
+    </script>
+  </body>
+
+</html>
