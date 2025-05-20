@@ -38,13 +38,15 @@
     emit('stop')
   }
 
-  const btnClasses = 'btn btn-accent relative h-auto mx-auto md:w-24 p-1 sm:p-2 lg:p-4'
-  const iconClasses = `h-4 w-8 sm:h-5 sm:w-10 md:h-6 md:w-12 lg:h-12 lg:w-12 relative}`
+  const btnClasses = [
+    'btn btn-accent relative h-auto mx-auto @[960px]:w-24 p-1 @[400px]:p-1 @[640px]:p-2 @[1024px]:py-2 @[1024px]:px-8',
+    props.horizontal ? '' : 'px-4'].join(' ')
+  const iconClasses = `h-4 w-8 @[400px]:h-5 @[400px]:w-5 @[960px]:h-6 @[960px]:w-12 relative}`
 
 </script>
 <template>
-  <div class="py-0 sm:py-2 sm:px-12 flex justify-stretch items-center flex-grow relatve z-20"
-    :class="`${horizontal ? 'flex-row px-1' : 'flex-col px-8'}`">
+  <div class="py-0 @[400px]:py-2 @[400px]:px-4 @[640px]:py-2 @[640px]:px-12 flex justify-stretch items-center flex-grow relatve z-20"
+    :class="`${horizontal ? 'flex-row px-1' : 'flex-col '}`">
     <button 
       class=" flex-grow" 
       :class="`${btnClasses} ${horizontal ? 'rounded-r-none rounded-l-3xl' : 'rounded-b-none rounded-t-3xl'}`"
@@ -64,10 +66,10 @@
       />
     </button>
     <button 
-      class="btn bg-red-500 rounded-3xl py-2 lg:py-4 min-w-16 h-auto mx-auto relative z-10"
-      :class="horizontal ? 'md:h-36 rounded-none' : 'w-28 md:w-36 rounded-3xl'"
+      class="btn bg-red-500 rounded-3xl py-2 @[1024px]:py-4 min-w-16 h-auto mx-auto relative z-10"
+      :class="horizontal ? '@[960px]:h-36 rounded-none' : 'w-28 @[960px]:w-36 rounded-3xl'"
        @click="handleStop">
-      <v-icon icon="mdi-stop" class="h-8 w-8 lg:h-12 lg:w-12 relative" />
+      <v-icon icon="mdi-stop" class="h-8 w-8 @[1024px]:h-12 @[1024px]:w-12 relative" />
     </button>
     <button 
       class="rounded-none  flex-grow"
@@ -90,26 +92,3 @@
     </button>
   </div>
 </template>
-<style scroped>
-  
-  .speed-btn {
-    height: auto;
-  }
-  .stop-btn {
-    height: auto;
-    width: 140%;
-    position: relative;
-    left: -20%;
-    z-index: 1;
-  }
-
-  .speed-val {
-    line-height: .75rem;
-  }
-
-  .speed-icon {
-    /* left: 4rem; */
-    left: -0.5rem;
-  }
-
-</style>

@@ -21,6 +21,7 @@
 
   const isOpen = ref(false)
   const functionsCmp = ref(null)
+  const containerRef = ref<HTMLElement | null>(null)
   const currentSpeed = ref(props.throttle?.speed || 0)
 
   watch(currentSpeed, sendLocoSpeed)
@@ -72,8 +73,9 @@
             v-bind="activatorProps" 
             rounded="circle"
             variant="flat"
+            class="text-xl text-2xl"
             :color="loco?.meta?.color || 'primary'"
-            class="text-none !h-16 w-16 md:!h-20 md:w-20" 
+            :size="'x-small'"
             stacked>
               {{throttle.address.toString()}}
           </v-btn>

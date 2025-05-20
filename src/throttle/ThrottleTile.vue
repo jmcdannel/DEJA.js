@@ -57,18 +57,27 @@
 <template>
   <main class="my-2 rounded-2xl shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border " v-if="throttle">
     <section class="p-1 flex flex-row flex-wrap items-center justify-between overflow-auto">
+      <div class="order-1 basis-1/3 py-2" >
         <CurrentSpeed :speed="currentSpeed" />
+      </div>
+      <div class="flex-grow order-4 basis-full py-2">
         <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="adjustSpeed" @stop="handleStop" horizontal class=""  />
+      </div>
+      <div class="order-2 basis-1/3 py-2 flex justify-center">
+        <span v-if="loco" class="text-2xl bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-cyan-400 font-bold">{{loco.name}}</span>
+      </div>
+      <div class="order-2  basis-1/3 py-2 text-center">
         <ThrottleAvatar :throttle="throttle" :loco="loco" @release="handleRelease" @select="handleSelect" />
-        <!-- <LocoAvatar
+      </div>
+    </section>
+  </main>  
+   <!-- <LocoAvatar
           :loco="loco as Loco"
           :throttle="throttle as Throttle"
           :showMenu="true"
           :size="48"
           variant="flat"
         /> -->
-      </section>
-  </main>  
 </template>
 <style scroped>
   .bg-gradient-border {

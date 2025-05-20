@@ -64,75 +64,18 @@ export const useThrottle = () => {
       delay = SWITCH_DIR_DELAY
     }
 
-    console.log('updateSpeed', newSpeed, consist)
-
     if (newSpeed === 0) {
-      // stop
-      // stop(address, consist)
       dccApi.setSpeed(address, 0)
     } else {
       // set speed
       setTimeout(() => {
         dccApi.setSpeed(address, newSpeed)
-        // consist &&
-        //   consist.forEach((cloco) => {
-        //     const clocoSpeed = calculateConsistSpeed(newSpeed, cloco)
-        //     dccApi.setSpeed(address, clocoSpeed)
-        //     // dccApi.sendDccCommand({
-        //     //   action: 'throttle',
-        //     //   payload: {
-        //     //     address: cloco.address,
-        //     //     speed: clocoSpeed,
-        //     //     direction: clocoSpeed || 0 < 0 ? false : true,
-        //     //   },
-        //     // })
-        //   })
       }, delay)
     }
   }
 
   function stop(address: number, consist: ConsistLoco[]) {
     dccApi.setSpeed(address, 0)
-    consist &&
-      consist.forEach((cloco) => {
-        // dccApi.setSpeed(cloco.address, 0)
-        // dccApi.sendDccCommand({
-        //   action: 'throttle',
-        //   payload: {
-        //     address: cloco.address,
-        //     speed: 0,
-        //   },
-        // })
-      })
-  }
-
-  function calculateConsistSpeed(
-    newSpeed: number,
-    consistLoco: ConsistLoco
-  ): number | undefined {
-    if (!consistLoco.trim) {
-      return consistLoco.direction ? newSpeed : -newSpeed
-    }
-    let consistSpeed = newSpeed
-    if (consistLoco.direction) {
-      consistSpeed =
-        newSpeed > 0
-          ? consistSpeed + consistLoco.trim
-          : -consistSpeed - consistLoco.trim
-    } else {
-      consistSpeed =
-        newSpeed > 0
-          ? consistSpeed - consistLoco.trim
-          : -consistSpeed + consistLoco.trim
-    }
-
-    // if (newSpeed > 0 && consistSpeed <= 0) {
-    //   consistSpeed = 1
-    // } else if (newSpeed < 0 && consistSpeed >= 0) {
-    //   consistSpeed = -1
-    // }
-
-    return consistSpeed
   }
 
   return {

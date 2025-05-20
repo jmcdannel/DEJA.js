@@ -32,7 +32,7 @@ function filter(turnouts: ITurnout[]) {
     </v-toolbar-items>
   </v-toolbar>
   <TurnoutFilters v-model:show="showFilters" v-model:selected="selectedDevices"></TurnoutFilters>
-  <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 w-full p-4">
+  <div class="grid grid-cols-1 @[960px]:grid-cols-3 xlg:grid-cols-4 gap-2 w-full p-4">
     <Turnout v-for="item in filter(turnouts)"
       :key="item.id" :turnout="item" :turnoutId="item?.id"></Turnout>
   </div>

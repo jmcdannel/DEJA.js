@@ -6,7 +6,7 @@
 </script>
 
 <template>
-  <main class="min-h-screen forest-background bg-opacity-50 bg-fixed overflow-auto">
+  <main class="@container min-h-screen forest-background bg-opacity-50 bg-fixed overflow-auto">
     <template v-if="user">
       <Turnouts />
     </template>

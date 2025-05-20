@@ -50,7 +50,7 @@ function filter(efxList: IEfx[]) {
   </v-dialog>
   <EffectFilters v-model:show="showFilters" v-model:selected="selectedDevices"></EffectFilters>
   <!-- <pre>{{ viewAs }}</pre> -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 w-full gap-x-4">
+  <div class="grid grid-cols-1 @[960px]:grid-cols-2 w-full gap-x-4">
     <EffectItem 
       v-for="item in filter(list)"
       :key="item.id" 

@@ -40,6 +40,14 @@ const active = ref($router.currentRoute.value.path)
           />
           <v-btn 
             class="sm:px-12"
+            :class="active === '/conductor' ? '' : 'text-red-500'"
+            @click="$router.push('/conductor')"
+            color="red"
+            icon="mdi-account-tie-hat"
+            value="/conductor"
+          />
+          <v-btn 
+            class="sm:px-12"
             :class="active === '/effects' ? '' : 'text-purple-500'"
             @click="$router.push('/effects')"
             color="purple"

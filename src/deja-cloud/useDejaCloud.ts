@@ -44,6 +44,7 @@ export function useDejaCloud() {
         break
       case 'dcc':
       case 'function':
+      case 'output':
         sendDccCommand({ action, payload })
         break
       default:

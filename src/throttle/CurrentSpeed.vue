@@ -11,14 +11,13 @@ defineProps({
     <span class="
       current-speed 
       min-w-16
-      lg:min-w-24
+      @[1024px]:min-w-24
       shadow-blue-500/50 
       text-center 
       text-xl
-      md:text-2xl
-      lg:text-5xl 
-      p-2
-      lg:p-4 
+      @[960px]:text-2xl
+      @[1024px]:text-3xl 
+      p-3
       rounded-xl 
       shadow-inner 
       bg-gradient-to-r 
