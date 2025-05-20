@@ -32,44 +32,48 @@ const loco = computed<Loco|null>(() => currentThrottle?.value && (getLoco(curren
 </script>
 
 <template>
-  <div class="conductor-layout">
-    <div class="column">
-      <div class="@container column-content">
-        <!-- Column 1 content goes here -->
-         <ThrottleList />
+  <main class="@container">
+    <div class="conductor-layout grid grid-cols-1 @[960px]:grid-cols-3 gap-4 w-full">
+      <div class="column order-2 @[960px]:!order-1">
+        <div class="@container column-content">
+          <!-- Column 1 content goes here -->
+          <ThrottleList />
+        </div>
+      </div>
+      <div class="column order-1 @[960px]:!order-2">
+        <div class="@container column-content min-h-[500px]">
+          <!-- Column 2 content goes here -->
+          <!-- <pre>{{throttles}}</pre> -->
+          <v-carousel v-if="throttles && throttles.length > 0" height="100%" hideDelimiters>
+            <v-carousel-item v-for="(throttle, index) in throttles" :key="throttle.address" draggable>
+              <SimpleThrottle
+                :throttle="throttle.address"
+                :loco="getLoco(throttle.address) as Loco"
+                @release="handleRelease"
+              />
+            </v-carousel-item>
+          </v-carousel>
+        </div>
+      </div>
+      <div class="column order-3">
+        <div class="@container column-content">
+          <!-- Column 3 content goes here -->
+          <Turnouts />
+        </div>
       </div>
     </div>
-    <div class="column">
-      <div class="@container column-content">
-        <!-- Column 2 content goes here -->
-         <!-- <pre>{{throttles}}</pre> -->
-        <v-carousel v-if="throttles && throttles.length > 0" height="100%" hideDelimiters>
-          <v-carousel-item v-for="(throttle, index) in throttles" :key="throttle.address" draggable>
-            <SimpleThrottle
-              :throttle="throttle.address"
-              :loco="getLoco(throttle.address) as Loco"
-              @release="handleRelease"
-            />
-          </v-carousel-item>
-        </v-carousel>
-      </div>
-    </div>
-    <div class="column">
-      <div class="@container column-content">
-        <!-- Column 3 content goes here -->
-        <Turnouts />
-      </div>
-    </div>
-  </div>
+  </main>
 </template>
 
 <style scoped>
-.conductor-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 1rem;
+/* .conductor-layout {
   height: calc(100vh - var(--v-layout-bottom) - var(--v-layout-top));
-  width: 100%;
+} */
+
+@media (min-width: 960px) {
+  .conductor-layout {
+    height: calc(100vh - var(--v-layout-bottom) - var(--v-layout-top));
+  }
 }
 
 .column {
