@@ -1,38 +1,46 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import CommandStation from './CommandStation.vue'
-import Dejacloud from './Dejacloud.vue'
+import { ref, onMounted, watchEffect } from 'vue'
+import { useCurrentUser } from 'vuefire'
+import { useStorage } from '@vueuse/core'
+import CommandStationConnect from './CommandStationConnect.vue'
+import Connected from './Connected.vue'
+import useDejaCloudDccConnector from './useDejaCloudDccConnector.ts'
 
 const alreadyConnected = ref(false)
-
+const isConnected = ref(false)
+const { listen } = useDejaCloudDccConnector()
+const layoutId = useStorage('@DEJA/cloud/layoutId', null)
+const user = useCurrentUser()
 
 onMounted(async () => {
   console.log('onMounted', window.serialOutputStream)
   alreadyConnected.value = !!window.serialOutputStream
 })
 
-// function handleOn() {
-//   if (!selected.value) return
+watchEffect(() => {
+  console.log(`watch layoutId ${layoutId.value} ${isConnected.value}`)
+  if (layoutId.value && isConnected.value) {
+    listen(layoutId.value)
+  }
+})
 
-//   send('<1 MAIN>')
-//   setDoc(doc(db, 'layouts', selected.value.layoutId), {
-//     dccEx: { powerStatus: '1 MAIN' }
-//   }, { merge: true })
-// }
+function handleLayoutSelect(layout) {
+  layoutId.value = layout.layoutId
+}
 
-// function handleOff() {
-//   if (!selected.value) return
+function handleLayoutClear() {
+  layoutId.value = null
+}
 
-//   send('<0>')
-//   setDoc(doc(db, 'layouts', selected.value.layoutId), {
-//     dccEx: { powerStatus: '0' }
-//   }, { merge: true })
-// }
+function handleConnected() {
+  console.log('handleConnected')
+  isConnected.value = true
+}
 
 </script>
 <template>
-  <main class="flex min-h-screen w-screen bg-gradient-to-b from-zinc-950 to-zinc-800 justify-center items-center flex-wrap">
-    <Dejacloud />
-    <CommandStation />
+  <main class="flex flex-col justify-start items-start flex-wrap">
+    <CommandStationConnect v-if="layoutId" @connected="handleConnected" />
+    <Connected v-if="isConnected" />
   </main> 
 </template>

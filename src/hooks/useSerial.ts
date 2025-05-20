@@ -47,7 +47,7 @@ export function useSerial(handleMessage: (message: string) => void) {
   async function disconnect() {
     try {
       disconnectServer()
-      isConnected.value = true
+      isConnected.value = false
     } catch (err) {
       console.error(err)
     }
@@ -69,6 +69,7 @@ export function useSerial(handleMessage: (message: string) => void) {
       await port?.open({ baudRate: 115200 }) // open the port at the proper supported baud rate
       connectServer()
       isConnected.value = true
+      console.log("useSerial", isConnected.value)
     } catch (err) {
       console.error(err)
     }
@@ -344,6 +345,7 @@ export function useSerial(handleMessage: (message: string) => void) {
     disconnect,
     send,
     isConnected,
+    getIsConnected: () => isConnected.value,
     getIsActivelyConnected: () => port !== null,
   }
 }
