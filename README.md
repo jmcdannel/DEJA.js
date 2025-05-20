@@ -1,6 +1,6 @@
 # <span style="color: #16c5d9;">DEJA</span>.js
 ## <span style="color: #16c5d9;">D</span>CC-<span style="color: #16c5d9;">E</span>X <span style="color: #16c5d9;">J</span>avaScript <span style="color: #16c5d9;">A</span>pi
-### The Definitive, Tranformative, Innovative DCC-EX CommandStation API
+### The Definitive, Transformative, Innovative DCC-EX CommandStation API
 ---
 > This API runs on any supported device with a [DCC-EX EX-CommandStation](https://dcc-ex.com/ex-commandstation/index.html) connected via USB. DEJA.js can replace JMRI as a lightweight replacement that runs in modern environments.
 
@@ -49,22 +49,22 @@
 ## Replace `your-layout-name` with a descriptive name of your layout. Only use lowercase letter, numbers, and dashed. No spaces. No special characters. No emoji.
 
 #### 🤌 GOOD Examples 
-`LAYOUTID=[my-basement-empire]`
+`LAYOUT_ID=[my-basement-empire]`
 
-`LAYOUTID=[idaho-crossing]`
+`LAYOUT_ID=[idaho-crossing]`
 
-`LAYOUTID=[something-unique]`
+`LAYOUT_ID=[something-unique]`
 
-`LAYOUTID=[apple-munchkin-fairy]`
+`LAYOUT_ID=[apple-munchkin-fairy]`
 
 #### 💩 BAD Examples 
-`LAYOUTID=[My B@sement "Empire"!]`
+`LAYOUT_ID=[My B@sement "Empire"!]`
 
-`LAYOUTID=[ID_cross]`
+`LAYOUT_ID=[ID_cross]`
 
-`LAYOUTID=[my-basement-empire]` (already used!)
+`LAYOUT_ID=[my-basement-empire]` (already used!)
 
-`LAYOUTID=['🍎👶🧚']`
+`LAYOUT_ID=['🍎👶🧚']`
 
 ### 🧩 Usage
 

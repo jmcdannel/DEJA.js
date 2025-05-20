@@ -5,8 +5,8 @@ import dcc from './dcc.mjs'
 const layoutId = process.env.LAYOUT_ID
 const mqttBroker = process.env.VITE_MQTT_BROKER
 const mqttPort = process.env.VITE_MQTT_PORT
-const subscriptionTopics = [`@ttt/dcc/${layoutId}`]
-const publishTopics = [`@ttt/DEJA.js/${layoutId}`]
+const subscriptionTopics = []
+const publishTopics = []
 
 let mqttClient = null
 
@@ -46,7 +46,7 @@ function handleError(error) {
 function handleMessage(topic, message) {
   try {
     log.log(`MQTT mqttClient received message: ${message} from topic: ${topic}`)
-    dcc.handleMessage(message.toString())
+    // dcc.handleMessage(message.toString())
   } catch (error) {
     log.error('MQTT Error in onMessage:', error)
   }
@@ -67,9 +67,9 @@ const connect = () => {
     mqttClient.on('message', handleMessage)
 
     // https://github.com/mqttjs/MQTT.js#event-reconnect
-    // mqttClient.on('reconnect', () => {
-    //   log.log('mqttClient reconnecting')
-    // })
+    mqttClient.on('reconnect', () => {
+      log.log('mqttClient reconnecting')
+    })
   } catch (err) {
     log.error('MQTT Error connecting:', err)
   }
@@ -87,8 +87,7 @@ const disconnect = () => {
 const send = (message) => {
   try {
     log.log('[MQTT]', message, publishTopics)
-    mqttClient &&
-      publishTopics.map((topic) => mqttClient.publish(topic, message))
+    mqttClient && publishTopics.map((topic) => publish(topic, message))
     log.log(
       `MQTT mqttClient sent message: ${message} from topic: ${publishTopics.join(', ')}`
     )
@@ -97,4 +96,27 @@ const send = (message) => {
   }
 }
 
-export default { connect, send, disconnect }
+const subscribe = (topic, keepAlive = true) => {
+  try {
+    mqttClient.subscribe(topic, handleSubscribeError)
+    if (keepAlive && !publishTopics.includes(topic)) {
+      publishTopics.push(topic)
+    }
+  } catch (err) {
+    log.error('MQTT Error subscribing:', err)
+  }
+}
+
+const publish = (topic, message, keepAlive = true) => {
+  try {
+    log.log('mqtt pub', topic, message)
+    mqttClient.publish(topic, message)
+    if (keepAlive && !publishTopics.includes(topic)) {
+      publishTopics.push(topic)
+    }
+  } catch (err) {
+    log.error('MQTT Error publishing:', err)
+  }
+}
+
+export default { connect, send, disconnect, subscribe, publish }

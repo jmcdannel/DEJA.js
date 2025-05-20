@@ -2,27 +2,30 @@ import { SerialPort } from 'serialport'
 import { ReadlineParser } from '@serialport/parser-readline'
 import log from './utils/logger.mjs'
 
-let port
-
 function handleOpen(err) {
   if (err) {
     log.error('[SERIAL] Error opening port:', err.message)
     return
   }
-  log.info('[SERIAL] Port Status', port.isOpen, port.settings)
+  log.info('[SERIAL] Port Opened')
   return true
 }
 
 const connect = ({ path, baudRate, handleMessage }) => {
   try {
-    if (port) {
-      return Promise.resolve(port)
+    if (!path) {
+      return Promise.reject(path)
     } else {
       return new Promise(function (resolve, reject) {
-        if (!path) reject({ message: '[SERIAL] No serial port specified' })
-        log.await('[SERIAL] Attempting to connect to:', path, typeof handleMessage)
+        if (!path)
+          reject({ message: '[SERIAL] No serial port specified: ' + path })
+        log.await(
+          '[SERIAL] Attempting to connect to:',
+          path,
+          typeof handleMessage
+        )
         // Create a port
-        port = new SerialPort({ path, baudRate, autoOpen: false })
+        const port = new SerialPort({ path, baudRate, autoOpen: false })
         port.setEncoding('utf8')
         port.on('open', () => {
           log.complete('[SERIAL] Port opened:', path)
@@ -46,10 +49,10 @@ function handleSend(err) {
   }
 }
 
-const send = (data) => {
+const send = (_port, data) => {
   try {
-    log.await('[SERIAL] writing to port', JSON.stringify(data))
-    port && port.write(data, handleSend)
+    log.await('[SERIAL] writing to port', data)
+    _port && _port.write(data, handleSend)
   } catch (err) {
     log.fatal('[SERIAL] Error writing to port:', err)
   }
