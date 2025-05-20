@@ -1,5 +1,5 @@
 {
-  "name": "@ttt/dcc-api",
+  "name": "dejajs-sserver",
   "version": "0.0.1",
   "description": "NodeJS Websocket Server that processes DCC commands and sends them via Serial over USB to an Arduino Mega running DCC-EX EX-CommandStation.",
   "main": "index.mjs",
@@ -7,6 +7,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
+    "dev": "node --env-file .env ./index.mjs",
     "start": "node --env-file .env ./index.mjs",
     "lint": "eslint",
     "format": "prettier --write ."
