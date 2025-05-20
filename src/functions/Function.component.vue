@@ -9,11 +9,19 @@
     },
     address: {
         type: Number
+    },
+    showLabel: {
+        type: Boolean,
+        default: false
+    },
+    showDefaultIcon: {
+        type: Boolean,
+        default: false
     }
   })
   
   const dccApi = useDcc()  
-  const func1State = ref(false);
+  const func1State = ref(props.func.state);
 
   async function cabFuction() {
     func1State.value = !func1State.value;
@@ -26,11 +34,23 @@
   }
 </script>
 <template>
-  <button @click="cabFuction()"
-    class="relative btn btn-md w-full bg-gradient-to-br from-cyan-600 to-indigo-600">
-    <FunctionIcon v-if="func?.icon" :icon="func?.icon" class="w-6 h-6" />
+  <button v-if="func" @click="cabFuction()"
+    class="relative btn btn-md min-w-16 bg-gradient-to-br from-cyan-600 to-indigo-600">
+    <FunctionIcon v-if="func?.icon" :icon="func?.icon" 
+      class="w-4 h-4 md:w-6 md:h-6" 
+      :class="func1State ? 'text-green-400' : 'text-gray-200'"
+    />
+    <FunctionIcon v-else-if="showDefaultIcon" icon="track" 
+      class="w-4 h-4 md:w-6 md:h-6" 
+      :class="func1State ? 'text-green-400' : 'text-gray-200'"
+    />
     <template v-else>
-      <div class="w-6 h-6 flex items-center justify-center">{{ func?.label }}</div>
+      <div 
+        class="w-4 h-4 md:w-6 md:h-6 flex items-center justify-center"
+        :class="func1State ? 'text-green-400' : 'text-gray-200'">
+        {{ func?.label }}
+      </div>
     </template>
+    <span v-if="showLabel" class="ml-2">{{ func?.label }}</span>
   </button>  
 </template>

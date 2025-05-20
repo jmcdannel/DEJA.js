@@ -1,14 +1,23 @@
 <script setup lang="ts">
-  import { defineEmits, defineProps, onMounted, ref, watch, toRef } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { refDebounced, watchDebounced } from '@vueuse/core'
 
-  const emit = defineEmits(['update:currentSpeed', 'stop'])
+  const emit = defineEmits(['update', 'stop'])
 
   const props  = defineProps({
     speed: {
       type: Number,
       required: true
     },
+    throttleVal: {
+      type: Number,
+      required: true
+    },
     disabled: {
+      type: Boolean,
+      default: false
+    },
+    direction: {
       type: Boolean,
       default: false
     },
@@ -18,113 +27,82 @@
     }
   })
 
-  const slider = ref(null)
-  const sliderPosition = ref(0)
-  const speed = toRef(props, 'speed')
+  const sliderSpeed = computed( () => Math.abs(props.speed) )
+  const sliderVal = ref(Math.abs(props.speed))
 
-  let down = false
-  let sliderHeight = 0
-  let sliderTop = 0
+  watchDebounced(sliderSpeed, () => {
+    console.log('watchDebounced', sliderVal.value)
+    sliderVal.value = sliderSpeed.value
+    // emit('update', sliderVal.value)
+  }, { debounce: 500, maxWait: 1000 })
 
-
-  onMounted(() => {
-    if (slider?.value) {
-      const sliderEl = slider.value as HTMLElement
-      sliderHeight = sliderEl.clientHeight
-      sliderTop = sliderEl.getBoundingClientRect().top
-    }
-    updateSlider(speed.value)
+  watch(sliderVal, () => {
+    console.log('watch sliderVal', sliderVal.value)
+    emit('update', sliderVal.value)
   })
 
-
-  function sliderUp() {
-    if (props.disabled) {
-      return
-    }
-    down = false
+  function handleSlider(val) {
+    console.log('handleSlider', val)
+    sliderVal.value = val
   }
-
-  function sliderDown(event: MouseEvent) {
-    if (props.disabled) {
-      return
-    }
-    down = true
-    updateDragger(event.offsetY)
-    return false
-  }
-
-  function sliderMove(event: MouseEvent) {
-    if (props.disabled) {
-      return
-    }
-    if (down) {
-      // console.log('sliderMove', event.clientY - sliderTop, event.clientY, sliderTop)
-      if (event.clientY - sliderTop > 1 && event.clientY - sliderTop < sliderHeight - 1) {
-        updateDragger(event.clientY - sliderTop)
-      }
-    }
-  }
-
-  function updateSlider(y: number) {
-    // console.log('updateSlider', y, sliderHeight, (Math.abs(y) * sliderHeight / 100))
-    sliderPosition.value = sliderHeight - (Math.abs(y) * sliderHeight / 100) - 8
-  }
-
-  function updateDragger(y: number) {
-    const newSpeed = 100 - (y / sliderHeight * 100)
-    // console.log('updateDragger', y, parseInt(newSpeed.toString()))
-    emit('update:currentSpeed', parseInt(newSpeed.toString()))
-    
-    sliderPosition.value = y - 8
-  }
-
-  watch(speed, (val) => {
-    updateSlider(val)
-  })
 
 </script>
 <template>
-  <div 
-    ref="slider" 
-    class="
-      range-slider 
-      w-12
-      md:w-24 
-      h-full 
-      mx-auto 
-      my-0 
-      relative
-      before:content-['']
-      before:block
-      before:absolute
-      before:top-0
-      before:left-0
-      before:w-full
-      before:h-full
-      before:bg-cyan-400"
-    :class="props.disabled ? 'opacity-30' : 'opacity-100'" 
-    @mousedown="sliderDown"
-    @mouseup="sliderUp" 
-    @mousemove="sliderMove">
-    <span 
-      class="
-        block 
-        h-4 
-        w-16
-        md:w-36 
-        -left-2 
-        md:-left-6 
-        bg-pink-500 
-        relative 
-        z-10 
-        cursor-pointer 
-        rounded-lg 
-        opacity-80"
-      :class="props.disabled ? 'bg-gray-500 cursor-not-allowed' : 'bg-pink-500 cursor-pointer'"
-      :style="{ top: sliderPosition + 'px' }" ref="dragger">
-    </span>
-  </div>
+  <!-- <VaSlider
+    v-model="sliderVal"
+    class=""
+    :label="direction ? 'FWD' : 'REV'"
+    vertical
+    track-label-visible
+    show-ticks
+    @change="emit('update', sliderVal)"
+    :step="1"
+  >
+    <template #trackLabel="{ value }">
+      <v-chip
+        :color="direction ? 'green-500' : 'red-500'"
+        size="small"
+      >
+        {{ value }}
+      </v-chip>
+    </template>
+  </VaSlider> -->
+  <v-slider
+    :model-value="sliderVal"
+    class=" content-end"
+    direction="vertical"
+    :label="direction ? 'FWD' : 'REV'"
+    @update:model-value="handleSlider"
+    step="1"
+    density="comfortable"
+    thumb-label="always"
+    show-ticks
+    color="purple"
+    track-color="purple"
+    track-fill-color="blue"
+    thumb-color="purple"
+    min-width="5rem"
+    thumb-size="20"
+    track-size="50"
+  >
+  </v-slider>
 </template>
-<style scoped>
+<style >
+:root {
+  --va-slider-handler-width: 4rem;
+  --va-slider-handler-border-radius: 0.5rem;
+  --va-slider-handler-left: -1rem;
+  --va-slider-handler-transition: .5s;
 
+  --va-slider-vertical-label-inverse-left: 2rem;
+  --va-slider-vertical-dot-value-top: 1rem;
+  --va-slider-vertical-dot-value-left: 5.5rem;
+  --va-slider-vertical-track-width: 2rem;
+}
+.va-slider--vertical .va-slider__container {
+  width: 2.2rem;
+}
+.va-slider--vertical .va-slider__mark {
+  width: 2.2rem;
+}
 </style>

@@ -1,17 +1,16 @@
 <script setup lang="ts">
   import { defineEmits } from 'vue'
-  import chevronUpIconSvg from '@/assets/icons/chevron-up.svg'
-  import chevronDownIconSvg from '@/assets/icons/chevron-down.svg'
-  import chevronDoubleUpIconSvg from '@/assets/icons/chevron-double-up.svg'
-  import chevronDoubleDownIconSvg from '@/assets/icons/chevron-double-down.svg'
-  import stopIconSvg from '@/assets/icons/stop.svg'
-
+  
   const props  = defineProps({
     speed: {
       type: Number,
       required: true
     },
     disabled: {
+      type: Boolean,
+      default: false
+    },
+    horizontal: {
       type: Boolean,
       default: false
     }
@@ -39,76 +38,57 @@
     emit('stop')
   }
 
-  const btnClasses = 'btn btn-accent relative h-auto mx-auto md:w-24 '
-  const iconClasses = 'h-8 w-8 md:h-16 md:w-16 relative'
+  const btnClasses = [
+    'btn btn-accent relative h-auto mx-auto @[960px]:w-24 p-1 @[400px]:p-1 @[640px]:p-2 @[1024px]:py-2 @[1024px]:px-8',
+    props.horizontal ? '' : 'px-4'].join(' ')
+  const iconClasses = `h-4 w-8 @[400px]:h-5 @[400px]:w-5 @[960px]:h-6 @[960px]:w-12 relative}`
 
 </script>
 <template>
-  <div class="px-2 py-4 flex flex-col justify-center align-middle">
+  <div class="py-0 @[400px]:py-2 @[400px]:px-4 @[640px]:py-2 @[640px]:px-12 flex justify-stretch items-center flex-grow relatve z-20"
+    :class="`${horizontal ? 'flex-row px-1' : 'flex-col '}`">
     <button 
-      class="rounded-b-none rounded-t-3xl" 
-      :class="btnClasses"
+      class=" flex-grow" 
+      :class="`${btnClasses} ${horizontal ? 'rounded-r-none rounded-l-3xl' : 'rounded-b-none rounded-t-3xl'}`"
       @click="handleUp5">
-      <img 
-        :src="chevronDoubleUpIconSvg" 
-        :class="iconClasses"
-      />
+      <v-icon 
+        :icon="horizontal ? 'mdi-plus-thick' : 'mdi-chevron-double-up'" 
+        :class="iconClasses" />
     </button>
     <hr class="border-black" />
     <button 
-      class="rounded-none" 
+      class="rounded-none flex-grow" 
       :class="btnClasses"
       @click="handleUp">
-      <img 
-        :src="chevronUpIconSvg" 
+      <v-icon 
+        :icon="horizontal ? 'mdi-plus' : 'mdi-chevron-up'" 
         :class="iconClasses"
       />
     </button>
     <button 
-      class="btn btn-primary rounded-3xl h-auto mx-auto w-28 md:w-36 relative z-10" @click="handleStop">
-      <img :src="stopIconSvg" :class="iconClasses" />
+      class="btn bg-red-500 rounded-3xl py-2 @[1024px]:py-4 min-w-16 h-auto mx-auto relative z-10"
+      :class="horizontal ? '@[960px]:h-36 rounded-none' : 'w-28 @[960px]:w-36 rounded-3xl'"
+       @click="handleStop">
+      <v-icon icon="mdi-stop" class="h-8 w-8 @[1024px]:h-12 @[1024px]:w-12 relative" />
     </button>
     <button 
-      class="rounded-none"
+      class="rounded-none  flex-grow"
       :class="btnClasses" 
       @click="handleDown">
-      <img 
-        :src="chevronDownIconSvg" 
+      <v-icon 
+        :icon="horizontal ? 'mdi-minus' : 'mdi-chevron-down'" 
         :class="iconClasses"
       />
     </button>
     <hr class="border-black" />
     <button 
-      class="rounded-t-none rounded-b-3xl" 
-      :class="btnClasses"
+      class="flex-grow" 
+      :class="`${btnClasses} ${horizontal ? 'rounded-l-none rounded-r-3xl' : 'rounded-t-none rounded-b-3xl'}`"
       @click="handleDown5">
-      <img 
-        :src="chevronDoubleDownIconSvg" 
+      <v-icon 
+        :icon="horizontal ? 'mdi-minus-thick' : 'mdi-chevron-double-down'"
         :class="iconClasses"
       />
     </button>
   </div>
 </template>
-<style scroped>
-  
-  .speed-btn {
-    height: auto;
-  }
-  .stop-btn {
-    height: auto;
-    width: 140%;
-    position: relative;
-    left: -20%;
-    z-index: 1;
-  }
-
-  .speed-val {
-    line-height: .75rem;
-  }
-
-  .speed-icon {
-    /* left: 4rem; */
-    left: -0.5rem;
-  }
-
-</style>

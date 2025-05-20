@@ -1,28 +1,79 @@
 <script setup lang="ts">
-  import { onMounted, ref } from 'vue'
+  import { onMounted, ref, watch } from 'vue'
   import { storeToRefs } from 'pinia'
   import { RouterView } from 'vue-router'
+  import { getAuth, onAuthStateChanged } from 'firebase/auth'
+  import { useCurrentUser } from 'vuefire'
+  import { useConnectionStore } from '@/connections/connectionStore'
+  import { useDejaJs } from '@/api/useDejaJs'
+  import { db,firebaseApp } from '@/firebase'
   import HeaderView from '@/views/HeaderView.vue'
   import FooterView from '@/views/FooterView.vue'
-  import DEJAConnect from '@/core/DEJAConnect.component.vue'
-  import { useConnectionStore } from '@/connections/connectionStore'
+  import ContextMenu from '@/core/ContextMenu.vue'
+  import DejaJsConnect from '@/core/DejaJsConnect.component.vue'
+  import DejaCloudConnect from '@/deja-cloud/DejaCloudConnect.vue'
+  import { useDejaCloudStore } from '@/deja-cloud/dejaCloudStore'
   
-  const conn = useConnectionStore()
-  const { layoutId } = storeToRefs(conn)
+  const user = useCurrentUser()
+  const dejaJsApi = useDejaJs()
+  const connectionStore = useConnectionStore()
+  const dejaCloudStore = useDejaCloudStore()
+  const { layoutId, isDejaJS, isDejaServer, connectionType } = storeToRefs(connectionStore)
+  const { initialized } = storeToRefs(dejaCloudStore)
   
+  onMounted(async () => {
+    const auth = getAuth(firebaseApp)
+    console.log('App.vue onMounted', auth)
+    onAuthStateChanged(auth, async function(user) {
+      // if (connectionType.value === 'dejaJS') {
+        if (user) {
+          // User is signed in.
+          console.log('User is signed in.', auth)
+          layoutId.value && await dejaJsApi.connectDejaCloud()
+          // layoutId.value && await dejaCloudStore.init(layoutId.value)
+        } else {
+          // No user is signed in.
+          console.log('No user is signed in.', auth)
+          // await dejaJsApi.connectMqtt()
+        }
+      // }
+    })
+    // if (layoutId.value) {
+    //   console.log('connecting from App.vue', user.value, user?.value?.email, layoutId?.value, connectionType.value)
+    //   if (connectionType.value === 'dejaJS') {
+    //     await dejaJsApi.connect()
+    //   }
+    // }
+  })
+
+  watch(layoutId.value, (newVal:string, oldVal:string) => {
+    console.log('layoutId changed', newVal, oldVal, connectionType.value)
+  })
+
 </script>
 
 <template>
-  <template v-if="layoutId">
-    <DEJAConnect />
-  </template>
-  <main class="flex flex-col h-screen max-w-screen-md mx-auto">
-    <HeaderView />
-    <main class="flex-grow flex mb-16 min-h-0">
-      <RouterView />
-    </main>
-    <FooterView />
-  </main>
+  <v-responsive>
+    <v-app theme="dark">
+      <template v-if="user && layoutId && connectionType === 'dejaJS'">
+        <DejaJsConnect />
+      </template>
+      <template v-if="user && layoutId">
+        <DejaCloudConnect />
+      </template>
+      <HeaderView />
+      <v-main>
+        <v-container class="p-0 min-h-full flex flex-col" fluid>
+          <!-- <main class="flex flex-col h-screen w-full mx-auto relative"> -->
+          <!-- <v-container class="flex-grow flex flex-col mb-16 min-h-0 p-0" fluid> -->
+          <!-- <ContextMenu /> -->
+          <RouterView />
+          <!-- </main> -->
+        </v-container>
+      </v-main>
+      <FooterView v-if="!!user" :layoutId="layoutId"></FooterView>
+    </v-app>
+  </v-responsive>
 </template>
 <style>
   .fade-enter-active,
@@ -43,4 +94,5 @@
   .slide-out-enter-to {
     transform: translateX(0);
   }
+
 </style>

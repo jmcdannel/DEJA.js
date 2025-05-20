@@ -17,19 +17,21 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/"
   },
-  "resolutions": {
-    "alias": {
-      "@": "./src"
-    }
-  },
   "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "@tailwindcss/container-queries": "^0.1.1",
+    "dayjs": "^1.11.13",
+    "firebase": "^10.13.1",
     "mqtt-vue-hook": "^1.2.20",
     "pinia": "^2.1.6",
     "realm-web": "^2.0.0",
     "vue": "^3.3.4",
     "vue-debounce": "^5.0.0",
     "vue-router": "^4.2.2",
-    "vue3-icons": "^0.1.13"
+    "vue3-icons": "^0.1.13",
+    "vuefire": "^3.2.0",
+    "vuestic-ui": "^1.10.0",
+    "vuetify": "^3.7.3"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.2.0",
@@ -43,6 +45,7 @@
     "@vue/eslint-config-typescript": "^11.0.3",
     "@vue/test-utils": "^2.3.2",
     "@vue/tsconfig": "^0.4.0",
+    "@vueuse/core": "^11.0.3",
     "autoprefixer": "^10.4.14",
     "daisyui": "^4.12.10",
     "eslint": "^8.39.0",
@@ -55,7 +58,7 @@
     "tailwindcss": "^3.3.2",
     "typescript": "~5.0.4",
     "vite": "^4.3.9",
-    "vitest": "^0.32.0",
+    "vitest": "^2.0.5",
     "vue-tsc": "^1.6.5"
   }
 }

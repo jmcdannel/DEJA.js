@@ -1,32 +1,19 @@
 <script setup lang="ts">
-  import { defineProps } from 'vue'
-  import { 
-    PiHeadlightsFill,
-    PiBellFill
-  } from 'vue3-icons/pi'
-  import { 
-    FaBullhorn,
-    FaChevronCircleLeft,
-    FaChevronCircleRight,
-    FaMinus,
-    FaPlus,
-    FaRegStar,
-    FaTimesCircle,
-  } from 'vue3-icons/fa'
-  import { RiTrainWifiFill } from 'vue3-icons/ri'
+  import { ref } from 'vue'
+  import { useFunctionIcon } from '@/functions/useFunctionIcon'
 
-  defineProps({
+  const props = defineProps({
     icon: {
       type: String
     }
   })
 
+  const functionIcons = useFunctionIcon()
+
+  const iconCmp = ref(functionIcons.getIconComponent(props?.icon || ''))
+
 </script>
 <template>
-  <PiHeadlightsFill v-if="icon === 'light'" />
-  <PiBellFill v-else-if="icon === 'bell'" class="w-6 h-6" />
-  <FaBullhorn v-else-if="icon === 'horn'" class="w-6 h-6" />
-  <template v-else>
-    <RiTrainWifiFill class="w-6 h-6" />
-  </template>
+  <component :is="iconCmp" class="h-8 w-8 stroke-none" />
+   <!-- <pre v-if="icon">{{ functionIcons.getIconComponent(icon) }}</pre> -->
 </template>

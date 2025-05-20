@@ -6,7 +6,6 @@
     FaChevronRight,
   } from "vue3-icons/fa";
 
-  const direction = ref(null as(null | boolean))
 
   const emit = defineEmits(['update:currentSpeed', 'stop'])
 
@@ -21,6 +20,7 @@
     }
   })
 
+  const direction = ref(props.speed > -1 ? true : false)
   const speed = toRef(props, 'speed')
 
   function handleForward() {
@@ -36,6 +36,7 @@
   }
 
   function handleSliderUpdate(val: number) {
+    console.log('handleSliderUpdate', val)
     if (direction.value === null) {
       return
     } else if (direction.value === true) {
@@ -64,7 +65,7 @@
 
   watch(speed, (val: number) => {
     if (val === 0) {
-      direction.value = null
+      // direction.value = true
     } else if (val > 0) {
       direction.value = true
     } else if (val < 0) {
@@ -74,10 +75,14 @@
 
 </script>
 <template>
-  <div class="flex flex-col h-full">
-    <div class="flex-grow">
-      <ThrottleSlider :speed="speed" @update:currentSpeed="handleSliderUpdate" @stop="$emit('stop')" :disabled="isDisabled()" />
-    </div>
+  <div class="flex flex-col h-full justify-end">
+    <ThrottleSlider 
+      :speed="speed" 
+      :throttleVal.sync="Math.abs(speed)" 
+      :direction.sync="direction" 
+      :disabled="isDisabled()"
+      @update="handleSliderUpdate" 
+      @stop="$emit('stop')"  />
     <div class="flex mt-4 align-middle justify-center">
       <button 
         @click="handleReverse" 

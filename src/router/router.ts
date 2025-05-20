@@ -1,48 +1,75 @@
-import { createRouter, createWebHistory } from "vue-router"
-import HomeView from "@/views/HomeView.vue"
-import SelectConnections from "@/connections/SelectConnections.component.vue"
+import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '@/views/HomeView.vue'
+import SelectConnections from '@/connections/SelectConnections.component.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: "/",
-      name: "home",
+      path: '/',
+      name: 'home',
       component: HomeView,
     },
     {
-      path: "/throttle/:locoId?",
-      name: "throttle",
-      component: () => import("../views/ThrottleView.vue"),
+      path: '/locos',
+      name: 'roster',
+      component: () => import('../views/RosterView.vue'),
     },
     {
-      path: "/connect",
-      name: "connect",
+      path: '/conductor',
+      name: 'conductor',
+      component: import('../views/ConductorView.vue'),
+    },
+    {
+      path: '/connect',
+      name: 'connect',
       component: SelectConnections,
     },
     {
-      path: "/connect/deja",
-      name: "deja",
-      component: () =>
-        import("../connections/deja/DejaConnection.component.vue"),
+      path: '/effects',
+      name: 'effects',
+      component: () => import('../views/EffectsView.vue'),
     },
     {
-      path: "/connect/emulator",
-      name: "emulator",
-      component: () =>
-        import("../connections/emulator/EmulatorConnect.component.vue"),
+      path: '/routes',
+      name: 'routes',
+      component: () => import('../views/RoutesView.vue'),
     },
     {
-      path: "/connect/layout-id",
-      name: "layout-id",
-      component: () =>
-        import("../connections/layout-id/LayoutConnect.component.vue"),
+      path: '/turnouts',
+      name: 'turnouts',
+      component: () => import('../views/TurnoutsView.vue'),
     },
     {
-      path: "/connect/serial",
-      name: "serial",
-      component: () =>
-        import("../connections/serial/SerialConnect.component.vue"),
+      path: '/throttle/:address',
+      name: 'throttle',
+      component: () => import('../views/ThrottleView.vue'),
+      props: { dejaCloud: false },
+    },
+    {
+      path: '/cloud-throttle/:address',
+      name: 'cloud-throttle',
+      component: () => import('../views/CloudThrottleView.vue'),
+    },
+    {
+      path: '/throttle-list',
+      name: 'throttle-list',
+      component: () => import('../views/ThrottleList.vue'),
+    },
+    {
+      path: '/connect/dejajs',
+      name: 'dejajs',
+      component: () => import('../connections/deja/DejaJs.vue'),
+    },
+    {
+      path: '/connect/deja-cloud',
+      name: 'deja-cloud',
+      component: () => import('../connections/deja/DejaCloud.vue'),
+    },
+    {
+      path: '/connect/deja-direct',
+      name: 'deja-direct',
+      component: () => import('../connections/deja/DejaServer.vue'),
     },
   ],
 })

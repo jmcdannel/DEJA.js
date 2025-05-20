@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-  import { defineProps, ref } from 'vue';
 
   import { 
     FaChevronCircleLeft,
     FaChevronCircleRight,
   } from "vue3-icons/fa";
+
+  defineEmits(['toggleDir'])
 
   const props = defineProps({
     cloco: {

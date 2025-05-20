@@ -1,58 +1,81 @@
 <script setup lang="ts">
-  import { storeToRefs } from 'pinia'
-  import { useConnectionStore } from '@/connections/connectionStore.jsx'
-  import { BsFillLightningChargeFill } from 'vue3-icons/bs'
-  import { 
-    IoIosCog,
-  } from "vue3-icons/io";
-  import { AiFillControl } from "vue3-icons/ai";
-
-  
-  const { layoutId } = storeToRefs(useConnectionStore())
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import ThrottleNav from '@/throttle/ThrottleNav.vue'
+defineProps({
+  layoutId: {
+    type: String,
+    required: true
+  },
+})
+const $router = useRouter()
+const active = ref($router.currentRoute.value.path)
 </script>
 <template>
-  <footer class="relative">
-    <div class="btm-nav max-w-screen-md mx-auto">
-      <!-- <router-link
-        to="/effects"
-        custom
-        v-slot="{ navigate }"
-      >
-        <button class="text-primary" :class="{ active: ($route?.name === 'effects') }" @click="navigate" role="link"></button>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-          </svg>
-        </button>
-      </router-link> -->
-      <router-link
-        :to="`/`"
-        custom
-        v-slot="{ navigate }"
-      >
-        <button class="text-primary" :class="{ active: ($route?.name === 'home' || $route?.name === 'throttle') }" @click="navigate" role="link">
-          <AiFillControl  class="w-6 h-6" />
-        </button>
-      </router-link>
-      <router-link
-        :to="`/connect`"
-        custom
-        v-slot="{ navigate }"
-      >
-        <button class="text-primary" :class="{ active: ($route?.name === 'connect') }" @click="navigate" role="link">
-          <IoIosCog  class="w-6 h-6" />
-        </button>
-      </router-link>
-      <!-- <router-link
-        to="/turnouts"
-        custom
-        v-slot="{ navigate }"
-      >
-        <button class="text-primary" :class="{ active: ($route?.name === 'turnouts') }" @click="navigate" role="link">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-          </svg>
-        </button>
-      </router-link> -->
-    </div>
-  </footer>
+  <v-footer app class="bg-transparent">
+    <v-container fluid class="p-0">
+      <v-row class="pt-2 pb-3 px-0">
+        <v-spacer />
+        <v-btn-toggle 
+          class="border-2 border-primary"
+          divided 
+          rounded="pill" 
+          variant="flat" 
+          v-model="active">
+          <v-btn 
+            class="sm:px-12 'opacity-65"
+            :class="active === '/locos' ? '' : 'text-pink-500'"
+            @click="$router.push('/locos')"
+            color="pink"
+            icon="mdi-train"
+            value="/locos"
+          />
+          <v-btn 
+            class="sm:px-12"
+            :class="active === '/throttle-list' ? '' : 'text-green-500'"
+            @click="$router.push('/throttle-list')"
+            color="green"
+            icon="mdi-view-list"
+            value="/throttle-list"
+          />
+          <v-btn 
+            class="sm:px-12"
+            :class="active === '/conductor' ? '' : 'text-red-500'"
+            @click="$router.push('/conductor')"
+            color="red"
+            icon="mdi-account-tie-hat"
+            value="/conductor"
+          />
+          <v-btn 
+            class="sm:px-12"
+            :class="active === '/effects' ? '' : 'text-purple-500'"
+            @click="$router.push('/effects')"
+            color="purple"
+            icon="mdi-rocket"
+            value="/effects"
+          />
+          <v-btn 
+            class="sm:px-12"
+            :class="active === '/turnouts' ? '' : 'text-yellow-500'"
+            @click="$router.push('/turnouts')"
+            color="yellow"
+            icon="mdi-call-split"
+            value="/turnouts"
+          />
+          <v-btn 
+            class="sm:px-12"
+            :class="active === '/routes' ? '' : 'text-blue-500'"
+            @click="$router.push('/routes')"
+            color="blue"
+            icon="mdi-tournament"
+            value="/routes"
+          />
+        </v-btn-toggle>
+        <v-spacer />
+      </v-row>
+      <v-row class="p-2 bg-gradient-to-r from-zinc-950 to-gray-950">
+        <ThrottleNav v-if="!!layoutId" />
+      </v-row>
+    </v-container>
+  </v-footer>
 </template>
