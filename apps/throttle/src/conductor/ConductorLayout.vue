@@ -30,7 +30,6 @@ function getLoco(locoAddress: number) {
 const loco = computed<Loco|null>(() => currentThrottle?.value && (getLoco(currentThrottle.value?.address) as Loco) || null)
 
 </script>
-
 <template>
   <main class="@container">
     <div class="conductor-layout grid grid-cols-1 @[960px]:grid-cols-3 gap-4 w-full">

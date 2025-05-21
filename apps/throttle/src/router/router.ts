@@ -38,7 +38,7 @@ const router = createRouter({
     {
       path: '/conductor',
       name: 'conductor',
-      component: import('../views/ConductorView.vue'),
+      component: () => import('../views/ConductorView.vue'),
     },
     {
       path: '/throttle/:address',
