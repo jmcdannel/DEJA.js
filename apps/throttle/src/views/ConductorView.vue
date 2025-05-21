@@ -11,8 +11,5 @@ console.log('ConductorView user', user)
     <template v-if="user">
       <ConductorLayout />
     </template>
-    <template v-else>
-      <p class="text-red-500">Login to DejaCloud to view effects.</p>
-    </template>
   </main>
 </template>
