@@ -9,8 +9,7 @@ console.log('ConductorView user', user)
 <template>
   <main class="@container flex flex-col flex-grow w-full viaduct-background bg-opacity-50 bg-fixed overflow-auto conductor-view">
     <template v-if="user">
-      <!-- <ConductorLayout /> -->
-       <p>test</p>
+      <ConductorLayout />
     </template>
     <template v-else>
       <p class="text-red-500">Login to DejaCloud to view effects.</p>
