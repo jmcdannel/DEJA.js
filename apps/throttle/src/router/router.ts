@@ -16,11 +16,6 @@ const router = createRouter({
       component: () => import('../views/RosterView.vue'),
     },
     {
-      path: '/conductor',
-      name: 'conductor',
-      component: import('../views/ConductorView.vue'),
-    },
-    {
       path: '/connect',
       name: 'connect',
       component: SelectConnections,
@@ -39,6 +34,11 @@ const router = createRouter({
       path: '/turnouts',
       name: 'turnouts',
       component: () => import('../views/TurnoutsView.vue'),
+    },
+    {
+      path: '/conductor',
+      name: 'conductor',
+      component: import('../views/ConductorView.vue'),
     },
     {
       path: '/throttle/:address',

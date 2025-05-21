@@ -67,6 +67,9 @@
           <!-- <main class="flex flex-col h-screen w-full mx-auto relative"> -->
           <!-- <v-container class="flex-grow flex flex-col mb-16 min-h-0 p-0" fluid> -->
           <!-- <ContextMenu /> -->
+          <div class="text-caption text-grey-darken-1 mt-2">
+            {{ $route.path }}
+          </div>
           <RouterView />
           <!-- </main> -->
         </v-container>
