@@ -11,11 +11,8 @@ import Effects from '@/effects/Effects.vue'
 const { releaseThrottle } = useDejaCloud()
 const { getThrottles, getLocos } = useLocos()
 
-const address = ref(17) // Example address, replace with actual logic to get the address
 const throttles = getThrottles()
 const locos = getLocos()
-
-const currentThrottle = computed<Throttle|null>(() => (throttles?.value.find((throttle) => throttle.address === address.value) as Throttle) || null)
 
 async function handleRelease(address: number) {
   if (address) {
@@ -26,8 +23,6 @@ async function handleRelease(address: number) {
 function getLoco(locoAddress: number) {
   return locos?.value.find((loco) => loco.locoId === locoAddress)
 }
-
-const loco = computed<Loco|null>(() => currentThrottle?.value && (getLoco(currentThrottle.value?.address) as Loco) || null)
 
 </script>
 <template>
@@ -44,9 +39,9 @@ const loco = computed<Loco|null>(() => currentThrottle?.value && (getLoco(curren
           <!-- Column 2 content goes here -->
           <!-- <pre>{{throttles}}</pre> -->
           <v-carousel v-if="throttles && throttles.length > 0" height="100%" hideDelimiters>
-            <v-carousel-item v-for="(throttle, index) in throttles" :key="throttle.address" draggable>
+            <v-carousel-item v-for="(throttle) in throttles" :key="throttle.address" draggable>
               <SimpleThrottle
-                :throttle="throttle.address"
+                :throttle="throttle as Throttle"
                 :loco="getLoco(throttle.address) as Loco"
                 @release="handleRelease"
               />

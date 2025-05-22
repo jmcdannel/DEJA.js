@@ -160,6 +160,8 @@ export async function handleEffect(payload) {
     await conn.send(conn.port, command)
   } else if (layoutDevice?.connection === 'wifi') {
     await conn.send(conn.topic, JSON.stringify(command))
+  } else if (layoutDevice?.type === 'dcc-ex') {
+    await dcc.sendDccCommand(JSON.stringify(command))
   }
 }
 

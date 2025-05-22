@@ -1,5 +1,6 @@
 <script async setup lang="ts">
   import { useRouter } from 'vue-router'
+  import type { Loco, Throttle } from '@/throttle/types'
   import ThrottleTile from '@/throttle/ThrottleTile.vue'
 
   import { useLocos } from '@/api/useLocos'
@@ -27,7 +28,6 @@
   }
 
   function getLoco(locoAddress: number) {
-    console.log('getLoco', locoAddress, locos?.value)
     return locos?.value.find((loco) => loco.locoId === locoAddress)
   }
 
@@ -42,15 +42,15 @@
         v-for="throttle in throttles"        
         :key="throttle.id">
         <ThrottleTile        
-          :throttle="throttle" 
-          :loco="getLoco(throttle.address)"
+          :throttle="throttle as Throttle" 
+          :loco="getLoco(throttle.address) as Loco"
           @release="handleRelease"
           @select="handleSelect"
         />
       </div>
     </div>
   </template>
-  <!-- <pre>
+  <pre>
     {{ throttles }}
-  </pre> -->
+  </pre>
 </template>

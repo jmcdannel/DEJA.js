@@ -70,7 +70,7 @@ const handleConnectionMessage = async (payload) =>
 const send = async (data) => {
   try {
     const cmd = `<${data}>\n`
-    log.await('Writing to port', data)
+    // log.await('Writing to port', data)
     serial.send(com.port, cmd)
   } catch (err) {
     log.fatal('Error writting to port:', err)
@@ -137,9 +137,9 @@ const sendSpeed = async ({ address, speed }) => {
   await send(cmd)
 }
 
-const sendTurnout = async ({ turnoutId, state }) => {
-  log.star('Turnout', turnoutId, state)
-  const cmd = `T ${turnoutId} ${state ? 1 : 0}`
+const sendTurnout = async ({ turnoutIdx, state }) => {
+  log.star('Turnout', turnoutIdx, state)
+  const cmd = `T ${turnoutIdx} ${state ? 1 : 0}`
   await send(cmd)
 }
 
@@ -183,6 +183,7 @@ export default {
   setConnection,
   sendSpeed,
   sendCommand: send,
+  sendTurnout,
   handleDccChange,
   dccSerial: com,
 }

@@ -1,46 +1,32 @@
 <script setup lang="ts">
-  import { ref, watch, type PropType } from 'vue'
+import { watch, type PropType } from 'vue'
+import ThrottleButtonControls from './ThrottleButtonControls.component.vue'
+import CurrentSpeed from './CurrentSpeed.vue'
+import type { Loco, Throttle } from './types';
+import { useThrottle } from './useThrottle'
 
-  import ThrottleButtonControls from './ThrottleButtonControls.component.vue'
-  import CurrentSpeed from './CurrentSpeed.vue'
-  import type { Loco, Throttle } from './types';
-  import { useThrottle } from './useThrottle'
-
-  const props = defineProps({
-    throttle: {
-      type: Object as PropType<Throttle>,
-      required: true
-    },
-    loco: {
-      type: Object as PropType<Loco>,
-      required: true
-    }
-  })
-
-  defineEmits(['consist', 'fullscreen', 'functions', 'park'])
-
-  const { updateSpeed, releaseThrottle } = useThrottle()
-  function getSignedSpeed({speed, direction}: Throttle) {
-    return speed && !!direction ? speed : -speed || 0
+const props = defineProps({
+  throttle: {
+    type: Object as PropType<Throttle>,
+    required: true
+  },
+  loco: {
+    type: Object as PropType<Loco>,
+    required: true
   }
+})
 
-  const currentSpeed = ref(getSignedSpeed(props.throttle))
+defineEmits(['consist', 'fullscreen', 'functions', 'park'])
 
-  watch(currentSpeed, sendLocoSpeed)
+const { 
+  currentSpeed, 
+  adjustSpeed: handleAdjustSpeed, 
+  handleThrottleChange,
+  stop: handleStop,
+} = useThrottle(props.throttle)
 
-  async function handleStop() {
-    currentSpeed.value = 0
-  }
-
-  function adjustSpeed(val: number): void { // handle incremental speed changes
-    currentSpeed.value = currentSpeed.value + val
-  }
-
-  async function sendLocoSpeed(newSpeed:number, oldSpeed:number) {
-    console.log('sendLocoSpeed', { newSpeed, oldSpeed }, props.throttle?.address, props.throttle)
-    updateSpeed(props.throttle?.address, props?.loco?.consist, newSpeed, oldSpeed)
-  }
-  
+// Setup watchers
+watch( () => props.throttle, handleThrottleChange, { deep: true })
 </script>
 <template>
   <v-card>
@@ -56,7 +42,7 @@
       <CurrentSpeed :speed="currentSpeed" />
     </v-card-title>
     <v-card-text>
-      <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="adjustSpeed" @stop="handleStop" horizontal class=""  />
+      <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" horizontal class=""  />
     </v-card-text>
     <v-slider 
       v-model="currentSpeed"

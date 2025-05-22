@@ -14,7 +14,7 @@ import { useDcc } from '@/api/dccApi'
 import { useDejaJs } from '@/api/useDejaJs'
 
 export function useTurnouts() {
-  const layoutId = useStorage('@DEJA/layoutId')
+  const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
   const { getDevice } = useLayout()
   const dccApi = useDcc()
   const { send: sendDejaCommand } = useDejaJs()
@@ -53,7 +53,16 @@ export function useTurnouts() {
         //   action: 'turnout',
         //   payload: { turnoutId: turnout.turnoutIdx, state: !turnout.state },
         // })
-        dccApi.setTurnout(turnout.turnoutIdx, !turnout.state)
+        // dccApi.setTurnout(turnout.turnoutIdx, !turnout.state)
+
+        await setDoc(
+          doc(db, `layouts/${layoutId.value}/turnouts`, turnout.id),
+          {
+            state: turnout.state,
+            timestamp: serverTimestamp(),
+          },
+          { merge: true }
+        )
       } else if (
         device?.type === 'deja-arduino' ||
         device?.type === 'deja-mqtt'

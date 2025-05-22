@@ -1,5 +1,6 @@
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from './firebase.mjs'
+import dcc from './dcc.mjs'
 import log from './utils/logger.mjs'
 import layout from './layout.mjs'
 
@@ -19,7 +20,9 @@ export async function handleTurnout(turnout) {
       .devices()
       ?.find(({ id }) => id === turnout.device)
     log.log('handleTurnout', turnout, command, conn?.isConnected, layoutDevice)
-    if (layoutDevice?.connection === 'usb') {
+    if (layoutDevice?.type === 'dcc-ex') {
+      await dcc.sendTurnout(command)
+    } else if (layoutDevice?.connection === 'usb') {
       await conn.send(conn.port, JSON.stringify([command]))
     } else if (layoutDevice?.connection === 'wifi') {
       await conn.send(conn.topic, JSON.stringify(command))
@@ -42,19 +45,24 @@ export async function getTurnout(id) {
 
 export function turnoutCommand(turnout) {
   try {
-    let commands = []
-    switch (turnout?.type) {
-      case 'kato':
-        commands.push(katoCommand(turnout))
-        break
-      case 'servo':
-        commands.push(servoCommand(turnout))
-        break
-      default:
-        // no op
-        break
+    if (turnout.device === 'dccex') {
+      return turnout
+    } else {
+      let commands = []
+      
+      switch (turnout?.type) {
+        case 'kato':
+          commands.push(katoCommand(turnout))
+          break
+        case 'servo':
+          commands.push(servoCommand(turnout))
+          break
+        default:
+          // no op
+          break
+      }
+      return commands?.[0] //  TODO: refactor to return all commands
     }
-    return commands?.[0] //  TODO: refactor to return all commands
   } catch (err) {
     log.error('[COMMANDS] turnoutCommand', err?.message)
   }

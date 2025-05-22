@@ -29,7 +29,7 @@ async function init() {
     })
     // console.log('Locos', JSON.stringify(locos, null, 2))
   })
-  console.log('Throttles listening for loco changes')
+  // console.log('Throttles listening for loco changes')
 }
 
 async function getLocos() {
@@ -60,13 +60,13 @@ export async function handleThrottleChange(snapshot) {
     }
     const _locos = await getLocos()
     const loco = _locos.find((loco) => loco.locoId == throttleCmd.address)
-    console.log(
-      'Throttle change',
-      change.type,
-      change.doc.data(),
-      throttleCmd,
-      loco
-    )
+    // console.log(
+    //   'Throttle change',
+    //   change.type,
+    //   change.doc.data(),
+    //   throttleCmd,
+    //   loco
+    // )
     if (loco?.consist?.length > 0) {
       loco?.consist.forEach(async (consistLoco) => {
         let consistSpeed
@@ -107,7 +107,7 @@ export async function handleThrottleChange(snapshot) {
           address: consistLoco.address,
           speed: consistSpeed,
         }
-        console.log('Consist loco', consistLoco, throttleCmd, consistCmd, loco)
+        // console.log('Consist loco', consistLoco, throttleCmd, consistCmd, loco)
         await dcc.sendSpeed(consistCmd)
       })
     }
