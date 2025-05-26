@@ -44,7 +44,7 @@ const props = defineProps({
 })
 
 const $router = useRouter()
-const { acquireThrottle, releaseThrottle, updateSpeed } = useThrottle()
+const { acquireThrottle, releaseThrottle, updateSpeed } = useThrottle(props.throttle)
 
 const isMenuOpen = ref(false)
 const isThrottleCardOpen = ref(false)
@@ -87,7 +87,7 @@ function handlePark() {
 }
 
 function handleStop() {
-  updateSpeed(props.loco.locoId, props.loco.consist, 0, 0)
+  updateSpeed(props.loco.locoId, 0)
 }
 
 </script>

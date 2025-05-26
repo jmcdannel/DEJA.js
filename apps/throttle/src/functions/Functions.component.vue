@@ -1,23 +1,10 @@
 <script setup lang="ts">
-  import { ref, computed, type PropType } from 'vue'
-  import { storeToRefs } from 'pinia'
-  import { db } from '@/firebase'
-  import { collection, doc } from 'firebase/firestore'
-  import { useDocument } from 'vuefire'
-  import { computedWithControl } from '@vueuse/core'
-  import { 
-    IoIosCog,
-  } from 'vue3-icons/io'
-  import { RiTrainWifiFill, RiMoreFill } from 'vue3-icons/ri'
+  import { ref, type PropType } from 'vue'
   import Function from './Function.component.vue'
-  import FunctionSettings from './FunctionSettings.component.vue'
   import FunctionList from './FunctionList.vue'
-  import type { Loco, LocoFunction } from '@/throttle/types'
-  import { useDejaCloud } from '@/deja-cloud/useDejaCloud'
-  import { useConnectionStore } from '@/connections/connectionStore'
-  import { defaultFunctions } from '@/functions/useFunctions'
+  import type { Loco } from '@/throttle/types'
 
-  const props = defineProps({
+defineProps({
     loco: {
       type: Object as PropType<Loco>,
       required: true
@@ -30,9 +17,8 @@
     openSettings: () => settingsRef?.value?.showModal()
   })
 
-  const { updateFunctions } = useDejaCloud()
-  const { layoutId } = storeToRefs(useConnectionStore())
   const listRef = ref<HTMLDialogElement | null>(null)
+  const settingsRef = ref<HTMLDialogElement | null>(null)
   
   function openAllFunctions() {
     listRef?.value?.showModal()
@@ -51,7 +37,7 @@
         <li class=" basis-full sm:basis-1/2 md:basis-1/3">
           <button @click="openAllFunctions()"
             class="relative btn btn-md bg-gradient-to-br from-cyan-600 to-indigo-600 w-full p-2">
-            <RiMoreFill class="w-4 h-4 md:w-6 md:h-6" />
+            <v-icon size="10">mdi-more-fill</v-icon>
           </button>  
         </li>
       </ul>

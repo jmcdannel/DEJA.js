@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useFunctionIcon } from '@/Roster/Functions/useFunctionIcon'
+import { useFunctionIcon } from '@repo/modules/locos'
 
 const emit = defineEmits(['edit', 'update'])
 const props = defineProps({

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useLayout } from '@/Layout/useLayout'
+import { useLayout } from '@repo/modules/layouts'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 
 const { getLayouts, getLayout } = useLayout()

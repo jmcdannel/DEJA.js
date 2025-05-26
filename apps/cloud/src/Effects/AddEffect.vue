@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useEfx } from '@/Effects/useEfx'
-import { useLayout } from '@/Layout/useLayout'
+import { useEfx } from '@repo/modules/effects'
+import { useLayout } from '@repo/modules/layouts'
 import { useSound } from '@vueuse/sound'
 import { useWebSocket } from '@vueuse/core'
 import { BsCpu } from 'vue3-icons/bs'

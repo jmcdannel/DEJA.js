@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useDcc } from '@/DCCEX/useDcc'
+import { useDcc } from '@repo/dccex/useDcc'
 
 const props = defineProps({
   cmd: Object,

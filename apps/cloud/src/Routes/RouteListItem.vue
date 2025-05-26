@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useEfx } from '@/Effects/useEfx'
+import { useEfx, efxTypes } from '@repo/modules/effects'
 import { useColors } from '@/Core/UI/useColors'
 
 const { DEFAULT_COLOR } = useColors()
-const { efxTypes, runEffect, deleteEfx } = useEfx()
+const { runEffect, deleteEfx } = useEfx()
 
 const props = defineProps({
   efx: Object,

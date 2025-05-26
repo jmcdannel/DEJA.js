@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import {
   BsBezier2,
 } from 'vue3-icons/bs'
-import { useLocos } from '@/Roster/useLocos'
+import { useLocos } from '@repo/modules/locos'
 import { useColors } from '@/Core/UI/useColors'
 
 defineEmits(['edit'])

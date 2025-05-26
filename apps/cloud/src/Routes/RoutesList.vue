@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useEfx } from '@/Effects/useEfx'
+import { useEfx } from '@repo/modules/effects'
 import RouteListItem from '@/Routes/RouteListItem.vue'
 
 const emit = defineEmits(['edit'])

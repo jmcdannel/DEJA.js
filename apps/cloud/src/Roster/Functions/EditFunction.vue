@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useFunctionIcon } from '@/Roster/Functions/useFunctionIcon'
+import { useFunctionIcon } from '@repo/modules/locos'
 const emit = defineEmits(['edit'])
 const props = defineProps({
   defaultFunction: Object,
@@ -55,7 +55,7 @@ watch(customIcon, (value) => {
         size="large"
         @click="showPresets = !showPresets"
         >
-        <component :is="iconCmp" class="mr-2 stroke-none w-8 h-8"></component>
+        <v-icon size="24" class="mr-2 stroke-none">{{ iconCmp }}</v-icon>
       </v-btn>
       <v-btn 
         class="m-2" 
@@ -83,7 +83,7 @@ watch(customIcon, (value) => {
         :variant="customIcon === icon.name ? 'elevated' : 'tonal'"
         @click="customIcon = icon.name"
         >
-        <component :is="icon?.icon" class="mr-2"></component>
+        <v-icon size="24" class="mr-2 stroke-none">{{ icon.icon }}</v-icon>
         {{ icon.name }}
       </v-btn>
     </v-sheet>

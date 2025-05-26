@@ -35,7 +35,7 @@
 
 <template>
   <template v-if="locos?.length  && throttles?.length">
-    <div class="flex-grow flex flex-row flex-wrap relative overflow-auto">
+    <div class="flex-grow flex flex-row flex-wrap relative overflow-auto items-end content-end">
       <div class="flex-grow"></div>
        <div 
         class="basis-full @[960px]:basis-1/2 p-2"  
@@ -50,7 +50,7 @@
       </div>
     </div>
   </template>
-  <pre>
+  <!-- <pre>
     {{ throttles }}
-  </pre>
+  </pre> -->
 </template>

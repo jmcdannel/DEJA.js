@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import RosterItem from '@/Roster/RosterItem.vue'
-import { useLocos } from '@/Roster/useLocos'
+import { useLocos } from '@repo/modules/locos'
 
 const emit = defineEmits(['edit'])
 

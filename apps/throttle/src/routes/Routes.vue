@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch }  from 'vue'
-import { useEfx } from '@/effects/useEfx'
+import { useEfx } from '@repo/modules/effects'
 import TamarackJunction from './maps/tam/TamarackJunction.vue'
 
 const p1 = ref(null)

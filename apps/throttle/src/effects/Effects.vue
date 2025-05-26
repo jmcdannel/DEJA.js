@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import { ref }  from 'vue'
-import type { IEfx } from '@/effects/types'
+import type { IEfx } from '@repo/modules/effects'
 import { useStorage } from '@vueuse/core'
-import { useEfx } from '@/effects/useEfx'
+import { useEfx } from '@repo/modules/effects'
 import EffectItem from '@/effects/Effect.vue'
 import EffectFilters from '@/effects/EffectFilters.vue'
 
 const showViewMenu = ref(false)
 const showFilters = ref(false)
 const viewAs = useStorage('@DEJA/prefs/effectsView', ['grid'])
-const selectedDevices = useStorage('effects-filter-devices', [])
-
+const selectedDevices = useStorage<string[]>('effects-filter-devices', [])
 const { getEffects } = useEfx()
 const list = getEffects()
 
@@ -23,7 +22,7 @@ const VIEW_OPTIONS = [
 
 function filter(efxList: IEfx[]) {
   if (selectedDevices.value.length) {
-    return efxList.filter((efx:IEfx) => selectedDevices.value.includes(efx.device))
+    return efxList.filter((efx:IEfx) => efx.device && selectedDevices.value.includes(efx.device))
   }
   return efxList
 }

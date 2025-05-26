@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-// import { useDejaJS } from '@/DejaJS/useDejaJS'
+// import { useDejaJS } from '@repo/deja/useDejaJS'
 // import { useColors } from '@/Core/UI/useColors'
 import { useLayout } from '@/api/useLayout'
 

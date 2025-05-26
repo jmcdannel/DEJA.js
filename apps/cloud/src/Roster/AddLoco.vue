@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import {
-  BsFillTrainFreightFrontFill,
-} from 'vue3-icons/bs'
-import { useLocos } from '@/Roster/useLocos'
+import { useLocos } from '@repo/modules/locos'
 
 const emit = defineEmits(['close'])
 

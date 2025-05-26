@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ITag } from '@/Common/Tags/types'
+import type { ITag } from '@repo/modules/layout/types'
 
 defineProps<{
   tag: ITag

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useDcc } from '@/DCCEX/useDcc'
+import { useDcc } from '@repo/dccex/useDcc'
 
 const { sendDccCommand } = useDcc()
 

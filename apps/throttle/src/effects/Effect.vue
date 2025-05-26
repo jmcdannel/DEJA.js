@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import type { PropType } from 'vue'
-import type { IEfx } from '@/effects/types'
+import type { IEfx } from '@repo/modules/effects'
 import { useTimeoutFn } from '@vueuse/core'
 
-import { useEfx } from '@/effects/useEfx'
+import { useEfx } from '@repo/modules/effects'
 
 const { runEffect, getEfxType } = useEfx()
 
@@ -23,7 +23,7 @@ const props = defineProps({
 const state = ref(props.efx?.state || false)
 const efxType = ref(props.efx?.type && getEfxType(props.efx?.type))
 const isRunning = ref(false)
-
+console.log('EffectItem', efxType.value?.icon)
 watch(state, async (val) => {
   console.log('state', val)
   const { isPending } = useTimeoutFn(() => {
@@ -51,9 +51,10 @@ watch(state, async (val) => {
         v-model="state"
       >
         <template #prepend v-if="efxType?.icon">        
-          <component 
-            :is="efxType?.icon" 
-            class="w-10 h-10 stroke-none" 
+          <v-icon 
+            v-if="efxType?.icon" 
+            :icon="efxType?.icon" 
+            class="w-6 h-6 stroke-none"
             :color="efx?.color || efxType?.color || 'primary'"
           />
         </template>
@@ -77,13 +78,15 @@ watch(state, async (val) => {
             :class="isRunning ? 'shadow-inner shadow-pink-500 bg-opacity-80' : 'bg-opacity-95'"
             >
             <h4 class="text-sm font-bold flex items-center gap-2">
-              <component 
-                v-if="efxType?.icon"
-                :is="efxType?.icon" 
-                class="w-6 h-6 stroke-none"
+              <v-icon 
+                v-if="efxType?.icon" 
+                :icon="efxType?.icon" 
+                class="stroke-none"
+                :size="32"
                 :color="efx?.color || efxType?.color || 'primary'"
               />
               {{efx?.name}}
+              {{efx?.icon}}
             </h4>
             <aside class="flex items-center gap-2">
               <v-chip size="small" :text="efx?.device || 'marco'" />
@@ -101,7 +104,13 @@ watch(state, async (val) => {
         variant="tonal"
         @click="state = !state">
         <template #prepend>
-          <component v-if="efxType?.icon" :is="efxType?.icon" class="w-6 h-6 stroke-none" :color="efxType?.color"></component>
+          <v-icon 
+            v-if="efxType?.icon" 
+            :icon="efxType?.icon" 
+            class="stroke-none"
+            :size="20"
+            :color="efx?.color || efxType?.color || 'primary'"
+          />
         </template>
         {{efx?.name}}
       </v-btn>
@@ -125,7 +134,13 @@ watch(state, async (val) => {
             indeterminate>
           </v-progress-linear>
             <section class="p-4">
-              <component :is="efxType?.icon" class="w-10 h-10 stroke-none" :color="efxType?.color"></component>
+              <v-icon 
+                v-if="efxType?.icon" 
+                :icon="efxType?.icon" 
+                class="stroke-none"
+                :size="48"
+                :color="efx?.color || efxType?.color || 'primary'"
+              />
             </section>
             <h4 class="flex-grow text-md font-bold p-4">{{efx?.name}}</h4>
             <!-- <pre>{{ viewAs }}</pre> -->

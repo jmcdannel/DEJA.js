@@ -42,8 +42,8 @@ const {
 // Setup watchers
 watch( () => props.throttle, handleThrottleChange, { deep: true })
 
-const consistCmp = ref(null)
-const functionsCmp = ref(null)
+const consistCmp = ref<InstanceType<typeof Consist> | null>(null)
+const functionsCmp = ref<InstanceType<typeof Functions> | null>(null)
 
 const setSpeed = debounce((val: number): void => { currentSpeed.value = val; }, `${DEBOUNCE_DELAY}ms`)
 
@@ -108,21 +108,3 @@ function openFunctionSettings() {
   </main>
   <Consist v-if="loco" :loco="loco" ref="consistCmp" />
 </template>
-<style>
-  .bg-gradient-border {
-    position: relative;
-    z-index: 2;
-  }
-  .bg-gradient-border:before {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    right: 2px;
-    bottom: 2px;
-    background-color: #0d0c14;  
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='105' viewBox='0 0 80 105'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='death-star' fill='%23000000' fill-opacity='0.4'%3E%3Cpath d='M20 10a5 5 0 0 1 10 0v50a5 5 0 0 1-10 0V10zm15 35a5 5 0 0 1 10 0v50a5 5 0 0 1-10 0V45zM20 75a5 5 0 0 1 10 0v20a5 5 0 0 1-10 0V75zm30-65a5 5 0 0 1 10 0v50a5 5 0 0 1-10 0V10zm0 65a5 5 0 0 1 10 0v20a5 5 0 0 1-10 0V75zM35 10a5 5 0 0 1 10 0v20a5 5 0 0 1-10 0V10zM5 45a5 5 0 0 1 10 0v50a5 5 0 0 1-10 0V45zm0-35a5 5 0 0 1 10 0v20a5 5 0 0 1-10 0V10zm60 35a5 5 0 0 1 10 0v50a5 5 0 0 1-10 0V45zm0-35a5 5 0 0 1 10 0v20a5 5 0 0 1-10 0V10z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");  
-    z-index: -1;
-    border-radius: var(--rounded-box, 1rem);
-  }
-</style>

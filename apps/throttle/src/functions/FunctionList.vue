@@ -3,7 +3,7 @@
   import Function from './Function.component.vue'
   import Modal from '@/core/Modal.component.vue'
   import type { Loco } from '@/throttle/types'
-  import { defaultFunctions } from '@/functions/useFunctions'
+  import { defaultFunctions } from '@repo/modules/locos'
 
   const props = defineProps<{
     loco: Loco | null,

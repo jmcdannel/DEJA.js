@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import type { IEfx } from '@/Effects/types'
+import type { IEfx } from '@repo/modules'
 // import type { IDevice } from '@/Devices/types'
-import { useLayout } from '@/Layout/useLayout'
+import { useLayout } from '@repo/modules/layouts'
 
 const pattern = defineModel('pattern')
 const range = defineModel('range')

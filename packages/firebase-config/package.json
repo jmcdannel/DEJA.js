@@ -1,0 +1,13 @@
+{
+  "name": "@repo/firebase-config",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./firebase": "./src/firebase.ts"
+  },
+  "dependencies": {
+    "firebase": "^10.13.1"
+  }
+}

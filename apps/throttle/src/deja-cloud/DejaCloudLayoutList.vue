@@ -5,7 +5,7 @@ import { useCollection, useCurrentUser } from 'vuefire'
     BsCloud,
     BsCloudFill,
   } from 'vue3-icons/bs'
-import { db } from '@/firebase'
+import { db } from '@repo/firebase-config/firebase'
 import { VaAvatar, VaButton, VaCardActions, VaChip } from 'vuestic-ui'
 
 const user = useCurrentUser()

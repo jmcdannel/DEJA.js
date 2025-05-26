@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useEfx } from '@/Effects/useEfx'
-import { useLocos } from '@/Roster/useLocos'
-import { useTurnouts } from '@/Turnouts/useTurnouts'
+import { useEfx } from '@repo/modules/effects'
+import { useLocos } from '@repo/modules/locos'
+import { useTurnouts } from '@repo/modules/turnouts'
 
 const emit = defineEmits(['add', 'close'])
 

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
-import DejaConnect from '@/components/DejaConnect.vue'
+import DejaConnect from '@/DejaDirectConnect/DejaConnect.vue'
 import DCCCommand from '@/DCCEX/DCCCommand.vue'
 import DCCLog from '@/DCCEX/Log/DCCLog.vue'
-import { useDcc } from '@/DCCEX/useDcc'
+import { useDcc } from '@repo/dccex/useDcc'
 
 const { defaultCommands } = useDcc()
 

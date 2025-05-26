@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useEfx } from '@/Effects/useEfx'
-import { useTurnouts } from '@/Turnouts/useTurnouts'
+import { useEfx } from '@repo/modules/effects'
+import { useTurnouts } from '@repo/modules/turnouts'
 
 const emit = defineEmits(['add', 'close'])
 const props = defineProps({

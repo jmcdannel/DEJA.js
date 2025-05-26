@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, shallowRef } from 'vue'
-import { useLocos } from '@/Roster/useLocos'
+import { useLocos } from '@repo/modules/locos'
 import LeadLoco from '@/Roster/Consist/LeadLoco.vue'
 import ConsistLoco from '@/Roster/Consist/ConsistLoco.vue'
 import AddConsistLoco from '@/Roster/Consist/AddConsistLoco.vue'

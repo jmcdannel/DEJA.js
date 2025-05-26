@@ -22,14 +22,12 @@ import UserProfile from './User/Profile/UserProfile.vue'
 import Header from './Core/Header/Header.vue'
 import AppMenu from './Core/Header/AppMenu.vue';
 import UserProfileMenu from './Core/Header/UserProfile.vue';
-import Sidebar from './Core/Sidebar/Sidebar.vue'
-import Search from './Core/Search/Search.vue'
 import Menu from '@/Core/Menu/Menu.vue'
 import DeviceStatus from '@/Layout/Devices/DeviceStatus.vue'
 import DCCLogStatus from '@/DCCEX/Log/DCCLogStatus.vue'
 import LayoutStatus from '@/Layout/LayoutStatus.vue'
 
-const layoutId = useStorage('@DEJA/cloud/layoutId', 'betatrack')
+const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 const enableLogging = useStorage('@DEJA/pref/ws-logging', false)
 
 const user = useCurrentUser()
@@ -41,12 +39,7 @@ const drawer = ref(null)
 const mobile = ref(null)
 
 function handleMenu(item:string) {
-  console.log('handleMenu', item)
   view.value = item
-}
-
-function handleLayoutSelect(_layoutId) {
-  layoutId.value = _layoutId
 }
 
 </script>
@@ -55,10 +48,6 @@ function handleLayoutSelect(_layoutId) {
     <v-app v-if="user" :theme="theme">
       <DCCLogger v-if="enableLogging" />
       <Header :layoutId="layoutId" @toggle="drawer = !drawer">
-        <template #search>
-          <Search class="hidden md:block mx-2" />
-          <!-- <SelectLayout v-if="!!user" class="hidden md:flex" :layoutId="layoutId" @selected="handleLayoutSelect" /> -->
-        </template>
         <template #menu>
           <DCCLogStatus />          
           <LayoutStatus />          
@@ -68,10 +57,8 @@ function handleLayoutSelect(_layoutId) {
         </template>
       </Header>
 
-      <v-navigation-drawer v-model="drawer" :mobile="mobile" mobile-breakpoint="md">       
-        <Search class="md:hidden p-2" />
-        <!-- <SelectLayout class="md:hidden p-2" v-if="!!user" class="my-1" :layoutId="layoutId" @selected="handleLayoutSelect" /> -->
-        <v-spacer class="sm:hidden"></v-spacer>
+      <v-navigation-drawer v-model="drawer" :mobile="mobile" mobile-breakpoint="md">
+        <v-spacer class="h-8"></v-spacer>
         <Menu @change="handleMenu" :view="view" />
       </v-navigation-drawer>
 

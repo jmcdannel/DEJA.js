@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useCurrentUser } from 'vuefire';
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
-import DejaConnect from '@/components/DejaConnect.vue'
-import DejaLogin from '@/components/DejaLogin.vue'
+import DejaConnect from '@/DejaDirectConnect/DejaConnect.vue'
+import DejaLogin from '@/DejaDirectConnect/DejaLogin.vue'
 import SignOut from '@/User/SignOut/SignOut.vue';
 
 const user = useCurrentUser()

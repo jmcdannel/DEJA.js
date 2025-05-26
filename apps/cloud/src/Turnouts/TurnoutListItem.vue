@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
-import { useEfx } from '@/Effects/useEfx'
-import { useTurnouts } from '@/Turnouts/useTurnouts'
+import { useEfx } from '@repo/modules/effects'
+import { useTurnouts } from '@repo/modules/turnouts'
 
 const { switchTurnout } = useTurnouts()
 const { runEffect, getEffect } = useEfx()

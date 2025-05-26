@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { ITag } from '@/Common/Tags/types'
-import { useLayout } from '@/Layout/useLayout'
+import type { ITag } from '@repo/modules/layout/types'
+import { useLayout } from '@repo/modules/layouts'
 import Tag from './Tag.vue'
 
 const model = defineModel()

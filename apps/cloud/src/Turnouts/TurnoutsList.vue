@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTurnouts } from '@/Turnouts/useTurnouts'
+import { useTurnouts } from '@repo/modules/turnouts'
 import TurnoutListItem from '@/Turnouts/TurnoutListItem.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 

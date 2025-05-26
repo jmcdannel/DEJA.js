@@ -1,28 +1,28 @@
 <script setup>
-  import { computed, ref, watch } from 'vue'
-  import { storeToRefs } from 'pinia'
-  import { useConnectionStore } from '@/connections/connectionStore'
-  import { useEfx } from '@/effects/useEfx'
+import { computed, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useConnectionStore } from '@/connections/connectionStore'
+import { useEfx } from '@repo/modules/effects'
 
-  const { runEffect, getEffectsByType } = useEfx()
+const { runEffect, getEffectsByType } = useEfx()
 
-  const {
-    isEmulated,
-    isSerial,
-    dccExConnected
-   } = storeToRefs(useConnectionStore())
+const {
+  isEmulated,
+  isSerial,
+  dccExConnected
+  } = storeToRefs(useConnectionStore())
 
-  const power = ref(null)
-  const enabled = computed(() => dccExConnected || isEmulated || isSerial)
-  const locked = ref(false)
+const power = ref(null)
+const enabled = computed(() => dccExConnected || isEmulated || isSerial)
+const locked = ref(false)
 
-  watch(power, async (newPower) => {
-    const powerEfx = await getEffectsByType('power')
-    powerEfx.forEach(efx => {
-      runEffect({...efx, state: newPower })
-    })
-    console.log('power', newPower, powerEfx)
+watch(power, async (newPower) => {
+  const powerEfx = await getEffectsByType('power')
+  powerEfx.forEach(efx => {
+    runEffect({...efx, state: newPower })
   })
+  console.log('power', newPower, powerEfx)
+})
 
 </script>
 <template>

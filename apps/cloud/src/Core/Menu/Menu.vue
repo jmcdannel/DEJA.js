@@ -1,14 +1,12 @@
 <script setup lang="ts">
-  import { useMenu } from '@/Core/Menu/useMenu'
-  import { useColors } from '@/Core/UI/useColors'
+import { useMenu } from '@/Core/Menu/useMenu'
+import { useColors } from '@/Core/UI/useColors'
 defineEmits(['change'])
-  defineProps({ 
-    view: String
-  })
-  const { menu } = useMenu()
-  const { colors } = useColors()
-
-  console.log('colors', colors )
+defineProps({ 
+  view: String
+})
+const { menu } = useMenu()
+const { colors } = useColors()
 
 </script>
 <template>
@@ -21,11 +19,8 @@ defineEmits(['change'])
       link
     >
     <template #prepend>
-      <component 
-          :is="item.icon" 
-          :class="`text-${item.color}-500 dark:text-${item.color}-400`"
-          class="w-6 h-6 stroke-none mr-4" 
-        />
+      <v-icon size="32" :class="`text-${item.color}-500 dark:text-${item.color}-400`"
+        class="stroke-none mr-4" >{{item.icon}}</v-icon>
     </template>
   </v-list-item>
 </template>

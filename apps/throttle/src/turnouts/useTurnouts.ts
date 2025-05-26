@@ -8,7 +8,7 @@ import {
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
-import { db } from '@/firebase'
+import { db } from '@repo/firebase-config/firebase'
 import { useLayout } from '@/api/useLayout'
 import { useDcc } from '@/api/dccApi'
 import { useDejaJs } from '@/api/useDejaJs'

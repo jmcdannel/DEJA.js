@@ -1,0 +1,23 @@
+{
+  "name": "@repo/dccex",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./useDcc": "./src/useDcc.ts"
+  },
+  "dependencies": {
+    "firebase": "^10.13.1",
+    "vuefire": "^3.2.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@repo/firebase-config": "workspace:*",
+    "@vueuse/core": "^11.0.3",
+    "typescript": "latest"
+  }
+}

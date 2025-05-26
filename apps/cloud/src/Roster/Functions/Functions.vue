@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useFunctions } from '@/Roster/Functions/useFunctions'
+import { useFunctions, defaultFunctions } from '@repo/modules/locos'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import EditFunc from '@/Roster/Functions/EditFunction.vue'
 
@@ -10,7 +10,7 @@ const props = defineProps({
 const locoFunctions = ref(props.loco?.functions)
 const locoId = ref(props.loco?.id)
 const isModified = ref(false)
-const { defaultFunctions, updateFunctions } = useFunctions()
+const { updateFunctions } = useFunctions()
 
 async function handleSave() {
   console.log('handleSave', locoId.value, locoFunctions.value)

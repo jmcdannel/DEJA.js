@@ -14,6 +14,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@repo/modules": "workspace:*",
     "@serialport/parser-readline": "^12.0.0",
     "dotenv": "^16.3.1",
     "mqtt": "^5.3.4",

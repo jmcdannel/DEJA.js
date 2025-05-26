@@ -32,19 +32,19 @@ watch( () => props.throttle, handleThrottleChange, { deep: true })
   
 </script>
 <template>
-  <main class="my-2 rounded-2xl shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border " v-if="throttle">
+  <main class="rounded-2xl shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border " v-if="throttle">
     <section class="p-1 flex flex-row flex-wrap items-center justify-between overflow-auto">
-      <div class="order-1 basis-1/3 py-2" >
+      <div class="order-1 basis-1/3" >
         <CurrentSpeed :speed="currentSpeed" />
       </div>
-      <div class="flex-grow order-4 basis-full py-2">
+      <div class="flex-grow order-4 basis-full my-1">
         <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" horizontal class=""  />
       </div>
-      <div class="order-2 basis-1/3 py-2 flex justify-center">
-        <span v-if="loco" class="text-2xl bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-cyan-400 font-bold">{{loco.name}}</span>
+      <div class="order-2 basis-1/3 py-2 flex justify-center text-base @[960px]:text-xl">
+        <span v-if="loco" class="bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-cyan-400 font-bold">{{loco.name}}</span>
       </div>
-      <div class="order-2  basis-1/3 py-2 text-center">
-        <ThrottleAvatar :throttle="throttle" :loco="loco" @release="$emit('release', throttle.address)" @select="$emit('select', throttle.address)" />
+      <div class="order-2  basis-1/3 text-center">
+        <ThrottleAvatar :throttle="throttle" :size="'48'" :loco="loco" @release="$emit('release', throttle.address)" @select="$emit('select', throttle.address)" />
       </div>
     </section>
   </main>

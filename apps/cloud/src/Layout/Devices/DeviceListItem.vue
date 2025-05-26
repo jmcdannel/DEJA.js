@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useDejaJS } from '@/DejaJS/useDejaJS'
+import { useDejaJS } from '@repo/deja/useDejaJS'
 import { useColors } from '@/Core/UI/useColors'
-import { useLayout } from '@/Layout/useLayout'
-import { useTurnouts } from '@/Turnouts/useTurnouts'
+import { useLayout } from '@repo/modules/layouts'
+import { useTurnouts } from '@repo/modules/turnouts'
 
 const { sendDejaCommand } = useDejaJS()
 const { deviceTypes, connectDevice, autoConnectDevice } = useLayout()

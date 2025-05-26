@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { useLocos } from '@/api/useLocos'
-import { VaAvatar } from 'vuestic-ui'
 
 const { getThrottles } = useLocos()
 const throttles = getThrottles()

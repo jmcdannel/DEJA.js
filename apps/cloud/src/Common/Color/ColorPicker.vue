@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {  onMounted, ref, watch } from 'vue'
-import type { ITag } from '@/Common/Tags/types'
-import { useLayout } from '@/Layout/useLayout'
+import type { ITag } from '@repo/modules/layout/types'
+import { useLayout } from '@repo/modules/layouts'
 
 defineEmits(['select', 'cancel'])
 const model = defineModel<string>()

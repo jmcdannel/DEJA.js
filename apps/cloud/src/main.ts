@@ -11,7 +11,7 @@ import { VueFire, VueFireAuth } from 'vuefire'
 // Flowbite
 import 'flowbite'
 // Firebase
-import { firebaseApp } from './firebase'
+import { firebaseApp } from '@repo/firebase-config/firebase'
 
 // Components
 import App from './App.vue'

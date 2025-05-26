@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useLayout } from '@/Layout/useLayout'
+import { useLayout } from '@repo/modules/layouts'
 
 const { getDevices } = useLayout()
 const devices = getDevices()

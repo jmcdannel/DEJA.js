@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useEfx } from '@/Effects/useEfx'
+import { useEfx } from '@repo/modules/effects'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import RouteTurnoutForm from '@/Routes/RouteTurnoutForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import type { IEfx } from '@/Effects/types'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
-import { slugify } from '@/Common/Utils'
+import { slugify } from '@repo/utils/slugify'
 // TODO: icon picker
 
 const props = defineProps<{

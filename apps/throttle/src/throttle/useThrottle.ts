@@ -2,7 +2,7 @@ import { ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { deleteDoc, doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import type { Throttle } from '@/throttle/types'
-import { db } from '@/firebase'
+import { db } from '@repo/firebase-config/firebase'
 import { useConnectionStore } from '@/connections/connectionStore'
 
 

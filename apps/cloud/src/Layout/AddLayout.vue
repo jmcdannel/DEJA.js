@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useLayout } from '@/Layout/useLayout'
+import { useLayout } from '@repo/modules/layouts'
 const { createLayout } = useLayout()
 
 const showForm = ref(false)

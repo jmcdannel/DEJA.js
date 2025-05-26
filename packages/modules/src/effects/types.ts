@@ -15,3 +15,11 @@ export interface IEfx {
   tags?: string[]
   id?: string
 }
+
+export interface IEfxType {
+  value: string
+  label: string
+  icon: string
+  color: string
+  require?: string[]
+}

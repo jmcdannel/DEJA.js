@@ -10,9 +10,9 @@ import {
 } from 'firebase/firestore'
 import { useConnectionStore } from '@/connections/connectionStore'
 import { useCollection, useDocument } from 'vuefire'
-import { db } from '@/firebase'
-// import { useDcc } from '@/DCCEX/useDcc'
-// import { useDejaJS } from '@/DejaJS/useDejaJS'
+import { db } from '@repo/firebase-config/firebase'
+// import { useDcc } from '@repo/dccex/useDcc'
+// import { useDejaJS } from '@repo/deja/useDejaJS'
 
 export const useLayout = () => {
   const { layoutId } = storeToRefs(useConnectionStore())

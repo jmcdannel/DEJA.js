@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useEfx } from '@/Effects/useEfx'
+import { useEfx } from '@repo/modules/effects'
 import { useSound } from '@vueuse/sound'
-import { useLayout } from '@/Layout/useLayout'
+import { useLayout } from '@repo/modules/layouts'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import MacroForm from '@/Effects/MacroForm.vue'
 import IALEDForm from '@/Effects//IALEDForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
-import type { IEfx } from '@/Effects/types'
+import type { IEfx } from '@repo/modules'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 // TODO: icon picker
 

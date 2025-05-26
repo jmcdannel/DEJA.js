@@ -17,7 +17,8 @@ const { getMenuItem } = useMenu()
 </script>
 <template>
   <h2 class="flex" :class="`text-${color}-500 dark:text-${color}-400`">
-    <component :is="icon" class="w-8 h-8 mr-2 stroke-none" /> 
+    <v-icon size="32" :class="`text-${color}-500 dark:text-${color}-400`"
+      class="mr-2 stroke-non" >{{icon}}</v-icon>
     <span class="text-2xl">{{ label }}</span>
   </h2>
   <hr class="my-4 border-sky-500" />

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { collection } from 'firebase/firestore'
-import { db } from '@/firebase'
+import { db } from '@repo/firebase-config/firebase'
 
 export const useDejaCloudStore = defineStore('dejaCloud', {
   state: () => ({

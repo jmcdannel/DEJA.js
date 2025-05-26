@@ -10,7 +10,7 @@ import {
 } from 'firebase/firestore'
 import { useConnectionStore } from '@/connections/connectionStore'
 import { useCollection, useDocument } from 'vuefire'
-import { db } from '@/firebase'
+import { db } from '@repo/firebase-config/firebase'
 
 export function useLocos() {
   const { layoutId } = storeToRefs(useConnectionStore())
