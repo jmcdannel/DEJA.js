@@ -62,6 +62,12 @@ const handleEmulator = () => {
 <template>
   <div class="grid grid-cols-1 gap-4">
 
+    <v-btn v-if="!user" 
+      class="bg-gradient-to-r from-pink-700 to-pink-400 text-white rounded-full"
+      @click="$router.push('/connect/deja-cloud')">
+      <v-icon icon="mdi-account" class="mr-2"></v-icon>
+      Login to DejaCloud
+    </v-btn>
     <DejaCloudCard v-if="!!user" />
     <LayoutCard v-if="!!layoutId" />
     

@@ -41,11 +41,7 @@ const { menu } = useMenu()
         :class="`text-${item.color}-500 dark:text-${item.color}-400`"
         @click="$emit('menu', item.label)"
         >
-          <component 
-            :is="item.icon" 
-            :class="`text-${item.color}-500 dark:text-${item.color}-400`"
-            class="mx-auto mb-1 w-7 h-7 text-gray-500 dark:text-gray-400 stroke-none" 
-          />
+          <v-icon class="mx-auto mb-1 stroke-none" size="10" color="gray-500">{{item.icon}}</v-icon>
           <div class="text-sm">{{ item.label }}</div>
         </button>
       </template>

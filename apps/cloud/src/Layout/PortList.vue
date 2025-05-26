@@ -3,9 +3,9 @@ import { useDcc } from '@repo/dccex/useDcc'
 
 const { sendDccCommand } = useDcc()
 
-defineProps({
-  ports: Array
-})
+defineProps<{
+  ports: string[]
+}>()
 
 function handleRefresh() {
   sendDccCommand({ action: 'listPorts', payload: {} })

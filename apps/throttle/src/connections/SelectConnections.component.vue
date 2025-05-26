@@ -1,7 +1,6 @@
 <script setup lang="ts">
   import { storeToRefs } from 'pinia'
   import { useCurrentUser } from 'vuefire'
-  import { useModal, useToast } from 'vuestic-ui'
 
   import { 
     BsUsbSymbol,
@@ -15,17 +14,12 @@
   import DejaSignout from '@/deja-cloud/DejaSignout.vue'
   import DejaUser from '@/deja-cloud/DejaUser.vue'
   import useSerial from '@/api/serialApi'
-  import router from '@/router' 
- 
-  const { confirm } = useModal()
-  const { init } = useToast()
   const serialApi = useSerial()
   const user = useCurrentUser()
   const connStore = useConnectionStore()
   const { 
     isEmulated, 
     isSerial,
-    isDejaServer
   } = storeToRefs(connStore)  
 
   function handleDisconnect() {
@@ -69,6 +63,7 @@
           :is-connected="(!!user)"
           item-label="DEJA Cloud" 
           page="deja-cloud"
+          @connect="$router.push({ name: 'deja-cloud' })"
           :class="!!user ? 'bg-gradient-to-r from-cyan-800 to-violet-800' : '' "
           @disconnect="handleDisconnect()">    
           <template v-if="(!!user)" v-slot:desc>

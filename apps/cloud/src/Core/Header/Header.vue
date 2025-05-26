@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ToggleSidebar from '@/Core/Sidebar/ToggleSidebar.vue'
+import ToggleSidebar from '@/Core/UI/ToggleSidebar.vue'
 import Title from './Title.vue'
 
 defineProps({

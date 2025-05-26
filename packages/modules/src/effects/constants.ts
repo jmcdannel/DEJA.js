@@ -23,7 +23,7 @@ export const efxTypes: IEfxType[] = [
   {
     value: 'streetlight',
     label: 'Street Light',
-    icon: 'mdi-lamp-post',
+    icon: 'mdi-post-lamp',
     color: 'yellow',
   },
   {
@@ -35,7 +35,7 @@ export const efxTypes: IEfxType[] = [
   {
     value: 'frog',
     label: 'Frog Juicer',
-    icon: 'mdi-railway-switch',
+    icon: 'mdi-blender',
     color: 'green',
   },
   {

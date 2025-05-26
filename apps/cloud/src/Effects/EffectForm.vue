@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useEfx } from '@repo/modules/effects'
+import { useEfx, efxTypes } from '@repo/modules/effects'
 import { useSound } from '@vueuse/sound'
 import { useLayout } from '@repo/modules/layouts'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import MacroForm from '@/Effects/MacroForm.vue'
 import IALEDForm from '@/Effects//IALEDForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
-import type { IEfx } from '@repo/modules'
+import type { IEfx, IDevice, IEfxType } from '@repo/modules'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 // TODO: icon picker
+
+interface ValidationRules {
+  required: ((val: any) => boolean | string)[];
+}
 
 const props = defineProps<{
   efx: IEfx
@@ -19,7 +23,7 @@ const emit = defineEmits(['close'])
 const DEFAULT_DEVICE = 'dccex'
 const { getDevices } = useLayout()
 
-const { setEfx, efxTypes, getEfxType, DEFAULT_TYPE } = useEfx()
+const { setEfx, getEfxType } = useEfx()
 
 const editColor = ref(false)
 
@@ -33,19 +37,17 @@ const range = ref(props.efx?.range || undefined)
 const config = ref(props.efx?.config || undefined)
 const sound = ref('')
 const soundObj = ref(null as null | HTMLAudioElement)
-const efxType = ref(props.efx?.type || DEFAULT_TYPE?.value as string | undefined)
-const efxTypeObj = ref(props.efx?.type ?  getEfxType(props.efx?.type) : DEFAULT_TYPE)
+const efxType = ref(props.efx?.type)
+const efxTypeObj = ref(props.efx?.type ? getEfxType(props.efx?.type) : undefined)
 const color = ref(props.efx?.color || efxTypeObj.value?.color || 'purple')  
 const tags = ref<string[]>(props.efx?.tags || [])
 const loading = ref(false)
-const rules = {
+const rules: ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
 const devices = getDevices()
+console.log('devices', devices)
 
-// watch(data, (newData) => {
-//   console.log('data', newData)
-// })
 
 watch(sound, (newSound) => {
   console.log('sound', newSound)
@@ -53,7 +55,6 @@ watch(sound, (newSound) => {
 })
 
 watch(efxType, (newType) => {
-  console.log('efxType', newType)
   efxTypeObj.value = getEfxType(newType)
 })
 
@@ -92,14 +93,11 @@ async function submit () {
   }
 
   await setEfx(props.efx?.id, newEfx)
-
-  console.log(props.efx, newEfx)
   loading.value = false
   emit('close')
 }
 
 function handleMacro({on , off}: {on: string[], off: string[]}) {
-  console.log('handleMacro', on, off)
   macroOn.value = on
   macroOff.value = off
 }
@@ -109,7 +107,6 @@ function handleIALED(ialedEffectConfig: {
     range: string;
     config: string;
   }): void {  
-  console.log('handleIALED', ialedEffectConfig)
   pattern.value = ialedEffectConfig.pattern
   range.value = ialedEffectConfig.range
   config.value = ialedEffectConfig.config
@@ -122,7 +119,7 @@ function playSound() {
   soundObj.value?.play()
 }
 function stopSound() {
-  console.log('playSound', sound.value)
+  console.log('stopSound', sound.value)
   soundObj.value?.pause()
 }
 // /Users/jmcdannel/trains/trestle-tt-suite/packages/ttt-action-api/sounds/departing-train.wav
@@ -133,8 +130,8 @@ function stopSound() {
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
     <div class="flex items-center justify-between">
     <v-label class="m-2 text-4xl">
-      <component v-if="efxTypeObj?.icon" :is="efxTypeObj?.icon" :color="color" class="w-16 h-16 stoke-none mr-4"></component>
-      {{ efx ? 'Edit' : 'Add'}} Effect
+      <v-icon v-if="efxTypeObj?.icon" size="32" class="stroke-none">{{efxTypeObj.icon}}</v-icon>
+      {{ efx?.length ? 'Edit' : 'Add'}} Effect
     </v-label>
     <v-chip class="m-2" :color="color" size="x-large">
       <v-icon v-if="efxTypeObj?.icon" :icon="efxTypeObj.icon" class="mr-2"></v-icon>
@@ -147,13 +144,9 @@ function stopSound() {
       <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
       <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large">
           <v-btn v-for="deviceOpt in devices" :value="deviceOpt.id" :key="deviceOpt.id" 
-            class="min-h-48 min-w-48 border"
+            class="min-h-24 min-w-48 border"
             :color="color" >
-            <!-- <v-icon :icon="efxOpt.icon" :color="efxOpt.color"></v-icon> -->
-            <div class="flex flex-col justify-center items-center">
-              <component :is="deviceOpt.icon" class="w-16 h-16 stroke-none "></component>
-              <div class="mt-4">{{ deviceOpt.id }}</div>
-            </div>        
+              {{ deviceOpt.id }}
           </v-btn>
       </v-btn-toggle>
     </template>
@@ -166,7 +159,7 @@ function stopSound() {
           class="min-h-48 min-w-48 border"
           :color="color">
           <div class="flex flex-col">
-            <component :is="efxOpt.icon" :color="efxOpt.color" class="w-16 h-16 stroke-none"></component>
+            <v-icon v-if="efxOpt.icon" size="32" :color="efxOpt.color" class="stroke-none">{{efxOpt.icon}}</v-icon>
             <div class="mt-4">{{ efxOpt.label }}</div>
           </div>
           

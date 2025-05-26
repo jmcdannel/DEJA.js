@@ -2,6 +2,10 @@
 import { ref } from 'vue'
 import { useLayout } from '@repo/modules/layouts'
 
+interface ValidationRules {
+  required: ((val: any) => boolean | string)[];
+}
+
 const emit = defineEmits(['close'])
 const props = defineProps({
   show: {
@@ -14,7 +18,7 @@ const loading = ref(false)
 const connection = ref(null)
 const deviceType = ref(null)
 const deviceId = ref(null)
-const rules = {
+const rules:ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
 
@@ -22,17 +26,16 @@ const { createDevice, deviceTypes } = useLayout()
 
 const connectionTypes = ['usb', 'wifi', 'bluetooth']
 
-async function submit (e) {
+async function submit (e: Event) {
   loading.value = true
-  const results = await e
-
-  if (results.valid) {
+  const form = e.target as HTMLFormElement
+  
+  if (form.checkValidity()) {
     const device = {
       connection: connection.value,
       ['type']: deviceType.value
     }
     await createDevice(deviceId.value, device)
-    console.log(results, e, device)
   }
 
   loading.value = false
@@ -68,9 +71,7 @@ function handleClose() {
           <v-divider class="my-4"></v-divider>
           <v-btn-toggle v-model="connection" color="cyan" divided class="flex-wrap h-auto" size="x-large">
             <v-btn v-for="conn in connectionTypes" :value="conn" :key="conn" 
-            class="min-h-24 min-w-24 border">
-              <!-- <v-icon :icon="efxOpt.icon" :color="efxOpt.color"></v-icon> -->
-              
+            class="min-h-24 min-w-24 border">              
               <div class="flex flex-col justify-center items-center py-2">
                 <v-icon :icon="`mdi-${conn}`"></v-icon>
                 <div class="mt-4">{{ conn }}</div>

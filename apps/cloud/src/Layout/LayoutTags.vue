@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { ITag } from '@repo/modules/layouts'
 import TagList from '@/Common/Tags/TagList.vue'
 import TagForm from '@/Common/Tags/TagForm.vue'
 const editTag = ref(null)
@@ -23,7 +24,7 @@ function handleClose () {
         @close="handleClose" 
       />
       <TagList v-else
-        @select="(tag) => editTag = tag"
+        @select="(tag: ITag) => editTag = tag"
       >
         <template #append>
           <v-chip variant="outlined" @click="addTag = true">Add Tag</v-chip>

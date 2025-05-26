@@ -1,0 +1,51 @@
+export const defaultCommands = [
+  {
+    id: 'p',
+    type: 'toggle',
+    label: 'Power',
+    icon: 'mdi-power',
+    command: ['0', '1'],
+  },
+  {
+    id: 'pmain',
+    type: 'toggle',
+    label: 'Power MAIN',
+    icon: 'mdi-power',
+    command: ['0 MAIN', '1 MAIN'],
+  },
+  {
+    id: 'r',
+    type: 'dcc',
+    label: 'Reset',
+    icon: 'mdi-refresh',
+    command: 'D RESET',
+  },
+  {
+    id: 's',
+    type: 'dcc',
+    label: 'Status',
+    icon: 'mdi-information',
+    command: '=',
+  },
+  {
+    id: 'e',
+    type: 'dcc',
+    label: 'Save <E>',
+    icon: 'mdi-memory-arrow-down',
+    command: 'E',
+  },
+  {
+    id: 'z',
+    type: 'dcc',
+    label: 'List Outputs',
+    icon: 'mdi-creation',
+    command: 'Z',
+  },
+  {
+    id: 'dcc',
+    type: 'text',
+    label: 'DCC Command',
+    icon: 'mdi-code-tags',
+    command: '',
+  },
+]

@@ -5,7 +5,7 @@ import SelectLayout from '@/Layout/SelectLayout.vue'
 
 const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 
-function handleSelect(_layoutId) {
+function handleSelect(_layoutId: string) {
   console.log('handleSelect', _layoutId)
   layoutId.value = _layoutId
 }

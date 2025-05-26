@@ -4,7 +4,7 @@ import { useStorage } from '@vueuse/core';
 import { useWebSocket } from '@vueuse/core'
 import { useLogStore } from '@/DCCEX/Log/useLogStore'
 
-const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.249:8082')
+const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.22:8082')
 const { append } = useLogStore()
 
 console.log('wshost', wshost)

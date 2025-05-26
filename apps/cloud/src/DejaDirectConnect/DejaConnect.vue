@@ -24,14 +24,6 @@ watchEffect(() => {
   }
 })
 
-function handleLayoutSelect(layout) {
-  layoutId.value = layout.layoutId
-}
-
-function handleLayoutClear() {
-  layoutId.value = null
-}
-
 function handleConnected() {
   console.log('handleConnected')
   isConnected.value = true

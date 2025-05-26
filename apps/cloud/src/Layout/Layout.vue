@@ -2,7 +2,6 @@
 import { ref } from 'vue' 
 import { useLayout } from '@repo/modules/layouts'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
-// import DeviceList from './Devices/DeviceList.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import PortList from '@/Layout/PortList.vue'
 import LayoutTags from '@/Layout/LayoutTags.vue'
