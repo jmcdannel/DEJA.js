@@ -1,32 +1,57 @@
 export interface ITag {
-  id: string
-  name: string
   color?: string
   icon?: string
-}
-export interface ILayout {
   id: string
   name: string
-  description?: string
-  tags?: ITag[]
-  devices?: string[]
-  locos?: string[]
-  turnouts?: string[]
-  effects?: string[]
-  sensors?: string[]
-  routes?: string[]
-  scripts?: string[]
-  meta?: Record<string, any>
-  // Additional properties
-  // These can be used for UI or metadata purposes
-  createdAt?: Date
-  updatedAt?: Date
+}
+export interface ILayout {
   author?: string
-  version?: string
+  createdAt?: Date
+  description?: string
+  devices?: string[]
+  effects?: string[]
+  id: string
   image?: string
-  thumbnail?: string
-  isPublic?: boolean
+  isArchived?: boolean
   isDefault?: boolean
   isFavorite?: boolean
-  isArchived?: boolean
+  isPublic?: boolean
+  locos?: string[]
+  meta?: Record<string, any>
+  name: string
+  routes?: string[]
+  scripts?: string[]
+  sensors?: string[]
+  tags?: ITag[]
+  thumbnail?: string
+  turnouts?: string[]
+  updatedAt?: Date
+  version?: string
+}
+
+export interface IDevice {
+  autoConnect?: boolean
+  client?: string
+  config?: Record<string, any>
+  connection?: string
+  description?: string
+  id: string
+  isConnected?: boolean
+  lastConnected?: Date
+  name: string
+  port?: string
+  strips?: number[]
+  tags?: ITag[]
+  timestamp?: Date
+  topic?: string
+  type: string
+}
+
+export interface ISensor {
+  deviceId: string
+  effectId?: string
+  enabled: boolean
+  id: string
+  index: number
+  state: boolean
 }

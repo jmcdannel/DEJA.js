@@ -8,7 +8,7 @@ import {
 import { useStorage } from '@vueuse/core'
 import { useCollection, useDocument, useCurrentUser } from 'vuefire'
 import { db } from '@repo/firebase-config/firebase'
-import { ITag } from './types'
+import { IDevice, ILayout, ITag } from './types'
 import { useDejaJS } from '@repo/deja/useDejaJS'
 
 export const useLayout = () => {
@@ -43,8 +43,7 @@ export const useLayout = () => {
   const user = useCurrentUser()
   const { sendDejaCommand } = useDejaJS()
   const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
-  const layoutDoc = () =>
-    layoutId.value ? doc(db, 'layouts', layoutId.value) : null
+  const layoutDoc = doc(db, 'layouts', layoutId.value)
   
   const layoutCol = () =>
     layoutId.value ? collection(db, 'layouts') : null
@@ -83,7 +82,7 @@ export const useLayout = () => {
     }
   }
 
-  async function createLayout(id, layout) {
+  async function createLayout(id: string, layout: ILayout) {
     console.log('createLayout', layout)
     try {
       await setDoc(doc(db, `layouts`, id), {
@@ -101,7 +100,7 @@ export const useLayout = () => {
     }
   }
 
-  async function createDevice(id, device) {
+  async function createDevice(id: string, device: IDevice) {
     console.log('createDevice', device)
     try {
       await setDoc(doc(db, `layouts/${layoutId.value}/devices`, id), {
@@ -114,7 +113,7 @@ export const useLayout = () => {
     }
   }
 
-  async function connectDevice(serial, device) {
+  async function connectDevice(serial: string, device: IDevice) {
     console.log('connectDevice', serial, device)
     try {
       const payload = {
@@ -130,7 +129,7 @@ export const useLayout = () => {
     }
   }
 
-  async function autoConnectDevice(id, autoConnect) {
+  async function autoConnectDevice(id: string, autoConnect: boolean) {
     try {
       const deviceDoc = doc(db, `layouts/${layoutId.value}/devices`, id)
       await setDoc(deviceDoc, { autoConnect: !!autoConnect }, { merge: true })
@@ -140,24 +139,30 @@ export const useLayout = () => {
   }
 
   async function getTags() {
-    if (layoutDoc) {
-      const docSnap = await getDoc(layoutDoc)
-
-      if (docSnap.exists()) {
-        const layout = docSnap.data()
-        if (layout?.tags) {
-          return layout.tags
-        }
+    if (!layoutId.value) {
+      console.error('No layoutId set, cannot get tags')
+      return []
+    }
+    const docSnap = await getDoc(layoutDoc)
+    if (docSnap.exists()) {
+      const layout = docSnap.data()
+      if (layout?.tags) {
+        return layout.tags
       }
     }
     return []
   }
 
   async function setTags(tags: ITag[]) {
+    if (!layoutId.value) {
+      console.error('No layoutId set, cannot get tags')
+      return []
+    }
     try {
-      if (layoutDoc.value) {
+      const docSnap = await getDoc(layoutDoc)
+      if (docSnap.exists()) {
         console.log('setTags', layoutId.value, tags)
-        await setDoc(layoutDoc.value, { tags }, { merge: true })
+        await setDoc(doc(db, `layouts`, layoutId.value), { tags }, { merge: true })
       }
     } catch (e) {
       console.error('Error updating consist: ', e)
@@ -165,15 +170,14 @@ export const useLayout = () => {
   }
 
   async function setTag(tag: ITag) {
+    if (!layoutId.value) {
+      console.error('No layoutId set, cannot get tags')
+      return []
+    }
     try {
-      if (layoutDoc.value) {
-        const layout = useDocument(layoutDoc)
-        console.log('setTags', layoutId.value, layout, tag)
-        await setDoc(
-          layoutDoc.value,
-          { tags: [...(layout.value?.tags || []), tag] },
-          { merge: true }
-        )
+      const docSnap = await getDoc(layoutDoc)
+      if (docSnap.exists()) {
+        await setDoc(doc(db, `layouts`, layoutId.value), { tags: [...(docSnap.data().tags || []), tag] }, { merge: true })
       }
     } catch (e) {
       console.error('Error updating consist: ', e)
@@ -181,16 +185,17 @@ export const useLayout = () => {
   }
 
   async function getTagsByIds(ids: string[]): Promise<ITag[]> {
-    if (layoutDoc.value) {
-      const docSnap = await getDoc(layoutDoc.value)
-
-      if (docSnap.exists()) {
-        const layout = docSnap.data()
-        if (layout?.tags) {
-          return layout.tags.filter((tag: ITag) => ids.includes(tag.id))
-        }
-      }
+    if (!layoutId.value) {
+      console.error('No layoutId set, cannot get tags')
+      return []
     }
+    const docSnap = await getDoc(layoutDoc)
+    if (docSnap.exists()) {
+      const layout = docSnap.data()
+      if (layout?.tags) {
+        return layout.tags.filter((tag: ITag) => ids.includes(tag.id))
+      }
+    }    
     return []
   }
 

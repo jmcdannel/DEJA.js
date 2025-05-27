@@ -23,3 +23,13 @@ export interface IEfxType {
   color: string
   require?: string[]
 }
+
+export interface IMacroItem {
+  device?: string
+  direction?: boolean | string
+  name?: string
+  type?: string
+  speed?: string
+  state?: boolean
+  id?: string
+}

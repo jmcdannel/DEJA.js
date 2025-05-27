@@ -1,4 +1,3 @@
-import log from './utils/logger.mjs'
 import {
   collection,
   doc,
@@ -10,21 +9,23 @@ import {
   serverTimestamp,
   setDoc,
   where,
+  type DocumentData,
 } from 'firebase/firestore'
 import { ref, onChildAdded } from 'firebase/database'
-import { db, rtdb } from './firebase.mjs'
-import { handleTurnoutChange, handleTurnout } from './turnouts.mjs'
-import { handleEffectChange, handleEffect, handleMacro } from './effects.mjs'
-import { handleDccChange } from './dcc.mjs'
-import { connectDevice } from './layout.mjs'
-import { handleThrottleChange } from './throttles.mjs'
+import { db, rtdb } from '@repo/firebase-config/firebase'
+import { handleTurnoutChange, handleTurnout } from './modules/turnouts.js'
+import { handleEffectChange, handleEffect, handleMacro } from './modules/effects.js'
+import { handleDccChange } from './dcc.js'
+import { log } from './utils/logger.js'
+import { connectDevice } from './modules/layout.js'
+import { handleThrottleChange } from './modules/throttles.js'
 
 const layoutId = process.env.LAYOUT_ID
 
-async function handleDejaCommands(snapshot) {
+async function handleDejaCommands(snapshot: DocumentData): Promise<void> {
   try {
     log.note('handleDejaCommands')
-    snapshot.docChanges().forEach(async (change) => {
+    snapshot.docChanges().forEach(async (change: DocumentData) => {
       if (change.type === 'added') {
         const { action, payload } = change.doc.data()
         log.log('handleDejaCommands: ', action, payload)
@@ -55,8 +56,8 @@ async function handleDejaCommands(snapshot) {
   }
 }
 
-async function handleSensorChange(snapshot) {
-  snapshot.docChanges().forEach(async (change) => {
+async function handleSensorChange(snapshot: DocumentData): Promise<void> {
+  snapshot.docChanges().forEach(async (change: DocumentData) => {
     const sensor = change.doc.data()
     if (change.type === 'modified') {
       log.log('Sensor modified', sensor.effectId, Boolean(sensor.state))
@@ -68,12 +69,11 @@ async function handleSensorChange(snapshot) {
         },
         { merge: true }
       )
-      return
     }
   })
 }
 
-export async function listen() {
+export async function listen(): Promise<void> {
   log.start('Listen for dccCommands', layoutId)
 
   const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId}`)

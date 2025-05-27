@@ -1,51 +1,43 @@
 import mqtt from 'mqtt'
-import log from './utils/logger.mjs'
-import dcc from './dcc.mjs'
+import { log } from './utils/logger.js'
 
 const layoutId = process.env.LAYOUT_ID
 const mqttBroker = process.env.VITE_MQTT_BROKER
 const mqttPort = process.env.VITE_MQTT_PORT
-const subscriptionTopics = []
-const publishTopics = []
+const subscriptionTopics: string[] = []
+const publishTopics: string[] = []
 
-let mqttClient = null
+let mqttClient: mqtt.MqttClient | null = null
 
-const handleSubscribeError = (error) => {
-  if (error) {
-    log.error('MQTT subscribe to topics error', error)
-    return
-  }
-}
-
-function handleConnect() {
+function handleConnect(): void {
   try {
-    log.start('MQTT client connected', layoutId)
-    subscriptionTopics.map((topic) =>
-      mqttClient.subscribe(topic, handleSubscribeError)
-    )
-    publishTopics.map((topic) =>
-      mqttClient.publish(
-        topic,
-        JSON.stringify({ action: 'ack', payload: { layoutId } })
+    if (mqttClient) {
+      log.start('MQTT client connected', layoutId)
+      subscriptionTopics.map((topic) =>
+        mqttClient?.subscribe(topic)
       )
-    )
+      publishTopics.map((topic) =>
+        mqttClient?.publish(
+          topic,
+          JSON.stringify({ action: 'ack', payload: { layoutId } })
+        )
+      )
+    } else {
+      log.error('MQTT Error in handleConnect:', mqttClient)
+    }
   } catch (error) {
     log.error('MQTT Error in handleConnect:', error)
   }
 }
 
-function handleError(error) {
-  try {
-    log.error('MQTT mqttClient error', error)
-    mqttClient.end()
-  } catch (error) {
-    log.error('MQTT Error in handleConnect:', error)
-  }
+function handleError(error: Error): void {  
+  log.error('MQTT mqttClient error', error)
+  disconnect()
 }
 
-function handleMessage(topic, message) {
+function handleMessage(topic: string, message: Buffer): void {
   try {
-    log.log(`MQTT mqttClient received message: ${message} from topic: ${topic}`)
+    log.log(`MQTT mqttClient received message: ${message.toString()} from topic: ${topic}`)
     // dcc.handleMessage(message.toString())
   } catch (error) {
     log.error('MQTT Error in onMessage:', error)
@@ -53,9 +45,13 @@ function handleMessage(topic, message) {
 }
 
 // Function to connect to MQTT broker
-const connect = () => {
+const connect = (): void => {
   try {
-    mqttClient = mqtt.connect(mqttBroker, { port: mqttPort })
+    if (!mqttBroker || !mqttPort) {
+      log.error('MQTT broker or port not specified')
+      return
+    }
+    mqttClient = mqtt.connect(mqttBroker, { port: parseInt(mqttPort) })
 
     // https://github.com/mqttjs/MQTT.js#event-connect
     mqttClient.on('connect', handleConnect)
@@ -76,18 +72,18 @@ const connect = () => {
 }
 
 // Function to disconnect from MQTT broker
-const disconnect = () => {
+const disconnect = (): void => {
   try {
-    mqttClient.end()
+    mqttClient?.end()
   } catch (err) {
     log.error('MQTT Error disconnecting:', err)
   }
 }
 
-const send = (message) => {
+const send = (message: string): void => {
   try {
     log.log('[MQTT]', message, publishTopics)
-    mqttClient && publishTopics.map((topic) => publish(topic, message))
+    publishTopics.map((topic) => publish(topic, message))
     log.log(
       `MQTT mqttClient sent message: ${message} from topic: ${publishTopics.join(', ')}`
     )
@@ -96,9 +92,9 @@ const send = (message) => {
   }
 }
 
-const subscribe = (topic, keepAlive = true) => {
+const subscribe = (topic: string, keepAlive = true): void => {
   try {
-    mqttClient.subscribe(topic, handleSubscribeError)
+    mqttClient?.subscribe(topic)
     if (keepAlive && !publishTopics.includes(topic)) {
       publishTopics.push(topic)
     }
@@ -107,10 +103,10 @@ const subscribe = (topic, keepAlive = true) => {
   }
 }
 
-const publish = (topic, message, keepAlive = true) => {
+const publish = (topic: string, message: string, keepAlive = true) => {
   try {
     log.log('mqtt pub', topic, message)
-    mqttClient.publish(topic, message)
+    mqttClient?.publish(topic, message)
     if (keepAlive && !publishTopics.includes(topic)) {
       publishTopics.push(topic)
     }
@@ -119,4 +115,12 @@ const publish = (topic, message, keepAlive = true) => {
   }
 }
 
-export default { connect, send, disconnect, subscribe, publish }
+export const dejaMqtt = {
+  connect,
+  disconnect,
+  publish,
+  send,
+  subscribe,
+}
+
+export default dejaMqtt

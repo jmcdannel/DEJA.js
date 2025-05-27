@@ -8,6 +8,7 @@ import {
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
 import { db } from '@repo/firebase-config/firebase'
+import type { ITurnout } from '@repo/modules/turnouts'
 
 export function useTurnouts() {
   const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
@@ -32,7 +33,7 @@ export function useTurnouts() {
     }
   }
 
-  async function switchTurnout(turnout) {
+  async function switchTurnout(turnout: ITurnout) {
     try {
       await setDoc(
         doc(db, `layouts/${layoutId.value}/turnouts`, turnout.id),
@@ -47,7 +48,7 @@ export function useTurnouts() {
     }
   }
 
-  async function setTurnout(id, turnout) {
+  async function setTurnout(id: string, turnout: ITurnout) {
     try {
       await setDoc(doc(db, `layouts/${layoutId.value}/turnouts`, id), {
         ...turnout,

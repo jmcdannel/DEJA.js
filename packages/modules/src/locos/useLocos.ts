@@ -5,10 +5,12 @@ import {
   setDoc,
   addDoc,
   deleteDoc,
+  type DocumentReference,
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useCollection, useDocument } from 'vuefire'
 import { db } from '@repo/firebase-config/firebase'
+import type { Loco, ConsistLoco } from './types'
 import { ROADNAMES } from './constants'
 
 export function useLocos() {
@@ -26,19 +28,18 @@ export function useLocos() {
     return result
   }
 
-  function getLoco(id) {
+  function getLoco(id: string) {
     const locoDoc = () =>
       layoutId.value ? doc(db, `layouts/${layoutId.value}/locos`, id) : null
     
-    const result = useDocument(locoDoc)
-    return result
+    return useDocument(locoDoc)
   }
 
-  async function deleteLoco(id) {
+  async function deleteLoco(id: string) {
     await deleteDoc(doc(db, `layouts/${layoutId.value}/locos`, id))
   }
 
-  async function updateLoco(id: string, loco) {
+  async function updateLoco(id: string, loco: Loco) {
     console.log('updateLoco', loco)
     try {
       const locoDoc = doc(db, `layouts/${layoutId.value}/locos`, id)
@@ -54,7 +55,7 @@ export function useLocos() {
     }
   }
 
-  async function updateConsist(id: string, consist) {
+  async function updateConsist(id: string, consist: ConsistLoco[]) {
     console.log('updateConsist', id, consist)
     try {
       const locoDoc = doc(db, `layouts/${layoutId.value}/locos`, id)

@@ -1,14 +1,45 @@
 import { SerialPort } from 'serialport'
-import { ref, remove } from 'firebase/database'
-import { rtdb } from './firebase.mjs'
-import serial from './serial.mjs'
-import { broadcast } from './broadcast.mjs'
-import log from './utils/logger.mjs'
+import { type DataSnapshot, ref, remove } from 'firebase/database'
+import { rtdb } from '@repo/firebase-config/firebase'
+import { serial } from './serial.js'
+import { broadcast } from './broadcast.js'
+import { log } from './utils/logger.js'
+
+export interface ConnectCommand {
+  device: string
+  serial: string
+}
+
+export interface SerialCom {
+  isConnected: boolean
+  port: SerialPort | null
+}
+
+export interface ThrottlePayload {
+  address: string | number
+  speed: number
+}
+export interface TurnoutPayload {
+  state: boolean
+  turnoutIdx: number
+}
+
+export interface FunctionPayload {
+  address: string | number
+  func: number
+  state: boolean
+}
+
+export interface OutputPayload {
+  pin: number
+  state: boolean
+}
 
 let isConnected = false // serial port connection status
 const baudRate = 115200
-let com = {
+let com: SerialCom = {
   isConnected: false,
+  port: null as SerialPort | null,
 }
 const layoutId = process.env.LAYOUT_ID
 
@@ -21,7 +52,7 @@ const getPorts = async () => {
   }
 }
 
-const handleMessage = async (msg) => {
+const handleMessage = async (msg: string): Promise<void> => {
   try {
     const { action, payload } = JSON.parse(msg)
     log.note('handleMessage', action, payload, msg)
@@ -64,72 +95,77 @@ const handleMessage = async (msg) => {
   }
 }
 
-const handleConnectionMessage = async (payload) =>
+const handleConnectionMessage = async (payload: JSON | string): Promise<void> =>
   await broadcast({ action: 'broadcast', payload })
 
-const send = async (data) => {
+const send = async (data: string): Promise<void> => {
   try {
     const cmd = `<${data}>\n`
     // log.await('Writing to port', data)
-    serial.send(com.port, cmd)
+    if (com.port) {
+      serial.send(com.port, cmd)
+    }
   } catch (err) {
     log.fatal('Error writting to port:', err)
   }
 }
 
-const connect = async (payload) => {
+const connect = async (payload: ConnectCommand): Promise<boolean> => {
   try {
     log.star('[DCC] connect', payload)
     const { serial: path, device } = payload
     if (isConnected) {
-      await broadcast({ action: 'connected', payload: { path, baudRate } })
+      await broadcast({ action: 'connected', payload: { baudRate, path } })
       return isConnected
-    } else {
-      const port = await serial.connect({
-        path,
-        baudRate,
-        handleMessage: handleConnectionMessage,
-      })
-      await broadcast({
-        action: 'connected',
-        payload: { path, baudRate, device },
-      })
-      isConnected = true
+    }    
+    const port = await serial.connect({
+      baudRate,
+      handleMessage: handleConnectionMessage,
+      path,
+    })
+    await broadcast({
+      action: 'connected',
+      payload: { baudRate, device, path },
+    })
+    isConnected = true
+    if (port) {
       com = { isConnected, port }
-      return com
     }
+    return isConnected
   } catch (err) {
     log.fatal('Error opening port: ', err)
+    return false
   }
 }
 
-const setConnection = async (port) => {
-  console.log('setConnection', !!port)
+const setConnection = async (port: SerialPort): Promise<SerialCom> => {
+  log.log('setConnection', Boolean(port))
   com = { isConnected: true, port }
   isConnected = true
   return com
 }
 
-const listPorts = async () => {
+const listPorts = async (): Promise<void> => {
   const payload = await getPorts()
   await broadcast({ action: 'portList', payload })
   log.star('[DCC] List ports', payload)
 }
 
-const getStatus = async () => {
+const getStatus = async (): Promise<void> => {
   await broadcast({
     action: 'status',
-    payload: { isConnected, client: 'dejaJS' },
+    payload: { client: 'dejaJS', isConnected },
   })
   log.star('[DCC] getStatus', { action: 'status', payload: { isConnected } })
 }
 
-const power = async (state) => {
+const power = async (state: string): Promise<void> => {
   await send(state)
   log.star('Power', state)
 }
 
-const sendSpeed = async ({ address, speed }) => {
+
+const sendSpeed = async ({ address, speed }: ThrottlePayload): Promise<void> => {
   const direction = speed > 0 ? 1 : 0
   const absSpeed = Math.abs(speed)
   log.star('Throttle', address, speed, direction)
@@ -137,26 +173,25 @@ const sendSpeed = async ({ address, speed }) => {
   await send(cmd)
 }
 
-const sendTurnout = async ({ turnoutIdx, state }) => {
+const sendTurnout = async ({ turnoutIdx, state }: TurnoutPayload): Promise<void> => {
   log.star('Turnout', turnoutIdx, state)
   const cmd = `T ${turnoutIdx} ${state ? 1 : 0}`
   await send(cmd)
 }
 
-const sendFunction = async (payload) => {
-  const { address, func, state } = payload
-  log.star('Function', payload, typeof payload, address, func)
+const sendFunction = async ({ address, func, state }: FunctionPayload): Promise<void> => {
+  log.star('Function', address, func)
   const cmd = `F ${address} ${func} ${state ? 1 : 0}`
   await send(cmd)
 }
 
-const sendOutput = async (payload) => {
+const sendOutput = async (payload: OutputPayload) => {
   log.star('Output', payload)
   const cmd = `Z ${payload.pin} ${payload.state ? 1 : 0}`
   await send(cmd)
 }
 
-export async function handleDccChange(snapshot) {
+export async function handleDccChange(snapshot: DataSnapshot): Promise<void> {
   try {
     log.note('handleDccChange')
     // snapshot.docChanges().forEach((change) => {
@@ -172,18 +207,22 @@ export async function handleDccChange(snapshot) {
     await handleMessage(
       JSON.stringify({ action, payload: JSON.parse(payload) })
     )
-    snapshot.key && remove(ref(rtdb, `dccCommands/${layoutId}/${snapshot.key}`))
+    if (snapshot.key) {
+      remove(ref(rtdb, `dccCommands/${layoutId}/${snapshot.key}`))
+    }
   } catch (err) {
     log.fatal('Error handling dcc command:', err)
   }
 }
 
-export default {
-  handleMessage,
-  setConnection,
-  sendSpeed,
-  sendCommand: send,
-  sendTurnout,
-  handleDccChange,
+export const dcc = {
   dccSerial: com,
+  handleDccChange,
+  handleMessage,
+  sendCommand: send,
+  sendSpeed,
+  sendTurnout,
+  setConnection,
 }
+
+export default dcc
