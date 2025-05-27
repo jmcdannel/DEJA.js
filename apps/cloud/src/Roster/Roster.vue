@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { Loco } from '@repo/modules/locos'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import AddLoco from '@/Roster/AddLoco.vue'
 import EditLoco from '@/Roster/EditLoco.vue'
@@ -8,9 +9,9 @@ import AddTile from '@/Core/UI/AddTile.vue'
 
 const showAddLoco = ref(false)
 const showEditLoco = ref(false)
-const editLoco = ref(null)
+const editLoco = ref<Loco | null>(null)
 
-function handleEdit(loco) {
+function handleEdit(loco: Loco) {
   console.log('handleEdit', loco)
   editLoco.value = loco
   showEditLoco.value = true
@@ -20,7 +21,7 @@ function handleEdit(loco) {
 <template>
   <ModuleTitle menu="Roster" />
   <AddLoco v-if="showAddLoco" @close="showAddLoco = false" />
-  <EditLoco v-else-if="showEditLoco" @close="showEditLoco = false" :loco="editLoco" />
+  <EditLoco v-else-if="showEditLoco" @close="showEditLoco = false" :loco="editLoco as Loco" />
   <RosterList v-else-if="!showAddLoco && !showEditLoco" @edit="handleEdit" @add="showAddLoco = true" :allowEdit="!showEditLoco">
     <template #prepend>
       <AddTile color="pink" @click="showAddLoco = true" />

@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useColors } from '@/Core/UI/useColors'
-import { useLayout } from '@repo/modules/layouts'
+import { useLayout, type Device } from '@repo/modules/layouts'
 import { useTurnouts } from '@repo/modules/turnouts'
 
 const { deviceTypes, connectDevice, autoConnectDevice } = useLayout()
 const { getTurnouts } = useTurnouts()
 const { colors, DEFAULT_COLOR } = useColors()
 
-const props = defineProps({
-  device: Object,
-  ports: Array,
-})
+const props = defineProps<{
+  device: Device,
+  ports: string[],
+}>()
 
 const turnouts = ref(getTurnouts())
 const serial = ref(props?.device?.port || '')
@@ -27,15 +27,19 @@ onMounted(() => {
 })
 
 watch(() => deviceType.value?.color, (newVal) => {
-  color.value = colors[newVal]
+  if (newVal) {
+    color.value = colors[newVal]
+  }
 })
 
 async function handleConnect () {
   connectDevice(serial.value, props.device)
 }
 
-async function handelAutoConnect (checked: boolean) {
-  props.device?.id && await autoConnectDevice(props.device?.id, checked)
+async function handelAutoConnect (checked: boolean | null) {
+  if (checked !== null && props.device?.id) {
+    await autoConnectDevice(props.device.id, checked)
+  }
 }
 
 </script>

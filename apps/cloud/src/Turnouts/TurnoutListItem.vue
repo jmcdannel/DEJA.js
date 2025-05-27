@@ -2,24 +2,26 @@
 import { ref } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
 import { useEfx } from '@repo/modules/effects'
-import { useTurnouts } from '@repo/modules/turnouts'
+import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
 
 const { switchTurnout } = useTurnouts()
 const { runEffect, getEffect } = useEfx()
 
 defineEmits(['edit'])
-const props = defineProps({
-  turnout: Object,
-  turnoutId: String,
-})
+
+const props = defineProps<{
+  turnout: Turnout
+  turnoutId: string
+}>()
 
 const turnoutState = ref(props.turnout?.state || true)
 
 async function handleSwitch() {
   await switchTurnout({...props.turnout, id: props.turnoutId, state: turnoutState.value})
   if (props.turnout?.effectId) {
+    const effectId = props.turnout.effectId
     useTimeoutFn(async () => {
-      const effect = await getEffect(props.turnout?.effectId)
+      const effect = await getEffect(effectId)
       await runEffect({...effect, state: turnoutState.value})
     }, 2000)
   }

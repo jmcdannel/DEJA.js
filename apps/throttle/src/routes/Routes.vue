@@ -1,10 +1,11 @@
 <script setup lang="ts">
+// @ts-nocheck
 import { ref, watch }  from 'vue'
 import { useEfx } from '@repo/modules/effects'
 import TamarackJunction from './maps/tam/TamarackJunction.vue'
 
-const p1 = ref(null)
-const p2 = ref(null)
+const p1 = ref(<string | null>(null))
+const p2 = ref(<string | null>(null))
 
 const { getEffects, runEffect, getEffect } = useEfx()
 const list = getEffects()
@@ -25,10 +26,14 @@ watch(p2, async (newValue) => {
   }
 })
 
-function findClickableParent(target) {
+function findClickableParent(target: EventTarget | null): { target: HtmlElement, type: string } | null {
+  if (!target || !(target instanceof Element)) {
+    return null
+  }
   const clickableContainers = ['Routes', 'Turnouts', 'TurnoutLabels']
   let found = false
   let currentTarget = target
+  
   let targetType = ''
   while (!found && currentTarget && currentTarget.parentNode) {
     if (currentTarget.parentNode.nodeName.toLowerCase() === 'svg') {

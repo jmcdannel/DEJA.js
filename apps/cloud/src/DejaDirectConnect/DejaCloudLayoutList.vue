@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { getFirestore, collection, query, where } from 'firebase/firestore'
+import { collection, query, where } from 'firebase/firestore'
 import { useCollection, useCurrentUser } from 'vuefire'
-import { db } from '../firebase'
+import { db } from '@repo/firebase-config/firebase'
 
 const user = useCurrentUser()
 const layoutsRef = collection(db, 'layouts')

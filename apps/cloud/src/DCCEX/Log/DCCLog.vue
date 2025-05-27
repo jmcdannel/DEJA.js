@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core';
-import { useLogStore } from '@/DCCEX/Log/useLogStore'
+import { useDccLog } from '@/DCCEX/Log/useDccLog'
 import DCCLogItem from '@/DCCEX/Log/DCCLogItem.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue';
 
 const enabled = useStorage('@DEJA/pref/ws-logging', false)
 const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.249:8082')
-const { log } = useLogStore()
+const { log } = useDccLog()
 
 </script>
 <template>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { ITag } from '@repo/modules/layout/types'
+import type { Tag } from '@repo/modules/layouts'
 
 defineProps<{
-  tag: ITag
+  tag: Tag
 }>()
 
 </script>

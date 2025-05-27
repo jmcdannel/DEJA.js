@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { useLayout } from '@/api/useLayout'
+import { useLayout } from '@repo/modules/layouts'
 
 const show = defineModel<boolean>('show')
 const selected = defineModel<string[]>('selected')
 const { getDevices } = useLayout()
 const devices = getDevices()
+
 </script>
 <template>
   <v-chip-group 

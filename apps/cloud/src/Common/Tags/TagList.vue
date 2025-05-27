@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { ITag } from '@repo/modules/layout/types'
+import type { Tag } from '@repo/modules/layouts'
 import { useLayout } from '@repo/modules/layouts'
-import Tag from './Tag.vue'
+import TagCmp from './Tag.vue'
 
 const model = defineModel()
 defineEmits(['select'])
 
 const { getLayout } = useLayout()
 const layout = getLayout()
-const selectedTags = ref<ITag[]>(Array.isArray(model.value) ? model.value : [])
+const selectedTags = ref<Tag[]>(Array.isArray(model.value) ? model.value : [])
 
 </script>
 <template>
@@ -19,7 +19,7 @@ const selectedTags = ref<ITag[]>(Array.isArray(model.value) ? model.value : [])
     color="yellow"
     column
     multiple>
-    <Tag 
+    <TagCmp 
       v-for="tag in layout?.tags" 
       :key="tag.id" 
       :tag="tag" 

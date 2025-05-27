@@ -13,7 +13,7 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import App from './App.vue'
 import router from './router'
 import vuesticConfig from '../vuestic.config'
-import { firebaseApp } from './firebase'
+import { firebaseApp } from '@repo/firebase-config/firebase'
 // Styles
 import './style.css'
 import '@mdi/font/css/materialdesignicons.css'

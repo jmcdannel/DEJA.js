@@ -1,21 +1,24 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useEfx } from '@repo/modules/effects'
+import { useEfx, efxTypes, type Effect, type MacroItem } from '@repo/modules/effects'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import RouteTurnoutForm from '@/Routes/RouteTurnoutForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
-import type { IEfx } from '@/Effects/types'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import { slugify } from '@repo/utils/slugify'
 // TODO: icon picker
 
+interface ValidationRules {
+  required: ((val: any) => boolean | string)[];
+}
+
 const props = defineProps<{
-  efx: IEfx
+  efx: Effect
 }>()
 
 const emit = defineEmits(['close'])
 
-const { setEfx, efxTypes, getEfxType, DEFAULT_TYPE } = useEfx()
+const { setEfx, getEfxType } = useEfx()
 
 const editColor = ref(false)
 
@@ -25,18 +28,18 @@ const point2 = ref(props.efx?.point2)
 const macroOn = ref(props.efx?.on || [])
 const macroOff = ref(props.efx?.off || [])
 const efxType = ref('route')
-const efxTypeObj = ref(props.efx?.type ?  getEfxType(props.efx?.type) : DEFAULT_TYPE)
+const efxTypeObj = ref(props.efx?.type ?  getEfxType(props.efx?.type) : null)
 const color = ref(props.efx?.color || efxTypeObj.value?.color || 'purple')  
 const tags = ref<string[]>(props.efx?.tags || [])
 const loading = ref(false)
-const rules = {
+const rules: ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
 
 async function submit () {
   loading.value = true
 
-  const newEfx: IEfx = {
+  const newEfx: Effect = {
     name: name.value,
     type: efxType.value,
     color: color.value,
@@ -124,7 +127,7 @@ function handleMacro({on , off}: {on: string[], off: string[]}) {
       </v-btn>
     </section>
     <v-dialog max-width="80vw" v-model="editColor">
-      <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.turnout?.color ?? 'purple'"></ColorPicker>
+      <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.efx?.color ?? 'purple'"></ColorPicker>
     </v-dialog>
 
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
@@ -147,7 +150,7 @@ function handleMacro({on , off}: {on: string[], off: string[]}) {
       ></v-btn>  
     </div>
     <ViewJson :json="efx" label="Efx" />
-    <ViewJson :json="efxTypeObj" label="efxTypeObj" />
+    <ViewJson :json="efxTypeObj || {}" label="efxTypeObj" />
     <ViewJson :json="efxTypes" label="efxTypes" />
   </v-form>
 </template>

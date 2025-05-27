@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useEfx } from '@repo/modules/effects'
+import { useEfx, type Effect } from '@repo/modules/effects'
 import RouteListItem from '@/Routes/RouteListItem.vue'
 
 const emit = defineEmits(['edit'])
@@ -8,7 +8,7 @@ const { getEffects } = useEfx()
 const all = getEffects()
 const list = all.data.value.filter((item) => item.type === 'route')
 
-function handleEdit(item) {
+function handleEdit(item: Effect) {
   console.log('handleEdit', item)
   emit('edit', item)
 }

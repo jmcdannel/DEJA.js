@@ -78,7 +78,7 @@ watch(customIcon, (value) => {
       <pre class="text-xs">{{ JSON.stringify(func) }}</pre>
     </div>
     <v-sheet v-if="showPresets">
-      <v-btn v-for="icon in allIcons" :key="icon" 
+      <v-btn v-for="icon in allIcons" :key="icon.name" 
         class="m-2" color="pink-darken-3" 
         :variant="customIcon === icon.name ? 'elevated' : 'tonal'"
         @click="customIcon = icon.name"

@@ -3,22 +3,19 @@ import { computed, ref, watch } from 'vue'
 import {
   BsBezier2,
 } from 'vue3-icons/bs'
-import { useLocos } from '@repo/modules/locos'
+import { useLocos, type Loco } from '@repo/modules/locos'
 import { useColors } from '@/Core/UI/useColors'
 
 defineEmits(['edit'])
-const props = defineProps({
-  loco: Object,
-  allowEdit: {
-    type: Boolean,
-    default: true
-  }
-})
+const props = defineProps<{
+  loco: Loco
+}>()
+
 const { colors, DEFAULT_COLOR } = useColors()
 const { getRoadname, deleteLoco } = useLocos()
 
 const confirmDelete = ref(false)
-const roadname = computed(() => getRoadname(props?.loco?.meta?.roadname))
+const roadname = computed(() => props.loco.meta?.roadname ? getRoadname(props.loco.meta?.roadname) : null)
 const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
 
 //  watch(() => props.loco?.roadname, (value) => {
@@ -28,6 +25,10 @@ const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
 
  async function handleDelete() {
   console.log('handleDelete', props.loco.id)
+  if (!props.loco.id) {
+    console.error('No loco ID provided for deletion')
+    return
+  }
   await deleteLoco(props.loco.id)
   confirmDelete.value = false
  }

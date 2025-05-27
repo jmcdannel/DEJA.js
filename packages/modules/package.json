@@ -25,5 +25,8 @@
     "@repo/utils": "workspace:*",
     "@vueuse/core": "^11.0.3",
     "typescript": "latest"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit"
   }
 }

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { FaUsb } from 'vue3-icons/fa6'
 import { useStorage } from '@vueuse/core'
 import useSerial from './useSerial'
-import { db } from "../firebase"
+import { db } from '@repo/firebase-config/firebase'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import CommandStation from './CommandStation.vue'
@@ -43,10 +43,10 @@ const {
 
   delta && console.log('delta', delta, val)
 
-  delta && layoutId.value && updateDoc(doc(db, 'layouts', layoutId.value),
+  delta && layoutId.value && setDoc(doc(db, 'layouts', layoutId.value),
     {
       [`dccEx.${delta}`]: val,
-      ['dccEx.timestamp']: serverTimestamp()
+      timestamp: serverTimestamp()
     }, { merge: true })
 
   /*

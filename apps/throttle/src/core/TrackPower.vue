@@ -3,7 +3,7 @@
   import { storeToRefs } from 'pinia'
   import { useWakeLock } from '@vueuse/core'
   import { useConnectionStore } from '@/connections/connectionStore'
-  import { useDcc } from '@/api/dccApi'
+  import { useDcc } from '@repo/dccex'
 
   const { isSupported, isActive, request, release } = useWakeLock()
 
@@ -15,26 +15,19 @@
     isSerial,
     dccExConnected
    } = storeToRefs(useConnectionStore())
-  const dccApi = useDcc()
+  const { setPower } = useDcc()
   const power = ref(null)
   const enabled = computed(() => dccExConnected || isEmulated || isSerial)
   const locked = ref(false)
 
   watch(power, async (newPower) => {
-    console.log('power', newPower)
-
-    await dccApi.setPower(newPower ? DEFAULT_ON : DEFAULT_OFF)
-
+    await setPower(newPower ? DEFAULT_ON : DEFAULT_OFF)
     if (newPower && isSupported.value && !isActive.value) {
-        console.log('locking screen')
         await request('screen')
         locked.value = true
       } else if (!newPower && isActive.value) {
-        console.log('unlocking screen')
         await release()
         locked.value = false
-      } else {
-        console.log('screen lock noop', isSupported.value, isActive.value)
       }
   })
 

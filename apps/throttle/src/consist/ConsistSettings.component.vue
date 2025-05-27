@@ -8,7 +8,7 @@ import {
   FaTimesCircle,
 } from "vue3-icons/fa";
 
-import { useDejaCloud } from '@/deja-cloud/useDejaCloud'
+import { useLocos } from '@repo/modules/locos'
 
 import ConsistAddLoco from './ConsistAddLoco.component.vue'
 import Modal from '@/core/Modal.component.vue'
@@ -23,7 +23,7 @@ const props = defineProps({
 const addLocoRef = ref<HTMLDialogElement | null>(null)
 const modalRef = ref<HTMLDialogElement | null>(null)
 
-const { updateConsist } = useDejaCloud()
+const { updateConsist } = useLocos()
 
 defineExpose({
   showModal: () => modalRef?.value?.showModal()
@@ -43,9 +43,8 @@ const handleAddLoco = (newAddress: string) => {
       trim: 0
     }
     const newConsist = [...(props.loco.consist || []), newLoco]
-    console.log('newConsist', newConsist, props.loco, props.loco?.id)
     updateConsist(props.loco.id, newConsist)
-    addLocoRef?.value?.closeModal()
+    addLocoRef?.value?.close()
   }
 }
 

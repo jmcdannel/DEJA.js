@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import type { ITag } from '@repo/modules/layout/types'
+import type { Tag } from '@repo/modules/layouts'
 import { useLayout } from '@repo/modules/layouts'
-import Tag from './Tag.vue'
+import TagCmp from './Tag.vue'
 
 const model = defineModel()
 
 const { getTags } = useLayout()
-const layoutTags = ref<ITag[]>([])
+const layoutTags = ref<Tag[]>([])
 
 onMounted(async () => {
   layoutTags.value = await getTags()
@@ -16,7 +16,7 @@ onMounted(async () => {
 </script>
 <template>
   <v-chip-group v-model="model" multiple>
-    <Tag 
+    <TagCmp 
       v-for="tag in layoutTags" 
       :key="tag.id" 
       :tag="tag" 

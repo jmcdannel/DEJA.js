@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { watch, type PropType } from 'vue'
-import type { Loco, Throttle } from './types';
+import type { Loco } from '@repo/modules/locos'
+import type { Throttle } from './types';
 import ThrottleAvatar from '@/throttle/ThrottleAvatar.vue'
 import ThrottleButtonControls from './ThrottleButtonControls.component.vue'
 import CurrentSpeed from './CurrentSpeed.vue'
@@ -44,7 +45,7 @@ watch( () => props.throttle, handleThrottleChange, { deep: true })
         <span v-if="loco" class="bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-cyan-400 font-bold">{{loco.name}}</span>
       </div>
       <div class="order-2  basis-1/3 text-center">
-        <ThrottleAvatar :throttle="throttle" :size="'48'" :loco="loco" @release="$emit('release', throttle.address)" @select="$emit('select', throttle.address)" />
+        <ThrottleAvatar :throttle="throttle" :size="48" :loco="loco" @release="$emit('release', throttle.address)" @select="$emit('select', throttle.address)" />
       </div>
     </section>
   </main>

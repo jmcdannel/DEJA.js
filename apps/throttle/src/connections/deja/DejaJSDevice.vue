@@ -1,33 +1,22 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-// import { useDejaJS } from '@repo/deja/useDejaJS'
-// import { useColors } from '@/Core/UI/useColors'
-import { useLayout } from '@/api/useLayout'
+import { computed, ref, type PropType } from 'vue'
+import type { Device } from '@repo/modules/layouts'
+import { useLayout, deviceTypes } from '@repo/modules/layouts'
 
-// const { sendDejaCommand } = useDejaJS()
-const { deviceTypes, connectDevice } = useLayout()
-// const { colors, DEFAULT_COLOR } = useColors()
+const { connectDevice } = useLayout()
 
 const props = defineProps({
-  device: Object,
-  ports: Array,
+  device: {
+    type: Object as PropType<Device>,
+    required: true
+  },
+  ports: {
+    type: Array as PropType<string[]>,
+    required: true
+  }
 })
 
 const serial = ref(props?.device?.port || '')
-// const color = ref(colors[DEFAULT_COLOR])
-
-const deviceType = computed(() => deviceTypes.find((type) => type.value === props?.device?.type))
-// const color = colors[deviceType.color || DEFAULT_COLOR]
-
-// onMounted(() => {
-//   console.log('DeviceListItem', props.device, deviceType.value?.color, deviceType)
-//   deviceType.value?.color && (color.value = colors[deviceType.value.color])
-// })
-
-// watch(() => deviceType.value?.color, (newVal) => {
-//   console.log('deviceType.color', newVal)
-//   color.value = colors[newVal]
-// })
 
 async function handleConnect (event: Event) {
   console.log('handleConnect', props.device, serial.value)
@@ -40,11 +29,7 @@ async function handleConnect (event: Event) {
     class="mx-auto w-full h-full justify-between flex flex-col border-t-4 border-b-4"
     
   >
-  
       <span class="text-md">{{device?.id}}</span>
-      <!-- <img v-if="deviceType?.image" :src="deviceType.image" alt="DCC-EX Logo" class="w-16 h-16 mr-2" />
-      <v-icon v-else :icon="deviceType?.icon || 'mdi-help'" class="w-16 h-16 mr-2 border rounded-full" /> -->
-  
     <div>
       <div
         class="ma-1"

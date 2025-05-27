@@ -13,7 +13,7 @@
   import StatusMenuItem from '@/core/StatusMenu/StatusMenuItem.component.vue'
   import DejaSignout from '@/deja-cloud/DejaSignout.vue'
   import DejaUser from '@/deja-cloud/DejaUser.vue'
-  import useSerial from '@/api/serialApi'
+  import useSerial from '@/deja-cloud/serialApi'
   const serialApi = useSerial()
   const user = useCurrentUser()
   const connStore = useConnectionStore()

@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import type { PropType } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
-import { useTurnouts } from '@repo/modules/turnouts'
+import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
 import { MdOutlineForkLeft } from 'vue3-icons/md'
 
 const { switchTurnout } = useTurnouts()
@@ -25,7 +25,10 @@ async function handleTurnouts (event: Event) {
   }, 3000)
   isRunning.value = isPending.value
   const target = event.target as HTMLInputElement;
-  await switchTurnout({...props.turnout, id: props.turnoutId, state: target.checked})
+  console.log('handleTurnouts', target.checked, props.turnoutId, props.turnout)
+  if (props.turnoutId) {
+    await switchTurnout({...props.turnout, id: props.turnoutId, state: target.checked} as Turnout)
+  }
 }
 
 </script>
@@ -55,7 +58,7 @@ async function handleTurnouts (event: Event) {
       :disabled="isRunning"
       :loading="isRunning"
       variant="tonal"
-      @click="state = !state">
+      @click="handleTurnouts">
       <template #prepend>
         <MdOutlineForkLeft class="w-6 h-6 stroke-none" :color="turnout?.color || 'primary'"></MdOutlineForkLeft>
       </template>

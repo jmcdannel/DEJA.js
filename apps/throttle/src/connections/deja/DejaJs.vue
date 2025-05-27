@@ -1,46 +1,30 @@
 <script setup lang="ts">
-  import { onMounted, ref } from 'vue'
+  import { ref } from 'vue'
   import { storeToRefs } from 'pinia'
   import { useCurrentUser } from 'vuefire'
   import ConnectionStatus from '@/core/ConnectionStatus.component.vue'
-  import useDcc from '@/api/dccApi'
-  import { useDejaJs } from '@/api/useDejaJs'
-  import { useLayout } from '@/api/useLayout'
+  import { useLayout } from '@repo/modules/layouts'
+  import { useDcc } from '@repo/dccex'
   import router from '@/router'
   import tttButton from '@/shared/ui/tttButton.component.vue'
-  import DejaDCCEX from '@/deja-cloud/DejaDCCEX.vue'
   import { useConnectionStore } from '@/connections/connectionStore.jsx'
-  import DejaJSDevice from '@/connections/deja/DejaJSDevice.vue'
-  import closeIconSvg from '@/assets/icons/close.svg'
-  import DejaPortList from '@/deja-cloud/DejaPortList.vue'
-  
+  import closeIconSvg from '@/assets/icons/close.svg'  
 
-  const { getLayout, getDevices } = useLayout()
+  const { getLayout } = useLayout()
 
   const layout = getLayout()
-  const devices = getDevices()
 
   const user = useCurrentUser()
-  const dccApi = useDcc()
-  const dejaJsApi = useDejaJs()
+  const { sendDccCommand } = useDcc()
   const conn = useConnectionStore()
   const { layoutId, ports, isDejaJS, mqttConnected, dccExConnected } = storeToRefs(conn)
   const dccStatus = ref(isDejaJS.value && dccExConnected.value ? 'connected' : 'disconnected')
   const storedLayoutsData = localStorage.getItem('@DEJA/layouts')
   const MAX_SAVED_LAYOUTS = 10
   const layouts = ref(storedLayoutsData ? JSON.parse(storedLayoutsData) : [])
-  // const layout = ref(null)
-
-  onMounted(async () => {
-    // if (layoutId.value) {
-    //   console.log('connecting from DejaJs', user.value)
-    //   dejaJsApi.connect()
-    // }
-    // dccApi.send('listPorts', { })
-  });
 
   const handleRefreshClick = () => {
-    dccApi.send('listPorts', { })
+    sendDccCommand({ action: 'listPorts', payload: { } })
   }
 
   const handlePortClick = async (e:any) => {
@@ -48,7 +32,7 @@
       e.preventDefault()
       dccStatus.value = 'pending'
       const serial = e.target.value
-      dccApi.send('connect', { serial })
+      sendDccCommand({ action: 'connect', payload: serial })
     } catch (err) {
       console.error(err)
     }
@@ -59,8 +43,8 @@
 
   const handleLayoutClick = async () => {
     console.log('LayoutConnect.handleGoClick', layout.value)
-    layoutId.value = layout.value
-    !!layout.value && savelayout(layout.value)
+    layoutId.value = layout.value?.id || null
+    !!layout.value && savelayout(layout.value?.id || layout.value)
     // await dejaJsApi.connect()
     
   }
@@ -95,14 +79,14 @@
     localStorage.removeItem('@DEJA/layoutId')
   }
 
-  const handleMqtt = async () => {
-    dejaJsApi.connectMqtt()
-  }
+  // const handleMqtt = async () => {
+  //   dejaJsApi.connectMqtt()
+  // }
 
-  const handleCloud = async () => {
-    console.log('handleCloud', user.value)
-    dejaJsApi.connectDejaCloud()
-  }
+  // const handleCloud = async () => {
+  //   console.log('handleCloud', user.value)
+  //   dejaJsApi.connectDejaCloud()
+  // }
 
 </script>
 
@@ -145,10 +129,8 @@
           </svg>
         </div>
         <template v-else-if="user && layoutId">
-          <!-- <DejaJSDevice v-for="item in devices" :key="item.id" :device="item" :ports="layout?.ports" /> -->
           <p>Connect via DEJA Cloud</p>
           <pre>{{ layout }}</pre>
-          <!-- <DejaPortList @connect="handlePortClick" /> -->
         </template>
         <div v-else-if="!ports?.length">
           <span class=" ">Loading</span>

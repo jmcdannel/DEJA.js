@@ -20,7 +20,8 @@
   "tasks": {
     "build": {},
     "lint": {},
-    "check-types": {},
+    "format": {},
+    "type-check": {},
     "dev": {
       "cache": false,
       "persistent": true

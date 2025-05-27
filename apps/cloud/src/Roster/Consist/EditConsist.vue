@@ -1,40 +1,44 @@
 <script setup lang="ts">
-import { ref, shallowRef } from 'vue'
-import { useLocos } from '@repo/modules/locos'
+import { ref } from 'vue'
+import { ConsistLoco, Loco, useLocos } from '@repo/modules/locos'
 import LeadLoco from '@/Roster/Consist/LeadLoco.vue'
-import ConsistLoco from '@/Roster/Consist/ConsistLoco.vue'
+import ConsistLocoCmp from '@/Roster/Consist/ConsistLoco.vue'
 import AddConsistLoco from '@/Roster/Consist/AddConsistLoco.vue'
 
-const props = defineProps({
-  loco: Object,
-  color: Object
-})
+const props = defineProps<{
+  loco: Loco
+  color: string
+}>()
 
 const { getLocos, updateConsist } = useLocos()
 const show = ref(false)
 
-let locos = shallowRef(getLocos())
+const locos = getLocos()
 
-async function handleRemoveLoco(cloco) {
+async function handleRemoveLoco(cloco: ConsistLoco) {
   if (props.loco) {
     const newConsist = (props.loco.consist || [])
-      .filter((l) => l.address !== cloco.address)
+      .filter((l:ConsistLoco) => l.address !== cloco.address)
     console.log('newConsist', newConsist)
-    await updateConsist(props.loco.id, newConsist)
-    locos.value = getLocos()
+    if (props.loco.id) {
+      await updateConsist(props.loco.id, newConsist)
+    }
+    // locos.value = getLocos()
   }
 }
 
-async function handleAdjustTrim(cloco, trim: number) {
+async function handleAdjustTrim(cloco: ConsistLoco, trim: number) {
   if (props.loco) {
-    const newConsist = (props.loco.consist || []).map((l) => {
+    const newConsist = (props.loco.consist || []).map((l:ConsistLoco) => {
       if (l.address === cloco.address) {
         l.trim += trim
       }
       return l
     })
     console.log('newConsist', newConsist)
-    await updateConsist(props.loco.id, newConsist)
+    if (props.loco.id) {
+      await updateConsist(props.loco.id, newConsist)
+    }
   }
 }
 
@@ -47,21 +51,25 @@ async function handleAddLoco(newAddress: string, direction:boolean = true) {
     }
     const newConsist = [...(props.loco.consist || []), newLoco]
     console.log('newConsist', newConsist)
-    await updateConsist(props.loco.id, newConsist)
+    if (props.loco.id) {
+      await updateConsist(props.loco.id, newConsist)
+    }
     show.value = false
   }
 }
 
-async function toggleLocoDir(cloco, direction:boolean) {
+async function toggleLocoDir(cloco: ConsistLoco, direction:boolean) {
   if (props.loco) {
-    const newConsist = (props.loco.consist || []).map((l) => {
+    const newConsist = (props.loco.consist || []).map((l:ConsistLoco) => {
       if (l.address === cloco.address) {
         l.direction = direction
       }
       return l
     })
     console.log('newConsist', newConsist)
-    await updateConsist(props.loco.id, newConsist)
+    if (props.loco.id) {
+      await updateConsist(props.loco.id, newConsist)
+    }
   }
 }
 
@@ -72,7 +80,7 @@ async function toggleLocoDir(cloco, direction:boolean) {
       class="ma-1" 
       variant="elevated" 
       prepend-icon="mdi-arrow-left-circle"
-      :color="color.value"
+      :color="color || 'primary'"
     >
       {{ loco?.locoId }}
     </v-chip>
@@ -82,7 +90,7 @@ async function toggleLocoDir(cloco, direction:boolean) {
       :prepend-icon="cloco.direction ? 'mdi-arrow-left-circle' : ''" 
       :append-icon="!cloco.direction ? 'mdi-arrow-right-circle' : ''"
       :key="cloco.address" 
-      :color="color.value"
+      :color="color || 'primary'""
     >
     {{ cloco?.address }}
     </v-chip>
@@ -91,7 +99,7 @@ async function toggleLocoDir(cloco, direction:boolean) {
       variant="outlined" 
       prepend-icon="mdi-arrow-left-circle"
       append-icon="mdi-arrow-right-circle"
-      :color="color.value"
+      :color="color || 'primary'"
       @click="show = !show"
     >
       <v-icon icon="mdi-plus"></v-icon>
@@ -101,9 +109,9 @@ async function toggleLocoDir(cloco, direction:boolean) {
     <LeadLoco v-if="loco?.consist?.length > 0" :loco="loco" :color="color" />
     <v-divider></v-divider>
     <template v-for="cloco in loco?.consist" :key="cloco.address">
-      <ConsistLoco 
+      <ConsistLocoCmp 
         :cloco="cloco" 
-        :color="color" 
+        :color="color || 'primary'" 
         @toggle="toggleLocoDir" 
         @trim="handleAdjustTrim" 
         @delete="handleRemoveLoco" 
@@ -111,7 +119,7 @@ async function toggleLocoDir(cloco, direction:boolean) {
       <v-divider></v-divider>
     </template>
     <AddConsistLoco 
-      :alocos="locos" 
+      :alocos="locos as Loco[]" 
       :loco="loco" 
       :color="color" 
       :open="show"

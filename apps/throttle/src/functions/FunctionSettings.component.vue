@@ -1,57 +1,46 @@
 <script lang="ts" setup>
-  import { ref } from 'vue'
-  import Function from './Function.component.vue'
-  import { 
-    FaRegStar,
-    FaStar,
-  } from 'vue3-icons/fa'
-  import Modal from '@/core/Modal.component.vue'
-  import type { Loco, LocoFunction } from '@/throttle/types'
-  import { useFunctionIcon } from '@/functions/useFunctionIcon'
-  import FunctionIcon from './FunctionIcon.component.vue'
-  import { defaultFunctions } from '@/functions/useFunctions'
+import { ref } from 'vue'
+import Function from './Function.vue'
+import { 
+  FaRegStar,
+  FaStar,
+} from 'vue3-icons/fa'
+import Modal from '@/core/Modal.component.vue'
+import type { Loco, LocoFunction } from '@repo/modules/locos'
+import { FUNCTION_ICONS, defaultFunctions } from '@repo/modules/locos'
+import FunctionIcon from './FunctionIcon.component.vue'
 
-  const functionIcons = useFunctionIcon()
-  const icons = functionIcons.getAllIcons()
+const props = defineProps<{
+  loco: Loco | null,
+}>()
 
-  const props = defineProps<{
-    loco: Loco | null,
-  }>()
+const emit = defineEmits(['saveFunctions'])
 
-  const emit = defineEmits(['saveFunctions'])
+const menuRefs = ref<HTMLElement[]>([])
+const _functions = ref(defaultFunctions.map(f => ({...f, ...props.loco?.functions?.find(lf => lf.id === f.id)})))
+const modalRef = ref<HTMLDialogElement | null>(null)
+
+function handleLabelBlur() {
+  emit('saveFunctions', _functions.value)
+}
+
+function handleFavorite(func: LocoFunction) {
+  func.isFavorite = !func.isFavorite
+  emit('saveFunctions', _functions.value)
+}
+
+function handleIcon(func: LocoFunction, icon: string, fIdx: number) {
+  func.icon = icon
+  console.log('handleIcon', { func, icon }, menuRefs.value[fIdx], menuRefs.value[fIdx].attributes,  _functions.value)
+  emit('saveFunctions', _functions.value)
   
-  const menuRefs = ref<HTMLElement[]>([])
-  const _functions = ref(defaultFunctions.map(f => ({...f, ...props.loco?.functions?.find(lf => lf.id === f.id)})))
-  const modalRef = ref<HTMLDialogElement | null>(null)
+  menuRefs.value[fIdx].attributes.removeNamedItem('open')
+  
+}
+defineExpose({
+  showModal: () => modalRef?.value?.showModal()
+})
 
-  function handleLabelBlur() {
-    // if (loco.value) {
-    emit('saveFunctions', _functions.value)
-    // }
-  }
-
-  function handleFavorite(func: LocoFunction) {
-    func.isFavorite = !func.isFavorite
-    // if (loco.value) {
-    emit('saveFunctions', _functions.value)
-    // }
-  }
-
-  function handleIcon(func: LocoFunction, icon: string, fIdx: number) {
-    func.icon = icon
-    console.log('handleIcon', { func, icon }, menuRefs.value[fIdx], menuRefs.value[fIdx].attributes,  _functions.value)
-    // if (loco.value) {
-    emit('saveFunctions', _functions.value)
-    // }
-    
-    menuRefs.value[fIdx].attributes.removeNamedItem('open')
-    
-  }
-  defineExpose({
-    showModal: () => modalRef?.value?.showModal()
-  })
-
-  console.log('Functions', _functions, defaultFunctions, props.loco)
 
 </script>
 <template>
@@ -89,11 +78,13 @@
               </template>
             </summary>
             <ul class="menu dropdown-content bg-base-200 rounded-box z-[1] w-auto p-2 shadow">
-              <li v-for="ico in icons" :key="ico.name">
+              <li v-for="ico in FUNCTION_ICONS" :key="ico.name">
                 <button 
                   @click="() => handleIcon(func, ico.name, fIdx)"
                   class="relative btn btn-md btn-square bg-gradient-to-br from-cyan-600 to-indigo-600">
-                  <component :is="ico.icon" class="w-6 h-6" />
+                  <v-icon size="16" class="stroke-none">
+                    {{ ico.icon }}
+                  </v-icon>
                 </button>
               </li>
             </ul>

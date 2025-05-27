@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { doc } from 'firebase/firestore'
 import { useDocument } from 'vuefire'
-import { FaUsb, FaCloud, FaPowerOff } from 'vue3-icons/fa6'
-import { useStorage, watchImmediate } from '@vueuse/core'
+import { useStorage } from '@vueuse/core'
 import useSerial from './useSerial'
-import { db } from "../firebase"
+import { db } from '@repo/firebase-config/firebase'
 import CommandStationLCD from './CommandStationLCD.vue'
 import CommandStationTracks from './CommandStationTracks.vue'
 import CommandStationStats from './CommandStationStats.vue'
-import useDejaCloudDccConnector from './useDejaCloudDccConnector'
-
 
 const layoutId = useStorage('@DEJA/layoutId', null)
 
@@ -17,7 +14,6 @@ const layoutDoc = layoutId.value
   ? doc(db, 'layouts', layoutId.value)
   : null
 const layout = useDocument(layoutDoc)
-
 
 const {
   disconnect

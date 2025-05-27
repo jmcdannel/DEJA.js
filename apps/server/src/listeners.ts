@@ -12,7 +12,7 @@ import {
   type DocumentData,
 } from 'firebase/firestore'
 import { ref, onChildAdded } from 'firebase/database'
-import { db, rtdb } from '@repo/firebase-config/firebase'
+import { db, rtdb } from '@repo/firebase-config/firebase-node'
 import { handleTurnoutChange, handleTurnout } from './modules/turnouts.js'
 import { handleEffectChange, handleEffect, handleMacro } from './modules/effects.js'
 import { handleDccChange } from './dcc.js'

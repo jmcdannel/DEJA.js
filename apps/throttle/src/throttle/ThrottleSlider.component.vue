@@ -41,7 +41,7 @@ import { refDebounced, watchDebounced } from '@vueuse/core'
     emit('update', sliderVal.value)
   })
 
-  function handleSlider(val) {
+  function handleSlider(val: number) {
     console.log('handleSlider', val)
     sliderVal.value = val
   }

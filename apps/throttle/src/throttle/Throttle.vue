@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, type PropType } from 'vue'
-import type { Loco, Throttle } from './types';
+
+import type { Loco } from '@repo/modules/locos'
+import type { Throttle } from '@/throttle/types'
 import { debounce } from 'vue-debounce'
 import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.component.vue'
 import ThrottleSliderControls from '@/throttle/ThrottleSliderControls.component.vue'
@@ -79,7 +81,7 @@ function openFunctionSettings() {
     <pre>props.throttle {{ props.throttle }}</pre> -->
     <ThrottleHeader :address="throttle.address">
       <template v-slot:left>
-        <LocoAvatar :loco="loco as Loco" :size="48" />
+        <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" />
         <MiniConsist v-if="loco" :loco="loco" />
       </template>
       <template v-slot:center>

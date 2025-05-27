@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useEfx } from '@repo/modules/effects'
-import { useLocos } from '@repo/modules/locos'
-import { useTurnouts } from '@repo/modules/turnouts'
+import { useEfx, type Effect } from '@repo/modules/effects'
+import { useLocos, type Loco } from '@repo/modules/locos'
+import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
 
 const emit = defineEmits(['add', 'close'])
 
+interface MacroLoco extends Loco {
+  speed: number
+  direction: 'forward' | 'reverse'
+  isSelected?: boolean
+  type: string
+}
 
 const { getEffects } = useEfx()
 const { getLocos } = useLocos()
@@ -15,14 +21,15 @@ const effects = getEffects()
 const turnouts = getTurnouts()
 const locos = getLocos()
 
-const effectChips = ref([])
-const locoChips = ref([])
-const turnoutChips = ref([])
-const throttles = computed(() => locoChips.value.map((loco) => ({
+const effectChips = ref([] as Effect[])
+const locoChips = ref([] as MacroLoco[])
+const turnoutChips = ref([] as Turnout[])
+const throttles = computed(() => locoChips.value.map((loco: Loco) => ({
   speed: 0,
   direction: 'forward',
+  type: 'throttle',
   ...loco,
-})))
+} as MacroLoco)) as MacroLoco[])
 
 function handleOk() {
   console.log('handleOk', effectChips.value, turnoutChips.value, locoChips.value, throttles.value)
@@ -87,7 +94,7 @@ function handleOk() {
           <v-item-group 
             v-model="throttles" multiple>
             <v-row>
-              <v-col  v-for="item in locoChips" :key="item" cols="12" md="4" :value="item">
+              <v-col  v-for="item in locoChips" :key="item.locoId" cols="12" md="4" :value="item">
                 <v-item 
                   size="large"
                   color="blue"

@@ -1,10 +1,9 @@
 import { ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { deleteDoc, doc, serverTimestamp, setDoc } from 'firebase/firestore'
+import { deleteDoc, doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import type { Throttle } from '@/throttle/types'
 import { db } from '@repo/firebase-config/firebase'
 import { useConnectionStore } from '@/connections/connectionStore'
-
 
 export const useThrottle = (throttle?: Throttle) => {
   const connStore = useConnectionStore()
@@ -40,14 +39,19 @@ export const useThrottle = (throttle?: Throttle) => {
 
   async function acquireThrottle(address: string | number) {
     try {
+      const id = typeof address === 'string' ? address : address.toString() || throttle?.address
+      if (!id) {
+        console.warn('No throttle address provided for acquisition')
+        return
+      }
       const data = {
-        address: parseInt(address.toString()),
+        address: id,
         speed: 0,
         direction: false,
         timestamp: serverTimestamp(),
       }
       const newThrottleDoc = await setDoc(
-        doc(db, `layouts/${layoutId.value}/throttles`, address.toString()),
+        doc(db, `layouts/${layoutId.value}/throttles`, id.toString()),
         data
       )
       return newThrottleDoc
@@ -56,10 +60,16 @@ export const useThrottle = (throttle?: Throttle) => {
     }
   }
 
-  async function releaseThrottle(throttleId: number) {
+  async function releaseThrottle(throttleId?: number) {
     try {
+      const id = throttleId || throttle?.address
+      if (!id) {
+        console.warn('No throttle ID provided for release')
+        return
+      }
+      const throttleDoc = doc(db, `layouts/${layoutId.value}/throttles`, id.toString())
       await deleteDoc(
-        doc(db, `layouts/${layoutId.value}/throttles`, throttleId.toString())
+        throttleDoc
       )
     } catch (e) {
       console.error('Error releasing throttle: ', e)
@@ -82,26 +92,6 @@ export const useThrottle = (throttle?: Throttle) => {
       },
       { merge: true }
     )
-    // let delay = 0
-
-    // if (newSpeed > 0 && oldSpeed < 0) {
-    //   //change direction to forward
-    //   stop(address, consist)
-    //   delay = SWITCH_DIR_DELAY
-    // } else if (newSpeed < 0 && oldSpeed > 0) {
-    //   //change direction to reverse
-    //   stop(address, consist)
-    //   delay = SWITCH_DIR_DELAY
-    // }
-
-    // if (newSpeed === 0) {
-    //   dccApi.setSpeed(address, 0)
-    // } else {
-    //   // set speed
-    //   setTimeout(() => {
-    //     dccApi.setSpeed(address, newSpeed)
-    //   }, delay)
-    // }
   }
 
 

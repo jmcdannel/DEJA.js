@@ -1,7 +1,8 @@
 <script setup lang="ts">
   import { storeToRefs } from 'pinia'
   import { useConnectionStore } from '@/connections/connectionStore.jsx'
-  import { useDejaCloud } from "@/deja-cloud/useDejaCloud.js"
+  import type { Layout } from '@repo/modules/layouts'
+  import { useDejaJS } from '@repo/deja'
   import DejaCloudLayoutList from '@/deja-cloud/DejaCloudLayoutList.vue'
   import DejaDCCEX from '@/deja-cloud/DejaDCCEX.vue'
   import DejaUser from '@/deja-cloud/DejaUser.vue'
@@ -9,17 +10,17 @@
   import tttButton from '@/shared/ui/tttButton.component.vue'
   
   const conn = useConnectionStore()
-  const dejaCloud = useDejaCloud()
+  const { sendDejaCommand } = useDejaJS()
   const { layoutId } = storeToRefs(conn)
 
   function handleCancelClick() {
     router.push({ name: 'home' })
   }
 
-  async function handleLayoutClick(_layout) {
-    console.log('handleLayoutClick', _layout?.layoutId)
-    dejaCloud.send({ action: 'status', payload: { layoutId: _layout?.layoutId }})
-    conn.connect('cloud', _layout?.layoutId)
+  async function handleLayoutClick(_layout: Layout) {
+    console.log('handleLayoutClick', _layout?.id)
+    sendDejaCommand({ action: 'status', payload: { layoutId: _layout?.id }})
+    conn.connect('cloud', _layout?.id)
   }
 
   function handleDisconnectClick() {

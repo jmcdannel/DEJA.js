@@ -19,6 +19,14 @@ export function useLocos() {
   const locosCol = () =>
     layoutId.value ? collection(db, `layouts/${layoutId.value}/locos`) : null
 
+  const throttlesCol = () =>
+    layoutId.value ? collection(db, `layouts/${layoutId.value}/throttles`) : null
+
+  function getThrottles() {
+    const throttles = useCollection(throttlesCol)
+    return throttles
+  }
+
   function getRoadname(roadname: string) {
     return ROADNAMES.find((r) => r.value === roadname)
   }
@@ -68,7 +76,7 @@ export function useLocos() {
   async function createLoco(
     locoId: number,
     name: string | undefined,
-    roadname: string | undefined
+    roadname: string | undefined = undefined
   ) {
     console.log('dejaCloud createLoco', locoId)
     try {
@@ -93,13 +101,14 @@ export function useLocos() {
   }
 
   return {
+    createLoco,
+    deleteLoco,
     getLoco,
     getLocos,
-    createLoco,
-    updateLoco,
-    deleteLoco,
-    updateConsist,
     getRoadname,
+    getThrottles,
+    updateLoco,
+    updateConsist,
   }
 }
 

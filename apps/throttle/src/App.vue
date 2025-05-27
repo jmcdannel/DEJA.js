@@ -1,54 +1,30 @@
 <script setup lang="ts">
-  import { onMounted, ref, watch } from 'vue'
+  import { onMounted } from 'vue'
   import { storeToRefs } from 'pinia'
   import { RouterView } from 'vue-router'
   import { getAuth, onAuthStateChanged } from 'firebase/auth'
   import { useCurrentUser } from 'vuefire'
   import { useConnectionStore } from '@/connections/connectionStore'
-  import { useDejaJs } from '@/api/useDejaJs'
-  import { db,firebaseApp } from '@/firebase'
+  import { firebaseApp } from '@repo/firebase-config/firebase'
   import HeaderView from '@/views/HeaderView.vue'
   import FooterView from '@/views/FooterView.vue'
   import ContextMenu from '@/core/ContextMenu.vue'
   import DejaJsConnect from '@/core/DejaJsConnect.component.vue'
   import DejaCloudConnect from '@/deja-cloud/DejaCloudConnect.vue'
-  import { useDejaCloudStore } from '@/deja-cloud/dejaCloudStore'
   
   const user = useCurrentUser()
-  const dejaJsApi = useDejaJs()
   const connectionStore = useConnectionStore()
-  const dejaCloudStore = useDejaCloudStore()
-  const { layoutId, isDejaJS, isDejaServer, connectionType } = storeToRefs(connectionStore)
-  const { initialized } = storeToRefs(dejaCloudStore)
+  const { layoutId, connectionType } = storeToRefs(connectionStore)
   
   onMounted(async () => {
     const auth = getAuth(firebaseApp)
     console.log('App.vue onMounted', auth)
     onAuthStateChanged(auth, async function(user) {
-      // if (connectionType.value === 'dejaJS') {
-        if (user) {
-          // User is signed in.
-          console.log('User is signed in.', auth)
-          layoutId.value && await dejaJsApi.connectDejaCloud()
-          // layoutId.value && await dejaCloudStore.init(layoutId.value)
-        } else {
-          // No user is signed in.
-          console.log('No user is signed in.', auth)
-          // await dejaJsApi.connectMqtt()
+      if (user && layoutId.value) {
+        connectionStore.connect('dejaJS', layoutId.value || undefined)
         }
-      // }
     })
-    // if (layoutId.value) {
-    //   console.log('connecting from App.vue', user.value, user?.value?.email, layoutId?.value, connectionType.value)
-    //   if (connectionType.value === 'dejaJS') {
-    //     await dejaJsApi.connect()
-    //   }
-    // }
   })
-
-  // watch(layoutId.value, (newVal:string, oldVal:string) => {
-  //   console.log('layoutId changed', newVal, oldVal, connectionType.value)
-  // })
 
 </script>
 
@@ -67,7 +43,7 @@
           <RouterView />
         </v-container>
       </v-main>
-      <FooterView v-if="!!user" :layoutId="layoutId"></FooterView>
+      <FooterView v-if="!!user && !!layoutId" :layoutId="layoutId"></FooterView>
     </v-app>
   </v-responsive>
 </template>

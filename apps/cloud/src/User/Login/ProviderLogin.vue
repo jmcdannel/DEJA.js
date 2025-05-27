@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
 import { GithubAuthProvider } from 'firebase/auth'
 export const githubAuthProvider = new GithubAuthProvider()
 </script>
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getRedirectResult, signInWithPopup } from 'firebase/auth'
 import { useFirebaseAuth } from 'vuefire'
@@ -14,6 +14,10 @@ const auth = useFirebaseAuth()
 const error = ref(null)
 
 function handleGithubSignin() {
+  if (!auth) {
+    console.error('Firebase auth is not initialized')
+    return
+  }
   signInWithPopup(auth, githubAuthProvider).catch((reason) => {
     console.error('Failed signinRedirect', reason)
     error.value = reason
@@ -21,6 +25,10 @@ function handleGithubSignin() {
 }
 
 onMounted(() => {
+  if (!auth) {
+    console.error('Firebase auth is not initialized')
+    return
+  }
   getRedirectResult(auth).catch((reason) => {
     console.error('Failed redirect result', reason)
     error.value = reason
@@ -32,7 +40,7 @@ onMounted(() => {
   <main class="flex flex-col mx-auto">    
     <template v-if="error">
       <div class="alert alert-error">
-        {{ error.message }}
+        {{ error }}
       </div>
     </template>
     <template v-else>

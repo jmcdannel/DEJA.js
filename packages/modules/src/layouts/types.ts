@@ -1,10 +1,10 @@
-export interface ITag {
+export interface Tag {
   color?: string
   icon?: string
   id: string
   name: string
 }
-export interface ILayout {
+export interface Layout {
   author?: string
   createdAt?: Date
   description?: string
@@ -22,14 +22,14 @@ export interface ILayout {
   routes?: string[]
   scripts?: string[]
   sensors?: string[]
-  tags?: ITag[]
+  tags?: Tag[]
   thumbnail?: string
   turnouts?: string[]
   updatedAt?: Date
   version?: string
 }
 
-export interface IDevice {
+export interface Device {
   autoConnect?: boolean
   client?: string
   config?: Record<string, any>
@@ -41,13 +41,21 @@ export interface IDevice {
   name: string
   port?: string
   strips?: number[]
-  tags?: ITag[]
+  tags?: Tag[]
   timestamp?: Date
   topic?: string
   type: string
 }
 
-export interface ISensor {
+export interface DeviceType {
+  value: string
+  label: string
+  icon: string
+  image?: string
+  color: string
+}
+
+export interface Sensor {
   deviceId: string
   effectId?: string
   enabled: boolean

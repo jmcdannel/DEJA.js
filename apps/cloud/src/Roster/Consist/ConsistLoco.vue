@@ -1,8 +1,9 @@
 <script setup lang="ts">
-  defineProps({
-    cloco: Object,
-    color: Object
-  })
+import { type ConsistLoco } from '@repo/modules/locos'
+defineProps<{
+  cloco: ConsistLoco
+  color: string
+}>()
 </script>
 <template>
   <v-list-item :title="cloco?.address">
@@ -17,7 +18,7 @@
         :color="cloco.direction ? 'green' : 'gray'"
         @click="$emit('toggle', cloco, true)"
       ></v-btn>
-      <v-avatar :color="color.value">{{ cloco?.address }}</v-avatar>
+      <v-avatar :color="color">{{ cloco?.address }}</v-avatar>
       <v-btn
         class="ma-2"
         icon="mdi-arrow-right-circle"
@@ -31,7 +32,7 @@
         <span class="mx-2">Trim</span>
         <v-btn icon="mdi-minus-circle" size="small" class="mx-1" @click="$emit('trim', cloco, -1)"></v-btn>
         <v-btn icon="mdi-plus-circle" size="small" class="mx-1" @click="$emit('trim', cloco, 1)"></v-btn>
-        <v-avatar :color="color.value" class="mx-1">{{ cloco?.trim }}</v-avatar>
+        <v-avatar :color="color" class="mx-1">{{ cloco?.trim }}</v-avatar>
       </v-sheet>
       <v-spacer></v-spacer>
       <v-btn

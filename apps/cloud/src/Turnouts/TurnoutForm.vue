@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useTurnouts } from '@repo/modules/turnouts'
+import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
 import { useLayout } from '@repo/modules/layouts'
-import { useEfx } from '@repo/modules/effects'
-import { ITurnout } from '@/Turnouts/types'
+// import { useEfx } from '@repo/modules/effects'
 import { slugify } from '@repo/utils/slugify'
 import TurnoutTypePicker from '@/Turnouts/TurnoutTypePicker.vue'
 import DevicePicker from '@/Layout/Devices/DevicePicker.vue'
@@ -12,19 +11,23 @@ import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 
+interface ValidationRules {
+  required: ((val: any) => boolean | string)[];
+}
+
 const props = defineProps<{
-  turnout: ITurnout
+  turnout: Turnout | null
 }>()
 const emit = defineEmits(['close'])
 const DEFAULT_DEVICE = 'dccex'
 const DEFAULT_TYPE = 'kato'
 
-const { getEffects } = useEfx()
+// const { getEffects } = useEfx()
 const { getDevices } = useLayout()
 const { setTurnout } = useTurnouts()
 
 const devices = getDevices()
-const effects = getEffects()
+// const effects = getEffects()
 
 const editColor = ref(false)
 const editEffect = ref(false)
@@ -43,15 +46,14 @@ const color = ref(props.turnout?.color || 'yellow')
 const tags = ref<string[]>(props.turnout?.tags || [])
 const turnoutType = ref(props.turnout?.type || DEFAULT_TYPE)
 const loading = ref(false)
-const rules = {
+const rules: ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
 
-console.log('turnout', props.turnout)
-const effectOptions = effects?.value.map((efx) => ({
-  title: `${efx.name} [${efx.id}]`,
-  value: efx.id
-}))
+// const effectOptions = effects?.value.map((efx) => ({
+//   title: `${efx.name} [${efx.id}]`,
+//   value: efx.id
+// }))
 
 watch(name, autoId)
 watch(device, autoId)
@@ -64,11 +66,11 @@ function autoId() {
     : ''
 }
 
-async function submit (e) {
+async function submit (e: Promise<{ valid: boolean }>): Promise<void> {
   loading.value = true
   const results = await e
   if (results.valid) {
-    const turnout: ITurnout = {
+    const turnout: Turnout = {
       id: props.turnout?.id || turnoutId.value,
       device: device.value,
       name: name.value,
@@ -231,10 +233,10 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
 
     </div>
 
-    <TurnoutTypePicker v-if="editType" v-model="turnoutType" :color="color" @select="editType = false" @cancel="editType = false; turnoutType = props.turnout.type ?? 'kato'"></TurnoutTypePicker>
-    <DevicePicker v-if="editDevice" v-model="device" :color="color" @select="editDevice = false" @cancel="editDevice = false; device = props.turnout.device ?? DEFAULT_DEVICE"></DevicePicker>
-    <ColorPicker v-if="editColor" v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.turnout.color ?? 'yellow'"></ColorPicker>
-    <EffectPicker v-if="editEffect" v-model="effectId" :color="color" @select="editEffect = false" @cancel="editEffect = false; effectId = props.turnout.effectId"></EffectPicker>
+    <TurnoutTypePicker v-if="editType" v-model="turnoutType" :color="color" @select="editType = false" @cancel="editType = false; turnoutType = props?.turnout?.type ?? 'kato'"></TurnoutTypePicker>
+    <DevicePicker v-if="editDevice" v-model="device" :color="color" @select="editDevice = false" @cancel="editDevice = false; device = props?.turnout?.device ?? DEFAULT_DEVICE"></DevicePicker>
+    <ColorPicker v-if="editColor" v-model="color" @select="editColor = false" @cancel="editColor = false; color = props?.turnout?.color ?? 'yellow'"></ColorPicker>
+    <EffectPicker v-if="editEffect" v-model="effectId" :color="color" @select="editEffect = false" @cancel="editEffect = false; effectId = props?.turnout?.effectId"></EffectPicker>
 
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
     <div class="grid grid-cols-2 gap-8 my-4">
@@ -254,6 +256,6 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
       ></v-btn>  
     </div>
   </v-form>
-  <ViewJson :json="turnout"></ViewJson>
+  <ViewJson :json="turnout || {}"></ViewJson>
   <ViewJson :json="devices"></ViewJson>
 </template>

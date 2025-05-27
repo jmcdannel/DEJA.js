@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {  onMounted, ref, watch } from 'vue'
-import type { ITag } from '@repo/modules/layout/types'
-import { useLayout } from '@repo/modules/layouts'
+import { useLayout, type Tag } from '@repo/modules/layouts'
 
 defineEmits(['select', 'cancel'])
 const model = defineModel<string>()
@@ -9,7 +8,7 @@ const model = defineModel<string>()
 const { getTags } = useLayout()
 
 const current = ref<string>(model.value || '')
-const layoutTags = ref<ITag[]>([])
+const layoutTags = ref<Tag[]>([])
 
 // list of vuestic colors
 const themeColors = [

@@ -11,19 +11,16 @@ const props = defineProps({
   efxId: String,
 })
 
-const active = ref(false)
 const confirmDelete = ref(false)
-
 
 const efxType = computed(() => efxTypes.find((type) => type.value === props?.efx?.type))
 const color = ref(props.efx?.color || efxType.value?.color || DEFAULT_COLOR)
 
 async function handleEfx (event: Event) {
-  console.log('handleEfx', props.efx, props.efx?.id, event, event?.target?.checked)
   props?.efx && props?.efxId && await runEffect({
-      ...props.efx,
-      id: props.efxId,
-      state: event?.target?.checked
+    ...props.efx,
+    id: props.efxId,
+    state: (event?.target as HTMLInputElement)?.checked
   })
 }
 

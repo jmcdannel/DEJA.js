@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref }  from 'vue'
-import type { IEfx } from '@repo/modules/effects'
+import type { Effect } from '@repo/modules/effects'
 import { useStorage } from '@vueuse/core'
 import { useEfx } from '@repo/modules/effects'
 import EffectItem from '@/effects/Effect.vue'
@@ -20,9 +20,9 @@ const VIEW_OPTIONS = [
   { title: 'Button', value: 'button' },
 ]
 
-function filter(efxList: IEfx[]) {
+function filter(efxList: Effect[]) {
   if (selectedDevices.value.length) {
-    return efxList.filter((efx:IEfx) => efx.device && selectedDevices.value.includes(efx.device))
+    return efxList.filter((efx:Effect) => efx.device && selectedDevices.value.includes(efx.device))
   }
   return efxList
 }

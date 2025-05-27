@@ -14,6 +14,7 @@ const user = useCurrentUser()
   >
     <span class="sr-only">Open user menu</span>
     <img
+      v-if="user?.photoURL"
       class="w-8 h-8 rounded-full"
       :src="user?.photoURL"
       alt="user photo"

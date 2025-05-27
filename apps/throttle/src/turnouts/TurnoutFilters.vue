@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useLayout } from '@/api/useLayout'
+import { useLayout } from '@repo/modules/layouts'
 
 const show = defineModel<boolean>('show')
 const selected = defineModel<string[]>('selected')
@@ -30,18 +30,16 @@ const devices = getDevices()
   >
     <v-list v-model:selected="selected" select-strategy="leaf">
       <v-list-subheader>Devices</v-list-subheader>
-      <v-list-item-group multiple>
+      <v-list-group multiple>
         <v-list-item v-for="device in devices" :key="device.id" appendIcon="mdi-chip" :value="device.id">
           <template v-slot:prepend="{ isSelected }">
             <v-list-item-action start>
               <v-checkbox-btn :model-value="isSelected"></v-checkbox-btn>
             </v-list-item-action>
           </template>
-          <v-list-item-content>
-            <v-list-item-title>{{ device.id }}</v-list-item-title>
-          </v-list-item-content>
+          <v-list-item-title>{{ device.id }}</v-list-item-title>
         </v-list-item>
-      </v-list-item-group>
+      </v-list-group>
     </v-list>
   </v-bottom-sheet>
 </template>

@@ -2,10 +2,10 @@
 import { watch } from 'vue'
 import { useStorage } from '@vueuse/core';
 import { useWebSocket } from '@vueuse/core'
-import { useLogStore } from '@/DCCEX/Log/useLogStore'
+import { useDccLog } from '@/DCCEX/Log/useDccLog'
 
 const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.22:8082')
-const { append } = useLogStore()
+const { append } = useDccLog()
 
 console.log('wshost', wshost)
 //http://192.168.86.249:5173/

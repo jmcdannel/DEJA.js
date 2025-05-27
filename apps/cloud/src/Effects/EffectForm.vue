@@ -7,7 +7,7 @@ import ViewJson from '@/Core/UI/ViewJson.vue'
 import MacroForm from '@/Effects/MacroForm.vue'
 import IALEDForm from '@/Effects//IALEDForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
-import type { IEfx, IDevice, IEfxType } from '@repo/modules'
+import type { Effect } from '@repo/modules/effects'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 // TODO: icon picker
 
@@ -16,7 +16,7 @@ interface ValidationRules {
 }
 
 const props = defineProps<{
-  efx: IEfx
+  efx: Effect
 }>()
 
 const emit = defineEmits(['close'])
@@ -55,28 +55,32 @@ watch(sound, (newSound) => {
 })
 
 watch(efxType, (newType) => {
-  efxTypeObj.value = getEfxType(newType)
+  if (newType) {
+    efxTypeObj.value = getEfxType(newType)
+  } else {
+    efxTypeObj.value = undefined
+  }
 })
 
 async function submit () {
   loading.value = true
 
-  const newEfx: IEfx = {
+  const newEfx: Effect = {
     name: name.value,
     type: efxType.value,
     color: color.value,
     tags: tags.value
   }
   // set device
-  if (efxTypeObj.value?.require.includes('device')) {
+  if (efxTypeObj.value?.require?.includes('device')) {
     newEfx.device = device.value
   }
   //  set pin
-  if (efxTypeObj.value?.require.includes('pin') && pin.value) {
+  if (efxTypeObj.value?.require?.includes('pin') && pin.value) {
     newEfx.pin = parseInt(pin.value as unknown as string)
   }
   //  set sound
-  if (efxTypeObj.value?.require.includes('sound')) {
+  if (efxTypeObj.value?.require?.includes('sound')) {
     // newEfx.sound = sound.value
   }
   //  set macro
@@ -92,7 +96,7 @@ async function submit () {
     newEfx.config = config.value
   }
 
-  await setEfx(props.efx?.id, newEfx)
+  await setEfx(props.efx?.id || '', newEfx)
   loading.value = false
   emit('close')
 }
@@ -131,7 +135,7 @@ function stopSound() {
     <div class="flex items-center justify-between">
     <v-label class="m-2 text-4xl">
       <v-icon v-if="efxTypeObj?.icon" size="32" class="stroke-none">{{efxTypeObj.icon}}</v-icon>
-      {{ efx?.length ? 'Edit' : 'Add'}} Effect
+      {{ efx ? 'Edit' : 'Add'}} Effect
     </v-label>
     <v-chip class="m-2" :color="color" size="x-large">
       <v-icon v-if="efxTypeObj?.icon" :icon="efxTypeObj.icon" class="mr-2"></v-icon>
@@ -239,7 +243,7 @@ function stopSound() {
       </v-btn>
     </section>
     <v-dialog max-width="80vw" v-model="editColor">
-      <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.turnout?.color ?? 'purple'"></ColorPicker>
+      <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.efx?.color ?? 'purple'"></ColorPicker>
     </v-dialog>
 
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>

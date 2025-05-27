@@ -1,6 +1,6 @@
 import { SerialPort } from 'serialport'
 import { type DataSnapshot, ref, remove } from 'firebase/database'
-import { rtdb } from '@repo/firebase-config/firebase'
+import { rtdb } from '@repo/firebase-config/firebase-node'
 import { serial } from './serial.js'
 import { broadcast } from './broadcast.js'
 import { log } from './utils/logger.js'

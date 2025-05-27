@@ -1,16 +1,16 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
-import type { Loco } from '@/throttle/types'
+import type { Loco } from '@repo/modules/locos'
 import Modal from '@/core/Modal.component.vue'
-import { useLocos } from '@/api/useLocos'
+import { useLocos } from '@repo/modules/locos'
 import LocoAvatar from '@/core/LocoAvatar/LocoAvatar.vue'
   
 const modalRef = ref<HTMLDialogElement | null>(null);
 
 defineEmits(['selected'])
 defineExpose({
-  showModal: () => modalRef?.value?.showModal(),
-  closeModal: () => modalRef?.value?.closeModal()
+  showModal: (): void => modalRef?.value?.showModal(),
+  closeModal: (): void => modalRef?.value?.close()
 })
 
 const { getLocos } = useLocos()

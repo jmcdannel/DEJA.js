@@ -1,8 +1,8 @@
 <script lang="ts" setup>
   import { ref } from 'vue'
-  import Function from './Function.component.vue'
+  import Function from './Function.vue'
   import Modal from '@/core/Modal.component.vue'
-  import type { Loco } from '@/throttle/types'
+  import type { Loco } from '@repo/modules/locos'
   import { defaultFunctions } from '@repo/modules/locos'
 
   const props = defineProps<{

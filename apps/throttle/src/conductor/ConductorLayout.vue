@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import type { Loco, Throttle } from '@/throttle/types'
-import { useLocos } from '@/api/useLocos'
-import { useDejaCloud } from '@/deja-cloud/useDejaCloud'
+import type { Loco } from '@repo/modules/locos'
+import type { Throttle } from '@/throttle/types'
+import { useLocos } from '@repo/modules/locos'
+import { useThrottle } from '@/throttle/useThrottle'
 import SimpleThrottle from '@/throttle/SimpleThrottle.vue'
 import ThrottleList from '@/throttle/ThrottleList.vue'
 import Turnouts from '@/turnouts/Turnouts.vue'
-import Effects from '@/effects/Effects.vue'
+// import Effects from '@/effects/Effects.vue'
 
-const { releaseThrottle } = useDejaCloud()
-const { getThrottles, getLocos } = useLocos()
+const { releaseThrottle } = useThrottle()
+const { getLocos, getThrottles } = useLocos()
 
 const throttles = getThrottles()
 const locos = getLocos()

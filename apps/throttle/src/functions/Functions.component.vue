@@ -1,8 +1,8 @@
 <script setup lang="ts">
   import { ref, type PropType } from 'vue'
-  import Function from './Function.component.vue'
+  import Function from './Function.vue'
   import FunctionList from './FunctionList.vue'
-  import type { Loco } from '@/throttle/types'
+  import type { Loco } from '@repo/modules/locos'
 
 defineProps({
     loco: {

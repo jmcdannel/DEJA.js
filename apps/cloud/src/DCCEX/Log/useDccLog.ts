@@ -1,54 +1,15 @@
 import { ref } from 'vue'
 import { createGlobalState, isObject } from '@vueuse/core'
+import type { LogEntry } from './types'
+import { defuaultEntry, dccMessages} from './constants'
 
 export function useDccLog() {
   const dccRegex = /<\*\s(.*?)\s\*>/
 
-  const defuaultDcc = {
-    color: 'gray',
-    icon: 'mdi-information',
-  }
-  const defuaultEntry = {
-    color: 'indogo',
-    icon: 'mdi-information',
-  }
-
-  const dccMessages = [
-    {
-      key: '*',
-      action: 'Status',
-      color: 'green',
-      icon: 'mdi-information',
-    },
-    {
-      key: 'l',
-      action: 'Locomotive',
-      color: 'yellow',
-      icon: 'mdi-train',
-    },
-    {
-      key: 'p',
-      action: 'Power',
-      color: 'red',
-      icon: 'mdi-power',
-    },
-    {
-      key: 'H',
-      action: 'Turnout',
-      color: 'blue',
-      icon: 'mdi-directions-fork',
-    },
-    {
-      key: 'Y',
-      action: 'Accessory',
-      color: 'purple',
-      icon: 'mdi-lightbulb',
-    },
-  ]
   const useLogState = createGlobalState(() => {
-    const log = ref([])
+    const log = ref<LogEntry[]>([])
 
-    function append(entry) {
+    function append(entry: string) {
       console.log('append', entry, log.value)
       log.value = [...log.value, parseEntry(entry)]
       console.log('appended', log.value)
@@ -59,10 +20,10 @@ export function useDccLog() {
 
   const logState = useLogState()
 
-  function parseEntry(entry) {
+  function parseEntry(entry: string) {
     const { action, payload } = JSON.parse(entry)
     console.log('parseEntry', isObject(payload), payload)
-    let formattedEntry = { id: Date.now(), action, payload, ...defuaultEntry }
+    let formattedEntry = { ...defuaultEntry, id: Date.now(), action, payload }
     if (action === 'broadcast' && !isObject(payload)) {
       // parse message
       const dcc =

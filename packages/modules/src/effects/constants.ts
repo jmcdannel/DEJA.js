@@ -1,6 +1,6 @@
-import type { IEfxType } from './types'
+import type { EffectType } from './types'
 
-export const efxTypes: IEfxType[] = [
+export const efxTypes: EffectType[] = [
   {
     value: 'ialed',
     label: 'IALED',

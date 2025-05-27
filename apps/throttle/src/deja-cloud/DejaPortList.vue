@@ -2,7 +2,7 @@
   import { computed,} from 'vue'
   import { storeToRefs } from 'pinia'
   import { doc } from "firebase/firestore"
-  import { db } from "@/firebase"
+  import { db } from "@repo/firebase-config/firebase"
   import { useDocument } from 'vuefire'
   import { useConnectionStore } from '@/connections/connectionStore'
   const conn = useConnectionStore()
@@ -18,9 +18,6 @@
   const handlePortClick = async (e:any) => {
     try {
       e.preventDefault()
-      // dccStatus.value = 'pending'
-      // const serial = e.target.value
-      // dccApi.send('connect', { serial })
       console.log('handlePortClick', e.target.value)
       emit('connect', e) 
     } catch (err) {

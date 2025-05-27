@@ -1,17 +1,15 @@
 <script setup lang="ts">
   import { storeToRefs } from 'pinia'
-  import { BsCpu } from 'vue3-icons/bs'
-  import { FiRefreshCcw } from "vue3-icons/fi";
   import { useConnectionStore } from '@/connections/connectionStore.jsx'
-  import { useDcc } from '@/api/dccApi'
-  const dccApi = useDcc()
+  import { useDcc } from '@repo/dccex'
+  const { sendDccCommand } = useDcc()
   const { 
     dccExConnected, 
     layoutId
   } = storeToRefs(useConnectionStore())
 
 function handleLayoutClick() {
-  dccApi.send('getStatus', { })
+  sendDccCommand({ action: 'getStatus', payload: { } })
 }
 
 </script>

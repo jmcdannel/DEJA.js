@@ -8,7 +8,7 @@ import {
 import { useStorage } from '@vueuse/core'
 import { useCollection, useDocument, useCurrentUser } from 'vuefire'
 import { db } from '@repo/firebase-config/firebase'
-import { IDevice, ILayout, ITag } from './types'
+import type { Device, Layout, Tag } from './types'
 import { useDejaJS } from '@repo/deja/useDejaJS'
 
 export const useLayout = () => {
@@ -67,7 +67,7 @@ export const useLayout = () => {
     return devices
   }
 
-  async function getDevice(deviceId: string) {
+  async function getDevice(deviceId: string): Promise<Device | undefined> {
     // const device = useDocument(
     //   doc(db, `layouts/${layoutId.value}/devices`, deviceId)
     // )
@@ -75,14 +75,14 @@ export const useLayout = () => {
     const docSnap = await getDoc(deviceRef)
 
     if (docSnap.exists()) {
-      return { ...docSnap.data(), id: docSnap.id }
+      return { ...docSnap.data(), id: docSnap.id } as Device
     } else {
       // docSnap.data() will be undefined in this case
       console.error('No such document!')
     }
   }
 
-  async function createLayout(id: string, layout: ILayout) {
+  async function createLayout(id: string, layout: Layout) {
     console.log('createLayout', layout)
     try {
       await setDoc(doc(db, `layouts`, id), {
@@ -100,7 +100,7 @@ export const useLayout = () => {
     }
   }
 
-  async function createDevice(id: string, device: IDevice) {
+  async function createDevice(id: string, device: Device) {
     console.log('createDevice', device)
     try {
       await setDoc(doc(db, `layouts/${layoutId.value}/devices`, id), {
@@ -113,7 +113,7 @@ export const useLayout = () => {
     }
   }
 
-  async function connectDevice(serial: string, device: IDevice) {
+  async function connectDevice(serial: string, device: Device) {
     console.log('connectDevice', serial, device)
     try {
       const payload = {
@@ -153,7 +153,7 @@ export const useLayout = () => {
     return []
   }
 
-  async function setTags(tags: ITag[]) {
+  async function setTags(tags: Tag[]) {
     if (!layoutId.value) {
       console.error('No layoutId set, cannot get tags')
       return []
@@ -169,7 +169,7 @@ export const useLayout = () => {
     }
   }
 
-  async function setTag(tag: ITag) {
+  async function setTag(tag: Tag) {
     if (!layoutId.value) {
       console.error('No layoutId set, cannot get tags')
       return []
@@ -184,7 +184,7 @@ export const useLayout = () => {
     }
   }
 
-  async function getTagsByIds(ids: string[]): Promise<ITag[]> {
+  async function getTagsByIds(ids: string[]): Promise<Tag[]> {
     if (!layoutId.value) {
       console.error('No layoutId set, cannot get tags')
       return []
@@ -193,7 +193,7 @@ export const useLayout = () => {
     if (docSnap.exists()) {
       const layout = docSnap.data()
       if (layout?.tags) {
-        return layout.tags.filter((tag: ITag) => ids.includes(tag.id))
+        return layout.tags.filter((tag: Tag) => ids.includes(tag.id))
       }
     }    
     return []

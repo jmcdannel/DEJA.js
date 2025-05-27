@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { type Turnout } from '@repo/modules/turnouts'
+import { type Effect, type MacroItem } from '@repo/modules/effects'
 import TurnoutAdd from '@/Routes/TurnoutAdd.vue'
 
 const emit = defineEmits(['change'])
@@ -13,21 +15,21 @@ const offdialog = ref(false)
 const onChips = ref(props.on || [])
 const offChips = ref(props.off || [])
 
-function handleOnUpdate(e) {
-  console.log('handleOnUpdate', e, onChips.value)
+function handleOnUpdate(e: Array<string> | undefined) {
+  console.log('handleOnUpdate', onChips.value)
   // remove e from onChips
-  onChips.value = onChips.value.filter((c) => c.id !== e?.[0])
+  onChips.value = onChips.value.filter((c: MacroItem) => c.id !== e?.[0])
   emitChanges()  
 }
 
-function handleOffUpdate(e) {
-  console.log('handleOffUpdate', e, offChips.value)
+function handleOffUpdate(e: Array<string> | undefined) {
+  console.log('handleOffUpdate', offChips.value)
   // remove e from onChips
-  offChips.value = offChips.value.filter((c) => c.id !== e?.[0])
+  offChips.value = offChips.value.filter((c: MacroItem) => c.id !== e?.[0])
   emitChanges()  
 }
 
-function handleAddOn(effects, turnouts) {
+function handleAddOn(effects: Effect[], turnouts: Turnout[]) {
   console.log('handleAddOn', effects, turnouts)
   onChips.value = onChips.value.concat(effects.map((e) => ({
     id: e.id,
@@ -47,7 +49,7 @@ function handleAddOn(effects, turnouts) {
   ondialog.value = false
 }
 
-function handleAddOff(effects, turnouts) {
+function handleAddOff(effects: Effect[], turnouts: Turnout[]) {
   console.log('handleAddOff', effects, turnouts)
   offChips.value = offChips.value.concat(effects.map((e) => ({
     id: e.id,

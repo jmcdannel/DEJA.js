@@ -1,24 +1,27 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useLocos } from '@repo/modules/locos'
+import { useLocos, ROADNAMES, type Loco } from '@repo/modules/locos'
 import { useColors } from '@/Core/UI/useColors'
 import ViewJson from '@/Core/UI/ViewJson.vue';
 import EditConsist from '@/Roster/Consist/EditConsist.vue'
 import Functions from '@/Roster/Functions/Functions.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 
+interface ValidationRules {
+  required: ((val: any) => boolean | string)[];
+}
+
 const locoTypes = [
   'Steam',
   'Diesel',
   'Electric'
 ]
-const { colors, getColor } = useColors()
 
 const props = defineProps({
   loco: Object
 })
 const emit = defineEmits(['close'])
-const { roadnames, getLoco, updateLoco, getRoadname } = useLocos()
+const { getLoco, updateLoco, getRoadname } = useLocos()
 
 const locoDoc = getLoco(props.loco?.id ? props.loco.id : null)
 
@@ -29,28 +32,28 @@ const roadname = ref(getRoadname(props.loco?.meta?.roadname) || null)
 const roadnameVal = ref(roadname.value?.value)
 const color = ref(props.loco?.meta?.color || roadname?.value?.color || 'pink')  
 const loading = ref(false)
-const rules = {
+const rules:ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
 // const color = getColor(roadname?.value?.color)
 
-async function submit (e) {
+async function submit () {
   loading.value = true
 
-  const results = await e
-  console.log(results)
-
   if (!!address && props.loco?.id) {
-    const loco = {
+    const loco: Loco = {
+      ...props.loco,
       locoId: address.value,
       name: name.value,
       meta: {
         color: color.value,
         roadname: roadnameVal.value || undefined
-      }
+      },
+      consist: props.loco?.consist || [],
+      functions: props.loco?.functions || [],
     }
 
-    await updateLoco(props.loco.id, loco)
+    await updateLoco(props.loco.id, {...loco})
   }
 
   loading.value = false
@@ -97,7 +100,7 @@ async function submit (e) {
         mandatory
       >
         <v-chip
-          v-for="road in roadnames" :key="road.value" :value="road.value" :text="road.label"
+          v-for="road in ROADNAMES" :key="road.value" :value="road.value" :text="road.label"
           variant="outlined"
           filter
         ></v-chip>
@@ -142,7 +145,7 @@ async function submit (e) {
   <v-label class="m-2 text-pink-400 text-2xl">Consist</v-label>
   <v-divider class="my-4 border-pink-500"></v-divider>
 
-  <EditConsist :loco="locoDoc" :color="color" />
+  <EditConsist :loco="locoDoc as Loco" :color="color" />
 
   <v-divider class="my-8 border-pink-500"></v-divider>
   <v-label class="m-2 text-pink-400 text-2xl">Functions</v-label>

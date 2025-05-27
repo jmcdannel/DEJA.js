@@ -1,11 +1,21 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { type Effect, MacroItem } from '@repo/modules/effects'
+import { type Loco } from '@repo/modules/locos'
+import { type Turnout } from '@repo/modules/turnouts'
 import MacroAdd from '@/Effects/MacroAdd.vue'
+
+interface MacroLoco extends Loco {
+  speed: number
+  direction: 'forward' | 'reverse'
+  type: 'throttle',
+  isSelected?: boolean
+}
 
 const emit = defineEmits(['change'])
 const props = defineProps<{
-  on: Array<any>,
-  off: Array<any>
+  on: Array<MacroItem>,
+  off: Array<MacroItem>
 }>()
 
 const ondialog = ref(false)
@@ -13,21 +23,21 @@ const offdialog = ref(false)
 const onChips = ref(props.on || [])
 const offChips = ref(props.off || [])
 
-function handleOnUpdate(e) {
+function handleOnUpdate(e: Array<string | undefined>) {
   console.log('handleOnUpdate', e, onChips.value)
   // remove e from onChips
   onChips.value = onChips.value.filter((c) => c.id !== e?.[0])
   emitChanges()  
 }
 
-function handleOffUpdate(e) {
+function handleOffUpdate(e: Array<string | undefined>) {
   console.log('handleOffUpdate', e, offChips.value)
   // remove e from onChips
   offChips.value = offChips.value.filter((c) => c.id !== e?.[0])
   emitChanges()  
 }
 
-function handleAddOn(effects, turnouts, throttles) {
+function handleAddOn(effects: Effect[], turnouts: Turnout[], throttles: MacroLoco[]) {
   console.log('handleAddOn', effects, turnouts, throttles)
   onChips.value = onChips.value.concat(effects.map((e) => ({
     id: e.id,
@@ -43,17 +53,18 @@ function handleAddOn(effects, turnouts, throttles) {
     type: 'turnout',
     state: true,
   })))
-  onChips.value = onChips.value.concat(throttles.map((t) => ({
+  const throttleChips = throttles.map((t) => ({
     id: t.locoId,
     type: 'throttle',
-    speed: parseInt(t.speed),
+    speed: t.speed,
     direction: t.direction,
-  })))
+  }))
+  onChips.value = onChips.value.concat(throttleChips)
   emitChanges()
   ondialog.value = false
 }
 
-function handleAddOff(effects, turnouts, throttles) {
+function handleAddOff(effects: Effect[], turnouts: Turnout[], throttles: MacroLoco[]) {
   console.log('handleAddOff', effects, turnouts, throttles)
   offChips.value = offChips.value.concat(effects.map((e) => ({
     id: e.id,
@@ -69,6 +80,13 @@ function handleAddOff(effects, turnouts, throttles) {
     type: 'turnout',
     state: false,
   })))
+  const throttleChips = throttles.map((t) => ({
+    id: t.locoId,
+    type: 'throttle',
+    speed: t.speed,
+    direction: t.direction,
+  }))
+  offChips.value = offChips.value.concat(throttleChips)
   emitChanges()
   offdialog.value = false
 }
@@ -80,7 +98,8 @@ function emitChanges() {
   })
 }
 
-function getIconByType(type) {
+function getIconByType(type: string | undefined) {
+  if (!type) return 'mdi-help-circle'
   switch (type) {
     case 'effect':
       return 'mdi-rocket-launch'
@@ -93,7 +112,8 @@ function getIconByType(type) {
   }
 }
 
-function getChipLabel(chip) {
+function getChipLabel(chip: MacroItem | MacroLoco | undefined) {
+  if (!chip) return ''
   switch (chip.type) {
     case 'effect':
       return chip.name
@@ -137,7 +157,7 @@ function getChipLabel(chip) {
           </template>  
           <template #append>
             <v-icon 
-              @click="handleOnUpdate([chip.id])"
+              @click="handleOnUpdate([String(chip.id)])"
               class="ml-2"
               icon="mdi-delete"
               color="grey">
@@ -177,7 +197,7 @@ function getChipLabel(chip) {
         </template>  
         <template #append>
           <v-icon 
-            @click="handleOffUpdate([chip.id])"
+            @click="handleOffUpdate([String(chip.id)])"
             class="ml-2"
             icon="mdi-delete"
             color="grey">

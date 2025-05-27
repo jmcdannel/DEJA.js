@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { Loco } from '@/throttle/types'
+import type { Loco } from '@repo/modules/locos'
 import RosterViewMenu from '@/throttle/RosterViewMenu.vue'
 import router from '@/router'
-import { useLocos } from '@/api/useLocos'
+import { useLocos } from '@repo/modules/locos'
 import { useThrottle } from '@/throttle/useThrottle'
 import { useStorage } from '@vueuse/core'
 import AddLoco from '@/roster/AddLoco.vue'
@@ -20,7 +20,7 @@ defineProps({
 })
 
 async function handleThrottle(address: number) {
-  const throttle = await acquireThrottle(address)
+  await acquireThrottle(address)
   router.push({ name: 'cloud-throttle', params: { address } })
 }
 
@@ -56,7 +56,7 @@ const showAdd = ref(false)
       </div>
     </template>
     <template v-else>
-      <RosterListItem v-for="loco in locos" :key="loco.locoId" :loco="loco" @selected="handleThrottle" />
+      <RosterListItem v-for="loco in locos" :key="loco.locoId" :loco="loco as Loco" @selected="handleThrottle" />
       <v-btn v-if="allowAdd"
         @click="showAdd = !showAdd" 
         color="pink"

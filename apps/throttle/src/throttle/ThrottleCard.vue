@@ -2,7 +2,8 @@
 import { watch, type PropType } from 'vue'
 import ThrottleButtonControls from './ThrottleButtonControls.component.vue'
 import CurrentSpeed from './CurrentSpeed.vue'
-import type { Loco, Throttle } from './types';
+import type { Loco } from '@repo/modules/locos'
+import type { Throttle } from './types';
 import { useThrottle } from './useThrottle'
 
 const props = defineProps({

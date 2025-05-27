@@ -5,7 +5,7 @@ import {
   getDocs,
   query,
 } from 'firebase/firestore'
-import { db } from '@repo/firebase-config/firebase'
+import { db } from '@repo/firebase-config/firebase-node'
 import type { Loco } from '@repo/modules/locos'
 import { log } from '../utils/logger.js'
 import { dcc, type ThrottlePayload } from '../dcc.js'

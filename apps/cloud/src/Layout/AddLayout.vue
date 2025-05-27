@@ -9,7 +9,7 @@ const layoutId = ref('')
 
 async function handleAdd() {
   console.log('handleAdd', layoutName, layoutId)
-  await createLayout(layoutId.value, { name: layoutName.value, layoutId: layoutId.value })
+  await createLayout(layoutId.value, { name: layoutName.value, id: layoutId.value })
 }
 </script>
 <template>

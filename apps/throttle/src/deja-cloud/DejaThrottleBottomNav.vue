@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useLocos } from '@/api/useLocos'
+import { useLocos } from '@repo/modules/locos'
 
 const { getThrottles } = useLocos()
 const throttles = getThrottles()

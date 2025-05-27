@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import type { PropType } from 'vue'
-import type { IEfx } from '@repo/modules/effects'
+import type { Effect, EffectType } from '@repo/modules/effects'
 import { useTimeoutFn } from '@vueuse/core'
 
 import { useEfx } from '@repo/modules/effects'
@@ -10,7 +10,7 @@ const { runEffect, getEfxType } = useEfx()
 
 const props = defineProps({
   efx: {
-    type: Object as PropType<IEfx>,
+    type: Object as PropType<Effect>,
     required: true
   },
   efxId: String,
@@ -21,11 +21,9 @@ const props = defineProps({
 })
 
 const state = ref(props.efx?.state || false)
-const efxType = ref(props.efx?.type && getEfxType(props.efx?.type))
+const efxType = ref<EffectType | null>(props.efx?.type ? getEfxType(props.efx?.type) as EffectType : null)
 const isRunning = ref(false)
-console.log('EffectItem', efxType.value?.icon)
 watch(state, async (val) => {
-  console.log('state', val)
   const { isPending } = useTimeoutFn(() => {
     isRunning.value = false
   }, 3000)
@@ -86,7 +84,6 @@ watch(state, async (val) => {
                 :color="efx?.color || efxType?.color || 'primary'"
               />
               {{efx?.name}}
-              {{efx?.icon}}
             </h4>
             <aside class="flex items-center gap-2">
               <v-chip size="small" :text="efx?.device || 'marco'" />

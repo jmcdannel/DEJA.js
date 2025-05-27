@@ -1,6 +1,6 @@
-import type { IEfx, IMacroItem } from '@repo/modules/effects'
+import type { Effect, MacroItem } from '@repo/modules/effects'
 import { doc, getDoc, serverTimestamp, setDoc, type DocumentData } from 'firebase/firestore'
-import { db } from '@repo/firebase-config/firebase'
+import { db } from '@repo/firebase-config/firebase-node'
 import { log }  from '../utils/logger.js'
 import { dcc } from '../dcc.js'
 import { layout } from './layout.js'
@@ -27,7 +27,7 @@ export interface EffectCommand {
 
 const layoutId = process.env.LAYOUT_ID
 
-const pinCommand = (effect: IEfx): EffectCommand => ({
+const pinCommand = (effect: Effect): EffectCommand => ({
   action: 'pin',
   device: effect?.device || '',
   payload: {
@@ -36,7 +36,7 @@ const pinCommand = (effect: IEfx): EffectCommand => ({
   },
 })
 
-const ialedCommand = (effect: IEfx): string => {
+const ialedCommand = (effect: Effect): string => {
   const pin = effect?.pin
   const pattern = effect?.state ? effect?.pattern : 'off'
   // const range = effect?.range
@@ -45,17 +45,17 @@ const ialedCommand = (effect: IEfx): string => {
   return command
 }
 
-async function getEffect(id: string): Promise<IEfx | undefined> {
+async function getEffect(id: string): Promise<Effect | undefined> {
   const deviceRef = doc(db, `layouts/${layoutId}/effects`, id)
   const docSnap = await getDoc(deviceRef)
   if (docSnap.exists()) {
-    return { ...docSnap.data(), id: docSnap.id } as IEfx
+    return { ...docSnap.data(), id: docSnap.id } as Effect
   } 
   log.error('No such document!')
   return undefined
 }
 
-export function getEffectCommand(efx: IEfx): EffectCommand | string | undefined {
+export function getEffectCommand(efx: Effect): EffectCommand | string | undefined {
   try {
     switch (efx?.type) {
       case 'light':
@@ -92,7 +92,7 @@ export const asyncTimeout = (ms: number) => {
   })
 }
 
-async function handleMacroItem(item: IMacroItem, state: boolean, macroState: boolean): Promise<void> {
+async function handleMacroItem(item: MacroItem, state: boolean, macroState: boolean): Promise<void> {
   if (item.type === 'turnout' && item.id) {
     await setDoc(
       doc(db, `layouts/${layoutId}/turnouts`, item.id),
@@ -121,17 +121,17 @@ async function handleMacroItem(item: IMacroItem, state: boolean, macroState: boo
   log.log('handleMacroItem', item)
 }
 
-export async function handleMacro(efx: IEfx): Promise<void> {
+export async function handleMacro(efx: Effect): Promise<void> {
   try {
     // const macroItemPromises = efx?.on?.map(async (item) => await handleMacroItem(item, efx.state))
-    const onPromises = efx?.on?.map((item: IMacroItem) => 
+    const onPromises = efx?.on?.map((item: MacroItem) => 
       Promise.all([
         handleMacroItem(item, Boolean(efx.state), true),
         asyncTimeout(MACRO_DELAY),
       ])
     ) || [];
     await Promise.all(onPromises);
-    const offPromises = efx?.off?.map((item: IMacroItem) => 
+    const offPromises = efx?.off?.map((item: MacroItem) => 
       Promise.all([
         handleMacroItem(item, !efx.state, false),
         asyncTimeout(MACRO_DELAY),
@@ -143,7 +143,7 @@ export async function handleMacro(efx: IEfx): Promise<void> {
   }
 }
 
-export async function handleEffect(payload: IEfx): Promise<void> {
+export async function handleEffect(payload: Effect): Promise<void> {
   // log.log(layout.connections())
   if (payload.type === 'route' || payload.type === 'macro') {
     return await handleMacro(payload)

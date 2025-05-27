@@ -1,9 +1,9 @@
 <script setup lang="ts">
-  import { computed, watch, ref } from 'vue'
+  import { computed } from 'vue'
   import { storeToRefs } from 'pinia'
   import { doc } from "firebase/firestore"
-  import { db } from "@/firebase"
-  import { useCurrentUser, useDocument } from 'vuefire'
+  import { db } from "@repo/firebase-config/firebase"
+  import { useDocument } from 'vuefire'
   import dayjs from 'dayjs'
   import relativeTime from 'dayjs/plugin/relativeTime'
   import { 
@@ -14,13 +14,12 @@
     FaPowerOff
   } from 'vue3-icons/fa'
   import { useConnectionStore } from '@/connections/connectionStore'
-  import { useDejaCloud } from "@/deja-cloud/useDejaCloud"
+  import { useDejaJS } from '@repo/deja'
   import closeIconSvg from '@/assets/icons/close.svg'
   import tttButton from '@/shared/ui/tttButton.component.vue'
 
-  const user = useCurrentUser()
   const conn = useConnectionStore()
-  const dejaCloud = useDejaCloud()
+  const { sendDejaCommand } = useDejaJS()
   const { layoutId, dccExConnected } = storeToRefs(conn)
 
   dayjs.extend(relativeTime)
@@ -37,7 +36,7 @@
 
   async function handleRefresh() {
     console.log('handleRefresh', layoutId.value)
-    dejaCloud.send({ action: 'status', payload: { layoutId: layoutId.value }})
+    sendDejaCommand({ action: 'status', payload: { layoutId: layoutId.value }})
   }
 
 </script>

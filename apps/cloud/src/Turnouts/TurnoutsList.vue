@@ -1,17 +1,12 @@
 <script setup lang="ts">
-import { useTurnouts } from '@repo/modules/turnouts'
+import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
 import TurnoutListItem from '@/Turnouts/TurnoutListItem.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 
-const emit = defineEmits(['edit'])
+defineEmits(['edit'])
 
 const { getTurnouts } = useTurnouts()
 const list = getTurnouts()
-
-function handleEdit(item) {
-  console.log('handleEdit', item)
-  emit('edit', item)
-}
 
 </script>
 <template>
@@ -33,7 +28,7 @@ function handleEdit(item) {
         sm="6"
         lg="4"
       >
-        <TurnoutListItem :turnout="item" :turnoutId="item.id" @edit="handleEdit"></TurnoutListItem>
+        <TurnoutListItem :turnout="item as Turnout" :turnoutId="item.id" @edit="$emit('edit', item)"></TurnoutListItem>
     </v-col>
     </v-row>
   </v-container>

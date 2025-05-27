@@ -35,7 +35,7 @@ const user = useCurrentUser()
 const view = useStorage('@DEJA/cloud/view', 'Effects')
 
 const theme = ref('dark')
-const drawer = ref(null)
+const drawer = ref(true)
 const mobile = ref(null)
 
 function handleMenu(item:string) {
@@ -46,7 +46,7 @@ function handleMenu(item:string) {
 <template>
   <v-responsive class="border rounded">
     <v-app v-if="user" :theme="theme">
-      <DCCLogger v-if="enableLogging" />
+      <!-- <DCCLogger v-if="enableLogging" /> -->
       <Header :layoutId="layoutId" @toggle="drawer = !drawer">
         <template #menu>
           <DCCLogStatus />          

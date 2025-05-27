@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { type PropType } from 'vue'
-import type { Loco, Throttle } from '@/throttle/types'
+import type { Loco } from '@repo/modules/locos'
+import type { Throttle } from '@/throttle/types'
 import { useRouter } from 'vue-router'
 
 defineEmits(['showcard', 'fullscreen', 'throttlelist', 'park', 'stop'])

@@ -3,13 +3,13 @@ import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { useLayout } from '@/api/useLayout'
-import { useDcc } from '@/api/dccApi'
+import { useLayout } from '@repo/modules/layouts'
+import { useDcc } from '@repo/dccex'
 import { useConnectionStore } from '@/connections/connectionStore.jsx'
 
 dayjs.extend(relativeTime)
 
-const dccApi = useDcc()
+const { sendDccCommand } = useDcc()
 const connStore = useConnectionStore()
 const { getLayout } = useLayout()
 const layoutDoc = getLayout()
@@ -21,7 +21,7 @@ const handleDisconnect = () => {
 }
 
 const handleStatus = () => {
-  dccApi.send('getStatus', { })
+  sendDccCommand({ action: 'getStatus', payload: { } })
 }
 
 </script>

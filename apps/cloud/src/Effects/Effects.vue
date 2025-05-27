@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { Effect } from '@repo/modules/effects'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import EffectForm from '@/Effects/EffectForm.vue'
 import EffectsList from '@/Effects/EffectsList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 
-const editEffect = ref(null)
+const editEffect = ref(<Effect | null>null)
 const newEfx = {}
 
 </script>

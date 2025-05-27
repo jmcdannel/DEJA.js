@@ -1,4 +1,4 @@
-export interface ITurnout {
+export interface Turnout {
   id: string
   name: string
   device: string

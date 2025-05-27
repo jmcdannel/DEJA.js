@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { type PropType } from 'vue'
-import type { Loco } from '@/throttle/types'
+import type { Loco } from '@repo/modules/locos'
 
 defineProps({
   loco: {

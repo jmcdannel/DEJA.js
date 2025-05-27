@@ -2,13 +2,14 @@
   import { computed, watch, ref } from 'vue'
   import { useRoute } from 'vue-router'
   import router from '../router'
-  import type { Loco, Throttle } from '@/throttle/types'
+  import type { Loco } from '@repo/modules/locos'
+  import type { Throttle } from '@/throttle/types'
   import ThrottleComponent from '@/throttle/Throttle.vue'
-  import { useLocos } from '@/api/useLocos'
-  import { useDejaCloud } from '@/deja-cloud/useDejaCloud'
+  import { useLocos } from '@repo/modules/locos'
+  import { useThrottle } from '@/throttle/useThrottle'
 
   const route = useRoute()
-  const { releaseThrottle } = useDejaCloud()
+  const { releaseThrottle } = useThrottle()
   const { getThrottles, getLocos } = useLocos()
 
   const address = ref(parseInt(route.params.address?.toString()))

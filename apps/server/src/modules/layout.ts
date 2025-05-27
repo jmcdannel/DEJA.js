@@ -10,8 +10,8 @@ import {
   type DocumentData
 } from 'firebase/firestore'
 import type { SerialPort } from 'serialport'
-import type { ILayout, IDevice, ISensor } from '@repo/modules/layouts'
-import { db } from '@repo/firebase-config/firebase'
+import type { Layout, Device, Sensor } from '@repo/modules/layouts'
+import { db } from '@repo/firebase-config/firebase-node'
 import { serial } from '../serial.js'
 import { log }  from '../utils/logger.js'
 import { dcc } from '../dcc.js'
@@ -30,10 +30,10 @@ const baudRate = 115200
 
 const layoutId = process.env.LAYOUT_ID || 'betatrack'
 const _connections: { [key: string]: Connection } = {}
-let _devices: IDevice[] = []
-let sensors: ISensor[] = []
+let _devices: Device[] = []
+let sensors: Sensor[] = []
 
-export async function load(): Promise<ILayout | undefined> {
+export async function load(): Promise<Layout | undefined> {
   log.start('Load layout', layoutId)
   const layout = await loadLayout()
   _devices = await loadDevices()
@@ -42,7 +42,7 @@ export async function load(): Promise<ILayout | undefined> {
   return layout
 }
 
-async function autoConnect(devices: IDevice[]): Promise<void> {
+async function autoConnect(devices: Device[]): Promise<void> {
   devices.forEach((device) => {
     log.log('Auto connect device', device.autoConnect, {
       device: device.id,
@@ -54,13 +54,13 @@ async function autoConnect(devices: IDevice[]): Promise<void> {
   })
 }
 
-async function loadLayout(): Promise<ILayout | undefined> {
+async function loadLayout(): Promise<Layout | undefined> {
   try {
     const layoutRef = doc(db, `layouts`, layoutId)
     const docSnap = await getDoc(layoutRef)
 
     if (docSnap.exists()) {
-      return { ...docSnap.data(), id: docSnap.id } as ILayout
+      return { ...docSnap.data(), id: docSnap.id } as Layout
     }
     log.error('No such layout!', layoutId)
   } catch (error) {
@@ -68,29 +68,29 @@ async function loadLayout(): Promise<ILayout | undefined> {
   }
 }
 
-async function loadDevices(): Promise<IDevice[]> {
+async function loadDevices(): Promise<Device[]> {
   try {
     const q = query(collection(db, `layouts/${layoutId}/devices`))
     const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }) as IDevice);
+    return querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }) as Device);
   } catch (error) {
     log.error('Error loading devices', error)
     return []
   }
 }
 
-async function loadSensors(): Promise<ISensor[]> {
+async function loadSensors(): Promise<Sensor[]> {
   try {
     const q = query(collection(db, `layouts/${layoutId}/sensors`))
     const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }) as ISensor);
+    return querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }) as Sensor);
   } catch (error) {
     log.error('Error loading sensors', error)
     return []
   }
 }
 
-export async function connectDevice(device: IDevice): Promise<void> {
+export async function connectDevice(device: Device): Promise<void> {
   try {
     if (device?.connection === 'usb') {
       await connectUsbDevice(device)
@@ -102,7 +102,7 @@ export async function connectDevice(device: IDevice): Promise<void> {
   }
 }
 
-async function connectUsbDevice(device: IDevice): Promise<void> {
+async function connectUsbDevice(device: Device): Promise<void> {
   try {
     if (_connections[device.id]) {
       await broadcast({
@@ -144,7 +144,7 @@ async function connectUsbDevice(device: IDevice): Promise<void> {
   }
 }
 
-async function connectMqttDevice(device: IDevice): Promise<void> {
+async function connectMqttDevice(device: Device): Promise<void> {
   try {
     if (_connections[device.id]) {
       await broadcast({

@@ -4,15 +4,15 @@ import { useMenu } from '@/Core/Menu/useMenu'
 const { getMenuItem } = useMenu()
 
   const props = defineProps({
-    label: String,
-    icon: String,
-    color: String,
-    menu: 'String'
+    label: { type: String },
+    icon: { type: String },
+    color: { type: String },
+    menu: { type: String }
   })
 
-  const { label, color, icon } = props.menu
-    ? getMenuItem(props.menu)
-    : { label: props.label, color: props.color, icon: props.icon }
+  const menuItem = props.menu ? getMenuItem(props.menu) : null
+  const { label, color, icon } = menuItem
+    ?? { label: props.label, color: props.color, icon: props.icon }
 
 </script>
 <template>

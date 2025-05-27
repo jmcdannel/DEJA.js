@@ -8,7 +8,7 @@ import {
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
 import { db } from '@repo/firebase-config/firebase'
-import type { ITurnout } from '@repo/modules/turnouts'
+import type { Turnout } from '@repo/modules/turnouts'
 
 export function useTurnouts() {
   const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
@@ -33,22 +33,23 @@ export function useTurnouts() {
     }
   }
 
-  async function switchTurnout(turnout: ITurnout) {
+  async function switchTurnout(turnout: Turnout): Promise<void> {
     try {
       await setDoc(
         doc(db, `layouts/${layoutId.value}/turnouts`, turnout.id),
         {
-          state: turnout.state,
+          state: Boolean(turnout.state),
           timestamp: serverTimestamp(),
         },
         { merge: true }
       )
+      console.log('Turnout switched:', turnout.id, turnout.state)
     } catch (e) {
       console.error('Error adding document: ', e)
     }
   }
 
-  async function setTurnout(id: string, turnout: ITurnout) {
+  async function setTurnout(id: string, turnout: Turnout) {
     try {
       await setDoc(doc(db, `layouts/${layoutId.value}/turnouts`, id), {
         ...turnout,

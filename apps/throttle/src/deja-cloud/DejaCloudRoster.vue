@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import RosterViewMenu from '@/throttle/RosterViewMenu.vue'
 import router from '@/router'
-import { useLocos } from '@/api/useLocos'
+import { useLocos } from '@repo/modules/locos'
 import { useThrottle } from '@/throttle/useThrottle'
 import { useStorage } from '@vueuse/core'
 

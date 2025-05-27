@@ -1,41 +1,42 @@
 <script setup lang="ts">  
-  import { ref } from 'vue';
-  import { storeToRefs } from 'pinia'
-  import router from '@/router';
-  import { useThrottleStore } from '@/throttle/throttleStore';
+import { ref } from 'vue';
+import { storeToRefs } from 'pinia'
+import router from '@/router'
+import type { Loco } from '@repo/modules/locos'
+import { useThrottleStore } from '@/throttle/throttleStore';
 
-  const MAX_SAVED_LOCOS = 20
+const MAX_SAVED_LOCOS = 20
 
-  const throttleStore = useThrottleStore()
-  const { locos } = storeToRefs(throttleStore)
+const throttleStore = useThrottleStore()
+const { locos } = storeToRefs(throttleStore)
 
-  const loco = ref('')
-  
-  async function handleGoClick() {
-    const address = parseInt(loco.value as unknown as string) 
-    !!address && saveLoco(address)
-    !!address && router.push({ name: 'throttle', params: { address } })
-  }
+const loco = ref('')
 
-  const navigate = (e:any) => {
-    console.log('SELECTLOCO.navigate', e.target.value)
-    const address = parseInt(e.target.value)
-    !!address && router.push({ name: 'throttle', params: { address } })
-  }
+async function handleGoClick() {
+  const address = parseInt(loco.value as unknown as string) 
+  !!address && saveLoco(address)
+  !!address && router.push({ name: 'throttle', params: { address } })
+}
 
-  function saveLoco(address:number) {
-    if (!locos.value.find(l => l.address === address)) {
-      locos.value.push({
-        address,
-        consist: [],
-        functions: []
-      });
-      if (locos.value.length > MAX_SAVED_LOCOS) {
-        locos.value.shift();
-      }
-      throttleStore.saveLocos()
+const navigate = (e:any) => {
+  console.log('SELECTLOCO.navigate', e.target.value)
+  const address = parseInt(e.target.value)
+  !!address && router.push({ name: 'throttle', params: { address } })
+}
+
+function saveLoco(address:number) {
+  if (!locos.value.find((l:Loco) => l.locoId === address)) {
+    locos.value.push({
+      address,
+      consist: [],
+      functions: []
+    });
+    if (locos.value.length > MAX_SAVED_LOCOS) {
+      locos.value.shift();
     }
+    throttleStore.saveLocos()
   }
+}
 
 </script>
 <template>  

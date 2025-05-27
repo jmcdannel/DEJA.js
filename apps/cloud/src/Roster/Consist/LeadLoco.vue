@@ -1,9 +1,9 @@
 <script setup lang="ts">
-
-defineProps({
-  loco: Object,
-  color: Object
-})
+import type { Loco } from '@repo/modules/locos'
+defineProps<{
+  loco: Loco
+  color: string
+}>()
 
 </script>
 
@@ -19,7 +19,7 @@ defineProps({
         variant="tonal"
         color="green"
       ></v-btn>
-      <v-avatar :color="color.value">{{ loco?.locoId }}</v-avatar>
+      <v-avatar :color="color">{{ loco?.locoId }}</v-avatar>
       <v-btn
         class="ma-2"
         icon="mdi-arrow-right-circle"

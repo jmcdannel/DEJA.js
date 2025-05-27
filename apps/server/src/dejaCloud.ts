@@ -2,7 +2,7 @@
 import { log } from './utils/logger.js'
 import { wipe, reset, load } from './modules/layout.js'
 import { listen } from './listeners.js'
-// import { db } from '@repo/firebase-config/firebase'
+// import { db } from '@repo/firebase-config/firebase-node'
 
 const layoutId = process.env.LAYOUT_ID
 

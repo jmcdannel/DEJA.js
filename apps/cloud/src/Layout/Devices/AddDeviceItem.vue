@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useLayout } from '@repo/modules/layouts'
+import { useLayout, type Device } from '@repo/modules/layouts'
 
 interface ValidationRules {
   required: ((val: any) => boolean | string)[];
@@ -17,7 +17,7 @@ const reveal = ref(false)
 const loading = ref(false)
 const connection = ref(null)
 const deviceType = ref(null)
-const deviceId = ref(null)
+const deviceId = ref('')
 const rules:ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
@@ -30,9 +30,11 @@ async function submit (e: Event) {
   loading.value = true
   const form = e.target as HTMLFormElement
   
-  if (form.checkValidity()) {
-    const device = {
+  if (form.checkValidity() && connection.value && deviceType.value && deviceId.value) {
+    const device: Device = {
       connection: connection.value,
+      id: deviceId.value,
+      name: deviceId.value,
       ['type']: deviceType.value
     }
     await createDevice(deviceId.value, device)

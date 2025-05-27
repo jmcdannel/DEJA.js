@@ -1,27 +1,17 @@
 <script setup lang="ts">
-  import { onMounted, computed, watch } from 'vue'
+  import { computed, watch } from 'vue'
   import { storeToRefs } from 'pinia'
-  import { useCurrentUser, useDocument } from 'vuefire'
-  import { watchArray } from '@vueuse/core'
-  import { doc } from "firebase/firestore"
-  import { db } from "@/firebase"
   import dayjs from 'dayjs'
   import relativeTime from 'dayjs/plugin/relativeTime'
   import { useConnectionStore } from '@/connections/connectionStore'
-  import { useDejaCloudStore } from '@/deja-cloud/dejaCloudStore'
-  import { useDejaCloud } from '@/deja-cloud/useDejaCloud'
-  import { useDcc } from '@/api/dccApi'
-  import { useLayout } from '@/api/useLayout'
+  import { useLayout } from '@repo/modules/layouts'
   import DejaCloudConnectDevice from './DejaCloudConnectDevice.vue'
 
-  const user = useCurrentUser()
   const conn = useConnectionStore()
-  const dejaCloudStore = useDejaCloudStore()
-  const dcc = useDcc()
 
   dayjs.extend(relativeTime)
 
-  const { layoutId, dccExConnected } = storeToRefs(conn)
+  const { dccExConnected } = storeToRefs(conn)
   const { getLayout, getDevices } = useLayout()
     
   const layout = getLayout()

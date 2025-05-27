@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue' 
-import { useLayout } from '@repo/modules/layouts'
+import { useLayout, type Device } from '@repo/modules/layouts'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import PortList from '@/Layout/PortList.vue'
@@ -29,7 +29,7 @@ const showAdd = ref(false)
   </h3>
   <hr class="my-4 border-sky-500" />
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    <DeviceListItem v-for="item in devices" :key="item.id" :device="item" :ports="layout?.ports" />
+    <DeviceListItem v-for="item in devices" :key="item.id" :device="item as Device" :ports="layout?.ports" />
     <AddTile v-if="!showAdd" color="cyan" @click="showAdd = !showAdd" />
   </div>
   <AddDeviceItem :show="showAdd" @close="showAdd = false" class="mt-4" />

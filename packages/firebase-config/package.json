@@ -5,7 +5,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./firebase": "./src/firebase.ts"
+    "./firebase": "./src/firebase.ts",
+    "./firebase-node": "./src/firebase-node.ts"
   },
   "dependencies": {
     "firebase": "^10.13.1"

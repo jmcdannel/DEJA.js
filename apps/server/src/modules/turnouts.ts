@@ -1,6 +1,6 @@
 import { doc, getDoc, type DocumentData } from 'firebase/firestore'
-import { db } from '@repo/firebase-config/firebase'
-import type { ITurnout } from '@repo/modules/turnouts'
+import { db } from '@repo/firebase-config/firebase-node'
+import type { Turnout } from '@repo/modules/turnouts'
 import { log } from '../utils/logger.js'
 import { dcc, type TurnoutPayload } from '../dcc.js'
 import { layout } from './layout.js'
@@ -27,7 +27,7 @@ export interface ServoCommand {
 const layoutId = process.env.LAYOUT_ID
 const turnoutStates: { [key: string]: boolean } = {}
 
-export async function handleTurnout(turnout: ITurnout): Promise<void> {
+export async function handleTurnout(turnout: Turnout): Promise<void> {
   try {
     const conn = layout.connections()?.[turnout.device]
     log.log('handleTurnout', turnout, conn?.isConnected)
@@ -52,17 +52,17 @@ export async function handleTurnout(turnout: ITurnout): Promise<void> {
   }
 }
 
-export async function getTurnout(id: string): Promise<ITurnout | undefined> {
+export async function getTurnout(id: string): Promise<Turnout | undefined> {
   const deviceRef = doc(db, `layouts/${layoutId}/turnouts`, id)
   const docSnap = await getDoc(deviceRef)
 
   if (docSnap.exists()) {
-    return { ...docSnap.data(), id: docSnap.id } as ITurnout
+    return { ...docSnap.data(), id: docSnap.id } as Turnout
   } 
   log.error('No such turnout', id, layoutId)
 }
 
-export function turnoutCommand(turnout: ITurnout): KatoCommand | ServoCommand | ITurnout | undefined {
+export function turnoutCommand(turnout: Turnout): KatoCommand | ServoCommand | Turnout | undefined {
   try {
     if (turnout.device === 'dccex') {
       return turnout
@@ -87,7 +87,7 @@ export function turnoutCommand(turnout: ITurnout): KatoCommand | ServoCommand | 
   }
 }
 
-function katoCommand(turnout: ITurnout): KatoCommand {
+function katoCommand(turnout: Turnout): KatoCommand {
   return {
     action: 'turnout',
     device: turnout.device,
@@ -98,7 +98,7 @@ function katoCommand(turnout: ITurnout): KatoCommand {
   }
 }
 
-function servoCommand(turnout: ITurnout): ServoCommand {
+function servoCommand(turnout: Turnout): ServoCommand {
   return {
     action: 'servo',
     device: turnout.device,
@@ -112,6 +112,7 @@ function servoCommand(turnout: ITurnout): ServoCommand {
 
 export async function handleTurnoutChange(snapshot: DocumentData): Promise<void> {
   snapshot.docChanges().forEach(async (change:DocumentData) => {
+    log.log('handleTurnoutChange', change.type, change.doc.id, change.doc.data())
     if (change.type === 'added') {
       turnoutStates[change.doc.id] = change.doc.data()?.state
     }

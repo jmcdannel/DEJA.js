@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { Effect } from '@repo/modules/effects'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import RouteForm from '@/Routes/RouteForm.vue'
 import RoutesList from '@/Routes/RoutesList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 
-const editEffect = ref(null)
+const editEffect = ref(<Effect | null>null)
 const newEfx = {}
 
 </script>
@@ -15,7 +16,7 @@ const newEfx = {}
     <RouteForm v-if="editEffect" v-show="editEffect" @close="editEffect = null" :efx="editEffect" />
     <RoutesList v-else @edit="efx => editEffect = efx">
       <template #prepend>
-        <AddTile @click="editEffect = {...newEfx}" color="purple" />
+        <AddTile @click="editEffect = {...newEfx} as Effect" color="purple" />
       </template>
     </RoutesList>
   </Transition>

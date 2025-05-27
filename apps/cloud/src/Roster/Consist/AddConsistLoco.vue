@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { Loco } from '@repo/modules/locos'
 defineEmits(['add'])
-const props = defineProps({
-  alocos: Array,
-  loco: Object,
-  color: Object,
-  open: Boolean
-})
+const props = defineProps<{
+  alocos: Array<Loco>,
+  loco: Loco
+  color: string
+  open: boolean
+}>()
 const show = ref(props.open)
 </script>
 <template>
@@ -36,7 +37,7 @@ const show = ref(props.open)
             @click="$emit('add', aloco?.locoId, true)"
             :disabled="!!(aloco?.locoId === loco?.locoId || loco?.consist?.find((l) => l.address === aloco?.locoId))"
           ></v-btn>
-          <v-avatar :color="color.value">{{ aloco?.locoId }}</v-avatar>
+          <v-avatar :color="color">{{ aloco?.locoId }}</v-avatar>
           <v-btn
             class="ma-2"
             icon="mdi-arrow-right-circle"

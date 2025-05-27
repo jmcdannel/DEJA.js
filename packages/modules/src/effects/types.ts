@@ -1,4 +1,4 @@
-export interface IEfx {
+export interface Effect {
   device?: string
   name?: string
   pin?: number
@@ -16,7 +16,7 @@ export interface IEfx {
   id?: string
 }
 
-export interface IEfxType {
+export interface EffectType {
   value: string
   label: string
   icon: string
@@ -24,12 +24,12 @@ export interface IEfxType {
   require?: string[]
 }
 
-export interface IMacroItem {
+export interface MacroItem {
   device?: string
   direction?: boolean | string
   name?: string
   type?: string
-  speed?: string
+  speed?: number
   state?: boolean
-  id?: string
+  id?: string | number
 }

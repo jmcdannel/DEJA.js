@@ -87,3 +87,21 @@ export const defaultFunctions = [
   { id: 30, label: 'F30' },
   { id: 31, label: 'F31' },
 ] as LocoFunction[]
+
+export const FUNCTION_ICONS = [
+  { name: 'light', icon: 'mdi-car-light-high' },
+  { name: 'bell', icon: 'mdi-bell' },
+  { name: 'horn', icon: 'mdi-bullhorn' },
+  { name: 'wifi', icon: 'mdi-wifi' },
+  { name: 'coupler', icon: 'mdi-connection' },
+  { name: 'fan', icon: 'mdi-fan' },
+  { name: 'brake', icon: 'mdi-stop' },
+  { name: 'station', icon: 'mdi-bus-stop' },
+  { name: 'mute', icon: 'mdi-volume-off' },
+  { name: 'quiet', icon: 'mdi-volume-low' },
+  { name: 'sound', icon: 'mdi-volume-high' },
+  { name: 'track', icon: 'mdi-train-track' },
+  { name: 'air', icon: 'mdi-weather-windy' },
+  { name: 'announce', icon: 'mdi-microphone' },
+  { name: 'dim', icon: 'mdi-brightness-4' },
+]

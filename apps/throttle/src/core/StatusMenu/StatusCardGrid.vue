@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { useLayout } from '@/api/useLayout'
+import { useLayout } from '@repo/modules/layouts'
 import { useConnectionStore } from '@/connections/connectionStore.jsx'
 import { useCurrentUser } from 'vuefire'
 import DejaCloudCard from '@/core/StatusMenu/DejaCloudCard.vue'
 import LayoutCard from '@/core/StatusMenu/LayoutCard.vue'
 import StatusMenuItem from '@/core/StatusMenu/StatusMenuItem.component.vue'
-import useSerial from '@/api/serialApi'
-import { useDcc } from '@/api/dccApi'
+import useSerial from '@/deja-cloud/serialApi'
+import { useDcc } from '@repo/dccex'
 
 dayjs.extend(relativeTime)
 
 const { getLayout } = useLayout()
 const user = useCurrentUser()
-const dccApi = useDcc()
+const { sendDccCommand } = useDcc()
 const serialApi = useSerial()
 const connStore = useConnectionStore()
 const layoutDoc = getLayout()
@@ -33,7 +33,7 @@ const handleDisconnect = () => {
 }
 
 const handleStatus = () => {
-  dccApi.send('getStatus', { })
+  sendDccCommand({ action: 'getStatus', payload: { } })
 }
 
 const handleSerial = () => {

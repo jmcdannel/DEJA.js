@@ -11,7 +11,7 @@ import { useCollection } from 'vuefire'
 import { db } from '@repo/firebase-config/firebase'
 import { slugify } from '@repo/utils/slugify'
 import { efxTypes } from './constants'
-import type { IEfx, IEfxType } from './types'
+import type { Effect, EffectType } from './types'
 
 export const useEfx = () => {
   const layoutId = useStorage('@DEJA/layoutId', null)
@@ -29,7 +29,7 @@ export const useEfx = () => {
     return layouts
   }
 
-  async function getEffect(id: string): Promise<IEfx | undefined> {
+  async function getEffect(id: string): Promise<Effect | undefined> {
     if (!layoutId.value) {
       console.error('Layout ID is not set')
       return
@@ -44,7 +44,7 @@ export const useEfx = () => {
     }
   }
 
-  async function getEffectsByType(efxType: string): Promise<IEfx[]> {
+  async function getEffectsByType(efxType: string): Promise<Effect[]> {
     if (!layoutId.value) {
       console.error('Layout ID is not set')
       return []
@@ -55,7 +55,7 @@ export const useEfx = () => {
 
   
 
-  function getEfxType(value: string): IEfxType | undefined {
+  function getEfxType(value: string): EffectType | undefined {
     return efxTypes.find((item) => item.value === value)
   }
 
@@ -70,7 +70,7 @@ export const useEfx = () => {
 
   // const DEFAULT_TYPE = getEfxType('pin')
 
-  async function setEfx(efxId: string, efx: IEfx): Promise<boolean> {
+  async function setEfx(efxId: string, efx: Effect): Promise<boolean> {
     if (!layoutId.value) {
       console.error('Layout ID is not set')
       return false
@@ -94,7 +94,7 @@ export const useEfx = () => {
     }
   }
 
-  async function runEffect(efx: IEfx): Promise<void> {
+  async function runEffect(efx: Effect): Promise<void> {
     if (!layoutId.value) {
       console.error('Layout ID is not set')
       return
