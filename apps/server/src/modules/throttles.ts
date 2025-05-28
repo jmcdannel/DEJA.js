@@ -8,7 +8,7 @@ import {
 import { db } from '@repo/firebase-config/firebase-node'
 import type { Loco } from '@repo/modules/locos'
 import { log } from '../utils/logger.js'
-import { dcc, type ThrottlePayload } from '../dcc.js'
+import { dcc, type ThrottlePayload } from '../lib/dcc.js'
 
 const layoutId = process.env.LAYOUT_ID
 let locos: Loco[] = []
@@ -51,7 +51,6 @@ async function getLocos(): Promise<Loco[]> {
 }
 
 export async function handleThrottleChange(snapshot: DocumentData): Promise<void> {
-  log.note('handleThrottleChange')
   snapshot.docChanges().forEach(async (change: DocumentData) => {
     const throttleCmd: ThrottlePayload = {
       address: parseInt(change.doc.data().address),

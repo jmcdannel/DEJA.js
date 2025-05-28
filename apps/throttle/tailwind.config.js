@@ -4,22 +4,5 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [require('daisyui'), require('@tailwindcss/container-queries')],
-  daisyui: {
-    themes: [
-      {
-        mytheme: {
-          primary: 'rgb(14, 165, 233)',
-          secondary: '#7818e5',
-          accent: '#10b981',
-          neutral: '#2a323c',
-          'base-100': '#1f2937',
-          info: '#3abff8',
-          success: '#36d399',
-          warning: '#fbbd23',
-          error: '#f87272',
-        },
-      },
-    ],
-  },
+  plugins: [require('@tailwindcss/container-queries')],
 }

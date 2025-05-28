@@ -48,25 +48,6 @@ import { refDebounced, watchDebounced } from '@vueuse/core'
 
 </script>
 <template>
-  <!-- <VaSlider
-    v-model="sliderVal"
-    class=""
-    :label="direction ? 'FWD' : 'REV'"
-    vertical
-    track-label-visible
-    show-ticks
-    @change="emit('update', sliderVal)"
-    :step="1"
-  >
-    <template #trackLabel="{ value }">
-      <v-chip
-        :color="direction ? 'green-500' : 'red-500'"
-        size="small"
-      >
-        {{ value }}
-      </v-chip>
-    </template>
-  </VaSlider> -->
   <v-slider
     :model-value="sliderVal"
     class=" content-end"

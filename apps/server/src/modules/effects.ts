@@ -2,7 +2,7 @@ import type { Effect, MacroItem } from '@repo/modules/effects'
 import { doc, getDoc, serverTimestamp, setDoc, type DocumentData } from 'firebase/firestore'
 import { db } from '@repo/firebase-config/firebase-node'
 import { log }  from '../utils/logger.js'
-import { dcc } from '../dcc.js'
+import { dcc } from '../lib/dcc.js'
 import { layout } from './layout.js'
 
 export interface EffectCommand {
@@ -15,15 +15,6 @@ export interface EffectCommand {
     state?: boolean
   }
 }
-
-// export interface EffectCommand {
-//   type: 'pin' | 'ialed' | 'relay' | 'light' | 'streetlight' | 'frog' | 'led' | 'power'
-//   device: string
-//   pin?: string
-//   state?: boolean
-//   pattern?: string
-//   config?: string
-// }
 
 const layoutId = process.env.LAYOUT_ID
 

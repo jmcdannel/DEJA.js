@@ -1,4 +1,4 @@
-import { wsServer } from './ws-server.js' // TODO: refactor to use event emitter
+import { wsServer } from './lib/ws-server.js' // TODO: refactor to use event emitter
 import { dejaMqtt } from './mqtt.js'
 // import { handleBroadcastActions } from './dejaCloud.js'
 import { log } from './utils/logger.js'

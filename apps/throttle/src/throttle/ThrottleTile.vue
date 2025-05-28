@@ -3,7 +3,7 @@ import { watch, type PropType } from 'vue'
 import type { Loco } from '@repo/modules/locos'
 import type { Throttle } from './types';
 import ThrottleAvatar from '@/throttle/ThrottleAvatar.vue'
-import ThrottleButtonControls from './ThrottleButtonControls.component.vue'
+import ThrottleButtonControls from './ThrottleButtonControls.vue'
 import CurrentSpeed from './CurrentSpeed.vue'
 import { useThrottle } from './useThrottle'
 

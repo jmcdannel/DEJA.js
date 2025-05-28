@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { watch, type PropType } from 'vue'
-import ThrottleButtonControls from './ThrottleButtonControls.component.vue'
+import ThrottleButtonControls from './ThrottleButtonControls.vue'
 import CurrentSpeed from './CurrentSpeed.vue'
 import type { Loco } from '@repo/modules/locos'
 import type { Throttle } from './types';
