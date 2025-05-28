@@ -13,7 +13,7 @@ const { colors } = useColors()
     <v-list-item v-for="item in menu" 
       :key="item.label" 
       :title="item.label"
-      :class="`${colors?.[item.color]?.text}`"
+      :color="item.color || 'primary'"
       :active="view === item.label"
       @click="$emit('change', item.label)"
       link
