@@ -1,6 +1,6 @@
 import { SerialPort } from 'serialport'
 import { ReadlineParser } from '@serialport/parser-readline'
-import { log } from './utils/logger.js'
+import { log } from '../utils/logger.js'
 
 function handleOpen(err: Error | null): boolean | void {
   if (err) {

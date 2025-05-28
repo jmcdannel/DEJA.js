@@ -86,23 +86,23 @@ export const asyncTimeout = (ms: number) => {
 async function handleMacroItem(item: MacroItem, state: boolean, macroState: boolean): Promise<void> {
   if (item.type === 'turnout' && item.id) {
     await setDoc(
-      doc(db, `layouts/${layoutId}/turnouts`, item.id),
+      doc(db, `layouts/${layoutId}/turnouts`, item.id.toString()),
       { state },
       { merge: true }
     )
   } else if (item.type === 'effect' && item.id) {
     await setDoc(
-      doc(db, `layouts/${layoutId}/effects`, item.id),
+      doc(db, `layouts/${layoutId}/effects`, item.id.toString()),
       { state },
       { merge: true }
     )
-  } else if (item.type === 'throttle' && macroState === state && item.id && item.speed?.length) {
+  } else if (item.type === 'throttle' && macroState === state && item.id && item.speed !== undefined) {
     log.log('handleMacroItem throttle', item)
     await setDoc(
-      doc(db, `layouts/${layoutId}/throttles`, item.id),
+      doc(db, `layouts/${layoutId}/throttles`, item.id.toString()),
       {
         direction: item?.direction === 'forward',
-        speed: parseInt(item.speed),
+        speed: item.speed,
         timestamp: serverTimestamp(),
       },
       { merge: true }

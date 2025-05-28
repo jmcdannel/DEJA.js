@@ -12,10 +12,10 @@ import {
 import type { SerialPort } from 'serialport'
 import type { Layout, Device, Sensor } from '@repo/modules/layouts'
 import { db } from '@repo/firebase-config/firebase-node'
-import { serial } from '../serial.js'
+import { serial } from '../lib/serial.js'
 import { log }  from '../utils/logger.js'
 import { dcc } from '../lib/dcc.js'
-import { dejaMqtt as mqtt } from '../mqtt.js'
+import { dejaMqtt as mqtt } from '../lib/mqtt.js'
 import { broadcast } from '../broadcast.js'
 
 interface Connection {
