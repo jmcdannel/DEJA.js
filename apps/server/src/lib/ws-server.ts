@@ -1,7 +1,7 @@
 import os from 'node:os'
 import type { IncomingMessage } from 'node:http'
 import { WebSocketServer } from 'ws'
-import { log } from './utils/logger.js'
+import { log } from '../utils/logger.js'
 import { dcc } from './dcc.js'
 
 const layoutId = process.env.LAYOUT_ID

@@ -8,8 +8,6 @@ import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 // VueFire
 import { VueFire, VueFireAuth } from 'vuefire'
-// Flowbite
-import 'flowbite'
 // Firebase
 import { firebaseApp } from '@repo/firebase-config/firebase'
 

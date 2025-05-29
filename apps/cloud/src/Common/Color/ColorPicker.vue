@@ -10,7 +10,6 @@ const { getTags } = useLayout()
 const current = ref<string>(model.value || '')
 const layoutTags = ref<Tag[]>([])
 
-// list of vuestic colors
 const themeColors = [
   'primary',
   'success',

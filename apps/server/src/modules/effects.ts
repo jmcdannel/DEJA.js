@@ -2,7 +2,7 @@ import type { Effect, MacroItem } from '@repo/modules/effects'
 import { doc, getDoc, serverTimestamp, setDoc, type DocumentData } from 'firebase/firestore'
 import { db } from '@repo/firebase-config/firebase-node'
 import { log }  from '../utils/logger.js'
-import { dcc } from '../dcc.js'
+import { dcc } from '../lib/dcc.js'
 import { layout } from './layout.js'
 
 export interface EffectCommand {
@@ -15,15 +15,6 @@ export interface EffectCommand {
     state?: boolean
   }
 }
-
-// export interface EffectCommand {
-//   type: 'pin' | 'ialed' | 'relay' | 'light' | 'streetlight' | 'frog' | 'led' | 'power'
-//   device: string
-//   pin?: string
-//   state?: boolean
-//   pattern?: string
-//   config?: string
-// }
 
 const layoutId = process.env.LAYOUT_ID
 
@@ -95,23 +86,23 @@ export const asyncTimeout = (ms: number) => {
 async function handleMacroItem(item: MacroItem, state: boolean, macroState: boolean): Promise<void> {
   if (item.type === 'turnout' && item.id) {
     await setDoc(
-      doc(db, `layouts/${layoutId}/turnouts`, item.id),
+      doc(db, `layouts/${layoutId}/turnouts`, item.id.toString()),
       { state },
       { merge: true }
     )
   } else if (item.type === 'effect' && item.id) {
     await setDoc(
-      doc(db, `layouts/${layoutId}/effects`, item.id),
+      doc(db, `layouts/${layoutId}/effects`, item.id.toString()),
       { state },
       { merge: true }
     )
-  } else if (item.type === 'throttle' && macroState === state && item.id && item.speed?.length) {
+  } else if (item.type === 'throttle' && macroState === state && item.id && item.speed !== undefined) {
     log.log('handleMacroItem throttle', item)
     await setDoc(
-      doc(db, `layouts/${layoutId}/throttles`, item.id),
+      doc(db, `layouts/${layoutId}/throttles`, item.id.toString()),
       {
         direction: item?.direction === 'forward',
-        speed: parseInt(item.speed),
+        speed: item.speed,
         timestamp: serverTimestamp(),
       },
       { merge: true }

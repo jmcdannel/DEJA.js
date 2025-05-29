@@ -1,5 +1,5 @@
-import { wsServer } from './src/ws-server.js'
-import { dejaMqtt as mqtt } from './src/mqtt.js'
+import { wsServer } from './src/lib/ws-server.js'
+import { dejaMqtt as mqtt } from './src/lib/mqtt.js'
 import { dejaCloud } from './src/dejaCloud.js'
 import { log } from './src/utils/logger.js'
 

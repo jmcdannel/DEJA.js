@@ -2,7 +2,7 @@ import { doc, getDoc, type DocumentData } from 'firebase/firestore'
 import { db } from '@repo/firebase-config/firebase-node'
 import type { Turnout } from '@repo/modules/turnouts'
 import { log } from '../utils/logger.js'
-import { dcc, type TurnoutPayload } from '../dcc.js'
+import { dcc, type TurnoutPayload } from '../lib/dcc.js'
 import { layout } from './layout.js'
 
 export interface KatoCommand {
@@ -112,7 +112,6 @@ function servoCommand(turnout: Turnout): ServoCommand {
 
 export async function handleTurnoutChange(snapshot: DocumentData): Promise<void> {
   snapshot.docChanges().forEach(async (change:DocumentData) => {
-    log.log('handleTurnoutChange', change.type, change.doc.id, change.doc.data())
     if (change.type === 'added') {
       turnoutStates[change.doc.id] = change.doc.data()?.state
     }

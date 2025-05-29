@@ -31,7 +31,6 @@
     "vue-router": "^4.2.2",
     "vue3-icons": "^0.1.13",
     "vuefire": "^3.2.0",
-    "vuestic-ui": "^1.10.0",
     "vuetify": "^3.7.3"
   },
   "devDependencies": {
@@ -55,7 +54,6 @@
     "@vue/tsconfig": "^0.4.0",
     "@vueuse/core": "^11.0.3",
     "autoprefixer": "^10.4.14",
-    "daisyui": "^4.12.10",
     "eslint": "^8.39.0",
     "eslint-plugin-vue": "^9.11.0",
     "https": "^1.0.0",

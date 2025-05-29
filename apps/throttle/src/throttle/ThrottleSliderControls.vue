@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { defineEmits, ref, toRef, watch } from 'vue'
-  import ThrottleSlider from './ThrottleSlider.component.vue'
+  import ThrottleSlider from './ThrottleSlider.vue'
   import { 
     FaChevronLeft,
     FaChevronRight,
@@ -48,19 +48,6 @@
 
   function isDisabled() {
     return direction.value === null
-  }
-
-  function getButtonColors(isForward: boolean) {
-    if (direction.value === null) {
-      return 'border-gray-500 text-gray-500'
-    }
-    if (direction.value === isForward) {
-      return 'border-violet-400 text-violet-400'
-    } else if (direction.value !== isForward) {
-      return 'border-gray-500 text-gray-500'
-    } else {
-      return 'border-gray-500 text-gray-500'
-    }    
   }
 
   watch(speed, (val: number) => {

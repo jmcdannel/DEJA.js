@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { Loco } from '@repo/modules/locos'
-import RosterViewMenu from '@/throttle/RosterViewMenu.vue'
+import RosterViewMenu from '@/roster/RosterViewMenu.vue'
 import router from '@/router'
 import { useLocos } from '@repo/modules/locos'
 import { useThrottle } from '@/throttle/useThrottle'

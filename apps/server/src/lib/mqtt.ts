@@ -1,5 +1,5 @@
 import mqtt from 'mqtt'
-import { log } from './utils/logger.js'
+import { log } from '../utils/logger.js'
 
 const layoutId = process.env.LAYOUT_ID
 const mqttBroker = process.env.VITE_MQTT_BROKER
