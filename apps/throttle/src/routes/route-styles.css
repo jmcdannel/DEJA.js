@@ -1,0 +1,1937 @@
+:root {
+  --turnout-hover-fill: rgb(253, 35, 253);
+  --route-selected-fill: rgb(0, 255, 17);
+  --route-available-fill: rgb(254, 217, 33);
+  --route-hover-fill: rgb(254, 217, 33);
+}
+
+#TurnoutLabels > g,
+#Routes > g {
+  cursor: pointer;
+}
+#TurnoutLabels > g:hover {
+  fill-opacity: 0.8;
+}
+#TurnoutLabels > g:hover circle {
+  fill: var(--turnout-hover-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+#Routes > g:hover path {
+  fill: var(--route-hover-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.p1-selected #Routes > g path {
+  fill-opacity: 0.1 !important;
+}
+.p1-selected #Routes > g text {
+  opacity: 0.05 !important;
+}
+
+.selected-PSUBM1 #Routes > g#PSUBM1 path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.dm-sl-int-1-tj-eagle-nest-pico-straight
+  #Turnouts
+  #dm-sl-int-1-tj-eagle-nest-pico
+  > g:last-child {
+  visibility: hidden;
+}
+
+.dm-sl-int-1-tj-eagle-nest-pico-straight
+  #Turnouts
+  #dm-sl-int-1-tj-eagle-nest-pico
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.dm-sl-int-1-tj-eagle-nest-pico-divergent
+  #Turnouts
+  #dm-sl-int-1-tj-eagle-nest-pico
+  > g:first-child {
+  visibility: hidden;
+}
+
+.dm-sl-int-1-tj-eagle-nest-pico-divergent
+  #Turnouts
+  #dm-sl-int-1-tj-eagle-nest-pico
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.dm-vl-p1-0-tj-eagle-nest-pico-straight
+  #Turnouts
+  #dm-vl-p1-0-tj-eagle-nest-pico
+  > g:last-child {
+  visibility: hidden;
+}
+
+.dm-vl-p1-0-tj-eagle-nest-pico-straight
+  #Turnouts
+  #dm-vl-p1-0-tj-eagle-nest-pico
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.dm-vl-p1-0-tj-eagle-nest-pico-divergent
+  #Turnouts
+  #dm-vl-p1-0-tj-eagle-nest-pico
+  > g:first-child {
+  visibility: hidden;
+}
+
+.dm-vl-p1-0-tj-eagle-nest-pico-divergent
+  #Turnouts
+  #dm-vl-p1-0-tj-eagle-nest-pico
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.en-hx-int-4-tj-eagle-nest-pico-straight
+  #Turnouts
+  #en-hx-int-4-tj-eagle-nest-pico
+  > g:last-child {
+  visibility: hidden;
+}
+
+.en-hx-int-4-tj-eagle-nest-pico-straight
+  #Turnouts
+  #en-hx-int-4-tj-eagle-nest-pico
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.en-hx-int-4-tj-eagle-nest-pico-divergent
+  #Turnouts
+  #en-hx-int-4-tj-eagle-nest-pico
+  > g:first-child {
+  visibility: hidden;
+}
+
+.en-hx-int-4-tj-eagle-nest-pico-divergent
+  #Turnouts
+  #en-hx-int-4-tj-eagle-nest-pico
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.en-vl-int-2-tj-eagle-nest-pico-straight
+  #Turnouts
+  #en-vl-int-2-tj-eagle-nest-pico
+  > g:last-child {
+  visibility: hidden;
+}
+
+.en-vl-int-2-tj-eagle-nest-pico-straight
+  #Turnouts
+  #en-vl-int-2-tj-eagle-nest-pico
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.en-vl-int-2-tj-eagle-nest-pico-divergent
+  #Turnouts
+  #en-vl-int-2-tj-eagle-nest-pico
+  > g:first-child {
+  visibility: hidden;
+}
+
+.en-vl-int-2-tj-eagle-nest-pico-divergent
+  #Turnouts
+  #en-vl-int-2-tj-eagle-nest-pico
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.en-vl-pass-3-tj-eagle-nest-pico-straight
+  #Turnouts
+  #en-vl-pass-3-tj-eagle-nest-pico
+  > g:last-child {
+  visibility: hidden;
+}
+
+.en-vl-pass-3-tj-eagle-nest-pico-straight
+  #Turnouts
+  #en-vl-pass-3-tj-eagle-nest-pico
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.en-vl-pass-3-tj-eagle-nest-pico-divergent
+  #Turnouts
+  #en-vl-pass-3-tj-eagle-nest-pico
+  > g:first-child {
+  visibility: hidden;
+}
+
+.en-vl-pass-3-tj-eagle-nest-pico-divergent
+  #Turnouts
+  #en-vl-pass-3-tj-eagle-nest-pico
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.eng1-203-dcc-ex-straight #Turnouts #eng1-203-dcc-ex > g:last-child {
+  visibility: hidden;
+}
+
+.eng1-203-dcc-ex-straight #Turnouts #eng1-203-dcc-ex > g:first-child path {
+  stroke: black !important;
+}
+.eng1-203-dcc-ex-divergent #Turnouts #eng1-203-dcc-ex > g:first-child {
+  visibility: hidden;
+}
+
+.eng1-203-dcc-ex-divergent #Turnouts #eng1-203-dcc-ex > g:last-child path {
+  stroke: black !important;
+}
+
+.eng2-205-dcc-ex-straight #Turnouts #eng2-205-dcc-ex > g:last-child {
+  visibility: hidden;
+}
+
+.eng2-205-dcc-ex-straight #Turnouts #eng2-205-dcc-ex > g:first-child path {
+  stroke: black !important;
+}
+.eng2-205-dcc-ex-divergent #Turnouts #eng2-205-dcc-ex > g:first-child {
+  visibility: hidden;
+}
+
+.eng2-205-dcc-ex-divergent #Turnouts #eng2-205-dcc-ex > g:last-child path {
+  stroke: black !important;
+}
+
+.n-test-215-dcc-ex-straight #Turnouts #n-test-215-dcc-ex > g:last-child {
+  visibility: hidden;
+}
+
+.n-test-215-dcc-ex-straight #Turnouts #n-test-215-dcc-ex > g:first-child path {
+  stroke: black !important;
+}
+.n-test-215-dcc-ex-divergent #Turnouts #n-test-215-dcc-ex > g:first-child {
+  visibility: hidden;
+}
+
+.n-test-215-dcc-ex-divergent #Turnouts #n-test-215-dcc-ex > g:last-child path {
+  stroke: black !important;
+}
+
+.n1-206-dcc-ex-straight #Turnouts #n1-206-dcc-ex > g:last-child {
+  visibility: hidden;
+}
+
+.n1-206-dcc-ex-straight #Turnouts #n1-206-dcc-ex > g:first-child path {
+  stroke: black !important;
+}
+.n1-206-dcc-ex-divergent #Turnouts #n1-206-dcc-ex > g:first-child {
+  visibility: hidden;
+}
+
+.n1-206-dcc-ex-divergent #Turnouts #n1-206-dcc-ex > g:last-child path {
+  stroke: black !important;
+}
+
+.n2-207-dcc-ex-straight #Turnouts #n2-207-dcc-ex > g:last-child {
+  visibility: hidden;
+}
+
+.n2-207-dcc-ex-straight #Turnouts #n2-207-dcc-ex > g:first-child path {
+  stroke: black !important;
+}
+.n2-207-dcc-ex-divergent #Turnouts #n2-207-dcc-ex > g:first-child {
+  visibility: hidden;
+}
+
+.n2-207-dcc-ex-divergent #Turnouts #n2-207-dcc-ex > g:last-child path {
+  stroke: black !important;
+}
+
+.n3-208-dcc-ex-straight #Turnouts #n3-208-dcc-ex > g:last-child {
+  visibility: hidden;
+}
+
+.n3-208-dcc-ex-straight #Turnouts #n3-208-dcc-ex > g:first-child path {
+  stroke: black !important;
+}
+.n3-208-dcc-ex-divergent #Turnouts #n3-208-dcc-ex > g:first-child {
+  visibility: hidden;
+}
+
+.n3-208-dcc-ex-divergent #Turnouts #n3-208-dcc-ex > g:last-child path {
+  stroke: black !important;
+}
+
+.n4-200-dcc-ex-straight #Turnouts #n4-200-dcc-ex > g:last-child {
+  visibility: hidden;
+}
+
+.n4-200-dcc-ex-straight #Turnouts #n4-200-dcc-ex > g:first-child path {
+  stroke: black !important;
+}
+.n4-200-dcc-ex-divergent #Turnouts #n4-200-dcc-ex > g:first-child {
+  visibility: hidden;
+}
+
+.n4-200-dcc-ex-divergent #Turnouts #n4-200-dcc-ex > g:last-child path {
+  stroke: black !important;
+}
+
+.n5-204-dcc-ex-straight #Turnouts #n5-204-dcc-ex > g:last-child {
+  visibility: hidden;
+}
+
+.n5-204-dcc-ex-straight #Turnouts #n5-204-dcc-ex > g:first-child path {
+  stroke: black !important;
+}
+.n5-204-dcc-ex-divergent #Turnouts #n5-204-dcc-ex > g:first-child {
+  visibility: hidden;
+}
+
+.n5-204-dcc-ex-divergent #Turnouts #n5-204-dcc-ex > g:last-child path {
+  stroke: black !important;
+}
+
+.n6-202-dcc-ex-straight #Turnouts #n6-202-dcc-ex > g:last-child {
+  visibility: hidden;
+}
+
+.n6-202-dcc-ex-straight #Turnouts #n6-202-dcc-ex > g:first-child path {
+  stroke: black !important;
+}
+.n6-202-dcc-ex-divergent #Turnouts #n6-202-dcc-ex > g:first-child {
+  visibility: hidden;
+}
+
+.n6-202-dcc-ex-divergent #Turnouts #n6-202-dcc-ex > g:last-child path {
+  stroke: black !important;
+}
+
+.nx-201-dcc-ex-straight #Turnouts #nx-201-dcc-ex > g:last-child {
+  visibility: hidden;
+}
+
+.nx-201-dcc-ex-straight #Turnouts #nx-201-dcc-ex > g:first-child path {
+  stroke: black !important;
+}
+.nx-201-dcc-ex-divergent #Turnouts #nx-201-dcc-ex > g:first-child {
+  visibility: hidden;
+}
+
+.nx-201-dcc-ex-divergent #Turnouts #nx-201-dcc-ex > g:last-child path {
+  stroke: black !important;
+}
+
+.ps0-0-tj-payette-sub-straight #Turnouts #ps0-0-tj-payette-sub > g:last-child {
+  visibility: hidden;
+}
+
+.ps0-0-tj-payette-sub-straight
+  #Turnouts
+  #ps0-0-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps0-0-tj-payette-sub-divergent
+  #Turnouts
+  #ps0-0-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps0-0-tj-payette-sub-divergent
+  #Turnouts
+  #ps0-0-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps1-1-tj-payette-sub-straight #Turnouts #ps1-1-tj-payette-sub > g:last-child {
+  visibility: hidden;
+}
+
+.ps1-1-tj-payette-sub-straight
+  #Turnouts
+  #ps1-1-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps1-1-tj-payette-sub-divergent
+  #Turnouts
+  #ps1-1-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps1-1-tj-payette-sub-divergent
+  #Turnouts
+  #ps1-1-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps10-10-tj-payette-sub-straight
+  #Turnouts
+  #ps10-10-tj-payette-sub
+  > g:last-child {
+  visibility: hidden;
+}
+
+.ps10-10-tj-payette-sub-straight
+  #Turnouts
+  #ps10-10-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps10-10-tj-payette-sub-divergent
+  #Turnouts
+  #ps10-10-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps10-10-tj-payette-sub-divergent
+  #Turnouts
+  #ps10-10-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps11-11-tj-payette-sub-straight
+  #Turnouts
+  #ps11-11-tj-payette-sub
+  > g:last-child {
+  visibility: hidden;
+}
+
+.ps11-11-tj-payette-sub-straight
+  #Turnouts
+  #ps11-11-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps11-11-tj-payette-sub-divergent
+  #Turnouts
+  #ps11-11-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps11-11-tj-payette-sub-divergent
+  #Turnouts
+  #ps11-11-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps12-12-tj-payette-sub-straight
+  #Turnouts
+  #ps12-12-tj-payette-sub
+  > g:last-child {
+  visibility: hidden;
+}
+
+.ps12-12-tj-payette-sub-straight
+  #Turnouts
+  #ps12-12-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps12-12-tj-payette-sub-divergent
+  #Turnouts
+  #ps12-12-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps12-12-tj-payette-sub-divergent
+  #Turnouts
+  #ps12-12-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps13-13-tj-payette-sub-straight
+  #Turnouts
+  #ps13-13-tj-payette-sub
+  > g:last-child {
+  visibility: hidden;
+}
+
+.ps13-13-tj-payette-sub-straight
+  #Turnouts
+  #ps13-13-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps13-13-tj-payette-sub-divergent
+  #Turnouts
+  #ps13-13-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps13-13-tj-payette-sub-divergent
+  #Turnouts
+  #ps13-13-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps14-14-tj-payette-sub-straight
+  #Turnouts
+  #ps14-14-tj-payette-sub
+  > g:last-child {
+  visibility: hidden;
+}
+
+.ps14-14-tj-payette-sub-straight
+  #Turnouts
+  #ps14-14-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps14-14-tj-payette-sub-divergent
+  #Turnouts
+  #ps14-14-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps14-14-tj-payette-sub-divergent
+  #Turnouts
+  #ps14-14-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps15-15-tj-payette-sub-straight
+  #Turnouts
+  #ps15-15-tj-payette-sub
+  > g:last-child {
+  visibility: hidden;
+}
+
+.ps15-15-tj-payette-sub-straight
+  #Turnouts
+  #ps15-15-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps15-15-tj-payette-sub-divergent
+  #Turnouts
+  #ps15-15-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps15-15-tj-payette-sub-divergent
+  #Turnouts
+  #ps15-15-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps16-16-tj-payette-sub-straight
+  #Turnouts
+  #ps16-16-tj-payette-sub
+  > g:last-child {
+  visibility: hidden;
+}
+
+.ps16-16-tj-payette-sub-straight
+  #Turnouts
+  #ps16-16-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps16-16-tj-payette-sub-divergent
+  #Turnouts
+  #ps16-16-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps16-16-tj-payette-sub-divergent
+  #Turnouts
+  #ps16-16-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps17-17-tj-payette-sub-straight
+  #Turnouts
+  #ps17-17-tj-payette-sub
+  > g:last-child {
+  visibility: hidden;
+}
+
+.ps17-17-tj-payette-sub-straight
+  #Turnouts
+  #ps17-17-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps17-17-tj-payette-sub-divergent
+  #Turnouts
+  #ps17-17-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps17-17-tj-payette-sub-divergent
+  #Turnouts
+  #ps17-17-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps2-2-tj-payette-sub-straight #Turnouts #ps2-2-tj-payette-sub > g:last-child {
+  visibility: hidden;
+}
+
+.ps2-2-tj-payette-sub-straight
+  #Turnouts
+  #ps2-2-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps2-2-tj-payette-sub-divergent
+  #Turnouts
+  #ps2-2-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps2-2-tj-payette-sub-divergent
+  #Turnouts
+  #ps2-2-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps3-3-tj-payette-sub-straight #Turnouts #ps3-3-tj-payette-sub > g:last-child {
+  visibility: hidden;
+}
+
+.ps3-3-tj-payette-sub-straight
+  #Turnouts
+  #ps3-3-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps3-3-tj-payette-sub-divergent
+  #Turnouts
+  #ps3-3-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps3-3-tj-payette-sub-divergent
+  #Turnouts
+  #ps3-3-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps4-4-tj-payette-sub-straight #Turnouts #ps4-4-tj-payette-sub > g:last-child {
+  visibility: hidden;
+}
+
+.ps4-4-tj-payette-sub-straight
+  #Turnouts
+  #ps4-4-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps4-4-tj-payette-sub-divergent
+  #Turnouts
+  #ps4-4-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps4-4-tj-payette-sub-divergent
+  #Turnouts
+  #ps4-4-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps5-5-tj-payette-sub-straight #Turnouts #ps5-5-tj-payette-sub > g:last-child {
+  visibility: hidden;
+}
+
+.ps5-5-tj-payette-sub-straight
+  #Turnouts
+  #ps5-5-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps5-5-tj-payette-sub-divergent
+  #Turnouts
+  #ps5-5-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps5-5-tj-payette-sub-divergent
+  #Turnouts
+  #ps5-5-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps6-6-tj-payette-sub-straight #Turnouts #ps6-6-tj-payette-sub > g:last-child {
+  visibility: hidden;
+}
+
+.ps6-6-tj-payette-sub-straight
+  #Turnouts
+  #ps6-6-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps6-6-tj-payette-sub-divergent
+  #Turnouts
+  #ps6-6-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps6-6-tj-payette-sub-divergent
+  #Turnouts
+  #ps6-6-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps7-7-tj-payette-sub-straight #Turnouts #ps7-7-tj-payette-sub > g:last-child {
+  visibility: hidden;
+}
+
+.ps7-7-tj-payette-sub-straight
+  #Turnouts
+  #ps7-7-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps7-7-tj-payette-sub-divergent
+  #Turnouts
+  #ps7-7-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps7-7-tj-payette-sub-divergent
+  #Turnouts
+  #ps7-7-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps8-8-tj-payette-sub-straight #Turnouts #ps8-8-tj-payette-sub > g:last-child {
+  visibility: hidden;
+}
+
+.ps8-8-tj-payette-sub-straight
+  #Turnouts
+  #ps8-8-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps8-8-tj-payette-sub-divergent
+  #Turnouts
+  #ps8-8-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps8-8-tj-payette-sub-divergent
+  #Turnouts
+  #ps8-8-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.ps9-9-tj-payette-sub-straight #Turnouts #ps9-9-tj-payette-sub > g:last-child {
+  visibility: hidden;
+}
+
+.ps9-9-tj-payette-sub-straight
+  #Turnouts
+  #ps9-9-tj-payette-sub
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.ps9-9-tj-payette-sub-divergent
+  #Turnouts
+  #ps9-9-tj-payette-sub
+  > g:first-child {
+  visibility: hidden;
+}
+
+.ps9-9-tj-payette-sub-divergent
+  #Turnouts
+  #ps9-9-tj-payette-sub
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.s1-9-tam-station-south-straight
+  #Turnouts
+  #s1-9-tam-station-south
+  > g:last-child {
+  visibility: hidden;
+}
+
+.s1-9-tam-station-south-straight
+  #Turnouts
+  #s1-9-tam-station-south
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.s1-9-tam-station-south-divergent
+  #Turnouts
+  #s1-9-tam-station-south
+  > g:first-child {
+  visibility: hidden;
+}
+
+.s1-9-tam-station-south-divergent
+  #Turnouts
+  #s1-9-tam-station-south
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.s10-0-tam-station-south-straight
+  #Turnouts
+  #s10-0-tam-station-south
+  > g:last-child {
+  visibility: hidden;
+}
+
+.s10-0-tam-station-south-straight
+  #Turnouts
+  #s10-0-tam-station-south
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.s10-0-tam-station-south-divergent
+  #Turnouts
+  #s10-0-tam-station-south
+  > g:first-child {
+  visibility: hidden;
+}
+
+.s10-0-tam-station-south-divergent
+  #Turnouts
+  #s10-0-tam-station-south
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.s2-8-tam-station-south-straight
+  #Turnouts
+  #s2-8-tam-station-south
+  > g:last-child {
+  visibility: hidden;
+}
+
+.s2-8-tam-station-south-straight
+  #Turnouts
+  #s2-8-tam-station-south
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.s2-8-tam-station-south-divergent
+  #Turnouts
+  #s2-8-tam-station-south
+  > g:first-child {
+  visibility: hidden;
+}
+
+.s2-8-tam-station-south-divergent
+  #Turnouts
+  #s2-8-tam-station-south
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.s5-6-tam-station-south-straight
+  #Turnouts
+  #s5-6-tam-station-south
+  > g:last-child {
+  visibility: hidden;
+}
+
+.s5-6-tam-station-south-straight
+  #Turnouts
+  #s5-6-tam-station-south
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.s5-6-tam-station-south-divergent
+  #Turnouts
+  #s5-6-tam-station-south
+  > g:first-child {
+  visibility: hidden;
+}
+
+.s5-6-tam-station-south-divergent
+  #Turnouts
+  #s5-6-tam-station-south
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.s6-4-tam-station-south-straight
+  #Turnouts
+  #s6-4-tam-station-south
+  > g:last-child {
+  visibility: hidden;
+}
+
+.s6-4-tam-station-south-straight
+  #Turnouts
+  #s6-4-tam-station-south
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.s6-4-tam-station-south-divergent
+  #Turnouts
+  #s6-4-tam-station-south
+  > g:first-child {
+  visibility: hidden;
+}
+
+.s6-4-tam-station-south-divergent
+  #Turnouts
+  #s6-4-tam-station-south
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.s7-3-tam-station-south-straight
+  #Turnouts
+  #s7-3-tam-station-south
+  > g:last-child {
+  visibility: hidden;
+}
+
+.s7-3-tam-station-south-straight
+  #Turnouts
+  #s7-3-tam-station-south
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.s7-3-tam-station-south-divergent
+  #Turnouts
+  #s7-3-tam-station-south
+  > g:first-child {
+  visibility: hidden;
+}
+
+.s7-3-tam-station-south-divergent
+  #Turnouts
+  #s7-3-tam-station-south
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.s8-2-tam-station-south-straight
+  #Turnouts
+  #s8-2-tam-station-south
+  > g:last-child {
+  visibility: hidden;
+}
+
+.s8-2-tam-station-south-straight
+  #Turnouts
+  #s8-2-tam-station-south
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.s8-2-tam-station-south-divergent
+  #Turnouts
+  #s8-2-tam-station-south
+  > g:first-child {
+  visibility: hidden;
+}
+
+.s8-2-tam-station-south-divergent
+  #Turnouts
+  #s8-2-tam-station-south
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.s9-1-tam-station-south-straight
+  #Turnouts
+  #s9-1-tam-station-south
+  > g:last-child {
+  visibility: hidden;
+}
+
+.s9-1-tam-station-south-straight
+  #Turnouts
+  #s9-1-tam-station-south
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.s9-1-tam-station-south-divergent
+  #Turnouts
+  #s9-1-tam-station-south
+  > g:first-child {
+  visibility: hidden;
+}
+
+.s9-1-tam-station-south-divergent
+  #Turnouts
+  #s9-1-tam-station-south
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.sx-5-tam-station-south-straight
+  #Turnouts
+  #sx-5-tam-station-south
+  > g:last-child {
+  visibility: hidden;
+}
+
+.sx-5-tam-station-south-straight
+  #Turnouts
+  #sx-5-tam-station-south
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.sx-5-tam-station-south-divergent
+  #Turnouts
+  #sx-5-tam-station-south
+  > g:first-child {
+  visibility: hidden;
+}
+
+.sx-5-tam-station-south-divergent
+  #Turnouts
+  #sx-5-tam-station-south
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs-tunnel-3-tj-south-arduino-straight
+  #Turnouts
+  #tjs-tunnel-3-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs-tunnel-3-tj-south-arduino-straight
+  #Turnouts
+  #tjs-tunnel-3-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs-tunnel-3-tj-south-arduino-divergent
+  #Turnouts
+  #tjs-tunnel-3-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs-tunnel-3-tj-south-arduino-divergent
+  #Turnouts
+  #tjs-tunnel-3-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs0-0-tj-south-arduino-straight
+  #Turnouts
+  #tjs0-0-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs0-0-tj-south-arduino-straight
+  #Turnouts
+  #tjs0-0-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs0-0-tj-south-arduino-divergent
+  #Turnouts
+  #tjs0-0-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs0-0-tj-south-arduino-divergent
+  #Turnouts
+  #tjs0-0-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs1-1-tj-south-arduino-straight
+  #Turnouts
+  #tjs1-1-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs1-1-tj-south-arduino-straight
+  #Turnouts
+  #tjs1-1-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs1-1-tj-south-arduino-divergent
+  #Turnouts
+  #tjs1-1-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs1-1-tj-south-arduino-divergent
+  #Turnouts
+  #tjs1-1-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs10-10-tj-south-arduino-straight
+  #Turnouts
+  #tjs10-10-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs10-10-tj-south-arduino-straight
+  #Turnouts
+  #tjs10-10-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs10-10-tj-south-arduino-divergent
+  #Turnouts
+  #tjs10-10-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs10-10-tj-south-arduino-divergent
+  #Turnouts
+  #tjs10-10-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs11-11-tj-south-arduino-straight
+  #Turnouts
+  #tjs11-11-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs11-11-tj-south-arduino-straight
+  #Turnouts
+  #tjs11-11-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs11-11-tj-south-arduino-divergent
+  #Turnouts
+  #tjs11-11-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs11-11-tj-south-arduino-divergent
+  #Turnouts
+  #tjs11-11-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs12-12-tj-south-arduino-straight
+  #Turnouts
+  #tjs12-12-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs12-12-tj-south-arduino-straight
+  #Turnouts
+  #tjs12-12-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs12-12-tj-south-arduino-divergent
+  #Turnouts
+  #tjs12-12-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs12-12-tj-south-arduino-divergent
+  #Turnouts
+  #tjs12-12-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs13-13-tj-south-arduino-straight
+  #Turnouts
+  #tjs13-13-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs13-13-tj-south-arduino-straight
+  #Turnouts
+  #tjs13-13-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs13-13-tj-south-arduino-divergent
+  #Turnouts
+  #tjs13-13-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs13-13-tj-south-arduino-divergent
+  #Turnouts
+  #tjs13-13-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs14-14-tj-south-arduino-straight
+  #Turnouts
+  #tjs14-14-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs14-14-tj-south-arduino-straight
+  #Turnouts
+  #tjs14-14-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs14-14-tj-south-arduino-divergent
+  #Turnouts
+  #tjs14-14-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs14-14-tj-south-arduino-divergent
+  #Turnouts
+  #tjs14-14-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs15-15-tj-south-arduino-straight
+  #Turnouts
+  #tjs15-15-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs15-15-tj-south-arduino-straight
+  #Turnouts
+  #tjs15-15-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs15-15-tj-south-arduino-divergent
+  #Turnouts
+  #tjs15-15-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs15-15-tj-south-arduino-divergent
+  #Turnouts
+  #tjs15-15-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs2-2-tj-south-arduino-straight
+  #Turnouts
+  #tjs2-2-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs2-2-tj-south-arduino-straight
+  #Turnouts
+  #tjs2-2-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs2-2-tj-south-arduino-divergent
+  #Turnouts
+  #tjs2-2-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs2-2-tj-south-arduino-divergent
+  #Turnouts
+  #tjs2-2-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs4-4-tj-south-arduino-straight
+  #Turnouts
+  #tjs4-4-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs4-4-tj-south-arduino-straight
+  #Turnouts
+  #tjs4-4-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs4-4-tj-south-arduino-divergent
+  #Turnouts
+  #tjs4-4-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs4-4-tj-south-arduino-divergent
+  #Turnouts
+  #tjs4-4-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs5-5-tj-south-arduino-straight
+  #Turnouts
+  #tjs5-5-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs5-5-tj-south-arduino-straight
+  #Turnouts
+  #tjs5-5-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs5-5-tj-south-arduino-divergent
+  #Turnouts
+  #tjs5-5-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs5-5-tj-south-arduino-divergent
+  #Turnouts
+  #tjs5-5-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs6-6-tj-south-arduino-straight
+  #Turnouts
+  #tjs6-6-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs6-6-tj-south-arduino-straight
+  #Turnouts
+  #tjs6-6-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs6-6-tj-south-arduino-divergent
+  #Turnouts
+  #tjs6-6-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs6-6-tj-south-arduino-divergent
+  #Turnouts
+  #tjs6-6-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs7-7-tj-south-arduino-straight
+  #Turnouts
+  #tjs7-7-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs7-7-tj-south-arduino-straight
+  #Turnouts
+  #tjs7-7-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs7-7-tj-south-arduino-divergent
+  #Turnouts
+  #tjs7-7-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs7-7-tj-south-arduino-divergent
+  #Turnouts
+  #tjs7-7-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs8-8-tj-south-arduino-straight
+  #Turnouts
+  #tjs8-8-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs8-8-tj-south-arduino-straight
+  #Turnouts
+  #tjs8-8-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs8-8-tj-south-arduino-divergent
+  #Turnouts
+  #tjs8-8-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs8-8-tj-south-arduino-divergent
+  #Turnouts
+  #tjs8-8-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tjs9-9-tj-south-arduino-straight
+  #Turnouts
+  #tjs9-9-tj-south-arduino
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tjs9-9-tj-south-arduino-straight
+  #Turnouts
+  #tjs9-9-tj-south-arduino
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tjs9-9-tj-south-arduino-divergent
+  #Turnouts
+  #tjs9-9-tj-south-arduino
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tjs9-9-tj-south-arduino-divergent
+  #Turnouts
+  #tjs9-9-tj-south-arduino
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+.tss4-7-tam-station-south-straight
+  #Turnouts
+  #tss4-7-tam-station-south
+  > g:last-child {
+  visibility: hidden;
+}
+
+.tss4-7-tam-station-south-straight
+  #Turnouts
+  #tss4-7-tam-station-south
+  > g:first-child
+  path {
+  stroke: black !important;
+}
+.tss4-7-tam-station-south-divergent
+  #Turnouts
+  #tss4-7-tam-station-south
+  > g:first-child {
+  visibility: hidden;
+}
+
+.tss4-7-tam-station-south-divergent
+  #Turnouts
+  #tss4-7-tam-station-south
+  > g:last-child
+  path {
+  stroke: black !important;
+}
+
+/* Styles for route: PSUBM1 */
+.selected-PSUBM1 #Routes > g#PSUBM1 path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-PSUBM1 #Routes > g#PSUBM1 text {
+  opacity: 1 !important;
+}
+
+.available-PSUBM1 #Routes > g#PSUBM1 path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-PSUBM1 #Routes > g#PSUBM1 text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: REVS1 */
+.selected-REVS1 #Routes > g#REVS1 path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-REVS1 #Routes > g#REVS1 text {
+  opacity: 1 !important;
+}
+
+.available-REVS1 #Routes > g#REVS1 path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-REVS1 #Routes > g#REVS1 text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: REVS2 */
+.selected-REVS2 #Routes > g#REVS2 path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-REVS2 #Routes > g#REVS2 text {
+  opacity: 1 !important;
+}
+
+.available-REVS2 #Routes > g#REVS2 path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-REVS2 #Routes > g#REVS2 text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: REVS3 */
+.selected-REVS3 #Routes > g#REVS3 path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-REVS3 #Routes > g#REVS3 text {
+  opacity: 1 !important;
+}
+
+.available-REVS3 #Routes > g#REVS3 path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-REVS3 #Routes > g#REVS3 text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: REVS4 */
+.selected-REVS4 #Routes > g#REVS4 path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-REVS4 #Routes > g#REVS4 text {
+  opacity: 1 !important;
+}
+
+.available-REVS4 #Routes > g#REVS4 path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-REVS4 #Routes > g#REVS4 text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: PSUBM2 */
+.selected-PSUBM2 #Routes > g#PSUBM2 path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-PSUBM2 #Routes > g#PSUBM2 text {
+  opacity: 1 !important;
+}
+
+.available-PSUBM2 #Routes > g#PSUBM2 path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-PSUBM2 #Routes > g#PSUBM2 text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: REVN1 */
+.selected-REVN1 #Routes > g#REVN1 path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-REVN1 #Routes > g#REVN1 text {
+  opacity: 1 !important;
+}
+
+.available-REVN1 #Routes > g#REVN1 path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-REVN1 #Routes > g#REVN1 text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: AD2 */
+.selected-AD2 #Routes > g#AD2 path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-AD2 #Routes > g#AD2 text {
+  opacity: 1 !important;
+}
+
+.available-AD2 #Routes > g#AD2 path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-AD2 #Routes > g#AD2 text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: AD1 */
+.selected-AD1 #Routes > g#AD1 path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-AD1 #Routes > g#AD1 text {
+  opacity: 1 !important;
+}
+
+.available-AD1 #Routes > g#AD1 path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-AD1 #Routes > g#AD1 text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: YD2N */
+.selected-YD2N #Routes > g#YD2N path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-YD2N #Routes > g#YD2N text {
+  opacity: 1 !important;
+}
+
+.available-YD2N #Routes > g#YD2N path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-YD2N #Routes > g#YD2N text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: YD3N */
+.selected-YD3N #Routes > g#YD3N path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-YD3N #Routes > g#YD3N text {
+  opacity: 1 !important;
+}
+
+.available-YD3N #Routes > g#YD3N path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-YD3N #Routes > g#YD3N text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: YD4N */
+.selected-YD4N #Routes > g#YD4N path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-YD4N #Routes > g#YD4N text {
+  opacity: 1 !important;
+}
+
+.available-YD4N #Routes > g#YD4N path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-YD4N #Routes > g#YD4N text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: YD1N */
+.selected-YD1N #Routes > g#YD1N path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-YD1N #Routes > g#YD1N text {
+  opacity: 1 !important;
+}
+
+.available-YD1N #Routes > g#YD1N path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-YD1N #Routes > g#YD1N text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: YD1S */
+.selected-YD1S #Routes > g#YD1S path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-YD1S #Routes > g#YD1S text {
+  opacity: 1 !important;
+}
+
+.available-YD1S #Routes > g#YD1S path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-YD1S #Routes > g#YD1S text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: YD2S */
+.selected-YD2S #Routes > g#YD2S path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-YD2S #Routes > g#YD2S text {
+  opacity: 1 !important;
+}
+
+.available-YD2S #Routes > g#YD2S path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-YD2S #Routes > g#YD2S text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: YD4S */
+.selected-YD4S #Routes > g#YD4S path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-YD4S #Routes > g#YD4S text {
+  opacity: 1 !important;
+}
+
+.available-YD4S #Routes > g#YD4S path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-YD4S #Routes > g#YD4S text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: VLYSB1 */
+.selected-VLYSB1 #Routes > g#VLYSB1 path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-VLYSB1 #Routes > g#VLYSB1 text {
+  opacity: 1 !important;
+}
+
+.available-VLYSB1 #Routes > g#VLYSB1 path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-VLYSB1 #Routes > g#VLYSB1 text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: TS1 */
+.selected-TS1 #Routes > g#TS1 path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-TS1 #Routes > g#TS1 text {
+  opacity: 1 !important;
+}
+
+.available-TS1 #Routes > g#TS1 path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-TS1 #Routes > g#TS1 text {
+  opacity: 1 !important;
+}
+
+/* Styles for route: VLYSB3 */
+.selected-VLYSB3 #Routes > g#VLYSB3 path {
+  fill: var(--route-selected-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.selected-VLYSB3 #Routes > g#VLYSB3 text {
+  opacity: 1 !important;
+}
+
+.available-VLYSB3 #Routes > g#VLYSB3 path {
+  fill: var(--route-available-fill) !important;
+  fill-opacity: 0.8 !important;
+}
+
+.available-VLYSB3 #Routes > g#VLYSB3 text {
+  opacity: 1 !important;
+}

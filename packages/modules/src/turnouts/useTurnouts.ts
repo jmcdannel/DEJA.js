@@ -15,21 +15,21 @@ export function useTurnouts() {
 
   const turnoutsCol = () =>
     layoutId.value ? collection(db, `layouts/${layoutId.value}/turnouts`) : null
-  
 
   function getTurnouts() {
     const turnouts = useCollection(turnoutsCol)
     return turnouts
   }
 
-  async function getTurnout(id: string) {
+  async function getTurnout(id: string): Turnout {
     const deviceRef = doc(db, `layouts/${layoutId.value}/turnouts`, id)
     const docSnap = await getDoc(deviceRef)
 
     if (docSnap.exists()) {
-      return { ...docSnap.data(), id: docSnap.id }
+      return { ...docSnap.data(), id: docSnap.id } as Turnout
     } else {
       console.error('No such document!')
+      throw new Error('No such turnout!')
     }
   }
 
