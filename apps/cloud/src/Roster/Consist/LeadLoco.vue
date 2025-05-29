@@ -19,7 +19,7 @@ defineProps<{
         variant="tonal"
         color="green"
       ></v-btn>
-      <v-avatar :color="color">{{ loco?.locoId }}</v-avatar>
+      <v-avatar :color="color">{{ loco?.address }}</v-avatar>
       <v-btn
         class="ma-2"
         icon="mdi-arrow-right-circle"

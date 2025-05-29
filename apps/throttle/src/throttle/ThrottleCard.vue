@@ -36,7 +36,7 @@ watch( () => props.throttle, handleThrottleChange, { deep: true })
         :color="loco?.meta?.color || 'primary'" 
         class="mr-2" 
         @click="$emit('fullscreen')" 
-        :text="loco.locoId.toString()"/>
+        :text="loco.address.toString()"/>
       <span>
         {{ loco.name }}
       </span>

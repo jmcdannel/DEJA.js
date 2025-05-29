@@ -1,6 +1,6 @@
 // import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { log } from './utils/logger.js'
-import { wipe, reset, load } from './modules/layout.js'
+import { reset, load } from './modules/layout.js'
 import { listen } from './listeners.js'
 // import { db } from '@repo/firebase-config/firebase-node'
 
@@ -89,7 +89,6 @@ export async function handleBroadcastActions(): Promise<void> {
 export async function connect(): Promise<boolean> {
   try {
     log.start('Connecting to DejaCloud', layoutId)
-    await wipe()
     await reset()
     await load()
     await listen()

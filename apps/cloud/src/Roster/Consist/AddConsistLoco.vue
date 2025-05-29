@@ -24,7 +24,7 @@ const show = ref(props.open)
   </v-list-item>
   <v-divider></v-divider>
   <v-list v-if="show || open" class="bg-red-960">
-    <template  v-for="aloco in alocos" :key="aloco.locoId">
+    <template  v-for="aloco in alocos" :key="aloco.address">
       <v-list-item :subtitle="aloco.name">
         <template #prepend>
           <v-icon icon="mdi-train" class="w-8 h-8"></v-icon>
@@ -34,16 +34,16 @@ const show = ref(props.open)
             class="ma-2"
             icon="mdi-arrow-left-circle"
             variant="tonal"
-            @click="$emit('add', aloco?.locoId, true)"
-            :disabled="!!(aloco?.locoId === loco?.locoId || loco?.consist?.find((l) => l.address === aloco?.locoId))"
+            @click="$emit('add', aloco?.address, true)"
+            :disabled="!!(aloco?.address === loco?.address || loco?.consist?.find((l) => l.address === aloco?.address))"
           ></v-btn>
-          <v-avatar :color="color">{{ aloco?.locoId }}</v-avatar>
+          <v-avatar :color="color">{{ aloco?.address }}</v-avatar>
           <v-btn
             class="ma-2"
             icon="mdi-arrow-right-circle"
             variant="tonal"
-            @click="$emit('add', aloco?.locoId, false)"
-            :disabled="!!(aloco?.locoId === loco?.locoId || loco?.consist?.find((l) => l.address === aloco?.locoId))"
+            @click="$emit('add', aloco?.address, false)"
+            :disabled="!!(aloco?.address === loco?.address || loco?.consist?.find((l) => l.address === aloco?.address))"
           ></v-btn>
         </template>
       </v-list-item>

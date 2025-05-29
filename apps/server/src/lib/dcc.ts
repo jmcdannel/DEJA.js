@@ -16,7 +16,7 @@ export interface SerialCom {
 }
 
 export interface ThrottlePayload {
-  address: string | number
+  address: number
   speed: number
 }
 export interface TurnoutPayload {
@@ -25,7 +25,7 @@ export interface TurnoutPayload {
 }
 
 export interface FunctionPayload {
-  address: string | number
+  address: number
   func: number
   state: boolean
 }

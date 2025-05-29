@@ -30,9 +30,9 @@ defineProps({
     <section class="flex flex-col flex-grow justify-end my-8">
       <!-- <pre>{{ functions }}</pre> -->
       <ul class="flex flex-wrap justify-center mx-2 items-center max-w-48 sm:max-w-48 md:max-w-48">
-        <li v-for="(locoFunc, locoIdx) in loco.functions?.filter(lf => lf.isFavorite)" :key="locoFunc.id" class="basis-1/2 md:basis-1/3">
+        <li v-for="(locoFunc, addressx) in loco.functions?.filter(lf => lf.isFavorite)" :key="locoFunc.id" class="basis-1/2 md:basis-1/3">
           <!-- <pre>{{ locoFunc }}</pre> -->
-          <Function :func="locoFunc" :address="loco.locoId" class="w-full" />
+          <Function :func="locoFunc" :address="loco.address" class="w-full" />
         </li>
         <li class=" basis-full sm:basis-1/2 md:basis-1/3">
           <button @click="openAllFunctions()"

@@ -26,7 +26,7 @@ const { getLoco, updateLoco, getRoadname } = useLocos()
 const locoDoc = getLoco(props.loco?.id ? props.loco.id : null)
 
 const editColor = ref(false)
-const address = ref(props.loco?.locoId || null)
+const address = ref(props.loco?.address || null)
 const name = ref(props.loco?.name || '')
 const roadname = ref(getRoadname(props.loco?.meta?.roadname) || null)
 const roadnameVal = ref(roadname.value?.value)
@@ -43,7 +43,7 @@ async function submit () {
   if (!!address && props.loco?.id) {
     const loco: Loco = {
       ...props.loco,
-      locoId: address.value,
+      address: address.value,
       name: name.value,
       meta: {
         color: color.value,

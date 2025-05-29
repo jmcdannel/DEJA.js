@@ -1,30 +1,29 @@
-<script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { useLocos, type Loco } from '@repo/modules/locos'
-import { useThrottleStore } from "@/throttle/throttleStore"
-import ThrottleComponent from '@/throttle/Throttle.vue'
-import type { Throttle } from '@/throttle/types'
+<script async setup lang="ts">
+  import { watch, ref } from 'vue'
+  import { useRoute } from 'vue-router'
+  import { useLocos, type LocoThrottle } from '@repo/modules/locos'
+  import Throttle from '@/throttle/Throttle.vue'
 
-const route = useRoute()
-const { acquireThrottle, releaseThrottle } = useThrottleStore()
-const { getLoco } = useLocos()
-const throttle = computed<Throttle | null>(() => {
-  const address = route.params?.address ? parseInt(route.params.address.toString()) : null
-  return address ? acquireThrottle(address) : null
-})
-const loco = computed<Loco | null>(() => {
-  const address = route.params?.address ? route.params.address.toString() : null
-  return address ? getLoco(address) as unknown as Loco : null
-})
+  const route = useRoute()
+  const { getLocoThrottle } = useLocos()
 
-function handleRelease() {
-  throttle.value?.id && releaseThrottle(throttle.value?.id)
-}
+  const address = ref(parseInt(route.params.address?.toString()))
+  const locoThrottle = ref(<LocoThrottle | null>null)
+
+  watch(
+    address,
+    async (newAddress) => {
+      locoThrottle.value = await getLocoThrottle(newAddress)
+    },
+    { immediate: true }
+  )
+
+  
 </script>
 
 <template>
-  <template v-if="throttle && loco">
-    <ThrottleComponent :throttle="throttle" :loco="loco" @release="handleRelease" />
-  </template>
+  <Throttle  v-if="locoThrottle"
+    :throttle="locoThrottle.throttle"
+    :loco="locoThrottle.loco"
+  />
 </template>

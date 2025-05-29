@@ -4,6 +4,7 @@ import type { Loco } from '@repo/modules/locos'
 import type { Throttle } from '@/throttle/types'
 import { useRouter } from 'vue-router'
 import { useThrottle } from '@/throttle/useThrottle'
+import { useRoster } from '@/roster/useRoster'
 import LocoAvatarButton from './LocoAvatarButton.vue'
 import LocoAvatarMenu from './LocoAvatarMenu.vue'
 import ThrottleCard from '@/throttle/ThrottleCard.vue'
@@ -45,7 +46,8 @@ const props = defineProps({
 })
 
 const $router = useRouter()
-const { acquireThrottle, releaseThrottle, updateSpeed } = useThrottle(props.throttle)
+const { acquireThrottle } = useRoster()
+const { releaseThrottle, updateSpeed } = useThrottle(props.throttle)
 
 const isMenuOpen = ref(false)
 const isThrottleCardOpen = ref(false)
@@ -56,13 +58,13 @@ function handleLocoClick() {
   } else if (props.showMenu) {
     isMenuOpen.value = !isMenuOpen.value
   } else {
-    emit('selected', props.loco.locoId)
+    emit('selected', props.loco.address)
   }
 }
 
 async function handleCard() {
   if (!props.throttle) {
-    await acquireThrottle(props.loco.locoId)
+    await acquireThrottle(props.loco.address)
   }
   isThrottleCardOpen.value = true
 }
@@ -70,25 +72,22 @@ async function handleCard() {
 async function handleFullscreen() {
   isThrottleCardOpen.value = false
   if (!props.throttle) {
-    await acquireThrottle(props.loco.locoId)
+    await acquireThrottle(props.loco.address)
   }
-  $router.push({ name: 'cloud-throttle', params: { address: props.loco.locoId } })
+  $router.push({ name: 'throttle', params: { address: props.loco.address } })
 }
 
 async function handleThrottleList() {
-  if (!props.throttle) {
-    await acquireThrottle(props.loco.locoId)
-  }
   $router.push({ name: 'throttle-list' })
 }
 
 function handlePark() {
-  releaseThrottle(props.loco.locoId)
+  releaseThrottle(props.loco.address)
   $router.push({ name: 'throttle-list' })
 }
 
 function handleStop() {
-  updateSpeed(props.loco.locoId, 0)
+  updateSpeed(props.loco.address, 0)
 }
 
 </script>
@@ -106,7 +105,7 @@ function handleStop() {
           :color="loco?.meta?.color || color"
           :loco="loco"
           :size="size"
-          :text="loco.locoId?.toString() || '?'"
+          :text="loco.address?.toString() || '?'"
           :variant="variant"
           @click="handleLocoClick"
         />

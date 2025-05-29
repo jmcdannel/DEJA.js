@@ -7,9 +7,6 @@ export interface Throttle {
   speed: number
   timesstamp: number
 }
-export interface ConsistProps {
-  address: number
-}
 
 export interface ConsistSettingsProps {
   locos: Loco[]

@@ -376,7 +376,7 @@ export function useSerial() {
         try {
           locoAddr = parseInt(cmdArray[1])
           if (locoAddr > 0) {
-            // $("#cv-locoid").val(locoAddr)
+            // $("#cv-address").val(locoAddr)
           } else {
             displayLog("[i] DCC Address Read Failed!")
           }

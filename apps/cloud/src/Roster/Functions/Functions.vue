@@ -8,14 +8,14 @@ const props = defineProps({
   loco: Object,
 })
 const locoFunctions = ref(props.loco?.functions)
-const locoId = ref(props.loco?.id)
+const address = ref(props.loco?.id)
 const isModified = ref(false)
 const { updateFunctions } = useFunctions()
 
 async function handleSave() {
-  console.log('handleSave', locoId.value, locoFunctions.value)
-  if (locoId.value) {
-    await updateFunctions(locoId.value, locoFunctions.value)
+  console.log('handleSave', address.value, locoFunctions.value)
+  if (address.value) {
+    await updateFunctions(address.value, locoFunctions.value)
   }
 }
 
@@ -61,7 +61,7 @@ async function handleEdit(func: LocoFunction) {
     <ViewJson :json="defaultFunc" label="RAW DEFAULT"></ViewJson>
     <ViewJson :json="loco?.functions.find(lf => lf.id === defaultFunc.id)" label="RAW LOCO"></ViewJson>
   </template> -->
-  <pre>locoId: {{ locoId }}</pre>
+  <pre>address: {{ address }}</pre>
   <ViewJson :json="loco?.functions || {}" label="RAW loco Data"></ViewJson>
   <ViewJson :json="locoFunctions" label="RAW locoFunctions Data"></ViewJson>
   <ViewJson :json="defaultFunctions" label="RAW DEFAULT FUNCTIONS"></ViewJson>

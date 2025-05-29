@@ -47,48 +47,56 @@
 <template>
   <div class="py-0 @[400px]:py-2 @[400px]:px-4 @[640px]:py-2 @[640px]:px-12 flex justify-stretch items-center flex-grow relatve z-20"
     :class="`${horizontal ? 'flex-row px-1' : 'flex-col '}`">
-    <button 
+    <v-btn 
       class=" flex-grow" 
       :class="`${btnClasses} ${horizontal ? 'rounded-r-none rounded-l-3xl' : 'rounded-b-none rounded-t-3xl'}`"
+      color="green"
       @click="handleUp5">
-      <v-icon 
-        :icon="horizontal ? 'mdi-plus-thick' : 'mdi-chevron-double-up'" 
-        :class="iconClasses" />
-    </button>
+        <template v-if="horizontal">
+          <v-icon icon="mdi-plus-thick" :class="iconClasses" />
+          <v-icon icon="mdi-plus-thick" :class="iconClasses" class="hidden @[960px]:inline" />
+        </template>
+        <v-icon v-else icon="mdi-chevron-double-up" :class="iconClasses" />
+    </v-btn>
     <hr class="border-black" />
-    <button 
+    <v-btn  
       class="rounded-none flex-grow" 
       :class="btnClasses"
+      color="green"
       @click="handleUp">
       <v-icon 
         :icon="horizontal ? 'mdi-plus' : 'mdi-chevron-up'" 
         :class="iconClasses"
       />
-    </button>
-    <button 
-      class="btn bg-red-500 rounded-3xl py-2 @[1024px]:py-4 min-w-16 h-auto mx-auto relative z-10"
-      :class="horizontal ? '@[960px]:h-36 rounded-none' : 'w-28 @[960px]:w-36 rounded-3xl'"
-       @click="handleStop">
+    </v-btn>
+    <v-btn  
+      class="rounded-3xl py-0 @[960px]:py-4 min-w-8 @[960px]:min-w-16 h-auto mx-auto relative z-10"
+      :class="horizontal ? 'px-1 @[960px]:h-36 rounded-none' : 'w-28 @[960px]:w-36 rounded-3xl'"
+      color="red"
+      @click="handleStop">
       <v-icon icon="mdi-stop" class="h-8 w-8 @[1024px]:h-12 @[1024px]:w-12 relative" />
-    </button>
-    <button 
+    </v-btn>
+    <v-btn  
       class="rounded-none  flex-grow"
       :class="btnClasses" 
+      color="green"
       @click="handleDown">
       <v-icon 
         :icon="horizontal ? 'mdi-minus' : 'mdi-chevron-down'" 
         :class="iconClasses"
       />
-    </button>
+    </v-btn>
     <hr class="border-black" />
-    <button 
-      class="flex-grow" 
+    <v-btn  
+      class="flex-grow items-center justify-center" 
       :class="`${btnClasses} ${horizontal ? 'rounded-l-none rounded-r-3xl' : 'rounded-t-none rounded-b-3xl'}`"
+      color="green"
       @click="handleDown5">
-      <v-icon 
-        :icon="horizontal ? 'mdi-minus-thick' : 'mdi-chevron-double-down'"
-        :class="iconClasses"
-      />
-    </button>
+        <template v-if="horizontal">
+          <v-icon icon="mdi-minus-thick" :class="iconClasses" />
+          <v-icon icon="mdi-minus-thick" :class="iconClasses" class="hidden @[960px]:inline" />
+        </template>
+        <v-icon v-else icon="mdi-chevron-double-down" :class="iconClasses" />
+    </v-btn>
   </div>
 </template>

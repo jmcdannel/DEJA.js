@@ -1,28 +1,29 @@
-import { ref } from 'vue'
-import { createGlobalState, isObject } from '@vueuse/core'
+import { ref, watch } from 'vue'
+import { isObject, useStorage, useWebSocket } from '@vueuse/core'
 import type { LogEntry } from './types'
 import { defuaultEntry, dccMessages} from './constants'
 
-export function useDccLog() {
+export function useDccLog(isEnabled: boolean) {
+  if (!isEnabled) {
+    return {
+      log: ref<LogEntry[]>([]),
+      append: (_entry: string) => {},
+    }
+  }
+  const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.22:8082')
   const dccRegex = /<\*\s(.*?)\s\*>/
 
-  const useLogState = createGlobalState(() => {
-    const log = ref<LogEntry[]>([])
+  const log = ref<LogEntry[]>([])
+  const { data } = useWebSocket(`ws://${wshost.value}/`)
 
-    function append(entry: string) {
-      console.log('append', entry, log.value)
-      log.value = [...log.value, parseEntry(entry)]
-      console.log('appended', log.value)
-    }
-
-    return { log, append }
-  })
-
-  const logState = useLogState()
+  function append(entry: string) {
+    console.log('append', entry, log.value)
+    log.value = [...log.value, parseEntry(entry)]
+    console.log('appended', log.value)
+  }
 
   function parseEntry(entry: string) {
     const { action, payload } = JSON.parse(entry)
-    console.log('parseEntry', isObject(payload), payload)
     let formattedEntry = { ...defuaultEntry, id: Date.now(), action, payload }
     if (action === 'broadcast' && !isObject(payload)) {
       // parse message
@@ -40,10 +41,14 @@ export function useDccLog() {
     return formattedEntry
   }
 
+
+  watch(data, (newData) => {
+    append(newData)
+  })
+
   return {
-    parseEntry,
-    log: logState.log.value,
-    append: logState.append,
+    log,
+    append,
   }
 }
 

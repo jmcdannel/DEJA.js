@@ -5,18 +5,15 @@
   import relativeTime from 'dayjs/plugin/relativeTime'
   import { useConnectionStore } from '@/connections/connectionStore'
   import { useLayout } from '@repo/modules/layouts'
-  import DejaCloudConnectDevice from './DejaCloudConnectDevice.vue'
 
   const conn = useConnectionStore()
 
   dayjs.extend(relativeTime)
 
   const { dccExConnected } = storeToRefs(conn)
-  const { getLayout, getDevices } = useLayout()
+  const { getLayout } = useLayout()
     
   const layout = getLayout()
-  const devices = getDevices()
-
 
   const lastUpdated = computed(() => layout?.value?.dccEx?.timestamp?.seconds)
   const lastConnected = computed(() => layout?.value?.dccEx?.lastConnected?.seconds)
@@ -55,5 +52,4 @@
 
 <template>
   <!-- <pre>{{ layout }}</pre> -->
-  <DejaCloudConnectDevice v-for="device in devices" :key="device.id" :deviceId="device.id" :device="device" />
 </template>

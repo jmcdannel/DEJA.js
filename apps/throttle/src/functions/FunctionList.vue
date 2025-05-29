@@ -31,7 +31,7 @@
         basis-full
         md:basis-1/2
         ">
-          <Function :func="func" :address="loco.locoId" class="w-full justify-start" show-label show-default-icon />
+          <Function :func="func" :address="loco.address" class="w-full justify-start" show-label show-default-icon />
       </li>
     </ul>
   </Modal>

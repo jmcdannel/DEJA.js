@@ -37,9 +37,9 @@ defineProps({
       rounded="circle"
       :size="size"
       stacked
-      :text="loco.locoId?.toString() || '?'"
+      :text="loco.address?.toString() || '?'"
       :variant="variant"
-      @select="$emit('select', loco.locoId)"
+      @select="$emit('select', loco.address)"
     />
   </v-badge>
   <v-btn v-else
@@ -47,8 +47,8 @@ defineProps({
     rounded="circle"
     :size="size"
     stacked
-    :text="loco.locoId?.toString() || '?'"
+    :text="loco.address?.toString() || '?'"
     :variant="variant"
-    @select="$emit('select', loco.locoId)"
+    @select="$emit('select', loco.address)"
   />  
 </template>

@@ -65,7 +65,7 @@ defineExpose({
             <FaStar v-if="func.isFavorite" class="w-6 h-6" />
             <FaRegStar v-else class="w-6 h-6" />
           </button>
-          <Function :func="func" :address="loco.locoId" class="mx-2" />
+          <Function :func="func" :address="loco.address" class="mx-2" />
 
           <input v-model="func.label" class="input input-bordered h-8 min-w-28 w-full max-w-xs" @blur="handleLabelBlur">
            <details class="dropdown dropdown-end" ref="menuRefs">

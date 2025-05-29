@@ -6,11 +6,11 @@ export interface ConsistLoco {
   trim: number
 }
 export interface Loco {
-  locoId: number
+  address: number
   name: string
-  consist: ConsistLoco[]
-  functions: LocoFunction[]
-  id?: string
+  consist?: ConsistLoco[]
+  functions?: LocoFunction[]
+  id: string
   meta?: {
     color?: string
     roadname?: string
@@ -23,15 +23,12 @@ export interface Throttle {
   speed: number
   timesstamp: number
 }
+
 export interface LocoFunction {
   id: number
   label: string
   icon: string | null | undefined
   isFavorite: boolean | undefined
-}
-
-export interface ConsistProps {
-  address: number
 }
 
 export interface ConsistSettingsProps {
@@ -43,4 +40,10 @@ export interface RoadName {
   value: string
   label: string
   color: string
+}
+
+export interface LocoThrottle {
+  address: number
+  loco: Loco
+  throttle: Throttle
 }

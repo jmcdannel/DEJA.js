@@ -17,8 +17,8 @@ const props = defineProps({
 })
 const $router = useRouter()
 
-const showThrottle = $router.currentRoute.value.name !== 'cloud-throttle' 
-  || ($router.currentRoute.value.name === 'cloud-throttle' && $router.currentRoute.value.params.address !== props.loco.locoId.toString())
+const showThrottle = $router.currentRoute.value.name !== 'throttle' 
+  || ($router.currentRoute.value.name === 'throttle' && $router.currentRoute.value.params.address !== props.loco.address.toString())
 
 const showThrottleList = $router.currentRoute.value.name !== 'throttle-list' 
   && !props.throttle

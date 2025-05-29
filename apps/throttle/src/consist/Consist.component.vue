@@ -111,7 +111,7 @@ function toggleLocoDir(cloco: ConsistLoco, direction:boolean) {
           </button>
           <div class="ml-1 avatar placeholder">
             <div class=" rounded-full w-6 bg-sky-500 text-white">
-              <span class="text-sm">{{ loco?.locoId }}</span>
+              <span class="text-sm">{{ loco?.address }}</span>
             </div> 
           </div>
         </li>

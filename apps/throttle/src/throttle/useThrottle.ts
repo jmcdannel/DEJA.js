@@ -1,6 +1,6 @@
 import { ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { deleteDoc, doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
+import { deleteDoc, doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import type { Throttle } from '@/throttle/types'
 import { db } from '@repo/firebase-config/firebase'
 import { useConnectionStore } from '@/connections/connectionStore'
@@ -35,29 +35,6 @@ export const useThrottle = (throttle?: Throttle) => {
 
   function stop() {
     currentSpeed.value = 0
-  }
-
-  async function acquireThrottle(address: string | number) {
-    try {
-      const id = typeof address === 'string' ? address : address.toString() || throttle?.address
-      if (!id) {
-        console.warn('No throttle address provided for acquisition')
-        return
-      }
-      const data = {
-        address: id,
-        speed: 0,
-        direction: false,
-        timestamp: serverTimestamp(),
-      }
-      const newThrottleDoc = await setDoc(
-        doc(db, `layouts/${layoutId.value}/throttles`, id.toString()),
-        data
-      )
-      return newThrottleDoc
-    } catch (e) {
-      console.error('Error adding throttle: ', e)
-    }
   }
 
   async function releaseThrottle(throttleId?: number) {
@@ -96,7 +73,6 @@ export const useThrottle = (throttle?: Throttle) => {
 
 
   return {
-    acquireThrottle,
     adjustSpeed,
     currentSpeed,
     getSignedSpeed,

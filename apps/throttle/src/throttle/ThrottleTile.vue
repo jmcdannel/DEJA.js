@@ -14,17 +14,16 @@ const props = defineProps({
   },
   loco: {
     type: Object as PropType<Loco>,
-    required: false
+    required: true
   }
 })
-
-const emit = defineEmits(['release', 'select'])
 
 const { 
   currentSpeed, 
   adjustSpeed: handleAdjustSpeed, 
   handleThrottleChange,
   stop: handleStop,
+  releaseThrottle,
 } = useThrottle(props.throttle)
 
 // Setup watchers
@@ -33,19 +32,27 @@ watch( () => props.throttle, handleThrottleChange, { deep: true })
   
 </script>
 <template>
-  <main class="rounded-2xl shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border " v-if="throttle">
+  <main class="rounded-2xl shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border ">
     <section class="p-1 flex flex-row flex-wrap items-center justify-between overflow-auto">
       <div class="order-1 basis-1/3" >
         <CurrentSpeed :speed="currentSpeed" />
       </div>
       <div class="flex-grow order-4 basis-full my-1">
-        <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" horizontal class=""  />
+        <ThrottleButtonControls 
+          horizontal 
+          :speed="currentSpeed" 
+          @stop="handleStop" 
+          @update:currentSpeed="handleAdjustSpeed" 
+        />
       </div>
       <div class="order-2 basis-1/3 py-2 flex justify-center text-base @[960px]:text-xl">
-        <span v-if="loco" class="bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-cyan-400 font-bold">{{loco.name}}</span>
+        <span class="bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-cyan-400 font-bold">{{loco.name}}</span>
       </div>
       <div class="order-2  basis-1/3 text-center">
-        <ThrottleAvatar :throttle="throttle" :size="48" :loco="loco" @release="$emit('release', throttle.address)" @select="$emit('select', throttle.address)" />
+        <ThrottleAvatar :throttle="throttle" :size="48" :loco="loco" 
+          @release="releaseThrottle" 
+          @select="$router.push({ name: 'throttle', params: { address: throttle.address }})" 
+        />
       </div>
     </section>
   </main>

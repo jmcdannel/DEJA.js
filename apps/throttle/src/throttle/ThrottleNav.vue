@@ -13,7 +13,7 @@ const throttlesWithLocos = computed(() =>
   throttles.value?.map(throttle => ({
     id: throttle.address,
     throttle,
-    loco: locos.value?.find(loco => loco.locoId === throttle.address)
+    loco: locos.value?.find(loco => loco.address === throttle.address)
   })).filter(t => t.loco)
 )
 </script>

@@ -53,13 +53,13 @@ async function getLocos(): Promise<Loco[]> {
 export async function handleThrottleChange(snapshot: DocumentData): Promise<void> {
   snapshot.docChanges().forEach(async (change: DocumentData) => {
     const throttleCmd: ThrottlePayload = {
-      address: parseInt(change.doc.data().address),
+      address: change.doc.data().address,
       speed: change.doc.data().direction
         ? change.doc.data().speed
         : -change.doc.data().speed,
     }
     const _locos = await getLocos()
-    const loco = _locos.find((_loco) => _loco.locoId == throttleCmd.address)
+    const loco = _locos.find((_loco) => _loco.address == throttleCmd.address)
     // console.log(
     //   'Throttle change',
     //   change.type,

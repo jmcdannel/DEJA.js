@@ -25,7 +25,7 @@ const navigate = (e:any) => {
 }
 
 function saveLoco(address:number) {
-  if (!locos.value.find((l:Loco) => l.locoId === address)) {
+  if (!locos.value.find((l:Loco) => l.address === address)) {
     locos.value.push({
       address,
       consist: [],

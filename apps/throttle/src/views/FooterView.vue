@@ -73,9 +73,9 @@ const active = ref($router.currentRoute.value.path)
         </v-btn-toggle>
         <v-spacer />
       </v-row>
-      <v-row class="p-2 bg-gradient-to-r from-zinc-950 to-gray-950">
+      <!-- <v-row class="p-2 bg-gradient-to-r from-zinc-950 to-gray-950">
         <ThrottleNav v-if="!!layoutId" />
-      </v-row>
+      </v-row> -->
     </v-container>
   </v-footer>
 </template>

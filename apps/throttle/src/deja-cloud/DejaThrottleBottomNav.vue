@@ -10,8 +10,8 @@ const throttles = getThrottles()
   <template v-if="throttles">
     <router-link
       v-for="throttle in throttles"
-        :key="throttle.id"
-        :to="`/cloud-throttle/${throttle?.id}`"
+        :key="throttle.address"
+        :to="`/throttle/${throttle?.address}`"
         custom
         v-slot="{ navigate }"
       >

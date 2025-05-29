@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useCurrentUser } from 'vuefire'
-
-import DCCLogger from '@/DCCEX/Log/DCCLogger.vue'
 
 // Pages
 import Login from '@/User/Login/Login.vue'
@@ -27,10 +25,13 @@ import DeviceStatus from '@/Layout/Devices/DeviceStatus.vue'
 import DCCLogStatus from '@/DCCEX/Log/DCCLogStatus.vue'
 import LayoutStatus from '@/Layout/LayoutStatus.vue'
 
+import { useDccLog } from '@/DCCEX/Log/useDccLog'
+
 const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 const enableLogging = useStorage('@DEJA/pref/ws-logging', false)
 
 const user = useCurrentUser()
+const dccLog = useDccLog(enableLogging.value)
 
 const view = useStorage('@DEJA/cloud/view', 'Effects')
 

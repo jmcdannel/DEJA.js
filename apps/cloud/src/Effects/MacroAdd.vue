@@ -94,7 +94,7 @@ function handleOk() {
           <v-item-group 
             v-model="throttles" multiple>
             <v-row>
-              <v-col  v-for="item in locoChips" :key="item.locoId" cols="12" md="4" :value="item">
+              <v-col  v-for="item in locoChips" :key="item.address" cols="12" md="4" :value="item">
                 <v-item 
                   size="large"
                   color="blue"
@@ -104,7 +104,7 @@ function handleOk() {
                   v-slot="{ isSelected, toggle }"
                 >
                   <v-sheet class="flex items-center justify-start gap-2" color="surface">
-                    <v-avatar :color="item?.meta?.color" :variant="isSelected ? 'flat' : 'outlined'" @click="toggle">{{ item.locoId }}</v-avatar>
+                    <v-avatar :color="item?.meta?.color" :variant="isSelected ? 'flat' : 'outlined'" @click="toggle">{{ item.address }}</v-avatar>
                     <v-text-field
                       v-model="item.speed"
                       type="number"

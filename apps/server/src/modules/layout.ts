@@ -201,48 +201,17 @@ async function handleConnectionMessage(payload: string): Promise<void> {
   await broadcast({ action: 'broadcast', payload })
 }
 
-export async function wipe(): Promise<void> {
-  Promise.all([wipeDcc(), wipeDeja(), wipeThrottles()])
-}
-
-async function wipeDcc(): Promise<void> {
-  log.complete('wipe dccCommands', layoutId)
+async function resetThrottles(): Promise<void> {
+  log.complete('reset throttles', layoutId)
   const querySnapshot = await getDocs(
-    collection(db, `layouts/${layoutId}/dccCommands`)
+    collection(db, `layouts/${layoutId}/throttles`)
   )
   querySnapshot.forEach((d: DocumentData) => {
-    deleteDoc(d.ref)
+    setDoc(d.ref, {
+      speed: 0,
+      direction: false
+    })
   })
-}
-
-async function wipeDeja(): Promise<void> {
-  log.complete('wipe dejaCommands', layoutId)
-  const querySnapshot = await getDocs(
-    collection(db, `layouts/${layoutId}/dejaCommands`)
-  )
-  querySnapshot.forEach((d: DocumentData) => {
-    deleteDoc(d.ref)
-  })
-}
-
-async function wipeThrottles(): Promise<void> {
-  // log.complete('wipe throttles', layoutId)
-  // const querySnapshot = await getDocs(
-  //   collection(db, `layouts/${layoutId}/throttles`)
-  // )
-  // querySnapshot.forEach((doc) => {
-  //   deleteDoc(doc.ref)
-  // })
-}
-
-export async function reset(): Promise<void> {
-  // TODO: reset all thr
-  await resetDevices()
-  await setDoc(
-    doc(db, 'layouts', layoutId),
-    { 'dccEx.client': null, 'dccEx.lastConnected': null },
-    { merge: true }
-  )
 }
 
 async function resetDevices(): Promise<void> {
@@ -258,13 +227,22 @@ async function resetDevices(): Promise<void> {
   })
 }
 
+export async function reset(): Promise<void> {
+  await resetDevices()
+  await resetThrottles()
+  await setDoc(
+    doc(db, 'layouts', layoutId),
+    { 'dccEx.client': null, 'dccEx.lastConnected': null },
+    { merge: true }
+  )
+}
+
 export const layout = {
   connectDevice,
   connections: () => _connections,
   devices: () => _devices,
   load,
   reset,
-  wipe,
 }
 
 export default layout

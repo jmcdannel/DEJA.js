@@ -82,7 +82,7 @@ async function toggleLocoDir(cloco: ConsistLoco, direction:boolean) {
       prepend-icon="mdi-arrow-left-circle"
       :color="color || 'primary'"
     >
-      {{ loco?.locoId }}
+      {{ loco?.address }}
     </v-chip>
     <v-chip v-if="loco?.consist?.length > 0" v-for="cloco in loco?.consist"
       class="ma-1" 

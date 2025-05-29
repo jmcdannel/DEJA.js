@@ -40,7 +40,7 @@ stop: handleStop,
 watch( () => props.throttle, handleThrottleChange, { deep: true })
 
 function handleSelect(address: number) {
-  $router.push({ name: 'cloud-throttle', params: { address } })
+  $router.push({ name: 'throttle', params: { address } })
 }
 
 </script>
@@ -59,8 +59,7 @@ function handleSelect(address: number) {
         </template>
       </ThrottleHeader>
       <section class="throttle w-full h-full flex flex-row justify-around flex-grow pt-72 -mt-72">
-        <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
-          
+        <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">          
           <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" />
         </section>
       </section>

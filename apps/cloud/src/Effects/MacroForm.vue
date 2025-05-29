@@ -54,7 +54,7 @@ function handleAddOn(effects: Effect[], turnouts: Turnout[], throttles: MacroLoc
     state: true,
   })))
   const throttleChips = throttles.map((t) => ({
-    id: t.locoId,
+    id: t.address,
     type: 'throttle',
     speed: t.speed,
     direction: t.direction,
@@ -81,7 +81,7 @@ function handleAddOff(effects: Effect[], turnouts: Turnout[], throttles: MacroLo
     state: false,
   })))
   const throttleChips = throttles.map((t) => ({
-    id: t.locoId,
+    id: t.address,
     type: 'throttle',
     speed: t.speed,
     direction: t.direction,

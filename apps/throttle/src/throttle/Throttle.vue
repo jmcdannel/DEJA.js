@@ -32,12 +32,11 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['release'])
-
 const { 
   currentSpeed, 
   adjustSpeed: handleAdjustSpeed, 
   handleThrottleChange,
+  releaseThrottle,
   stop: handleStop,
 } = useThrottle(props.throttle)
 
@@ -55,7 +54,7 @@ function setSliderSpeed(val: number): void { // handle slider changes
 
 async function clearLoco() {
   await handleStop()
-  emit('release', props.throttle?.address)
+  releaseThrottle(props.throttle?.address)
 }
 
 function openFunctions() {

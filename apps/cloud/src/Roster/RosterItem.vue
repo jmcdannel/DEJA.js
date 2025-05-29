@@ -42,7 +42,7 @@ const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
     :class="`${color?.border}`"
   >
     <template #append>
-      <v-avatar size="large" :color="props?.loco?.meta?.color || color.value">{{ loco?.locoId }}</v-avatar>
+      <v-avatar size="large" :color="props?.loco?.meta?.color || color.value">{{ loco?.address }}</v-avatar>
     </template>
     <v-card-text class="min-h-16 flex flex-wrap">
         <v-badge

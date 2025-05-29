@@ -24,9 +24,9 @@ const locos = getLocos()
     <div class="flex flex-wrap gap-2">
       <LocoAvatar
         v-for="loco in locos" 
-        :key="loco.locoId" 
+        :key="loco.address" 
         :loco="loco as Loco"
-        @selected="$emit('selected', loco.locoId)"
+        @selected="$emit('selected', loco.address)"
       />
     </div>
   </Modal>

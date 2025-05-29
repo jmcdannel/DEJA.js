@@ -44,12 +44,6 @@ const router = createRouter({
       path: '/throttle/:address',
       name: 'throttle',
       component: () => import('../views/ThrottleView.vue'),
-      props: { dejaCloud: false },
-    },
-    {
-      path: '/cloud-throttle/:address',
-      name: 'cloud-throttle',
-      component: () => import('../views/CloudThrottleView.vue'),
     },
     {
       path: '/throttle-list',
