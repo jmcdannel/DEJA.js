@@ -11,7 +11,7 @@
   } from 'vue3-icons/bs'
   import { useConnectionStore } from '@/connections/connectionStore'
   import StatusMenuItem from '@/core/StatusMenu/StatusMenuItem.component.vue'
-  import DejaSignout from '@/deja-cloud/DejaSignout.vue'
+  import DejaSignout from '@/auth/Signout.vue'
   import DejaUser from '@/deja-cloud/DejaUser.vue'
   import useSerial from '@/deja-cloud/serialApi'
   const serialApi = useSerial()

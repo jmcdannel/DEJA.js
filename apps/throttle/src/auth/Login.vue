@@ -5,17 +5,14 @@ export const githubAuthProvider = new GithubAuthProvider()
 <script setup>
 import { ref, onMounted } from 'vue'
 import { getRedirectResult, signInWithPopup } from 'firebase/auth'
-import { useFirebaseAuth } from 'vuefire'
+import { useFirebaseAuth, useCurrentUser } from 'vuefire'
+import { useRouter } from 'vue-router'
 import { FaGithubAlt, FaGoogle, FaMicrosoft, FaApple, FaFacebook } from 'vue3-icons/fa6'
 
 const emit = defineEmits(['auth'])
-const props = defineProps({
-  isAuthenticated: {
-    type: Boolean,
-    default: false
-  }
-})
+const router = useRouter()
 const auth = useFirebaseAuth()
+const user = useCurrentUser()
 
 // display errors if any
 const error = ref(null)
@@ -53,19 +50,19 @@ onMounted(() => {
         Welcom to DEJA Cloud
       </h1>
     </header>
-    <pre>isAuthenticated: {{ isAuthenticated }}</pre>
+    <pre>isAuthenticated: {{ Boolean(user) }}</pre>
 
     <template v-if="error">
       <div class="alert alert-error">
         {{ error.message }}
       </div>
     </template>
-    <template v-else-if="isAuthenticated">
+    <template v-else-if="user">
       <div class="alert alert-success">
         Sign in success
       </div>
     </template>
-    <template v-else-if="!isAuthenticated">
+    <template v-else-if="!user">
       <h2
         class="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-800 to-indigo-600"
       >

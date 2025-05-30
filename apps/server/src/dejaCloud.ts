@@ -22,8 +22,6 @@ import { log } from './utils/logger'
 const layoutId = process.env.LAYOUT_ID
 
 async function listen(): Promise<void> {
-  log.start('Listen for dccCommands', layoutId)
-
   const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId}`)
   onChildAdded(dccCommandsRef, (data) => {
     log.log('listen.dccCommands', data.key, data.val())
@@ -74,9 +72,11 @@ async function resetThrottles(): Promise<void> {
   )
   querySnapshot.forEach((d: DocumentData) => {
     setDoc(d.ref, {
+      ...d.data(),
       speed: 0,
       direction: false,
-    })
+    }),
+      { merge: true }
   })
 }
 
@@ -86,10 +86,12 @@ async function resetDevices(): Promise<void> {
   )
   querySnapshot.forEach((d: DocumentData) => {
     setDoc(d.ref, {
+      ...d.data(),
       client: null,
       isConnected: false,
       lastConnected: null,
-    })
+    }),
+      { merge: true }
   })
 }
 
@@ -112,8 +114,14 @@ export async function connect(): Promise<boolean> {
   }
 }
 
+export async function disconnect(): Promise<void> {
+  log.start('Disconnecting from DejaCloud', layoutId)
+  await reset()
+}
+
 export const dejaCloud = {
   connect,
+  disconnect,
   listen,
 }
 

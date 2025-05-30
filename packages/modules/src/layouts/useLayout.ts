@@ -1,12 +1,19 @@
+import { computed } from 'vue'
 import {
   doc,
   collection,
   serverTimestamp,
   getDoc,
   setDoc,
+  type DocumentData,
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
-import { useCollection, useDocument, useCurrentUser } from 'vuefire'
+import {
+  firestoreDefaultConverter,
+  useCollection,
+  useDocument,
+  useCurrentUser,
+} from 'vuefire'
 import { db } from '@repo/firebase-config/firebase'
 import type { Device, Layout, Tag } from './types'
 import { useDejaJS } from '@repo/deja/useDejaJS'
@@ -42,15 +49,14 @@ export const useLayout = () => {
 
   const user = useCurrentUser()
   const { sendDejaCommand } = useDejaJS()
-  const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+  const layoutId = useStorage('@DEJA/layoutId', '')
   const layoutDoc = doc(db, 'layouts', layoutId.value)
-  
-  const layoutCol = () =>
-    layoutId.value ? collection(db, 'layouts') : null
-  
-  const devicesCol = () =>
+
+  const layoutCol = () => (layoutId.value ? collection(db, 'layouts') : null)
+
+  const devicesCol = computed(() =>
     layoutId.value ? collection(db, `layouts/${layoutId.value}/devices`) : null
-  
+  )
 
   function getLayout() {
     const layout = useDocument(layoutDoc)
@@ -63,7 +69,11 @@ export const useLayout = () => {
   }
 
   function getDevices() {
-    const devices = useCollection(devicesCol)
+    const devices = useCollection<Device>(() =>
+      layoutId.value
+        ? collection(db, `layouts/${layoutId.value}/devices`)
+        : null
+    )
     return devices
   }
 
@@ -162,7 +172,11 @@ export const useLayout = () => {
       const docSnap = await getDoc(layoutDoc)
       if (docSnap.exists()) {
         console.log('setTags', layoutId.value, tags)
-        await setDoc(doc(db, `layouts`, layoutId.value), { tags }, { merge: true })
+        await setDoc(
+          doc(db, `layouts`, layoutId.value),
+          { tags },
+          { merge: true }
+        )
       }
     } catch (e) {
       console.error('Error updating consist: ', e)
@@ -177,7 +191,11 @@ export const useLayout = () => {
     try {
       const docSnap = await getDoc(layoutDoc)
       if (docSnap.exists()) {
-        await setDoc(doc(db, `layouts`, layoutId.value), { tags: [...(docSnap.data().tags || []), tag] }, { merge: true })
+        await setDoc(
+          doc(db, `layouts`, layoutId.value),
+          { tags: [...(docSnap.data().tags || []), tag] },
+          { merge: true }
+        )
       }
     } catch (e) {
       console.error('Error updating consist: ', e)
@@ -195,7 +213,7 @@ export const useLayout = () => {
       if (layout?.tags) {
         return layout.tags.filter((tag: Tag) => ids.includes(tag.id))
       }
-    }    
+    }
     return []
   }
 

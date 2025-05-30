@@ -14,7 +14,7 @@ import { efxTypes } from './constants'
 import type { Effect, EffectType } from './types'
 
 export const useEfx = () => {
-  const layoutId = useStorage('@DEJA/layoutId', null)
+  const layoutId = useStorage('@DEJA/layoutId', '')
 
   const efxCol = () => {
     if (!layoutId.value) {
@@ -52,8 +52,6 @@ export const useEfx = () => {
     const efxs = await getEffects()
     return efxs.value.filter((efx) => efx.type === efxType)
   }
-
-  
 
   function getEfxType(value: string): EffectType | undefined {
     return efxTypes.find((item) => item.value === value)
@@ -103,7 +101,7 @@ export const useEfx = () => {
       console.error('Effect data is not provided or invalid')
       return
     }
-    try {     
+    try {
       await setDoc(
         doc(db, `layouts/${layoutId.value}/effects`, efx.id),
         {

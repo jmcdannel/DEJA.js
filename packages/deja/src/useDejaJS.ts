@@ -8,12 +8,11 @@ interface DejaCommand {
 }
 
 export const useDejaJS = () => {
-  const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+  const layoutId = useStorage('@DEJA/layoutId', '')
 
   async function sendDejaCommand({ action, payload }: DejaCommand) {
     // console.log('dejaCloud SEND', action, payload)
     try {
-
       const commandsRef = ref(rtdb, `dejaCommands/${layoutId.value}`)
       const newCommandRef = push(commandsRef)
       set(newCommandRef, {
@@ -26,7 +25,7 @@ export const useDejaJS = () => {
     }
   }
   return {
-    sendDejaCommand
+    sendDejaCommand,
   }
 }
 

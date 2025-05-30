@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useColors } from '@/Core/UI/useColors'
-import { useLayout, type Device } from '@repo/modules/layouts'
+import { deviceTypes, useLayout, type Device } from '@repo/modules/layouts'
 import { useTurnouts } from '@repo/modules/turnouts'
 
-const { deviceTypes, connectDevice, autoConnectDevice } = useLayout()
+const { connectDevice, autoConnectDevice } = useLayout()
 const { getTurnouts } = useTurnouts()
 const { colors, DEFAULT_COLOR } = useColors()
 

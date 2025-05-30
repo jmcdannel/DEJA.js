@@ -1,13 +1,11 @@
 import {
   collection,
   doc,
-  deleteDoc,
   getDoc,
   getDocs,
   query,
   serverTimestamp,
   setDoc,
-  type DocumentData,
 } from 'firebase/firestore'
 import type { SerialPort } from 'serialport'
 import type { Layout, Device, Sensor } from '@repo/modules/layouts'
@@ -44,12 +42,12 @@ export async function initialize(): Promise<Layout | undefined> {
 
 async function autoConnect(devices: Device[]): Promise<void> {
   devices.forEach((device) => {
-    log.log('Auto connect device', device.autoConnect, {
-      device: device.id,
-      serial: device.port,
-    })
     if (device.autoConnect && device.port) {
-      connectDevice(device)
+      log.star('Auto connect device', device.autoConnect, {
+        device: device.id,
+        serial: device.port,
+      })
+      connectDevice({ device: device.id, serial: device.port })
     }
   })
 }
@@ -90,11 +88,26 @@ async function loadSensors(): Promise<Sensor[]> {
   }
 }
 
-export async function connectDevice(device: Device): Promise<void> {
+export async function connectDevice({
+  device: deviceId,
+  serial,
+  topic,
+}: {
+  device: string
+  serial?: string
+  topic?: string
+}): Promise<void> {
   try {
-    if (device?.connection === 'usb') {
-      await connectUsbDevice(device)
-    } else if (device?.connection === 'wifi') {
+    log.start('Connecting device', serial, deviceId)
+    const device = _devices.find((d) => d.id === deviceId)
+    if (!device) {
+      log.error('Device not found', device)
+      return
+    }
+    if (device.connection === 'usb' && serial) {
+      await connectUsbDevice(device, serial)
+    } else if (device.connection === 'wifi' && topic) {
+      device.topic = topic
       await connectMqttDevice(device)
     }
   } catch (err) {
@@ -102,10 +115,25 @@ export async function connectDevice(device: Device): Promise<void> {
   }
 }
 
-async function connectUsbDevice(device: Device): Promise<void> {
+// export async function connectDevice(device: Device): Promise<void> {
+//   try {
+//     if (device?.connection === 'usb') {
+//       await connectUsbDevice(device)
+//     } else if (device?.connection === 'wifi') {
+//       await connectMqttDevice(device)
+//     }
+//   } catch (err) {
+//     log.fatal('Error connectDevice: ', err)
+//   }
+// }
+
+async function connectUsbDevice(
+  device: Device,
+  serialPort: string
+): Promise<void> {
   try {
     if (_connections[device.id]) {
-      await broadcast({
+      broadcast({
         action: 'connected',
         payload: { device: device.id },
       })
@@ -114,13 +142,14 @@ async function connectUsbDevice(device: Device): Promise<void> {
     const port = await serial.connect({
       baudRate,
       handleMessage: handleConnectionMessage,
-      path: device.port || '',
+      path: serialPort,
     })
     const updates = {
       client: 'dejaJS',
       isConnected: true,
       lastConnected: new Date(),
-      port: device.port,
+      timestamp: serverTimestamp(),
+      port: serialPort,
     }
 
     await setDoc(
@@ -164,6 +193,7 @@ async function connectMqttDevice(device: Device): Promise<void> {
         {
           client: 'dejaJS',
           isConnected: true,
+          lastConnected: new Date(),
           timestamp: serverTimestamp(),
           topic,
         },

@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useStorage } from '@vueuse/core'
+import { useCurrentUser } from 'vuefire'
 import ThrottleNav from '@/throttle/ThrottleNav.vue'
-defineProps({
-  layoutId: {
-    type: String,
-    required: true
-  },
-})
+
 const $router = useRouter()
 const active = ref($router.currentRoute.value.path)
+
+const user = useCurrentUser()
+const layoutId = useStorage('@DEJA/layoutId', '')
 </script>
 <template>
-  <v-footer app class="bg-transparent">
+  <v-footer app class="bg-transparent" v-if="!!user && !!layoutId">
     <v-container fluid class="p-0">
       <v-row class="pt-2 pb-3 px-0">
         <v-spacer />

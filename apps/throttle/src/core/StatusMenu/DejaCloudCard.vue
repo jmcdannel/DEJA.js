@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia'
 import { useCurrentUser } from 'vuefire'
 import { useConnectionStore } from '@/connections/connectionStore.jsx'
-import DejaSignout from '@/deja-cloud/DejaSignout.vue'
+import DejaSignout from '@/auth/Signout.vue'
 import DejaUser from '@/deja-cloud/DejaUser.vue'
 import DejaCloudLayoutMenu from '@/deja-cloud/DejaCloudLayoutMenu.vue'
 

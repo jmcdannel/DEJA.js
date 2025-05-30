@@ -27,7 +27,7 @@ import LayoutStatus from '@/Layout/LayoutStatus.vue'
 
 // import { useDccLog } from '@/DCCEX/Log/useDccLog'
 
-const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+const layoutId = useStorage('@DEJA/layoutId', '')
 const enableLogging = useStorage('@DEJA/pref/ws-logging', false)
 
 const user = useCurrentUser()

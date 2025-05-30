@@ -1,6 +1,12 @@
 <script setup lang="ts">
-  // import StatusCardGrid from '@/core/StatusMenu/StatusCardGrid.vue'
+  import StatusCardGrid from '@/core/StatusMenu/StatusCardGrid.vue'
+  import { useCurrentUser } from 'vuefire'
+  import { useStorage } from '@vueuse/core'
+  import DeviceeStatusList from '@/devices/status/DeviceeStatusList.vue'
+  import Signout from '@/auth/Signout.vue'
 
+  const user = useCurrentUser()
+  const layoutId = useStorage('@DEJA/layoutId', '')
 </script>
 <template>
   <main class="flex flex-col flex-grow p-8 w-full viaduct-background bg-opacity-50 bg-fixed overflow-auto">
@@ -12,6 +18,44 @@
           <span class="text-6xl font-bold uppercase bg-clip-text bg-gradient-to-r from-violet-600 to-cyan-400">Throttle</span>
       </h2>
     </header>
-    <!-- <StatusCardGrid /> -->
+    
+
+    <template v-if="user && layoutId">
+      <p class="text-lg mb-4">
+        You are connected to layout: <span class="font-bold">{{ layoutId }}</span>
+      </p>
+      <DeviceeStatusList />
+      <v-btn
+        class="mb-4"
+        color="error"
+        @click="$router.push('/connect')"
+        variant="outlined">
+        Disconnect
+      </v-btn>
+      <Signout />
+      <!-- <StatusCardGrid /> -->
+    </template>
+    <template v-else-if="!user">
+      <p class="text-lg mb-4">
+        Please connect to a layout to see the status.
+      </p>
+      <v-btn
+        class="mt-4"
+        color="primary"
+        @click="$router.push('/login')">
+        Sign In
+      </v-btn>
+    </template>
+    <template v-else>
+      <p class="text-lg mb-4">
+        No layout connected. Please select a layout to view its status.
+      </p>
+      <v-btn
+        class="mt-4"
+        color="primary"
+        @click="$router.push('/connect')">
+        Select Layout
+      </v-btn>
+    </template>
   </main>
 </template>

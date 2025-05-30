@@ -12,4 +12,16 @@ export const deviceTypes = [
     icon: 'mdi-usb',
     color: 'lime',
   },
+  {
+    value: 'deja-arduino-led',
+    label: 'DEJA LED Arduino',
+    icon: 'mdi-led-strip',
+    color: 'teal',
+  },
+  {
+    value: 'deja-mqtt',
+    label: 'DEJA MQTT (Pico W)',
+    icon: 'mdi-wifi',
+    color: 'blue',
+  },
 ]

@@ -1,6 +1,6 @@
 import { wsServer } from './src/lib/ws-server.js'
 import { dejaMqtt as mqtt } from './src/lib/mqtt.js'
-import { dejaCloud } from './src/dejaCloud.js'
+import { dejaCloud, disconnect } from './src/dejaCloud.js'
 import { log } from './src/utils/logger.js'
 
 const ENABLE_MQTT = process.env.ENABLE_MQTT === 'true' || false
@@ -17,5 +17,16 @@ async function main(): Promise<void> {
     log.fatal(err)
   }
 }
+
+process.on('SIGINT', disconnect) // Handles CTRL+C
+process.on('SIGTERM', disconnect) // Handles kill command
+process.on('uncaughtException', async (error) => {
+  log.fatal('Uncaught Exception:', error)
+  await disconnect()
+})
+process.on('unhandledRejection', async (reason, promise) => {
+  log.fatal('Unhandled Rejection at:', promise, 'reason:', reason)
+  await disconnect()
+})
 
 await main()

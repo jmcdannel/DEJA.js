@@ -33,7 +33,7 @@ export interface Device {
   autoConnect?: boolean
   client?: string
   config?: Record<string, any>
-  connection?: string
+  connection?: 'usb' | 'wifi'
   description?: string
   id: string
   isConnected?: boolean
@@ -44,7 +44,7 @@ export interface Device {
   tags?: Tag[]
   timestamp?: Date
   topic?: string
-  type: string
+  type: 'dcc-ex' | 'deja-arduino' | 'deja-arduino-led' | 'deja-mqtt'
 }
 
 export interface DeviceType {

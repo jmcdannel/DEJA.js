@@ -4,7 +4,7 @@ import { db } from '@repo/firebase-config/firebase'
 import type { LocoFunction } from './types'
 
 export function useFunctions() {
-  const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+  const layoutId = useStorage('@DEJA/layoutId', '')
 
   async function updateFunctions(id: string, functions: LocoFunction[]) {
     try {

@@ -11,7 +11,7 @@ import { db } from '@repo/firebase-config/firebase'
 import type { Turnout } from '@repo/modules/turnouts'
 
 export function useTurnouts() {
-  const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+  const layoutId = useStorage('@DEJA/layoutId', '')
 
   const turnoutsCol = () =>
     layoutId.value ? collection(db, `layouts/${layoutId.value}/turnouts`) : null

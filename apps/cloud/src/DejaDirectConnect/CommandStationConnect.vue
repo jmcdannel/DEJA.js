@@ -9,7 +9,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import CommandStation from './CommandStation.vue'
 
 
-const layoutId = useStorage('@DEJA/layoutId', null)
+const layoutId = useStorage('@DEJA/layoutId', '')
 
 const emit = defineEmits(['connected'])
 

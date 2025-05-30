@@ -45,7 +45,7 @@ function handleSelect(address: number) {
 
 </script>
 <template>
-    <main v-if="throttle" class="p-2 card overflow-hidden w-full h-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
+    <main v-if="throttle" class="p-2 overflow-hidden w-full h-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
       <ThrottleHeader :address="throttle.address">
         <template v-slot:left>
           <LocoAvatar :loco="loco as Loco" :size="48" @selected="handleSelect" />

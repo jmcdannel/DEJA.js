@@ -8,7 +8,7 @@ interface DccCommand {
 }
 
 export const useDcc = () => {
-  const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+  const layoutId = useStorage('@DEJA/layoutId', '')
   const isEmulated = useStorage('@DEJA/isEmulated', false)
   const isSerial = useStorage('@DEJA/layoutId', false)
 
@@ -41,7 +41,10 @@ export const useDcc = () => {
     }
   }
 
-  async function sendDccCommand({ action, payload }: DccCommand): Promise<void> {
+  async function sendDccCommand({
+    action,
+    payload,
+  }: DccCommand): Promise<void> {
     // console.log('dejaCloud SEND', action, payload)
     try {
       const command = {
@@ -69,7 +72,7 @@ export const useDcc = () => {
         return
       } else {
         console.log('[DEJA CLOUD] send', action, payload)
-      sendDccCommand({ action, payload })
+        sendDccCommand({ action, payload })
         return
       }
     } catch (err) {

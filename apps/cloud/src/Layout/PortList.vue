@@ -21,7 +21,7 @@ function handleRefresh() {
     variant="tonal"
     density="compact">
     <v-card-text>
-      <v-list lines="one">
+      <v-list lines="one" v-if="ports?.length > 0">
         <v-list-item
           v-for="port in ports"
           :key="port"

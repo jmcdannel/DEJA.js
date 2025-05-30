@@ -8,7 +8,7 @@ import CommandStationLCD from './CommandStationLCD.vue'
 import CommandStationTracks from './CommandStationTracks.vue'
 import CommandStationStats from './CommandStationStats.vue'
 
-const layoutId = useStorage('@DEJA/layoutId', null)
+const layoutId = useStorage('@DEJA/layoutId', '')
 
 const layoutDoc = layoutId.value
   ? doc(db, 'layouts', layoutId.value)

@@ -1,7 +1,7 @@
-import { wsServer } from './lib/ws-server.js' // TODO: refactor to use event emitter
-import { dejaMqtt } from './lib/mqtt.js'
-// import { handleBroadcastActions } from './dejaCloud.js'
-import { log } from './utils/logger.js'
+import { wsServer } from './lib/ws-server' // TODO: refactor to use event emitter
+import { dejaMqtt } from './lib/mqtt'
+import { handleDejaMessages } from './lib/deja'
+import { log } from './utils/logger'
 
 export interface BroadcastMessage {
   action: string
@@ -11,9 +11,13 @@ export interface BroadcastMessage {
 
 const ENABLE_MQTT = process.env.ENABLE_MQTT === 'true' || false
 const ENABLE_WS = process.env.ENABLE_WS === 'true' || true
-// const ENABLE_DEJACLOUD = process.env.ENABLE_DEJACLOUD === 'true' || false
+const ENABLE_DEJACLOUD = process.env.ENABLE_DEJACLOUD === 'true' || false
 
-export const broadcast = (data: string | JSON | BroadcastMessage): void => {
+async function dejaSend(data: string | BroadcastMessage): Promise<void> {
+  await handleDejaMessages(data)
+}
+
+export const broadcast = (data: string | BroadcastMessage): void => {
   try {
     if (ENABLE_MQTT) {
       dejaMqtt.send(JSON.stringify(data))
@@ -21,9 +25,9 @@ export const broadcast = (data: string | JSON | BroadcastMessage): void => {
     if (ENABLE_WS) {
       wsServer.send(typeof data === 'string' ? JSON.parse(data) : data)
     }
-    // if (ENABLE_DEJACLOUD) {
-    //   await handleBroadcastActions(data)
-    // }
+    if (ENABLE_DEJACLOUD) {
+      dejaSend(data)
+    }
     log.log('[broadcast]', data)
   } catch (err) {
     log.fatal('[DEJA.js] Error sending broadcast:', err, data, typeof data)

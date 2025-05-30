@@ -3,7 +3,7 @@ import { useStorage } from '@vueuse/core'
 import AddLayout from '@/Layout/AddLayout.vue'
 import SelectLayout from '@/Layout/SelectLayout.vue'
 
-const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+const layoutId = useStorage('@DEJA/layoutId', '')
 
 function handleSelect(_layoutId: string) {
   console.log('handleSelect', _layoutId)
