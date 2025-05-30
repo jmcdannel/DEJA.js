@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import StatusCardGrid from '@/core/StatusMenu/StatusCardGrid.vue'
+  // import StatusCardGrid from '@/core/StatusMenu/StatusCardGrid.vue'
 
 </script>
 <template>
@@ -12,6 +12,6 @@
           <span class="text-6xl font-bold uppercase bg-clip-text bg-gradient-to-r from-violet-600 to-cyan-400">Throttle</span>
       </h2>
     </header>
-    <StatusCardGrid />
+    <!-- <StatusCardGrid /> -->
   </main>
 </template>

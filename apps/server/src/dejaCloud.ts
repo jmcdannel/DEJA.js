@@ -1,97 +1,109 @@
-// import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'
-import { log } from './utils/logger.js'
-import { reset, load } from './modules/layout.js'
-import { listen } from './listeners.js'
-// import { db } from '@repo/firebase-config/firebase-node'
+import {
+  collection,
+  getDocs,
+  onSnapshot,
+  query,
+  orderBy,
+  setDoc,
+  where,
+  type DocumentData,
+} from 'firebase/firestore'
+import { ref, onChildAdded } from 'firebase/database'
+import { db, rtdb } from '@repo/firebase-config/firebase-node'
+import { initialize } from './modules/layout'
+import { handleThrottleChange } from './modules/throttles'
+import { handleTurnoutChange } from './modules/turnouts'
+import { handleEffectChange } from './modules/effects'
+import { handleSensorChange } from './modules/sensors'
+import { handleDccChange } from './lib/dcc'
+import { handleDejaCommands } from './lib/deja'
+import { log } from './utils/logger'
 
 const layoutId = process.env.LAYOUT_ID
 
-// export async function handleBroadcastActions(data) {
-//   try {
-//     log.log('dejaClound.broadcast.send', data)
-//     const { action, payload } = data
-//     switch (action) {
-//       case 'portList':
-//         await updateDoc(
-//           doc(db, 'layouts', layoutId),
-//           { ports: payload },
-//           { merge: true }
-//         )
-//         break
-//       case 'status':
-//       case 'getStatus':
-//         if (payload.isConnected) {
-//           await updateDoc(
-//             doc(db, 'layouts', layoutId),
-//             {
-//               'dccEx.lastConnected': serverTimestamp(),
-//               'dccEx.client': 'dejaJS',
-//               pong: serverTimestamp(),
-//               timestamp: serverTimestamp(),
-//             },
-//             { merge: true }
-//           )
-//         } else {
-//           await updateDoc(
-//             doc(db, 'layouts', layoutId),
-//             {
-//               'dccEx.lastConnected': null,
-//               'dccEx.client': 'dejaJS',
-//               pong: serverTimestamp(),
-//               timestamp: serverTimestamp(),
-//             },
-//             { merge: true }
-//           )
-//         }
-//         break
-//       case 'connected':
-//         log.log('dejaClound.connected!!', data)
-//         if (payload.device === 'dccex') {
-//           await updateDoc(
-//             doc(db, 'layouts', layoutId),
-//             {
-//               'dccEx.lastConnected': serverTimestamp(),
-//               'dccEx.client': 'dejaJS',
-//             },
-//             { merge: true }
-//           )
-//         }
-//         await updateDoc(
-//           doc(db, `layouts/${layoutId}/devices`, payload.device),
-//           {
-//             isConnected: true,
-//             lastConnected: serverTimestamp(),
-//             client: 'dejaJS',
-//             port: payload.path,
-//           },
-//           { merge: true }
-//         )
-//         break
-//       default:
-//       //noop
-//       // log.warn('Unknown action in `send`', action, payload)
-//     }
-//   } catch (err) {
-//     log.fatal('Error handling message:', err)
-//   }
-// }
+async function listen(): Promise<void> {
+  log.start('Listen for dccCommands', layoutId)
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars -- This function is deprecated and the exact type is no longer relevant
-export async function handleBroadcastActions(): Promise<void> {
-  log.warn('Deprecated: handleBroadcastActions is no longer used')
-  // This function is deprecated and no longer used.
-  // It was previously used to handle broadcast actions,
-  // but has been replaced by more specific functions.
-  // Keeping it here for reference, but it does nothing now.
-  // Consider removing this in the future.
+  const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId}`)
+  onChildAdded(dccCommandsRef, (data) => {
+    log.log('listen.dccCommands', data.key, data.val())
+    handleDccChange(data)
+  })
+
+  const dejaCommandsRef = ref(rtdb, `dejaCommands/${layoutId}`)
+  onChildAdded(dejaCommandsRef, (data) => {
+    log.log('listen.dejaCommands', data.key, data.val())
+    handleDejaCommands(data)
+  })
+
+  onSnapshot(
+    query(
+      collection(db, `layouts/${layoutId}/throttles`),
+      orderBy('timestamp', 'desc')
+    ),
+    handleThrottleChange
+  )
+  onSnapshot(
+    query(
+      collection(db, `layouts/${layoutId}/effects`),
+      orderBy('timestamp', 'desc')
+    ),
+    handleEffectChange
+  )
+  onSnapshot(
+    query(
+      collection(db, `layouts/${layoutId}/turnouts`),
+      orderBy('timestamp', 'desc')
+    ),
+    handleTurnoutChange
+  )
+
+  onSnapshot(
+    query(
+      collection(db, `layouts/${layoutId}/sensors`),
+      where('enabled', '==', true)
+    ),
+    handleSensorChange
+  )
+}
+
+async function resetThrottles(): Promise<void> {
+  log.complete('reset throttles', layoutId)
+  const querySnapshot = await getDocs(
+    collection(db, `layouts/${layoutId}/throttles`)
+  )
+  querySnapshot.forEach((d: DocumentData) => {
+    setDoc(d.ref, {
+      speed: 0,
+      direction: false,
+    })
+  })
+}
+
+async function resetDevices(): Promise<void> {
+  const querySnapshot = await getDocs(
+    collection(db, `layouts/${layoutId}/devices`)
+  )
+  querySnapshot.forEach((d: DocumentData) => {
+    setDoc(d.ref, {
+      client: null,
+      isConnected: false,
+      lastConnected: null,
+    })
+  })
+}
+
+async function reset(): Promise<void> {
+  await resetDevices()
+  await resetThrottles()
 }
 
 export async function connect(): Promise<boolean> {
   try {
     log.start('Connecting to DejaCloud', layoutId)
     await reset()
-    await load()
     await listen()
+    await initialize()
     log.success('Connected to DejaCloud', layoutId)
     return true
   } catch (error) {
@@ -102,7 +114,6 @@ export async function connect(): Promise<boolean> {
 
 export const dejaCloud = {
   connect,
-  handleBroadcastActions,
   listen,
 }
 

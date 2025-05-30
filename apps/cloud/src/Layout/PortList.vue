@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { useDcc } from '@repo/dccex/useDcc'
+import { useDejaJS } from '@repo/deja/useDejaJS'
 
-const { sendDccCommand } = useDcc()
+const { sendDejaCommand } = useDejaJS()
 
 defineProps<{
   ports: string[]
 }>()
 
 function handleRefresh() {
-  sendDccCommand({ action: 'listPorts', payload: {} })
+  sendDejaCommand({ action: 'listPorts', payload: {} })
 }
 </script>
 <template>

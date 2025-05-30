@@ -12,7 +12,7 @@
   
   const user = useCurrentUser()
   const connectionStore = useConnectionStore()
-  const { layoutId, connectionType } = storeToRefs(connectionStore)
+  const { layoutId } = storeToRefs(connectionStore)
   
   onMounted(async () => {
     const auth = getAuth(firebaseApp)
@@ -22,7 +22,6 @@
       }
     })
   })
-
 </script>
 
 <template>
@@ -60,5 +59,4 @@
   .slide-out-enter-to {
     transform: translateX(0);
   }
-
 </style>

@@ -1,9 +1,9 @@
 import { SerialPort } from 'serialport'
 import { type DataSnapshot, ref, remove } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config/firebase-node'
-import { serial } from './serial.js'
-import { broadcast } from '../broadcast.js'
-import { log } from '../utils/logger.js'
+import { serial } from './serial'
+import { broadcast } from '../broadcast'
+import { log } from '../utils/logger'
 
 export interface ConnectCommand {
   device: string
@@ -117,7 +117,7 @@ const connect = async (payload: ConnectCommand): Promise<boolean> => {
     if (isConnected) {
       await broadcast({ action: 'connected', payload: { baudRate, path } })
       return isConnected
-    }    
+    }
     const port = await serial.connect({
       baudRate,
       handleMessage: handleConnectionMessage,
@@ -164,8 +164,10 @@ const power = async (state: string): Promise<void> => {
   log.star('Power', state)
 }
 
-
-const sendSpeed = async ({ address, speed }: ThrottlePayload): Promise<void> => {
+const sendSpeed = async ({
+  address,
+  speed,
+}: ThrottlePayload): Promise<void> => {
   const direction = speed > 0 ? 1 : 0
   const absSpeed = Math.abs(speed)
   log.star('Throttle', address, speed, direction)
@@ -173,13 +175,20 @@ const sendSpeed = async ({ address, speed }: ThrottlePayload): Promise<void> => 
   await send(cmd)
 }
 
-const sendTurnout = async ({ turnoutIdx, state }: TurnoutPayload): Promise<void> => {
+const sendTurnout = async ({
+  turnoutIdx,
+  state,
+}: TurnoutPayload): Promise<void> => {
   log.star('Turnout', turnoutIdx, state)
   const cmd = `T ${turnoutIdx} ${state ? 1 : 0}`
   await send(cmd)
 }
 
-const sendFunction = async ({ address, func, state }: FunctionPayload): Promise<void> => {
+const sendFunction = async ({
+  address,
+  func,
+  state,
+}: FunctionPayload): Promise<void> => {
   log.star('Function', address, func)
   const cmd = `F ${address} ${func} ${state ? 1 : 0}`
   await send(cmd)

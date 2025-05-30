@@ -7,16 +7,16 @@ import {
   query,
   serverTimestamp,
   setDoc,
-  type DocumentData
+  type DocumentData,
 } from 'firebase/firestore'
 import type { SerialPort } from 'serialport'
 import type { Layout, Device, Sensor } from '@repo/modules/layouts'
 import { db } from '@repo/firebase-config/firebase-node'
-import { serial } from '../lib/serial.js'
-import { log }  from '../utils/logger.js'
-import { dcc } from '../lib/dcc.js'
-import { dejaMqtt as mqtt } from '../lib/mqtt.js'
-import { broadcast } from '../broadcast.js'
+import { serial } from '../lib/serial'
+import { log } from '../utils/logger'
+import { dcc } from '../lib/dcc'
+import { dejaMqtt as mqtt } from '../lib/mqtt'
+import { broadcast } from '../broadcast'
 
 interface Connection {
   isConnected: boolean
@@ -33,7 +33,7 @@ const _connections: { [key: string]: Connection } = {}
 let _devices: Device[] = []
 let sensors: Sensor[] = []
 
-export async function load(): Promise<Layout | undefined> {
+export async function initialize(): Promise<Layout | undefined> {
   log.start('Load layout', layoutId)
   const layout = await loadLayout()
   _devices = await loadDevices()
@@ -72,7 +72,7 @@ async function loadDevices(): Promise<Device[]> {
   try {
     const q = query(collection(db, `layouts/${layoutId}/devices`))
     const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }) as Device);
+    return querySnapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Device))
   } catch (error) {
     log.error('Error loading devices', error)
     return []
@@ -83,7 +83,7 @@ async function loadSensors(): Promise<Sensor[]> {
   try {
     const q = query(collection(db, `layouts/${layoutId}/sensors`))
     const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }) as Sensor);
+    return querySnapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Sensor))
   } catch (error) {
     log.error('Error loading sensors', error)
     return []
@@ -110,7 +110,7 @@ async function connectUsbDevice(device: Device): Promise<void> {
         payload: { device: device.id },
       })
       return
-    } 
+    }
     const port = await serial.connect({
       baudRate,
       handleMessage: handleConnectionMessage,
@@ -125,7 +125,8 @@ async function connectUsbDevice(device: Device): Promise<void> {
 
     await setDoc(
       doc(db, `layouts/${layoutId}/devices`, device.id),
-      { ...updates }, { merge: true }
+      { ...updates },
+      { merge: true }
     )
 
     _connections[device.id] = {
@@ -136,8 +137,6 @@ async function connectUsbDevice(device: Device): Promise<void> {
     if (device.type === 'dcc-ex' && port) {
       dcc.setConnection(port)
     }
-
-    
   } catch (err) {
     log.fatal('Error connectUsbDevice: ', err)
     return undefined
@@ -167,7 +166,8 @@ async function connectMqttDevice(device: Device): Promise<void> {
           isConnected: true,
           timestamp: serverTimestamp(),
           topic,
-        }, { merge: true }
+        },
+        { merge: true }
       )
 
       _connections[device.id] = {
@@ -201,48 +201,11 @@ async function handleConnectionMessage(payload: string): Promise<void> {
   await broadcast({ action: 'broadcast', payload })
 }
 
-async function resetThrottles(): Promise<void> {
-  log.complete('reset throttles', layoutId)
-  const querySnapshot = await getDocs(
-    collection(db, `layouts/${layoutId}/throttles`)
-  )
-  querySnapshot.forEach((d: DocumentData) => {
-    setDoc(d.ref, {
-      speed: 0,
-      direction: false
-    })
-  })
-}
-
-async function resetDevices(): Promise<void> {
-  const querySnapshot = await getDocs(
-    collection(db, `layouts/${layoutId}/devices`)
-  )
-  querySnapshot.forEach((d: DocumentData) => {
-    setDoc(d.ref, {
-      client: null,
-      isConnected: false,
-      lastConnected: null,
-    })
-  })
-}
-
-export async function reset(): Promise<void> {
-  await resetDevices()
-  await resetThrottles()
-  await setDoc(
-    doc(db, 'layouts', layoutId),
-    { 'dccEx.client': null, 'dccEx.lastConnected': null },
-    { merge: true }
-  )
-}
-
 export const layout = {
   connectDevice,
   connections: () => _connections,
   devices: () => _devices,
-  load,
-  reset,
+  initialize,
 }
 
 export default layout
