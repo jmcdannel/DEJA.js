@@ -115,18 +115,6 @@ export async function connectDevice({
   }
 }
 
-// export async function connectDevice(device: Device): Promise<void> {
-//   try {
-//     if (device?.connection === 'usb') {
-//       await connectUsbDevice(device)
-//     } else if (device?.connection === 'wifi') {
-//       await connectMqttDevice(device)
-//     }
-//   } catch (err) {
-//     log.fatal('Error connectDevice: ', err)
-//   }
-// }
-
 async function connectUsbDevice(
   device: Device,
   serialPort: string

@@ -3,7 +3,7 @@
   import Power from '@/core/Power.vue';
   import TrackPower from '@/core/TrackPower.vue';
   import EvergencyStop from '@/core/EmergencyStop.vue';
-  import StatusMenu from '@/core/StatusMenu/StatusMenu.component.vue';
+  import StatusMenu from '@/core/StatusMenu.vue';
 
 </script>
 

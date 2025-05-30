@@ -1,11 +1,9 @@
-import { storeToRefs } from 'pinia'
+import { useStorage } from '@vueuse/core'
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { db } from '@repo/firebase-config/firebase'
-import { useConnectionStore } from '@/connections/connectionStore'
 
 export const useRoster = () => {
-  const connStore = useConnectionStore()
-  const { layoutId } = storeToRefs(connStore)
+  const layoutId = useStorage('@DEJA/layoutId', '')
 
   async function acquireThrottle(address: number) {
     try {

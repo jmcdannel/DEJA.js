@@ -1,13 +1,11 @@
 import { ref, watch } from 'vue'
-import { storeToRefs } from 'pinia'
+import { useStorage } from '@vueuse/core'
 import { deleteDoc, doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import type { Throttle } from '@/throttle/types'
 import { db } from '@repo/firebase-config/firebase'
-import { useConnectionStore } from '@/connections/connectionStore'
 
 export const useThrottle = (throttle?: Throttle) => {
-  const connStore = useConnectionStore()
-  const { layoutId } = storeToRefs(connStore)
+  const layoutId = useStorage('@DEJA/layoutId', '')
   const currentSpeed = ref(throttle ? getSignedSpeed(throttle) : 0)
 
   function getSignedSpeed({speed, direction}: { speed: number, direction: boolean }): number {

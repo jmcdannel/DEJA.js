@@ -1,8 +1,6 @@
 <script setup>
-  import { computed, ref, watch } from 'vue'
-  import { storeToRefs } from 'pinia'
+  import { ref, watch } from 'vue'
   import { useWakeLock } from '@vueuse/core'
-  import { useConnectionStore } from '@/connections/connectionStore'
   import { useDcc } from '@repo/dccex'
 
   const { isSupported, isActive, request, release } = useWakeLock()
@@ -10,14 +8,8 @@
   const DEFAULT_ON = '1 MAIN'
   const DEFAULT_OFF = '0'
 
-  const {
-    isEmulated,
-    isSerial,
-    dccExConnected
-   } = storeToRefs(useConnectionStore())
   const { setPower } = useDcc()
   const power = ref(null)
-  const enabled = computed(() => dccExConnected || isEmulated || isSerial)
   const locked = ref(false)
 
   watch(power, async (newPower) => {
@@ -34,7 +26,6 @@
 </script>
 <template>
   <button @click="power = !power"
-    :disabled="!enabled"
     class="btn btn-ghost btn-circle relative"
     :class="{
       'text-gray-500': power === null,

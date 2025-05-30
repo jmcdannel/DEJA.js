@@ -7,11 +7,11 @@ export async function requireDccEx() {
   const dccExDevice = computed(() =>
     devices.value.find((device) => device.type === 'dcc-ex')
   )
-  console.log('requireDccEx', dccExDevice, devices.value)
-  if (!dccExDevice.value?.isConnected) {
-    return {
-      path: '/connect',
-      query: { redirect: window.location.pathname },
-    }
-  }
+  console.log('dccExDevice', dccExDevice.value)
+  // if (!dccExDevice.value?.isConnected) {
+  //   return {
+  //     path: '/connect',
+  //     query: { redirect: window.location.pathname },
+  //   }
+  // }
 }

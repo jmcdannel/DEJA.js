@@ -1,5 +1,4 @@
 <script setup lang="ts">
-  import StatusCardGrid from '@/core/StatusMenu/StatusCardGrid.vue'
   import { useCurrentUser } from 'vuefire'
   import { useStorage } from '@vueuse/core'
   import DeviceeStatusList from '@/devices/status/DeviceeStatusList.vue'
@@ -33,7 +32,6 @@
         Disconnect
       </v-btn>
       <Signout />
-      <!-- <StatusCardGrid /> -->
     </template>
     <template v-else-if="!user">
       <p class="text-lg mb-4">

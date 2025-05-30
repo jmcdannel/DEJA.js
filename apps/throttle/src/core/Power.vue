@@ -1,19 +1,10 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useConnectionStore } from '@/connections/connectionStore'
+import { ref, watch } from 'vue'
 import { useEfx } from '@repo/modules/effects'
 
 const { runEffect, getEffectsByType } = useEfx()
 
-const {
-  isEmulated,
-  isSerial,
-  dccExConnected
-  } = storeToRefs(useConnectionStore())
-
 const power = ref(null)
-const enabled = computed(() => dccExConnected || isEmulated || isSerial)
 const locked = ref(false)
 
 watch(power, async (newPower) => {
@@ -21,13 +12,11 @@ watch(power, async (newPower) => {
   powerEfx.forEach(efx => {
     runEffect({...efx, state: newPower })
   })
-  console.log('power', newPower, powerEfx)
 })
 
 </script>
 <template>
   <button @click="power = !power"
-    :disabled="!enabled"
     class="btn btn-ghost btn-circle relative"
     :class="{
       'text-gray-500': power === null,
