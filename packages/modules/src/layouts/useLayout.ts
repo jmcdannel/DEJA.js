@@ -124,7 +124,6 @@ export const useLayout = () => {
   }
 
   async function connectDevice(serial: string, device: Device) {
-    console.log('connectDevice', serial, device)
     try {
       const payload = {
         serial,

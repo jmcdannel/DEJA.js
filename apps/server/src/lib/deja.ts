@@ -46,7 +46,6 @@ export async function handleDejaMessages(
     return
   }
   try {
-    log.log('dejaClound.broadcast.send', data)
     const { action, payload } = data
     switch (action) {
       case 'portList':
@@ -83,7 +82,7 @@ export async function handleDejaMessages(
         }
         break
       case 'connected':
-        log.log('dejaClound.connected!!', data)
+        log.success('dejaClound.connected!!', data)
         if (payload.device === 'dccex') {
           await setDoc(
             doc(db, 'layouts', layoutId),
@@ -118,7 +117,6 @@ export async function handleDejaCommands(
   snapshot: DataSnapshot
 ): Promise<void> {
   try {
-    log.note('deja')
     const { action, payload } = snapshot.val()
     switch (action) {
       case 'connect':

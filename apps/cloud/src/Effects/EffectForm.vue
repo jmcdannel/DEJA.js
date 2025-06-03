@@ -179,7 +179,10 @@ function stopSound() {
         variant="outlined"
         :rules="rules.required"
       ></v-text-field>
-    </div>    
+    </div>   
+    
+    <pre>efxType:{{efxType}}</pre>
+    <pre>efxTypeObj:{{efxTypeObj}}</pre>
 
     <!-- pin -->
     <template v-if="efxTypeObj?.require?.includes('pin')">

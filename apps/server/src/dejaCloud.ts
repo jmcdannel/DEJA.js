@@ -24,13 +24,13 @@ const layoutId = process.env.LAYOUT_ID
 async function listen(): Promise<void> {
   const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId}`)
   onChildAdded(dccCommandsRef, (data) => {
-    log.log('listen.dccCommands', data.key, data.val())
+    // log.log('listen.dccCommands', data.key, data.val())
     handleDccChange(data)
   })
 
   const dejaCommandsRef = ref(rtdb, `dejaCommands/${layoutId}`)
   onChildAdded(dejaCommandsRef, (data) => {
-    log.log('listen.dejaCommands', data.key, data.val())
+    // log.log('listen.dejaCommands', data.key, data.val())
     handleDejaCommands(data)
   })
 

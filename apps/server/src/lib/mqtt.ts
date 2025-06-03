@@ -13,9 +13,7 @@ function handleConnect(): void {
   try {
     if (mqttClient) {
       log.start('MQTT client connected', layoutId)
-      subscriptionTopics.map((topic) =>
-        mqttClient?.subscribe(topic)
-      )
+      subscriptionTopics.map((topic) => mqttClient?.subscribe(topic))
       publishTopics.map((topic) =>
         mqttClient?.publish(
           topic,
@@ -30,14 +28,14 @@ function handleConnect(): void {
   }
 }
 
-function handleError(error: Error): void {  
+function handleError(error: Error): void {
   log.error('MQTT mqttClient error', error)
   disconnect()
 }
 
 function handleMessage(topic: string, message: Buffer): void {
   try {
-    log.log(`MQTT mqttClient received message: ${message.toString()} from topic: ${topic}`)
+    // log.log(`MQTT mqttClient received message: ${message.toString()} from topic: ${topic}`)
     // dcc.handleMessage(message.toString())
   } catch (error) {
     log.error('MQTT Error in onMessage:', error)
@@ -63,9 +61,9 @@ const connect = (): void => {
     mqttClient.on('message', handleMessage)
 
     // https://github.com/mqttjs/MQTT.js#event-reconnect
-    mqttClient.on('reconnect', () => {
-      log.log('mqttClient reconnecting')
-    })
+    // mqttClient.on('reconnect', () => {
+    //   log.log('mqttClient reconnecting')
+    // })
   } catch (err) {
     log.error('MQTT Error connecting:', err)
   }
@@ -82,11 +80,13 @@ const disconnect = (): void => {
 
 const send = (message: string): void => {
   try {
-    log.log('[MQTT]', message, publishTopics)
+    // log.log('[MQTT]', message, publishTopics)
     publishTopics.map((topic) => publish(topic, message))
-    log.log(
-      `MQTT mqttClient sent message: ${message} from topic: ${publishTopics.join(', ')}`
-    )
+    // log.log(
+    //   `MQTT mqttClient sent message: ${message} from topic: ${publishTopics.join(
+    //     ', '
+    //   )}`
+    // )
   } catch (err) {
     log.error('MQTT Error sending message:', err)
   }
@@ -105,7 +105,7 @@ const subscribe = (topic: string, keepAlive = true): void => {
 
 const publish = (topic: string, message: string, keepAlive = true) => {
   try {
-    log.log('mqtt pub', topic, message)
+    // log.log('mqtt pub', topic, message)
     mqttClient?.publish(topic, message)
     if (keepAlive && !publishTopics.includes(topic)) {
       publishTopics.push(topic)

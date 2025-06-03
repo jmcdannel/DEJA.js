@@ -203,7 +203,7 @@ async function handleConnectionMessage(payload: string): Promise<void> {
   if (payload?.startsWith('{ "sensor')) {
     const data = JSON.parse(payload)
     const sensorId = sensors.find((sensor) => sensor.index === data.sensor)?.id
-    log.debug('handleConnectionMessage', data, payload, sensorId)
+    // log.debug('handleConnectionMessage', data, payload, sensorId)
     if (sensorId) {
       await setDoc(
         doc(db, `layouts/${layoutId}/sensors`, sensorId),

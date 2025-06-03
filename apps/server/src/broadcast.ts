@@ -28,7 +28,7 @@ export const broadcast = (data: string | BroadcastMessage): void => {
     if (ENABLE_DEJACLOUD) {
       dejaSend(data)
     }
-    log.log('[broadcast]', data)
+    // log.log('[broadcast]', data)
   } catch (err) {
     log.fatal('[DEJA.js] Error sending broadcast:', err, data, typeof data)
   }

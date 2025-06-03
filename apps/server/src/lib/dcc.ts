@@ -55,7 +55,7 @@ const getPorts = async () => {
 const handleMessage = async (msg: string): Promise<void> => {
   try {
     const { action, payload } = JSON.parse(msg)
-    log.note('handleMessage', action, payload, msg)
+    // log.note('handleMessage', action, payload, msg)
     switch (action) {
       case 'connect':
         await connect(payload)
@@ -139,7 +139,7 @@ const connect = async (payload: ConnectCommand): Promise<boolean> => {
 }
 
 const setConnection = async (port: SerialPort): Promise<SerialCom> => {
-  log.log('setConnection', Boolean(port))
+  // log.log('setConnection', Boolean(port))
   com = { isConnected: true, port }
   isConnected = true
   return com
@@ -202,17 +202,8 @@ const sendOutput = async (payload: OutputPayload) => {
 
 export async function handleDccChange(snapshot: DataSnapshot): Promise<void> {
   try {
-    log.note('handleDccChange')
-    // snapshot.docChanges().forEach((change) => {
-    //   if (change.type === 'added') {
-    //     const { action, payload: payloadRaw } = change.doc.data()
-    //     const payload = JSON.parse(payloadRaw)
-    //     log.log('handleDccCommands: ', action, payload)
-    //     handleMessage(JSON.stringify({ action, payload }))
-    //   }
-    // })
     const { action, payload } = snapshot.val()
-    log.log('handleDccChange: ', action, payload, snapshot.key)
+    // log.log('handleDccChange: ', action, payload, snapshot.key)
     await handleMessage(
       JSON.stringify({ action, payload: JSON.parse(payload) })
     )
@@ -229,6 +220,7 @@ export const dcc = {
   handleDccChange,
   handleMessage,
   sendCommand: send,
+  sendOutput,
   sendSpeed,
   sendTurnout,
   setConnection,

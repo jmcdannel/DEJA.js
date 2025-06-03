@@ -1,11 +1,13 @@
 {
   "$schema": "https://turborepo.com/schema.json",
-  "globalDependencies": ["**/.env"],
+  "globalDependencies": [
+    "**/.env"
+  ],
   "globalEnv": [
     "ENABLE_MQTT",
     "ENABLE_DEJACLOUD",
     "ENABLE_WS",
-    "LAYOUT_ID", 
+    "LAYOUT_ID",
     "VITE_FIREBASE_API_KEY",
     "VITE_FIREBASE_AUTH_DOMAIN",
     "VITE_FIREBASE_DATABASE_URL",
@@ -13,12 +15,13 @@
     "VITE_FIREBASE_STORAGE_BUCKET",
     "VITE_FIREBASE_MESSAGING_SENDER_ID",
     "VITE_FIREBASE_APP_ID",
-    "VITE_WS_PORT", 
+    "VITE_WS_PORT",
     "VITE_WS_ID"
   ],
   "ui": "tui",
   "tasks": {
     "build": {},
+    "start": {},
     "lint": {},
     "format": {},
     "type-check": {},

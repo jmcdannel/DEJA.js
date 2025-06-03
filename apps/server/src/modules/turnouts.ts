@@ -30,7 +30,7 @@ const turnoutStates: { [key: string]: boolean } = {}
 export async function handleTurnout(turnout: Turnout): Promise<void> {
   try {
     const conn = layout.connections()?.[turnout.device]
-    log.log('handleTurnout', turnout, conn?.isConnected)
+    // log.log('handleTurnout', turnout, conn?.isConnected)
     if (!conn?.isConnected) {
       log.error('Device not connected', turnout.device)
       return
@@ -39,12 +39,19 @@ export async function handleTurnout(turnout: Turnout): Promise<void> {
     const layoutDevice = layout
       .devices()
       ?.find(({ id }) => id === turnout.device)
-    log.log('handleTurnout', turnout, command, conn?.isConnected, layoutDevice)
+    // log.log('handleTurnout', turnout, command, conn?.isConnected, layoutDevice)
     if (layoutDevice?.type === 'dcc-ex') {
-      await dcc.sendTurnout({ state: turnout.state, turnoutIdx: turnout.turnoutIdx } as TurnoutPayload)
+      await dcc.sendTurnout({
+        state: turnout.state,
+        turnoutIdx: turnout.turnoutIdx,
+      } as TurnoutPayload)
     } else if (layoutDevice?.connection === 'usb' && conn?.port && conn.send) {
       await conn.send(conn.port, JSON.stringify([command]))
-    } else if (layoutDevice?.connection === 'wifi' && conn?.topic && conn.publish) {
+    } else if (
+      layoutDevice?.connection === 'wifi' &&
+      conn?.topic &&
+      conn.publish
+    ) {
       await conn.publish(conn.topic, JSON.stringify(command), true)
     }
   } catch (err) {
@@ -58,17 +65,19 @@ export async function getTurnout(id: string): Promise<Turnout | undefined> {
 
   if (docSnap.exists()) {
     return { ...docSnap.data(), id: docSnap.id } as Turnout
-  } 
+  }
   log.error('No such turnout', id, layoutId)
 }
 
-export function turnoutCommand(turnout: Turnout): KatoCommand | ServoCommand | Turnout | undefined {
+export function turnoutCommand(
+  turnout: Turnout
+): KatoCommand | ServoCommand | Turnout | undefined {
   try {
     if (turnout.device === 'dccex') {
       return turnout
-    } 
+    }
     const commands: (KatoCommand | ServoCommand)[] = []
-    
+
     switch (turnout?.type) {
       case 'kato':
         commands.push(katoCommand(turnout))
@@ -81,7 +90,6 @@ export function turnoutCommand(turnout: Turnout): KatoCommand | ServoCommand | T
         break
     }
     return commands?.[0] //  TODO: refactor to return all commands
-    
   } catch (err) {
     log.error(`[COMMANDS] turnoutCommand ${err}`)
   }
@@ -110,8 +118,10 @@ function servoCommand(turnout: Turnout): ServoCommand {
   }
 }
 
-export async function handleTurnoutChange(snapshot: DocumentData): Promise<void> {
-  snapshot.docChanges().forEach(async (change:DocumentData) => {
+export async function handleTurnoutChange(
+  snapshot: DocumentData
+): Promise<void> {
+  snapshot.docChanges().forEach(async (change: DocumentData) => {
     if (change.type === 'added') {
       turnoutStates[change.doc.id] = change.doc.data()?.state
     }
