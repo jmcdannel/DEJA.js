@@ -4,7 +4,7 @@ import { useStorage } from '@vueuse/core'
 import { useCurrentUser } from 'vuefire'
 
 // Pages
-// import Login from '@/User/Login/Login.vue'
+import Login from '@/User/Login/Login.vue'
 import Dashboard from './Dashboard/Dashboard.vue'
 import DCCEX from './DCCEX/DCCEX.vue'
 import Layout from './Layout/Layout.vue'
@@ -81,7 +81,7 @@ function handleMenu(item:string) {
       </v-main>
     </v-app>
     <v-app v-else :theme="theme">
-      <!-- <Login /> -->
+      <Login />
     </v-app>
   </v-responsive>
 </template>

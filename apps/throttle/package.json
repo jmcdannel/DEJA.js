@@ -3,8 +3,7 @@
   "private": true,
   "version": "0.1.0alpha",
   "engines": {
-    "node": ">=20",
-    "pnpm": ">=9"
+    "node": ">=20"
   },
   "scripts": {
     "start": "vite --host",
