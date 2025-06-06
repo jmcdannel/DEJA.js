@@ -10,8 +10,9 @@
 
 </script>
 <template>
-  <button @click="stop"
-    class="btn btn-ghost btn-circle relative text-error">
-    <v-icon icon="mdi-alert-octagon" size="x-large"></v-icon>
-    </button>
+  <v-btn @click="stop"
+    class="relative text-error"
+    icon="mdi-alert-octagon"
+    variant="plain">
+  </v-btn>
 </template>

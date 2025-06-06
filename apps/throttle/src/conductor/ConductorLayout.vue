@@ -12,22 +12,22 @@ const { throttlesWithLocos } = useLocos()
 </script>
 <template>
   <main class="@container">
-    <div class="conductor-layout grid grid-cols-1 @[960px]:grid-cols-3 gap-4 w-full">
-      <div class="column order-2 @[960px]:!order-1">
+    <div class="conductor-layout grid grid-cols-1 @[960px]:grid-cols-3 gap-2 w-full">
+      <div class="bg-black bg-opacity-60 rounded border-1 border-green-500 border-opacity-50 order-2 @[960px]:!order-1">
         <div class="@container column-content">
           <!-- Column 1 content goes here -->
-          <div v-if="throttlesWithLocos?.length" class="flex-grow flex flex-row flex-wrap relative overflow-auto items-end content-end">
-      <div class="flex-grow"></div>
-      <div 
-        class="basis-full @[960px]:basis-1/2"  
-        v-for="item in throttlesWithLocos"        
-        :key="item.address">
-          <ThrottleTile 
-            :throttle="item.throttle as Throttle" 
-            :loco="item.loco as Loco" 
-          />
-      </div>
-    </div>
+          <div v-if="throttlesWithLocos?.length" class="flex-grow flex flex-row flex-wrap gap-1 relative overflow-auto items-end content-end">
+            <div class="flex-grow"></div>
+            <div 
+              class="basis-full @[960px]:basis-1/2"
+              v-for="item in throttlesWithLocos" 
+              :key="item.address">
+                <ThrottleTile 
+                  :throttle="item.throttle as Throttle" 
+                  :loco="item.loco as Loco" 
+                />
+            </div>
+          </div>
         </div>
       </div>
       <div class="column order-1 @[960px]:!order-2">

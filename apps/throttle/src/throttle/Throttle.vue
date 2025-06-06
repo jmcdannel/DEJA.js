@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, type PropType } from 'vue'
-
+import { useRouter } from 'vue-router'
 import type { Loco } from '@repo/modules/locos'
 import type { Throttle } from '@/throttle/types'
 import { debounce } from 'vue-debounce'
@@ -14,6 +14,7 @@ import Consist from '@/consist/Consist.component.vue'
 import MiniConsist from '@/consist/MiniConsist.vue'
 import Functions from '@/functions/Functions.component.vue'
 import { useThrottle } from '@/throttle/useThrottle'
+import { getSignedSpeed } from '@/throttle/utils'
 
 const DEBOUNCE_DELAY = 100 // debounce speed changes by 100ms to prevent too many requests
 
@@ -36,6 +37,7 @@ const {
   currentSpeed, 
   adjustSpeed: handleAdjustSpeed, 
   handleThrottleChange,
+  liveThrottle,
   releaseThrottle,
   stop: handleStop,
 } = useThrottle(props.throttle)
@@ -43,6 +45,7 @@ const {
 // Setup watchers
 watch( () => props.throttle, handleThrottleChange, { deep: true })
 
+const $router = useRouter()
 const consistCmp = ref<InstanceType<typeof Consist> | null>(null)
 const functionsCmp = ref<InstanceType<typeof Functions> | null>(null)
 
@@ -55,6 +58,7 @@ function setSliderSpeed(val: number): void { // handle slider changes
 async function clearLoco() {
   await handleStop()
   releaseThrottle(props.throttle?.address)
+  $router.push({ name: 'throttle-list' })
 }
 
 function openFunctions() {
@@ -76,11 +80,10 @@ function openFunctionSettings() {
     <!-- <pre>loco:{{loco.functions}}</pre>  -->
     <!-- <pre>throttleSpeed {{ throttleSpeed }}</pre>
     <pre>throttleDir {{ throttleDir }}</pre>
-    <pre>currentSpeed {{ currentSpeed }}</pre>
     <pre>props.throttle {{ props.throttle }}</pre> -->
     <ThrottleHeader :address="throttle.address">
       <template v-slot:left>
-        <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" />
+        <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" />
         <MiniConsist v-if="loco" :loco="loco" />
       </template>
       <template v-slot:center>
@@ -96,16 +99,16 @@ function openFunctionSettings() {
     </ThrottleHeader>
     <section class="throttle w-full h-full flex flex-row justify-around flex-grow pt-72 -mt-72">
       <section class="px-1 text-center flex-1 hidden sm:block">
-        <ThrottleSliderControls :speed="currentSpeed" @update:currentSpeed="setSliderSpeed" @stop="handleStop" />
+        <ThrottleSliderControls :speed="liveThrottle ? getSignedSpeed(liveThrottle as Throttle) : 0" @update:currentSpeed="setSliderSpeed" @stop="handleStop" />
       </section>
       <section v-if="loco" class="w-full flex flex-col flex-grow h-full overflow-y-auto items-center justify-between flex-1/2 sm:flex-1">
         <Functions :loco="loco" ref="functionsCmp" />
+        <Consist v-if="loco" :loco="loco" ref="consistCmp" />
       </section>
       <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
-        <CurrentSpeed :speed="currentSpeed" />
-        <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" />
+        <CurrentSpeed :speed="liveThrottle ? getSignedSpeed(liveThrottle as Throttle) : 0" />
+        <ThrottleButtonControls @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" />
       </section>
     </section>
   </main>
-  <Consist v-if="loco" :loco="loco" ref="consistCmp" />
 </template>

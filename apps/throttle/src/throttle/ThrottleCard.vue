@@ -5,6 +5,7 @@ import CurrentSpeed from './CurrentSpeed.vue'
 import type { Loco } from '@repo/modules/locos'
 import type { Throttle } from './types';
 import { useThrottle } from './useThrottle'
+import { getSignedSpeed } from '@/throttle/utils'
 
 const props = defineProps({
   throttle: {
@@ -19,10 +20,11 @@ const props = defineProps({
 
 defineEmits(['consist', 'fullscreen', 'functions', 'park'])
 
-const { 
-  currentSpeed, 
+const {
+  currentSpeed,
   adjustSpeed: handleAdjustSpeed, 
   handleThrottleChange,
+  liveThrottle,
   stop: handleStop,
 } = useThrottle(props.throttle)
 
@@ -40,10 +42,10 @@ watch( () => props.throttle, handleThrottleChange, { deep: true })
       <span>
         {{ loco.name }}
       </span>
-      <CurrentSpeed :speed="currentSpeed" />
+        <CurrentSpeed :speed="liveThrottle ? getSignedSpeed(liveThrottle as Throttle) : 0" />
     </v-card-title>
     <v-card-text>
-      <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" horizontal class=""  />
+      <ThrottleButtonControls @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" horizontal class=""  />
     </v-card-text>
     <v-slider 
       v-model="currentSpeed"

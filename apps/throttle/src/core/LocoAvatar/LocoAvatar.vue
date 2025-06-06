@@ -9,7 +9,7 @@ import LocoAvatarButton from './LocoAvatarButton.vue'
 import LocoAvatarMenu from './LocoAvatarMenu.vue'
 import ThrottleCard from '@/throttle/ThrottleCard.vue'
 
-const emit = defineEmits(['selected'])
+const emit = defineEmits(['selected', 'park', 'stop'])
 const props = defineProps({
   loco: {
     type: Object as PropType<Loco>,
@@ -47,7 +47,7 @@ const props = defineProps({
 
 const $router = useRouter()
 const { acquireThrottle } = useRoster()
-const { releaseThrottle, updateSpeed } = useThrottle(props.throttle)
+// const { releaseThrottle, updateSpeed } = useThrottle(props.throttle)
 
 const isMenuOpen = ref(false)
 const isThrottleCardOpen = ref(false)
@@ -77,19 +77,6 @@ async function handleFullscreen() {
   $router.push({ name: 'throttle', params: { address: props.loco.address } })
 }
 
-async function handleThrottleList() {
-  $router.push({ name: 'throttle-list' })
-}
-
-function handlePark() {
-  releaseThrottle(props.loco.address)
-  $router.push({ name: 'throttle-list' })
-}
-
-function handleStop() {
-  updateSpeed(props.loco.address, 0)
-}
-
 </script>
 <template>
   <div class="relative flex" v-if="loco">
@@ -115,16 +102,16 @@ function handleStop() {
         :throttle="throttle"
         @showcard="handleCard"
         @fullscreen="handleFullscreen"
-        @park="handlePark"
-        @stop="handleStop"
-        @throttlelist="handleThrottleList"
+        @park="$emit('park')"
+        @stop="$emit('stop')"
+        @throttlelist="$router.push('throttle-list')"
       />
     </v-speed-dial>
   </div>  
   <v-bottom-sheet v-model="isThrottleCardOpen">
     <ThrottleCard v-if="loco && throttle" 
       @fullscreen="handleFullscreen"
-      @park="handlePark"
+      @park="$emit('park')"
       :throttle="throttle" 
       :loco="loco" />
   </v-bottom-sheet>

@@ -7,6 +7,7 @@ import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import LocoAvatar from '@/core/LocoAvatar/LocoAvatar.vue'
 import MiniConsist from '@/consist/MiniConsist.vue'
+import { getSignedSpeed } from '@/throttle/utils'
 import { useThrottle } from '@/throttle/useThrottle'
 import { useRouter } from 'vue-router'
 
@@ -30,10 +31,10 @@ const props = defineProps({
 const emit = defineEmits(['release'])
 
 const { 
-currentSpeed, 
-adjustSpeed: handleAdjustSpeed, 
-handleThrottleChange,
-stop: handleStop,
+  adjustSpeed: handleAdjustSpeed, 
+  handleThrottleChange,
+  liveThrottle,
+  stop: handleStop,
 } = useThrottle(props.throttle)
 
 // Setup watchers
@@ -55,12 +56,12 @@ function handleSelect(address: number) {
            <span v-if="loco" class="text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 font-bold">{{loco.name}}</span>
         </template>
         <template v-slot:right>
-          <CurrentSpeed :speed="currentSpeed" />
+          <CurrentSpeed :speed="liveThrottle ? getSignedSpeed(liveThrottle as Throttle) : 0" />
         </template>
       </ThrottleHeader>
       <section class="throttle w-full h-full flex flex-row justify-around flex-grow pt-72 -mt-72">
-        <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">          
-          <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" />
+        <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
+          <ThrottleButtonControls @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" />
         </section>
       </section>
     </main>

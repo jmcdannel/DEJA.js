@@ -1,16 +1,23 @@
 import { ref, watch } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { deleteDoc, doc, serverTimestamp, setDoc } from 'firebase/firestore'
+import { useDocument } from 'vuefire'
 import type { Throttle } from '@/throttle/types'
+import { useLocos } from '@repo/modules/locos'
 import { db } from '@repo/firebase-config/firebase'
+import { getSignedSpeed } from '@/throttle/utils'
 
-export const useThrottle = (throttle?: Throttle) => {
+export const useThrottle = (throttle: Throttle) => {
   const layoutId = useStorage('@DEJA/layoutId', '')
   const currentSpeed = ref(throttle ? getSignedSpeed(throttle) : 0)
-
-  function getSignedSpeed({speed, direction}: { speed: number, direction: boolean }): number {
-    return speed && !!direction ? speed : -speed || 0
-  }
+  const { getLoco } = useLocos()
+  const loco = getLoco(throttle.address.toString())
+  const liveThrottle = useDocument(
+    () =>
+      throttle?.address
+        ? doc(db, `layouts/${layoutId.value}/throttles`, throttle.address.toString())
+        : null
+  )
 
   function handleThrottleChange(throttle: Throttle) {
     if (throttle) {
@@ -42,19 +49,18 @@ export const useThrottle = (throttle?: Throttle) => {
         console.warn('No throttle ID provided for release')
         return
       }
-      const throttleDoc = doc(db, `layouts/${layoutId.value}/throttles`, id.toString())
-      await deleteDoc(
-        throttleDoc
+      const throttleDoc = doc(
+        db,
+        `layouts/${layoutId.value}/throttles`,
+        id.toString()
       )
+      await deleteDoc(throttleDoc)
     } catch (e) {
       console.error('Error releasing throttle: ', e)
     }
   }
 
-  async function updateSpeed(
-    address: number,
-    speed: number,
-  ) {
+  async function updateSpeed(address: number, speed: number) {
     if (!address) {
       return
     }
@@ -63,18 +69,19 @@ export const useThrottle = (throttle?: Throttle) => {
       {
         direction: speed > 0,
         speed: Math.abs(speed),
-        timestamp: serverTimestamp(),
+        // timestamp: serverTimestamp(),
       },
       { merge: true }
     )
   }
-
 
   return {
     adjustSpeed,
     currentSpeed,
     getSignedSpeed,
     handleThrottleChange,
+    liveThrottle,
+    loco,
     releaseThrottle,
     stop,
     updateSpeed,

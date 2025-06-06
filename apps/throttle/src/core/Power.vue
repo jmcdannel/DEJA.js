@@ -16,21 +16,10 @@ watch(power, async (newPower) => {
 
 </script>
 <template>
-  <button @click="power = !power"
-    class="btn btn-ghost btn-circle relative"
-    :class="{
-      'text-gray-500': power === null,
-      'text-success': power === true,
-      'text-error': power === false,  
-    }">
-    <v-icon icon="mdi-power" size="x-large"></v-icon>
-      <span 
-        class="w-1 h-1 rounded-full absolute -top-1"
-        :class="{
-          'bg-success': locked,
-          'bg-gray-500 animate-bounce': !locked && power === null,
-          'bg-error': !locked,  
-        }"
-      ></span>
-    </button>
+  <v-btn 
+    @click="power = !power"
+    :color="power ? 'success' : 'error'"
+    icon="mdi-power"
+    variant="plain">
+  </v-btn>
 </template>
