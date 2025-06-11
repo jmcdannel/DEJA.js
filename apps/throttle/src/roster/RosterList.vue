@@ -10,7 +10,7 @@ import AddLoco from '@/roster/AddLoco.vue'
 import LocoAvatar from '@/core/LocoAvatar/LocoAvatar.vue'
 import RosterListItem from '@/roster/RosterListItem.vue'
 
-const viewAs = useStorage('@DEJA/prefs/rosterView', 'Grid')
+const viewAs = useStorage('@DEJA/prefs/rosterView', 'grid')
 
 defineProps({
   allowAdd: {

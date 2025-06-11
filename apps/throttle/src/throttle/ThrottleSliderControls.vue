@@ -1,92 +1,75 @@
 <script setup lang="ts">
-  import { defineEmits, ref, toRef, watch } from 'vue'
-  import ThrottleSlider from './ThrottleSlider.vue'
-  import { 
-    FaChevronLeft,
-    FaChevronRight,
-  } from "vue3-icons/fa";
+import { ref, toRef, watch } from 'vue'
+import { debounce } from 'vue-debounce'
+import ThrottleSlider from './ThrottleSlider.vue'
 
+const DEBOUNCE_DELAY = 1000 // debounce speed changes by 100ms to prevent too many requests
 
-  const emit = defineEmits(['update:currentSpeed', 'stop'])
+const emit = defineEmits(['update:currentSpeed', 'stop'])
 
-  const props  = defineProps({
-    speed: {
-      type: Number,
-      required: true
-    },
-    disabled: {
-      type: Boolean,
-      default: false
-    }
-  })
-
-  const direction = ref(props.speed > -1 ? true : false)
-  const speed = toRef(props, 'speed')
-
-  function handleForward() {
-    console.log('forward')
-    emit('stop')
-    direction.value = true
+const props  = defineProps({
+  speed: {
+    type: Number,
+    required: true
+  },
+  direction: {
+    type: Boolean,
+    default: null // null means no direction set
+  },
+  disabled: {
+    type: Boolean,
+    default: false
   }
+})
 
-  function handleReverse() {
-    console.log('reverse')
-    emit('stop')
-    direction.value = false
-  }
+const speed = toRef(props, 'speed')
+const setSpeed = debounce((val: number): void => { emit('update:currentSpeed', val); }, `${DEBOUNCE_DELAY}ms`)
 
-  function handleSliderUpdate(val: number) {
-    console.log('handleSliderUpdate', val)
-    if (direction.value === null) {
-      return
-    } else if (direction.value === true) {
-      emit('update:currentSpeed', val)
-    } else if (direction.value === false) {
-      emit('update:currentSpeed', -val)
-    }
-  }
+function setSliderSpeed(val: number): void { // handle slider changes
+  setSpeed(parseInt(val.toString())) // debounced speed changes
+}
+function handleForward() {
+  console.log('forward')
+  emit('stop')
+}
 
-  function isDisabled() {
-    return direction.value === null
-  }
+function handleReverse() {
+  console.log('reverse')
+  emit('stop')
+}
 
-  watch(speed, (val: number) => {
-    if (val === 0) {
-      // direction.value = true
-    } else if (val > 0) {
-      direction.value = true
-    } else if (val < 0) {
-      direction.value = false
-    }
-  })
+// function handleSliderUpdate(val: number) {
+//   if (direction.value === null) {
+//     return
+//   } else if (direction.value === true) {
+//     emit('update:currentSpeed', val)
+//   } else if (direction.value === false) {
+//     emit('update:currentSpeed', -val)
+//   }
+// }
+
+function isDisabled() {
+  return props.direction === null
+}
 
 </script>
 <template>
   <div class="flex flex-col h-full justify-end">
     <ThrottleSlider 
       :speed="speed" 
-      :throttleVal.sync="Math.abs(speed)" 
-      :direction.sync="direction" 
       :disabled="isDisabled()"
-      @update="handleSliderUpdate" 
+      :label="direction ? 'FWD' : 'REV'"
+      @update="setSliderSpeed" 
       @stop="$emit('stop')"  />
     <div class="flex mt-4 align-middle justify-center">
-      <button 
+      <v-btn 
         @click="handleReverse" 
-        class="
-          btn 
-          btn-outline 
-          btn-sm
-          text-xs"
-      ><FaChevronLeft />Rev</button>
-      <button 
+        prepend-icon="mdi-chevron-left"
+      >Rev</v-btn>
+      <v-btn 
         @click="handleForward"
-        class="
-        btn 
-        btn-outline 
-        btn-sm
-          text-xs"
-      >Fwd<FaChevronRight /></button>
+        append-icon="mdi-chevron-right"
+      >Fwd</v-btn>
     </div>
   </div>
 </template>

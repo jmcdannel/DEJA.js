@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { deleteDoc, doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { useDocument } from 'vuefire'
@@ -8,51 +8,38 @@ import { db } from '@repo/firebase-config/firebase'
 import { getSignedSpeed } from '@/throttle/utils'
 
 export const useThrottle = (address: Number) => {
+  const { getLoco } = useLocos()
   const layoutId = useStorage('@DEJA/layoutId', '')
-  const liveThrottle = useDocument(
+  const throttle = useDocument<Throttle>(
     () => address
       ? doc(db, `layouts/${layoutId.value}/throttles`, address.toString())
       : null
   )
-  const throttle = liveThrottle.value as Throttle
-  const currentSpeed = ref(throttle ? getSignedSpeed(throttle) : 0)
-  const { getLoco } = useLocos()
   const loco = getLoco(address)
+  const currentSpeed = computed(() => throttle.value ? getSignedSpeed({
+    speed: throttle.value?.speed,
+    direction: throttle.value?.direction
+  }) : 0)
+  const direction = computed(() => currentSpeed.value > -1 ? true : false)
 
-  function handleThrottleChange(addres: Throttle) {
-    if (throttle) {
-      const newSpeed = getSignedSpeed(throttle)
-      // Only update if speeds are different to avoid loops
-      if (currentSpeed.value !== newSpeed) {
-        currentSpeed.value = newSpeed
-      }
-    }
-  }
-
-  // watch(currentSpeed, (newSpeed: number) => {
-  //   console.log('Throttle speed changed:', newSpeed)
-  //   throttle?.address && updateSpeed(throttle?.address, newSpeed)
-  // })
+  watch(currentSpeed, (newSpeed: number) => {
+    updateSpeed(newSpeed)
+  })
 
   function adjustSpeed(val: number): void {
-    currentSpeed.value = currentSpeed.value + val
+    updateSpeed(currentSpeed.value + val)
   }
 
   function stop() {
-    currentSpeed.value = 0
+    updateSpeed(0)
   }
 
-  async function releaseThrottle(throttleId?: number) {
+  async function releaseThrottle() {
     try {
-      const id = throttleId || throttle?.address
-      if (!id) {
-        console.warn('No throttle ID provided for release')
-        return
-      }
       const throttleDoc = doc(
         db,
         `layouts/${layoutId.value}/throttles`,
-        id.toString()
+        address.toString()
       )
       await deleteDoc(throttleDoc)
     } catch (e) {
@@ -60,10 +47,7 @@ export const useThrottle = (address: Number) => {
     }
   }
 
-  async function updateSpeed(address: number, speed: number) {
-    if (!address) {
-      return
-    }
+  async function updateSpeed(speed: number) {
     await setDoc(
       doc(db, `layouts/${layoutId.value}/throttles`, address.toString()),
       {
@@ -78,9 +62,7 @@ export const useThrottle = (address: Number) => {
   return {
     adjustSpeed,
     currentSpeed,
-    getSignedSpeed,
-    handleThrottleChange,
-    liveThrottle,
+    direction,
     loco,
     releaseThrottle,
     stop,

@@ -14,17 +14,9 @@ import { useRouter } from 'vue-router'
 const $router = useRouter()
 
 const props = defineProps({
-  throttle: {
-    type: Object as PropType<Throttle>,
+  address: {
+    type: Number,
     required: true
-  },
-  loco: {
-    type: Object as PropType<Loco>,
-    required: true
-  },
-  viewAs: {
-    type: String,
-    required: false
   }
 })
 
@@ -32,10 +24,11 @@ const emit = defineEmits(['release'])
 
 const { 
   adjustSpeed: handleAdjustSpeed, 
-  handleThrottleChange,
-  liveThrottle,
+  currentSpeed, 
+  throttle,
+  loco,
   stop: handleStop,
-} = useThrottle(props.throttle)
+} = useThrottle(props.address)
 
 // Setup watchers
 // watch( () => props.throttle, handleThrottleChange, { deep: true })
@@ -47,16 +40,16 @@ function handleSelect(address: number) {
 </script>
 <template>
     <main v-if="throttle" class="p-2 overflow-hidden w-full h-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
-      <ThrottleHeader :address="throttle.address">
+      <ThrottleHeader>
         <template v-slot:left>
-          <LocoAvatar :loco="loco as Loco" :size="48" @selected="handleSelect" />
+          <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @selected="handleSelect" />
           <MiniConsist v-if="loco" :loco="loco" />
         </template>
         <template v-slot:center>
            <span v-if="loco" class="text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 font-bold">{{loco.name}}</span>
         </template>
         <template v-slot:right>
-          <CurrentSpeed :speed="liveThrottle ? getSignedSpeed(liveThrottle as Throttle) : 0" />
+          <CurrentSpeed :speed="currentSpeed" />
         </template>
       </ThrottleHeader>
       <section class="throttle w-full h-full flex flex-row justify-around flex-grow pt-72 -mt-72">

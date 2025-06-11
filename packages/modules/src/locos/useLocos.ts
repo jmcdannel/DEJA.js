@@ -4,7 +4,6 @@ import {
   getDoc,
   serverTimestamp,
   setDoc,
-  addDoc,
   deleteDoc,
   where,
   getDocs,
@@ -45,7 +44,7 @@ export function useLocos() {
     const locoDoc = () =>
       layoutId.value ? doc(db, `layouts/${layoutId.value}/locos`, address.toString()) : null
 
-    return useDocument(locoDoc)
+    return useDocument<Loco>(locoDoc)
   }
 
   async function getLocoThrottle(address: number) {

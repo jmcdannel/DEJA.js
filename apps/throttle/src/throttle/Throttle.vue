@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { ref, watch, type PropType } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Loco } from '@repo/modules/locos'
-import type { Throttle } from '@/throttle/types'
-import { debounce } from 'vue-debounce'
 import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.vue'
 import ThrottleSliderControls from '@/throttle/ThrottleSliderControls.vue'
 import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
@@ -14,50 +12,37 @@ import Consist from '@/consist/Consist.component.vue'
 import MiniConsist from '@/consist/MiniConsist.vue'
 import Functions from '@/functions/Functions.component.vue'
 import { useThrottle } from '@/throttle/useThrottle'
-import { getSignedSpeed } from '@/throttle/utils'
 
 const DEBOUNCE_DELAY = 100 // debounce speed changes by 100ms to prevent too many requests
 
 const props = defineProps({
-  throttle: {
-    type: Object as PropType<Throttle>,
+  address: {
+    type: Number,
     required: true
-  },
-  loco: {
-    type: Object as PropType<Loco>,
-    required: true
-  },
-  viewAs: {
-    type: String,
-    required: false
   }
 })
 
 const { 
+  adjustSpeed: handleAdjustSpeed,
   currentSpeed, 
-  adjustSpeed: handleAdjustSpeed, 
-  handleThrottleChange,
-  liveThrottle,
+  direction,
+  loco,
   releaseThrottle,
   stop: handleStop,
-} = useThrottle(props.throttle.address)
-
-// Setup watchers
-// watch( () => props.throttle, handleThrottleChange, { deep: true })
+  throttle,
+} = useThrottle(props.address)
 
 const $router = useRouter()
 const consistCmp = ref<InstanceType<typeof Consist> | null>(null)
 const functionsCmp = ref<InstanceType<typeof Functions> | null>(null)
 
-const setSpeed = debounce((val: number): void => { currentSpeed.value = val; }, `${DEBOUNCE_DELAY}ms`)
-
-function setSliderSpeed(val: number): void { // handle slider changes
-  setSpeed(parseInt(val.toString())) // debounced speed changes
+function handleSlider(val: number): void { // handle slider changes
+  currentSpeed.value = parseInt(val.toString()) // debounced speed changes
 }
 
 async function clearLoco() {
-  await handleStop()
-  releaseThrottle(props.throttle?.address)
+  handleStop()
+  releaseThrottle()
   $router.push({ name: 'throttle-list' })
 }
 
@@ -78,10 +63,10 @@ function openFunctionSettings() {
   <main v-if="throttle" class="p-2 card overflow-hidden w-full h-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
     <!-- <pre>locoDocId:{{locoDocId}}</pre>-->
     <!-- <pre>loco:{{loco.functions}}</pre>  -->
-    <!-- <pre>throttleSpeed {{ throttleSpeed }}</pre>
-    <pre>throttleDir {{ throttleDir }}</pre>
-    <pre>props.throttle {{ props.throttle }}</pre> -->
-    <ThrottleHeader :address="throttle.address">
+    <!-- <pre>currentSpeed {{ currentSpeed }}</pre> -->
+    <!-- <pre>throttleDir {{ throttleDir }}</pre> -->
+    <!-- <pre>props.throttle {{ props.throttle }}</pre> -->
+    <ThrottleHeader>
       <template v-slot:left>
         <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" />
         <MiniConsist v-if="loco" :loco="loco" />
@@ -99,14 +84,15 @@ function openFunctionSettings() {
     </ThrottleHeader>
     <section class="throttle w-full h-full flex flex-row justify-around flex-grow pt-72 -mt-72">
       <section class="px-1 text-center flex-1 hidden sm:block">
-        <ThrottleSliderControls :speed="liveThrottle ? getSignedSpeed(liveThrottle as Throttle) : 0" @update:currentSpeed="setSliderSpeed" @stop="handleStop" />
+        <!-- <ThrottleSliderControls :direction="direction" :speed="currentSpeed" @update:currentSpeed="handleSlider" @stop="handleStop" /> -->
       </section>
       <section v-if="loco" class="w-full flex flex-col flex-grow h-full overflow-y-auto items-center justify-between flex-1/2 sm:flex-1">
         <Functions :loco="loco" ref="functionsCmp" />
         <Consist v-if="loco" :loco="loco" ref="consistCmp" />
+        <pre>{{ throttle }}</pre>
       </section>
       <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
-        <CurrentSpeed :speed="liveThrottle ? getSignedSpeed(liveThrottle as Throttle) : 0" />
+        <CurrentSpeed :speed="currentSpeed" />
         <ThrottleButtonControls @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" />
       </section>
     </section>

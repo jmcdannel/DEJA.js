@@ -1,12 +1,5 @@
 <script setup lang="ts">
 
-defineProps({
-  address: {
-    type: Number,
-    required: true
-  }
-})
-
 </script>
 <template>
   <header class="p-2 text-lg bg-transparent flex items-center justify-between relative flex-wrap">

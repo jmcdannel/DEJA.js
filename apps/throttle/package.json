@@ -19,6 +19,7 @@
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "@repo/modules": "workspace:*",
+    "@repo/ui": "workspace:*",
     "@tailwindcss/container-queries": "^0.1.1",
     "dayjs": "^1.11.13",
     "firebase": "^10.13.1",

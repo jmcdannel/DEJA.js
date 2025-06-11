@@ -1,58 +1,47 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { refDebounced, watchDebounced } from '@vueuse/core'
+import { ref, watch } from 'vue'
 
-  const emit = defineEmits(['update', 'stop'])
+const emit = defineEmits(['update', 'stop'])
 
-  const props  = defineProps({
-    speed: {
-      type: Number,
-      required: true
-    },
-    throttleVal: {
-      type: Number,
-      required: true
-    },
-    disabled: {
-      type: Boolean,
-      default: false
-    },
-    direction: {
-      type: Boolean,
-      default: false
-    },
-    showSteps: {
-      type: Boolean,
-      default: false
-    }
-  })
+const props  = defineProps({
+  disabled: {
+    type: Boolean,
+    default: false
+  },
+  label: {
+    type: String,
+    default: 'FWD'
+  },
+  speed: {
+    type: Number,
+    required: true
+  },
+})
 
-  const sliderSpeed = computed( () => Math.abs(props.speed) )
-  const sliderVal = ref(Math.abs(props.speed))
+const sliderVal = ref(Math.abs(props.speed))
 
-  // watchDebounced(sliderSpeed, () => {
-  //   console.log('watchDebounced', sliderVal.value)
-  //   sliderVal.value = sliderSpeed.value
-  //   // emit('update', sliderVal.value)
-  // }, { debounce: 500, maxWait: 1000 })
+watch(() => props.speed, (newSpeed) => {
+  sliderVal.value = Math.abs(newSpeed)
+})
 
-  // watch(sliderVal, () => {
-  //   console.log('watch sliderVal', sliderVal.value)
-  //   emit('update', sliderVal.value)
-  // })
+watch(sliderVal, () => {
+  emit('update', sliderVal.value)
+})
 
-  function handleSlider(val: number) {
-    console.log('handleSlider', val)
-    sliderVal.value = val
-  }
+function handleSlider(val: number) {
+  sliderVal.value = val
+}
 
 </script>
 <template>
+  <pre>{{ sliderVal }}</pre>
+  <pre>{{ speed }}</pre>
   <v-slider
     :model-value="sliderVal"
     class=" content-end"
+    :disabled="disabled"
     direction="vertical"
-    :label="direction ? 'FWD' : 'REV'"
+    :label="label"
     @update:model-value="handleSlider"
     step="1"
     density="comfortable"
