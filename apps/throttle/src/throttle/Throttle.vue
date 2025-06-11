@@ -40,10 +40,10 @@ const {
   liveThrottle,
   releaseThrottle,
   stop: handleStop,
-} = useThrottle(props.throttle)
+} = useThrottle(props.throttle.address)
 
 // Setup watchers
-watch( () => props.throttle, handleThrottleChange, { deep: true })
+// watch( () => props.throttle, handleThrottleChange, { deep: true })
 
 const $router = useRouter()
 const consistCmp = ref<InstanceType<typeof Consist> | null>(null)

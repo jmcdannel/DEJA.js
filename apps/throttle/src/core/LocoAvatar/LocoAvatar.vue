@@ -3,7 +3,6 @@ import { ref, type PropType } from 'vue'
 import type { Loco } from '@repo/modules/locos'
 import type { Throttle } from '@/throttle/types'
 import { useRouter } from 'vue-router'
-import { useThrottle } from '@/throttle/useThrottle'
 import { useRoster } from '@/roster/useRoster'
 import LocoAvatarButton from './LocoAvatarButton.vue'
 import LocoAvatarMenu from './LocoAvatarMenu.vue'
@@ -47,7 +46,6 @@ const props = defineProps({
 
 const $router = useRouter()
 const { acquireThrottle } = useRoster()
-// const { releaseThrottle, updateSpeed } = useThrottle(props.throttle)
 
 const isMenuOpen = ref(false)
 const isThrottleCardOpen = ref(false)

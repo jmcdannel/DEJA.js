@@ -7,29 +7,21 @@ import EditLoco from '@/Roster/EditLoco.vue'
 import RosterList from '@/Roster/RosterList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 
-const showAddLoco = ref(false)
-const showEditLoco = ref(false)
-const editLoco = ref<Loco | null>(null)
-
-function handleEdit(loco: Loco) {
-  console.log('handleEdit', loco)
-  editLoco.value = loco
-  showEditLoco.value = true
-}
+const editLoco = ref(<Loco | null>null)
+const addLoco = ref(false)
 
 </script>
 <template>
-  <ModuleTitle menu="Roster" />
-  <AddLoco v-if="showAddLoco" @close="showAddLoco = false" />
-  <EditLoco v-else-if="showEditLoco" @close="showEditLoco = false" :loco="editLoco as Loco" />
-  <RosterList v-else-if="!showAddLoco && !showEditLoco" @edit="handleEdit" @add="showAddLoco = true" :allowEdit="!showEditLoco">
-    <template #prepend>
-      <AddTile color="pink" @click="showAddLoco = true" />
-    </template>
-  </RosterList>
-  <!-- <pre>
-    {{  locos }}
-  </pre> -->
+  <ModuleTitle menu="Loco Roster" />
+  <AddLoco v-if="addLoco" @close="addLoco = false" />
+  <Transition v-else name="slide">
+    <EditLoco v-if="editLoco" v-show="editLoco" @close="editLoco = null" :efx="editLoco" />
+    <RosterList v-else @edit="loco => editLoco = loco">
+      <template #prepend>
+        <AddTile @click="addLoco = true" color="purple" />
+      </template>
+    </RosterList>
+  </Transition>
 </template>
 <style>
 

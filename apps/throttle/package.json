@@ -39,6 +39,7 @@
     "@repo/firebase-config": "workspace:*",
     "@repo/dccex": "workspace:*",
     "@repo/deja": "workspace:*",
+    "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
     "@rushstack/eslint-patch": "^1.2.0",
     "@tsconfig/node18": "^2.0.1",

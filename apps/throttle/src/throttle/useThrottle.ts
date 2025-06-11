@@ -7,19 +7,19 @@ import { useLocos } from '@repo/modules/locos'
 import { db } from '@repo/firebase-config/firebase'
 import { getSignedSpeed } from '@/throttle/utils'
 
-export const useThrottle = (throttle: Throttle) => {
+export const useThrottle = (address: Number) => {
   const layoutId = useStorage('@DEJA/layoutId', '')
+  const liveThrottle = useDocument(
+    () => address
+      ? doc(db, `layouts/${layoutId.value}/throttles`, address.toString())
+      : null
+  )
+  const throttle = liveThrottle.value as Throttle
   const currentSpeed = ref(throttle ? getSignedSpeed(throttle) : 0)
   const { getLoco } = useLocos()
-  const loco = getLoco(throttle.address.toString())
-  const liveThrottle = useDocument(
-    () =>
-      throttle?.address
-        ? doc(db, `layouts/${layoutId.value}/throttles`, throttle.address.toString())
-        : null
-  )
+  const loco = getLoco(address)
 
-  function handleThrottleChange(throttle: Throttle) {
+  function handleThrottleChange(addres: Throttle) {
     if (throttle) {
       const newSpeed = getSignedSpeed(throttle)
       // Only update if speeds are different to avoid loops
@@ -29,10 +29,10 @@ export const useThrottle = (throttle: Throttle) => {
     }
   }
 
-  watch(currentSpeed, (newSpeed: number) => {
-    console.log('Throttle speed changed:', newSpeed)
-    throttle?.address && updateSpeed(throttle?.address, newSpeed)
-  })
+  // watch(currentSpeed, (newSpeed: number) => {
+  //   console.log('Throttle speed changed:', newSpeed)
+  //   throttle?.address && updateSpeed(throttle?.address, newSpeed)
+  // })
 
   function adjustSpeed(val: number): void {
     currentSpeed.value = currentSpeed.value + val
@@ -84,6 +84,7 @@ export const useThrottle = (throttle: Throttle) => {
     loco,
     releaseThrottle,
     stop,
+    throttle,
     updateSpeed,
   }
 }

@@ -9,14 +9,14 @@ const throttles = getThrottles()
 
 <template>
   <div class="@container flex-grow flex flex-col">
-    <div v-if="throttles" class="flex-grow flex flex-row flex-wrap relative overflow-auto items-end content-end">
+    <div v-if="throttles" class="flex-grow flex flex-row flex-wrap relative overflow-auto items-end content-end justify-end">
       <!-- <div class="basis-full @[960px]:basis-1/2 flex-grow"></div> -->
       <div 
         class="basis-full @[960px]:basis-1/2 p-1"  
         v-for="item in throttles"
         :key="((item as unknown) as Throttle).id">
           <ThrottleTile 
-            :throttle="(item as unknown) as Throttle" 
+            :address="((item as unknown) as Throttle).address" 
           />
       </div>
     </div>

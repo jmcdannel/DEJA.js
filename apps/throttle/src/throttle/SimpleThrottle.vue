@@ -38,7 +38,7 @@ const {
 } = useThrottle(props.throttle)
 
 // Setup watchers
-watch( () => props.throttle, handleThrottleChange, { deep: true })
+// watch( () => props.throttle, handleThrottleChange, { deep: true })
 
 function handleSelect(address: number) {
   $router.push({ name: 'throttle', params: { address } })

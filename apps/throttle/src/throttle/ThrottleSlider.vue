@@ -30,16 +30,16 @@ import { refDebounced, watchDebounced } from '@vueuse/core'
   const sliderSpeed = computed( () => Math.abs(props.speed) )
   const sliderVal = ref(Math.abs(props.speed))
 
-  watchDebounced(sliderSpeed, () => {
-    console.log('watchDebounced', sliderVal.value)
-    sliderVal.value = sliderSpeed.value
-    // emit('update', sliderVal.value)
-  }, { debounce: 500, maxWait: 1000 })
+  // watchDebounced(sliderSpeed, () => {
+  //   console.log('watchDebounced', sliderVal.value)
+  //   sliderVal.value = sliderSpeed.value
+  //   // emit('update', sliderVal.value)
+  // }, { debounce: 500, maxWait: 1000 })
 
-  watch(sliderVal, () => {
-    console.log('watch sliderVal', sliderVal.value)
-    emit('update', sliderVal.value)
-  })
+  // watch(sliderVal, () => {
+  //   console.log('watch sliderVal', sliderVal.value)
+  //   emit('update', sliderVal.value)
+  // })
 
   function handleSlider(val: number) {
     console.log('handleSlider', val)
