@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, type PropType } from 'vue'
+import { useRouter } from 'vue-router'
 import type { Loco } from '@repo/modules/locos'
 
 const emit = defineEmits(['select', 'park', 'stop'])
@@ -29,31 +30,31 @@ const props = defineProps({
     default: 'tonal'
   }
 })
-
+const $router = useRouter()
 const isMenuOpen = ref(false)
 const color = ref(props.color || props.loco?.meta?.color || 'primary')
-
-function handleLocoClick() {
-  console.debug('LocoAvatar clicked', props.loco.address)
-  if (props.showMenu) {
-    isMenuOpen.value = !isMenuOpen.value
-  } else {
-    emit('select', props.loco.address)
-  }
-}
 
 </script>
 <template>
   <div class="relative flex" v-if="loco">
+     <v-btn v-if="!showMenu"
+      :color="loco?.meta?.color || color"
+      rounded="circle"
+      @click="$emit('select', loco.address)"
+      :size="size"
+      :text="loco.address?.toString() || '?'"
+      :variant="variant"
+    />  
     <v-speed-dial
+      v-else
       v-model="isMenuOpen"
-      location="top center"
+      location="left center"
       transition="fade-transition"
       :color="color"
       contained
       >
-      <template #activator>        
-        <v-badge v-if="loco.consist?.length && showConsist" 
+      <template v-slot:activator="{ props: activatorProps }">
+        <v-badge v-if="loco.consist?.length && showConsist"
           color="primary"
           :content="loco?.consist?.length || 0"
           offset-x="5"
@@ -62,21 +63,20 @@ function handleLocoClick() {
           <v-btn
             :color="loco?.meta?.color || color"
             rounded="circle"
+            v-bind="activatorProps"
             :size="size"
             stacked
             :text="loco.address?.toString() || '?'"
             :variant="variant"
-            @select="handleLocoClick"
           />
         </v-badge>
         <v-btn v-else
           :color="loco?.meta?.color || color"
           rounded="circle"
+          v-bind="activatorProps"
           :size="size"
-          stacked
           :text="loco.address?.toString() || '?'"
           :variant="variant"
-          @select="handleLocoClick"
         />  
       </template>
       <v-btn 

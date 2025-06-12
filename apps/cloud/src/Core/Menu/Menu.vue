@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { useMenu } from '@/Core/Menu/useMenu'
-import { useColors } from '@/Core/UI/useColors'
 defineEmits(['change'])
 defineProps({ 
   view: String
 })
 const { menu } = useMenu()
-const { colors } = useColors()
 
 </script>
 <template>

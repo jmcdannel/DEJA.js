@@ -4,8 +4,8 @@
 [-] cloud - fix login component error
 [ ] cloud - layout device icons broken
 [ ] usb extension cord
-[-] REVERSE (72, tam)
-[-] throtte - park
+[x] REVERSE (72, tam)
+[x] throtte - park
 [ ] consist modal
 [ ] all modals
 [ ] turnout clamp

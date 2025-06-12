@@ -7,13 +7,9 @@ import ThrottleSliderControls from '@/throttle/ThrottleSliderControls.vue'
 import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
-import LocoAvatar from '@/core/LocoAvatar/LocoAvatar.vue'
-import Consist from '@/consist/Consist.component.vue'
-import MiniConsist from '@/consist/MiniConsist.vue'
+import { Consist, LocoAvatar, MiniConsist } from '@repo/ui'
 import Functions from '@/functions/Functions.component.vue'
 import { useThrottle } from '@/throttle/useThrottle'
-
-const DEBOUNCE_DELAY = 100 // debounce speed changes by 100ms to prevent too many requests
 
 const props = defineProps({
   address: {
@@ -33,11 +29,11 @@ const {
 } = useThrottle(props.address)
 
 const $router = useRouter()
-const consistCmp = ref<InstanceType<typeof Consist> | null>(null)
-const functionsCmp = ref<InstanceType<typeof Functions> | null>(null)
+// const consistCmp = ref<InstanceType<typeof Consist> | null>(null)
+// const functionsCmp = ref<InstanceType<typeof Functions> | null>(null)
 
 function handleSlider(val: number): void { // handle slider changes
-  currentSpeed.value = parseInt(val.toString()) // debounced speed changes
+  // currentSpeed.value = parseInt(val.toString()) // debounced speed changes
 }
 
 async function clearLoco() {
@@ -47,20 +43,20 @@ async function clearLoco() {
 }
 
 function openFunctions() {
-  functionsCmp.value && functionsCmp.value.openAll()
+  // functionsCmp.value && functionsCmp.value.openAll()
 }
 
 function openConsist() {
-  consistCmp.value && consistCmp.value.openSettings()
+  // consistCmp.value && consistCmp.value.openSettings()
 }
 
 function openFunctionSettings() {
-  functionsCmp.value && functionsCmp.value.openSettings()
+  // functionsCmp.value && functionsCmp.value.openSettings()
 }
 
 </script>
 <template>
-  <main v-if="throttle" class="p-2 card overflow-hidden w-full h-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
+  <main v-if="throttle" class="p-2 overflow-hidden w-full h-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
     <!-- <pre>locoDocId:{{locoDocId}}</pre>-->
     <!-- <pre>loco:{{loco.functions}}</pre>  -->
     <!-- <pre>currentSpeed {{ currentSpeed }}</pre> -->
@@ -89,7 +85,6 @@ function openFunctionSettings() {
       <section v-if="loco" class="w-full flex flex-col flex-grow h-full overflow-y-auto items-center justify-between flex-1/2 sm:flex-1">
         <Functions :loco="loco" ref="functionsCmp" />
         <Consist v-if="loco" :loco="loco" ref="consistCmp" />
-        <pre>{{ throttle }}</pre>
       </section>
       <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
         <CurrentSpeed :speed="currentSpeed" />

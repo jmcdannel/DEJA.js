@@ -18,9 +18,11 @@
   },
   "dependencies": {
     "@repo/modules": "workspace:*",
+    "@repo/ui": "workspace:*",
     "dayjs": "^1.11.13",
     "firebase": "^10.13.1",
     "vue": "^3.4.37",
+    "vue-router": "^4.2.2",
     "vuefire": "^3.2.0",
     "vuetify": "^3.7.2"
   },

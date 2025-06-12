@@ -1,18 +1,12 @@
 <script setup lang="ts">
-import { watch, type PropType } from 'vue'
-import type { Loco } from '@repo/modules/locos'
-import type { Throttle } from '@/throttle/types'
 import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.vue'
 import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
-import LocoAvatar from '@/core/LocoAvatar/LocoAvatar.vue'
-import MiniConsist from '@/consist/MiniConsist.vue'
-import { getSignedSpeed } from '@/throttle/utils'
+import { LocoAvatar, MiniConsist } from '@repo/ui'
 import { useThrottle } from '@/throttle/useThrottle'
 import { useRouter } from 'vue-router'
 
-const $router = useRouter()
-
+const emit = defineEmits(['release'])
 const props = defineProps({
   address: {
     type: Number,
@@ -20,7 +14,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['release'])
+const $router = useRouter()
 
 const { 
   adjustSpeed: handleAdjustSpeed, 
@@ -30,19 +24,16 @@ const {
   stop: handleStop,
 } = useThrottle(props.address)
 
-// Setup watchers
-// watch( () => props.throttle, handleThrottleChange, { deep: true })
-
-function handleSelect(address: number) {
-  $router.push({ name: 'throttle', params: { address } })
-}
-
 </script>
 <template>
     <main v-if="throttle" class="p-2 overflow-hidden w-full h-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
       <ThrottleHeader>
         <template v-slot:left>
-          <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @selected="handleSelect" />
+          <LocoAvatar 
+            v-if="loco" 
+            :loco="loco" 
+            :size="48" 
+            @selected="$router.push({ name: 'throttle', params: { address } })" />
           <MiniConsist v-if="loco" :loco="loco" />
         </template>
         <template v-slot:center>

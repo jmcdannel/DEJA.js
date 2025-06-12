@@ -45,6 +45,7 @@ const {
           @park="releaseThrottle" 
           :size="48" 
           @stop="handleStop"
+          showConsist
           showMenu
         />
         <!-- <pre>loco:{{loco}}</pre> -->

@@ -6,7 +6,9 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./LocoAvatar": "./src/LocoAvatar.vue"
+    "./LocoAvatar": "./src/LocoAvatar.vue",
+    "./Consist": "./src/Consist/Consist.vue",
+    "./MiniConsist": "./src/Consist/MiniConsist.vue"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useLocos, ROADNAMES, type Loco } from '@repo/modules/locos'
-import { useColors } from '@/Core/UI/useColors'
 import ViewJson from '@/Core/UI/ViewJson.vue';
 import EditConsist from '@/Roster/Consist/EditConsist.vue'
 import Functions from '@/Roster/Functions/Functions.vue'

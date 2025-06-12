@@ -7,7 +7,7 @@ import { useLocos } from '@repo/modules/locos'
 import { useRoster } from '@/roster/useRoster'
 import RosterViewMenu from '@/roster/RosterViewMenu.vue'
 import AddLoco from '@/roster/AddLoco.vue'
-import LocoAvatar from '@/core/LocoAvatar/LocoAvatar.vue'
+import { LocoAvatar } from '@repo/ui'
 import RosterListItem from '@/roster/RosterListItem.vue'
 
 const viewAs = useStorage('@DEJA/prefs/rosterView', 'grid')
@@ -53,7 +53,7 @@ async function handleThrottle(address: number) {
           v-for="loco in locos" 
           :key="loco.address" 
           :loco="loco as Loco"
-          @selected="handleThrottle"
+          @select="handleThrottle"
           :showMenu="false" 
           variant="flat"
         />

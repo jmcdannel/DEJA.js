@@ -2,10 +2,11 @@ import { computed } from 'vue'
 import {
   doc,
   collection,
-  serverTimestamp,
   getDoc,
+  query,
   setDoc,
-  type DocumentData,
+  serverTimestamp,
+  where,
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import {
@@ -52,7 +53,8 @@ export const useLayout = () => {
   const layoutId = useStorage('@DEJA/layoutId', '')
   const layoutDoc = doc(db, 'layouts', layoutId.value)
 
-  const layoutCol = () => (layoutId.value ? collection(db, 'layouts') : null)
+  const layoutsRef = collection(db, 'layouts')
+  const layoutsQuery = query(layoutsRef, where('owner', '==', user.value?.email))
 
   const devicesCol = computed(() =>
     layoutId.value ? collection(db, `layouts/${layoutId.value}/devices`) : null
@@ -64,7 +66,8 @@ export const useLayout = () => {
   }
 
   function getLayouts() {
-    const layouts = useCollection(layoutCol)
+    console.log('getLayouts', layoutsQuery)
+    const layouts = useCollection(layoutsQuery)
     return layouts
   }
 

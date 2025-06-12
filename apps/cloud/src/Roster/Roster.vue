@@ -15,7 +15,7 @@ const addLoco = ref(false)
   <ModuleTitle menu="Loco Roster" />
   <AddLoco v-if="addLoco" @close="addLoco = false" />
   <Transition v-else name="slide">
-    <EditLoco v-if="editLoco" v-show="editLoco" @close="editLoco = null" :efx="editLoco" />
+    <EditLoco v-if="editLoco" v-show="editLoco" @close="editLoco = null" :loco="editLoco" />
     <RosterList v-else @edit="loco => editLoco = loco">
       <template #prepend>
         <AddTile @click="addLoco = true" color="purple" />

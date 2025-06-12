@@ -1,15 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { collection, query, where } from 'firebase/firestore'
+import { useCollection, useCurrentUser } from 'vuefire'
+import { db } from '@repo/firebase-config/firebase'
 import { useLayout } from '@repo/modules/layouts'
 
-const { getLayouts } = useLayout()
 const emit = defineEmits(['selected', 'clear'])
 
 defineProps({
   layoutId: String
 })
 
-const layouts = getLayouts()
+const user = useCurrentUser()
+const layoutsRef = collection(db, 'layouts')
+const layoutsQuery = query(layoutsRef, where('owner', '==', user.value?.email))
+const layouts = useCollection(layoutsQuery)
 
 async function handleLayoutSelect(newLayout: string) {
   emit('selected', newLayout)
@@ -17,7 +21,25 @@ async function handleLayoutSelect(newLayout: string) {
 
 </script>
 <template>
-  <v-card title="Select Layout" color="orange" variant="tonal">
+  <div class="flex flex-row flex-wrap gap-2">
+    <v-card v-for="layout in layouts" :key="layout.layoutId" 
+      :title="layout.name" 
+      color="blue" 
+      variant="tonal">
+      <v-card-text>
+        <v-chip size="small" variant="outlined" class="m-1">{{ layout.layoutId }}</v-chip>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn 
+          variant="flat" 
+          color="primary" 
+          @click="handleLayoutSelect(layout.layoutId)">
+          Select
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </div>
+  <!-- <v-card title="Select Layout" color="blue" variant="tonal">
     <v-card-text>
       <v-btn v-for="layout in layouts" :key="layout.layoutId"
         variant="outlined" 
@@ -30,5 +52,5 @@ async function handleLayoutSelect(newLayout: string) {
         {{ layout.name }}
       </v-btn>
     </v-card-text>
-  </v-card>
+  </v-card> -->
 </template>
