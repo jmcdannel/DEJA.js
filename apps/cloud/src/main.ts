@@ -13,6 +13,7 @@ import { firebaseApp } from '@repo/firebase-config/firebase'
 
 // Components
 import App from './App.vue'
+import router from './router'
 
 // Styles
 import './style.css'
@@ -34,5 +35,6 @@ app.use(VueFire, {
   firebaseApp,
   modules: [VueFireAuth()],
 })
+app.use(router)
 app.use(vuetify)
 app.mount('#app')

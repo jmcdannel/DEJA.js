@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
 import { GithubAuthProvider } from 'firebase/auth'
 export const githubAuthProvider = new GithubAuthProvider()
 </script>
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getRedirectResult, signInWithPopup } from 'firebase/auth'
 import { useFirebaseAuth, useCurrentUser } from 'vuefire'
@@ -15,17 +15,18 @@ const auth = useFirebaseAuth()
 const user = useCurrentUser()
 
 // display errors if any
-const error = ref(null)
+const error = ref<Error | null>(null)
 
 async function handleGithubSignin() {
   // authComplete()
   try {
+    if (!auth) throw new Error('Authentication not initialized')
     const resp = await signInWithPopup(auth, githubAuthProvider)
     console.log('Github signin success', resp)
     authComplete()
   } catch (err) {
     console.error('Failed signinRedirect', err)
-    error.value = err
+    error.value = err as Error
   }
 }
 

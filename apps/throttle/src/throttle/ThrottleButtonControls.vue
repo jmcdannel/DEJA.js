@@ -1,11 +1,6 @@
 <script setup lang="ts">
-  import { defineEmits } from 'vue'
   
   const props  = defineProps({
-    speed: {
-      type: Number,
-      required: true
-    },
     disabled: {
       type: Boolean,
       default: false

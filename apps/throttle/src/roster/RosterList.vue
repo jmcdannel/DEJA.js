@@ -7,10 +7,10 @@ import { useLocos } from '@repo/modules/locos'
 import { useRoster } from '@/roster/useRoster'
 import RosterViewMenu from '@/roster/RosterViewMenu.vue'
 import AddLoco from '@/roster/AddLoco.vue'
-import LocoAvatar from '@/core/LocoAvatar/LocoAvatar.vue'
+import { LocoAvatar } from '@repo/ui'
 import RosterListItem from '@/roster/RosterListItem.vue'
 
-const viewAs = useStorage('@DEJA/prefs/rosterView', 'Array')
+const viewAs = useStorage('@DEJA/prefs/rosterView', 'grid')
 
 defineProps({
   allowAdd: {
@@ -41,7 +41,7 @@ async function handleThrottle(address: number) {
     <v-spacer></v-spacer>
     <v-toolbar-items color="purple">
       <v-btn icon="mdi-eye"></v-btn>
-      <v-btn  icon="mdi-filter"></v-btn>
+      <v-btn icon="mdi-filter"></v-btn>
     </v-toolbar-items>
   </v-toolbar>
   <main>
@@ -53,7 +53,7 @@ async function handleThrottle(address: number) {
           v-for="loco in locos" 
           :key="loco.address" 
           :loco="loco as Loco"
-          @selected="handleThrottle"
+          @select="handleThrottle"
           :showMenu="false" 
           variant="flat"
         />
@@ -68,7 +68,7 @@ async function handleThrottle(address: number) {
       </div>
     </template>
     <template v-else>
-      <RosterListItem v-for="loco in locos" :key="loco.address" :loco="loco as Loco" @selected="handleThrottle" />
+      <RosterListItem v-for="loco in locos" :key="((loco as unknown) as Loco).address" :loco="(loco as unknown) as Loco" @selected="handleThrottle" />
       <v-btn v-if="allowAdd"
         @click="showAdd = !showAdd" 
         color="pink"

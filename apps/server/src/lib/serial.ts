@@ -7,32 +7,32 @@ function handleOpen(err: Error | null): boolean | void {
     log.error('[SERIAL] Error opening port:', err.message)
     return
   }
-  log.info('[SERIAL] Port Opened')
   return true
 }
 
 interface ConnectOptions {
-  baudRate: number;
-  handleMessage: (data: string) => void;
-  path: string;
+  baudRate: number
+  handleMessage: (data: string) => void
+  path: string
 }
 
-const connect = ({ path, baudRate, handleMessage }: ConnectOptions): Promise<SerialPort | void> => {
+const connect = ({
+  path,
+  baudRate,
+  handleMessage,
+}: ConnectOptions): Promise<SerialPort | void> => {
   try {
     if (!path) {
       return Promise.reject(path)
-    } 
+    }
     return new Promise((resolve, reject) => {
       if (!path) {
         reject(new Error(`[SERIAL] No serial port specified: ${path}`))
         return
       }
-      log.await(
-        '[SERIAL] Attempting to connect to:',
-        path
-      )
+      log.await('[SERIAL] Attempting to connect to:', path)
       // Create a port
-      const port = new SerialPort({ autoOpen: false, baudRate, path, })
+      const port = new SerialPort({ autoOpen: false, baudRate, path })
       port.setEncoding('utf8')
       port.on('open', () => {
         log.complete('[SERIAL] Port opened:', path)
@@ -42,7 +42,6 @@ const connect = ({ path, baudRate, handleMessage }: ConnectOptions): Promise<Ser
       parser.on('data', handleMessage)
       port.open(handleOpen)
     })
-    
   } catch (err) {
     log.fatal('[SERIAL] Error opening port: ', err)
     return Promise.reject(err)
@@ -53,7 +52,7 @@ function handleSend(err: Error | null | undefined): void {
   if (err) {
     log.error('[SERIAL] Error on write:', err?.message)
   } else {
-    log.complete('[SERIAL] Data written to port')
+    // log.complete('[SERIAL] Data written to port')
   }
 }
 

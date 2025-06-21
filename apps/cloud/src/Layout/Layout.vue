@@ -37,7 +37,7 @@ const showAdd = ref(false)
   <LayoutTags />
   <hr class="my-8 border-sky-500" />
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-    <PortList :ports="layout?.ports" />
+    <PortList :ports="layout?.ports || []" />
     <v-card 
       class="mx-auto w-full h-full justify-between flex flex-col border-t-4 border-b-4"
       :prepend-icon="'mdi-usb'"

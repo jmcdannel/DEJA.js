@@ -1,54 +1,39 @@
 <script setup lang="ts">
-import { watch, type PropType } from 'vue'
-import type { Loco } from '@repo/modules/locos'
-import type { Throttle } from '@/throttle/types'
 import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.vue'
 import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
-import LocoAvatar from '@/core/LocoAvatar/LocoAvatar.vue'
-import MiniConsist from '@/consist/MiniConsist.vue'
+import { LocoAvatar, MiniConsist } from '@repo/ui'
 import { useThrottle } from '@/throttle/useThrottle'
 import { useRouter } from 'vue-router'
 
-const $router = useRouter()
-
+const emit = defineEmits(['release'])
 const props = defineProps({
-  throttle: {
-    type: Object as PropType<Throttle>,
+  address: {
+    type: Number,
     required: true
-  },
-  loco: {
-    type: Object as PropType<Loco>,
-    required: true
-  },
-  viewAs: {
-    type: String,
-    required: false
   }
 })
 
-const emit = defineEmits(['release'])
+const $router = useRouter()
 
 const { 
-currentSpeed, 
-adjustSpeed: handleAdjustSpeed, 
-handleThrottleChange,
-stop: handleStop,
-} = useThrottle(props.throttle)
-
-// Setup watchers
-watch( () => props.throttle, handleThrottleChange, { deep: true })
-
-function handleSelect(address: number) {
-  $router.push({ name: 'throttle', params: { address } })
-}
+  adjustSpeed: handleAdjustSpeed, 
+  currentSpeed, 
+  throttle,
+  loco,
+  stop: handleStop,
+} = useThrottle(props.address)
 
 </script>
 <template>
     <main v-if="throttle" class="p-2 overflow-hidden w-full h-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
-      <ThrottleHeader :address="throttle.address">
+      <ThrottleHeader>
         <template v-slot:left>
-          <LocoAvatar :loco="loco as Loco" :size="48" @selected="handleSelect" />
+          <LocoAvatar 
+            v-if="loco" 
+            :loco="loco" 
+            :size="48" 
+            @selected="$router.push({ name: 'throttle', params: { address } })" />
           <MiniConsist v-if="loco" :loco="loco" />
         </template>
         <template v-slot:center>
@@ -59,8 +44,8 @@ function handleSelect(address: number) {
         </template>
       </ThrottleHeader>
       <section class="throttle w-full h-full flex flex-row justify-around flex-grow pt-72 -mt-72">
-        <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">          
-          <ThrottleButtonControls :speed="currentSpeed" @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" />
+        <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
+          <ThrottleButtonControls @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" />
         </section>
       </section>
     </main>

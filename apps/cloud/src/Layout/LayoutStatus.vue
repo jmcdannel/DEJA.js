@@ -27,7 +27,7 @@ function handleSelect(_layoutId: string) {
           </span>
         </template>
         <template #default>
-          <span class="hidden lg:flex">{{ layoutId }}</span>
+          <span class=" lg:flex">{{ layoutId }}</span>
         </template>
       </v-chip></template>
     <template v-slot:default="{ isActive }">

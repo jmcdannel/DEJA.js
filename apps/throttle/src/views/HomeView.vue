@@ -24,6 +24,7 @@
         You are connected to layout: <span class="font-bold">{{ layoutId }}</span>
       </p>
       <DeviceeStatusList />
+      <v-spacer class="my-2" />
       <v-btn
         class="mb-4"
         color="error"

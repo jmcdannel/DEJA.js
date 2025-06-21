@@ -7,39 +7,34 @@ import ThrottleTile from '@/throttle/ThrottleTile.vue'
 import Turnouts from '@/turnouts/Turnouts.vue'
 // import Effects from '@/effects/Effects.vue'
 
-const { throttlesWithLocos } = useLocos()
+const { getThrottles } = useLocos()
+const throttles = getThrottles()
 
 </script>
 <template>
   <main class="@container">
-    <div class="conductor-layout grid grid-cols-1 @[960px]:grid-cols-3 gap-4 w-full">
-      <div class="column order-2 @[960px]:!order-1">
+    <div class="conductor-layout grid grid-cols-1 @[960px]:grid-cols-3 gap-2 w-full">
+      <div class="bg-black bg-opacity-60 rounded border-1 border-green-500 border-opacity-50 order-2 @[960px]:!order-1">
         <div class="@container column-content">
           <!-- Column 1 content goes here -->
-          <div v-if="throttlesWithLocos?.length" class="flex-grow flex flex-row flex-wrap relative overflow-auto items-end content-end">
-      <div class="flex-grow"></div>
-      <div 
-        class="basis-full @[960px]:basis-1/2"  
-        v-for="item in throttlesWithLocos"        
-        :key="item.address">
-          <ThrottleTile 
-            :throttle="item.throttle as Throttle" 
-            :loco="item.loco as Loco" 
-          />
-      </div>
-    </div>
+          <div v-if="throttles?.length" class="flex-grow flex flex-row flex-wrap gap-1 relative overflow-auto items-end content-end">
+            <div class="flex-grow"></div>
+            <div 
+              class="basis-full @[960px]:basis-1/2"
+              v-for="item in throttles" 
+              :key="item.address">
+                <ThrottleTile :address="item.address" />
+            </div>
+          </div>
         </div>
       </div>
       <div class="column order-1 @[960px]:!order-2">
         <div class="@container column-content min-h-[500px]">
           <!-- Column 2 content goes here -->
           <!-- <pre>{{throttles}}</pre> -->
-          <v-carousel v-if="throttlesWithLocos && throttlesWithLocos.length > 0" height="100%" hideDelimiters>
-            <v-carousel-item v-for="(item) in throttlesWithLocos" :key="item.address" draggable>
-              <SimpleThrottle
-                :throttle="item.throttle as Throttle"
-                :loco="item.loco as Loco"
-              />
+          <v-carousel v-if="throttles && throttles.length > 0" height="100%" hideDelimiters>
+            <v-carousel-item v-for="(item) in throttles" :key="item.address" draggable>
+              <SimpleThrottle :address="item.address" />
             </v-carousel-item>
           </v-carousel>
         </div>

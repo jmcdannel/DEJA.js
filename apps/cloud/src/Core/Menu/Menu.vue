@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import { useMenu } from '@/Core/Menu/useMenu'
-import { useColors } from '@/Core/UI/useColors'
 defineEmits(['change'])
-defineProps({ 
-  view: String
-})
-const { menu } = useMenu()
-const { colors } = useColors()
+const { currentItem, menu, handleMenu } = useMenu()
 
 </script>
 <template>
@@ -14,8 +9,8 @@ const { colors } = useColors()
       :key="item.label" 
       :title="item.label"
       :color="item.color || 'primary'"
-      :active="view === item.label"
-      @click="$emit('change', item.label)"
+      :active="currentItem === item.label"
+      @click="handleMenu(item)"
       link
     >
     <template #prepend>

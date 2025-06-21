@@ -1,5 +1,13 @@
+import {  useRouter } from 'vue-router'
+interface MenuItem {
+  label: string;
+  icon: string;
+  color: string;
+}
+
 export function useMenu() {
-  const menuConfig = [
+  const router = useRouter()
+  const menuConfig: MenuItem[] = [
     // {
     //   label: 'Dashboard',
     //   icon: 'mdi-view-dashboard',
@@ -52,6 +60,10 @@ export function useMenu() {
     },
   ]
 
+  function handleMenu(item:MenuItem) {
+    router.push({ name: item.label })
+  }
+
   function getMenuItem(label: string) {
     return menuConfig.find((item) => item.label === label)
   }
@@ -59,6 +71,8 @@ export function useMenu() {
   return {
     menu: menuConfig,
     getMenuItem,
+    handleMenu,
+    currentItem: router.currentRoute.value.name,
   }
 }
 

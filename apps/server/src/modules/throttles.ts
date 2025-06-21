@@ -68,7 +68,8 @@ export async function handleThrottleChange(snapshot: DocumentData): Promise<void
     //   loco
     // )
     if (loco?.consist && loco?.consist?.length > 0) {
-      loco?.consist.forEach(async (consistLoco) => {
+      loco?.
+      consist.forEach(async (consistLoco) => {
         let consistSpeed
         if (throttleCmd.speed > 0) {
           //moving forward
@@ -80,7 +81,7 @@ export async function handleThrottleChange(snapshot: DocumentData): Promise<void
             }
           } else {
             // facing backward
-            consistSpeed = throttleCmd.speed - consistLoco.trim
+            consistSpeed = -throttleCmd.speed - consistLoco.trim
             if (consistSpeed > 0) {
               consistSpeed = -1
             }
@@ -93,11 +94,9 @@ export async function handleThrottleChange(snapshot: DocumentData): Promise<void
           }
         } else {
           // facing backward
-          consistSpeed = throttleCmd.speed + consistLoco.trim
+          consistSpeed = -throttleCmd.speed + consistLoco.trim
           if (consistSpeed < 0) {
             consistSpeed = 1
-          } else {
-            consistSpeed = 0
           }
         }
         
