@@ -126,11 +126,12 @@ export const useLayout = () => {
     }
   }
 
-  async function connectDevice(serial: string, device: Device) {
+  async function connectDevice(device: Device, serial?: string, topic?: string) {
     try {
       const payload = {
+        device: device.id,
         serial,
-        device: device?.id || 'unknown',
+        topic
       }
 
       sendDejaCommand({ action: 'connect', payload })

@@ -76,20 +76,20 @@ export function turnoutCommand(
     if (turnout.device === 'dccex') {
       return turnout
     }
-    const commands: (KatoCommand | ServoCommand)[] = []
+    let command: KatoCommand | ServoCommand | undefined
 
     switch (turnout?.type) {
       case 'kato':
-        commands.push(katoCommand(turnout))
+        command = katoCommand(turnout)      
         break
       case 'servo':
-        commands.push(servoCommand(turnout))
+        command = servoCommand(turnout) 
         break
       default:
         // no op
         break
-    }
-    return commands?.[0] //  TODO: refactor to return all commands
+    }  
+    return command //  TODO: refactor to return all commands
   } catch (err) {
     log.error(`[COMMANDS] turnoutCommand ${err}`)
   }
@@ -106,14 +106,68 @@ function katoCommand(turnout: Turnout): KatoCommand {
   }
 }
 
-function servoCommand(turnout: Turnout): ServoCommand {
+function servoCommand(turnout: Turnout): ServoCommand | undefined {
+  
+  if (turnout.straight === undefined || turnout.divergent === undefined) {
+    log.error(
+      `[COMMANDS] servoCommand: straight/divergent values are undefined for turnout ${turnout.id}`
+    )
+    return undefined
+  }
+  if (isNaN(turnout.straight) || isNaN(turnout.divergent)) {
+    log.error(
+      `[COMMANDS] servoCommand: Invalid straight/divergent values for turnout ${turnout.id}`
+    )
+    return undefined
+  }
+  if (turnout.turnoutIdx === undefined) {
+    log.error(
+      `[COMMANDS] servoCommand: turnoutIdx is undefined for turnout ${turnout.id}`
+    )
+    return undefined
+  }
+  if (!turnout.device) {
+    log.error(`[COMMANDS] servoCommand: device is undefined for turnout ${turnout.id}`)
+    return undefined
+  }
+  if (turnout.straight === undefined || turnout.divergent === undefined) {
+    log.error(
+      `[COMMANDS] servoCommand: straight/divergent is undefined for turnout ${turnout.id}`
+    )
+    return undefined
+  }
+  if (turnout.straight === turnout.divergent) {
+    log.error(
+      `[COMMANDS] servoCommand: straight and divergent values are the same for turnout ${turnout.id}`
+    )
+    return undefined
+  }
+  if (turnout.straight < 0 || turnout.divergent < 0) {
+    log.error(
+      `[COMMANDS] servoCommand: straight/divergent values cannot be negative for turnout ${turnout.id}`
+    )
+    return undefined
+  }
+  if (turnout.straight > 180 || turnout.divergent > 180) {
+    log.error(
+      `[COMMANDS] servoCommand: straight/divergent values cannot be greater than 180 for turnout ${turnout.id}`
+    )
+    return undefined
+  }
+  const current = turnout.state ? parseInt(turnout.divergent) : parseInt(turnout.straight)
+  if (isNaN(current)) {
+    log.error(
+      `[COMMANDS] servoCommand: Invalid current value for turnout ${turnout.id}`
+    )
+    return undefined
+  }
   return {
     action: 'servo',
     device: turnout.device,
     payload: {
-      current: !turnout.state ? turnout.straight : turnout.divergent,
-      servo: turnout.turnoutIdx,
-      value: turnout.state ? turnout.straight : turnout.divergent,
+      current,
+      servo: parseInt(turnout.turnoutIdx),
+      value: turnout.state ? parseInt(turnout.straight) : parseInt(turnout.divergent),
     },
   }
 }

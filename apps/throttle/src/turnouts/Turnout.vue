@@ -27,7 +27,7 @@ async function handleTurnouts (event: Event) {
   const target = event.target as HTMLInputElement;
   console.log('handleTurnouts', target.checked, props.turnoutId, props.turnout)
   if (props.turnoutId) {
-    await switchTurnout({...props.turnout, id: props.turnoutId, state: target.checked} as Turnout)
+    await switchTurnout(props.turnout)
   }
 }
 

@@ -168,7 +168,7 @@ async function connectMqttDevice(device: Device): Promise<void> {
         payload: { device },
       })
     } else {
-      const topic = `DEJA/${layoutId}/${device}`
+      const topic = `DEJA/${layoutId}/${device.id}`
       mqtt.subscribe(topic)
 
       // await broadcast({

@@ -33,7 +33,7 @@ watch(() => deviceType.value?.color, (newVal) => {
 })
 
 async function handleConnect () {
-  connectDevice(serial.value, props.device)
+  connectDevice(props.device, serial.value, props.device?.topic)
 }
 
 async function handelAutoConnect (checked: boolean | null) {

@@ -38,7 +38,7 @@ export function useTurnouts() {
       await setDoc(
         doc(db, `layouts/${layoutId.value}/turnouts`, turnout.id),
         {
-          state: Boolean(turnout.state),
+          state: Boolean(!turnout.state),
           timestamp: serverTimestamp(),
         },
         { merge: true }
