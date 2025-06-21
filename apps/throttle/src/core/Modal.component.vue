@@ -22,12 +22,12 @@
 
 </script>
 <template>
-  <dialog class="modal" ref="_modalRef">
+  <v-dialog ref="_modalRef">
     <div class="modal-box">
       <slot></slot>
     </div>
     <form method="dialog" class="modal-backdrop">
       <button @click="closeModal">close</button>
     </form>
-  </dialog>
+  </v-dialog>
 </template>

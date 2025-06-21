@@ -52,7 +52,7 @@ function handleSend(err: Error | null | undefined): void {
   if (err) {
     log.error('[SERIAL] Error on write:', err?.message)
   } else {
-    log.complete('[SERIAL] Data written to port')
+    // log.complete('[SERIAL] Data written to port')
   }
 }
 

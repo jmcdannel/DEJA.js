@@ -40,7 +40,7 @@ export function useLocos() {
     return result
   }
 
-  function getLoco(address: Number) {
+  function getLoco<Loco>(address: Number) {
     const locoDoc = () =>
       layoutId.value ? doc(db, `layouts/${layoutId.value}/locos`, address.toString()) : null
 

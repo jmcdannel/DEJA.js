@@ -8,7 +8,8 @@
     ".": "./src/index.ts",
     "./LocoAvatar": "./src/LocoAvatar.vue",
     "./Consist": "./src/Consist/Consist.vue",
-    "./MiniConsist": "./src/Consist/MiniConsist.vue"
+    "./MiniConsist": "./src/Consist/MiniConsist.vue",
+    "./Functions": "./src/Functions/Functions.vue"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

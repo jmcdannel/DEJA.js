@@ -3,9 +3,10 @@ import { useStorage } from '@vueuse/core'
 import { deleteDoc, doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { useDocument } from 'vuefire'
 import type { Throttle } from '@/throttle/types'
-import { useLocos } from '@repo/modules/locos'
+import { type Loco, useLocos } from '@repo/modules/locos'
 import { db } from '@repo/firebase-config/firebase'
 import { getSignedSpeed } from '@/throttle/utils'
+
 
 export const useThrottle = (address: Number) => {
   const { getLoco } = useLocos()
@@ -63,10 +64,10 @@ export const useThrottle = (address: Number) => {
     adjustSpeed,
     currentSpeed,
     direction,
-    loco,
+    loco: loco as unknown as Loco,
     releaseThrottle,
     stop,
-    throttle,
+    throttle: throttle as unknown as Throttle,
     updateSpeed,
   }
 }

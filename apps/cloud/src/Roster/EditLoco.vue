@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useLocos, ROADNAMES, type Loco } from '@repo/modules/locos'
-import ViewJson from '@/Core/UI/ViewJson.vue';
-import EditConsist from '@/Roster/Consist/EditConsist.vue'
+import { computed, ref, watch } from 'vue'
+import {  useRoute, useRouter } from 'vue-router'
+import { useLocos, ROADNAMES, type Loco, type RoadName } from '@repo/modules/locos'
+import ViewJson from '@/Core/UI/ViewJson.vue'
+import { Consist } from '@repo/ui'
 import Functions from '@/Roster/Functions/Functions.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 
@@ -16,47 +17,45 @@ const locoTypes = [
   'Electric'
 ]
 
-const props = defineProps({
-  loco: Object
-})
-const emit = defineEmits(['close'])
+const route = useRoute()
+const router = useRouter()
 const { getLoco, updateLoco, getRoadname } = useLocos()
 
-const locoDoc = getLoco(props.loco?.id ? props.loco.id : null)
+const locoDoc = getLoco(parseInt(route.params.address.toString()))
+const loco = computed(() => locoDoc.value as Loco || null)
 
 const editColor = ref(false)
-const address = ref(props.loco?.address || null)
-const name = ref(props.loco?.name || '')
-const roadname = ref(getRoadname(props.loco?.meta?.roadname) || null)
-const roadnameVal = ref(roadname.value?.value)
-const color = ref(props.loco?.meta?.color || roadname?.value?.color || 'pink')  
+
+const roadname = ref<RoadName | undefined>(undefined)
+const color = ref<string>('pink')
 const loading = ref(false)
 const rules:ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
-// const color = getColor(roadname?.value?.color)
+
+watch(loco, (newLoco) => {
+  if (newLoco) {
+    roadname.value = getRoadname(newLoco.meta?.roadname || '')
+    color.value = newLoco.meta?.color || roadname.value?.color || 'pink'
+  }
+}, { immediate: true })
 
 async function submit () {
   loading.value = true
+  console.log('Submitting loco', {
+    ...loco.value,
+  })
 
-  if (!!address && props.loco?.id) {
-    const loco: Loco = {
-      ...props.loco,
-      address: address.value,
-      name: name.value,
-      meta: {
-        color: color.value,
-        roadname: roadnameVal.value || undefined
-      },
-      consist: props.loco?.consist || [],
-      functions: props.loco?.functions || [],
-    }
-
-    await updateLoco(props.loco.id, {...loco})
-  }
+  await updateLoco(loco.value.id, {
+    meta: {
+      roadname: roadname.value?.value || '',
+      color: color.value,
+    },
+    ...loco.value,
+  })
 
   loading.value = false
-  emit('close')
+  router.push({ name: 'Roster' })
 }
 
 </script>
@@ -64,10 +63,10 @@ async function submit () {
   <v-divider class="my-8 border-pink-500"></v-divider>
   <v-label class="m-2 text-pink-400 text-2xl">Edit Loco</v-label>
   <v-divider class="my-4 border-pink-500"></v-divider>
-  <v-form validate-on="submit lazy" @submit.prevent="submit">
+  <v-form v-if="loco" validate-on="submit lazy" @submit.prevent="submit">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
       <v-text-field
-        v-model="address"
+        v-model="loco.address"
         label="DCC Address"
         variant="outlined"
         prepend-icon="mdi-train"
@@ -82,7 +81,7 @@ async function submit () {
         </template>
       </v-text-field>
       <v-text-field
-        v-model="name"
+        v-model="loco.name"
         label="Name"
         variant="outlined"
         :color="color"
@@ -92,14 +91,15 @@ async function submit () {
       </v-text-field>
     </div>
     <v-divider class="my-4"></v-divider>
+    <p>{{ (getRoadname(loco.meta?.roadname || ''))?.label }}</p>
     <v-chip-group
-        v-model="roadnameVal"
+        v-model="roadname"
         selected-class="text-primary"
         column
         mandatory
       >
         <v-chip
-          v-for="road in ROADNAMES" :key="road.value" :value="road.value" :text="road.label"
+          v-for="road in ROADNAMES" :key="road.value" :value="road" :text="road.label"
           variant="outlined"
           filter
         ></v-chip>
@@ -119,7 +119,7 @@ async function submit () {
       </v-btn>
     </section>
     <v-dialog max-width="80vw" v-model="editColor">
-      <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.loco?.meta?.color ?? 'pink'"></ColorPicker>
+      <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = loco?.meta?.color ?? 'pink'"></ColorPicker>
     </v-dialog>
 
     <div class=" my-4">   
@@ -144,13 +144,13 @@ async function submit () {
   <v-label class="m-2 text-pink-400 text-2xl">Consist</v-label>
   <v-divider class="my-4 border-pink-500"></v-divider>
 
-  <EditConsist :loco="locoDoc as Loco" :color="color" />
+  <Consist v-if="loco" :loco="loco" />
 
   <v-divider class="my-8 border-pink-500"></v-divider>
   <v-label class="m-2 text-pink-400 text-2xl">Functions</v-label>
   <v-divider class="my-4 border-pink-500"></v-divider>
 
-  <Functions v-if="locoDoc" :loco="locoDoc" />
+  <Functions v-if="loco" :loco="loco" />
 
   <ViewJson :json="loco" label="RAW Loco Data"></ViewJson>
   <ViewJson :json="loco?.consist" label="RAW Cosist Data"></ViewJson>
