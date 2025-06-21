@@ -42,17 +42,16 @@ watch(loco, (newLoco) => {
 
 async function submit () {
   loading.value = true
+  const newLoco = loco.value || {}
+  newLoco.meta = newLoco.meta || {}
+  newLoco.meta.roadname = roadname.value?.value || ''
+  newLoco.meta.color = color.value || 'primary'
+  
   console.log('Submitting loco', {
     ...loco.value,
   })
 
-  await updateLoco(loco.value.id, {
-    meta: {
-      roadname: roadname.value?.value || '',
-      color: color.value,
-    },
-    ...loco.value,
-  })
+  await updateLoco(loco.value.id, newLoco)
 
   loading.value = false
   router.push({ name: 'Roster' })

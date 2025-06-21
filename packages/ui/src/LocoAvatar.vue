@@ -37,16 +37,32 @@ const color = ref(props.color || props.loco?.meta?.color || 'primary')
 </script>
 <template>
   <div class="relative flex" v-if="loco">
-     <v-btn v-if="!showMenu"
-      :color="loco?.meta?.color || color"
-      rounded="circle"
-      @click="$emit('select', loco.address)"
-      :size="size"
-      :text="loco.address?.toString() || '?'"
-      :variant="variant"
-    />  
-    <v-speed-dial
-      v-else
+    <template v-if="!showMenu">
+      <v-badge v-if="showConsist && loco?.consist?.length"
+        color="primary"
+        :content="loco?.consist?.length || 0"
+        >
+        <v-btn
+          :color="loco?.meta?.color || color"
+          rounded="circle"
+          @click="$emit('select', loco.address)"
+          :size="size"
+          stacked
+          :text="loco.address?.toString() || '?'"
+          :variant="variant"
+        />
+      </v-badge>
+      <v-btn v-else
+        :color="loco?.meta?.color || color"
+        rounded="circle"
+          @click="$emit('select', loco.address)"
+        :size="size"
+        :text="loco.address?.toString() || '?'"
+        :variant="variant"
+      />  
+    </template>
+     
+    <v-speed-dial v-else
       v-model="isMenuOpen"
       location="left center"
       transition="fade-transition"
@@ -54,11 +70,9 @@ const color = ref(props.color || props.loco?.meta?.color || 'primary')
       contained
       >
       <template v-slot:activator="{ props: activatorProps }">
-        <v-badge v-if="loco.consist?.length && showConsist"
+        <v-badge v-if="showConsist && loco?.consist?.length"
           color="primary"
           :content="loco?.consist?.length || 0"
-          offset-x="5"
-          offset-y="5"
           >
           <v-btn
             :color="loco?.meta?.color || color"
