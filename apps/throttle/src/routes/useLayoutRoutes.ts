@@ -1,4 +1,5 @@
 import { computed, ref, watch } from 'vue'
+import type { Efx } from '@repo/modules/efx/types'
 import { useEfx } from '@repo/modules/effects'
 import { useTurnouts } from '@repo/modules/turnouts'
 
@@ -170,14 +171,52 @@ export const useLayoutRoutes = () => {
     }
   }
 
+  async function runRoute(route: Efx): Promise<void> {
+    if (route) {
+      isRunning.value = true
+      percentComplete.value = 0
+      runEffect({ ...route, id: route.id, state: true })
+      const steps = route?.on?.length || 0
+      console.log('Running route:', steps, route)
+
+      const interval = setInterval(() => {
+        if (percentComplete.value < 100) {
+          percentComplete.value += 100 / steps
+          console.log('Percent complete:', percentComplete.value)
+        }
+      }, 1000)
+
+      // Clear the interval after the effect is done
+      setTimeout(() => {
+        clearInterval(interval)
+        percentComplete.value = 0
+        p1.value = null
+        p2.value = null
+        isRunning.value = false
+      }, steps * 1000 + 500)
+    } else {
+      console.log('No route found with ID:', route.id)
+    }
+  }
+
+  function clearP1() {
+    p1.value = null
+  }
+  function clearP2() {
+    p2.value = null
+  }
+
   return {
+    clearP1,
+    clearP2,
     getMapClasses,
+    handleMapClick,
     isRunning,
     p1,
     p2,
     percentComplete,
     routes,
-    handleMapClick,
+    runRoute,
   }
 }
 
