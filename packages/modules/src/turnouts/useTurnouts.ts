@@ -4,6 +4,8 @@ import {
   setDoc,
   doc,
   getDoc,
+  query, 
+  orderBy,
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
@@ -14,9 +16,14 @@ export function useTurnouts() {
   const layoutId = useStorage('@DEJA/layoutId', '')
 
   const turnoutsCol = () =>
-    layoutId.value ? collection(db, `layouts/${layoutId.value}/turnouts`) : null
+    layoutId.value ? query(collection(db, `layouts/${layoutId.value}/turnouts`),  orderBy('name')) : null
 
   function getTurnouts() {
+    const turnouts = useCollection(turnoutsCol)
+    return turnouts
+  }
+
+  function getDeviceTurnouts() {
     const turnouts = useCollection(turnoutsCol)
     return turnouts
   }
@@ -54,7 +61,8 @@ export function useTurnouts() {
       await setDoc(doc(db, `layouts/${layoutId.value}/turnouts`, id), {
         ...turnout,
         timestamp: serverTimestamp(),
-      })
+      },
+      { merge: true })
       return true
     } catch (e) {
       console.error('Error adding throttle: ', e)

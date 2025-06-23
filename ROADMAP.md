@@ -11,3 +11,10 @@
 [ ] turnout clamp
 [x] conductor sync speeds
 
+[ ] sortable / draggable
+[ ] bigger throttle buttons
+[ ] throttle slider
+[ ] logos
+[ ] compact turnouts
+[ ] mobile menu
+

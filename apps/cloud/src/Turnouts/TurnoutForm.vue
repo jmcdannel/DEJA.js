@@ -34,7 +34,6 @@ const editEffect = ref(false)
 const editType = ref(false) // TODO: remove - don't allow this to be changed
 const editDevice = ref(false) // TODO: remove - don't allow this to be changed
 
-const turnoutId = ref(props.turnout?.id || '')
 const name = ref(props.turnout?.name || '')
 const desc = ref(props.turnout?.desc || '')
 const index = ref(props.turnout?.turnoutIdx || '')
@@ -50,18 +49,9 @@ const rules: ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
 
-// const effectOptions = effects?.value.map((efx) => ({
-//   title: `${efx.name} [${efx.id}]`,
-//   value: efx.id
-// }))
-
-watch(name, autoId)
-watch(device, autoId)
-watch(index, autoId)
-
 function autoId() {
   console.log('autoId', name.value, device.value, index.value)
-  turnoutId.value = name.value && device.value && index.value 
+  return name.value && device.value && index.value 
     ? `${slugify(name.value)}-${slugify(index.value.toString())}-${slugify(device.value)}` 
     : ''
 }
@@ -69,25 +59,31 @@ function autoId() {
 async function submit (e: Promise<{ valid: boolean }>): Promise<void> {
   loading.value = true
   const results = await e
+  const turnoutId = props.turnout?.id || autoId()
   if (results.valid) {
     const turnout: Turnout = {
-      id: props.turnout?.id || turnoutId.value,
       device: device.value,
+      id: turnoutId,
       name: name.value,
       desc: desc.value,
-      turnoutIdx: parseInt(index.value as string),
       type: turnoutType.value,
       tags: tags.value,
       state: false,
       color: color.value,
-      straight: straight.value ? Number(straight.value) : undefined,
-      divergent: divergent.value ? Number(divergent.value) : undefined
+    }
+    if (straight.value) {
+      turnout.straight = Number(straight.value)
+    }
+    if (divergent.value) {
+      turnout.divergent = Number(divergent.value)
+    }
+    if (index.value) {
+      turnout.turnoutIdx = Number(index.value )
     }
     if (effectId.value) {
       turnout.effectId = effectId.value
     }
-    await setTurnout(props.turnout?.id || turnoutId.value, turnout)
-    console.log(turnout, tags.value)
+    await setTurnout(turnoutId, turnout)
     loading.value = false
     reset()
     emit('close')
@@ -104,7 +100,6 @@ function handleClose() {
 }
 
 function reset(){
-  turnoutId.value = ''
   name.value = ''
   desc.value = ''
   color.value = ''
@@ -148,15 +143,7 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
         variant="outlined"
           :color="color"
       ></v-text-field>
-      <v-text-field
-        v-model="turnoutId"
-        label="ID"
-        variant="outlined"
-        :color="color"
-        :rules="rules.required"
-        :disabled="!!props.turnout?.id"
-      ></v-text-field>
-      <v-text-field
+      <v-text-field v-if="turnoutType === 'servo'"
           v-model="straight"
           label="Straight"
           variant="outlined"
@@ -166,7 +153,7 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
           :rules="rules.required"
         >
       </v-text-field>
-      <v-text-field
+      <v-text-field v-if="turnoutType === 'servo'"
         v-model="divergent"
         label="Divergent"
         variant="outlined"

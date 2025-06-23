@@ -1,15 +1,16 @@
 export interface Turnout {
-  id: string
-  name: string
-  device: string
-  desc?: string
-  turnoutIdx: number
-  effectId?: string
-  type: string
-  state: boolean
   color?: string
-  tags?: Array<string>
-  straight?: number
+  desc?: string
+  device: string
   divergent?: number
+  effectId?: string
+  id: string
   lastUpdated?: string
+  name: string
+  order?: number
+  state: boolean
+  straight?: number
+  tags?: Array<string>
+  turnoutIdx?: number
+  type: string
 }

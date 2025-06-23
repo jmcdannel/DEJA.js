@@ -8,6 +8,7 @@ import TurnoutFilters from '@/turnouts/TurnoutFilters.vue'
 const VIEW_OPTIONS = [
   { title: 'List', value: 'list' },
   { title: 'Button', value: 'button' },
+  { title: 'Switch', value: 'switch' },
 ]
 
 const showViewMenu = ref(false)
@@ -45,7 +46,7 @@ function filter(turnouts: Turnout[]) {
     </v-card>
   </v-dialog>
   <TurnoutFilters v-model:show="showFilters" v-model:selected="selectedDevices"></TurnoutFilters>
-  <div class="grid grid-cols-1 @[960px]:grid-cols-3 xlg:grid-cols-4 gap-2 w-full p-4">
+  <div class="grid grid-cols-2 @[960px]:grid-cols-3 xlg:grid-cols-4 gap-2 w-full p-4">
     <TurnoutCmp 
       v-for="item in filter(turnouts as Turnout[])"
       :key="item.id" 

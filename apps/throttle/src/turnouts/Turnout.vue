@@ -33,7 +33,7 @@ async function handleTurnouts (event: Event) {
 
 </script>
 <template>
-  <template v-if="viewAs.includes('list')">
+  <template v-if="viewAs.includes('switch')">
     <v-card 
       class="shadow-xl my-1 p-[1px] rounded-full"
       :class="isRunning ? 'bg-gradient-to-r from-indigo-400 to-pink-900 ' : ''"
@@ -51,6 +51,20 @@ async function handleTurnouts (event: Event) {
       </v-card-title>
     </v-card>
   </template>
+  <template v-else-if="viewAs.includes('list')">
+    <v-btn 
+      class="m-1 whitespace-nowrap overflow-hidden text-ellipsis"
+      :color="turnout?.color || 'primary'"
+      :disabled="isRunning"
+      :loading="isRunning"
+      variant="tonal"
+      @click="handleTurnouts">
+      <template #prepend>
+        <MdOutlineForkLeft class="w-6 h-6 stroke-none" :color="turnout?.color || 'primary'"></MdOutlineForkLeft>
+      </template>{{turnout?.name}} -
+      {{turnout?.desc || turnout?.name}}
+    </v-btn>
+  </template>
   <template v-else-if="viewAs.includes('button')">
     <v-btn 
       class="m-1"
@@ -62,8 +76,7 @@ async function handleTurnouts (event: Event) {
       <template #prepend>
         <MdOutlineForkLeft class="w-6 h-6 stroke-none" :color="turnout?.color || 'primary'"></MdOutlineForkLeft>
       </template>
-      {{turnout?.name}} -
-      {{turnout?.desc || turnout?.name}}
+      {{turnout?.name}}
     </v-btn>
   </template>
 </template>
