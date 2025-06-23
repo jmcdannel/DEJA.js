@@ -33,6 +33,7 @@ async function handleGithubSignin() {
 
 function authComplete() {
   emit('auth', {})
+
 }
 
 onMounted(() => {

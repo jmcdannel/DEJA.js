@@ -1,15 +1,4 @@
-import {
-  collection,
-  getDocs,
-  onSnapshot,
-  query,
-  orderBy,
-  setDoc,
-  where,
-  type DocumentData,
-} from 'firebase/firestore'
-import { ref, onChildAdded } from 'firebase/database'
-import { db, rtdb } from '@repo/firebase-config/firebase-node'
+import { db, rtdb } from '@repo/firebase-config/firebase-admin-node'
 import { initialize } from './modules/layout'
 import { handleThrottleChange } from './modules/throttles'
 import { handleTurnoutChange } from './modules/turnouts'
@@ -19,79 +8,53 @@ import { handleDccChange } from './lib/dcc'
 import { handleDejaCommands } from './lib/deja'
 import { log } from './utils/logger'
 
-const layoutId = process.env.LAYOUT_ID
+const layoutId = process.env.LAYOUT_ID || 'betatrack'
 
 async function listen(): Promise<void> {
-  const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId}`)
-  onChildAdded(dccCommandsRef, (data) => {
+  const dccCommandsRef = rtdb.ref(`dccCommands/${layoutId}`)
+  dccCommandsRef.on('child_added', (data) => {
     // log.log('listen.dccCommands', data.key, data.val())
-    handleDccChange(data)
+    handleDccChange(data.val())
   })
 
-  const dejaCommandsRef = ref(rtdb, `dejaCommands/${layoutId}`)
-  onChildAdded(dejaCommandsRef, (data) => {
+  const dejaCommandsRef = rtdb.ref(`dejaCommands/${layoutId}`)
+  dejaCommandsRef.on('child_added', (data) => {
     // log.log('listen.dejaCommands', data.key, data.val())
-    handleDejaCommands(data)
+    handleDejaCommands(data.val())
   })
 
-  onSnapshot(
-    query(
-      collection(db, `layouts/${layoutId}/throttles`),
-      orderBy('timestamp', 'desc')
-    ),
-    handleThrottleChange
-  )
-  onSnapshot(
-    query(
-      collection(db, `layouts/${layoutId}/effects`),
-      orderBy('timestamp', 'desc')
-    ),
-    handleEffectChange
-  )
-  onSnapshot(
-    query(
-      collection(db, `layouts/${layoutId}/turnouts`),
-      orderBy('timestamp', 'desc')
-    ),
-    handleTurnoutChange
-  )
+  
+  db.collection(`layouts/${layoutId}/throttles`).onSnapshot(handleThrottleChange)
+  db.collection(`layouts/${layoutId}/effects`).onSnapshot(handleEffectChange)
+  db.collection(`layouts/${layoutId}/turnouts`).onSnapshot(handleTurnoutChange)
+  // db.collection(`layouts/${layoutId}/sensors`).onSnapshot(handleSensorChange)
 
-  onSnapshot(
-    query(
-      collection(db, `layouts/${layoutId}/sensors`),
-      where('enabled', '==', true)
-    ),
-    handleSensorChange
-  )
 }
 
 async function resetThrottles(): Promise<void> {
   log.complete('reset throttles', layoutId)
-  const querySnapshot = await getDocs(
-    collection(db, `layouts/${layoutId}/throttles`)
-  )
-  querySnapshot.forEach((d: DocumentData) => {
-    setDoc(d.ref, {
-      ...d.data(),
+  
+  const throttlesSnapshot = await db.collection('layouts').doc(layoutId).collection('throttles').get()
+  throttlesSnapshot.docs.map((doc) => {
+    doc.ref.set({
+      ...doc.data(),
       speed: 0,
       direction: false,
-    }),
-      { merge: true }
+    }, { merge: true })
   })
 }
 
 async function resetDevices(): Promise<void> {
-  const querySnapshot = await getDocs(
-    collection(db, `layouts/${layoutId}/devices`)
-  )
-  querySnapshot.forEach((d: DocumentData) => {
-    setDoc(d.ref, {
-      ...d.data(),
+  log.complete('reset devices', layoutId)
+
+  const devicesSnapshot = await db.collection('layouts').doc(layoutId).collection('devices').get()
+  devicesSnapshot.docs.map((doc) => {
+    doc.ref.set({
+      ...doc.data(),
       client: null,
       isConnected: false,
       lastConnected: null,
-    }),
-      { merge: true }
+    }, { merge: true })
   })
 }
 
@@ -115,8 +78,12 @@ export async function connect(): Promise<boolean> {
 }
 
 export async function disconnect(): Promise<void> {
-  log.start('Disconnecting from DejaCloud', layoutId)
-  await reset()
+  try {
+    log.start('Disconnecting from DejaCloud', layoutId)
+    await reset()
+  } catch (error) {
+    log.error('Error in disconnect:', error)
+  }
 }
 
 export const dejaCloud = {

@@ -1,12 +1,9 @@
 import type { Effect, MacroItem } from '@repo/modules/effects'
 import {
-  doc,
-  getDoc,
   serverTimestamp,
-  setDoc,
   type DocumentData,
 } from 'firebase/firestore'
-import { db } from '@repo/firebase-config/firebase-node'
+import { db } from '@repo/firebase-config/firebase-admin-node'
 import { log } from '../utils/logger.js'
 import { dcc, type OutputPayload } from '../lib/dcc.js'
 import { layout } from './layout.js'
@@ -22,7 +19,7 @@ export interface EffectCommand {
   }
 }
 
-const layoutId = process.env.LAYOUT_ID
+const layoutId = process.env.LAYOUT_ID || 'betatrack'
 
 const pinCommand = (effect: Effect): EffectCommand => ({
   action: 'pin',
@@ -43,13 +40,17 @@ const ialedCommand = (effect: Effect): string => {
 }
 
 async function getEffect(id: string): Promise<Effect | undefined> {
-  const deviceRef = doc(db, `layouts/${layoutId}/effects`, id)
-  const docSnap = await getDoc(deviceRef)
-  if (docSnap.exists()) {
-    return { ...docSnap.data(), id: docSnap.id } as Effect
+  if (!layoutId) {
+    log.error('Layout ID is not set')
+    return undefined
   }
-  log.error('No such document!')
-  return undefined
+  if (!id) {
+    log.error('Effect ID is not provided')
+    return undefined
+  }
+  const effectData = await db.collection('layouts').doc(layoutId)
+    .collection('effects').doc(id).get()
+  return { id: effectData.id, ...effectData.data() } as Effect
 }
 
 export function getEffectCommand(
@@ -97,17 +98,17 @@ async function handleMacroItem(
   macroState: boolean
 ): Promise<void> {
   if (item.type === 'turnout' && item.id) {
-    await setDoc(
-      doc(db, `layouts/${layoutId}/turnouts`, item.id.toString()),
-      { state },
-      { merge: true }
-    )
+    db.collection('layouts').doc(layoutId).collection('turnouts').doc(item.id.toString()).set({
+      state,
+      timestamp: serverTimestamp(),
+    }, { merge: true })
+    // log.log('handleMacroItem turnout', item)
   } else if (item.type === 'effect' && item.id) {
-    await setDoc(
-      doc(db, `layouts/${layoutId}/effects`, item.id.toString()),
-      { state },
-      { merge: true }
-    )
+    db.collection('layouts').doc(layoutId).collection('effects').doc(item.id.toString()).set({
+      state,
+      timestamp: serverTimestamp(),
+    }, { merge: true })
+    
   } else if (
     item.type === 'throttle' &&
     macroState === state &&
@@ -115,16 +116,11 @@ async function handleMacroItem(
     item.speed !== undefined
   ) {
     // log.log('handleMacroItem throttle', item)
-    await setDoc(
-      doc(db, `layouts/${layoutId}/throttles`, item.id.toString()),
-      {
-        direction: item?.direction === 'forward',
-        speed: item.speed,
-        timestamp: serverTimestamp(),
-      },
-      { merge: true }
-    )
-    // log.log('handleMacroItem throttle DONE')
+    db.collection('layouts').doc(layoutId).collection('throttles').doc(item.id.toString()).set({
+      direction: item?.direction === 'forward',
+      speed: item.speed,
+      timestamp: serverTimestamp(),
+    }, { merge: true })
   }
   // log.log('handleMacroItem', item)
 }

@@ -26,7 +26,13 @@ process.on('uncaughtException', async (error) => {
 })
 process.on('unhandledRejection', async (reason, promise) => {
   log.fatal('Unhandled Rejection at:', promise, 'reason:', reason)
-  await disconnect()
+  try {
+    await disconnect()
+  } catch (error) {
+    log.error('Error in cleanup:', error)
+  } finally {
+    process.exit(1) // Exit the process with an error code
+  }
 })
 
 await main()

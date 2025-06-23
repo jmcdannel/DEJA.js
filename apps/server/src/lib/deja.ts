@@ -1,7 +1,7 @@
 import { SerialPort } from 'serialport'
 import { type DataSnapshot, ref, remove } from 'firebase/database'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
-import { db, rtdb } from '@repo/firebase-config/firebase-node'
+import { db, rtdb } from '@repo/firebase-config/firebase-admin-node'
 import type { BroadcastMessage } from '../broadcast'
 import { layout } from '../modules/layout'
 import { broadcast } from '../broadcast'
@@ -49,60 +49,47 @@ export async function handleDejaMessages(
     const { action, payload } = data
     switch (action) {
       case 'portList':
-        await setDoc(
-          doc(db, 'layouts', layoutId),
-          { ports: payload },
-          { merge: true }
-        )
+        db.collection('layouts').doc(layoutId)
+          .set({ ports: payload }, { merge: true })
         break
       case 'status':
       case 'getStatus':
         if (payload.isConnected) {
-          await setDoc(
-            doc(db, 'layouts', layoutId),
-            {
-              'dccEx.lastConnected': serverTimestamp(),
-              'dccEx.client': 'dejaJS',
-              pong: serverTimestamp(),
+          db.collection('layouts').doc(layoutId)
+            .set({
+              isConnected: payload.isConnected,
+              lastConnected: serverTimestamp(),
+              client: 'dejaJS',
               timestamp: serverTimestamp(),
-            },
-            { merge: true }
-          )
+            }, { merge: true })
         } else {
-          await setDoc(
-            doc(db, 'layouts', layoutId),
-            {
-              'dccEx.lastConnected': null,
-              'dccEx.client': 'dejaJS',
-              pong: serverTimestamp(),
+          db.collection('layouts').doc(layoutId)
+            .set({
+              isConnected: false,
+              lastConnected: null,
+              client: 'dejaJS',
               timestamp: serverTimestamp(),
-            },
-            { merge: true }
-          )
+            }, { merge: true })
         }
         break
       case 'connected':
         log.success('dejaClound.connected!!', data)
         if (payload.device === 'dccex') {
-          await setDoc(
-            doc(db, 'layouts', layoutId),
-            {
+          db.collection('layouts').doc(layoutId)
+            .set({
+              'dccEx.isConnected': true,
               'dccEx.lastConnected': serverTimestamp(),
               'dccEx.client': 'dejaJS',
-            },
-            { merge: true }
-          )
+            }, { merge: true })
         }
-        await setDoc(
-          doc(db, `layouts/${layoutId}/devices`, payload.device),
-          {
+        db.collection('layouts').doc(layoutId).collection('devices').doc(payload.device)
+          .set({
             isConnected: true,
             lastConnected: serverTimestamp(),
             client: 'dejaJS',
             port: payload.path,
-          },
-          { merge: true }
-        )
+          }, { merge: true })
+          
         break
       default:
       //noop
@@ -138,7 +125,7 @@ export async function handleDejaCommands(
     log.fatal('Error handling deja command:', err)
   } finally {
     if (snapshot.key) {
-      remove(ref(rtdb, `dejaCommands/${layoutId}/${snapshot.key}`))
+      rtdb.ref(`dejaCommands/${layoutId}/${snapshot.key}`).remove()
     }
   }
 }

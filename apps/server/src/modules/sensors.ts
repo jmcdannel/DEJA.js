@@ -1,10 +1,8 @@
 import {
-  doc,
   serverTimestamp,
-  setDoc,
   type DocumentData,
 } from 'firebase/firestore'
-import { db } from '@repo/firebase-config/firebase-node'
+import { db } from '@repo/firebase-config/firebase-admin-node'
 import { log } from '../utils/logger'
 
 const layoutId = process.env.LAYOUT_ID
@@ -12,20 +10,32 @@ const layoutId = process.env.LAYOUT_ID
 export async function handleSensorChange(
   snapshot: DocumentData
 ): Promise<void> {
-  // snapshot.docChanges().forEach(async (change: DocumentData) => {
-  //   const sensor = change.doc.data()
-  //   if (change.type === 'modified') {
-  //     log.log('Sensor modified', sensor.effectId, Boolean(sensor.state))
-  //     await setDoc(
-  //       doc(db, `layouts/${layoutId}/effects`, sensor.effectId),
-  //       {
-  //         state: Boolean(!sensor.state),
-  //         // timestamp: serverTimestamp(),
-  //       },
-  //       { merge: true }
-  //     )
-  //   }
-  // })
+  if (!layoutId) {
+    log.error('Layout ID is not set')
+    return
+  }
+  if (!snapshot || !snapshot.docChanges) {
+    log.error('Invalid snapshot data', snapshot)
+    return
+  }
+  
+  snapshot.docChanges().forEach(async (change: DocumentData) => {
+    const sensor = change.doc.data()
+    if (change.type === 'modified') {
+      log.log('Sensor modified', sensor.effectId, Boolean(sensor.state))
+      db.collection('layouts')
+        .doc(layoutId)
+        .collection('effects')
+        .doc(sensor.effectId)
+        .set(
+          {
+            state: Boolean(sensor.state),
+            timestamp: serverTimestamp(),
+          },
+          { merge: true }
+        )
+    }
+  })
 }
 
 export default {

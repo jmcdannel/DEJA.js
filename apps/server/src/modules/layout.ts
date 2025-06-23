@@ -9,7 +9,7 @@ import {
 } from 'firebase/firestore'
 import type { SerialPort } from 'serialport'
 import type { Layout, Device, Sensor } from '@repo/modules/layouts'
-import { db } from '@repo/firebase-config/firebase-node'
+import { db } from '@repo/firebase-config/firebase-admin-node'
 import { serial } from '../lib/serial'
 import { log } from '../utils/logger'
 import { dcc } from '../lib/dcc'
@@ -43,7 +43,7 @@ export async function initialize(): Promise<Layout | undefined> {
 async function autoConnect(devices: Device[]): Promise<void> {
   devices.forEach((device) => {
     if (device.autoConnect && device.port) {
-      log.star('Auto connect device', device.autoConnect, {
+      log.start('Auto connect device', device.autoConnect, {
         device: device.id,
         serial: device.port,
       })
@@ -54,13 +54,13 @@ async function autoConnect(devices: Device[]): Promise<void> {
 
 async function loadLayout(): Promise<Layout | undefined> {
   try {
-    const layoutRef = doc(db, `layouts`, layoutId)
-    const docSnap = await getDoc(layoutRef)
-
-    if (docSnap.exists()) {
-      return { ...docSnap.data(), id: docSnap.id } as Layout
+    const layoutData = await db.collection('layouts').doc(layoutId).get()
+    const layoutDoc = layoutData.exists ? layoutData.data() : undefined
+    if (layoutDoc) {
+      log.complete('Layout loaded', layoutId)
+      return { ...layoutDoc, id: layoutData.id } as Layout
     }
-    log.error('No such layout!', layoutId)
+    log.error('No such layout found!', layoutId)
   } catch (error) {
     log.error('Error loading layout', error)
   }
@@ -68,9 +68,9 @@ async function loadLayout(): Promise<Layout | undefined> {
 
 async function loadDevices(): Promise<Device[]> {
   try {
-    const q = query(collection(db, `layouts/${layoutId}/devices`))
-    const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Device))
+    const devicesSnapshot = await db.collection('layouts').doc(layoutId).collection('devices').get()
+    const devices = devicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Device))
+    return devices
   } catch (error) {
     log.error('Error loading devices', error)
     return []
@@ -79,9 +79,9 @@ async function loadDevices(): Promise<Device[]> {
 
 async function loadSensors(): Promise<Sensor[]> {
   try {
-    const q = query(collection(db, `layouts/${layoutId}/sensors`))
-    const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Sensor))
+    const sensorsSnapshot = await db.collection('layouts').doc(layoutId).collection('sensors').get()
+    const sensors = sensorsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Sensor))
+    return sensors
   } catch (error) {
     log.error('Error loading sensors', error)
     return []
@@ -140,11 +140,13 @@ async function connectUsbDevice(
       port: serialPort,
     }
 
-    await setDoc(
-      doc(db, `layouts/${layoutId}/devices`, device.id),
-      { ...updates },
-      { merge: true }
-    )
+    // await setDoc(
+    //   doc(db, `layouts/${layoutId}/devices`, device.id),
+    //   { ...updates },
+    //   { merge: true }
+    // )
+    // db.doc(`layouts/${layoutId}/devices/${device.id}`)
+    //   .set(updates, { merge: true })
 
     _connections[device.id] = {
       isConnected: true,
@@ -176,17 +178,28 @@ async function connectMqttDevice(device: Device): Promise<void> {
       //   payload: { device, topic },
       // })
 
-      await setDoc(
-        doc(db, `layouts/${layoutId}/devices`, device.id),
-        {
-          client: 'dejaJS',
-          isConnected: true,
-          lastConnected: new Date(),
-          timestamp: serverTimestamp(),
-          topic,
-        },
-        { merge: true }
-      )
+      // await setDoc(
+      //   doc(db, `layouts/${layoutId}/devices`, device.id),
+      //   {
+      //     client: 'dejaJS',
+      //     isConnected: true,
+      //     lastConnected: new Date(),
+      //     timestamp: serverTimestamp(),
+      //     topic,
+      //   },
+      //   { merge: true }
+      // )
+      // db.doc(`layouts/${layoutId}/devices/${device.id}`)
+      //   .set(
+      //     {
+      //       client: 'dejaJS',
+      //       isConnected: true,
+      //       lastConnected: new Date(),
+      //       timestamp: serverTimestamp(),
+      //       topic,
+      //     },
+      //     { merge: true }
+      //   )
 
       _connections[device.id] = {
         isConnected: true,
@@ -205,13 +218,21 @@ async function handleConnectionMessage(payload: string): Promise<void> {
     const sensorId = sensors.find((sensor) => sensor.index === data.sensor)?.id
     // log.debug('handleConnectionMessage', data, payload, sensorId)
     if (sensorId) {
-      await setDoc(
-        doc(db, `layouts/${layoutId}/sensors`, sensorId),
-        {
-          state: data.state,
-        },
-        { merge: true }
-      )
+      // await setDoc(
+      //   doc(db, `layouts/${layoutId}/sensors`, sensorId),
+      //   {
+      //     state: data.state,
+      //   },
+      //   { merge: true }
+      // )
+      // db.doc(`layouts/${layoutId}/sensors/${sensorId}`)
+      //   .set(
+      //     {
+      //       state: data.state,
+      //       timestamp: serverTimestamp(),
+      //     },
+      //     { merge: true }
+      //   )
     } else {
       log.error('Sensor not found', data, sensors)
     }

@@ -5,7 +5,7 @@ import {
   getDocs,
   query,
 } from 'firebase/firestore'
-import { db } from '@repo/firebase-config/firebase-node'
+import { db } from '@repo/firebase-config/firebase-admin-node'
 import type { Loco } from '@repo/modules/locos'
 import { log } from '../utils/logger.js'
 import { dcc, type ThrottlePayload } from '../lib/dcc.js'
@@ -14,7 +14,12 @@ const layoutId = process.env.LAYOUT_ID
 let locos: Loco[] = []
 
 async function init(): Promise<void> {
-  onSnapshot(query(collection(db, `layouts/${layoutId}/locos`)), (snapshot) => {
+  if (!layoutId) {
+    log.error('Layout ID is not set')
+    return
+  }
+  log.start('Throttles listening for loco changes', layoutId)
+  db.collection(`layouts/${layoutId}/locos`).onSnapshot((snapshot) => {
     snapshot.docChanges().forEach(async (change) => {
       const loco = change.doc.data()
       // log.log('Loco change', change.type, loco)
@@ -35,13 +40,8 @@ async function init(): Promise<void> {
 async function getLocos(): Promise<Loco[]> {
   try {
     if (locos.length === 0) {
-      const locosCol = await collection(db, `layouts/${layoutId}/locos`)
-      const querySnapshot = await getDocs(locosCol)
-      const locosData: Loco[] = []
-      querySnapshot.forEach((doc) => {
-        locosData.push({ ...doc.data(), id: doc.id } as Loco)
-      })
-      locos = locosData
+      const locosData = await db.collection(`layouts/${layoutId}/locos`).get()
+      locos = locosData.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Loco))
     }
     return locos
   } catch (error) {

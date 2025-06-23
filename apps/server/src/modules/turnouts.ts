@@ -1,5 +1,5 @@
-import { doc, getDoc, type DocumentData } from 'firebase/firestore'
-import { db } from '@repo/firebase-config/firebase-node'
+import { type DocumentData } from 'firebase/firestore'
+import { db } from '@repo/firebase-config/firebase-admin-node'
 import type { Turnout } from '@repo/modules/turnouts'
 import { log } from '../utils/logger.js'
 import { dcc, type TurnoutPayload } from '../lib/dcc.js'
@@ -60,10 +60,18 @@ export async function handleTurnout(turnout: Turnout): Promise<void> {
 }
 
 export async function getTurnout(id: string): Promise<Turnout | undefined> {
-  const deviceRef = doc(db, `layouts/${layoutId}/turnouts`, id)
-  const docSnap = await getDoc(deviceRef)
-
-  if (docSnap.exists()) {
+  if (!layoutId) {
+    log.error('Layout ID is not set')
+    return undefined
+  }
+  if (!id) {
+    log.error('Turnout ID is not set')
+    return undefined
+  }
+  log.log('getTurnout', id, layoutId)
+  const turnoutRef = db.collection(`layouts/${layoutId}/turnouts`).doc(id)
+  const docSnap = await turnoutRef.get()
+  if (docSnap.exists) {
     return { ...docSnap.data(), id: docSnap.id } as Turnout
   }
   log.error('No such turnout', id, layoutId)

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 import { collection, query, where } from 'firebase/firestore'
 import { useRouter } from 'vue-router'
 import { useCollection, useCurrentUser } from 'vuefire'
@@ -7,6 +8,7 @@ import { db } from '@repo/firebase-config/firebase'
 
 const user = useCurrentUser()
 const router = useRouter()
+console.log('Loading LayoutsList.vue', user.value)
 const layoutsRef = collection(db, 'layouts')
 const layoutsQuery = query(layoutsRef, where('owner', '==', user.value?.email))
 const layouts = useCollection(layoutsQuery)

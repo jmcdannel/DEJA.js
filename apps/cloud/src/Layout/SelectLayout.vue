@@ -2,7 +2,6 @@
 import { collection, query, where } from 'firebase/firestore'
 import { useCollection, useCurrentUser } from 'vuefire'
 import { db } from '@repo/firebase-config/firebase'
-import { useLayout } from '@repo/modules/layouts'
 
 const emit = defineEmits(['selected', 'clear'])
 
