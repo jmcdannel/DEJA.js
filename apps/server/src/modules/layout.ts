@@ -38,7 +38,7 @@ async function autoConnect(devices: Device[]): Promise<void> {
         device: device.id,
         serial: device.port,
       })
-      connectDevice({ device: device.id, serial: device.port })
+      connectDevice({ device: device.id, serial: device.port, topic: device.topic })
     }
   })
 }

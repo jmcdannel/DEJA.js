@@ -37,11 +37,11 @@
 </script>
 <template>
   <v-btn 
-    v-if="func && showLabel" 
+    v-if="func" 
     @click="cabFuction()"
     :prepend-icon="icon"
     class="relative bg-gradient-to-br from-cyan-600 to-indigo-600 p-2">
-    <span v-if="showLabel" class="ml-2">{{ func?.label }}</span>
+    {{ func?.label }}
   </v-btn>
   <v-btn 
     v-else-if="func" 

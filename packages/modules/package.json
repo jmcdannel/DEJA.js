@@ -1,8 +1,8 @@
 {
   "name": "@repo/modules",
   "version": "0.0.0",
-  "license": "MIT",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "exports": {
     "./effects": "./src/effects/index.ts",
@@ -11,9 +11,12 @@
     "./turnouts": "./src/turnouts/index.ts",
     "./types": "./src/types.ts"
   },
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
   "dependencies": {
-    "firebase": "^10.13.1",
-    "vuefire": "^3.2.0"
+    "firebase": "^10.14.1",
+    "vuefire": "^3.2.1"
   },
   "devDependencies": {
     "@repo/dccex": "workspace:*",
@@ -26,8 +29,5 @@
     "@vueuse/core": "^11.0.3",
     "typescript": "latest",
     "vue": "^3.5.16"
-  },
-  "scripts": {
-    "type-check": "tsc --noEmit"
   }
 }

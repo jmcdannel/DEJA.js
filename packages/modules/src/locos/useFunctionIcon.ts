@@ -22,7 +22,7 @@ export function useFunctionIcon() {
 
   function getIconComponent(name: string) {
     if (!name) {
-      return
+      DEFAULT_ICON
     }
     const icon = icons.find((icon) => icon.name === name)
     return icon ? icon.icon : DEFAULT_ICON

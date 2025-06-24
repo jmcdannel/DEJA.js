@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Loco } from '@repo/modules/locos'
+import { FunctionsSpeedDial } from '@repo/ui'
 import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.vue'
 import ThrottleSliderControls from '@/throttle/ThrottleSliderControls.vue'
 import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
@@ -87,9 +88,10 @@ function openFunctionSettings() {
       <section class="px-1 text-center flex-1 hidden sm:block">
       <!-- <ThrottleSliderControls :direction="direction" :speed="currentSpeed" @update:currentSpeed="handleSlider" @stop="handleStop" /> -->
       </section>
-      <section v-if="loco" class="w-full flex flex-col flex-grow h-full overflow-y-auto items-center justify-between flex-1/2 sm:flex-1">
-      <Functions :loco="loco" ref="functionsCmp" />
-      <Consist v-if="loco" :loco="loco" />
+      <section v-if="loco" class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
+        <Consist v-if="loco" :loco="loco" />
+        <v-spacer />
+        <FunctionsSpeedDial :loco="loco" />
       </section>
       <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
       <CurrentSpeed :speed="currentSpeed" />

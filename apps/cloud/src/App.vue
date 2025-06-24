@@ -7,7 +7,6 @@ import { useCurrentUser } from 'vuefire'
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
 import Header from './Core/Header/Header.vue'
-import AppMenu from './Core/Header/AppMenu.vue';
 import UserProfileMenu from './Core/Header/UserProfile.vue';
 import Menu from '@/Core/Menu/Menu.vue'
 import DeviceStatus from '@/Layout/Devices/DeviceStatus.vue'
@@ -43,7 +42,7 @@ function handleLayoutSelect(newLayout: string) {
     <v-app v-if="user" :theme="theme">
       <!-- <DCCLogger v-if="enableLogging" /> -->
       <Header @toggle="drawer = !drawer">
-        <template #menu>
+        <template  v-if="layoutId" #menu>
           <DCCLogStatus />
           <LayoutStatus />
           <DeviceStatus v-if="!!user" />

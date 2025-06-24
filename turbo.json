@@ -21,13 +21,30 @@
   "ui": "tui",
   "tasks": {
     "build": {},
-    "start": {},
+    "start": {
+      "dependsOn": ["mosquitto"],
+      "cache": false
+    },
+    "predev": {},
     "lint": {},
     "format": {},
     "type-check": {},
     "dev": {
+      "dependsOn": ["mosquitto"],
       "cache": false,
       "persistent": true
+    },
+    "mosquitto": {
+      "cache": false
+    },
+    "deps:check": {
+      "cache": false
+    },
+    "deps:fix": {
+      "cache": false
+    },
+    "deps:format": {
+      "cache": false
     }
   }
 }

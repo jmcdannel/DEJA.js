@@ -25,21 +25,23 @@ defineProps({
 </script>
 <template>
   <template v-if="loco">
-    <section class="flex flex-col flex-grow justify-end">
+    <section class="flex flex-col flex-grow justify-center">
       <!-- <pre>{{ functions }}</pre> -->
-      <ul class="flex flex-wrap justify-center mx-2 items-center max-w-48 sm:max-w-48 md:max-w-48">
+      <ul class="grid grid-cols-3 justify-center mx-2 items-center gap-1">
         <li v-for="(locoFunc, addressx) in loco.functions?.filter(lf => lf.isFavorite)" :key="locoFunc.id">
           <!-- <pre>{{ locoFunc }}</pre> -->
           <FunctionButton :func="locoFunc" :address="loco.address" class="w-full" />
         </li>
-        <li class="">
+        <li class="col-span-3">
           <v-btn @click="openAllFunctions()"
-            icon="mdi-more"
-            class="relative bg-gradient-to-br from-green-600 to-teal-600 w-full p-2">
+            prepend-icon="mdi-more"
+            class="relative  w-full bg-gradient-to-br from-green-600 to-teal-600 w-full p-2">
+            View All
           </v-btn>  
         </li>
       </ul>
     </section>
+    <!-- <pre>{{ loco.functions?.filter(lf => lf.isFavorite) }}</pre> -->
     <FunctionList
       ref="listRef"
       :loco="loco"

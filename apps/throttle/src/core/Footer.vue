@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import { useCurrentUser } from 'vuefire'
 import ThrottleNav from '@/throttle/ThrottleNav.vue'
 
-const $router = useRouter()
-const active = ref($router.currentRoute.value.path)
+const router = useRouter()
+const route = useRoute()
+const active = ref(route.path)
 
 const user = useCurrentUser()
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -23,8 +24,8 @@ const layoutId = useStorage('@DEJA/layoutId', '')
           variant="flat" 
           v-model="active">
           <v-btn 
-            class="sm:px-12 'opacity-65"
-            :class="active === '/locos' ? '' : 'text-pink-500'"
+            class="sm:px-12"
+            :class="$route.path === '/locos' ? 'bg-pink-500' : 'text-pink-500'"
             @click="$router.push('/locos')"
             color="pink"
             icon="mdi-train"
@@ -32,7 +33,7 @@ const layoutId = useStorage('@DEJA/layoutId', '')
           />
           <v-btn 
             class="sm:px-12"
-            :class="active === '/throttle-list' ? '' : 'text-green-500'"
+            :class="$route.path === '/throttle-list' ? 'bg-green-500' : 'text-green-500'"
             @click="$router.push('/throttle-list')"
             color="green"
             icon="mdi-view-list"
@@ -40,7 +41,7 @@ const layoutId = useStorage('@DEJA/layoutId', '')
           />
           <v-btn 
             class="sm:px-12"
-            :class="active === '/conductor' ? '' : 'text-red-500'"
+            :class="$route.path === '/conductor' ? 'bg-red-500' : 'text-red-500'"
             @click="$router.push('/conductor')"
             color="red"
             icon="mdi-account-tie-hat"
@@ -48,7 +49,7 @@ const layoutId = useStorage('@DEJA/layoutId', '')
           />
           <v-btn 
             class="sm:px-12"
-            :class="active === '/effects' ? '' : 'text-purple-500'"
+            :class="$route.path === '/effects' ? 'bg-purple-500' : 'text-purple-500'"
             @click="$router.push('/effects')"
             color="purple"
             icon="mdi-rocket"
@@ -56,7 +57,7 @@ const layoutId = useStorage('@DEJA/layoutId', '')
           />
           <v-btn 
             class="sm:px-12"
-            :class="active === '/turnouts' ? '' : 'text-yellow-500'"
+            :class="$route.path === '/turnouts' ? 'bg-yellow-500' : 'text-yellow-500'"
             @click="$router.push('/turnouts')"
             color="yellow"
             icon="mdi-call-split"
@@ -64,7 +65,7 @@ const layoutId = useStorage('@DEJA/layoutId', '')
           />
           <v-btn 
             class="sm:px-12"
-            :class="active === '/routes' ? '' : 'text-blue-500'"
+            :class="$route.path === '/routes' ? '' : 'text-blue-500'"
             @click="$router.push('/routes')"
             color="blue"
             icon="mdi-tournament"
