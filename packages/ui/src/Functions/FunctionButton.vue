@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { ref } from 'vue'
   import { useDcc } from '@repo/dccex'
+  import { useFunctionIcon } from '@repo/modules/locos'
 
   const props = defineProps({
     func: {
@@ -19,8 +20,10 @@
     }
   })
   
-  const { setFunction } = useDcc()  
-  const func1State = ref(props.func?.state || false);
+  const { setFunction } = useDcc()
+  const { getIconComponent } = useFunctionIcon()
+  const func1State = ref(props.func?.state || false)
+  const icon =  getIconComponent(props.func?.icon)
 
   async function cabFuction() {
     func1State.value = !func1State.value;
@@ -33,15 +36,17 @@
   }
 </script>
 <template>
-  <button 
-    v-if="func" 
+  <v-btn 
+    v-if="func && showLabel" 
     @click="cabFuction()"
-    class="relative btn btn-md min-w-16 bg-gradient-to-br from-cyan-600 to-indigo-600">
-      <div 
-        class="w-4 h-4 md:w-6 md:h-6 flex items-center justify-center"
-        :class="func1State ? 'text-green-400' : 'text-gray-200'">
-        {{ func?.label }}
-      </div>
+    :prepend-icon="icon"
+    class="relative bg-gradient-to-br from-cyan-600 to-indigo-600 p-2">
     <span v-if="showLabel" class="ml-2">{{ func?.label }}</span>
-  </button>  
+  </v-btn>
+  <v-btn 
+    v-else-if="func" 
+    @click="cabFuction()"
+    :icon="icon"
+    class="relative bg-gradient-to-br from-cyan-600 to-indigo-600 p-2"
+  />
 </template>

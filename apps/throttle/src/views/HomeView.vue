@@ -13,29 +13,13 @@ const layoutId = useStorage('@DEJA/layoutId', '')
   <main class="flex flex-col flex-grow p-8 w-full viaduct-background bg-opacity-50 bg-fixed overflow-auto">
     <header>
       <h2 class="text-transparent text-3xl bg-clip-text bg-gradient-to-r from-cyan-300 to-violet-600 my-4">
-          Welcome to <br>
-          <span class="text-8xl font-bold uppercase bg-clip-text bg-gradient-to-r from-pink-500 to-violet-600">DEJA</span>
-          <br>
-          <span class="text-6xl font-bold uppercase bg-clip-text bg-gradient-to-r from-violet-600 to-cyan-400">Throttle</span>
+        Welcome to <br>
+        <span class="text-8xl font-bold uppercase bg-clip-text bg-gradient-to-r from-pink-500 to-violet-600">DEJA</span>
+        <br>
+        <span class="text-6xl font-bold uppercase bg-clip-text bg-gradient-to-r from-violet-600 to-cyan-400">Throttle</span>
       </h2>
     </header>
-    
-
-    <template v-if="user && layoutId">
-      <p class="text-lg mb-4">
-        You are connected to layout: <span class="font-bold">{{ layoutId }}</span>
-      </p>
-      <DeviceeStatusList />
-      <v-spacer class="my-2" />
-      <v-btn
-        class="mb-4"
-        color="error"
-        @click="router.push('/connect')"
-        variant="outlined">
-        Disconnect
-      </v-btn>
-      <Signout />
-    </template>
+    <DeviceeStatusList v-if="user && layoutId" @disconnect="router.push('/connect')" />
     <template v-else-if="!user">
       <p class="text-lg mb-4">
         Please connect to a layout to see the status.

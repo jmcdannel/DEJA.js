@@ -4,8 +4,8 @@ export interface Effect {
   pin?: number
   on?: any[]
   off?: any[]
-  type?: string
-  state?: boolean
+  type: string
+  state: boolean
   color?: string
   pattern?: string
   point1?: string
@@ -13,7 +13,7 @@ export interface Effect {
   range?: string
   config?: string
   tags?: string[]
-  id?: string
+  id: string
 }
 
 export interface EffectType {

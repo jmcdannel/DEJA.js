@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import Function from './Function.vue'
+import Function from './FunctionButton.vue'
 import { 
   FaRegStar,
   FaStar,

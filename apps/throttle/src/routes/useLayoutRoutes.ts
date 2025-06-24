@@ -1,5 +1,6 @@
 import { computed, ref, watch } from 'vue'
-import type { Efx } from '@repo/modules/efx/types'
+import { useCollection } from 'vuefire'
+import type { Efx } from '@repo/modules/effects/types'
 import { useEfx } from '@repo/modules/effects'
 import { useTurnouts } from '@repo/modules/turnouts'
 
@@ -12,9 +13,10 @@ export const useLayoutRoutes = () => {
   const percentComplete = ref(0)
 
   const { getTurnout, getTurnouts, switchTurnout } = useTurnouts()
-  const { getEffects, runEffect, getEffect } = useEfx()
-  const list = getEffects()
+  const { getEffectsByType, runEffect, getEffect } = useEfx()
+  const list = useCollection(getEffectsByType('route'), { ssrKey: 'routes' })
   const turnouts = getTurnouts()
+  const routeTurnouts = ref([])
 
   const routes = computed(() =>
     list.data.value?.filter((item) => item.type === 'route')
@@ -46,8 +48,9 @@ export const useLayoutRoutes = () => {
         isRunning.value = true
         percentComplete.value = 0
         // const efx = await getEffect(route.id)
+        routeTurnouts.value = [...route.on, ...route.off]
         runEffect({ ...route, id: route.id, state: true })
-        const steps = route?.on?.length || 0
+        const steps = (route?.on?.length || 0) + (route?.off?.length || 0)
         console.log('Route found:', steps, route)
 
         const interval = setInterval(() => {
@@ -73,6 +76,7 @@ export const useLayoutRoutes = () => {
 
   function getMapClasses(): string {
     let classes = ['']
+    console.log('getMapClasses', p1.value, p2.value, routes.value)
 
     if (p1.value) {
       classes.push('p1-selected')
@@ -109,16 +113,16 @@ export const useLayoutRoutes = () => {
       return null
     }
     let found = false
-    let currentTarget = target
+    let currentTarget: Element | null = target
 
     let targetType = ''
     while (!found && currentTarget && currentTarget.parentNode) {
       if (currentTarget.parentNode.nodeName.toLowerCase() === 'svg') {
         currentTarget = null
       } else if (
-        clickableContainers.indexOf(currentTarget.parentNode['id']) !== -1
+        clickableContainers.indexOf(currentTarget?.parentNode['id']) !== -1
       ) {
-        targetType = currentTarget.parentNode['id']
+        targetType = currentTarget?.parentNode['id']
         found = true
       } else {
         currentTarget = currentTarget.parentNode as HTMLElement
@@ -216,6 +220,7 @@ export const useLayoutRoutes = () => {
     p2,
     percentComplete,
     routes,
+    routeTurnouts,
     runRoute,
   }
 }

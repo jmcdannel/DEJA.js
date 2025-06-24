@@ -8,13 +8,13 @@
 [x] throtte - park
 [x] consist modal
 [ ] all modals
-[ ] turnout clamp
+[x] turnout clamp
 [x] conductor sync speeds
 
-[ ] sortable / draggable
-[ ] bigger throttle buttons
+[-] sortable / draggable
+[x] bigger throttle buttons
 [ ] throttle slider
 [ ] logos
-[ ] compact turnouts
+[x] compact turnouts
 [ ] mobile menu
 

@@ -1,10 +1,13 @@
 import {
+  collection,
   deleteDoc,
   doc,
-  collection,
+  getDoc,
+  orderBy,
+  query, 
   serverTimestamp,
   setDoc,
-  getDoc,
+  where
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
@@ -15,13 +18,14 @@ import type { Effect, EffectType } from './types'
 
 export const useEfx = () => {
   const layoutId = useStorage('@DEJA/layoutId', '')
+  const colRef = collection(db, `layouts/${layoutId.value}/effects`)
 
   const efxCol = () => {
     if (!layoutId.value) {
       console.error('Layout ID is not set')
       return null
     }
-    return collection(db, `layouts/${layoutId.value}/effects`)
+    return query(colRef, orderBy('device'), orderBy('type'), orderBy('name'))
   }
 
   function getEffects() {
@@ -44,13 +48,17 @@ export const useEfx = () => {
     }
   }
 
-  async function getEffectsByType(efxType: string): Promise<Effect[]> {
-    if (!layoutId.value) {
-      console.error('Layout ID is not set')
-      return []
+  function getEffectsByType(efxType: string) {
+    try {
+      console.log('getEffectsByType', efxType)
+      return query(
+        colRef, 
+        where('type', '==', efxType),
+      )
+    } catch (error) {
+      console.error('Error getting effects by type:', error)
+      return null
     }
-    const efxs = await getEffects()
-    return efxs.value.filter((efx) => efx.type === efxType)
   }
 
   function getEfxType(value: string): EffectType | undefined {
@@ -105,7 +113,7 @@ export const useEfx = () => {
       await setDoc(
         doc(db, `layouts/${layoutId.value}/effects`, efx.id),
         {
-          state: efx.state,
+          state: Boolean(efx.state),
           timestamp: serverTimestamp(),
         },
         { merge: true }
@@ -118,6 +126,7 @@ export const useEfx = () => {
 
   return {
     deleteEfx,
+    efxCol,
     getEfxType,
     getEffects,
     getEffect,

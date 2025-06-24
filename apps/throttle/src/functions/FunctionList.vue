@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import { ref } from 'vue'
-  import Function from './Function.vue'
+  import Function from './FunctionButton.vue'
   import Modal from '@/core/Modal.component.vue'
   import type { Loco } from '@repo/modules/locos'
   import { defaultFunctions } from '@repo/modules/locos'

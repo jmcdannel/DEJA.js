@@ -1,12 +1,12 @@
-<script setup lang="ts">
+<script async setup lang="ts">
+import { useCollection } from 'vuefire'
 import { useEfx, type Effect } from '@repo/modules/effects'
 import RouteListItem from '@/Routes/RouteListItem.vue'
 
 const emit = defineEmits(['edit'])
 
-const { getEffects } = useEfx()
-const all = getEffects()
-const list = all.data.value.filter((item) => item.type === 'route')
+const { getEffectsByType } = useEfx()
+const list = useCollection(getEffectsByType('route'), { ssrKey: 'routes' })
 
 function handleEdit(item: Effect) {
   console.log('handleEdit', item)
@@ -36,5 +36,6 @@ function handleEdit(item: Effect) {
         <RouteListItem :efx="item" :efxId="item.id" @edit="handleEdit"></RouteListItem>
     </v-col>
     </v-row>
+    <pre>{{ list }}</pre>
   </v-container>
 </template>

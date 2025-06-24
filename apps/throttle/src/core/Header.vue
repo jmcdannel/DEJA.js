@@ -1,10 +1,10 @@
 <script setup lang="ts">
-  import Title from '@/core/Title.component.vue';
-  import Power from '@/core/Power.vue';
-  import TrackPower from '@/core/TrackPower.vue';
-  import EvergencyStop from '@/core/EmergencyStop.vue';
-  import StatusMenu from '@/core/StatusMenu.vue';
-
+import { UserProfile } from '@repo/ui';
+import Title from '@/core/Title.component.vue';
+import Power from '@/core/Power.vue';
+import TrackPower from '@/core/TrackPower.vue';
+import EvergencyStop from '@/core/EmergencyStop.vue';
+import StatusMenu from '@/core/StatusMenu.vue';
 </script>
 
 <template>
@@ -17,6 +17,7 @@
       <TrackPower />
       <Power />
       <EvergencyStop />
+      <UserProfile />
     </template>
   </v-app-bar>
 </template>

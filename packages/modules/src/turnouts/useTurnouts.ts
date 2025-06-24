@@ -16,7 +16,7 @@ export function useTurnouts() {
   const layoutId = useStorage('@DEJA/layoutId', '')
 
   const turnoutsCol = () =>
-    layoutId.value ? query(collection(db, `layouts/${layoutId.value}/turnouts`),  orderBy('name')) : null
+    layoutId.value ? query(collection(db, `layouts/${layoutId.value}/turnouts`),  orderBy('order'),  orderBy('name')) : null
 
   function getTurnouts() {
     const turnouts = useCollection(turnoutsCol)
