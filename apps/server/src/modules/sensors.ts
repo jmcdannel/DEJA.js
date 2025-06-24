@@ -1,7 +1,4 @@
-import {
-  serverTimestamp,
-  type DocumentData,
-} from 'firebase/firestore'
+import { FieldValue, type DocumentData } from 'firebase-admin/firestore'
 import { db } from '@repo/firebase-config/firebase-admin-node'
 import { log } from '../utils/logger'
 
@@ -30,7 +27,7 @@ export async function handleSensorChange(
         .set(
           {
             state: Boolean(sensor.state),
-            timestamp: serverTimestamp(),
+            timestamp: FieldValue.serverTimestamp(),
           },
           { merge: true }
         )

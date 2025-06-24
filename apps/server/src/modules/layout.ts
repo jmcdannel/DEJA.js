@@ -1,12 +1,4 @@
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  serverTimestamp,
-  setDoc,
-} from 'firebase/firestore'
+import { FieldValue } from 'firebase-admin/firestore'
 import type { SerialPort } from 'serialport'
 import type { Layout, Device, Sensor } from '@repo/modules/layouts'
 import { db } from '@repo/firebase-config/firebase-admin-node'
@@ -15,7 +7,6 @@ import { log } from '../utils/logger'
 import { dcc } from '../lib/dcc'
 import { dejaMqtt as mqtt } from '../lib/mqtt'
 import { broadcast } from '../broadcast'
-
 interface Connection {
   isConnected: boolean
   port?: SerialPort
@@ -136,7 +127,7 @@ async function connectUsbDevice(
       client: 'dejaJS',
       isConnected: true,
       lastConnected: new Date(),
-      timestamp: serverTimestamp(),
+      timestamp: FieldValue.serverTimestamp(),
       port: serialPort,
     }
 
@@ -145,8 +136,8 @@ async function connectUsbDevice(
     //   { ...updates },
     //   { merge: true }
     // )
-    // db.doc(`layouts/${layoutId}/devices/${device.id}`)
-    //   .set(updates, { merge: true })
+    db.doc(`layouts/${layoutId}/devices/${device.id}`)
+      .set(updates, { merge: true })
 
     _connections[device.id] = {
       isConnected: true,
@@ -189,17 +180,17 @@ async function connectMqttDevice(device: Device): Promise<void> {
       //   },
       //   { merge: true }
       // )
-      // db.doc(`layouts/${layoutId}/devices/${device.id}`)
-      //   .set(
-      //     {
-      //       client: 'dejaJS',
-      //       isConnected: true,
-      //       lastConnected: new Date(),
-      //       timestamp: serverTimestamp(),
-      //       topic,
-      //     },
-      //     { merge: true }
-      //   )
+      db.doc(`layouts/${layoutId}/devices/${device.id}`)
+        .set(
+          {
+            client: 'dejaJS',
+            isConnected: true,
+            lastConnected: new Date(),
+            timestamp: FieldValue.serverTimestamp(),
+            topic,
+          },
+          { merge: true }
+        )
 
       _connections[device.id] = {
         isConnected: true,
@@ -225,14 +216,14 @@ async function handleConnectionMessage(payload: string): Promise<void> {
       //   },
       //   { merge: true }
       // )
-      // db.doc(`layouts/${layoutId}/sensors/${sensorId}`)
-      //   .set(
-      //     {
-      //       state: data.state,
-      //       timestamp: serverTimestamp(),
-      //     },
-      //     { merge: true }
-      //   )
+      db.doc(`layouts/${layoutId}/sensors/${sensorId}`)
+        .set(
+          {
+            state: data.state,
+            timestamp: FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        )
     } else {
       log.error('Sensor not found', data, sensors)
     }

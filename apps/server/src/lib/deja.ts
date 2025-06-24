@@ -1,6 +1,5 @@
 import { SerialPort } from 'serialport'
-import { type DataSnapshot, ref, remove } from 'firebase/database'
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { FieldValue } from 'firebase-admin/firestore'
 import { db, rtdb } from '@repo/firebase-config/firebase-admin-node'
 import type { BroadcastMessage } from '../broadcast'
 import { layout } from '../modules/layout'
@@ -58,17 +57,15 @@ export async function handleDejaMessages(
           db.collection('layouts').doc(layoutId)
             .set({
               isConnected: payload.isConnected,
-              lastConnected: serverTimestamp(),
               client: 'dejaJS',
-              timestamp: serverTimestamp(),
+              timestamp: FieldValue.serverTimestamp(),
             }, { merge: true })
         } else {
           db.collection('layouts').doc(layoutId)
             .set({
               isConnected: false,
-              lastConnected: null,
               client: 'dejaJS',
-              timestamp: serverTimestamp(),
+              timestamp: FieldValue.serverTimestamp(),
             }, { merge: true })
         }
         break
@@ -78,16 +75,15 @@ export async function handleDejaMessages(
           db.collection('layouts').doc(layoutId)
             .set({
               'dccEx.isConnected': true,
-              'dccEx.lastConnected': serverTimestamp(),
+              'dccEx.lastConnected': FieldValue.serverTimestamp(),
               'dccEx.client': 'dejaJS',
             }, { merge: true })
         }
         db.collection('layouts').doc(layoutId).collection('devices').doc(payload.device)
           .set({
-            isConnected: true,
-            lastConnected: serverTimestamp(),
             client: 'dejaJS',
-            port: payload.path,
+            isConnected: true,
+            timestamp: FieldValue.serverTimestamp(),
           }, { merge: true })
           
         break
@@ -101,10 +97,11 @@ export async function handleDejaMessages(
 }
 
 export async function handleDejaCommands(
-  snapshot: DataSnapshot
+  snapshot
 ): Promise<void> {
   try {
-    const { action, payload } = snapshot.val()
+    console.log(snapshot)
+    const { action, payload } = snapshot
     switch (action) {
       case 'connect':
         await layout.connectDevice(JSON.parse(payload))
@@ -132,6 +129,7 @@ export async function handleDejaCommands(
 
 export const deja = {
   handleDejaCommands,
+  handleDejaMessages
 }
 
 export default deja

@@ -1,8 +1,5 @@
 import type { Effect, MacroItem } from '@repo/modules/effects'
-import {
-  serverTimestamp,
-  type DocumentData,
-} from 'firebase/firestore'
+import { FieldValue, type DocumentData } from 'firebase-admin/firestore'
 import { db } from '@repo/firebase-config/firebase-admin-node'
 import { log } from '../utils/logger.js'
 import { dcc, type OutputPayload } from '../lib/dcc.js'
@@ -100,15 +97,15 @@ async function handleMacroItem(
   if (item.type === 'turnout' && item.id) {
     db.collection('layouts').doc(layoutId).collection('turnouts').doc(item.id.toString()).set({
       state,
-      timestamp: serverTimestamp(),
+      timestamp: FieldValue.serverTimestamp(),
     }, { merge: true })
     // log.log('handleMacroItem turnout', item)
   } else if (item.type === 'effect' && item.id) {
     db.collection('layouts').doc(layoutId).collection('effects').doc(item.id.toString()).set({
       state,
-      timestamp: serverTimestamp(),
+      timestamp: FieldValue.serverTimestamp(),
     }, { merge: true })
-    
+
   } else if (
     item.type === 'throttle' &&
     macroState === state &&
@@ -119,7 +116,7 @@ async function handleMacroItem(
     db.collection('layouts').doc(layoutId).collection('throttles').doc(item.id.toString()).set({
       direction: item?.direction === 'forward',
       speed: item.speed,
-      timestamp: serverTimestamp(),
+      timestamp: FieldValue.serverTimestamp(),
     }, { merge: true })
   }
   // log.log('handleMacroItem', item)
