@@ -21,6 +21,7 @@ const router = createRouter({
       path: '/connect',
       name: 'connect',
       component: Connect,
+      beforeEnter: [requireAuth],
     },
     {
       path: '/locos',

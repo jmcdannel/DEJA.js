@@ -1,11 +1,13 @@
 <script setup lang="ts">
-  import { useCurrentUser } from 'vuefire'
-  import { useStorage } from '@vueuse/core'
-  import DeviceeStatusList from '@/devices/status/DeviceeStatusList.vue'
-  import Signout from '@/auth/Signout.vue'
+import { useCurrentUser } from 'vuefire'
+import { useRouter } from 'vue-router'
+import { useStorage } from '@vueuse/core'
+import DeviceeStatusList from '@/devices/status/DeviceeStatusList.vue'
+import Signout from '@/auth/Signout.vue'
 
-  const user = useCurrentUser()
-  const layoutId = useStorage('@DEJA/layoutId', '')
+const user = useCurrentUser()
+const router = useRouter()
+const layoutId = useStorage('@DEJA/layoutId', '')
 </script>
 <template>
   <main class="flex flex-col flex-grow p-8 w-full viaduct-background bg-opacity-50 bg-fixed overflow-auto">
@@ -28,7 +30,7 @@
       <v-btn
         class="mb-4"
         color="error"
-        @click="$router.push('/connect')"
+        @click="router.push('/connect')"
         variant="outlined">
         Disconnect
       </v-btn>
@@ -41,7 +43,7 @@
       <v-btn
         class="mt-4"
         color="primary"
-        @click="$router.push('/login')">
+        @click="router.push('/login')">
         Sign In
       </v-btn>
     </template>
@@ -52,7 +54,7 @@
       <v-btn
         class="mt-4"
         color="primary"
-        @click="$router.push('/connect')">
+        @click="router.push('/connect')">
         Select Layout
       </v-btn>
     </template>
