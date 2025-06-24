@@ -1,5 +1,5 @@
 import { SerialPort } from 'serialport'
-import { type DataSnapshot, ref, remove } from 'firebase/database'
+import { FieldValue } from 'firebase-admin/firestore'
 import { rtdb } from '@repo/firebase-config/firebase-node'
 import { serial } from './serial'
 import { broadcast } from '../broadcast'
@@ -200,18 +200,19 @@ const sendOutput = async (payload: OutputPayload) => {
   await send(cmd)
 }
 
-export async function handleDccChange(snapshot: DataSnapshot): Promise<void> {
+export async function handleDccChange(snapshot, key): Promise<void> {
   try {
-    const { action, payload } = snapshot.val()
+    const { action, payload } = snapshot
     // log.log('handleDccChange: ', action, payload, snapshot.key)
     await handleMessage(
       JSON.stringify({ action, payload: JSON.parse(payload) })
     )
-    if (snapshot.key) {
-      remove(ref(rtdb, `dccCommands/${layoutId}/${snapshot.key}`))
-    }
   } catch (err) {
     log.fatal('Error handling dcc command:', err)
+  } finally {
+    if (key) {
+      rtdb.ref(`dccCommands/${layoutId}/${key}`).remove()
+    }
   }
 }
 

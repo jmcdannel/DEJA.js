@@ -97,7 +97,7 @@ export async function handleDejaMessages(
 }
 
 export async function handleDejaCommands(
-  snapshot
+  snapshot, key
 ): Promise<void> {
   try {
     console.log(snapshot)
@@ -121,8 +121,8 @@ export async function handleDejaCommands(
   } catch (err) {
     log.fatal('Error handling deja command:', err)
   } finally {
-    if (snapshot.key) {
-      rtdb.ref(`dejaCommands/${layoutId}/${snapshot.key}`).remove()
+    if (key) {
+      rtdb.ref(`dejaCommands/${layoutId}/${key}`).remove()
     }
   }
 }

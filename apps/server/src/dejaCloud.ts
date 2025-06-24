@@ -14,13 +14,13 @@ async function listen(): Promise<void> {
   const dccCommandsRef = rtdb.ref(`dccCommands/${layoutId}`)
   dccCommandsRef.on('child_added', (data) => {
     // log.log('listen.dccCommands', data.key, data.val())
-    handleDccChange(data.val())
+    handleDccChange(data.val(), data.key)
   })
 
   const dejaCommandsRef = rtdb.ref(`dejaCommands/${layoutId}`)
   dejaCommandsRef.on('child_added', (data) => {
     // log.log('listen.dejaCommands', data.key, data.val())
-    handleDejaCommands(data.val())
+    handleDejaCommands(data.val(), data.key)
   })
 
   
