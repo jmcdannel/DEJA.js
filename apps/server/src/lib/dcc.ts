@@ -1,6 +1,6 @@
 import { SerialPort } from 'serialport'
 import { FieldValue } from 'firebase-admin/firestore'
-import { rtdb } from '@repo/firebase-config/firebase-node'
+import { rtdb } from '@repo/firebase-config/firebase-admin-node'
 import { serial } from './serial'
 import { broadcast } from '../broadcast'
 import { log } from '../utils/logger'
@@ -211,7 +211,8 @@ export async function handleDccChange(snapshot, key): Promise<void> {
     log.fatal('Error handling dcc command:', err)
   } finally {
     if (key) {
-      rtdb.ref(`dccCommands/${layoutId}/${key}`).remove()
+      const cmd = rtdb.ref(`dccCommands/${layoutId}/${key}`)
+      cmd.remove()
     }
   }
 }

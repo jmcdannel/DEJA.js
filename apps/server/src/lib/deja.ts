@@ -122,7 +122,8 @@ export async function handleDejaCommands(
     log.fatal('Error handling deja command:', err)
   } finally {
     if (key) {
-      rtdb.ref(`dejaCommands/${layoutId}/${key}`).remove()
+      const cmd = rtdb.ref(`dejaCommands/${layoutId}/${key}`)
+      cmd.remove()
     }
   }
 }
