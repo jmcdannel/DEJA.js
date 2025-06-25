@@ -1,0 +1,20 @@
+{
+  "name": "@repo/auth",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/modules": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "firebase": "^10.14.1",
+    "typescript": "latest",
+    "vue": "^3.5.16",
+    "vuefire": "^3.2.1"
+  }
+}

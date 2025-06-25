@@ -66,6 +66,12 @@ const router = createRouter({
       beforeEnter: [requireAuth, requireLayout],
     },
     {
+      path: '/layout/device/:deviceId',
+      name: 'Device',
+      component: () => import('./Layout/Devices/DeviceDetails.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
       path: '/signals',
       name: 'Signals',
       component: () => import('./Signals/SignalList.vue'),

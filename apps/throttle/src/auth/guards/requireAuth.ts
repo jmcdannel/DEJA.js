@@ -32,13 +32,13 @@ export async function requireAuth() {
     }
   }
 
-  if (!isLocal) {
-    return {
-      path: '/connect',
-      query: { 
-        error: 'local-network-required',
-        redirect: window.location.pathname 
-      },
-    }
-  }
+  // if (!isLocal) {
+  //   return {
+  //     path: '/login',
+  //     query: { 
+  //       error: 'local-network-required',
+  //       redirect: window.location.pathname 
+  //     },
+  //   }
+  // }
 }

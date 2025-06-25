@@ -61,6 +61,19 @@ export const useEfx = () => {
     }
   }
 
+  function getEffectsByDevice(deviceId: string) {
+    try {
+      console.log('getEffectsByDevice', deviceId)
+      return query(
+        colRef, 
+        where('device', '==', deviceId),
+      )
+    } catch (error) {
+      console.error('Error getting effects by device:', error)
+      return null
+    }
+  }
+
   function getEfxType(value: string): EffectType | undefined {
     return efxTypes.find((item) => item.value === value)
   }
@@ -127,10 +140,11 @@ export const useEfx = () => {
   return {
     deleteEfx,
     efxCol,
-    getEfxType,
-    getEffects,
     getEffect,
+    getEffects,
+    getEffectsByDevice,
     getEffectsByType,
+    getEfxType,
     setEfx,
     runEffect,
   }
