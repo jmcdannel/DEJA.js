@@ -13,6 +13,7 @@ importers:
   apps/cloud:
     specifiers:
       '@mdi/font': ^7.4.47
+      '@repo/auth': workspace:^0.0.0
       '@repo/dccex': workspace:*
       '@repo/deja': workspace:*
       '@repo/eslint-config': workspace:*
@@ -51,6 +52,7 @@ importers:
       vuetify: 3.8.8_zkfcpmnijemxyxu63e56u6q7f4
     devDependencies:
       '@mdi/font': 7.4.47
+      '@repo/auth': link:../../packages/auth
       '@repo/dccex': link:../../packages/dccex
       '@repo/deja': link:../../packages/deja
       '@repo/eslint-config': link:../../packages/config-eslint
