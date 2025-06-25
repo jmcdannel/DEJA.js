@@ -1,6 +1,8 @@
 <script>
 import { GithubAuthProvider } from 'firebase/auth'
+import { GoogleAuthProvider } from 'firebase/auth'
 export const githubAuthProvider = new GithubAuthProvider()
+export const googleAuthProvider = new GoogleAuthProvider()
 </script>
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -17,7 +19,6 @@ const user = useCurrentUser()
 const error = ref(null)
 
 async function handleGithubSignin() {
-  // authComplete()
   try {
     if (!auth) {
       throw new Error('auth is null')
@@ -31,9 +32,22 @@ async function handleGithubSignin() {
   }
 }
 
+async function handleGoogleSignin() {
+  try {
+    if (!auth) {
+      throw new Error('auth is null')
+    }
+    const resp = await signInWithPopup(auth, googleAuthProvider)
+    console.log('Google signin success', resp)
+    authComplete()
+  } catch (err) {
+    console.error('Failed signinRedirect', err)
+    // error.value = err
+  }
+}
+
 function authComplete() {
   emit('auth', {})
-
 }
 
 onMounted(() => {
@@ -69,19 +83,17 @@ onMounted(() => {
     </template>
     <template v-else-if="!user">
       <article class="flex flex-col space-y-4 items-start my-4">
-        <v-btn
-          @click="handleGithubSignin"
-          prepend-icon="mdi-github">
+        <v-btn @click="handleGithubSignin" prepend-icon="mdi-github">
           Sign in with GitHub
         </v-btn>
-        <v-btn disabled>
-          Sign in with Facebook
-        </v-btn>
-        <v-btn disabled>
+        <v-btn @click="handleGoogleSignin" prepend-icon="mdi-google">
           Sign in with Google
         </v-btn>
         <v-btn disabled>
           Sign in with Apple
+        </v-btn>
+        <v-btn disabled>
+          Sign in with Facebook
         </v-btn>
         <v-btn disabled>
           Sign in with Microsoft

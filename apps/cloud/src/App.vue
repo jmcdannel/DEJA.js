@@ -12,7 +12,7 @@ import Menu from '@/Core/Menu/Menu.vue'
 import DeviceStatus from '@/Layout/Devices/DeviceStatus.vue'
 import DCCLogStatus from '@/DCCEX/Log/DCCLogStatus.vue'
 import LayoutStatus from '@/Layout/LayoutStatus.vue'
-import Login from '@/auth/Login.vue'
+import { Login } from '@repo/auth'
 
 // import { useDccLog } from '@/DCCEX/Log/useDccLog'
 

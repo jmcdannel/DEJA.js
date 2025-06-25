@@ -54,7 +54,7 @@ function handleClose() {
   </v-dialog>
   
   <v-dialog v-model="showSorter" max-width="80vw">
-      <TurnoutSorter @close="showSorter = false" />
+    <TurnoutSorter @close="showSorter = false" />
   </v-dialog>
   <v-divider class="my-2" />
   <TurnoutForm v-if="showForm" v-show="showForm" @close="handleClose" :turnout="editTurnout" />

@@ -131,29 +131,7 @@ async function handelAutoConnect (checked: boolean | null) {
         :items="ports"
         :disabled="device?.isConnected"
       ></v-combobox>
-      <ul>
-        <li v-for="turnout in turnouts.filter(t => t.device === device?.id)" :key="turnout.id">
-          {{ turnout.name }}
-        </li>
-      </ul>
 
-    </v-card-text>
-    <v-card-actions>
-      <v-btn
-         v-if="!device?.isConnected"
-        text="Connect"
-        :color="color.value"
-        variant="elevated"
-        prepend-icon="mdi-usb"
-        @click="handleConnect"
-      ></v-btn>
-      <v-btn
-        text="Reset"
-        :color="color.value"
-        variant="outlined"
-        prepend-icon="mdi-usb"
-        disabled
-      ></v-btn>
       <v-switch 
         v-if="device?.isConnected || device?.autoConnect"
         @update:modelValue="handelAutoConnect"
@@ -170,6 +148,32 @@ async function handelAutoConnect (checked: boolean | null) {
         hide-details
         class="pointer-events-none"
       ></v-switch>
+
+    </v-card-text>
+    <v-card-actions>
+      <v-btn
+        @click="$router.push({ name: 'Device', params: { deviceId: device?.id } })"  
+        :color="color.value"
+        text="Details"
+        variant="outlined">
+      </v-btn>
+      <v-spacer></v-spacer>
+      <v-btn
+         v-if="!device?.isConnected"
+        text="Connect"
+        :color="color.value"
+        variant="elevated"
+        prepend-icon="mdi-usb"
+        @click="handleConnect"
+      ></v-btn>
+      <v-btn
+        v-else
+        text="Disconncect"
+        :color="color.value"
+        variant="outlined"
+        prepend-icon="mdi-usb"
+        disabled
+      ></v-btn>      
     </v-card-actions>
   </v-card>
 </template>

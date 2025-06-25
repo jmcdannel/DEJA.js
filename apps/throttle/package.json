@@ -30,6 +30,7 @@
     "vuetify": "^3.7.3"
   },
   "devDependencies": {
+    "@repo/auth": "workspace:^0.0.0",
     "@repo/dccex": "workspace:*",
     "@repo/deja": "workspace:*",
     "@repo/eslint-config": "workspace:*",

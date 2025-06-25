@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { requireAuth, requireDccEx, requireLayout } from './auth/guards'
 import Dashboard from './Dashboard/Dashboard.vue'
-import Login from './auth/Login.vue'
+import { Login, requireAuth, requireDccEx, requireLayout } from '@repo/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -63,6 +62,12 @@ const router = createRouter({
       path: '/layout',
       name: 'Layout',
       component: () => import('./Layout/Layout.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
+      path: '/layout/device/:deviceId',
+      name: 'Device',
+      component: () => import('./Layout/Devices/DeviceDetails.vue'),
       beforeEnter: [requireAuth, requireLayout],
     },
     {

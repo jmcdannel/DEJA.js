@@ -6,6 +6,7 @@ import {
   getDoc,
   query, 
   orderBy,
+  where,
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
@@ -14,18 +15,27 @@ import type { Turnout } from '@repo/modules/turnouts'
 
 export function useTurnouts() {
   const layoutId = useStorage('@DEJA/layoutId', '')
+  const colRef = collection(db, `layouts/${layoutId.value}/turnouts`)
 
   const turnoutsCol = () =>
-    layoutId.value ? query(collection(db, `layouts/${layoutId.value}/turnouts`),  orderBy('order'),  orderBy('name')) : null
+    layoutId.value ? query(colRef, orderBy('order'), orderBy('name')) : null
 
   function getTurnouts() {
     const turnouts = useCollection(turnoutsCol)
     return turnouts
   }
-
-  function getDeviceTurnouts() {
-    const turnouts = useCollection(turnoutsCol)
-    return turnouts
+  
+  function getTurnoutsByDevice(deviceId: string) {
+    try {
+      console.log('getTurnoutsByDevice', deviceId)
+      return query(
+        colRef,
+        where('device', '==', deviceId),
+      )
+    } catch (error) {
+      console.error('Error getting turnouts by device:', error)
+      return null
+    }
   }
 
   async function getTurnout(id: string): Turnout {
@@ -70,10 +80,11 @@ export function useTurnouts() {
   }
 
   return {
-    getTurnouts,
     getTurnout,
-    switchTurnout,
+    getTurnouts,
+    getTurnoutsByDevice,
     setTurnout,
+    switchTurnout,
   }
 }
 

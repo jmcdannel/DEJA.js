@@ -143,7 +143,7 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
         variant="outlined"
           :color="color"
       ></v-text-field>
-      <v-text-field v-if="turnoutType === 'servo'"
+      <v-text-field 
           v-model="straight"
           label="Straight"
           variant="outlined"
@@ -153,7 +153,7 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
           :rules="rules.required"
         >
       </v-text-field>
-      <v-text-field v-if="turnoutType === 'servo'"
+      <v-text-field
         v-model="divergent"
         label="Divergent"
         variant="outlined"

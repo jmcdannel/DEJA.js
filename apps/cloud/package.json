@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@mdi/font": "^7.4.47",
+    "@repo/auth": "workspace:^0.0.0",
     "@repo/dccex": "workspace:*",
     "@repo/deja": "workspace:*",
     "@repo/eslint-config": "workspace:*",
