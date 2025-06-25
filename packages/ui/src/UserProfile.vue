@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCurrentUser } from 'vuefire'
-import SignOut from './SignOut.vue'
+import SignOut from './Signout.vue'
 const user = useCurrentUser()
 
 </script>
