@@ -1,38 +1,51 @@
 {
   "name": "deja-cloud",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
-  "engines": {
-    "node": ">=20",
-    "pnpm": ">=9"
-  },
   "scripts": {
-    "start": "vite --host",
-    "dev": "vite --host",
-    "build": "vue-tsc -b && vite build",
+    "build": "run-p type-check build-only",
     "build-only": "vite build",
-    "preview": "vite preview"
+    "dev": "vite --host",
+    "format": "prettier --write src/",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "preview": "vite preview",
+    "start": "vite --host",
+    "type-check": "vue-tsc --noEmit --composite false --skipLibCheck "
   },
   "dependencies": {
-    "@vueuse/sound": "^2.0.1",
+    "@repo/modules": "workspace:*",
+    "@repo/ui": "workspace:*",
     "dayjs": "^1.11.13",
-    "firebase": "^10.13.1",
-    "flowbite": "^2.5.2",
-    "vue": "^3.4.37",
-    "vuefire": "^3.2.0",
-    "vuetify": "^3.7.2"
+    "firebase": "^10.14.1",
+    "vue": "^3.5.16",
+    "vue-router": "^4.2.2",
+    "vuefire": "^3.2.1",
+    "vuetify": "^3.7.3"
   },
   "devDependencies": {
     "@mdi/font": "^7.4.47",
+    "@repo/dccex": "workspace:*",
+    "@repo/deja": "workspace:*",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/firebase-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@repo/utils": "workspace:*",
     "@vitejs/plugin-vue": "^5.1.2",
+    "@vue/tsconfig": "^0.4.0",
     "@vueuse/core": "^11.0.3",
+    "@vueuse/sound": "^2.0.1",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.10",
-    "typescript": "^5.5.3",
+    "typescript": "*",
     "vite": "^5.4.1",
     "vue-tsc": "^2.0.29",
-    "vue3-icons": "^0.1.13"
+    "vue3-icons": "^0.1.13",
+    "vuedraggable": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

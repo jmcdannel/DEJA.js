@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { useDcc } from '@/DCCEX/useDcc'
+import { useDejaJS } from '@repo/deja/useDejaJS'
 
-const { sendDccCommand } = useDcc()
+const { sendDejaCommand } = useDejaJS()
 
-defineProps({
-  ports: Array
-})
+defineProps<{
+  ports: string[]
+}>()
 
 function handleRefresh() {
-  sendDccCommand({ action: 'listPorts', payload: {} })
+  sendDejaCommand({ action: 'listPorts', payload: {} })
 }
 </script>
 <template>
@@ -21,7 +21,7 @@ function handleRefresh() {
     variant="tonal"
     density="compact">
     <v-card-text>
-      <v-list lines="one">
+      <v-list lines="one" v-if="ports?.length > 0">
         <v-list-item
           v-for="port in ports"
           :key="port"

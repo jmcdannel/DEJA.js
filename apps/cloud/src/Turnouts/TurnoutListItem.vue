@@ -1,25 +1,28 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
-import { useEfx } from '@/Effects/useEfx'
-import { useTurnouts } from '@/Turnouts/useTurnouts'
+import { useEfx } from '@repo/modules/effects'
+import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
 
 const { switchTurnout } = useTurnouts()
 const { runEffect, getEffect } = useEfx()
 
 defineEmits(['edit'])
-const props = defineProps({
-  turnout: Object,
-  turnoutId: String,
-})
+
+const props = defineProps<{
+  turnout: Turnout
+  turnoutId: string
+}>()
 
 const turnoutState = ref(props.turnout?.state || true)
 
 async function handleSwitch() {
+  
   await switchTurnout({...props.turnout, id: props.turnoutId, state: turnoutState.value})
   if (props.turnout?.effectId) {
+    const effectId = props.turnout.effectId
     useTimeoutFn(async () => {
-      const effect = await getEffect(props.turnout?.effectId)
+      const effect = await getEffect(effectId)
       await runEffect({...effect, state: turnoutState.value})
     }, 2000)
   }
@@ -34,20 +37,28 @@ async function handleSwitch() {
     :color="turnout?.color || 'yellow'"
   >
   <v-card-item class="font-weight-black">
-    <v-card-title class="font-weight-black">
+    <v-card-title class="font-weight-black flex items-center justify-between">
       {{ turnout?.name }}
+      <v-switch
+        v-model="turnoutState"
+        @change="handleSwitch"
+        :color="turnout?.color || 'yellow'"
+        hide-details
+      ></v-switch>
     </v-card-title>
+    <v-card-subtitle class="text-md">
+      {{ turnout?.desc }}
+    </v-card-subtitle>
   </v-card-item>
     <v-card-text 
       class="min-h-8 flex py-2 justify-space-between bg-blend-lighten bg-opacity-30"
       variant=""
       >
-      <div class="grid grid-cols-2 gap-2">
         <v-chip-group column>
           <v-chip
             size="small"
             class=""
-            icon="mdi-directions-fork"
+            prepend-icon="mdi-directions-fork"
           >{{ turnout?.type || 'Effect' }}</v-chip>          
           <v-chip
             size="small"
@@ -56,6 +67,13 @@ async function handleSwitch() {
           >
             {{ turnout?.device }}
           </v-chip>
+          <v-chip v-for="tag in turnout?.tags" :key="tag"
+            size="small"
+            class=""
+            color="primary"
+          >
+            {{ tag }}
+          </v-chip>
           <v-label
             v-if="turnout?.effectId"
             class="text-xs"
@@ -63,15 +81,6 @@ async function handleSwitch() {
             {{ turnout?.effectId }}
           </v-label>
         </v-chip-group>
-        <div class="flex flex-col items-center justify-center">
-          <v-switch
-            v-model="turnoutState"
-            @change="handleSwitch"
-            :color="turnout?.color || 'yellow'"
-            hide-details
-          ></v-switch>
-        </div>
-      </div>
     </v-card-text>
     <v-spacer></v-spacer>
     <v-card-actions>

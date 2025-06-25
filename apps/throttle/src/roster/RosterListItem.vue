@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PropType } from 'vue'
-import type { Loco } from '@/throttle/types'
+import type { Loco } from '@repo/modules/locos'
 
 defineEmits(['selected'])
 defineProps({
@@ -25,11 +25,11 @@ defineProps({
       my-1
       hover:bg-opacity-60 
     "
-    @click="$emit('selected', loco.locoId)" 
+    @click="$emit('selected', loco.address)" 
     :color="loco?.meta?.color || 'primary'"
     role="link">        
-    <span><v-avatar color="primary" :size="24" class="mr-2">{{  loco.locoId }}</v-avatar>
-      {{ loco?.name || loco?.locoId }}
+    <span><v-avatar color="primary" :size="24" class="mr-2">{{  loco.address }}</v-avatar>
+      {{ loco?.name || loco?.address }}
     </span>
     <span><v-avatar v-for="cloco in loco.consist" :key="cloco.address" :size="18" color="secondary" class="opacity-70">{{  cloco.address }}</v-avatar></span>
   </button>

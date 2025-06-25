@@ -1,86 +1,174 @@
 <script setup lang="ts">
+// @ts-nocheck
 import { ref, watch }  from 'vue'
-import { useEfx } from '@/effects/useEfx'
+import { useLayoutRoutes } from './useLayoutRoutes'
 import TamarackJunction from './maps/tam/TamarackJunction.vue'
+import PayetteSub from './maps/tam/PayetteSub.vue'
+import './route-styles.css'
 
-const p1 = ref(null)
-const p2 = ref(null)
+const activeMap = ref('PayetteSub')
 
-const { getEffects, runEffect, getEffect } = useEfx()
-const list = getEffects()
+const { 
+  clearP1,
+  clearP2,
+  getMapClasses,
+  handleMapClick,
+  isRunning,
+  percentComplete,
+  p1,
+  p2,
+  routes,
+  routeTurnouts,
+  runRoute
+} = useLayoutRoutes()
 
-const routes = list.data.value?.filter(item => item.type === 'route')
-
-watch(p2, async (newValue) => {
-  if (newValue !== null) {
-    const route = routes.find(r => r.point1 === p1.value && r.point2 === newValue) ||
-                  routes.find(r => r.point1 === newValue && r.point2 === p1.value)
-    if (route) {
-      const efx = await  getEffect(route.id)
-      console.log('Route found:', efx?.state, route, efx)
-      runEffect({...route, state: !efx?.state, id: route.id })
-    } else {
-      console.log('No route found between', p1.value, 'and', newValue, routes)
-    }
-  }
-})
-
-function findClickableParent(target) {
-  const clickableContainers = ['Routes', 'Turnouts', 'TurnoutLabels']
-  let found = false
-  let currentTarget = target
-  let targetType = ''
-  while (!found && currentTarget && currentTarget.parentNode) {
-    if (currentTarget.parentNode.nodeName.toLowerCase() === 'svg') {
-      currentTarget = null
-    } else if (clickableContainers.includes(currentTarget.parentNode.id)) {
-      targetType = currentTarget.parentNode.id
-      found = true
-    } else {
-      currentTarget = currentTarget.parentNode
-    }
-  }
-  return found ? { target: currentTarget, type: targetType } : null
-}
-
-async function handleMapClick(e: MouseEvent) {
-  e.preventDefault();
-  const svgBtn = findClickableParent(e.target)
-  console.log('handleMapClick', svgBtn, routes)
-  if (svgBtn) {
-    switch (svgBtn.type) {
-      case 'Routes':
-        if (p1.value === null) {
-          p1.value = svgBtn.target.id
-        } else if (p2.value === null) {
-          p2.value = svgBtn.target.id
-        } else {
-          p1.value = svgBtn.target.id
-          p2.value = null
-        }
-        // const rte = routes.find(r => r.point1 === svgBtn.target.id || r.point2 === svgBtn.target.id);
-        // console.log('handleMapRouteClick', svgBtn.target.id, rte);
-        // await onRouteToggle(rte);
-        break;
-      case 'Turnouts':
-      case 'TurnoutLabels':
-        // await onTurnoutToggle(svgBtn.target.id);
-        break;
-      default:
-        // noop
-        break;
-    }
-  }
-}
 </script>
 <template>
-  <div class="">
-    <!-- <img :src="tamarackJunction" alt="Tamarack Junction Map" @click="handleMapClick" /> -->
-    <TamarackJunction @click="handleMapClick" />
-    <pre>p1: {{ p1 }}</pre>
-    <pre>p2: {{ p2 }}</pre>    
-    <pre v-for="r in routes">
-      {{ r.id }}, {{ r.state }}, {{ r.timestamp }}, 
+  <div class="relative">
+    <header class="m-2 flex items-center justify-between">
+      <hgroup class="flex items-center space-x-8">
+        <h1 class="text-3xl font-bold text-blue-400">Routes</h1>
+      </hgroup>
+      <nav class="flex items-center space-x-2">
+        <v-btn 
+          v-for="map in ['TamarackJunction', 'PayetteSub']" 
+          :key="map"
+          :variant="activeMap === map ? 'flat' : 'outlined'"
+          color="primary"
+          prepend-icon="mdi-map"
+          size="small"
+          @click="activeMap = map"
+        >
+        {{ map }}
+        </v-btn>
+        <v-btn
+          :variant="activeMap === 'RoutesList' ? 'flat' : 'outlined'"
+          prepend-icon="mdi-format-list-bulleted"
+          color="primary"
+          size="small"
+          @click="activeMap = 'RoutesList'"
+        >Routes List</v-btn>
+      </nav>
+    </header>
+    <main>
+      <v-progress-linear v-model="percentComplete" :opacity="isRunning ? 1 : 0" color="primary" />
+      <v-timeline class="my-2" direction="horizontal" side="start" size="small" truncate-line="both">
+        <v-timeline-item dot-color="blue-lighten-1" icon="mdi-map-marker" size="small" fill-dot>
+          <template #opposite>
+            <v-chip 
+              v-if="p1"
+              @click="p1 = undefined"
+              color="primary" 
+              prepend-icon="mdi-map-marker"
+              append-icon="mdi-close"
+              size="small"
+              variant="outlined"
+            >{{ p1 }}</v-chip>
+            <v-chip
+              v-else
+              color="primary"
+              prepend-icon="mdi-map-marker"
+              size="small"
+              variant="outlined"
+            >No origin selected</v-chip>
+          </template>
+        </v-timeline-item>
+        <template v-if="p1 && p2">
+          <v-timeline-item 
+            
+            v-for="(t, idx) in routeTurnouts" 
+            :key="idx"
+            dot-color="purple-darken-1"
+            fill-dot
+            icon="mdi-call-split"
+            size="small"
+          >
+            <template #opposite>
+              <!-- <span class="text-xs">{{ t.state ? 'Straight' : 'Divergent' }}</span> -->
+              <span class="text-xs">{{ t.name }}</span>
+            </template>
+          </v-timeline-item>
+        </template>
+        <template  v-else>
+          <v-timeline-item
+            dot-color="grey-darken-1"
+            fill-dot
+            icon="mdi-call-split"
+            size="small"
+          >
+          </v-timeline-item>
+          <v-timeline-item
+            dot-color="grey-darken-1"
+            fill-dot
+            icon="mdi-call-split"
+            size="small"
+          >
+          </v-timeline-item>
+        </template>
+        <v-timeline-item dot-color="secondary" icon="mdi-map-marker"  size="small" fill-dot>
+          <template #opposite>
+            <v-chip 
+              v-if="p2"
+              @click="p2 = undefined"
+              color="secondary" 
+              append-icon="mdi-close"
+              prepend-icon="mdi-map-marker"
+              size="small"
+              variant="outlined"
+            >{{ p2 }}</v-chip>
+            <v-chip
+              v-else
+              color="secondary"
+              prepend-icon="mdi-map-marker"
+              size="small"
+              variant="outlined"
+            >No destination selected</v-chip>
+          </template>
+        </v-timeline-item>
+      </v-timeline>
+      <!-- <pre>{{ routeTurnouts }}</pre> -->
+    </main>
+    <TamarackJunction v-if="activeMap === 'TamarackJunction'" @click="handleMapClick" />
+    <PayetteSub 
+      v-if="activeMap === 'PayetteSub'" 
+      @click="handleMapClick" 
+      :class="getMapClasses()"
+    />
+    <v-container v-if="activeMap === 'RoutesList'" class="overflow-y-auto" >
+      <v-row>
+        <v-col v-for="r in routes" :key="r.id" cols="12" xs="12" sm="6" lg="4">
+          <v-card color="cyan" variant="tonal">
+            <v-card-title class="text-lg font-bold">{{ r.id }}</v-card-title>
+            <v-card-subtitle>State: {{ r.state }}</v-card-subtitle>
+            <v-card-text>
+              <v-chip-group>
+                <v-chip
+                  prepend-icon="mdi-map-marker"
+                  size="small"
+                >{{ r?.point1 }}</v-chip>
+                <v-chip v-for="t in r?.on" :key="t.id" size="small" prepend-icon="mdi-call-split">{{ t.name }}</v-chip>
+                <v-chip v-for="t in r?.off" :key="t.id" size="small" prepend-icon="mdi-call-split">{{ t.name }}</v-chip>
+                <v-chip
+                  append-icon="mdi-map-marker"
+                  :color="color"
+                  size="small"
+                >{{ r?.point2 }}</v-chip>
+              </v-chip-group>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn 
+                @click="runRoute(r)"
+                color="primary"
+                variant="outlined"
+              >Run</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+    <!-- <pre v-for="r in routes">
+{{ r.id }}, {{ r.state }}, {{ r.on?.map(e => e.name) }}, {{ r.off?.map(e => e.name) }}, 
     </pre>
+    <p>{{  getMapClasses() }}</p> -->
   </div>
 </template>

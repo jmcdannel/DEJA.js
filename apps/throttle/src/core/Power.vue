@@ -1,47 +1,25 @@
 <script setup>
-  import { computed, ref, watch } from 'vue'
-  import { storeToRefs } from 'pinia'
-  import { useConnectionStore } from '@/connections/connectionStore'
-  import { useEfx } from '@/effects/useEfx'
+import { ref, watch } from 'vue'
+import { useEfx } from '@repo/modules/effects'
 
-  const { runEffect, getEffectsByType } = useEfx()
+const { runEffect, getEffectsByType } = useEfx()
 
-  const {
-    isEmulated,
-    isSerial,
-    dccExConnected
-   } = storeToRefs(useConnectionStore())
+const power = ref(null)
+const locked = ref(false)
 
-  const power = ref(null)
-  const enabled = computed(() => dccExConnected || isEmulated || isSerial)
-  const locked = ref(false)
-
-  watch(power, async (newPower) => {
-    const powerEfx = await getEffectsByType('power')
-    powerEfx.forEach(efx => {
-      runEffect({...efx, state: newPower })
-    })
-    console.log('power', newPower, powerEfx)
+watch(power, async (newPower) => {
+  const powerEfx = await getEffectsByType('power')
+  powerEfx.forEach(efx => {
+    runEffect({...efx, state: newPower })
   })
+})
 
 </script>
 <template>
-  <button @click="power = !power"
-    :disabled="!enabled"
-    class="btn btn-ghost btn-circle relative"
-    :class="{
-      'text-gray-500': power === null,
-      'text-success': power === true,
-      'text-error': power === false,  
-    }">
-    <v-icon icon="mdi-power" size="x-large"></v-icon>
-      <span 
-        class="w-1 h-1 rounded-full absolute -top-1"
-        :class="{
-          'bg-success': locked,
-          'bg-gray-500 animate-bounce': !locked && power === null,
-          'bg-error': !locked,  
-        }"
-      ></span>
-    </button>
+  <v-btn 
+    @click="power = !power"
+    :color="power ? 'success' : 'error'"
+    icon="mdi-power"
+    variant="plain">
+  </v-btn>
 </template>

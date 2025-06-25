@@ -1,16 +1,16 @@
-<script setup lang="js">
+<script setup lang="ts">
 import { ref } from 'vue'
-import { useLocos } from '@/api/useLocos'
+import { useLocos } from '@repo/modules/locos'
 
-defineEmits(['added'])
+const emit = defineEmits(['added'])
 const { createLoco } = useLocos()
-const address = ref(null)
-const name = ref(null)
+const address = ref<number | null>(null)
+const name = ref<string | null>(null)
 
 async function handleAdd() {
-  const newAddress = parseInt(address.value) 
-  if (!!newAddress) {
-    await createLoco(newAddress, name.value)
+  const newAddress = address.value
+  if (newAddress && name.value) {
+    await createLoco(newAddress, name.value, '')
   }
   emit('added', address.value)
 }

@@ -1,0 +1,33 @@
+{
+  "name": "@repo/modules",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./effects": "./src/effects/index.ts",
+    "./layouts": "./src/layouts/index.ts",
+    "./locos": "./src/locos/index.ts",
+    "./turnouts": "./src/turnouts/index.ts",
+    "./types": "./src/types.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "firebase": "^10.14.1",
+    "vuefire": "^3.2.1"
+  },
+  "devDependencies": {
+    "@repo/dccex": "workspace:*",
+    "@repo/deja": "workspace:*",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/firebase-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@repo/utils": "workspace:*",
+    "@vueuse/core": "^11.0.3",
+    "typescript": "latest",
+    "vue": "^3.5.16"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@repo/deja",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./useDejaJS": "./src/useDejaJS.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "firebase": "^10.14.1",
+    "vuefire": "^3.2.1"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/firebase-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@vueuse/core": "^11.0.3",
+    "typescript": "latest"
+  }
+}

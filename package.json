@@ -1,22 +1,27 @@
 {
   "name": "deja",
   "version": "1.0.0",
-  "description": "",
   "private": true,
+  "description": "",
+  "author": "",
   "scripts": {
     "build": "turbo run build",
+    "check-types": "turbo run check-types",
+    "deps:check": "syncpack list-mismatches",
+    "deps:fix": "syncpack fix-mismatches",
+    "deps:format": "syncpack format",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "lint": "turbo run lint",
+    "start": "turbo run start"
   },
-  "keywords": [],
-  "author": "",
   "devDependencies": {
+    "syncpack": "^13.0.4",
     "turbo": "^2.5.3"
   },
-  "packageManager": "pnpm@9.0.0",
   "engines": {
-    "node": ">=18"
-  }
+    "node": ">=20"
+  },
+  "keywords": [],
+  "packageManager": "pnpm@9.0.0"
 }

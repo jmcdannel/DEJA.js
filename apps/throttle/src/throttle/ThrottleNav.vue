@@ -1,44 +1,26 @@
 <script lang="ts" setup>
-import type { Loco, Throttle } from '@/throttle/types'
-import { useLocos } from '@/api/useLocos'
-import { useRouter } from 'vue-router'
-import LocoAvatar from '@/core/LocoAvatar/LocoAvatar.vue'
-const $router = useRouter()
+import { computed } from 'vue'
+import type { Loco } from '@repo/modules/locos'
+import type { Throttle } from '@/throttle/types'
+import { useLocos } from '@repo/modules/locos'
+import { LocoAvatar } from '@repo/ui'
 
-const { getLocos, getThrottles } = useLocos()
-const locos = getLocos()
+const { getLoco, getThrottles } = useLocos()
 const throttles = getThrottles()
 
-function getSignedSpeed({speed, direction}: Throttle) {
-    return speed && !!direction ? speed : -speed || 0
-  }
-function getColor(speed: number) {
-  if (speed === 0) return 'black'
-  if (speed < 0) return 'red'
-  return 'green'
-}
-
-function handleThrottleClick(throttle: Throttle) {
-  $router.push({ name: 'cloud-throttle', params: { address: throttle.id } })
-}
-
-function handleListCkick() {
-  $router.push({ name: 'throttle-list' })
-}
-
+const getLocoData = (address: Number) => computed(() => getLoco(address)?.value || {} as Loco)
 </script>
 
 <template>
-  <div v-if="throttles?.length && locos?.length" 
+  <div v-if="throttles?.length" 
     class="p-1" 
-    v-for="throttle in throttles" 
-    :key="throttle.id"
-  >
+    v-for="item in throttles" 
+    :key="item.id">
     <LocoAvatar
-      :loco="locos.find(loco => loco.locoId === throttle.address) as Loco"
-      :throttle="throttle as Throttle"
-      :showCard="true"
+      :loco="getLocoData(item.address).value"
+      :throttle="item.throttle as Throttle"
       :size="48"
+    />
     />
   </div>
 </template>

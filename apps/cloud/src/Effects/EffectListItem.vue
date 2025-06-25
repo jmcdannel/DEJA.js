@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useEfx } from '@/Effects/useEfx'
+import { useEfx, efxTypes } from '@repo/modules/effects'
 import { useColors } from '@/Core/UI/useColors'
 
 const { DEFAULT_COLOR } = useColors()
-const { efxTypes, runEffect, deleteEfx } = useEfx()
+const { runEffect, deleteEfx } = useEfx()
 
 const props = defineProps({
   efx: Object,
   efxId: String,
 })
 
-const active = ref(false)
 const confirmDelete = ref(false)
 
 
@@ -19,11 +18,11 @@ const efxType = computed(() => efxTypes.find((type) => type.value === props?.efx
 const color = ref(props.efx?.color || efxType.value?.color || DEFAULT_COLOR)
 
 async function handleEfx (event: Event) {
-  console.log('handleEfx', props.efx, props.efx?.id, event, event?.target?.checked)
+  console.log('handleEfx', props.efx, props.efx?.id, event, (event.target as HTMLInputElement)?.checked)
   props?.efx && props?.efxId && await runEffect({
       ...props.efx,
       id: props.efxId,
-      state: event?.target?.checked
+      state: (event.target as HTMLInputElement)?.checked
   })
 }
 

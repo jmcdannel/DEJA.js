@@ -1,0 +1,23 @@
+{
+  "name": "@repo/firebase-config",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./firebase": "./src/firebase.ts",
+    "./firebase-node": "./src/firebase-node.ts",
+    "./firebase-admin-node": "./src/firebase-admin-node.ts"
+  },
+  "dependencies": {
+    "firebase": "^10.14.1"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "dotenv": "^16.3.1",
+    "firebase-admin": "^13.4.0",
+    "typescript": "*"
+  }
+}

@@ -1,27 +1,25 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import {
-  BsFillTrainFreightFrontFill,
-} from 'vue3-icons/bs'
-import { useLocos } from '@/Roster/useLocos'
+import { useLocos, ROADNAMES } from '@repo/modules/locos'
+
+interface ValidationRules {
+  required: ((val: any) => boolean | string)[];
+}
 
 const emit = defineEmits(['close'])
 
-const { roadnames, createLoco } = useLocos()
+const { createLoco } = useLocos()
 
 const address = ref(null)
 const name = ref('')
 const roadname = ref(null)
 const loading = ref(false)
-const rules = {
+const rules:ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
 
-async function submit (e) {
+async function submit () {
   loading.value = true
-
-  const results = await e
-  console.log('add loco', results)
 
   const newAddress = parseInt(address.value as unknown as string) 
   if (!!newAddress) {
@@ -74,7 +72,7 @@ async function submit (e) {
         mandatory
       >
         <v-chip
-          v-for="road in roadnames" :key="road.value" :value="road.value" :text="road.label"
+          v-for="road in ROADNAMES" :key="road.value" :value="road.value" :text="road.label"
           variant="outlined"
           filter
         ></v-chip>

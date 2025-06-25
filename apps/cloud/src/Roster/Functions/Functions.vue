@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useFunctions } from '@/Roster/Functions/useFunctions'
+import { useFunctions, defaultFunctions, type LocoFunction } from '@repo/modules/locos'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import EditFunc from '@/Roster/Functions/EditFunction.vue'
 
@@ -8,22 +8,22 @@ const props = defineProps({
   loco: Object,
 })
 const locoFunctions = ref(props.loco?.functions)
-const locoId = ref(props.loco?.id)
+const address = ref(props.loco?.id)
 const isModified = ref(false)
-const { defaultFunctions, updateFunctions } = useFunctions()
+const { updateFunctions } = useFunctions()
 
 async function handleSave() {
-  console.log('handleSave', locoId.value, locoFunctions.value)
-  if (locoId.value) {
-    await updateFunctions(locoId.value, locoFunctions.value)
+  console.log('handleSave', address.value, locoFunctions.value)
+  if (address.value) {
+    await updateFunctions(address.value, locoFunctions.value)
   }
 }
 
-async function handleEdit(func) {
+async function handleEdit(func: LocoFunction) {
   console.log('handleSave', func)
-  const existing = locoFunctions.value?.find(lf => lf.id === func?.id)
+  const existing = locoFunctions.value?.find((lf:LocoFunction) => lf.id === func?.id)
   locoFunctions.value = existing 
-    ? (locoFunctions.value || []).map(lf => {
+    ? (locoFunctions.value || []).map((lf:LocoFunction) => {
         if (lf.id === func?.id) {
           return {
             ...lf,
@@ -53,7 +53,7 @@ async function handleEdit(func) {
   <EditFunc 
     v-for="defaultFunc in defaultFunctions" 
     :key="defaultFunc.label" 
-    :locoFunction="locoFunctions?.find(lf => lf.id === defaultFunc.id)" 
+    :locoFunction="locoFunctions?.find((lf: LocoFunction) => lf.id === defaultFunc.id)" 
     :defaultFunction="defaultFunc" 
     @edit="handleEdit"
   />
@@ -61,8 +61,8 @@ async function handleEdit(func) {
     <ViewJson :json="defaultFunc" label="RAW DEFAULT"></ViewJson>
     <ViewJson :json="loco?.functions.find(lf => lf.id === defaultFunc.id)" label="RAW LOCO"></ViewJson>
   </template> -->
-  <pre>locoId: {{ locoId }}</pre>
-  <ViewJson :json="loco.functions" label="RAW loco Data"></ViewJson>
+  <pre>address: {{ address }}</pre>
+  <ViewJson :json="loco?.functions || {}" label="RAW loco Data"></ViewJson>
   <ViewJson :json="locoFunctions" label="RAW locoFunctions Data"></ViewJson>
   <ViewJson :json="defaultFunctions" label="RAW DEFAULT FUNCTIONS"></ViewJson>
 </template>

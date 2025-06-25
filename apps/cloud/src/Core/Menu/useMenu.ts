@@ -1,80 +1,68 @@
-import {
-  BsFillLightningChargeFill,
-  BsUsbSymbol,
-  BsCloud,
-  BsColumnsGap,
-  BsFillHouseGearFill,
-  BsCloudFill,
-  BsBezier2,
-  BsBoxes,
-  BsCpu,
-  BsUsbPlug,
-  BsUsbPlugFill,
-  BsFillMapFill,
-  BsFan,
-  BsFillGearFill,
-  BsFillRocketTakeoffFill,
-  BsFillTrainFreightFrontFill,
-  BsCompass,
-  BsFillStoplightsFill,
-  BsSignpost2,
-  BsFillSignpostSplitFill,
-  BsCupHotFill,
-} from 'vue3-icons/bs'
+import {  useRouter } from 'vue-router'
+interface MenuItem {
+  label: string;
+  icon: string;
+  color: string;
+}
 
 export function useMenu() {
-  const menuConfig = [
-    {
-      label: 'Dashboard',
-      icon: BsColumnsGap,
-      color: 'violet',
-    },
+  const router = useRouter()
+  const menuConfig: MenuItem[] = [
+    // {
+    //   label: 'Dashboard',
+    //   icon: 'mdi-view-dashboard',
+    //   color: 'violet',
+    // },
     {
       label: 'Layout',
-      icon: BsFillHouseGearFill,
+      icon: 'mdi-fence',
       color: 'cyan',
     },
     {
       label: 'DCC-EX',
-      icon: BsCpu,
+      icon: 'mdi-cpu-64-bit',
       color: 'lime',
     },
     {
       label: 'Roster',
-      icon: BsFillTrainFreightFrontFill,
+      icon: 'mdi-train',
       color: 'pink',
     },
     {
       label: 'Effects',
-      icon: BsFillRocketTakeoffFill,
+      icon: 'mdi-rocket-launch',
       color: 'indigo',
     },
     {
       label: 'Turnouts',
-      icon: BsBezier2,
+      icon: 'mdi-call-split',
       color: 'amber',
     },
     {
       label: 'Routes',
-      icon: BsFillMapFill,
+      icon: 'mdi-map',
       color: 'purple',
     },
     {
       label: 'Signals',
-      icon: BsFillStoplightsFill,
+      icon: 'mdi-traffic-light',
       color: 'emerald',
     },
     {
       label: 'Emulator',
-      icon: BsCupHotFill,
+      icon: 'mdi-console',
       color: 'rose',
     },
     {
       label: 'Settings',
-      icon: BsFillGearFill,
+      icon: 'mdi-cog',
       color: 'blue',
     },
   ]
+
+  function handleMenu(item:MenuItem) {
+    router.push({ name: item.label })
+  }
 
   function getMenuItem(label: string) {
     return menuConfig.find((item) => item.label === label)
@@ -83,6 +71,8 @@ export function useMenu() {
   return {
     menu: menuConfig,
     getMenuItem,
+    handleMenu,
+    currentItem: router.currentRoute.value.name,
   }
 }
 

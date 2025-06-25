@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
-import type { Loco, ConsistLoco, Throttle } from './types'
-import { useDejaCloud } from '@/deja-cloud/useDejaCloud'
+import type { Loco, Throttle } from '@repo/modules/locos'
 
 export const localStorageKeyLocos = '@DEJA/locos'
 export const localStorageKeyThrottles = '@DEJA/throttles'
@@ -16,13 +15,6 @@ export const useThrottleStore = defineStore('locos', {
   },
   actions: {
     initialize: () => {
-
-      // const dejaCloud = useDejaCloud()
-
-      // const dejaCloudLocos = dejaCloud.getLocos()
-
-      // console.log('dejaCloudLocos', dejaCloudLocos)
-
     },
     setLocos(newLocos: Loco[]) {
       this.locos = newLocos

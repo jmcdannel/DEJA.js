@@ -1,31 +1,34 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useEfx } from '@/Effects/useEfx'
+import { computed, ref, watch } from 'vue'
+import { useEfx, efxTypes } from '@repo/modules/effects'
 import { useColors } from '@/Core/UI/useColors'
 
 const { DEFAULT_COLOR } = useColors()
-const { efxTypes, runEffect, deleteEfx } = useEfx()
+const { runEffect, deleteEfx } = useEfx()
 
 const props = defineProps({
   efx: Object,
   efxId: String,
 })
 
-const active = ref(false)
 const confirmDelete = ref(false)
-
 
 const efxType = computed(() => efxTypes.find((type) => type.value === props?.efx?.type))
 const color = ref(props.efx?.color || efxType.value?.color || DEFAULT_COLOR)
+const state = ref(props.efx?.state || false)
 
-async function handleEfx (event: Event) {
-  console.log('handleEfx', props.efx, props.efx?.id, event, event?.target?.checked)
-  props?.efx && props?.efxId && await runEffect({
-      ...props.efx,
-      id: props.efxId,
-      state: event?.target?.checked
+async function handleEfx (state: boolean) {
+  props?.efx?.type && props?.efx && props?.efxId && await runEffect({
+    ...props.efx,
+    type: props.efx.type,
+    id: props.efxId,
+    state,
   })
 }
+
+watch(state, (newState) => {
+  handleEfx(newState)
+})
 
 </script>
 <template>
@@ -36,24 +39,29 @@ async function handleEfx (event: Event) {
     density="compact"
   >
     <template #title>
-      <span class="text-sm">{{efx?.name}}</span>
+      <span class="text-md">{{efx?.name}}</span>
+    </template>
+    <template #prepend>
+      <v-icon 
+        :icon="efxType?.icon || 'mdi-help'"
+        class="text-2xl m-3"></v-icon>
     </template>
     <v-card-text 
-      class="min-h-8 flex border-t-2 py-2 justify-space-between"
+      class="min-h-8 flex py-2 justify-space-between"
       variant="flat">
       <v-chip-group>
         <v-chip
-          :color="color"
+          prepend-icon="mdi-map-marker"
+          size="small"
         >{{ efx?.point1 }}</v-chip>
+        <v-chip v-for="t in efx?.on" :key="t.id" size="small" prepend-icon="mdi-call-split">{{ t.name }}</v-chip>
+        <v-chip v-for="t in efx?.off" :key="t.id" size="small" prepend-icon="mdi-call-split">{{ t.name }}</v-chip>
         <v-chip
+          append-icon="mdi-map-marker"
           :color="color"
+          size="small"
         >{{ efx?.point2 }}</v-chip>
       </v-chip-group>
-        <v-switch
-          hide-details
-          :color="color"
-          @click="handleEfx"
-        ></v-switch>
     </v-card-text>
     <v-spacer></v-spacer>
     <v-card-actions>
@@ -81,7 +89,6 @@ async function handleEfx (event: Event) {
           @click="deleteEfx(efx?.id)" />
       </template>
       <v-spacer></v-spacer>
-
       <v-btn
         text="Edit"
         variant="tonal"
@@ -89,6 +96,13 @@ async function handleEfx (event: Event) {
         size="small"
         @click="$emit('edit', efx)"
       ></v-btn>
+      <v-switch
+        hide-details
+        :color="color"
+        v-model="state"
+        text="Run"
+        variant="flat"
+      ></v-switch>
     </v-card-actions>
   </v-card>
 </template>

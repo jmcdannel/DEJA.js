@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { signOut } from 'firebase/auth'
 import { useCurrentUser, useFirebaseAuth } from 'vuefire'
 
@@ -6,10 +6,11 @@ const auth = useFirebaseAuth()
 const user = useCurrentUser()
 
 function handleSignOut() {
-  signOut(auth).catch((reason) => {
-    console.error('Failed signOut', reason)
-    error.value = reason
-  })
+  if (auth) {
+    signOut(auth).catch((reason) => {
+      console.error('Failed signOut', reason)
+    })
+  }
 }
 </script>
 <template>

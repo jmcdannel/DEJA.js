@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useDejaJS } from '@/DejaJS/useDejaJS'
 import { useColors } from '@/Core/UI/useColors'
-import { useLayout } from '@/Layout/useLayout'
-import { useTurnouts } from '@/Turnouts/useTurnouts'
+import { deviceTypes, useLayout, type Device } from '@repo/modules/layouts'
+import { useTurnouts } from '@repo/modules/turnouts'
 
-const { sendDejaCommand } = useDejaJS()
-const { deviceTypes, connectDevice, autoConnectDevice } = useLayout()
+const { connectDevice, autoConnectDevice } = useLayout()
 const { getTurnouts } = useTurnouts()
 const { colors, DEFAULT_COLOR } = useColors()
 
-const props = defineProps({
-  device: Object,
-  ports: Array,
-})
+const props = defineProps<{
+  device: Device,
+  ports: string[],
+}>()
 
 const turnouts = ref(getTurnouts())
 const serial = ref(props?.device?.port || '')
@@ -25,23 +23,23 @@ const deviceType = computed(() => deviceTypes.find((type) => type.value === prop
 // const color = colors[deviceType.color || DEFAULT_COLOR]
 
 onMounted(() => {
-  console.log('DeviceListItem', props.device, deviceType.value?.color, deviceType)
   deviceType.value?.color && (color.value = colors[deviceType.value.color])
 })
 
 watch(() => deviceType.value?.color, (newVal) => {
-  console.log('deviceType.color', newVal)
-  color.value = colors[newVal]
+  if (newVal) {
+    color.value = colors[newVal]
+  }
 })
 
-async function handleConnect (event: Event) {
-  console.log('handleConnect', props.device, serial.value)
-  connectDevice(serial.value, props.device)
+async function handleConnect () {
+  connectDevice(props.device, serial.value, props.device?.topic)
 }
 
-async function handelAutoConnect (checked: boolean) {
-  console.log('handelAutoConnect', props.device,checked)
-  props.device?.id && await autoConnectDevice(props.device?.id, checked)
+async function handelAutoConnect (checked: boolean | null) {
+  if (checked !== null && props.device?.id) {
+    await autoConnectDevice(props.device.id, checked)
+  }
 }
 
 </script>

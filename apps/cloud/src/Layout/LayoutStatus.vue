@@ -3,9 +3,9 @@ import { useStorage } from '@vueuse/core'
 import AddLayout from '@/Layout/AddLayout.vue'
 import SelectLayout from '@/Layout/SelectLayout.vue'
 
-const layoutId = useStorage('@DEJA/cloud/layoutId', 'betatrack')
+const layoutId = useStorage('@DEJA/layoutId', '')
 
-function handleSelect(_layoutId) {
+function handleSelect(_layoutId: string) {
   console.log('handleSelect', _layoutId)
   layoutId.value = _layoutId
 }
@@ -27,7 +27,7 @@ function handleSelect(_layoutId) {
           </span>
         </template>
         <template #default>
-          <span class="hidden lg:flex">{{ layoutId }}</span>
+          <span class=" lg:flex">{{ layoutId }}</span>
         </template>
       </v-chip></template>
     <template v-slot:default="{ isActive }">

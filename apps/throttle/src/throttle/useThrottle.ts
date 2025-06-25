@@ -1,86 +1,73 @@
-import { storeToRefs } from 'pinia'
+import { computed, ref, watch } from 'vue'
+import { useStorage } from '@vueuse/core'
 import { deleteDoc, doc, serverTimestamp, setDoc } from 'firebase/firestore'
-import { useDcc } from '@/api/dccApi'
-import { db } from '@/firebase'
-import { useConnectionStore } from '@/connections/connectionStore'
-import type { ConsistLoco } from './types'
+import { useDocument } from 'vuefire'
+import type { Throttle } from '@/throttle/types'
+import { type Loco, useLocos } from '@repo/modules/locos'
+import { db } from '@repo/firebase-config/firebase'
+import { getSignedSpeed } from '@/throttle/utils'
 
-const SWITCH_DIR_DELAY = 1000 // delay in ms to switch direction - occurs when slider goes from positive to negative value - which an occur quickly
 
-export const useThrottle = () => {
-  const dccApi = useDcc()
-  const connStore = useConnectionStore()
-  const { layoutId } = storeToRefs(connStore)
+export const useThrottle = (address: Number) => {
+  const { getLoco } = useLocos()
+  const layoutId = useStorage('@DEJA/layoutId', '')
+  const throttle = useDocument<Throttle>(
+    () => address
+      ? doc(db, `layouts/${layoutId.value}/throttles`, address.toString())
+      : null
+  )
+  const loco = getLoco(address)
+  const currentSpeed = computed(() => throttle.value ? getSignedSpeed({
+    speed: throttle.value?.speed,
+    direction: throttle.value?.direction
+  }) : 0)
+  const direction = computed(() => currentSpeed.value > -1 ? true : false)
 
-  async function acquireThrottle(address: string | number) {
-    console.log('useThrottle aquireThrottle', address)
-    try {
-      const data = {
-        address: parseInt(address.toString()),
-        speed: 0,
-        direction: false,
-        timestamp: serverTimestamp(),
-      }
-      const newThrottleDoc = await setDoc(
-        doc(db, `layouts/${layoutId.value}/throttles`, address.toString()),
-        data
-      )
-      console.log('throttle written with ID: ', newThrottleDoc)
-      return newThrottleDoc
-    } catch (e) {
-      console.error('Error adding throttle: ', e)
-    }
+  watch(currentSpeed, (newSpeed: number) => {
+    updateSpeed(newSpeed)
+  })
+
+  function adjustSpeed(val: number): void {
+    updateSpeed(currentSpeed.value + val)
   }
 
-  async function releaseThrottle(throttleId: number) {
+  function stop() {
+    updateSpeed(0)
+  }
+
+  async function releaseThrottle() {
     try {
-      console.log('dejaCloud releaseThrottle', throttleId)
-      await deleteDoc(
-        doc(db, `layouts/${layoutId.value}/throttles`, throttleId.toString())
+      const throttleDoc = doc(
+        db,
+        `layouts/${layoutId.value}/throttles`,
+        address.toString()
       )
+      await deleteDoc(throttleDoc)
     } catch (e) {
       console.error('Error releasing throttle: ', e)
     }
   }
 
-  async function updateSpeed(
-    address: number,
-    consist: ConsistLoco[],
-    newSpeed: number,
-    oldSpeed: number
-  ) {
-    if (!address) {
-      return
-    }
-    let delay = 0
-
-    if (newSpeed > 0 && oldSpeed < 0) {
-      //change direction to forward
-      stop(address, consist)
-      delay = SWITCH_DIR_DELAY
-    } else if (newSpeed < 0 && oldSpeed > 0) {
-      //change direction to reverse
-      stop(address, consist)
-      delay = SWITCH_DIR_DELAY
-    }
-
-    if (newSpeed === 0) {
-      dccApi.setSpeed(address, 0)
-    } else {
-      // set speed
-      setTimeout(() => {
-        dccApi.setSpeed(address, newSpeed)
-      }, delay)
-    }
-  }
-
-  function stop(address: number, consist: ConsistLoco[]) {
-    dccApi.setSpeed(address, 0)
+  async function updateSpeed(speed: number) {
+    await setDoc(
+      doc(db, `layouts/${layoutId.value}/throttles`, address.toString()),
+      {
+        direction: speed > 0,
+        speed: Math.abs(speed),
+        // timestamp: serverTimestamp(),
+      },
+      { merge: true }
+    )
   }
 
   return {
-    acquireThrottle,
+    adjustSpeed,
+    currentSpeed,
+    direction,
+    loco: loco as unknown as Loco,
     releaseThrottle,
+    stop,
+    throttle: throttle as unknown as Throttle,
     updateSpeed,
   }
 }

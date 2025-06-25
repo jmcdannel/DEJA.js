@@ -1,12 +1,16 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "extends": "@repo/typescript-config/vue-library",
   "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
-  "exclude": ["src/**/__tests__/*"],
+  "exclude": ["src/**/__tests__/*", "dist", "build", "node_modules"],
   "compilerOptions": {
     "composite": true,
     "baseUrl": ".",
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["./src/*"],
+      "@repo/*": ["../packages/*"]
+    },
+    "types": ["@repo/typescript-config/vue-library"]
   }
 }

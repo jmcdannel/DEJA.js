@@ -1,0 +1,29 @@
+{
+  "name": "@repo/ui",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./Consist": "./src/Consist/Consist.vue",
+    "./Functions": "./src/Functions/Functions.vue",
+    "./FunctionsSpeedDial": "./src/Functions/SpeedDial.vue",
+    "./LocoAvatar": "./src/LocoAvatar.vue",
+    "./MiniConsist": "./src/Consist/MiniConsist.vue",
+    "./UserProfile": "./src/UserProfile.vue"
+  },
+  "devDependencies": {
+    "@repo/dccex": "workspace:^0.0.0",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/modules": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@vueuse/core": "^11.0.3",
+    "firebase": "^10.14.1",
+    "typescript": "latest",
+    "vue": "^3.5.16",
+    "vue-router": "^4.2.2",
+    "vuefire": "^3.2.1"
+  }
+}

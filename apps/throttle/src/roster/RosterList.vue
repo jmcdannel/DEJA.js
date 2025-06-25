@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { Loco } from '@/throttle/types'
-import RosterViewMenu from '@/throttle/RosterViewMenu.vue'
 import router from '@/router'
-import { useLocos } from '@/api/useLocos'
-import { useThrottle } from '@/throttle/useThrottle'
+import type { Loco } from '@repo/modules/locos'
 import { useStorage } from '@vueuse/core'
+import { useLocos } from '@repo/modules/locos'
+import { useRoster } from '@/roster/useRoster'
+import RosterViewMenu from '@/roster/RosterViewMenu.vue'
 import AddLoco from '@/roster/AddLoco.vue'
-import LocoAvatar from '@/core/LocoAvatar/LocoAvatar.vue'
+import { LocoAvatar } from '@repo/ui'
 import RosterListItem from '@/roster/RosterListItem.vue'
 
-const viewAs = useStorage('@DEJA/prefs/rosterView', 'Array')
+const viewAs = useStorage('@DEJA/prefs/rosterView', 'grid')
 
 defineProps({
   allowAdd: {
@@ -19,29 +19,41 @@ defineProps({
   }
 })
 
-async function handleThrottle(address: number) {
-  const throttle = await acquireThrottle(address)
-  router.push({ name: 'cloud-throttle', params: { address } })
-}
-
 const emit = defineEmits(['selected'])
 const { getLocos } = useLocos()
-const { acquireThrottle } = useThrottle()
+const { acquireThrottle } = useRoster()
 const locos = getLocos()
 const showAdd = ref(false)
 
+async function handleThrottle(address: number) {
+  await acquireThrottle(address)
+  router.push({ name: 'throttle', params: { address } })
+}
+
 </script>
 <template>
-   <main class="py-4">
-    <RosterViewMenu />
+  <v-toolbar 
+    class="bg-clip-text bg-gradient-to-r from-purple-300 to-pink-600"  
+    color="purple" 
+    variant="tonal"
+  >
+    <v-toolbar-title class="text-3xl text-purple-400">Roster</v-toolbar-title>
+    <v-spacer></v-spacer>
+    <v-toolbar-items color="purple">
+      <v-btn icon="mdi-eye"></v-btn>
+      <v-btn icon="mdi-filter"></v-btn>
+    </v-toolbar-items>
+  </v-toolbar>
+  <main>
+    <!-- <RosterViewMenu /> -->
     <v-spacer class="my-4"></v-spacer>
     <template v-if="viewAs == 'grid'">
       <div class="flex flex-wrap gap-2 sm:gap-4 md:gap-10">
         <LocoAvatar
           v-for="loco in locos" 
-          :key="loco.locoId" 
+          :key="loco.address" 
           :loco="loco as Loco"
-          @selected="handleThrottle"
+          @select="handleThrottle"
           :showMenu="false" 
           variant="flat"
         />
@@ -56,7 +68,7 @@ const showAdd = ref(false)
       </div>
     </template>
     <template v-else>
-      <RosterListItem v-for="loco in locos" :key="loco.locoId" :loco="loco" @selected="handleThrottle" />
+      <RosterListItem v-for="loco in locos" :key="((loco as unknown) as Loco).address" :loco="(loco as unknown) as Loco" @selected="handleThrottle" />
       <v-btn v-if="allowAdd"
         @click="showAdd = !showAdd" 
         color="pink"
@@ -67,7 +79,7 @@ const showAdd = ref(false)
       </v-btn>
     </template>
     <v-expand-transition>
-      <AddLoco v-if="showAdd" @added="showAdd = false" />
+      <AddLoco v-if="showAdd" @added="showAdd = false" class="mt-8" />
     </v-expand-transition>
   </main>
 </template>

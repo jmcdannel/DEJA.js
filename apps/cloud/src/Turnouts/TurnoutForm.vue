@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useTurnouts } from '@/Turnouts/useTurnouts'
-import { useLayout } from '@/Layout/useLayout'
-import { useEfx } from '@/Effects/useEfx'
-import { ITurnout } from '@/Turnouts/types'
-import { slugify } from '@/Common/Utils'
+import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
+import { useLayout } from '@repo/modules/layouts'
+// import { useEfx } from '@repo/modules/effects'
+import { slugify } from '@repo/utils/slugify'
 import TurnoutTypePicker from '@/Turnouts/TurnoutTypePicker.vue'
 import DevicePicker from '@/Layout/Devices/DevicePicker.vue'
 import EffectPicker from '@/Effects/EffectPicker.vue'
@@ -12,26 +11,29 @@ import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 
+interface ValidationRules {
+  required: ((val: any) => boolean | string)[];
+}
+
 const props = defineProps<{
-  turnout: ITurnout
+  turnout: Turnout | null
 }>()
 const emit = defineEmits(['close'])
 const DEFAULT_DEVICE = 'dccex'
 const DEFAULT_TYPE = 'kato'
 
-const { getEffects } = useEfx()
+// const { getEffects } = useEfx()
 const { getDevices } = useLayout()
 const { setTurnout } = useTurnouts()
 
 const devices = getDevices()
-const effects = getEffects()
+// const effects = getEffects()
 
 const editColor = ref(false)
 const editEffect = ref(false)
 const editType = ref(false) // TODO: remove - don't allow this to be changed
 const editDevice = ref(false) // TODO: remove - don't allow this to be changed
 
-const turnoutId = ref(props.turnout?.id || '')
 const name = ref(props.turnout?.name || '')
 const desc = ref(props.turnout?.desc || '')
 const index = ref(props.turnout?.turnoutIdx || '')
@@ -43,49 +45,45 @@ const color = ref(props.turnout?.color || 'yellow')
 const tags = ref<string[]>(props.turnout?.tags || [])
 const turnoutType = ref(props.turnout?.type || DEFAULT_TYPE)
 const loading = ref(false)
-const rules = {
+const rules: ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
 
-console.log('turnout', props.turnout)
-const effectOptions = effects?.value.map((efx) => ({
-  title: `${efx.name} [${efx.id}]`,
-  value: efx.id
-}))
-
-watch(name, autoId)
-watch(device, autoId)
-watch(index, autoId)
-
 function autoId() {
   console.log('autoId', name.value, device.value, index.value)
-  turnoutId.value = name.value && device.value && index.value 
+  return name.value && device.value && index.value 
     ? `${slugify(name.value)}-${slugify(index.value.toString())}-${slugify(device.value)}` 
     : ''
 }
 
-async function submit (e) {
+async function submit (e: Promise<{ valid: boolean }>): Promise<void> {
   loading.value = true
   const results = await e
+  const turnoutId = props.turnout?.id || autoId()
   if (results.valid) {
-    const turnout: ITurnout = {
-      id: props.turnout?.id || turnoutId.value,
+    const turnout: Turnout = {
       device: device.value,
+      id: turnoutId,
       name: name.value,
       desc: desc.value,
-      turnoutIdx: parseInt(index.value as string),
       type: turnoutType.value,
       tags: tags.value,
       state: false,
       color: color.value,
-      straight: straight.value ? Number(straight.value) : undefined,
-      divergent: divergent.value ? Number(divergent.value) : undefined
+    }
+    if (straight.value) {
+      turnout.straight = Number(straight.value)
+    }
+    if (divergent.value) {
+      turnout.divergent = Number(divergent.value)
+    }
+    if (index.value) {
+      turnout.turnoutIdx = Number(index.value )
     }
     if (effectId.value) {
       turnout.effectId = effectId.value
     }
-    await setTurnout(props.turnout?.id || turnoutId.value, turnout)
-    console.log(turnout, tags.value)
+    await setTurnout(turnoutId, turnout)
     loading.value = false
     reset()
     emit('close')
@@ -102,7 +100,6 @@ function handleClose() {
 }
 
 function reset(){
-  turnoutId.value = ''
   name.value = ''
   desc.value = ''
   color.value = ''
@@ -146,15 +143,7 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
         variant="outlined"
           :color="color"
       ></v-text-field>
-      <v-text-field
-        v-model="turnoutId"
-        label="ID"
-        variant="outlined"
-        :color="color"
-        :rules="rules.required"
-        :disabled="!!props.turnout?.id"
-      ></v-text-field>
-      <v-text-field
+      <v-text-field v-if="turnoutType === 'servo'"
           v-model="straight"
           label="Straight"
           variant="outlined"
@@ -164,7 +153,7 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
           :rules="rules.required"
         >
       </v-text-field>
-      <v-text-field
+      <v-text-field v-if="turnoutType === 'servo'"
         v-model="divergent"
         label="Divergent"
         variant="outlined"
@@ -231,10 +220,10 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
 
     </div>
 
-    <TurnoutTypePicker v-if="editType" v-model="turnoutType" :color="color" @select="editType = false" @cancel="editType = false; turnoutType = props.turnout.type ?? 'kato'"></TurnoutTypePicker>
-    <DevicePicker v-if="editDevice" v-model="device" :color="color" @select="editDevice = false" @cancel="editDevice = false; device = props.turnout.device ?? DEFAULT_DEVICE"></DevicePicker>
-    <ColorPicker v-if="editColor" v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.turnout.color ?? 'yellow'"></ColorPicker>
-    <EffectPicker v-if="editEffect" v-model="effectId" :color="color" @select="editEffect = false" @cancel="editEffect = false; effectId = props.turnout.effectId"></EffectPicker>
+    <TurnoutTypePicker v-if="editType" v-model="turnoutType" :color="color" @select="editType = false" @cancel="editType = false; turnoutType = props?.turnout?.type ?? 'kato'"></TurnoutTypePicker>
+    <DevicePicker v-if="editDevice" v-model="device" :color="color" @select="editDevice = false" @cancel="editDevice = false; device = props?.turnout?.device ?? DEFAULT_DEVICE"></DevicePicker>
+    <ColorPicker v-if="editColor" v-model="color" @select="editColor = false" @cancel="editColor = false; color = props?.turnout?.color ?? 'yellow'"></ColorPicker>
+    <EffectPicker v-if="editEffect" v-model="effectId" :color="color" @select="editEffect = false" @cancel="editEffect = false; effectId = props?.turnout?.effectId"></EffectPicker>
 
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
     <div class="grid grid-cols-2 gap-8 my-4">
@@ -254,6 +243,6 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
       ></v-btn>  
     </div>
   </v-form>
-  <ViewJson :json="turnout"></ViewJson>
+  <ViewJson :json="turnout || {}"></ViewJson>
   <ViewJson :json="devices"></ViewJson>
 </template>

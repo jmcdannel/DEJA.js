@@ -1,0 +1,107 @@
+import type { LocoFunction, RoadName } from './types'
+
+export const ROADNAMES: RoadName[] = [
+  {
+    value: 'bnsf',
+    label: 'BNSF',
+    color: 'orange',
+  },
+  {
+    value: 'amtrak',
+    label: 'Amtrak',
+    color: 'sky',
+  },
+  {
+    value: 'up',
+    label: 'Union Pacific',
+    color: 'yellow',
+  },
+  {
+    value: 'cn',
+    label: 'Canadian National',
+    color: 'red',
+  },
+  {
+    value: 'csx',
+    label: 'CSX',
+    color: 'indigo',
+  },
+  {
+    value: 'ns',
+    label: 'Norfolk Southern',
+    color: 'zinc',
+  },
+  {
+    value: 'mrl',
+    label: 'Montana Rail Link',
+    color: 'blue',
+  },
+  {
+    value: 'gn',
+    label: 'Great Northern',
+    color: 'orange',
+  },
+  {
+    value: 'bn',
+    label: 'Burlington Northern',
+    color: 'green',
+  },
+  {
+    value: 'santefe',
+    label: 'Santa Fe',
+    color: 'red',
+  },
+]
+
+export const defaultFunctions = [
+  { id: 0, label: 'F0' },
+  { id: 1, label: 'F1' },
+  { id: 2, label: 'F2' },
+  { id: 3, label: 'F3' },
+  { id: 4, label: 'F4' },
+  { id: 5, label: 'F5' },
+  { id: 6, label: 'F6' },
+  { id: 7, label: 'F7' },
+  { id: 8, label: 'F8' },
+  { id: 9, label: 'F9' },
+  { id: 10, label: 'F10' },
+  { id: 11, label: 'F11' },
+  { id: 12, label: 'F12' },
+  { id: 13, label: 'F13' },
+  { id: 14, label: 'F14' },
+  { id: 15, label: 'F15' },
+  { id: 16, label: 'F16' },
+  { id: 17, label: 'F17' },
+  { id: 18, label: 'F18' },
+  { id: 19, label: 'F19' },
+  { id: 20, label: 'F20' },
+  { id: 21, label: 'F21' },
+  { id: 22, label: 'F22' },
+  { id: 23, label: 'F23' },
+  { id: 24, label: 'F24' },
+  { id: 25, label: 'F25' },
+  { id: 26, label: 'F26' },
+  { id: 27, label: 'F27' },
+  { id: 28, label: 'F28' },
+  { id: 29, label: 'F29' },
+  { id: 30, label: 'F30' },
+  { id: 31, label: 'F31' },
+] as LocoFunction[]
+
+export const FUNCTION_ICONS = [
+  { name: 'light', icon: 'mdi-car-light-high' },
+  { name: 'bell', icon: 'mdi-bell' },
+  { name: 'horn', icon: 'mdi-bullhorn' },
+  { name: 'wifi', icon: 'mdi-wifi' },
+  { name: 'coupler', icon: 'mdi-connection' },
+  { name: 'fan', icon: 'mdi-fan' },
+  { name: 'brake', icon: 'mdi-stop' },
+  { name: 'station', icon: 'mdi-bus-stop' },
+  { name: 'mute', icon: 'mdi-volume-off' },
+  { name: 'quiet', icon: 'mdi-volume-low' },
+  { name: 'sound', icon: 'mdi-volume-high' },
+  { name: 'track', icon: 'mdi-train-track' },
+  { name: 'air', icon: 'mdi-weather-windy' },
+  { name: 'announce', icon: 'mdi-microphone' },
+  { name: 'dim', icon: 'mdi-brightness-4' },
+]
