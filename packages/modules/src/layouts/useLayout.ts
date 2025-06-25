@@ -48,13 +48,11 @@ export const useLayout = () => {
     },
   ]
 
-  const user = useCurrentUser()
   const { sendDejaCommand } = useDejaJS()
   const layoutId = useStorage('@DEJA/layoutId', '')
   const layoutDoc = doc(db, 'layouts', layoutId.value)
 
   const layoutsRef = collection(db, 'layouts')
-  const layoutsQuery = query(layoutsRef, where('owner', '==', user.value?.email))
 
   const devicesCol = computed(() =>
     layoutId.value ? collection(db, `layouts/${layoutId.value}/devices`) : null
@@ -66,6 +64,8 @@ export const useLayout = () => {
   }
 
   function getLayouts() {
+    const user = useCurrentUser()
+    const layoutsQuery = query(layoutsRef, where('owner', '==', user.value?.email))
     console.log('getLayouts', layoutsQuery)
     const layouts = useCollection(layoutsQuery)
     return layouts

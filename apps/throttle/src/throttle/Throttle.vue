@@ -2,14 +2,12 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Loco } from '@repo/modules/locos'
-import { FunctionsSpeedDial } from '@repo/ui'
 import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.vue'
 import ThrottleSliderControls from '@/throttle/ThrottleSliderControls.vue'
 import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
-import { Consist, LocoAvatar, MiniConsist } from '@repo/ui'
-import Functions from '@/functions/Functions.component.vue'
+import { Consist, LocoAvatar, MiniConsist, FunctionsSpeedDial } from '@repo/ui'
 import { useThrottle } from '@/throttle/useThrottle'
 
 const props = defineProps({
