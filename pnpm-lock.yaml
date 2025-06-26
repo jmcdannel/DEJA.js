@@ -104,8 +104,6 @@ importers:
       vuefire: ^3.2.1
       vuetify: ^3.7.3
     dependencies:
-      '@repo/modules': link:../../packages/modules
-      '@repo/ui': link:../../packages/ui
       dayjs: 1.11.13
       firebase: 10.14.1
       vue: 3.5.17_typescript@5.8.3
@@ -119,8 +117,10 @@ importers:
       '@repo/deja': link:../../packages/deja
       '@repo/eslint-config': link:../../packages/config-eslint
       '@repo/firebase-config': link:../../packages/firebase-config
+      '@repo/modules': link:../../packages/modules
       '@repo/prettier-config': link:../../packages/config-prettier
       '@repo/typescript-config': link:../../packages/typescript-config
+      '@repo/ui': link:../../packages/ui
       '@repo/utils': link:../../packages/utils
       '@vitejs/plugin-vue': 5.2.4_vite@5.4.19+vue@3.5.17
       '@vue/tsconfig': 0.4.0
