@@ -7,7 +7,7 @@ function restartMosquitto() {
     // Copy config file
     const sourcePath = join(process.cwd(), 'mosquitto.conf')
     const targetPath = '/opt/homebrew/etc/mosquitto/mosquitto.conf'
-    copyFileSync(sourcePath, targetPath)
+    // copyFileSync(sourcePath, targetPath)
 
     // Restart service
     execSync('brew services restart mosquitto', { stdio: 'inherit' })
