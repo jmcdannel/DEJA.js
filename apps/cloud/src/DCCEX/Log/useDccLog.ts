@@ -4,27 +4,28 @@ import type { LogEntry } from './types'
 import { defuaultEntry, dccMessages} from './constants'
 
 export function useDccLog(isEnabled: boolean) {
+  console.log('useDccLog', isEnabled)
   if (!isEnabled) {
     return {
-      log: ref<LogEntry[]>([]),
       append: (_entry: string) => {},
+      log: ref<LogEntry[]>([]),
     }
   }
-  const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.22:8082')
+  const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.34:8082')
   const dccRegex = /<\*\s(.*?)\s\*>/
 
   const log = ref<LogEntry[]>([])
-  const { data } = useWebSocket(`ws://${wshost.value}/`)
+  const { status, data, send, open, close } = useWebSocket(`ws://${wshost.value}/`)
 
-  function append(entry: string) {
+  function append(entry: string): void {
     console.log('append', entry, log.value)
     log.value = [...log.value, parseEntry(entry)]
     console.log('appended', log.value)
   }
 
-  function parseEntry(entry: string) {
+  function parseEntry(entry: string): LogEntry {
     const { action, payload } = JSON.parse(entry)
-    let formattedEntry = { ...defuaultEntry, id: Date.now(), action, payload }
+    let formattedEntry = { ...defuaultEntry, action, id: Date.now(), payload }
     if (action === 'broadcast' && !isObject(payload)) {
       // parse message
       const dcc =
@@ -41,14 +42,21 @@ export function useDccLog(isEnabled: boolean) {
     return formattedEntry
   }
 
+  append('{"action":"web hook initialized","payload":{"serverId":"DEJA.js"}}')
+
 
   watch(data, (newData) => {
     append(newData)
   })
 
   return {
-    log,
     append,
+    close,
+    data,
+    log,
+    open,
+    send,
+    status
   }
 }
 

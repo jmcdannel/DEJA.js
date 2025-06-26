@@ -48,6 +48,6 @@ async function toggle() {
       @keyup.enter="send"
     ></v-text-field>
   </v-form>
-  <v-btn v-else :prepend-icon="cmd?.icon" @click="send">{{ cmd?.label || 'Go' }}</v-btn>
+  <v-btn v-else :prepend-icon="cmd?.icon" @click="send" class="ma-2">{{ cmd?.label || 'Go' }}</v-btn>
   <!-- <pre>{{ props.cmd.command }}</pre> -->
 </template>

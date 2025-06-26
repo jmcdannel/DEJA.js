@@ -5,12 +5,11 @@ import DCCLogItem from '@/DCCEX/Log/DCCLogItem.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue';
 
 const enabled = useStorage('@DEJA/pref/ws-logging', false)
-const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.249:8082')
-const { log } = useDccLog()
+const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.34:8082')
+const { log, status, data, send, open, close } = useDccLog(enabled.value)
 
 </script>
-<template>
-  
+<template>  
   <v-card title="DCC Log" color="lime" variant="tonal">
     <v-card-text>
       <v-switch v-model="enabled" label="Enabled" color="lime" />
@@ -22,5 +21,8 @@ const { log } = useDccLog()
       <DCCLogItem :entry="entry" />
     </li>
   </ul>
+  <pre>{{log}}</pre>
+  <pre>status: {{status}}</pre>
+  <pre>{{data}}</pre>
   <ViewJson :data="log" label="DCC Log" />
 </template>

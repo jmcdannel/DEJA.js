@@ -2,14 +2,12 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Loco } from '@repo/modules/locos'
-import { FunctionsSpeedDial } from '@repo/ui'
 import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.vue'
 import ThrottleSliderControls from '@/throttle/ThrottleSliderControls.vue'
 import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
-import { Consist, LocoAvatar, MiniConsist } from '@repo/ui'
-import Functions from '@/functions/Functions.component.vue'
+import { Consist, LocoAvatar, MiniConsist, FunctionsSpeedDial } from '@repo/ui'
 import { useThrottle } from '@/throttle/useThrottle'
 
 const props = defineProps({
@@ -58,11 +56,6 @@ function openFunctionSettings() {
 </script>
 <template>
   <main v-if="throttle" class="flex flex-col gap-2 p-2 overflow-hidden w-full h-full flex-1 shadow-xl relative  ">
-    <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[100px] -top-[200px] -left-[300px]"></div>
-      <div class="absolute w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[80px] -bottom-[100px] -right-[200px]"></div>
-      <div class="absolute w-[400px] h-[400px] rounded-full bg-violet-500/10 blur-[90px] top-[30%] left-[40%]"></div>
-    </div>
     <!-- <pre>locoDocId:{{locoDocId}}</pre>-->
     <!-- <pre>loco:{{loco.functions}}</pre>  -->
     <!-- <pre>currentSpeed {{ currentSpeed }}</pre> -->

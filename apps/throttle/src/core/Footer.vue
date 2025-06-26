@@ -3,11 +3,13 @@ import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import { useCurrentUser } from 'vuefire'
+import { useLocos } from '@repo/modules/locos'
 import ThrottleNav from '@/throttle/ThrottleNav.vue'
 
-const router = useRouter()
 const route = useRoute()
+const { getThrottles } = useLocos()
 const active = ref(route.path)
+const throttles = getThrottles()
 
 const user = useCurrentUser()
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -39,6 +41,15 @@ const layoutId = useStorage('@DEJA/layoutId', '')
             icon="mdi-view-list"
             value="/throttle-list"
           />
+          <v-btn
+            :disabled="!throttles.length"
+            class="sm:px-12"
+            :class="$route.path === '/throttle' ? 'bg-lime-500' : 'text-lime-500'"
+            @click="$router.push({ name: 'throttle', params: { address: throttles[0]?.address } })"
+            color="lime"
+            icon="mdi-speedometer"
+            value="/throttle"
+          />
           <v-btn 
             class="sm:px-12"
             :class="$route.path === '/conductor' ? 'bg-red-500' : 'text-red-500'"
@@ -56,20 +67,20 @@ const layoutId = useStorage('@DEJA/layoutId', '')
             value="/effects"
           />
           <v-btn 
-            class="sm:px-12"
-            :class="$route.path === '/turnouts' ? 'bg-yellow-500' : 'text-yellow-500'"
-            @click="$router.push('/turnouts')"
-            color="yellow"
-            icon="mdi-call-split"
-            value="/turnouts"
+            class="sm:px-12 hidden md:inline"
+            :class="$route.path === '/routes' ? 'bg-teal-500' : 'text-teal-500'"
+            @click="$router.push('/routes')"
+            color="teal"
+            icon="mdi-tournament"
+            value="/routes"
           />
           <v-btn 
             class="sm:px-12"
-            :class="$route.path === '/routes' ? '' : 'text-blue-500'"
-            @click="$router.push('/routes')"
+            :class="$route.path === '/turnouts' ? 'bg-blue-500' : 'text-blue-500'"
+            @click="$router.push('/turnouts')"
             color="blue"
-            icon="mdi-tournament"
-            value="/routes"
+            icon="mdi-call-split"
+            value="/turnouts"
           />
         </v-btn-toggle>
         <v-spacer />

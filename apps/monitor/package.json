@@ -1,0 +1,48 @@
+{
+  "name": "deja-monitor",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "run-p type-check build-only",
+    "build-only": "vite build",
+    "dev": "vite --host",
+    "format": "prettier --write src/",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "preview": "vite preview",
+    "start": "vite --host",
+    "type-check": "vue-tsc --noEmit --composite false --skipLibCheck "
+  },
+  "dependencies": {
+    "dayjs": "^1.11.13",
+    "firebase": "^10.14.1",
+    "vue": "^3.5.16",
+    "vue-router": "^4.2.2",
+    "vuefire": "^3.2.1",
+    "vuetify": "^3.7.3"
+  },
+  "devDependencies": {
+    "@mdi/font": "^7.4.47",
+    "@repo/auth": "workspace:^0.0.0",
+    "@repo/dccex": "workspace:*",
+    "@repo/deja": "workspace:*",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/firebase-config": "workspace:*",
+    "@repo/modules": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "@repo/utils": "workspace:*",
+    "@vitejs/plugin-vue": "^5.1.2",
+    "@vue/tsconfig": "^0.4.0",
+    "@vueuse/core": "^11.0.3",
+    "@vueuse/sound": "^2.0.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.10",
+    "typescript": "*",
+    "vite": "^5.4.1",
+    "vue-tsc": "^2.0.29",
+    "vue3-icons": "^0.1.13"
+  }
+}

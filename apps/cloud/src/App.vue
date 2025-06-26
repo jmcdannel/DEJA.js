@@ -13,15 +13,16 @@ import DeviceStatus from '@/Layout/Devices/DeviceStatus.vue'
 import DCCLogStatus from '@/DCCEX/Log/DCCLogStatus.vue'
 import LayoutStatus from '@/Layout/LayoutStatus.vue'
 import { Login } from '@repo/auth'
+import DCCLogger from '@/DCCEX/Log/DCCLogger.vue'
 
-// import { useDccLog } from '@/DCCEX/Log/useDccLog'
+import { useDccLog } from '@/DCCEX/Log/useDccLog'
 
 const layoutId = useStorage('@DEJA/layoutId', '')
 const enableLogging = useStorage('@DEJA/pref/ws-logging', false)
 
 const user = useCurrentUser()
 const router = useRouter()
-// const dccLog = useDccLog(enableLogging.value)
+const dccLog = useDccLog(enableLogging.value)
 
 const theme = ref('dark')
 const drawer = ref(true)
@@ -40,7 +41,7 @@ function handleLayoutSelect(newLayout: string) {
 <template>
   <v-responsive class="border rounded">
     <v-app v-if="user" :theme="theme">
-      <!-- <DCCLogger v-if="enableLogging" /> -->
+      <DCCLogger v-if="enableLogging" />
       <Header @toggle="drawer = !drawer">
         <template  v-if="layoutId" #menu>
           <DCCLogStatus />

@@ -228,7 +228,7 @@ async function handleConnectionMessage(payload: string): Promise<void> {
       log.error('Sensor not found', data, sensors)
     }
   }
-  await broadcast({ action: 'broadcast', payload })
+  // await broadcast({ action: 'broadcast', payload })
 }
 
 export const layout = {
