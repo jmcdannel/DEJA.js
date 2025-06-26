@@ -83,7 +83,7 @@ onSnapshot(collection(db, `layouts/${layoutId.value}/effects`), (snapshot) => {
 </script>
 
 <template>
-  <v-sheet class="p-4 flex flex-col gap-4 h-full">
+  <v-sheet class="p-4 flex flex-col gap-2 h-full">
     <div class="grid grid-cols-4 gap-4">
       <LayoutCard />
       <TurnoutStatsCard 
