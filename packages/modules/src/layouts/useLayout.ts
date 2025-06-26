@@ -76,7 +76,7 @@ export const useLayout = () => {
       layoutId.value
         ? collection(db, `layouts/${layoutId.value}/devices`)
         : null
-    )
+    , { ssrKey: 'devices' })
     return devices
   }
 

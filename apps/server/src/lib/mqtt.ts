@@ -2,8 +2,8 @@ import mqtt from 'mqtt'
 import { log } from '../utils/logger.js'
 
 const layoutId = process.env.LAYOUT_ID
-const mqttBroker = process.env.VITE_MQTT_BROKER
-const mqttPort = process.env.VITE_MQTT_PORT
+const mqttBroker = process.env.VITE_MQTT_BROKER || 'mqtt://localhost'
+const mqttPort = process.env.VITE_MQTT_PORT || '8082'
 const subscriptionTopics: string[] = []
 const publishTopics: string[] = []
 

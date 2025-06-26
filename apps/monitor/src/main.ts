@@ -6,6 +6,10 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
+// Vuetify components
+import { VBtn } from 'vuetify/components/VBtn'
+import { VCard } from 'vuetify/components/VCard'
+
 // VueFire
 import { VueFire, VueFireAuth } from 'vuefire'
 // Firebase
@@ -21,10 +25,21 @@ import '@mdi/font/css/materialdesignicons.css'
 
 const vuetify = createVuetify({
   components,
+  defaults: {
+    VBtn: {
+      color: 'purple',
+      rounded: 'lg',
+      variant: 'tonal',
+    },
+    VCard: {
+      color: 'purple',
+      variant: 'tonal',
+    },
+  },
   directives,
   icons: {
-    defaultSet: 'mdi',
     aliases,
+    defaultSet: 'mdi',
     sets: {
       mdi,
     },

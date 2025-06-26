@@ -38,17 +38,15 @@ const allConnected = computed(() => devices.value.every(device => device.isConne
           class="cursor-pointer"
           @click="$emit('select', device.id)"
         >
-          <v-list-item-content>
-            <v-list-item-title>
-              <v-chip
-                size="small"
-                :prepend-icon="device.type === 'dcc-ex' ? 'mdi-memory' : 'mdi-usb'"
-                :color="device?.isConnected ? 'green' : 'red'"
-              >
-                {{ device?.id || 'Device' }}
-              </v-chip>
-            </v-list-item-title>
-          </v-list-item-content>
+          <v-list-item-title>
+            <v-chip
+              size="small"
+              :prepend-icon="device.type === 'dcc-ex' ? 'mdi-memory' : 'mdi-usb'"
+              :color="device?.isConnected ? 'green' : 'red'"
+            >
+              {{ device?.id || 'Device' }}
+            </v-chip>
+          </v-list-item-title>
         </v-list-item>
       </v-list>
   </v-menu>

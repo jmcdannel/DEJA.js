@@ -1,19 +1,18 @@
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core';
-import { useDccLog } from '@/DCCEX/Log/useDccLog'
-import DCCLogItem from '@/DCCEX/Log/DCCLogItem.vue'
-import ViewJson from '@/Core/UI/ViewJson.vue';
+import { useDccLog } from './useDccLog'
+import DCCLogItem from './DCCLogItem.vue'
 
 const enabled = useStorage('@DEJA/pref/ws-logging', false)
-const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.34:8082')
+const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.249:8082')
 const { log, status, data, send, open, close } = useDccLog(enabled.value)
 
 </script>
 <template>  
-  <v-card title="DCC Log" color="lime" variant="tonal">
+  <v-card title="DCC Log" color="teal-darken-3">
     <v-card-text>
-      <v-switch v-model="enabled" label="Enabled" color="lime" />
-      <v-text-field v-model="wshost" color="lime"></v-text-field>
+      <v-switch v-model="enabled" label="Enabled" color="teal" />
+      <v-text-field v-model="wshost" color="teal" />
     </v-card-text>
   </v-card>
   <ul class="flex flex-col-reverse">
@@ -22,7 +21,7 @@ const { log, status, data, send, open, close } = useDccLog(enabled.value)
     </li>
   </ul>
   <pre>{{log}}</pre>
-  <pre>status: {{status}}</pre>
+  <pre>status:status{{status}}</pre>
   <pre>{{data}}</pre>
-  <ViewJson :data="log" label="DCC Log" />
+  
 </template>

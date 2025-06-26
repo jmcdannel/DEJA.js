@@ -104,6 +104,7 @@ const send = async (data: string): Promise<void> => {
     // log.await('Writing to port', data)
     if (com.port) {
       serial.send(com.port, cmd)
+      broadcast({ action: 'dcc', payload: data })
     }
   } catch (err) {
     log.fatal('Error writting to port:', err)

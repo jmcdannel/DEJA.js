@@ -8,27 +8,28 @@ const devices = getDevices()
 
 </script>
 <template>
-  <v-chip-group 
-    v-if="selected?.length" 
-    color="pink" 
-    column
-    multiple 
-    v-model="selected">
-    <v-chip 
-      v-for="device in selected" 
-      filter
-      :key="device"
-      :text="device" 
-      :value="device" 
-      color="pink" 
-      size="small"
-      variant="elevated"
-    />
-  </v-chip-group>
-  <v-bottom-sheet
+  <v-dialog
     v-model="show"
   >
-    <v-list v-model:selected="selected" select-strategy="leaf">
+  <!-- <pre>{{ devices }}</pre> -->
+    <v-chip-group 
+      v-if="selected?.length" 
+      color="pink" 
+      column
+      multiple 
+      v-model="selected">
+      <v-chip 
+        v-for="device in selected" 
+        filter
+        :key="device"
+        :text="device" 
+        :value="device" 
+        color="pink" 
+        size="small"
+        variant="elevated"
+      />
+    </v-chip-group>
+    <v-list >
       <v-list-subheader>Devices</v-list-subheader>
       <v-list-group multiple>
         <v-list-item v-for="device in devices" :key="device.id" appendIcon="mdi-chip" :value="device.id">
@@ -41,5 +42,5 @@ const devices = getDevices()
         </v-list-item>
       </v-list-group>
     </v-list>
-  </v-bottom-sheet>
+  </v-dialog>
 </template>
