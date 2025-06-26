@@ -23,7 +23,8 @@ function handleMenu(item:string) {
 
 function handleLayoutSelect(newLayout: string) {
   layoutId.value = newLayout
-  router.push({ name: 'Layout' })
+  
+  window.location.reload()
 }
 
 </script>
@@ -51,23 +52,23 @@ function handleLayoutSelect(newLayout: string) {
         </v-list>
         <v-divider />
         <v-list>
-          <v-list-item @click="handleLayoutSelect('Layout1')">
+          <v-list-item @click="handleLayoutSelect('betatrack')">
             <template #prepend>
-              <v-avatar size="32" color="primary">L1</v-avatar>
+              <v-avatar size="32" color="primary">BT</v-avatar>
             </template>
-            <v-list-item-title>Layout 1</v-list-item-title>
+            <v-list-item-title>Betatrack</v-list-item-title>
           </v-list-item>
-          <v-list-item @click="handleLayoutSelect('Layout2')">
+          <v-list-item @click="handleLayoutSelect('tam')">
             <template #prepend>
-              <v-avatar size="32" color="primary">L2</v-avatar>
+              <v-avatar size="32" color="primary">TJ</v-avatar>
             </template>
-            <v-list-item-title>Layout 2</v-list-item-title>
+            <v-list-item-title>Tamarack Junction</v-list-item-title>
           </v-list-item>
-          <v-list-item @click="handleLayoutSelect('Layout3')">
+          <v-list-item @click="handleLayoutSelect('shef')">
             <template #prepend>
-              <v-avatar size="32" color="primary">L3</v-avatar>
+              <v-avatar size="32" color="primary">HO</v-avatar>
             </template>
-            <v-list-item-title>Layout 3</v-list-item-title>
+            <v-list-item-title>HO Clockwork Shelf</v-list-item-title>
           </v-list-item>
         </v-list>
         <v-divider />
