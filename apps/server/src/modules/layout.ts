@@ -227,8 +227,9 @@ async function handleSerialMessage(payload: string): Promise<void> {
     } else {
       log.error('Sensor not found', data, sensors)
     }
+  } else {
+    await broadcast({ action: 'serial', payload })
   }
-  await broadcast({ action: 'serial', payload })
 }
 
 export const layout = {
