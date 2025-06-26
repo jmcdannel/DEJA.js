@@ -18,4 +18,6 @@ function restartMosquitto() {
   }
 }
 
-restartMosquitto()
+if (process.env.ENABLE_MQTT === 'true') {
+  restartMosquitto()
+}
