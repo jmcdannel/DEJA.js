@@ -11,4 +11,7 @@ export default defineConfig({
       '@repos': fileURLToPath(new URL('../../packages', import.meta.url)),
     },
   },
+  server: {
+    port: 3000
+  },
 })

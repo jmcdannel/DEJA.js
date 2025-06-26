@@ -3,7 +3,6 @@ defineProps<{
   throttles: any[]
 }>()
 </script>
-
 <template>
   <v-card color="purple-lighten-1" >
     <v-card-title>Throttles</v-card-title>

@@ -19,9 +19,6 @@
     "syncpack": "^13.0.4",
     "turbo": "^2.5.3"
   },
-  "engines": {
-    "node": ">=20"
-  },
   "keywords": [],
   "packageManager": "pnpm@9.0.0"
 }

@@ -1,6 +1,6 @@
 import os from 'node:os'
 import type { IncomingMessage } from 'node:http'
-import { WebSocketServer, type WebSocket as WS } from 'ws'
+import WebSocket, { WebSocketServer } from 'ws';
 import { log } from '../utils/logger.js'
 // import { dcc } from './dcc.js'
 
@@ -9,15 +9,15 @@ const port = process.env.VITE_WS_PORT || '8082'
 const serverId = process.env.VITE_WS_ID || 'DEJA.js'
 let weServer: WebSocketServer | null = null
 
-const connections: WS[] = []
-let latestConnection: WS | null = null
+const connections: WebSocket[] = []
+let latestConnection: WebSocket | null = null
 
 const MSG_CONNECTED = JSON.stringify({
   action: 'ack',
   payload: { layoutId, serverId },
 })
 
-const handleClose = (server: WS): void => {
+const handleClose = (server: WebSocket): void => {
   log.info('[Connection closed', serverId, layoutId, connections.indexOf(server))
   const position = connections.indexOf(server) // get the client's position in the array
   if (server) { 
@@ -26,45 +26,45 @@ const handleClose = (server: WS): void => {
 }
 
 const handleError = (err: Error): void => {
-  log.error('WS unexpected error occurred', err)
+  log.error('WebSocket unexpected error occurred', err)
 }
 
 const handlenMessage = async (payload: JSON | string): Promise<void> =>
-  log.note('WS message received:', payload)
+  log.note('WebSocket message received:', payload)
 
-const handleConnectionMessage = (ws: WS) => {
-  log.note('WS connection message received')
+const handleConnectionMessage = (ws: WebSocket) => {
+  log.note('WebSocket connection message received')
   // dcc.handleConnectionMessage(payload)
   // broadcast({ action: 'broadcast', payload })
   ws.emit('message', JSON.stringify({ action: 'ack', payload: { layoutId, serverId } }))
 }
 
-const handleConnection = (ws: WS, req: IncomingMessage): boolean => {
+const handleConnection = (ws: WebSocket, req: IncomingMessage): boolean => {
   try {
-    log.success('WS client connected', req?.socket?.remoteAddress)
+    log.success('WebSocket client connected', req?.socket?.remoteAddress)
     connections.push(ws) // add this client to the connections array
     latestConnection = ws
     ws.on('error', handleError)
     ws.on('close', handleClose)
     ws.on('message', handlenMessage)
     ws.on('connection', handleConnectionMessage)
-    ws.emit(MSG_CONNECTED)
-    ws.emit(JSON.stringify({ action: 'wsconnected', payload: { ip: req?.socket?.remoteAddress, serverId  } }))
+    ws.send(MSG_CONNECTED)
+    ws.send(JSON.stringify({ action: 'wsconnected', payload: { ip: req?.socket?.remoteAddress, serverId  } }))
     return Boolean(ws)
   } catch (err) {
-    log.error('Error handling WS connection', err)
+    log.error('Error handling WebSocket connection', err)
     return false
   }
 }
 
 export const send = (data: JSON): void => {
   try {
-    connections.map((ws) => ws.emit(JSON.stringify(data)))
-    // if (latestConnection) {
-    //   latestConnection.emit(JSON.stringify(data))
-    // }
+    connections.map((ws) => ws.send(JSON.stringify(data)))
+    if (latestConnection) {
+      latestConnection.send(JSON.stringify(data))
+    }
   } catch (err) {
-    log.error('[Error sending data to WS server:', err)
+    log.error('[Error sending data to WebSocket server:', err)
   }
 }
 

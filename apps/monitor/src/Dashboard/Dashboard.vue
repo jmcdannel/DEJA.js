@@ -83,8 +83,8 @@ onSnapshot(collection(db, `layouts/${layoutId.value}/effects`), (snapshot) => {
 </script>
 
 <template>
-  <v-sheet class="p-4 flex flex-col gap-2 h-full">
-    <div class="grid grid-cols-4 gap-4">
+  <!-- <v-sheet class="dashboard-layout flex flex-col gap-4">
+    <div class="grid grid-cols-4 gap-4 px-4 pt-4">
       <LayoutCard />
       <TurnoutStatsCard 
         :total-count="turnouts.length"
@@ -100,16 +100,55 @@ onSnapshot(collection(db, `layouts/${layoutId.value}/effects`), (snapshot) => {
       />
     </div>
     
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-2 gap-4 px-4 ">
       <DevicesTable :devices="devices" />
       <ThrottleStatus :throttles="throttles" />
     </div>
 
-    <div class="flex-grow grid grid-cols-4 gap-4">
+    <div class="flex-grow grid grid-cols-3 gap-4 px-4 pb-4">
       <TurnoutLogs :logs="turnoutChanges" />
       <EffectLogs :logs="effectChanges" />
       <SensorLogs :logs="sensorChanges" />
       <DCCLog />
     </div>
-  </v-sheet>
+  </v-sheet> -->
+  <div class="dashboard-layout">
+      <div class="p-6 h-screen grid grid-rows-[180px_1fr] gap-6">
+        <!-- First Row - Fixed Height -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+           <LayoutCard />
+          <TurnoutStatsCard 
+            :total-count="turnouts.length"
+            :thrown-count="turnoutsThrownCount"
+          />
+          <EffectStatsCard
+            :total-count="effects.length"
+            :active-count="efxThrownCount"
+          />
+          <ThrottleStatsCard
+            :total-count="throttles.length"
+            :active-count="throttles.filter(t => t.speed > 0).length"
+          />
+        </div>
+
+        <!-- Second Row - Fill Remaining Height -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 min-h-0">
+          <DCCLog />
+          
+          <TurnoutLogs :logs="turnoutChanges" />
+
+          <EffectLogs :logs="effectChanges" />
+
+        </div>
+      </div>
+    </div>
 </template>
+<style scoped>
+
+@media (min-width: 960px) {
+  .dashboard-layout {
+    height: calc(100vh - 12.5Krem - var(--v-layout-bottom) - var(--v-layout-top));
+  }
+}
+
+</style>
