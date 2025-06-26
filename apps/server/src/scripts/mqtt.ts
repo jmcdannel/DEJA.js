@@ -20,4 +20,8 @@ function restartMosquitto() {
 
 if (process.env.ENABLE_MQTT === 'true') {
   restartMosquitto()
+} else {
+  // return success if MQTT is not enabled
+  console.log('MQTT is not enabled, skipping Mosquitto restart')
+  process.exit(0)
 }

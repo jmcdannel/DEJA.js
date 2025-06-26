@@ -12,8 +12,6 @@
     "format": "prettier --write .",
     "lint": "eslint",
     "mosquitto": "tsx src/scripts/mqtt.ts",
-    "predev": "runmosquitto",
-    "prestart": "runmosquitto",
     "start": "tsx ./index.ts",
     "type-check": "tsc --noEmit --skipLibCheck --composite false"
   },
