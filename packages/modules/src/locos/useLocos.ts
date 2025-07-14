@@ -8,6 +8,7 @@ import {
   where,
   getDocs,
   query,
+  orderBy,
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useCollection, useDocument } from 'vuefire'
@@ -17,9 +18,11 @@ import { ROADNAMES } from './constants'
 
 export function useLocos() {
   const layoutId = useStorage('@DEJA/layoutId', '')
+  const sortBy = useStorage<string[]>('@DEJA/prefs/locos/Sort', ['address'])
+  const colRef = collection(db, `layouts/${layoutId.value}/locos`)
 
   const locosCol = () =>
-    layoutId.value ? collection(db, `layouts/${layoutId.value}/locos`) : null
+    layoutId.value ? query(colRef, orderBy(sortBy.value[0])) : null
 
   const throttlesCol = () =>
     layoutId.value

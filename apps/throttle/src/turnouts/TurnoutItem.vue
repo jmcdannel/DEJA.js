@@ -23,11 +23,7 @@ async function handleTurnouts (event: Event) {
     isRunning.value = false
   }, 3000)
   isRunning.value = isPending.value
-  const target = event.target as HTMLInputElement;
-  console.log('handleTurnouts', target.checked, props.turnoutId, props.turnout)
-  if (props.turnoutId && props.turnout) {
-    await switchTurnout(props.turnout as Turnout)
-  }
+  await switchTurnout({...props.turnout, id: props.turnoutId, state: state.value})
 }
 
 </script>

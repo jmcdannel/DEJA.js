@@ -15,10 +15,30 @@ import type { Turnout } from '@repo/modules/turnouts'
 
 export function useTurnouts() {
   const layoutId = useStorage('@DEJA/layoutId', '')
+  const sortBy = useStorage<string[]>('@DEJA/prefs/turnouts/Sort', ['order'])
+  const filterBy = useStorage<string[]>('@DEJA/prefs/turnouts/Filter', [])
   const colRef = collection(db, `layouts/${layoutId.value}/turnouts`)
 
-  const turnoutsCol = () =>
-    layoutId.value ? query(colRef, orderBy('order'), orderBy('name')) : null
+  const turnoutsCol = () => {
+    const whereClauses: any[] = []
+    if (filterBy.value.length > 0) {
+      filterBy.value.forEach((filter) => {
+        if (filter.startsWith('device:')) {
+          const deviceId = filter.split(':')[1]
+          whereClauses.push(where('device', '==', deviceId))
+        }
+      })
+    }
+    
+    let queryRef = query(colRef, orderBy(sortBy.value[0]))
+    whereClauses.forEach((clause) => {
+      console.log(clause)
+      queryRef = query(queryRef, clause)
+    })
+    
+    return layoutId.value ? queryRef : null
+  }
+  
 
   function getTurnouts() {
     const turnouts = useCollection(turnoutsCol)
