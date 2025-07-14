@@ -2,7 +2,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import type { SerialPort } from 'serialport'
 import type { Layout, Device, Sensor } from '@repo/modules/layouts'
 import { db } from '@repo/firebase-config/firebase-admin-node'
-import { serial } from '../lib/serial'
+import { serial as serialLib } from '../lib/serial'
 import { log } from '../utils/logger'
 import { dcc } from '../lib/dcc'
 import { dejaMqtt as mqtt } from '../lib/mqtt'
@@ -118,9 +118,9 @@ async function connectUsbDevice(
       })
       return
     }
-    const port = await serial.connect({
+    const port = await serialLib.connect({
       baudRate,
-      handleMessage: handleConnectionMessage,
+      handleMessage: handleSerialMessage,
       path: serialPort,
     })
     const updates = {
@@ -142,7 +142,7 @@ async function connectUsbDevice(
     _connections[device.id] = {
       isConnected: true,
       port: port ? port : undefined,
-      send: serial.send,
+      send: serialLib.send,
     }
     if (device.type === 'dcc-ex' && port) {
       dcc.setConnection(port)
@@ -203,11 +203,11 @@ async function connectMqttDevice(device: Device): Promise<void> {
   }
 }
 
-async function handleConnectionMessage(payload: string): Promise<void> {
+async function handleSerialMessage(payload: string): Promise<void> {
   if (payload?.startsWith('{ "sensor')) {
     const data = JSON.parse(payload)
     const sensorId = sensors.find((sensor) => sensor.index === data.sensor)?.id
-    // log.debug('handleConnectionMessage', data, payload, sensorId)
+    // log.debug('handleSerialMessage', data, payload, sensorId)
     if (sensorId) {
       // await setDoc(
       //   doc(db, `layouts/${layoutId}/sensors`, sensorId),
@@ -227,8 +227,9 @@ async function handleConnectionMessage(payload: string): Promise<void> {
     } else {
       log.error('Sensor not found', data, sensors)
     }
+  } else {
+    await broadcast({ action: 'serial', payload })
   }
-  // await broadcast({ action: 'broadcast', payload })
 }
 
 export const layout = {

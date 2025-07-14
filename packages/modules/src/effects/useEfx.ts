@@ -18,14 +18,28 @@ import type { Effect, EffectType } from './types'
 
 export const useEfx = () => {
   const layoutId = useStorage('@DEJA/layoutId', '')
+  const sortBy = useStorage<string[]>('@DEJA/prefs/effects/Sort', ['order'])
+  const filterBy = useStorage<string[]>('@DEJA/prefs/effects/Filter', [])
   const colRef = collection(db, `layouts/${layoutId.value}/effects`)
 
   const efxCol = () => {
-    if (!layoutId.value) {
-      console.error('Layout ID is not set')
-      return null
+   const whereClauses: any[] = []
+    if (filterBy.value.length > 0) {
+      filterBy.value.forEach((filter) => {
+        if (filter.startsWith('device:')) {
+          const deviceId = filter.split(':')[1]
+          whereClauses.push(where('device', '==', deviceId))
+        }
+      })
     }
-    return query(colRef, orderBy('device'), orderBy('type'), orderBy('name'))
+    
+    let queryRef = query(colRef, orderBy(sortBy.value[0]))
+    whereClauses.forEach((clause) => {
+      console.log(clause)
+      queryRef = query(queryRef, clause)
+    })
+    
+    return layoutId.value ? queryRef : null
   }
 
   function getEffects() {
