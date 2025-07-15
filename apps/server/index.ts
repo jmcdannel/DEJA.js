@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { wsServer } from './src/lib/ws-server.js'
 import { dejaMqtt as mqtt } from './src/lib/mqtt.js'
 import { dejaCloud, disconnect } from './src/dejaCloud.js'
@@ -11,7 +12,7 @@ async function main(): Promise<void> {
   try {
     log.start('Running', '[MAIN]', ENABLE_MQTT, ENABLE_WS, ENABLE_DEJACLOUD)
     if (ENABLE_DEJACLOUD) await dejaCloud.connect()
-    // if (ENABLE_MQTT) await mqtt.connect()
+    if (ENABLE_MQTT) await mqtt.connect()
     if (ENABLE_WS) await wsServer.connect()
   } catch (err) {
     log.fatal(err)
