@@ -26,28 +26,6 @@ async function handleTurnout(turnout: Turnout) {
       <ListMenu :module-name="'turnouts'" />
     </template>
     <v-toolbar-title class="text-xl md:text-3xl">Turnouts</v-toolbar-title>
-    <!-- <template #extension>
-        <v-chip-group class="p-4"
-          color="purple-darken-4" 
-          column
-          multiple
-          v-model="selectedDevices"
-        >
-          <v-chip 
-            v-for="device in selectedDevices" 
-            filter
-            :key="device"
-            :text="device" 
-            :value="device" 
-            prepend-icon="mdi-memory"
-            closable
-            color="pink" 
-            size="small"
-            variant="elevated"
-          />
-        </v-chip-group>
-        
-    </template> -->
   </v-toolbar>
   <v-spacer class="my-4"></v-spacer>
    <v-table v-if="viewAs?.[0] === 'table'" :items="turnouts as Turnout[]" :sort-by="sortBy" class="w-full p-4">

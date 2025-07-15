@@ -13,12 +13,12 @@ import { dcc, type ThrottlePayload } from '../lib/dcc.js'
 const layoutId = process.env.LAYOUT_ID
 let locos: Loco[] = []
 
-async function init(): Promise<void> {
+export async function listenToLocoChanges(): Promise<void> {
   if (!layoutId) {
     log.error('Layout ID is not set')
     return
   }
-  log.start('Throttles listening for loco changes', layoutId)
+  log.start('Throttles listening for loco changes on layout: ', layoutId)
   db.collection(`layouts/${layoutId}/locos`).onSnapshot((snapshot) => {
     snapshot.docChanges().forEach(async (change) => {
       const loco = change.doc.data()
@@ -113,8 +113,8 @@ export async function handleThrottleChange(snapshot: DocumentData): Promise<void
   })
 }
 
-init()
 
 export default {
   handleThrottleChange,
+  listenToLocoChanges
 }

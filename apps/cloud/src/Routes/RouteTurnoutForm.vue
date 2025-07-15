@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { type Turnout } from '@repo/modules/turnouts'
-import { type Effect, type MacroItem } from '@repo/modules/effects'
+import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
+import { useEfx, type Effect, type MacroItem } from '@repo/modules/effects'
 import TurnoutAdd from '@/Routes/TurnoutAdd.vue'
 
 const emit = defineEmits(['change'])
@@ -14,6 +14,9 @@ const ondialog = ref(false)
 const offdialog = ref(false)
 const onChips = ref(props.on || [])
 const offChips = ref(props.off || [])
+
+const { switchTurnout } = useTurnouts()
+const { runEffect } = useEfx()
 
 function handleOnUpdate(e: Array<string> | undefined) {
   console.log('handleOnUpdate', onChips.value)
@@ -76,6 +79,21 @@ function emitChanges() {
   })
 }
 
+function handleChipClick(chip: MacroItem) {
+  if (chip.type === 'turnout') {
+    switchTurnout({ ...chip, state: chip.state })
+  }
+}
+
+function handleRoute(state: boolean) {
+  console.log('handleRoute', state)
+  onChips.value.forEach((chip: MacroItem) => {
+    if (chip.type === 'turnout') {
+      switchTurnout({ ...chip, state: state ? chip.state : !chip.state })
+    }
+  })
+}
+
 </script>
 <template>
 
@@ -93,6 +111,7 @@ function emitChanges() {
         :model-value="onChips" >
         <v-chip v-for="chip in onChips" :key="chip.id" :value="chip.id"          
           size="small"
+          @click="handleChipClick(chip)"
           color="primary"
           variant="outlined"
           selected
@@ -159,6 +178,17 @@ function emitChanges() {
     </v-chip-group>
   </v-card-text>
 </v-card>
+
+<v-sheet>
+  <v-btn text="Turn Route ON" @click="handleRoute(true)">
+    <v-icon left>mdi-rocket-launch</v-icon>
+    Turn Route ON
+  </v-btn>
+  <v-btn text="Turn Route OFF"  @click="handleRoute(false)">
+    <v-icon left>mdi-rocket-launch</v-icon>
+    Turn Route OFF
+  </v-btn>
+</v-sheet>
 
   <v-dialog
     v-model="ondialog"

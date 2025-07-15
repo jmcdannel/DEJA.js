@@ -10,7 +10,7 @@ const props = defineProps({
   turnout: Object,
   turnoutId: String,
   viewAs: {
-    type: String as PropType<'switch' | 'card' | 'button' | 'table' | 'raw'>,
+    type: String,
     default: () => 'list'
   }
 })
@@ -28,6 +28,9 @@ async function handleTurnouts (event: Event) {
 
 </script>
 <template>
+  <!--
+  VIEW: Switch
+  -->
   <template v-if="viewAs === 'switch'">
     <v-card 
       class="shadow-xl my-1 p-[1px] rounded-full"
@@ -44,6 +47,9 @@ async function handleTurnouts (event: Event) {
       </v-card-title>
     </v-card>
   </template>
+  <!--
+  VIEW: Card
+  -->
   <template v-else-if="viewAs === 'card'">
     <v-card 
       class="m-1 shadow-xl"
@@ -87,6 +93,9 @@ async function handleTurnouts (event: Event) {
       </v-card-actions>
     </v-card>
   </template>
+  <!--
+  VIEW: Button
+  -->
   <template v-else-if="viewAs === 'button'">
     <v-btn 
       class="m-1"
@@ -101,6 +110,9 @@ async function handleTurnouts (event: Event) {
       {{turnout?.name}}
     </v-btn>
   </template>
+  <!--
+  VIEW: Raw
+  -->
   <template v-else-if="viewAs === 'raw'">
     <pre class="m-1 p-2 rounded-lg text-sm">
 {{ JSON.stringify(turnout, null, 2) }}

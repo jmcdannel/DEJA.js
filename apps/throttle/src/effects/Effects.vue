@@ -8,12 +8,12 @@ import { ListMenu } from '@repo/ui'
 const viewAs = useStorage('@DEJA/prefs/effects/View', ['button'])
 const sortBy = useStorage<string[]>('@DEJA/prefs/effects/Sort', ['device'])
 
-const { getEffects, switchEffect } = useEfx()
+const { getEffects, runEffect } = useEfx()
 const list = getEffects()
 
 function handleEffect(efx: Effect) {
   console.log('handleEffect', efx)
-  switchEffect(efx)
+  runEffect(efx)
 }
 
 </script>

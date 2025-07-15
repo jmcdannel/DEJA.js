@@ -1,12 +1,14 @@
+import 'dotenv/config'
 import { db, rtdb } from '@repo/firebase-config/firebase-admin-node'
 import { initialize } from './modules/layout'
-import { handleThrottleChange } from './modules/throttles'
+import { handleThrottleChange, listenToLocoChanges } from './modules/throttles'
 import { handleTurnoutChange } from './modules/turnouts'
 import { handleEffectChange } from './modules/effects'
 // import { handleSensorChange } from './modules/sensors'
 import { handleDccChange } from './lib/dcc'
 import { handleDejaCommands } from './lib/deja'
 import { log } from './utils/logger'
+import { serial } from './lib/serial'
 
 const layoutId = process.env.LAYOUT_ID || 'betatrack'
 
@@ -23,6 +25,7 @@ async function listen(): Promise<void> {
     handleDejaCommands(data.val(), data.key)
   })
 
+  listenToLocoChanges()
   
   db.collection(`layouts/${layoutId}/throttles`).onSnapshot(handleThrottleChange)
   db.collection(`layouts/${layoutId}/effects`).onSnapshot(handleEffectChange)
@@ -36,10 +39,11 @@ async function resetThrottles(): Promise<void> {
   
   const throttlesSnapshot = await db.collection('layouts').doc(layoutId).collection('throttles').get()
   throttlesSnapshot.docs.map((doc) => {
+    serial.disconnect(doc.data().port)
     doc.ref.set({
       ...doc.data(),
-      speed: 0,
       direction: false,
+      speed: 0,
     }, { merge: true })
   })
 }
@@ -49,6 +53,7 @@ async function resetDevices(): Promise<void> {
 
   const devicesSnapshot = await db.collection('layouts').doc(layoutId).collection('devices').get()
   devicesSnapshot.docs.map((doc) => {
+
     doc.ref.set({
       ...doc.data(),
       client: null,

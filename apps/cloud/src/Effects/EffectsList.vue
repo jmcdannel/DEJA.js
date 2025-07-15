@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useEfx, type Effect } from '@repo/modules/effects'
 import EffectListItem from '@/Effects/EffectListItem.vue'
+import { ListMenu } from '@repo/ui'
 
 const emit = defineEmits(['edit'])
 
@@ -15,6 +16,7 @@ function handleEdit(item: Effect) {
 </script>
 <template>
   <v-container>
+    <ListMenu :disabledMenus="['view']" :module-name="'effects'" />
     <v-row >
       <v-col
         cols="12"
