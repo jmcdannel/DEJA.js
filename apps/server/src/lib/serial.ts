@@ -32,7 +32,7 @@ const connect = ({
       }
       log.await('[SERIAL] Attempting to connect to:', path)
       // Create a port
-      const port = new SerialPort({ autoOpen: false, baudRate, path })
+      const port = new SerialPort({ autoOpen: false, baudRate, lock: false, path })
       port.setEncoding('utf8')
       port.on('open', () => {
         log.complete('[SERIAL] Port opened:', path)
@@ -67,8 +67,27 @@ const send = (_port: SerialPort, data: string): void => {
   }
 }
 
+const disconnect = (_port: SerialPort): void => {
+  try {
+    if (_port && _port.isOpen) {
+      _port.close((err) => {
+        if (err) {
+          log.error('[SERIAL] Error closing port:', err.message)
+        } else {
+          log.complete('[SERIAL] Port closed successfully')
+        }
+      })
+    } else {
+      log.warn('[SERIAL] Port is not open or already closed')
+    }
+  } catch (err) {
+    log.fatal('[SERIAL] Error disconnecting from port:', err)
+  }
+}
+
 export const serial = {
   connect,
+  disconnect,
   send,
 }
 
