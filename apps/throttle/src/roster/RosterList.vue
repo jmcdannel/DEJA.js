@@ -10,7 +10,6 @@ import { LocoAvatar } from '@repo/ui'
 import RosterListItem from '@/roster/RosterListItem.vue'
 import { ListMenu } from '@repo/ui'
 
-
 defineProps({
   allowAdd: {
     type: Boolean,

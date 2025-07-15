@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { db, rtdb } from '@repo/firebase-config/firebase-admin-node'
 import { initialize } from './modules/layout'
-import { handleThrottleChange } from './modules/throttles'
+import { handleThrottleChange, listenToLocoChanges } from './modules/throttles'
 import { handleTurnoutChange } from './modules/turnouts'
 import { handleEffectChange } from './modules/effects'
 // import { handleSensorChange } from './modules/sensors'
@@ -25,6 +25,7 @@ async function listen(): Promise<void> {
     handleDejaCommands(data.val(), data.key)
   })
 
+  listenToLocoChanges()
   
   db.collection(`layouts/${layoutId}/throttles`).onSnapshot(handleThrottleChange)
   db.collection(`layouts/${layoutId}/effects`).onSnapshot(handleEffectChange)

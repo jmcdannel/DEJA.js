@@ -10,7 +10,10 @@ const ENABLE_DEJACLOUD = process.env.ENABLE_DEJACLOUD === 'true' || false
 
 async function main(): Promise<void> {
   try {
-    log.start('Running', '[MAIN]', ENABLE_MQTT, ENABLE_WS, ENABLE_DEJACLOUD)
+    log.start('Running', '[MAIN]')
+    log.note('ENABLE_MQTT', ENABLE_MQTT)
+    log.note('ENABLE_WS', ENABLE_WS)
+    log.note('ENABLE_DEJACLOUD', ENABLE_DEJACLOUD)
     if (ENABLE_DEJACLOUD) await dejaCloud.connect()
     if (ENABLE_MQTT) await mqtt.connect()
     if (ENABLE_WS) await wsServer.connect()
