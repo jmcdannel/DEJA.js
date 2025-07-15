@@ -36,7 +36,7 @@ const devices = getDevices()
     </v-card-item>
     <v-card-text>
       <v-row align="start" justify="start" dense>
-        <v-col cols="4"
+        <v-col cols="12" md:cols="4" lg:cols="3"
           v-for="device in devices"
           :key="device.id" >
           <DeviceStatusItem :device="device" />

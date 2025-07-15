@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 
 const SORT_OPTIONS = [
+  { title: 'Default', value: 'order' },
   { title: 'Name', value: 'name' },
   { title: 'Device', value: 'device' },
   { title: 'Type', value: 'type' },

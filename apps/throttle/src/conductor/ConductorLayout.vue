@@ -33,7 +33,7 @@ const throttles = getThrottles()
         <div class="@containermin-h-[500px] h-full overflow-y-auto p-4">
           <!-- Column 2 content goes here -->
           <!-- <pre>{{throttles}}</pre> -->
-          <v-carousel v-if="throttles && throttles.length > 0" height="100%" hideDelimiters>
+          <v-carousel v-if="throttles && throttles.length > 0" height="100%" class="min-h-90vh" hideDelimiters>
             <v-carousel-item v-for="(item) in throttles" :key="item.address" draggable>
               <SimpleThrottle :address="item.address" />
             </v-carousel-item>

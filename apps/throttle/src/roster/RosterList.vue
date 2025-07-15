@@ -8,8 +8,7 @@ import { useRoster } from '@/roster/useRoster'
 import AddLoco from '@/roster/AddLoco.vue'
 import { LocoAvatar } from '@repo/ui'
 import RosterListItem from '@/roster/RosterListItem.vue'
-import ViewMenu from '@/core/ViewMenu.vue'
-import SortMenu from '@/core/SortMenu.vue'
+import { ListMenu } from '@repo/ui'
 
 
 defineProps({
@@ -20,7 +19,7 @@ defineProps({
 })
 
 const viewAs = useStorage<string[]>('@DEJA/prefs/locos/View', ['button'])
-const sortBy = useStorage<string[]>('@DEJA/prefs/locos/Sort', ['device'])
+
 const viewOptions = [
   { title: 'Avatar', value: 'avatar' },
   { title: 'Card', value: 'card' },
@@ -28,11 +27,12 @@ const viewOptions = [
   { title: 'Raw', value: 'raw' }
 ]
 const sortOptions = [
+  { title: 'Default', value: 'order' },
   { title: 'Name', value: 'name' },
   { title: 'Address', value: 'address' }
 ]
+const disabledMenus = ['filter']
 
-const emit = defineEmits(['selected'])
 const { getLocos } = useLocos()
 const { acquireThrottle } = useRoster()
 const locos = getLocos()
@@ -43,77 +43,22 @@ async function handleThrottle(address: number) {
   router.push({ name: 'throttle', params: { address } })
 }
 
-function sort(locos: Loco[]): Loco[] {
-  console.log('sort', sortBy.value)
-  return locos.sort((a, b) => {
-    if (sortBy.value?.[0] === 'name') {
-      return a.name.localeCompare(b.name)
-    } else if (sortBy.value?.[0] === 'address') {
-      return a.address - b.address
-    }
-    return 0
-  })
-}
-
 </script>
 <template>
   <v-toolbar color="blue-darken-4" :elevation="8">
     <template #prepend>
-      <v-icon icon="mdi-call-split" class="text-3xl"></v-icon>
+      <v-icon icon="mdi-train" class="text-xl md:text-3xl"></v-icon>
     </template>
-    <v-toolbar-title class="text-3xl">Roster</v-toolbar-title>
-    <v-spacer></v-spacer>
     <template #append>
-      <nav class="flex gap-4">
-        <ViewMenu v-model="viewAs" :view-options="viewOptions" />
-        <SortMenu v-model="sortBy" :sortOptions="sortOptions" />
-      </nav>
+      <ListMenu :disabled-menus="disabledMenus" :module-name="'locos'" :sort-options="sortOptions" :view-options="viewOptions" />
     </template>
-    <template #extension>
-        <v-chip-group class="p-4"
-          color="purple-darken-4" 
-          column
-          multiple
-          v-model="selectedDevices"
-        >
-          <v-chip 
-            v-for="device in selectedDevices" 
-            filter
-            :key="device"
-            :text="device" 
-            :value="device" 
-            prepend-icon="mdi-memory"
-            closable
-            color="pink" 
-            size="small"
-            variant="elevated"
-          />
-        </v-chip-group>
-        <v-spacer></v-spacer>
-        <v-chip-group class="p-4"
-          base-color="blue"
-          column
-        >
-          <v-chip
-            :text="viewAs?.join(', ') || 'View as...'"
-            color="blue"
-            prepend-icon="mdi-eye"            
-            size="small"
-            variant="elevated"
-          />
-          <v-chip
-            :text="sortBy?.join(', ') || 'Sort by...'"
-            color="green"
-            prepend-icon="mdi-sort"
-            size="small"
-            variant="elevated"
-          />
-        </v-chip-group>
-    </template>
+    <v-toolbar-title class="text-xl md:text-3xl">Roster</v-toolbar-title>
   </v-toolbar>
   <main>
-    <!-- <RosterViewMenu /> -->
     <v-spacer class="my-4"></v-spacer>
+    <!--
+    VIEW: Avatar
+    -->
     <template v-if="viewAs.includes('avatar')">
       <div class="flex flex-wrap gap-2 sm:gap-4 md:gap-10">
         <LocoAvatar
@@ -134,9 +79,12 @@ function sort(locos: Loco[]): Loco[] {
         </v-btn>
       </div>
     </template>
+    <!--
+    VIEW: Card
+    -->
     <template v-else-if="viewAs.includes('card')">
       <div class="grid grid-cols-2 @[960px]:grid-cols-3 xlg:grid-cols-4 gap-2 w-full p-4">
-        <RosterListItem v-for="loco in sort(locos)" :key="((loco as unknown) as Loco).address" :loco="(loco as unknown) as Loco" @selected="handleThrottle" />
+        <RosterListItem v-for="loco in locos" :key="((loco as unknown) as Loco).address" :loco="(loco as unknown) as Loco" @selected="handleThrottle" />
       </div>
       <v-btn v-if="allowAdd"
         @click="showAdd = !showAdd" 
@@ -147,6 +95,9 @@ function sort(locos: Loco[]): Loco[] {
         variant="tonal">
       </v-btn>
     </template>
+    <!--
+    VIEW: Table
+    -->
     <template v-else-if="viewAs.includes('table')">
       <v-data-table
         :headers="[
@@ -155,7 +106,7 @@ function sort(locos: Loco[]): Loco[] {
           { text: 'Device', value: 'device' },
           { text: 'Actions', value: 'actions', sortable: false }
         ]"
-        :items="sort(locos)"
+        :items="locos"
         item-value="address"
         class="elevation-1"
       >
@@ -172,6 +123,9 @@ function sort(locos: Loco[]): Loco[] {
         variant="tonal">
       </v-btn>
     </template>
+    <!--
+    VIEW: Raw
+    -->
     <template v-else-if="viewAs.includes('raw')">
       <pre class="p-4">
 {{ locos }}
