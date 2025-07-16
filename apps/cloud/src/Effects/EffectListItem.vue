@@ -35,7 +35,7 @@ async function handleEfx (event: Event) {
     density="compact"
   >
     <template #title>
-      <span class="text-sm">{{efx?.name}}</span>
+      <span>{{efx?.name}}</span>
     </template>
     <template #append>
       <v-avatar

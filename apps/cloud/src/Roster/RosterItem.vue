@@ -36,10 +36,12 @@ const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
 </script>
 <template>
   <v-card
-    class="mx-auto w-full justify-between flex flex-col border-t-4 border-b-4"
+    class="mx-auto w-full justify-between flex flex-col"
+    :color="color.value"
     :title="loco?.name"
     :subtitle="roadname?.label || 'Loco'"
-    :class="`${color?.border}`"
+    variant="tonal"
+    density="compact"
   >
     <template #append>
       <v-avatar size="large" :color="props?.loco?.meta?.color || color.value">{{ loco?.address }}</v-avatar>

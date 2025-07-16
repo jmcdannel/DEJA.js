@@ -47,7 +47,7 @@ function handleEffect(efx: Effect) {
       </tr>
     </tbody>
   </v-table>
-  <div v-else class="grid grid-cols-2 @[960px]:grid-cols-3 xlg:grid-cols-4 gap-2 w-full p-4">
+  <div v-else class="grid grid-cols-1 @[960px]:grid-cols-3 xlg:grid-cols-4 gap-2 w-full p-4">
     <EffectItem 
       v-for="item in list"
       :key="item.id" 

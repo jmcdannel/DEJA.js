@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { ref } from 'vue'
+  import { useDisplay } from 'vuetify'
   import { useDcc } from '@repo/dccex'
   import { useFunctionIcon } from '@repo/modules/locos'
 
@@ -24,6 +25,7 @@
   const { getIconComponent } = useFunctionIcon()
   const func1State = ref(props.func?.state || false)
   const icon =  getIconComponent(props.func?.icon)
+  const { mobile } = useDisplay()
 
   async function cabFuction() {
     func1State.value = !func1State.value;
@@ -37,7 +39,7 @@
 </script>
 <template>
   <v-btn 
-    v-if="func" 
+    v-if="func && !mobile" 
     @click="cabFuction()"
     :prepend-icon="icon"
     class="relative bg-gradient-to-br from-cyan-600 to-indigo-600 p-2">

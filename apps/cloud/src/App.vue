@@ -3,18 +3,18 @@ import { ref } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { RouterView, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
+import { useTheme } from 'vuetify'
 
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
-import Header from './Core/Header/Header.vue'
 import UserProfileMenu from './Core/Header/UserProfile.vue';
 import Menu from '@/Core/Menu/Menu.vue'
 import DeviceStatus from '@/Layout/Devices/DeviceStatus.vue'
-import DCCLogStatus from '@/DCCEX/Log/DCCLogStatus.vue'
 import LayoutStatus from '@/Layout/LayoutStatus.vue'
+import ToggleSidebar from '@/Core/UI/ToggleSidebar.vue'
 import { Login } from '@repo/auth'
-import DCCLogger from '@/DCCEX/Log/DCCLogger.vue'
 
+import { useMenu } from '@/Core/Menu/useMenu'
 import { useDccLog } from '@/DCCEX/Log/useDccLog'
 
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -23,14 +23,11 @@ const enableLogging = useStorage('@DEJA/pref/ws-logging', false)
 const user = useCurrentUser()
 const router = useRouter()
 const dccLog = useDccLog(enableLogging.value)
+const theme = useTheme()
+const { menu, handleMenu } = useMenu()
 
-const theme = ref('dark')
 const drawer = ref(true)
 const mobile = ref(null)
-
-function handleMenu(item:string) {
-  router.push({ name: item })
-}
 
 function handleLayoutSelect(newLayout: string) {
   layoutId.value = newLayout
@@ -40,23 +37,48 @@ function handleLayoutSelect(newLayout: string) {
 </script>
 <template>
   <v-responsive class="border rounded">
-    <v-app v-if="user" :theme="theme">
-      <DCCLogger v-if="enableLogging" />
-      <Header @toggle="drawer = !drawer">
-        <template  v-if="layoutId" #menu>
-          <DCCLogStatus />
+    <v-app v-if="user" :theme="theme.name">
+      <v-app-bar color="primary">
+        <template v-slot:prepend>
+          <v-app-bar-nav-icon @click="drawer = !drawer"
+            aria-controls="drawer-navigation"
+            class="lg:hidden p-2 mr-2" 
+          ></v-app-bar-nav-icon>
+        </template>
+
+        <v-app-bar-title>
+          <v-icon class="mr-2">mdi-cloud</v-icon>
+          DEJA Cloud
+        </v-app-bar-title>
+          <v-btn
+            @click="theme.change('light')"
+            text="Light"
+          ></v-btn>
+          <v-btn
+            @click="theme.change('dark')"
+            text="Dark"
+          ></v-btn>
           <LayoutStatus />
           <DeviceStatus v-if="!!user" />
-          <!-- <AppMenu @menu="handleMenu" /> -->
-          <UserProfileMenu />
-        </template>
-      </Header>
+          <UserProfileMenu v-if="!!user" />
 
+      </v-app-bar>
       <v-navigation-drawer v-model="drawer" :mobile="mobile" mobile-breakpoint="md">
         <v-spacer class="h-8"></v-spacer>
-        <Menu @change="handleMenu" />
+        <v-list-item v-for="item in menu" 
+          :key="item.label" 
+          :title="item.label"
+          :color="item.color || 'primary'"
+          :active="router.currentRoute.value.name === item.label"
+          @click="handleMenu(item)"
+          link
+        >
+          <template #prepend>
+            <v-icon size="24" :class="`text-${item.color}-500 dark:text-${item.color}-400`"
+              class="stroke-none" >{{item.icon}}</v-icon>
+          </template>
+        </v-list-item>
       </v-navigation-drawer>
-
       <v-main>
         <v-container v-if="layoutId">
           <RouterView />
