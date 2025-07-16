@@ -470,6 +470,7 @@ importers:
       vue: ^3.5.16
       vue-router: ^4.2.2
       vuefire: ^3.2.1
+      vuetify: ^3.7.3
     devDependencies:
       '@repo/dccex': link:../dccex
       '@repo/eslint-config': link:../config-eslint
@@ -482,6 +483,7 @@ importers:
       vue: 3.5.17_typescript@5.8.3
       vue-router: 4.5.1_vue@3.5.17
       vuefire: 3.2.1_fisqf2jybzdeddr5cuvxoobp3m
+      vuetify: 3.9.0_7et6wgumlogfwacqgibsqyqmmu
 
   packages/utils:
     specifiers: {}
@@ -11755,7 +11757,6 @@ packages:
     dependencies:
       typescript: 5.8.3
       vue: 3.5.17_typescript@5.8.3
-    dev: false
 
   /w3c-xmlserializer/4.0.0:
     resolution: {integrity: sha512-d+BFHzbiCx6zGfz0HyQ6Rg69w9k19nviJspaj4yNscGjrHu94sVP+aRm75yEbCh+r2/yR+7q6hux9LVtbuTGBw==}
