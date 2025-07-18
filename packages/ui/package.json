@@ -11,7 +11,9 @@
     "./FunctionsSpeedDial": "./src/Functions/SpeedDial.vue",
     "./LocoAvatar": "./src/LocoAvatar.vue",
     "./MiniConsist": "./src/Consist/MiniConsist.vue",
-    "./UserProfile": "./src/UserProfile.vue"
+    "./SelectLayout": "./src/SelectLayout.vue",
+    "./UserProfile": "./src/UserProfile.vue",
+    "./LayoutChip": "./src/LayoutChip.vue"
   },
   "devDependencies": {
     "@repo/dccex": "workspace:^0.0.0",
