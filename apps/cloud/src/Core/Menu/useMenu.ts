@@ -1,8 +1,8 @@
 import {  useRouter } from 'vue-router'
 interface MenuItem {
-  label: string;
-  icon: string;
   color: string;
+  icon: string;
+  label: string;
 }
 
 export function useMenu() {
@@ -14,49 +14,49 @@ export function useMenu() {
     //   color: 'violet',
     // },
     {
-      label: 'Layout',
-      icon: 'mdi-fence',
       color: 'cyan',
+      icon: 'mdi-fence',
+      label: 'Layout',
     },
     {
-      label: 'DCC-EX',
-      icon: 'mdi-cpu-64-bit',
       color: 'lime',
+      icon: 'mdi-cpu-64-bit',
+      label: 'DCC-EX',
     },
     {
-      label: 'Roster',
-      icon: 'mdi-train',
       color: 'pink',
+      icon: 'mdi-train',
+      label: 'Roster',
     },
     {
-      label: 'Effects',
-      icon: 'mdi-rocket-launch',
       color: 'indigo',
+      icon: 'mdi-rocket-launch',
+      label: 'Effects',
     },
     {
-      label: 'Turnouts',
-      icon: 'mdi-call-split',
       color: 'amber',
+      icon: 'mdi-call-split',
+      label: 'Turnouts',
     },
     {
-      label: 'Routes',
-      icon: 'mdi-map',
       color: 'purple',
+      icon: 'mdi-map',
+      label: 'Routes',
     },
     {
-      label: 'Signals',
-      icon: 'mdi-traffic-light',
       color: 'emerald',
+      icon: 'mdi-traffic-light',
+      label: 'Signals',
     },
     {
-      label: 'Emulator',
-      icon: 'mdi-console',
       color: 'rose',
+      icon: 'mdi-console',
+      label: 'Emulator',
     },
     {
-      label: 'Settings',
-      icon: 'mdi-cog',
       color: 'blue',
+      icon: 'mdi-cog',
+      label: 'Settings',
     },
   ]
 
@@ -69,10 +69,9 @@ export function useMenu() {
   }
 
   return {
-    menu: menuConfig,
     getMenuItem,
     handleMenu,
-    currentItem: router.currentRoute.value.name,
+    menu: menuConfig,
   }
 }
 

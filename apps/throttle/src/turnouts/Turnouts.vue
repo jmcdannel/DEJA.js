@@ -48,7 +48,7 @@ async function handleTurnout(turnout: Turnout) {
       </tr>
     </tbody>
   </v-table>
-  <div v-else class="grid grid-cols-2 @[960px]:grid-cols-3 xlg:grid-cols-4 gap-2 w-full p-4">
+  <div v-else class="grid grid-cols-1 @[960px]:grid-cols-3 xlg:grid-cols-4 gap-2 w-full p-4">
     <TurnoutItem 
       v-for="item in turnouts"
       :key="item.id" 

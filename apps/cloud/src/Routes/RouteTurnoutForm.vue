@@ -85,13 +85,19 @@ function handleChipClick(chip: MacroItem) {
   }
 }
 
-function handleRoute(state: boolean) {
+async function handleRoute(state: boolean) {
   console.log('handleRoute', state)
-  onChips.value.forEach((chip: MacroItem) => {
+  async function delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  for (let i = 0; i < onChips.value.length; i++) {
+    const chip = onChips.value[i] as MacroItem;
     if (chip.type === 'turnout') {
-      switchTurnout({ ...chip, state: state ? chip.state : !chip.state })
+      switchTurnout({ ...chip, state: state ? chip.state : !chip.state });
+      await delay(3000);
     }
-  })
+  }
 }
 
 </script>

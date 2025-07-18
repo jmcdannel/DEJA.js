@@ -10,26 +10,28 @@ const allConnected = computed(() => devices.value.every(device => device.isConne
 <template>
   <v-menu location="bottom">
       <template v-slot:activator="{ props }">
-        <v-chip
-          v-bind="props"
-          size="small"
-          class="ma-1"
-          prepend-icon="mdi-devices"
-           :color="!!allConnected ? 'green' : 'yellow'"
-        >
-        <template #append>
-          <span v-if="allConnected" class="ml-2 relative flex h-3 w-3">
-            <span class="absolute inline-flex h-full w-full rounded-full bg-green-600 animate-ping opacity-75"></span>
-            <span class="relative inline-flex h-full w-full rounded-full bg-green-600"></span>
-          </span>
-          <span v-else class="ml-2 relative flex h-3 w-3">
-            <span class="absolute inline-flex h-full w-full rounded-full bg-yellow-600 animate-ping opacity-75"></span>
-            <span class="relative inline-flex h-full w-full rounded-full bg-yellow-600"></span>
-          </span>
-        </template>
-          <span class="hidden lg:flex">Devices</span>
-          <span class="lg:hidden">D</span>
-        </v-chip>
+        <v-sheet class="p-1" color="background">
+          <v-chip
+            v-bind="props"
+            size="small"
+            class="ma-1"
+            prepend-icon="mdi-devices"
+            :color="!!allConnected ? 'green' : 'yellow'"
+          >
+          <template #append>
+            <span v-if="allConnected" class="ml-2 relative flex h-3 w-3">
+              <span class="absolute inline-flex h-full w-full rounded-full bg-green-600 animate-ping opacity-75"></span>
+              <span class="relative inline-flex h-full w-full rounded-full bg-green-600"></span>
+            </span>
+            <span v-else class="ml-2 relative flex h-3 w-3">
+              <span class="absolute inline-flex h-full w-full rounded-full bg-yellow-600 animate-ping opacity-75"></span>
+              <span class="relative inline-flex h-full w-full rounded-full bg-yellow-600"></span>
+            </span>
+          </template>
+            <span class="hidden lg:flex">Devices</span>
+            <span class="lg:hidden">D</span>
+          </v-chip>
+        </v-sheet>
       </template>
       <v-list>
         <v-list-item

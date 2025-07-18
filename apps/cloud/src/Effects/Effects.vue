@@ -5,13 +5,16 @@ import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import EffectForm from '@/Effects/EffectForm.vue'
 import EffectsList from '@/Effects/EffectsList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
+import { ListMenu } from '@repo/ui'
 
 const editEffect = ref(<Effect | null>null)
 const newEfx = {}
 
 </script>
 <template>
-  <ModuleTitle menu="Effects" />
+  <ModuleTitle menu="Effects">
+    <ListMenu :disabledMenus="['view']" :module-name="'effects'" />
+  </ModuleTitle>
   <Transition name="slide">
     <EffectForm v-if="editEffect" v-show="editEffect" @close="editEffect = null" :efx="editEffect" />
     <EffectsList v-else @edit="efx => editEffect = efx">

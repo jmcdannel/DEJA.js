@@ -27,24 +27,25 @@ defineProps<{
         @click="$emit('toggle', cloco, false)"
       ></v-btn>
     </template>
+    <v-sheet class="ma-2 bg-blue-800 rounded-full py-2 px-2 flex items-center justify-between">
+      <span class="mx-2">Trim</span>
+      <v-btn icon="mdi-minus-circle" color="secondary" size="small" variant="tonal" class="mx-1" @click="$emit('trim', cloco, -1)"></v-btn>
+      <v-btn icon="mdi-plus-circle" color="secondary" size="small" variant="tonal" class="mx-1" @click="$emit('trim', cloco, 1)"></v-btn>
+      <!-- <v-avatar rounded="0" varinat="tonal" :color="color" class="mx-1">{{ cloco?.trim }}</v-avatar> -->
+      <span class="
+        mx-1
+        py-1
+        px-3
+        font-mono
+        rounded-lg 
+        text-center 
+        text-xl
+        shadow-inner 
+        bg-gradient-to-r 
+        from-purple-500 
+        to-pink-600">{{ cloco?.trim }}</span>
+    </v-sheet>
     <template #append>
-      <v-sheet class="ma-2 bg-blue-800 rounded-full py-2 px-2 flex items-center justify-between">
-        <span class="mx-2">Trim</span>
-        <v-btn icon="mdi-minus-circle" color="secondary" size="small" variant="tonal" class="mx-1" @click="$emit('trim', cloco, -1)"></v-btn>
-        <v-btn icon="mdi-plus-circle" color="secondary" size="small" variant="tonal" class="mx-1" @click="$emit('trim', cloco, 1)"></v-btn>
-        <!-- <v-avatar rounded="0" varinat="tonal" :color="color" class="mx-1">{{ cloco?.trim }}</v-avatar> -->
-        <span class="
-          mx-2
-          py-1
-          px-5
-          rounded-lg 
-          text-center 
-          text-xl
-          shadow-inner 
-          bg-gradient-to-r 
-          from-purple-500 
-          to-pink-600">{{ cloco?.trim }}</span>
-      </v-sheet>
       <v-spacer></v-spacer>
       <v-btn
         class="ma-2"

@@ -1,19 +1,11 @@
-import LocoAvatarComponent from './LocoAvatar.vue'
-import ConsistComponent from './Consist/Consist.vue'
-import MiniConsistComponent from './Consist/MiniConsist.vue'
-import FunctionsComponent from './Functions/Functions.vue'
-import FunctionSpeedDialComponent from './Functions/SpeedDial.vue'
-import SignoutComponent from './Signout.vue'
-import UserProfileComponent from './UserProfile.vue'
-import ViewJsonComponent from './ViewJson.vue'
-import ListMenuComponent from './ListMenu/ListMenu.vue'
-
-export const LocoAvatar = LocoAvatarComponent
-export const Consist = ConsistComponent
-export const MiniConsist = MiniConsistComponent
-export const Functions = FunctionsComponent
-export const FunctionsSpeedDial = FunctionSpeedDialComponent
-export const ViewJson = ViewJsonComponent
-export const SignOut = SignoutComponent
-export const UserProfile = UserProfileComponent
-export const ListMenu = ListMenuComponent
+export { default as LocoAvatar } from './LocoAvatar.vue'
+export { default as Consist } from './Consist/Consist.vue'
+export { default as MiniConsist } from './Consist/MiniConsist.vue'
+export { default as Functions } from './Functions/Functions.vue'
+export { default as FunctionsSpeedDial } from './Functions/SpeedDial.vue'
+export { default as SignOut } from './Signout.vue'
+export { default as UserProfile } from './UserProfile.vue'
+export { default as ViewJson } from './ViewJson.vue'
+export { default as ListMenu } from './ListMenu/ListMenu.vue'
+export { default as SelectLayout } from './SelectLayout.vue'
+export { default as LayoutChip } from './LayoutChip.vue'

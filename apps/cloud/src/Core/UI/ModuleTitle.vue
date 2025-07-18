@@ -16,10 +16,14 @@ const { getMenuItem } = useMenu()
 
 </script>
 <template>
-  <h2 class="flex" :class="`text-${color}-500 dark:text-${color}-400`">
-    <v-icon size="32" :class="`text-${color}-500 dark:text-${color}-400`"
-      class="mr-2 stroke-non" >{{icon}}</v-icon>
-    <span class="text-2xl">{{ label }}</span>
-  </h2>
+  <v-sheet class="flex">
+    <h2 class="flex" :class="`text-${color}-500 dark:text-${color}-400`">
+      <v-icon size="32" :class="`text-${color}-500 dark:text-${color}-400`"
+        class="mr-2 stroke-non" >{{icon}}</v-icon>
+      <span class="text-2xl">{{ label }}</span>
+    </h2>
+    <v-spacer></v-spacer>
+    <slot></slot>
+  </v-sheet>
   <hr class="my-4 border-sky-500" />
 </template>
