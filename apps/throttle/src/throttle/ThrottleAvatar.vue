@@ -2,7 +2,7 @@
 import { ref, type PropType } from 'vue'
 import type { Loco } from '@repo/modules/locos'
 import type { Throttle } from './types';
-import FunctionList from '@/functions/FunctionList.vue'
+import { FunctionList } from '@repo/ui'
 
 defineProps({
   throttle: {

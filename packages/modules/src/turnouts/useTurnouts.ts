@@ -58,7 +58,7 @@ export function useTurnouts() {
     }
   }
 
-  async function getTurnout(id: string): Turnout {
+  async function getTurnout(id: string): Promise<Turnout> {
     const deviceRef = doc(db, `layouts/${layoutId.value}/turnouts`, id)
     const docSnap = await getDoc(deviceRef)
 

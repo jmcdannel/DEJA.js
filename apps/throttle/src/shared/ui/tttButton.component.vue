@@ -11,8 +11,8 @@
       default: 'md'
     },
     onClick: {
-      type: Function,
-      default: () => {}
+      type: Function as () => any,
+      default: undefined
     }
   })
   

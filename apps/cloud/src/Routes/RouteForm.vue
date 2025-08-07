@@ -44,6 +44,8 @@ async function submit () {
     type: efxType.value,
     color: color.value,
     tags: tags.value,
+    state: false,
+    id: props.efx?.id || ''
   }
   //  set pin
   newEfx.point1 = point1.value || ''

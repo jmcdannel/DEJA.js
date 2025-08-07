@@ -5,7 +5,7 @@ import { useWebSocket } from '@vueuse/core'
 import { useDccLog } from '@/DCCEX/Log/useDccLog'
 
 const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.22:8082')
-const { append } = useDccLog()
+const { append } = useDccLog(true)
 
 console.log('wshost', wshost)
 //http://192.168.86.249:5173/

@@ -19,7 +19,7 @@ const newEfx = {}
     <EffectForm v-if="editEffect" v-show="editEffect" @close="editEffect = null" :efx="editEffect" />
     <EffectsList v-else @edit="efx => editEffect = efx">
       <template #prepend>
-        <AddTile @click="editEffect = {...newEfx}" color="purple" />
+        <AddTile @click="editEffect = {type: '', state: false, id: '', ...newEfx}" color="purple" />
       </template>
     </EffectsList>
   </Transition>

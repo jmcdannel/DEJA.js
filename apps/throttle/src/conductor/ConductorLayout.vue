@@ -4,7 +4,7 @@ import type { Loco, Throttle } from '@repo/modules/locos'
 import { useLocos } from '@repo/modules/locos'
 import SimpleThrottle from '@/throttle/SimpleThrottle.vue'
 import ThrottleTile from '@/throttle/ThrottleTile.vue'
-import TurnoutList from '@repo/ui'
+import TurnoutList from '@repo/ui/TurnoutList'
 // import Effects from '@/effects/Effects.vue'
 
 const drawer = ref(false)

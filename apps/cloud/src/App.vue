@@ -85,7 +85,7 @@ function handleLayoutSelect(newLayout: string) {
         </v-container>
       </v-main>
     </v-app>
-    <v-app v-else :theme="theme">
+    <v-app v-else :theme="theme.name.value">
       <Login />
     </v-app>
   </v-responsive>

@@ -100,17 +100,17 @@ async function handleThrottle(address: number) {
     <template v-else-if="viewAs.includes('table')">
       <v-data-table
         :headers="[
-          { text: 'Name', value: 'name' },
-          { text: 'Address', value: 'address' },
-          { text: 'Device', value: 'device' },
-          { text: 'Actions', value: 'actions', sortable: false }
+          { title: 'Name', value: 'name' },
+          { title: 'Address', value: 'address' },
+          { title: 'Device', value: 'device' },
+          { title: 'Actions', value: 'actions', sortable: false }
         ]"
-        :items="locos"
+        :items="locos as Loco[]"
         item-value="address"
         class="elevation-1"
       >
         <template v-slot:item.actions="{ item }">
-          <v-btn @click="handleThrottle(item.address)" color="primary" variant="text">Select</v-btn>
+          <v-btn @click="handleThrottle((item as Loco).address)" color="primary" variant="text">Select</v-btn>
         </template>
       </v-data-table>
       <v-btn v-if="allowAdd"

@@ -97,6 +97,7 @@ export const useLayout = () => {
 
   async function createLayout(id: string, layout: Layout) {
     console.log('createLayout', layout)
+    const user = useCurrentUser()
     try {
       await setDoc(doc(db, `layouts`, id), {
         ...layout,

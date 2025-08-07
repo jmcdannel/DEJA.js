@@ -90,8 +90,8 @@ async function toggleLocoDir(cloco: ConsistLoco, direction:boolean) {
         <v-chip 
           class="ma-1" 
           variant="elevated" 
-          :append-icon="!cloco.direction ?  'mdi-arrow-right-circle' :null"
-          :prepend-icon="cloco.direction ? 'mdi-arrow-left-circle' : null"
+          :append-icon="!cloco.direction ? 'mdi-arrow-right-circle' : undefined"
+          :prepend-icon="cloco.direction ? 'mdi-arrow-left-circle' : undefined"
           :color="'secondary'"
         >
           {{ cloco?.address }}
