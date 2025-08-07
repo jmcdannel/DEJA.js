@@ -8,21 +8,15 @@ import { useTheme } from 'vuetify'
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
 import UserProfileMenu from './Core/Header/UserProfile.vue';
-import Menu from '@/Core/Menu/Menu.vue'
 import DeviceStatus from '@/Layout/Devices/DeviceStatus.vue'
 import LayoutStatus from '@/Layout/LayoutStatus.vue'
-import ToggleSidebar from '@/Core/UI/ToggleSidebar.vue'
 import { Login } from '@repo/auth'
 
 import { useMenu } from '@/Core/Menu/useMenu'
-import { useDccLog } from '@/DCCEX/Log/useDccLog'
-
-const layoutId = useStorage('@DEJA/layoutId', '')
-const enableLogging = useStorage('@DEJA/pref/ws-logging', false)
+const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 
 const user = useCurrentUser()
 const router = useRouter()
-const dccLog = useDccLog(enableLogging.value)
 const theme = useTheme()
 const { menu, handleMenu } = useMenu()
 
@@ -37,7 +31,7 @@ function handleLayoutSelect(newLayout: string) {
 </script>
 <template>
   <v-responsive class="border rounded">
-    <v-app v-if="user" :theme="theme.name">
+    <v-app v-if="user" :theme="theme.name.value">
       <v-app-bar color="primary">
         <template v-slot:prepend>
           <v-app-bar-nav-icon @click="drawer = !drawer"
