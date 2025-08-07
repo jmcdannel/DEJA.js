@@ -4,8 +4,7 @@ import type { Loco, Throttle } from '@repo/modules/locos'
 import { useLocos } from '@repo/modules/locos'
 import SimpleThrottle from '@/throttle/SimpleThrottle.vue'
 import ThrottleTile from '@/throttle/ThrottleTile.vue'
-import TurnoutList from '@repo/ui/TurnoutList'
-// import Effects from '@/effects/Effects.vue'
+import { TurnoutList, EffectList } from '@repo/ui'
 
 const drawer = ref(false)
 const { getThrottles } = useLocos()
@@ -59,6 +58,10 @@ const throttles = getThrottles()
         <h2 class="mb-4">Settings</h2>
         <!-- Add form controls here -->
       </v-form>
+      <div class="pa-4">
+        <h3 class="mb-2">Quick Controls</h3>
+        <EffectList />
+      </div>
     </v-navigation-drawer>
   </aside>
 </template>
