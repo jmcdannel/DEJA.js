@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useEfx, type Effect } from '@repo/modules/effects'
-import EffectListItem from '@/Effects/EffectListItem.vue'
+import CloudEventCard from '@/Effects/CloudEventCard.vue'
 
 const emit = defineEmits(['edit'])
 
@@ -32,7 +32,7 @@ function handleEdit(item: Effect) {
         sm="6"
         lg="4"
       >
-        <EffectListItem :efx="item" :efxId="item.id" @edit="handleEdit"></EffectListItem>
+        <CloudEventCard :efx="item as Effect" :efxId="item.id" @edit="handleEdit"></CloudEventCard>
     </v-col>
     </v-row>
   </v-container>

@@ -20,7 +20,14 @@
     "./TurnoutCard": "./src/Turnouts/TurnoutCard.vue",
     "./TurnoutButton": "./src/Turnouts/TurnoutButton.vue",
     "./TurnoutRaw": "./src/Turnouts/TurnoutRaw.vue",
-    "./TurnoutTable": "./src/Turnouts/TurnoutTable.vue"
+    "./TurnoutTable": "./src/Turnouts/TurnoutTable.vue",
+    "./EventList": "./src/Events/EventList.vue",
+    "./EventItem": "./src/Events/EventItem.vue",
+    "./EventSwitch": "./src/Events/EventSwitch.vue",
+    "./EventCard": "./src/Events/EventCard.vue",
+    "./EventButton": "./src/Events/EventButton.vue",
+    "./EventRaw": "./src/Events/EventRaw.vue",
+    "./EventTable": "./src/Events/EventTable.vue"
   },
   "devDependencies": {
     "@repo/dccex": "workspace:^0.0.0",
