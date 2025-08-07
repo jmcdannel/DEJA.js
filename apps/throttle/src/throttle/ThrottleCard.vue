@@ -23,13 +23,14 @@ defineEmits(['consist', 'fullscreen', 'functions', 'park'])
 const {
   currentSpeed,
   adjustSpeed: handleAdjustSpeed, 
-  handleThrottleChange,
-  liveThrottle,
   stop: handleStop,
-} = useThrottle(props.throttle)
+  throttle: liveThrottle,
+} = useThrottle(props.throttle.address)
 
 // Setup watchers
-watch( () => props.throttle, handleThrottleChange, { deep: true })
+watch( () => props.throttle, () => {
+  // Handle throttle changes if needed
+}, { deep: true })
 </script>
 <template>
   <v-card>

@@ -56,7 +56,13 @@ export const useEfx = () => {
     const docSnap = await getDoc(deviceRef)
 
     if (docSnap.exists()) {
-      return { ...docSnap.data(), id: docSnap.id }
+      const data = docSnap.data()
+      return { 
+        ...data, 
+        id: docSnap.id,
+        type: data.type || '',
+        state: data.state || false
+      } as Effect
     } else {
       console.error('No such document!')
     }

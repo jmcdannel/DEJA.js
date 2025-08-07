@@ -84,7 +84,7 @@ async function toggleLocoDir(cloco: ConsistLoco, direction:boolean) {
     >
       {{ loco?.address }}
     </v-chip>
-    <v-chip v-if="loco?.consist?.length > 0" v-for="cloco in loco?.consist"
+    <v-chip v-if="(loco?.consist?.length || 0) > 0" v-for="cloco in loco?.consist"
       class="ma-1" 
       variant="elevated" 
       :prepend-icon="cloco.direction ? 'mdi-arrow-left-circle' : ''" 
@@ -106,7 +106,7 @@ async function toggleLocoDir(cloco: ConsistLoco, direction:boolean) {
     </v-chip>
   </div>
   <v-list>
-    <LeadLoco v-if="loco?.consist?.length > 0" :loco="loco" :color="color" />
+    <LeadLoco v-if="(loco?.consist?.length || 0) > 0" :loco="loco" :color="color" />
     <v-divider></v-divider>
     <template v-for="cloco in loco?.consist" :key="cloco.address">
       <ConsistLocoCmp 

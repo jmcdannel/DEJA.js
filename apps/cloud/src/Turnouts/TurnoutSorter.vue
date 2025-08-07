@@ -10,8 +10,9 @@ const list = getTurnouts()
 const dragging = ref(false)
 
 function handleSave() {
-  console.log('Saving new order:', list.value.map(async (turnout: Turnout, order: number) => {
-    await setTurnout(turnout.id, { order })
+  console.log('Saving new order:', list.value.map(async (item: any, order: number) => {
+    const turnout = item as Turnout
+    await setTurnout(turnout.id, { ...turnout, order })
   }))
   emit('close')
 } 

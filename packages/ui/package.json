@@ -13,7 +13,14 @@
     "./MiniConsist": "./src/Consist/MiniConsist.vue",
     "./SelectLayout": "./src/SelectLayout.vue",
     "./UserProfile": "./src/UserProfile.vue",
-    "./LayoutChip": "./src/LayoutChip.vue"
+    "./LayoutChip": "./src/LayoutChip.vue",
+    "./TurnoutList": "./src/Turnouts/TurnoutList.vue",
+    "./TurnoutItem": "./src/Turnouts/TurnoutItem.vue",
+    "./TurnoutSwitch": "./src/Turnouts/TurnoutSwitch.vue",
+    "./TurnoutCard": "./src/Turnouts/TurnoutCard.vue",
+    "./TurnoutButton": "./src/Turnouts/TurnoutButton.vue",
+    "./TurnoutRaw": "./src/Turnouts/TurnoutRaw.vue",
+    "./TurnoutTable": "./src/Turnouts/TurnoutTable.vue"
   },
   "devDependencies": {
     "@repo/dccex": "workspace:^0.0.0",

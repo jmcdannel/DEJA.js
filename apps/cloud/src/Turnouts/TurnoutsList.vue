@@ -42,6 +42,6 @@ const listByDevice = computed(() => list.value ? Object.groupBy(list.value, t =>
         <pre>{{ list }}</pre>
       </template>
   </v-container>
-  <ViewJson :json="listByDevice" label="Turnouts By Device"></ViewJson>
+  <ViewJson :json="listByDevice || {}" label="Turnouts By Device"></ViewJson>
   <ViewJson :json="list" label="Turnouts"></ViewJson>
 </template>

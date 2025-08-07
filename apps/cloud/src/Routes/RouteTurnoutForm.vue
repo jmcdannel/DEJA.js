@@ -81,7 +81,29 @@ function emitChanges() {
 
 function handleChipClick(chip: MacroItem) {
   if (chip.type === 'turnout') {
-    switchTurnout({ ...chip, state: chip.state })
+    // Create a proper Turnout object from the MacroItem
+    const turnout: Turnout = {
+      id: chip.id?.toString() || '',
+      name: chip.name || '',
+      device: chip.device || '',
+      type: chip.type || '',
+      state: chip.state || false
+    }
+    switchTurnout(turnout)
+  }
+}
+
+function handleChipToggle(chip: MacroItem, state: boolean) {
+  if (chip.type === 'turnout') {
+    // Create a proper Turnout object from the MacroItem
+    const turnout: Turnout = {
+      id: chip.id?.toString() || '',
+      name: chip.name || '',
+      device: chip.device || '',
+      type: chip.type || '',
+      state: state ? (chip.state || false) : !(chip.state || false)
+    }
+    switchTurnout(turnout)
   }
 }
 
@@ -94,7 +116,14 @@ async function handleRoute(state: boolean) {
   for (let i = 0; i < onChips.value.length; i++) {
     const chip = onChips.value[i] as MacroItem;
     if (chip.type === 'turnout') {
-      switchTurnout({ ...chip, state: state ? chip.state : !chip.state });
+      const turnout: Turnout = {
+        id: chip.id?.toString() || '',
+        name: chip.name || '',
+        device: chip.device || '',
+        type: chip.type || '',
+        state: state ? (chip.state || false) : !(chip.state || false)
+      }
+      switchTurnout(turnout);
       await delay(3000);
     }
   }

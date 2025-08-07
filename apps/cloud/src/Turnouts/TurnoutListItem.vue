@@ -23,7 +23,9 @@ async function handleSwitch() {
     const effectId = props.turnout.effectId
     useTimeoutFn(async () => {
       const effect = await getEffect(effectId)
-      await runEffect({...effect, state: turnoutState.value})
+      if (effect) {
+        await runEffect({...effect, type: effect.type || '', state: turnoutState.value})
+      }
     }, 2000)
   }
 }

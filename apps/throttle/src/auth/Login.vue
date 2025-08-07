@@ -18,7 +18,6 @@ const user = useCurrentUser()
 const error = ref<Error | null>(null)
 
 async function handleGithubSignin() {
-  // authComplete()
   try {
     if (!auth) throw new Error('Authentication not initialized')
     const resp = await signInWithPopup(auth, githubAuthProvider)
@@ -26,19 +25,21 @@ async function handleGithubSignin() {
     authComplete()
   } catch (err) {
     console.error('Failed signinRedirect', err)
-    error.value = err as Error
+    error.value = err instanceof Error ? err : new Error(String(err))
   }
 }
 
 function authComplete() {
-  emit('auth', {})
+  emit('auth')
 }
 
 onMounted(() => {
-  getRedirectResult(auth).catch((reason) => {
-    console.error('Failed redirect result', reason)
-    error.value = reason
-  })
+  if (auth) {
+    getRedirectResult(auth).catch((reason) => {
+      console.error('Failed redirect result', reason)
+      error.value = reason instanceof Error ? reason : new Error(String(reason))
+    })
+  }
 })
 </script>
 
@@ -48,7 +49,7 @@ onMounted(() => {
       <h1
         class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-800 to-pink-600"
       >
-        Welcom to DEJA Cloud
+        Welcome to DEJA Cloud
       </h1>
     </header>
     <pre>isAuthenticated: {{ Boolean(user) }}</pre>
@@ -75,24 +76,24 @@ onMounted(() => {
           border-color="primary"
           class="w-64"
           @click="handleGithubSignin"
-          block="true"
+          :block="true"
         >
           <FaGithubAlt class="mr-2" />
           Sign in with GitHub
         </v-btn>
-        <v-btn preset="secondary" border-color="primary" class="" block="true" disabled>
+        <v-btn preset="secondary" border-color="primary" class="" :block="true" disabled>
           <FaFacebook class="mr-2" />
           Sign in with Facebook
         </v-btn>
-        <v-btn preset="secondary" border-color="primary" class="" block="true" disabled>
+        <v-btn preset="secondary" border-color="primary" class="" :block="true" disabled>
           <FaGoogle class="mr-2" />
           Sign in with Google
         </v-btn>
-        <v-btn preset="secondary" border-color="primary" class="" block="true" disabled>
+        <v-btn preset="secondary" border-color="primary" class="" :block="true" disabled>
           <FaApple class="mr-2" />
           Sign in with Apple
         </v-btn>
-        <v-btn preset="secondary" border-color="primary" class="" block="true" disabled>
+        <v-btn preset="secondary" border-color="primary" class="" :block="true" disabled>
           <FaMicrosoft class="mr-2" />
           Sign in with Microsoft
         </v-btn>

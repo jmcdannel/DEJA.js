@@ -63,7 +63,7 @@ const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
         <v-badge 
           class="m-2"
           :color="props?.loco?.meta?.color || color.value || 'primary'"
-          :content="loco?.consist?.length + 1 || 0">
+          :content="(loco?.consist?.length || 0) + 1">
           <v-chip variant="outlined"
             :color="props?.loco?.meta?.color || color.value || 'primary'">
             Consist

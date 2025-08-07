@@ -1,14 +1,14 @@
 import { computed, ref, watch } from 'vue'
 import { useCollection } from 'vuefire'
-import type { Efx } from '@repo/modules/effects/types'
+import type { Effect } from '@repo/modules/effects'
 import { useEfx } from '@repo/modules/effects'
 import { useTurnouts } from '@repo/modules/turnouts'
 
 export const useLayoutRoutes = () => {
   const clickableContainers = ['Routes', 'Turnouts', 'TurnoutLabels']
 
-  const p1 = ref(<string | null>null)
-  const p2 = ref(<string | null>null)
+  const p1 = ref<string | null>(null)
+  const p2 = ref<string | null>(null)
   const isRunning = ref(false)
   const percentComplete = ref(0)
 
@@ -16,25 +16,11 @@ export const useLayoutRoutes = () => {
   const { getEffectsByType, runEffect, getEffect } = useEfx()
   const list = useCollection(getEffectsByType('route'), { ssrKey: 'routes' })
   const turnouts = getTurnouts()
-  const routeTurnouts = ref([])
+  const routeTurnouts = ref<any[]>([])
 
   const routes = computed(() =>
     list.data.value?.filter((item) => item.type === 'route')
   )
-
-  // watch(p2, async (newValue) => {
-  //   if (newValue !== null) {
-  //     const route = routes.find(r => r.point1 === p1.value && r.point2 === newValue) ||
-  //                   routes.find(r => r.point1 === newValue && r.point2 === p1.value)
-  //     if (route) {
-  //       const efx = await  getEffect(route.id)
-  //       console.log('Route found:', efx?.state, route, efx)
-  //       runEffect({...route, state: !efx?.state, id: route.id })
-  //     } else {
-  //       console.log('No route found between', p1.value, 'and', newValue, routes)
-  //     }
-  //   }
-  // })
 
   watch([p1, p2], async ([newP1, newP2]) => {
     if (newP1 !== null && newP2 !== null) {
@@ -47,9 +33,8 @@ export const useLayoutRoutes = () => {
       if (route) {
         isRunning.value = true
         percentComplete.value = 0
-        // const efx = await getEffect(route.id)
-        routeTurnouts.value = [...route.on, ...route.off]
-        runEffect({ ...route, id: route.id, state: true })
+        routeTurnouts.value = [...(route.on || []), ...(route.off || [])]
+        runEffect({ ...route, id: route.id, state: true, type: route.type })
         const steps = (route?.on?.length || 0) + (route?.off?.length || 0)
         console.log('Route found:', steps, route)
 
@@ -93,7 +78,7 @@ export const useLayoutRoutes = () => {
       }
     })
 
-    routes.value.forEach((route) => {
+    routes.value?.forEach((route) => {
       if (route.point1 === p1.value) {
         classes.push(`selected-${route.point1}`)
         classes.push(`available-${route.point2}`)
@@ -103,126 +88,107 @@ export const useLayoutRoutes = () => {
       }
     })
 
-    return [...new Set(classes)].join(' ')
+    return classes.join(' ')
   }
 
   function findClickableParent(
     target: EventTarget | null
   ): { target: HTMLElement; type: string } | null {
-    if (!target || !(target instanceof Element)) {
-      return null
-    }
-    let found = false
-    let currentTarget: Element | null = target
+    if (!target) return null
 
-    let targetType = ''
-    while (!found && currentTarget && currentTarget.parentNode) {
-      if (currentTarget.parentNode.nodeName.toLowerCase() === 'svg') {
-        currentTarget = null
-      } else if (
-        clickableContainers.indexOf(currentTarget?.parentNode['id']) !== -1
+    const currentTarget = target as HTMLElement
+    const parentNode = currentTarget.parentNode as HTMLElement
+
+    if (
+      clickableContainers.indexOf(parentNode?.id || '') !== -1
+    ) {
+      return { target: parentNode, type: parentNode.id }
+    }
+
+    if (parentNode?.parentNode) {
+      const grandParent = parentNode.parentNode as HTMLElement
+      if (
+        clickableContainers.indexOf(grandParent?.id || '') !== -1
       ) {
-        targetType = currentTarget?.parentNode['id']
-        found = true
-      } else {
-        currentTarget = currentTarget.parentNode as HTMLElement
+        return { target: grandParent, type: grandParent.id }
       }
     }
-    return found
-      ? { target: currentTarget as HTMLElement, type: targetType }
-      : null
+
+    return null
   }
 
   async function toggleTurnout(id: string): Promise<void> {
-    if (!id) {
-      console.error('toggleTurnout called with no id')
-      return
-    }
-    const turnoutId = id.startsWith('lbl') ? id.slice(3) : id
-    const turnout = await getTurnout(turnoutId)
+    const turnout = await getTurnout(id)
     if (turnout) {
-      turnout.state = !turnout.state
-      await switchTurnout(turnout)
-    } else {
-      console.error('Turnout not found:', id)
+      await switchTurnout({ ...turnout, state: !turnout.state })
     }
   }
 
   async function handleMapClick(e: MouseEvent) {
-    e.preventDefault()
-    const svgBtn = findClickableParent(e.target)
-    console.log('handleMapClick', svgBtn, svgBtn?.type, routes)
-    if (svgBtn) {
-      switch (svgBtn.type) {
-        case 'Routes':
-          if (p1.value === null) {
-            p1.value = svgBtn.target.id
-          } else if (p2.value === null) {
-            p2.value = svgBtn.target.id
-          } else {
-            p1.value = svgBtn.target.id
-            p2.value = null
-          }
-          break
-        case 'Turnouts':
-        case 'TurnoutLabels':
-          await toggleTurnout(svgBtn.target.id)
-          break
-        default:
-          // noop
-          break
+    const clickableParent = findClickableParent(e.target)
+    if (!clickableParent) return
+
+    const { target, type } = clickableParent
+    const targetType = target?.id
+
+    if (type === 'Turnouts') {
+      const turnoutId = target?.getAttribute('data-turnout-id')
+      if (turnoutId) {
+        await toggleTurnout(turnoutId)
+      }
+    } else if (type === 'Routes') {
+      const routeId = target?.getAttribute('data-route-id')
+      if (routeId) {
+        const route = routes.value?.find((r) => r.id === routeId)
+        if (route) {
+          await runRoute(route as Effect)
+        }
       }
     }
   }
 
-  async function runRoute(route: Efx): Promise<void> {
-    if (route) {
-      isRunning.value = true
+  async function runRoute(route: Effect): Promise<void> {
+    if (!route.id) return
+
+    isRunning.value = true
+    percentComplete.value = 0
+
+    const steps = (route?.on?.length || 0) + (route?.off?.length || 0)
+    console.log('Running route:', steps, route)
+
+    await runEffect({ ...route, state: true, type: route.type })
+
+    const interval = setInterval(() => {
+      if (percentComplete.value < 100) {
+        percentComplete.value += 100 / steps
+      }
+    }, 1000)
+
+    setTimeout(() => {
+      clearInterval(interval)
       percentComplete.value = 0
-      runEffect({ ...route, id: route.id, state: true })
-      const steps = route?.on?.length || 0
-      console.log('Running route:', steps, route)
-
-      const interval = setInterval(() => {
-        if (percentComplete.value < 100) {
-          percentComplete.value += 100 / steps
-          console.log('Percent complete:', percentComplete.value)
-        }
-      }, 1000)
-
-      // Clear the interval after the effect is done
-      setTimeout(() => {
-        clearInterval(interval)
-        percentComplete.value = 0
-        p1.value = null
-        p2.value = null
-        isRunning.value = false
-      }, steps * 1000 + 500)
-    } else {
-      console.log('No route found with ID:', route.id)
-    }
+      isRunning.value = false
+    }, steps * 1000 + 500)
   }
 
   function clearP1() {
     p1.value = null
   }
+
   function clearP2() {
     p2.value = null
   }
 
   return {
-    clearP1,
-    clearP2,
-    getMapClasses,
-    handleMapClick,
-    isRunning,
     p1,
     p2,
+    isRunning,
     percentComplete,
     routes,
     routeTurnouts,
-    runRoute,
+    getMapClasses,
+    handleMapClick,
+    clearP1,
+    clearP2,
   }
 }
-
-export default useLayoutRoutes

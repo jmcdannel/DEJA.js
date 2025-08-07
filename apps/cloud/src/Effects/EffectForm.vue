@@ -67,9 +67,11 @@ async function submit () {
 
   const newEfx: Effect = {
     name: name.value,
-    type: efxType.value,
+    type: efxType.value || '',
     color: color.value,
-    tags: tags.value
+    tags: tags.value,
+    state: false,
+    id: props.efx?.id || ''
   }
   // set device
   if (efxTypeObj.value?.require?.includes('device')) {

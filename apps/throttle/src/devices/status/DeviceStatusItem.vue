@@ -36,7 +36,7 @@ defineProps({
       <template v-else>
         <p class="text-error">Disconnected</p>
       </template>
-      <p>Last Connected: {{ device.timestamp ? dayjs.unix(device.timestamp.seconds).fromNow() : 'Never' }}</p>
+      <p>Last Connected: {{ device.timestamp ? dayjs(device.timestamp).fromNow() : 'Never' }}</p>
       <!-- <pre>{{ device }}</pre> -->
     </v-card-text>
   </v-card>

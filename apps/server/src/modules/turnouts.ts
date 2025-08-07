@@ -30,7 +30,7 @@ const turnoutStates: { [key: string]: boolean } = {}
 export async function handleTurnout(turnout: Turnout): Promise<void> {
   try {
     const conn = layout.connections()?.[turnout.device]
-    // log.log('handleTurnout', turnout, conn?.isConnected)
+    log.log('handleTurnout', turnout, conn?.isConnected)
     if (!conn?.isConnected) {
       log.error('Device not connected', turnout.device)
       return

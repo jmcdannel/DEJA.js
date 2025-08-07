@@ -96,13 +96,13 @@ async function handleMacroItem(
 ): Promise<void> {
   if (item.type === 'turnout' && item.id) {
     db.collection('layouts').doc(layoutId).collection('turnouts').doc(item.id.toString()).set({
-      state,
+      state: item.state,
       timestamp: FieldValue.serverTimestamp(),
     }, { merge: true })
     // log.log('handleMacroItem turnout', item)
   } else if (item.type === 'effect' && item.id) {
     db.collection('layouts').doc(layoutId).collection('effects').doc(item.id.toString()).set({
-      state,
+      state: item.state,
       timestamp: FieldValue.serverTimestamp(),
     }, { merge: true })
 

@@ -37,21 +37,21 @@ function handleEffect(efx: Effect) {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="item in list as Effect[]" ::key="item.id">
+      <tr v-for="item in list as Effect[]" :key="item.id">
         <td>{{ item.name }}</td>
         <td>{{ item.device }}</td>
         <td>{{ item.type }}</td>
         <td>
-          <v-switch v-model="item.state" @change="handleEffect(item)" :color="item.color || 'primary'" hide-details />
+          <v-switch v-model="item.state" @change="handleEffect(item as Effect)" :color="item.color || 'primary'" hide-details />
         </td>
       </tr>
     </tbody>
   </v-table>
   <div v-else class="grid grid-cols-1 @[960px]:grid-cols-3 xlg:grid-cols-4 gap-2 w-full p-4">
     <EffectItem 
-      v-for="item in list"
+      v-for="item in list as Effect[]"
       :key="item.id" 
-      :efx="item" 
+      :efx="item as Effect" 
       :efxId="item.id"
       :viewAs="viewAs"
     />

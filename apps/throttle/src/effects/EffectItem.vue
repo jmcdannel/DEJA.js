@@ -30,7 +30,7 @@ watch(state, async (val) => {
   isRunning.value = isPending.value
   await runEffect({
       ...props.efx,
-      id: props.efxId,
+      id: props.efxId || props.efx.id,
       state: state.value
   })
 })

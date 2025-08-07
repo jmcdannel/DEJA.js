@@ -4,7 +4,7 @@ import type { Loco, Throttle } from '@repo/modules/locos'
 import { useLocos } from '@repo/modules/locos'
 import SimpleThrottle from '@/throttle/SimpleThrottle.vue'
 import ThrottleTile from '@/throttle/ThrottleTile.vue'
-import Turnouts from '@/turnouts/Turnouts.vue'
+import TurnoutList from '@repo/ui/TurnoutList'
 // import Effects from '@/effects/Effects.vue'
 
 const drawer = ref(false)
@@ -43,7 +43,7 @@ const throttles = getThrottles()
       <div class=" bg-slate-700 bg-opacity-20 order-3 overflow-hidden">
         <div class="@container h-full overflow-y-auto p-4">
           <!-- Column 3 content goes here -->
-          <Turnouts />
+          <TurnoutList />
         </div>
       </div>
     </div>

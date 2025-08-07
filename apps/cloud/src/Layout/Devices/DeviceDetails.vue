@@ -29,7 +29,7 @@ onMounted(async () => {
 // const wifiAutoConnect = ref(true)
 
 const deviceType = computed(() => deviceTypes.find((type) => type.value === device.value?.type))
-const color = colors[deviceType.color || DEFAULT_COLOR]
+const color = colors[deviceType.value?.color || DEFAULT_COLOR]
 const turnoutPins = computed(() => {
   return turnouts.value ? turnouts.value.map(turnout => `${turnout.straight}, ${turnout.divergent}`) : []
 })

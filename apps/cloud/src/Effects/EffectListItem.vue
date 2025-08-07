@@ -22,6 +22,7 @@ async function handleEfx (event: Event) {
   props?.efx && props?.efxId && await runEffect({
       ...props.efx,
       id: props.efxId,
+      type: props.efx.type || '',
       state: (event.target as HTMLInputElement)?.checked
   })
 }

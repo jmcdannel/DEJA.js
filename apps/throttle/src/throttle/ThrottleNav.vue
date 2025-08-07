@@ -8,7 +8,16 @@ import { LocoAvatar } from '@repo/ui'
 const { getLoco, getThrottles } = useLocos()
 const throttles = getThrottles()
 
-const getLocoData = (address: Number) => computed(() => getLoco(address)?.value || {} as Loco)
+const getLocoData = (address: Number) => computed(() => {
+  const loco = getLoco<Loco>(address)
+  return loco?.value || { 
+    id: address.toString(), 
+    address: address as number, 
+    name: `Loco ${address}`,
+    functions: [],
+    consist: []
+  } as Loco
+})
 </script>
 
 <template>
@@ -20,7 +29,6 @@ const getLocoData = (address: Number) => computed(() => getLoco(address)?.value 
       :loco="getLocoData(item.address).value"
       :throttle="item.throttle as Throttle"
       :size="48"
-    />
     />
   </div>
 </template>
