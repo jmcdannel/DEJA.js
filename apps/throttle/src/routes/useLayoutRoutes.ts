@@ -61,7 +61,7 @@ export const useLayoutRoutes = () => {
 
   function getMapClasses(): string {
     let classes = ['']
-    console.log('getMapClasses', p1.value, p2.value, routes.value)
+    // console.log('getMapClasses', p1.value, p2.value, routes.value)
 
     if (p1.value) {
       classes.push('p1-selected')
@@ -97,24 +97,41 @@ export const useLayoutRoutes = () => {
     if (!target) return null
 
     const currentTarget = target as HTMLElement
-    const parentNode = currentTarget.parentNode as HTMLElement
-
-    if (
-      clickableContainers.indexOf(parentNode?.id || '') !== -1
-    ) {
-      return { target: parentNode, type: parentNode.id }
-    }
-
-    if (parentNode?.parentNode) {
-      const grandParent = parentNode.parentNode as HTMLElement
-      if (
-        clickableContainers.indexOf(grandParent?.id || '') !== -1
-      ) {
-        return { target: grandParent, type: grandParent.id }
+    
+    // Recursively check parent nodes to find a clickable parent
+    function findClickableParentNode(node: HTMLElement | null): HTMLElement | null {
+      if (!node) return null
+      
+      // Check if current node is clickable
+      if (clickableContainers.indexOf(node.id || '') !== -1) {
+        return node
       }
+      
+      // Check parent node recursively
+      const parentNode = node.parentNode as HTMLElement
+      return findClickableParentNode(parentNode)
     }
 
-    return null
+    // Find the clickable parent
+    const clickableParent = findClickableParentNode(currentTarget)
+    if (!clickableParent) return null
+
+    // Find the direct child of the clickable parent that contains the clicked element
+    function findDirectChildOfContainer(clickedNode: HTMLElement, container: HTMLElement): HTMLElement {
+      let current = clickedNode
+      while (current && current.parentNode !== container) {
+        current = current.parentNode as HTMLElement
+        if (!current) break
+      }
+      return current || clickedNode
+    }
+
+    // Return the direct child of the container with the type from the clickable parent
+    const directChild = findDirectChildOfContainer(currentTarget, clickableParent)
+    return { 
+      target: directChild, 
+      type: clickableParent.id 
+    }
   }
 
   async function toggleTurnout(id: string): Promise<void> {
@@ -124,7 +141,8 @@ export const useLayoutRoutes = () => {
     }
   }
 
-  async function handleMapClick(e: MouseEvent) {
+  async function handleMapClick2(e: MouseEvent) {
+    console.log('handleMapClick', e.target)
     const clickableParent = findClickableParent(e.target)
     if (!clickableParent) return
 
@@ -143,6 +161,35 @@ export const useLayoutRoutes = () => {
         if (route) {
           await runRoute(route as Effect)
         }
+      }
+    }
+  }
+
+  
+
+  async function handleMapClick(e: MouseEvent) {
+    e.preventDefault()
+    const svgBtn = findClickableParent(e.target)
+    console.log('handleMapClick', svgBtn, svgBtn?.type, routes)
+    if (svgBtn) {
+      switch (svgBtn.type) {
+        case 'Routes':
+          if (p1.value === null) {
+            p1.value = svgBtn.target.id
+          } else if (p2.value === null) {
+            p2.value = svgBtn.target.id
+          } else {
+            p1.value = svgBtn.target.id
+            p2.value = null
+          }
+          break
+        case 'Turnouts':
+        case 'TurnoutLabels':
+          await toggleTurnout(svgBtn.target.id)
+          break
+        default:
+          // noop
+          break
       }
     }
   }
