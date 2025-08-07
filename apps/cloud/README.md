@@ -78,8 +78,8 @@
 2. **🚀 Start the Application**
    ```bash
    cd apps/cloud
-   pnpm install
-   pnpm dev
+   turbo install
+   turbo dev
    ```
 
 3. **🌐 Access the Interface**
@@ -230,11 +230,11 @@ interface FirebaseConfig {
 
 ```bash
 # Development commands
-pnpm dev          # 🚀 Start development server
-pnpm build        # 📦 Build for production
-pnpm preview      # 👀 Preview production build
-pnpm lint         # 🔍 Lint code
-pnpm type-check   # 🔬 TypeScript checking
+turbo dev          # 🚀 Start development server
+turbo build        # 📦 Build for production
+turbo preview      # 👀 Preview production build
+turbo lint         # 🔍 Lint code
+turbo type-check   # 🔬 TypeScript checking
 ```
 
 ---

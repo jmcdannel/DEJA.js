@@ -106,17 +106,17 @@
 git clone https://github.com/jmcdannel/deja.git
 cd deja
 
-# Install dependencies (uses pnpm workspaces)
-npm install -g pnpm
-pnpm install
+# Install dependencies (uses turbo for monorepo management)
+npm install -g turbo
+turbo install
 
 # Start all applications in development mode
-pnpm dev
+turbo dev
 ```
 
 ### 🌍 Application URLs
 
-After running `pnpm dev`, access the applications at:
+After running `turbo dev`, access the applications at:
 
 - 🚂 **Throttle**: http://localhost:5173
 - ☁️ **Cloud**: http://localhost:5174  
@@ -157,22 +157,22 @@ VITE_FIREBASE_AUTH_DOMAIN=your-domain
 
 ```bash
 # Development
-pnpm dev              # 🚀 Start all apps in development mode
-pnpm dev:throttle     # 🎮 Start only throttle app
-pnpm dev:cloud        # ☁️ Start only cloud app
+turbo dev              # 🚀 Start all apps in development mode
+turbo dev:throttle     # 🎮 Start only throttle app
+turbo dev:cloud        # ☁️ Start only cloud app
 
 # Building
-pnpm build            # 🏗️ Build all applications
-pnpm build:throttle   # 📦 Build only throttle app
+turbo build            # 🏗️ Build all applications
+turbo build:throttle   # 📦 Build only throttle app
 
 # Code Quality
-pnpm lint             # 🔍 Lint all packages
-pnpm format          # 💄 Format all code
-pnpm type-check      # 🔬 TypeScript type checking
+turbo lint             # 🔍 Lint all packages
+turbo format          # 💄 Format all code
+turbo type-check      # 🔬 TypeScript type checking
 
 # Dependencies
-pnpm deps:check      # 📋 Check dependency versions
-pnpm deps:fix        # 🔧 Fix dependency mismatches
+turbo deps:check      # 📋 Check dependency versions
+turbo deps:fix        # 🔧 Fix dependency mismatches
 ```
 
 ---
@@ -180,7 +180,7 @@ pnpm deps:fix        # 🔧 Fix dependency mismatches
 ## 🎯 Usage Scenarios
 
 ### 🏠 Home Layout Control
-1. 🚀 Start the server: `pnpm run start:server`
+1. 🚀 Start the server: `turbo run start:server`
 2. 🎮 Open throttle app for train control
 3. ☁️ Use cloud app for layout management
 

@@ -80,8 +80,8 @@
 2. **🚀 Start the Application**
    ```bash
    cd apps/tour
-   pnpm install
-   pnpm dev
+   turbo install
+   turbo dev
    ```
 
 3. **🌐 Access the Experience**
@@ -258,19 +258,19 @@ npm run generate-qr --type=achievement --id=engineer-badge
 
 ```bash
 # Development
-pnpm dev              # 🚀 Start development server
-pnpm build            # 📦 Build for production
-pnpm preview          # 👀 Preview production build
+turbo dev              # 🚀 Start development server
+turbo build            # 📦 Build for production
+turbo preview          # 👀 Preview production build
 
 # Content Management
-pnpm audio:process    # 🎵 Process audio files
-pnpm qr:generate      # 📱 Generate QR codes
-pnpm content:validate # 📋 Validate tour content
+turbo audio:process    # 🎵 Process audio files
+turbo qr:generate      # 📱 Generate QR codes
+turbo content:validate # 📋 Validate tour content
 
 # Testing
-pnpm test             # 🧪 Run tests
-pnpm test:touch       # 📱 Touch interaction tests
-pnpm test:audio       # 🎵 Audio system tests
+turbo test             # 🧪 Run tests
+turbo test:touch       # 📱 Touch interaction tests
+turbo test:audio       # 🎵 Audio system tests
 ```
 
 ---

@@ -80,8 +80,8 @@
 2. **🚀 Start the Application**
    ```bash
    cd apps/monitor
-   pnpm install
-   pnpm dev
+   turbo install
+   turbo dev
    ```
 
 3. **🌐 Access the Dashboard**
@@ -242,18 +242,18 @@ interface AnalyticsConfig {
 
 ```bash
 # Development
-pnpm dev          # 🚀 Start development server
-pnpm build        # 📦 Build for production
-pnpm preview      # 👀 Preview production build
+turbo dev          # 🚀 Start development server
+turbo build        # 📦 Build for production
+turbo preview      # 👀 Preview production build
 
 # Testing & Quality
-pnpm lint         # 🔍 Lint code
-pnpm type-check   # 🔬 TypeScript checking
-pnpm test         # 🧪 Run unit tests
+turbo lint         # 🔍 Lint code
+turbo type-check   # 🔬 TypeScript checking
+turbo test         # 🧪 Run unit tests
 
 # Monitoring Tools
-pnpm monitor:logs # 📋 Stream live logs
-pnpm monitor:perf # 📊 Performance monitoring
+turbo monitor:logs # 📋 Stream live logs
+turbo monitor:perf # 📊 Performance monitoring
 ```
 
 ---
