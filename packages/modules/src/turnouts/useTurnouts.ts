@@ -72,15 +72,16 @@ export function useTurnouts() {
 
   async function switchTurnout(turnout: Turnout): Promise<void> {
     try {
+      const newState = Boolean(!turnout.state)
       await setDoc(
         doc(db, `layouts/${layoutId.value}/turnouts`, turnout.id),
         {
-          state: Boolean(!turnout.state),
+          state: newState,
           timestamp: serverTimestamp(),
         },
         { merge: true }
       )
-      console.log('Turnout switched:', turnout.id, turnout.state)
+      console.log('Turnout switched:', turnout.id, newState)
     } catch (e) {
       console.error('Error adding document: ', e)
     }

@@ -20,7 +20,7 @@ async function handleTurnouts(event: Event) {
     isRunning.value = false
   }, 3000)
   isRunning.value = isPending.value
-  await switchTurnout({...props.turnout, id: props.turnoutId || props.turnout.id, state: state.value})
+  await switchTurnout({...props.turnout, id: props.turnoutId || props.turnout.id })
 }
 </script>
 
@@ -35,7 +35,7 @@ async function handleTurnouts(event: Event) {
       :class="isRunning ? 'shadow-inner shadow-pink-500 bg-opacity-80' : 'bg-opacity-95'"
     >
       <v-icon icon="mdi-call-split" class="w-6 h-6" />
-      <h4 class="text-md font-bold mr-2">{{turnout?.name}}</h4>
+      <h4 class="text-md font-bold mr-2 text-white">{{turnout?.name}}</h4>
       <v-switch 
         v-model="state" 
         @change="handleTurnouts" 
@@ -43,7 +43,7 @@ async function handleTurnouts(event: Event) {
         :disabled="isRunning" 
         :loading="isRunning" 
         hide-details 
-      />    
+      />
     </v-card-title>
   </v-card>
 </template> 
