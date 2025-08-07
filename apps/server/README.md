@@ -95,9 +95,9 @@ Copy the values below into your `.env` file:
 Clone this repository and open a terminal in the project root:
 
   ```bash
-  $ npm i -g pnpm
-  $ pnpm install
-  $ pnpm run start
+  $ npm i -g turbo
+  $ turbo install
+  $ turbo run start
   ```
 
 ### 🎛️ Connect Your Throttle
@@ -194,25 +194,25 @@ Clone this repository and open a terminal in the project root:
 
 ```bash
 # 📦 Install dependencies
-pnpm install
+turbo install
 
 # 🚀 Start development server
-pnpm run dev
+turbo run dev
 
 # 🏗️ Build for production
-pnpm run build
+turbo run build
 
 # 🔍 Code quality
-pnpm run lint
-pnpm run format
-pnpm run type-check
+turbo run lint
+turbo run format
+turbo run type-check
 
 # 🧪 Testing
-pnpm run test
-pnpm run test:watch
+turbo run test
+turbo run test:watch
 
 # 🔧 Utilities
-pnpm run mosquitto    # Start MQTT broker
+turbo run mosquitto    # Start MQTT broker
 ```
 
 ---
@@ -249,7 +249,7 @@ pnpm run mosquitto    # Start MQTT broker
 ```bash
 # 🔍 Check system status
 node --version
-pnpm --version
+turbo --version
 
 # 📡 Test serial ports
 ls /dev/tty*           # Linux/Mac

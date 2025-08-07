@@ -84,17 +84,17 @@ Want to run this on your own? Fork it, clone it, PR it. Just don't sell it! 😊
 
 ```bash
 # 📦 Install dependencies
-pnpm install
+turbo install
 
 # 🚀 Start development server
-pnpm run start
+turbo run start
 
 # 🏗️ Build for production
-pnpm run build
+turbo run build
 
 # 🔍 Lint and format
-pnpm run lint
-pnpm run format
+turbo run lint
+turbo run format
 ```
 
 ---
