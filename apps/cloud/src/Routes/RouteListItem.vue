@@ -96,13 +96,13 @@ watch(state, (newState) => {
         size="small"
         @click="$emit('edit', efx)"
       ></v-btn>
-      <v-switch
-        hide-details
-        :color="color"
-        v-model="state"
+      <v-btn
         text="Run"
-        variant="flat"
-      ></v-switch>
+        variant="tonal"
+        prepend-icon="mdi-play"
+        size="small"
+        @click="state = !state"
+      ></v-btn>
     </v-card-actions>
   </v-card>
 </template>

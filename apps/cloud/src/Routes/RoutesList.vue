@@ -2,6 +2,7 @@
 import { useCollection } from 'vuefire'
 import { useEfx, type Effect } from '@repo/modules/effects'
 import RouteListItem from '@/Routes/RouteListItem.vue'
+import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 
 const emit = defineEmits(['edit'])
 
@@ -36,6 +37,12 @@ function handleEdit(item: Effect) {
         <RouteListItem :efx="item" :efxId="item.id" @edit="handleEdit"></RouteListItem>
     </v-col>
     </v-row>
-    <pre>{{ list }}</pre>
+    <LcdDisplay 
+      :content="list.map(item => `${item.name}: ${item.type}`)"
+      title="ROUTES LIST"
+      color="blue"
+      size="sm"
+      :max-lines="10"
+    />
   </v-container>
 </template>
