@@ -227,11 +227,6 @@ async function connectUsbDevice(
       port: serialPort,
     }
 
-    // await setDoc(
-    //   doc(db, `layouts/${layoutId}/devices`, device.id),
-    //   { ...updates },
-    //   { merge: true }
-    // )
     db.doc(`layouts/${layoutId}/devices/${device.id}`)
       .set(updates, { merge: true })
 
@@ -261,22 +256,6 @@ async function connectMqttDevice(device: Device): Promise<void> {
       const topic = `DEJA/${layoutId}/${device.id}`
       mqtt.subscribe(topic)
 
-      // await broadcast({
-      //   action: 'connected',
-      //   payload: { device, topic },
-      // })
-
-      // await setDoc(
-      //   doc(db, `layouts/${layoutId}/devices`, device.id),
-      //   {
-      //     client: 'dejaJS',
-      //     isConnected: true,
-      //     lastConnected: new Date(),
-      //     timestamp: serverTimestamp(),
-      //     topic,
-      //   },
-      //   { merge: true }
-      // )
       db.doc(`layouts/${layoutId}/devices/${device.id}`)
         .set(
           {
@@ -301,31 +280,62 @@ async function connectMqttDevice(device: Device): Promise<void> {
 }
 
 async function handleSerialMessage(payload: string): Promise<void> {
-  if (payload?.startsWith('{ "sensor')) {
-    const data = JSON.parse(payload)
-    // const sensorId = sensors.find((sensor) => sensor.index === data.sensor)?.id
-    // log.debug('handleSerialMessage', data, payload, sensorId)
-    // if (sensorId) {
-      // await setDoc(
-      //   doc(db, `layouts/${layoutId}/sensors`, sensorId),
-      //   {
-      //     state: data.state,
-      //   },
-      //   { merge: true }
-      // )
-      // db.doc(`layouts/${layoutId}/sensors/${sensorId}`)
-      //   .set(
-      //     {
-      //       state: data.state,
-      //       timestamp: FieldValue.serverTimestamp(),
-      //     },
-      //     { merge: true }
-      //   )
-    // } else {
-      // log.error('Sensor not found', data, sensors)
-    // }
-  } else {
-    await broadcast({ action: 'serial', payload })
+  try {
+    if (payload?.startsWith('{ "sensor')) {
+      const data = JSON.parse(payload)
+      // Sensor handling omitted
+    } else {
+      // Parse DCC-EX status lines for power and tracks
+      const text = payload.replace(/[<>]/g, '').trim()
+      const updates: Record<string, any> = { timestamp: FieldValue.serverTimestamp(), client: 'dejaJS' }
+
+      // Track A/B lines like "= A MAIN" or "= B PROG"
+      const trackMatch = text.match(/^=\s([AB])\s(.+)$/)
+      if (trackMatch) {
+        const line = trackMatch[1] === 'A' ? 'trackA' : 'trackB'
+        updates[`${line}`] = trackMatch[2].trim()
+      }
+
+      // Pattern: @ 0 2 "Power On|Off" (quoted form)
+      const powerQuotedMatch = text.match(/@\s*\d+\s*\d+\s*"Power\s+(On|Off)"/i)
+      if (powerQuotedMatch && powerQuotedMatch[1]) {
+        updates['power'] = /on/i.test(powerQuotedMatch[1])
+      }
+
+      // const lcd2Match = text.match(/@\s*\d+\s*\d+\s*"Power\s+(SC|On|Off)"/i)
+      // if (lcd2Match) {
+      //   const lcd2Text = lcd2Match[1].trim()
+      //   updates['dccEx.LCD2'] = lcd2Text
+      //   if (/power\s*off/i.test(lcd2Text)) {
+      //     updates['dccEx.power'] = false
+      //   } else if (/\s*off/i.test(lcd2Text)) {
+      //     updates['dccEx.power'] = false
+      //   } else if (/power\s*on/i.test(lcd2Text)) {
+      //     updates['dccEx.power'] = true
+      //   } else if (/power\s*sc/i.test(lcd2Text)) {
+      //     updates['dccEx.power'] = true
+      //   } else if (/\s*sc/i.test(lcd2Text)) {
+      //     updates['dccEx.power'] = true
+      //   } else if (/\s*on/i.test(lcd2Text)) {
+      //     updates['dccEx.power'] = true
+      //   }
+      // }
+
+      // Version line e.g. "iDCC-EX V-5.0.9 / MEGA / ..."
+      if (/^iDCC-EX\s/i.test(text)) {
+        updates['version'] = text
+      }
+
+      // If any updates were collected other than timestamp/client, persist them
+      const hasStateUpdate = Object.keys(updates).some(k => k !== 'timestamp' && k !== 'client')
+      if (hasStateUpdate) {
+        await db.collection('layouts').doc(layoutId).set({ dccEx: updates }, { merge: true })
+      }
+
+      await broadcast({ action: 'serial', payload })
+    }
+  } catch (err) {
+    log.fatal('Error handling serial message:', err)
   }
 }
 

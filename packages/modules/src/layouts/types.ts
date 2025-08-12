@@ -27,6 +27,16 @@ export interface Layout {
   turnouts?: string[]
   updatedAt?: Date
   version?: string
+  dccEx?: {
+    power?: boolean
+    trackA?: string
+    trackB?: string
+    LCD2?: string
+    LCD3?: string
+    client?: string
+    isConnected?: boolean
+    lastConnected?: Date
+  }
 }
 
 export interface Device {
@@ -51,8 +61,6 @@ export interface DeviceType {
   value: string
   label: string
   icon: string
-  image?: string
-  color: string
 }
 
 export interface Sensor {

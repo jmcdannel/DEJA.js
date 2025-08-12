@@ -735,31 +735,22 @@ importers:
   packages/typescript-config: {}
 
   packages/ui:
-    devDependencies:
+    dependencies:
       '@repo/dccex':
         specifier: workspace:^0.0.0
         version: link:../dccex
-      '@repo/eslint-config':
+      '@repo/firebase-config':
         specifier: workspace:*
-        version: link:../config-eslint
+        version: link:../firebase-config
       '@repo/modules':
         specifier: workspace:*
         version: link:../modules
-      '@repo/prettier-config':
-        specifier: workspace:*
-        version: link:../config-prettier
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
       '@vueuse/core':
         specifier: ^11.0.3
         version: 11.3.0(vue@3.5.18(typescript@5.8.3))
       firebase:
         specifier: ^10.14.1
         version: 10.14.1
-      typescript:
-        specifier: latest
-        version: 5.8.3
       vue:
         specifier: ^3.5.16
         version: 3.5.18(typescript@5.8.3)
@@ -772,6 +763,19 @@ importers:
       vuetify:
         specifier: ^3.7.3
         version: 3.9.2(typescript@5.8.3)(vue@3.5.18(typescript@5.8.3))
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../config-eslint
+      '@repo/prettier-config':
+        specifier: workspace:*
+        version: link:../config-prettier
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      typescript:
+        specifier: latest
+        version: 5.8.3
 
   packages/utils: {}
 

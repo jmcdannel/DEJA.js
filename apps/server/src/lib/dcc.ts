@@ -1,6 +1,6 @@
 import { SerialPort } from 'serialport'
 import { FieldValue } from 'firebase-admin/firestore'
-import { rtdb } from '@repo/firebase-config/firebase-admin-node'
+import { rtdb, db } from '@repo/firebase-config/firebase-admin-node'
 import { serial } from './serial'
 import { broadcast } from '../broadcast'
 import { log } from '../utils/logger'
@@ -49,6 +49,27 @@ const getPorts = async () => {
     return availablePorts.map((port) => port.path)
   } catch (err) {
     log.fatal(err)
+  }
+}
+
+function isPowerCommand(data: string): boolean {
+  // Matches '1', '0', '1 MAIN', '0 MAIN', '1 PROG', '0 PROG' (ignoring whitespace)
+  return /^\s*[01](\s+(MAIN|PROG))?\s*$/.test(data)
+}
+
+async function writePowerToFirestore(data: string): Promise<void> {
+  try {
+    if (!layoutId) return
+    const isOn = /^\s*1(\s|$)/.test(data)
+    await db.collection('layouts').doc(layoutId).set({
+      dccEx: {
+        power: isOn,
+        client: 'dejaJS',
+        timestamp: FieldValue.serverTimestamp(),
+      },
+    }, { merge: true })
+  } catch (err) {
+    log.error('Failed to write dccEx.power to Firestore', err)
   }
 }
 
@@ -105,6 +126,10 @@ const send = async (data: string): Promise<void> => {
     if (com.port) {
       serial.send(com.port, cmd)
       broadcast({ action: 'dcc', payload: data })
+      if (isPowerCommand(data)) {
+        // Optimistically reflect requested power state in Firestore
+        await writePowerToFirestore(data)
+      }
     }
   } catch (err) {
     log.fatal('Error writting to port:', err)
@@ -162,6 +187,10 @@ const getStatus = async (): Promise<void> => {
 
 const power = async (state: string): Promise<void> => {
   await send(state)
+  // Optimistically update Firestore power state as well
+  if (isPowerCommand(state)) {
+    await writePowerToFirestore(state)
+  }
   log.star('Power', state)
 }
 
