@@ -36,6 +36,12 @@ const router = createRouter({
       beforeEnter: [requireAuth, requireLayout],
     },
     {
+      path: '/signals',
+      name: 'signals',
+      component: () => import('../views/SignalsView.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
       path: '/routes',
       name: 'routes',
       component: () => import('../views/RoutesView.vue'),

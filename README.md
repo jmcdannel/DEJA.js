@@ -226,6 +226,7 @@ Use pm2 to manage the turbo start process so it restarts on crashes and can boot
 ```bash
 # Start server + monitor via turbo under pm2
 pm2 start --name deja-start --interpreter bash -- turbo run start --filter=apps/server --filter=apps/monitor
+pm2 start bash --name deja-start -- -lc "pnpm turbo run start --filter=apps/server --filter=apps/monitor"
 
 # For all apps
 pm2 start --name deja-start-all --interpreter bash -- turbo run start

@@ -1,5 +1,5 @@
 // TODOS
-[ ] Signals in Cloud
+[x] Signals in Cloud
 [ ] Labels
 [ ] Device Details
 [x] Monitor: UI
