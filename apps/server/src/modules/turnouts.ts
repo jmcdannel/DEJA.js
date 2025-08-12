@@ -30,7 +30,7 @@ const turnoutStates: { [key: string]: boolean } = {}
 export async function handleTurnout(turnout: Turnout): Promise<void> {
   try {
     const conn = layout.connections()?.[turnout.device]
-    log.log('handleTurnout', turnout, conn?.isConnected)
+    log.log('handleTurnout', turnout?.id, turnout?.device, turnout?.name, conn?.isConnected)
     if (!conn?.isConnected) {
       log.error('Device not connected', turnout.device)
       return
@@ -46,7 +46,7 @@ export async function handleTurnout(turnout: Turnout): Promise<void> {
         turnoutIdx: turnout.turnoutIdx,
       } as TurnoutPayload)
     } else if (layoutDevice?.connection === 'usb' && conn?.port && conn.send) {
-      await conn.send(conn.port, JSON.stringify([command]))
+      await conn.send(conn, JSON.stringify([command]))
     } else if (
       layoutDevice?.connection === 'wifi' &&
       conn?.topic &&

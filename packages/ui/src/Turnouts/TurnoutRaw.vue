@@ -3,13 +3,14 @@ import type { Turnout } from '@repo/modules/turnouts'
 
 interface Props {
   turnout: Turnout
+  state?: boolean
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 </script>
 
 <template>
   <pre class="m-1 p-2 rounded-lg text-sm">
-{{ JSON.stringify(turnout, null, 2) }}
+{{ JSON.stringify({ ...turnout, state: props.state !== undefined ? props.state : turnout.state }, null, 2) }}
   </pre>
 </template> 

@@ -49,6 +49,9 @@ function handleLayoutSelect(newLayout: string) {
           <v-list-item @click="handleMenu('Logs')" prepend-icon="mdi-file-document">
             <v-list-item-title>Logs</v-list-item-title>
           </v-list-item>
+          <v-list-item @click="handleMenu('Device Monitor Demo')" prepend-icon="mdi-monitor-dashboard">
+            <v-list-item-title>Device Monitor Demo</v-list-item-title>
+          </v-list-item>
           <v-list-item @click="handleMenu('About')" prepend-icon="mdi-information">
             <v-list-item-title>About</v-list-item-title>
           </v-list-item>

@@ -1,26 +1,46 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
 import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
 
-const { switchTurnout } = useTurnouts()
+const { setTurnout } = useTurnouts()
 
 interface Props {
   turnout: Turnout
   turnoutId?: string
+  state?: boolean
 }
 
 const props = defineProps<Props>()
+const emit = defineEmits<{
+  'update:state': [value: boolean]
+}>()
 
-const state = ref(props.turnout?.state)
+const internalState = ref(props.state !== undefined ? props.state : props.turnout?.state)
 const isRunning = ref(false)
+
+// Computed property for state that can be updated
+const state = computed({
+  get: () => props.state !== undefined ? props.state : internalState.value,
+  set: (value: boolean) => {
+    internalState.value = value
+    emit('update:state', value)
+  }
+})
+
+// Watch for prop changes
+watch(() => props.state, (newState) => {
+  if (newState !== undefined) {
+    internalState.value = newState
+  }
+})
 
 async function handleTurnouts(event: Event) {
   const { isPending } = useTimeoutFn(() => {
     isRunning.value = false
   }, 3000)
   isRunning.value = isPending.value
-  await switchTurnout({...props.turnout, id: props.turnoutId || props.turnout.id, state: state.value})
+  await setTurnout(props.turnoutId || props.turnout.id, {...props.turnout, id: props.turnoutId || props.turnout.id, state: state.value})
 }
 </script>
 
@@ -39,6 +59,7 @@ async function handleTurnouts(event: Event) {
     </v-card-title>
     <v-card-text class="text-sm">
       <p class="my-4">{{turnout?.desc || turnout?.name}}</p>
+      <p class="my-4">{{ turnout.type }}</p>
       <div class="flex flex-wrap gap-2">
         <v-chip 
           v-if="turnout?.device" 

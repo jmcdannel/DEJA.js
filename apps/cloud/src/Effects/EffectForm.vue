@@ -9,6 +9,7 @@ import IALEDForm from '@/Effects//IALEDForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import type { Effect } from '@repo/modules/effects'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
+import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 // TODO: icon picker
 
 interface ValidationRules {
@@ -183,8 +184,22 @@ function stopSound() {
       ></v-text-field>
     </div>   
     
-    <pre>efxType:{{efxType}}</pre>
-    <pre>efxTypeObj:{{efxTypeObj}}</pre>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <LcdDisplay 
+        :content="`efxType: ${efxType}`"
+        title="EFFECT TYPE"
+        color="blue"
+        size="sm"
+        :max-lines="3"
+      />
+      <LcdDisplay 
+        :content="efxTypeObj ? JSON.stringify(efxTypeObj, null, 2).split('\n') : []"
+        title="TYPE OBJECT"
+        color="green"
+        size="sm"
+        :max-lines="8"
+      />
+    </div>
 
     <!-- pin -->
     <template v-if="efxTypeObj?.require?.includes('pin')">
@@ -230,7 +245,13 @@ function stopSound() {
         v-model:config="config"
         v-model:strip="pin"
       ></IALEDForm>
-      <pre>{{ config }}</pre>
+      <LcdDisplay 
+        :content="config ? JSON.stringify(config, null, 2).split('\n') : []"
+        title="CONFIG"
+        color="amber"
+        size="sm"
+        :max-lines="10"
+      />
     </template>
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
 

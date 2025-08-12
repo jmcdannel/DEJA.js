@@ -7,26 +7,121 @@ import { log } from '../utils/logger'
 import { dcc } from '../lib/dcc'
 import { dejaMqtt as mqtt } from '../lib/mqtt'
 import { broadcast } from '../broadcast'
+
+// Command pooling state for each connection
+interface CommandPool {
+  commands: string[]
+  timer: NodeJS.Timeout | null
+}
+
 interface Connection {
   isConnected: boolean
   port?: SerialPort
   publish?: (topic: string, message: string, keepAlive: boolean) => void
-  send?: (_port: SerialPort, data: string) => void
+  send?: (conn: Connection, data: string) => void
   topic?: string
+  commandPool?: CommandPool
 }
 
 const baudRate = 115200
+const POOL_INTERVAL = 3000 // 3 seconds
 
 const layoutId = process.env.LAYOUT_ID || 'betatrack'
 const _connections: { [key: string]: Connection } = {}
 let _devices: Device[] = []
 let sensors: Sensor[] = []
 
+// Flush the command pool for a specific connection
+const flushCommandPool = (connection: Connection): void => {
+  if (!connection.commandPool || connection.commandPool.commands.length === 0) {
+    return
+  }
+
+  const commands = [...connection.commandPool.commands]
+  connection.commandPool.commands = []
+  
+  if (!connection.port || !connection.isConnected) {
+    log.warn('[LAYOUT] Port not available for sending commands')
+    return
+  }
+
+  if (commands.length === 1) {
+    // Single command - send directly
+    log.await('[LAYOUT] Sending command:', commands[0])
+    connection.port.write(commands[0], handleSend)
+  } else {
+    // Multiple commands - join with newlines and send as batch
+    const batchedCommands = commands.join('\n')
+    log.await('[LAYOUT] Sending batched commands:', commands.length + ' commands')
+    log.debug('[LAYOUT] Batched commands:', batchedCommands)
+    connection.port.write(batchedCommands, handleSend)
+  }
+}
+
+// Start the command pool timer for a specific connection
+const startCommandPoolTimer = (connection: Connection): void => {
+  if (!connection.commandPool) {
+    connection.commandPool = { commands: [], timer: null }
+  }
+
+  if (connection.commandPool.timer) {
+    clearInterval(connection.commandPool.timer)
+  }
+  
+  connection.commandPool.timer = setInterval(() => {
+    flushCommandPool(connection)
+  }, POOL_INTERVAL)
+  
+  log.debug('[LAYOUT] Command pool timer started (3s interval)')
+}
+
+// Stop the command pool timer for a specific connection
+const stopCommandPoolTimer = (connection: Connection): void => {
+  if (connection.commandPool?.timer) {
+    clearInterval(connection.commandPool.timer)
+    connection.commandPool.timer = null
+    log.debug('[LAYOUT] Command pool timer stopped')
+  }
+}
+
+// Handle send errors
+function handleSend(err: Error | null | undefined): void {
+  if (err) {
+    log.error('[LAYOUT] Error on write:', err?.message)
+  }
+}
+
+// Pooled send function for connections
+const sendPooled = (connection: Connection, data: string): void => {
+  try {
+    if (!connection.isConnected || !connection.port) {
+      log.warn('[LAYOUT] Connection not available for sending command:', data)
+      return
+    }
+
+    // Initialize command pool if not exists
+    if (!connection.commandPool) {
+      connection.commandPool = { commands: [], timer: null }
+    }
+
+    // Add command to the pool
+    connection.commandPool.commands.push(data)
+    log.debug('[LAYOUT] Command queued:', data, '(queue size: ' + connection.commandPool.commands.length + ')')
+
+    // Start timer if not already running
+    if (!connection.commandPool.timer) {
+      startCommandPoolTimer(connection)
+    }
+  } catch (err) {
+    log.fatal('[LAYOUT] Error queuing command:', err)
+  }
+}
+
 export async function initialize(): Promise<Layout | undefined> {
   log.start('Load layout', layoutId)
   const layout = await loadLayout()
   _devices = await loadDevices()
-  sensors = await loadSensors()
+  // sensors = await loadSensors()
   await autoConnect(_devices)
   return layout
 }
@@ -122,6 +217,7 @@ async function connectUsbDevice(
       baudRate,
       handleMessage: handleSerialMessage,
       path: serialPort,
+      deviceId: device.id,
     })
     const updates = {
       client: 'dejaJS',
@@ -139,11 +235,12 @@ async function connectUsbDevice(
     db.doc(`layouts/${layoutId}/devices/${device.id}`)
       .set(updates, { merge: true })
 
-    _connections[device.id] = {
+    const connection: Connection = {
       isConnected: true,
       port: port ? port : undefined,
-      send: serialLib.send,
+      send: (conn: Connection, data: string) => sendPooled(conn, data),
     }
+    _connections[device.id] = connection
     if (device.type === 'dcc-ex' && port) {
       dcc.setConnection(port)
     }
@@ -206,9 +303,9 @@ async function connectMqttDevice(device: Device): Promise<void> {
 async function handleSerialMessage(payload: string): Promise<void> {
   if (payload?.startsWith('{ "sensor')) {
     const data = JSON.parse(payload)
-    const sensorId = sensors.find((sensor) => sensor.index === data.sensor)?.id
+    // const sensorId = sensors.find((sensor) => sensor.index === data.sensor)?.id
     // log.debug('handleSerialMessage', data, payload, sensorId)
-    if (sensorId) {
+    // if (sensorId) {
       // await setDoc(
       //   doc(db, `layouts/${layoutId}/sensors`, sensorId),
       //   {
@@ -216,24 +313,74 @@ async function handleSerialMessage(payload: string): Promise<void> {
       //   },
       //   { merge: true }
       // )
-      db.doc(`layouts/${layoutId}/sensors/${sensorId}`)
-        .set(
-          {
-            state: data.state,
-            timestamp: FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        )
-    } else {
-      log.error('Sensor not found', data, sensors)
-    }
+      // db.doc(`layouts/${layoutId}/sensors/${sensorId}`)
+      //   .set(
+      //     {
+      //       state: data.state,
+      //       timestamp: FieldValue.serverTimestamp(),
+      //     },
+      //     { merge: true }
+      //   )
+    // } else {
+      // log.error('Sensor not found', data, sensors)
+    // }
   } else {
     await broadcast({ action: 'serial', payload })
   }
 }
 
+// Disconnect a device and clean up its command pool
+export async function disconnectDevice(deviceId: string): Promise<void> {
+  try {
+    const connection = _connections[deviceId]
+    if (connection) {
+      // Flush any remaining commands before disconnecting
+      if (connection.commandPool && connection.commandPool.commands.length > 0) {
+        log.await('[LAYOUT] Flushing remaining commands before disconnect:', connection.commandPool.commands.length)
+        flushCommandPool(connection)
+      }
+
+      // Stop the command pool timer
+      stopCommandPoolTimer(connection)
+
+      // Disconnect the port if it exists
+      if (connection.port) {
+        serialLib.disconnect(connection.port)
+      }
+
+      // Remove the connection
+      delete _connections[deviceId]
+      
+      // Update the device status in the database
+      db.doc(`layouts/${layoutId}/devices/${deviceId}`)
+        .set(
+          {
+            isConnected: false,
+            lastDisconnected: new Date(),
+            timestamp: FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        )
+
+      log.complete('[LAYOUT] Device disconnected:', deviceId)
+    }
+  } catch (err) {
+    log.fatal('[LAYOUT] Error disconnecting device:', err)
+  }
+}
+
+// Manually flush commands for a specific device
+export function flushDeviceCommands(deviceId: string): void {
+  const connection = _connections[deviceId]
+  if (connection) {
+    flushCommandPool(connection)
+  }
+}
+
 export const layout = {
   connectDevice,
+  disconnectDevice,
+  flushDeviceCommands,
   connections: () => _connections,
   devices: () => _devices,
   initialize,

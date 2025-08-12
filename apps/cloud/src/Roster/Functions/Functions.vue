@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useFunctions, defaultFunctions, type LocoFunction } from '@repo/modules/locos'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import EditFunc from '@/Roster/Functions/EditFunction.vue'
+import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 
 const props = defineProps({
   loco: Object,
@@ -61,7 +62,13 @@ async function handleEdit(func: LocoFunction) {
     <ViewJson :json="defaultFunc" label="RAW DEFAULT"></ViewJson>
     <ViewJson :json="loco?.functions.find(lf => lf.id === defaultFunc.id)" label="RAW LOCO"></ViewJson>
   </template> -->
-  <pre>address: {{ address }}</pre>
+  <LcdDisplay 
+    :content="`address: ${address}`"
+    title="LOCO ADDRESS"
+    color="blue"
+    size="sm"
+    :max-lines="3"
+  />
   <ViewJson :json="loco?.functions || {}" label="RAW loco Data"></ViewJson>
   <ViewJson :json="locoFunctions" label="RAW locoFunctions Data"></ViewJson>
   <ViewJson :json="defaultFunctions" label="RAW DEFAULT FUNCTIONS"></ViewJson>

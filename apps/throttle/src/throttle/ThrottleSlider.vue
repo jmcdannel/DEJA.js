@@ -34,8 +34,10 @@ function handleSlider(val: number) {
 
 </script>
 <template>
-  <pre>{{ sliderVal }}</pre>
-  <pre>{{ speed }}</pre>
+  <div class="text-xs text-gray-500 mb-2">
+    <div>Slider: {{ sliderVal }}</div>
+    <div>Speed: {{ speed }}</div>
+  </div>
   <v-slider
     :model-value="sliderVal"
     class=" content-end"
