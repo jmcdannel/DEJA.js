@@ -6,6 +6,7 @@ import { useColors } from '@/Core/UI/useColors'
 import { deviceTypes, useLayout, type Device } from '@repo/modules/layouts'
 import { useTurnouts } from '@repo/modules/turnouts'
 import { useEfx } from '@repo/modules/effects'
+import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 
 const { connectDevice, autoConnectDevice, getDevice } = useLayout()
 const { getTurnoutsByDevice } = useTurnouts()
@@ -136,8 +137,53 @@ const turnoutPulsers = computed(() => {
         {{ device?.isConnected ? 'Connected' : 'Disconnected' }}
       </v-chip>
       <v-spacer class="mt-4"></v-spacer>
-      <pre>{{ turnoutPins.join(' ') }}</pre>
-      <pre>{{ turnoutPulsers.join(',\n') }}</pre>
+      
+      <!-- Turnout Pins LCD Display -->
+      <div class="mb-4 relative">
+        <LcdDisplay 
+          :content="turnoutPins"
+          title="PIN CONFIG"
+          color="green"
+          size="md"
+          :max-lines="8"
+        />
+      </div>
+      
+      <!-- Turnout Pulsers LCD Display -->
+      <div class="mb-4 relative">
+        <LcdDisplay 
+          :content="turnoutPulsers"
+          title="PULSER CODE"
+          color="blue"
+          size="md"
+          :max-lines="10"
+        />
+      </div>
+      
+      <!-- Turnout Labels LCD Display -->
+      <div class="mb-4 relative">
+        <LcdDisplay 
+          :content="turnouts.map(turnout => turnout.name)"
+          title="TURNOUT LABELS"
+          color="blue"
+          size="md"
+          :max-lines="turnouts.length"
+        />
+      </div>
+      
+      <!-- Effects Labels LCD Display -->
+      <div class="mb-4 relative">
+        <LcdDisplay 
+          :content="effects.map(effect => effect.name)"
+          title="EFFECT LABELS"
+          color="blue"
+          size="md"
+          :max-lines="effects.length"
+        />
+      </div>
+      
+      <v-spacer class="mt-4"></v-spacer>
+
       <v-table>
         <thead>
           <tr>

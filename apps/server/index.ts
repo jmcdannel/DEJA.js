@@ -27,6 +27,7 @@ process.on('SIGTERM', disconnect) // Handles kill command
 process.on('uncaughtException', async (error) => {
   log.fatal('Uncaught Exception:', error)
   await disconnect()
+  process.exit(1) // Exit the process with an error code
 })
 process.on('unhandledRejection', async (reason, promise) => {
   log.fatal('Unhandled Rejection at:', promise, 'reason:', reason)

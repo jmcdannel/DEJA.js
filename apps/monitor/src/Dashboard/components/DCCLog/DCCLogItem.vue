@@ -13,7 +13,9 @@ const item = ref(props.entry)
       <v-chip size="x-small" :color="item?.color || 'orange'">{{ item?.action }}</v-chip>
     </span>
     
-    <pre class="flex-grow p-2 bg-teal-900 text-xs text-teal-100">{{ JSON.stringify(item?.payload, null, 2) }}</pre>
+    <div class="flex-grow p-2 bg-teal-900 text-xs text-teal-100 font-mono">
+      {{ JSON.stringify(item?.payload, null, 2) }}
+    </div>
   </div>  
   <!-- <pre>item: {{ item }}</pre> -->
 </template>

@@ -30,7 +30,7 @@ function handleConnect(): void {
 
 function handleError(error: Error): void {
   log.error('MQTT mqttClient error', error)
-  disconnect()
+  // disconnect()
 }
 
 function handleMessage(topic: string, message: Buffer): void {

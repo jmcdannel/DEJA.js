@@ -8,11 +8,11 @@ import TurnoutTable from './TurnoutTable.vue'
 const viewAs = useStorage<string[]>('@DEJA/prefs/turnouts/View', ['button'])
 const sortBy = useStorage<string[]>('@DEJA/prefs/turnouts/Sort', ['device'])
 
-const { getTurnouts, switchTurnout } = useTurnouts()
+const {  getTurnouts, setTurnout } = useTurnouts()
 const turnouts = getTurnouts()
 
 async function handleTurnout(turnout: Turnout) {
-  await switchTurnout(turnout)
+  await setTurnout(turnout.id, turnout)
 }
 
 </script>
@@ -38,6 +38,7 @@ async function handleTurnout(turnout: Turnout) {
     <TurnoutItem 
       v-for="item in turnouts as Turnout[]"
       :key="item.id" 
+      :state="item.state"
       :turnout="item as Turnout" 
       :turnoutId="item?.id"
       :viewAs="viewAs?.[0]"

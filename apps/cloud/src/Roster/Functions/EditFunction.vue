@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useFunctionIcon } from '@repo/modules/locos'
+import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 const emit = defineEmits(['edit'])
 const props = defineProps({
   defaultFunction: Object,
@@ -75,7 +76,13 @@ watch(customIcon, (value) => {
         hide-details
       ></v-text-field>
       <v-spacer></v-spacer>
-      <pre class="text-xs">{{ JSON.stringify(func) }}</pre>
+      <LcdDisplay 
+        :content="JSON.stringify(func, null, 2).split('\n')"
+        title="FUNCTION"
+        color="blue"
+        size="sm"
+        :max-lines="8"
+      />
     </div>
     <v-sheet v-if="showPresets">
       <v-btn v-for="icon in allIcons" :key="icon.name" 

@@ -4,6 +4,7 @@ import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
 import { useLayout } from '@repo/modules/layouts'
 import TurnoutListItem from '@/Turnouts/TurnoutListItem.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
+import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 
 defineEmits(['edit'])
 defineProps<{
@@ -28,6 +29,7 @@ const listByDevice = computed(() => list.value ? Object.groupBy(list.value, t =>
           </v-col>
             <v-col v-for="item in list" :key="item.id" cols="12" xs="12"  sm="6" lg="4">
               <TurnoutListItem 
+                :state="item.state"
                 :turnout="item as Turnout" 
                 :turnoutId="item.id" 
                 @edit="$emit('edit', item)" 
@@ -39,7 +41,13 @@ const listByDevice = computed(() => list.value ? Object.groupBy(list.value, t =>
 
       </template>
       <template v-else>
-        <pre>{{ list }}</pre>
+        <LcdDisplay 
+          :content="list.map(item => `${item.name}: ${item.state} (${item.straight}, ${item.divergent})`)"
+          title="TURNOUTS LIST"
+          color="green"
+          size="sm"
+          :max-lines="15"
+        />
       </template>
   </v-container>
   <ViewJson :json="listByDevice || {}" label="Turnouts By Device"></ViewJson>

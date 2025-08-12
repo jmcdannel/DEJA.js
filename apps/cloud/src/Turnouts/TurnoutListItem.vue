@@ -4,30 +4,31 @@ import { useTimeoutFn } from '@vueuse/core'
 import { useEfx } from '@repo/modules/effects'
 import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
 
-const { switchTurnout } = useTurnouts()
+const { setTurnout } = useTurnouts()
 const { runEffect, getEffect } = useEfx()
 
 defineEmits(['edit'])
 
 const props = defineProps<{
+  state?: boolean
   turnout: Turnout
   turnoutId: string
 }>()
 
-const turnoutState = ref(props.turnout?.state || true)
+const internalState = ref(props.state !== undefined ? props.state : props.turnout?.state)
 
 async function handleSwitch() {
   
-  await switchTurnout({...props.turnout, id: props.turnoutId, state: turnoutState.value})
-  if (props.turnout?.effectId) {
-    const effectId = props.turnout.effectId
-    useTimeoutFn(async () => {
-      const effect = await getEffect(effectId)
-      if (effect) {
-        await runEffect({...effect, type: effect.type || '', state: turnoutState.value})
-      }
-    }, 2000)
-  }
+  await setTurnout(props.turnoutId, {...props.turnout, id: props.turnoutId, state: internalState.value })
+  // if (props.turnout?.effectId) {
+  //   const effectId = props.turnout.effectId
+  //   useTimeoutFn(async () => {
+  //     const effect = await getEffect(effectId)
+  //     if (effect) {
+  //       await runEffect({...effect, type: effect.type || '', state: props.state })
+  //     }
+  //   }, 2000)
+  // }
 }
 
 </script>
@@ -42,7 +43,7 @@ async function handleSwitch() {
     <v-card-title class="font-weight-black flex items-center justify-between">
       {{ turnout?.name }}
       <v-switch
-        v-model="turnoutState"
+        v-model="internalState"
         @change="handleSwitch"
         :color="turnout?.color || 'yellow'"
         hide-details

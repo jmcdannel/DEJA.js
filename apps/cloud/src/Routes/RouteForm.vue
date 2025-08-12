@@ -84,7 +84,7 @@ function handleMacro({on , off}: {on: string[], off: string[]}) {
     </div>
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
 
-    <!-- name -->
+    <!-- name, points -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <v-text-field
         v-model="name"
@@ -101,7 +101,6 @@ function handleMacro({on , off}: {on: string[], off: string[]}) {
             max-width="200"
           >
         </v-text-field>
-
         <v-text-field
             v-model="point2"
             label="Point 2"
@@ -112,7 +111,9 @@ function handleMacro({on , off}: {on: string[], off: string[]}) {
         </v-text-field>
       </div>
     </div>
+
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+
     <RouteTurnoutForm @change="handleMacro" :on="macroOn" :off="macroOff"></RouteTurnoutForm>
 
     <!-- color -->
@@ -120,12 +121,11 @@ function handleMacro({on , off}: {on: string[], off: string[]}) {
       <v-btn
         class="min-h-48 min-w-48 border flex"
         :color="color"
-        @click="editColor = true" >
-        <!-- <v-icon :icon="efxOpt.icon" :color="efxOpt.color"></v-icon> -->
+        @click="editColor = true" >       
         <div class="relative flex flex-col justify-center items-center">
           <v-icon size="64">mdi-palette</v-icon>
           <div class="mt-4">Color [{{ color }}]</div>
-        </div>        
+        </div>
       </v-btn>
     </section>
     <v-dialog max-width="80vw" v-model="editColor">
@@ -133,8 +133,11 @@ function handleMacro({on , off}: {on: string[], off: string[]}) {
     </v-dialog>
 
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+
     <TagPicker class="my-4 " v-model="tags"></TagPicker>
+
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 my-4">
       <v-btn
         class="mt-2"

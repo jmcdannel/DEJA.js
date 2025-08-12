@@ -16,6 +16,12 @@ const router = createRouter({
       name: 'login',
       path: '/login',
     },
+    {
+      path: '/demo',
+      name: 'Device Monitor Demo',
+      component: () => import('./Dashboard/components/DeviceSerialMonitor/DeviceSerialMonitorDemo.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
     // {
     //   path: '/dccex',
     //   name: 'DCC-EX',
@@ -26,7 +32,7 @@ const router = createRouter({
     //   path: '/layout',
     //   name: 'Layout',
     //   component: () => import('./Layout/Layout.vue'),
-    //   beforeEnter: [requireAuth, requireLayout],
+    //   beforeEnter: [requireAuth, requireDccEx, requireLayout],
     // },
   ],
 })
