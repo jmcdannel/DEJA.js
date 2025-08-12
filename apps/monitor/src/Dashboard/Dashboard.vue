@@ -15,6 +15,7 @@ import SensorLogs from './components/SensorLogs.vue'
 import EffectLogs from './components/EffectLogs.vue'
 import ThrottleStatus from './components/ThrottleStatus.vue'
 import DCCLog from './components/DCCLog/DCCLog.vue'
+import DeviceSerialMonitors from './components/DeviceSerialMonitors.vue'
 import { db } from '@repo/firebase-config/firebase'
 import { collection, onSnapshot, type DocumentData } from 'firebase/firestore'
 
@@ -102,11 +103,16 @@ onSnapshot(collection(db, `layouts/${layoutId.value}/effects`), (snapshot) => {
         />
       </div>
 
-      <!-- Second Row - Fill Remaining Height -->
+      <!-- Second Row - Logs -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
         <DCCLog />
         <TurnoutLogs :logs="turnoutChanges" />
         <EffectLogs :logs="effectChanges" />
+      </div>
+
+      <!-- Third Row - Device Monitors in single row -->
+      <div class="min-h-0">
+        <DeviceSerialMonitors :devices="devices" />
       </div>
     </div>
   </v-sheet>
