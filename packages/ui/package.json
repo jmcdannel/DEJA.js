@@ -21,7 +21,14 @@
     "./TurnoutButton": "./src/Turnouts/TurnoutButton.vue",
     "./TurnoutRaw": "./src/Turnouts/TurnoutRaw.vue",
     "./TurnoutTable": "./src/Turnouts/TurnoutTable.vue",
-    "./TrackPower": "./src/TrackPower.vue"
+    "./TrackPower": "./src/TrackPower.vue",
+    "./EffectList": "./src/Effects/EffectList.vue",
+    "./EffectItem": "./src/Effects/EffectItem.vue",
+    "./EffectSwitch": "./src/Effects/EffectSwitch.vue",
+    "./EffectCard": "./src/Effects/EffectCard.vue",
+    "./EffectButton": "./src/Effects/EffectButton.vue",
+    "./EffectRaw": "./src/Effects/EffectRaw.vue",
+    "./EffectTable": "./src/Effects/EffectTable.vue"
   },
   "dependencies": {
     "@repo/dccex": "workspace:^0.0.0",
