@@ -49,19 +49,51 @@ watch(state, (newState) => {
     <v-card-text 
       class="min-h-8 flex py-2 justify-space-between"
       variant="flat">
-      <v-chip-group>
+      <!-- <v-chip-group>
         <v-chip
           prepend-icon="mdi-map-marker"
           size="small"
         >{{ efx?.point1 }}</v-chip>
         <v-chip v-for="t in efx?.on" :key="t.id" size="small" prepend-icon="mdi-call-split">{{ t.name }}</v-chip>
-        <v-chip v-for="t in efx?.off" :key="t.id" size="small" prepend-icon="mdi-call-split">{{ t.name }}</v-chip>
         <v-chip
           append-icon="mdi-map-marker"
           :color="color"
           size="small"
         >{{ efx?.point2 }}</v-chip>
-      </v-chip-group>
+      </v-chip-group> -->
+      <v-stepper>
+        <v-stepper-header>
+          <v-stepper-item :value="'A'">
+            <template #title>
+              <v-chip
+                prepend-icon="mdi-map-marker"
+                color="blue"
+                variant="flat"
+                size="small"
+              >{{ efx?.point1 }}</v-chip>
+            </template>
+          </v-stepper-item>
+          <v-divider></v-divider>
+          <template v-for="(t, index) in efx?.on" :key="t.id">
+            <v-stepper-item :value="(index + 1)">
+              <template #title>
+                <v-chip :color="t.state ? 'green' : 'red'" size="small" variant="flat" prepend-icon="mdi-call-split">{{ t.name }}</v-chip>
+              </template>
+            </v-stepper-item>
+            <v-divider></v-divider>
+          </template>
+          <v-stepper-item :value="'B'">
+            <template #title>
+              <v-chip
+                append-icon="mdi-map-marker"
+                color="blue"
+                variant="flat"
+                size="small"
+              >{{ efx?.point2 }}</v-chip>
+            </template>
+          </v-stepper-item>
+        </v-stepper-header>
+      </v-stepper>
     </v-card-text>
     <v-spacer></v-spacer>
     <v-card-actions>

@@ -59,6 +59,7 @@ async function handleTurnouts(event: Event) {
     </v-card-title>
     <v-card-text class="text-sm">
       <p class="my-4">{{turnout?.desc || turnout?.name}}</p>
+      <p class="my-4">{{ turnout.type }}</p>
       <div class="flex flex-wrap gap-2">
         <v-chip 
           v-if="turnout?.device" 

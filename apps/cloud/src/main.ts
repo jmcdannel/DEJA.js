@@ -5,6 +5,7 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import { VStepperVertical } from 'vuetify/labs/VStepperVertical'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import colors from 'vuetify/util/colors'
 // VueFire
@@ -99,7 +100,10 @@ const dark = {
 }
 
 const vuetify = createVuetify({
-  components,
+  components: {
+    ...components,
+    VStepperVertical,
+  },
   defaults: {
     VNavigationDrawer: {
       VListItem: {

@@ -21,8 +21,8 @@ function handleEdit(item: Effect) {
       <v-col
         cols="12"
         xs="12"
-        sm="6"
-        lg="4"
+        sm="12"
+        lg="12"
       >
       <slot name="prepend"></slot>      
     </v-col>
@@ -31,8 +31,8 @@ function handleEdit(item: Effect) {
         :key="item.id"
         cols="12"
         xs="12"
-        sm="6"
-        lg="4"
+        sm="12"
+        lg="12"
       >
         <RouteListItem :efx="item" :efxId="item.id" @edit="handleEdit"></RouteListItem>
     </v-col>
