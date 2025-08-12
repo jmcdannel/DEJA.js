@@ -59,6 +59,12 @@ const router = createRouter({
       beforeEnter: [requireAuth, requireLayout],
     },
     {
+      path: '/turnouts/labels',
+      name: 'Turnout Labels',
+      component: () => import('./Turnouts/TurnoutLabels.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
       path: '/dccex',
       name: 'DCC-EX',
       component: () => import('./DCCEX/DCCEX.vue'),

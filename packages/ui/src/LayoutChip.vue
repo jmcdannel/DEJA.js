@@ -32,7 +32,7 @@ function handleSelect(_layoutId: string) {
     </template>
     <template v-slot:default="{ isActive }">
       <v-sheet class="p-4 relative flex flex-col flex-wrap gap-4">
-        <SelectLayout :layoutId="layoutId" @selected="handleSelect(layoutId)" />
+        <SelectLayout :layoutId="layoutId" @selected="(newLayout: string) => handleSelect(newLayout)" />
       </v-sheet>
     </template>
   </v-dialog>
