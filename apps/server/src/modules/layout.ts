@@ -18,7 +18,7 @@ interface Connection {
   isConnected: boolean
   port?: SerialPort
   publish?: (topic: string, message: string, keepAlive: boolean) => void
-  send?: (data: string) => void
+  send?: (conn: Connection, data: string) => void
   topic?: string
   commandPool?: CommandPool
 }
@@ -40,7 +40,7 @@ const flushCommandPool = (connection: Connection): void => {
   const commands = [...connection.commandPool.commands]
   connection.commandPool.commands = []
   
-  if (!connection.port || !connection.port.isOpen) {
+  if (!connection.port || !connection.isConnected) {
     log.warn('[LAYOUT] Port not available for sending commands')
     return
   }
@@ -121,7 +121,7 @@ export async function initialize(): Promise<Layout | undefined> {
   log.start('Load layout', layoutId)
   const layout = await loadLayout()
   _devices = await loadDevices()
-  sensors = await loadSensors()
+  // sensors = await loadSensors()
   await autoConnect(_devices)
   return layout
 }
@@ -217,6 +217,7 @@ async function connectUsbDevice(
       baudRate,
       handleMessage: handleSerialMessage,
       path: serialPort,
+      deviceId: device.id,
     })
     const updates = {
       client: 'dejaJS',
@@ -237,7 +238,7 @@ async function connectUsbDevice(
     const connection: Connection = {
       isConnected: true,
       port: port ? port : undefined,
-      send: (data: string) => sendPooled(connection, data),
+      send: (conn: Connection, data: string) => sendPooled(conn, data),
     }
     _connections[device.id] = connection
     if (device.type === 'dcc-ex' && port) {
@@ -302,9 +303,9 @@ async function connectMqttDevice(device: Device): Promise<void> {
 async function handleSerialMessage(payload: string): Promise<void> {
   if (payload?.startsWith('{ "sensor')) {
     const data = JSON.parse(payload)
-    const sensorId = sensors.find((sensor) => sensor.index === data.sensor)?.id
+    // const sensorId = sensors.find((sensor) => sensor.index === data.sensor)?.id
     // log.debug('handleSerialMessage', data, payload, sensorId)
-    if (sensorId) {
+    // if (sensorId) {
       // await setDoc(
       //   doc(db, `layouts/${layoutId}/sensors`, sensorId),
       //   {
@@ -312,17 +313,17 @@ async function handleSerialMessage(payload: string): Promise<void> {
       //   },
       //   { merge: true }
       // )
-      db.doc(`layouts/${layoutId}/sensors/${sensorId}`)
-        .set(
-          {
-            state: data.state,
-            timestamp: FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        )
-    } else {
-      log.error('Sensor not found', data, sensors)
-    }
+      // db.doc(`layouts/${layoutId}/sensors/${sensorId}`)
+      //   .set(
+      //     {
+      //       state: data.state,
+      //       timestamp: FieldValue.serverTimestamp(),
+      //     },
+      //     { merge: true }
+      //   )
+    // } else {
+      // log.error('Sensor not found', data, sensors)
+    // }
   } else {
     await broadcast({ action: 'serial', payload })
   }

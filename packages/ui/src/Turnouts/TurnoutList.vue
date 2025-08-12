@@ -44,10 +44,4 @@ async function handleTurnout(turnout: Turnout) {
       :viewAs="viewAs?.[0]"
     />
   </v-sheet>
-  <v-sheet class="grid grid-cols-1 @[960px]:grid-cols-3 xlg:grid-cols-4 gap-2 w-full p-4">
-    <span 
-      v-for="item in turnouts as Turnout[]"
-      :key="item.id" 
-    >{{ item.name }} - {{ item.state }}</span>
-  </v-sheet>
 </template>

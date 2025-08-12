@@ -201,7 +201,7 @@ const sendOutput = async (payload: OutputPayload) => {
   await send(cmd)
 }
 
-export async function handleDccChange(snapshot, key): Promise<void> {
+export async function handleDccChange(snapshot: any, key: string): Promise<void> {
   try {
     const { action, payload } = snapshot
     // log.log('handleDccChange: ', action, payload, snapshot.key)
