@@ -84,10 +84,10 @@ onSnapshot(collection(db, `layouts/${layoutId.value}/effects`), (snapshot) => {
 </script>
 
 <template>
-  <v-sheet>
-    <div class="p-6 h-full grid gap-6">
-      <!-- First Row - Fixed Height -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+  <v-sheet class="h-full">
+    <div class="p-6 h-full flex flex-col gap-6">
+      <!-- First Row - Takes only the height it needs -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 flex-shrink-0">
         <LayoutCard />
         <TurnoutStatsCard 
           :total-count="turnouts.length"
@@ -103,15 +103,21 @@ onSnapshot(collection(db, `layouts/${layoutId.value}/effects`), (snapshot) => {
         />
       </div>
 
-      <!-- Second Row - Fill Remaining Height -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
-        <DCCLog />
-        <TurnoutLogs :logs="turnoutChanges" />
-        <EffectLogs :logs="effectChanges" />
+      <!-- Second Row - Uses half of remaining height with scrolling -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+        <div class="overflow-auto">
+          <DCCLog />
+        </div>
+        <div class="overflow-auto">
+          <TurnoutLogs :logs="turnoutChanges" />
+        </div>
+        <div class="overflow-auto">
+          <EffectLogs :logs="effectChanges" />
+        </div>
       </div>
 
-      <!-- Third Row - Device Serial Monitors -->
-      <div class="min-h-0">
+      <!-- Third Row - Uses half of remaining height with scrolling -->
+      <div class="flex-1 min-h-0 overflow-auto">
         <DeviceSerialMonitors :devices="devices" />
       </div>
     </div>
