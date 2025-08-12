@@ -47,6 +47,12 @@ const router = createRouter({
       beforeEnter: [requireAuth, requireLayout],
     },
     {
+      path: '/signals',
+      name: 'Signals',
+      component: () => import('./Signals/Signals.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
       path: '/turnouts',
       name: 'Turnouts',
       component: () => import('./Turnouts/Turnouts.vue'),
@@ -73,7 +79,7 @@ const router = createRouter({
     {
       path: '/signals',
       name: 'Signals',
-      component: () => import('./Signals/SignalList.vue'),
+      component: () => import('./Signals/SignalsList.vue'),
       beforeEnter: [requireAuth, requireLayout],
     }
   ],

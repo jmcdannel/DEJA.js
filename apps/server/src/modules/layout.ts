@@ -24,7 +24,7 @@ interface Connection {
 }
 
 const baudRate = 115200
-const POOL_INTERVAL = 3000 // 3 seconds
+const POOL_INTERVAL = 5000 // 3 seconds
 
 const layoutId = process.env.LAYOUT_ID || 'betatrack'
 const _connections: { [key: string]: Connection } = {}
@@ -48,13 +48,12 @@ const flushCommandPool = (connection: Connection): void => {
   if (commands.length === 1) {
     // Single command - send directly
     log.await('[LAYOUT] Sending command:', commands[0])
-    connection.port.write(commands[0], handleSend)
+    connection.port.write(`[${commands.join(',')}]`, handleSend)
   } else {
     // Multiple commands - join with newlines and send as batch
-    const batchedCommands = commands.join('\n')
     log.await('[LAYOUT] Sending batched commands:', commands.length + ' commands')
-    log.debug('[LAYOUT] Batched commands:', batchedCommands)
-    connection.port.write(batchedCommands, handleSend)
+    log.debug('[LAYOUT] Batched commands:', commands)
+    connection.port.write(`[${commands.join(',')}]`, handleSend)
   }
 }
 

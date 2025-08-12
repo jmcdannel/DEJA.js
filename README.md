@@ -196,6 +196,51 @@ turbo deps:fix        # 🔧 Fix dependency mismatches
 
 ---
 
+## 🧰 Production Runbook
+
+### Start only Server + Monitor by default
+
+These scripts use Turborepo filters to start only the critical services:
+
+```bash
+# Start just the server and monitor apps
+turbo run start --filter=apps/server --filter=apps/monitor
+
+# Alternatively, from the repo root (already configured in package.json)
+pnpm start
+```
+
+### Start all applications
+
+```bash
+turbo run start
+
+# Alternatively, from the repo root
+pnpm run start:all
+```
+
+### Keep the server running robustly (pm2 + turbo)
+
+Use pm2 to manage the turbo start process so it restarts on crashes and can boot on startup:
+
+```bash
+# Start server + monitor via turbo under pm2
+pm2 start --name deja-start --interpreter bash -- turbo run start --filter=apps/server --filter=apps/monitor
+
+# For all apps
+pm2 start --name deja-start-all --interpreter bash -- turbo run start
+
+# Persist the pm2 process list and enable on boot
+pm2 save
+pm2 startup
+```
+
+Notes:
+- The root `package.json` is configured so `pnpm start` maps to the filtered turbo start.
+- `turbo.json` marks `start` and `start:all` as persistent to work well under pm2.
+
+---
+
 ## 🗺️ Roadmap
 
 ### 🔥 Current Focus
