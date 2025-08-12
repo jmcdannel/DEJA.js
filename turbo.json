@@ -25,7 +25,13 @@
     "build": {},
     "start": {
       "dependsOn": ["mosquitto"],
-      "cache": false
+      "cache": false,
+      "persistent": true
+    },
+    "start:all": {
+      "dependsOn": ["mosquitto"],
+      "cache": false,
+      "persistent": true
     },
     "predev": {},
     "lint": {},

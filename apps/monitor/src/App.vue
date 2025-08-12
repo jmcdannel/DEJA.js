@@ -4,7 +4,7 @@ import { useStorage } from '@vueuse/core'
 import { RouterView, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { Login } from '@repo/auth'
-import { LayoutChip } from '@repo/ui'
+import { LayoutChip, TrackPower } from '@repo/ui'
 
 // import { useDccLog } from '@/DCCEX/Log/useDccLog'
 
@@ -35,6 +35,7 @@ function handleLayoutSelect(newLayout: string) {
       <!-- <DCCLogger v-if="enableLogging" /> -->
       <v-app-bar title="DEJA JS Monitor" class="px-2">
         <LayoutChip />
+        <TrackPower />
       </v-app-bar>
 
       <v-navigation-drawer expand-on-hover

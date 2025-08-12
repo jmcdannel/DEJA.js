@@ -166,7 +166,7 @@ export async function handleEffect(payload: Effect): Promise<void> {
     conn.send &&
     conn.port
   ) {
-    conn.send(conn, JSON.stringify([command]))
+    conn.send(conn, JSON.stringify(command))
   } else if (
     layoutDevice?.connection === 'usb' &&
     layoutDevice?.type === 'deja-arduino-led' &&

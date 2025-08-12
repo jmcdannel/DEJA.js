@@ -11,6 +11,7 @@ import UserProfileMenu from './Core/Header/UserProfile.vue';
 import DeviceStatus from '@/Layout/Devices/DeviceStatus.vue'
 import LayoutStatus from '@/Layout/LayoutStatus.vue'
 import { Login } from '@repo/auth'
+import { TrackPower } from '@repo/ui'
 
 import { useMenu } from '@/Core/Menu/useMenu'
 const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
@@ -54,6 +55,7 @@ function handleLayoutSelect(newLayout: string) {
           ></v-btn>
           <LayoutStatus />
           <DeviceStatus v-if="!!user" />
+          <TrackPower />
           <UserProfileMenu v-if="!!user" />
 
       </v-app-bar>

@@ -46,7 +46,7 @@ export async function handleTurnout(turnout: Turnout): Promise<void> {
         turnoutIdx: turnout.turnoutIdx,
       } as TurnoutPayload)
     } else if (layoutDevice?.connection === 'usb' && conn?.port && conn.send) {
-      await conn.send(conn, JSON.stringify([command]))
+      await conn.send(conn, JSON.stringify(command))
     } else if (
       layoutDevice?.connection === 'wifi' &&
       conn?.topic &&

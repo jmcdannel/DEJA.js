@@ -13,6 +13,10 @@ export interface Effect {
   range?: string
   config?: string
   tags?: string[]
+  // For 'signal' effect type: references to child pin effects by ID (optional)
+  red?: string
+  yellow?: string
+  green?: string
   id: string
 }
 

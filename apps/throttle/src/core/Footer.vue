@@ -82,6 +82,14 @@ const layoutId = useStorage('@DEJA/layoutId', '')
             icon="mdi-call-split"
             value="/turnouts"
           />
+          <v-btn 
+            class="sm:px-12"
+            :class="$route.path === '/signals' ? 'bg-blue-500' : 'text-blue-500'"
+            @click="$router.push('/signals')"
+            color="blue"
+            icon="mdi-traffic-light"
+            value="/signals"
+          />
         </v-btn-toggle>
         <v-spacer />
       </v-row>

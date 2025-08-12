@@ -13,10 +13,12 @@
     "dev": "turbo run dev",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lint": "turbo run lint",
-    "start": "turbo run start"
+    "start": "turbo run start --filter=apps/server --filter=apps/monitor",
+    "start:all": "turbo run start"
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5",
+    "pm2": "^5.4.2",
     "syncpack": "^13.0.4",
     "turbo": "^2.5.3"
   },

@@ -8,6 +8,7 @@ const layoutId = useStorage('@DEJA/layoutId', '')
 function handleSelect(_layoutId: string) {
   console.log('handleSelect', _layoutId)
   layoutId.value = _layoutId
+  window.location.reload()
 }
 
 </script>
