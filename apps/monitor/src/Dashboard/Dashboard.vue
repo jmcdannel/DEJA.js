@@ -120,11 +120,6 @@ onSnapshot(collection(db, `layouts/${layoutId.value}/effects`), (snapshot) => {
       <div class="flex-1 min-h-0 overflow-auto">
         <DeviceSerialMonitors :devices="devices" />
       </div>
-
-      <!-- Third Row - Device Monitors in single row -->
-      <div class="min-h-0">
-        <DeviceSerialMonitors :devices="devices" />
-      </div>
     </div>
   </v-sheet>
 </template>
