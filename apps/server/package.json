@@ -8,12 +8,12 @@
   "type": "module",
   "main": "index.ts",
   "scripts": {
-    "dev": "tsx ./index.ts",
-    "format": "prettier --write .",
-    "lint": "eslint",
+    "build": "tsc",
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts",
     "mosquitto": "tsx src/scripts/start-mqtt.ts",
-    "start": "tsx ./index.ts",
-    "type-check": "tsc --noEmit --skipLibCheck --composite false"
+    "check-mqtt": "tsx src/scripts/check-mqtt.ts",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@repo/modules": "workspace:*",

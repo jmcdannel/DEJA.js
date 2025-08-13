@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Tour app loading issues** - Resolved TypeScript compilation errors and dependency problems:
+  - Fixed `currentGuest.value` references in tour store and TourLogin.vue
+  - Replaced problematic `@repo/modules` imports with local implementations
+  - Created local `GuestEffectCard.vue` component to avoid `@repo/ui` dependency issues
+  - Updated Vite configuration to match working app patterns with proper `optimizeDeps.include`
+  - Added `commonjsOptions` and proper package resolution for better compatibility
+  - Tour app now builds successfully and runs on port 3003
+
 ### Added
 - **New features and improvements** - Development continues with ongoing enhancements
 

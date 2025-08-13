@@ -17,14 +17,29 @@ export default defineConfig({
     global: 'globalThis',
   },
   optimizeDeps: {
+    include: [
+      '@repo/firebase-config',
+      '@repo/modules/effects',
+      '@repo/modules/layouts',
+      '@repo/modules/locos',
+      '@repo/modules/turnouts',
+      '@repo/dccex',
+      '@repo/deja',
+      '@repo/utils',
+      '@repo/ui',
+      '@repo/auth'
+    ],
     exclude: ['dotenv']
   },
   build: {
+    commonjsOptions: {
+      include: [/node_modules/, /packages/]
+    },
     rollupOptions: {
       external: ['dotenv']
     }
   },
   server: {
-    port: 6000
+    port: 3003
   },
 })

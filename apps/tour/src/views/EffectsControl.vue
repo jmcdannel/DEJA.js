@@ -129,7 +129,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useTourStore } from '../stores/tour'
-import { GuestEffectCard } from '@repo/ui'
+import GuestEffectCard from '../components/GuestEffectCard.vue'
 
 const tourStore = useTourStore()
 const selectedCategory = ref<string | null>(null)
