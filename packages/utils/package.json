@@ -4,8 +4,17 @@
   "private": true,
   "license": "MIT",
   "type": "module",
+  "main": "./index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./slugify": "./src/slugify.ts"
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "typescript": "latest"
   }
 }

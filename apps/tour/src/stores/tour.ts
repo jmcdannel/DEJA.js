@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
-import { useEfx, type Effect } from '@repo/modules/effects'
-import { useLayout } from '@repo/modules/layouts'
+import { useEfx, useLayout, type Effect } from '@repo/modules'
 
 export interface TourEffect extends Effect {
   description?: string

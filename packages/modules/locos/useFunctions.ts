@@ -1,6 +1,6 @@
 import { doc, setDoc } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
-import { db } from '@repo/firebase-config/firebase'
+import { db } from '@repo/firebase-config'
 import type { LocoFunction } from './types'
 
 export function useFunctions() {

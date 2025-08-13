@@ -1,3 +1,3 @@
 export * from './types'
 export * from './constants'
-export * from './useEfx'
+export { default as useEfx } from './useEfx'

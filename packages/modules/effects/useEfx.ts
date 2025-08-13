@@ -11,8 +11,8 @@ import {
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
-import { db } from '@repo/firebase-config/firebase'
-import { slugify } from '@repo/utils/slugify'
+import { db } from '@repo/firebase-config'
+import { slugify } from '@repo/utils'
 import { efxTypes } from './constants'
 import type { Effect, EffectType } from './types'
 

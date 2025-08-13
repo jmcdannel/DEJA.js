@@ -4,16 +4,16 @@
   "private": true,
   "license": "MIT",
   "type": "module",
+  "main": "./index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./useDcc": "./src/useDcc.ts"
+    ".": "./index.ts"
   },
   "scripts": {
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@vueuse/core": "^11.0.3",
     "firebase": "^10.14.1",
-    "vue": "^3.5.16",
     "vuefire": "^3.2.1"
   },
   "devDependencies": {
@@ -21,7 +21,7 @@
     "@repo/firebase-config": "workspace:*",
     "@repo/prettier-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@vueuse/core": "^11.0.3",
-    "typescript": "latest"
+    "typescript": "latest",
+    "vue": "^3.5.16"
   }
 }

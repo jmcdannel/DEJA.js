@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useEfx, efxTypes } from '@repo/modules/effects'
+import { useEfx, efxTypes } from '@repo/modules'
 import { useColors } from '@/Core/UI/useColors'
 
 const { DEFAULT_COLOR } = useColors()

@@ -4,7 +4,7 @@ import { collection, query, where } from 'firebase/firestore'
 import { useRouter } from 'vue-router'
 import { useCollection, useCurrentUser } from 'vuefire'
 import { useStorage } from '@vueuse/core'
-import { db } from '@repo/firebase-config/firebase'
+import { db } from '@repo/firebase-config'
 
 const user = useCurrentUser()
 const router = useRouter()

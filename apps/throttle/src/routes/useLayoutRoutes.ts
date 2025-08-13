@@ -1,8 +1,6 @@
 import { computed, ref, watch } from 'vue'
 import { useCollection } from 'vuefire'
-import type { Effect } from '@repo/modules/effects'
-import { useEfx } from '@repo/modules/effects'
-import { useTurnouts } from '@repo/modules/turnouts'
+import { useEfx, useTurnouts, type Effect } from '@repo/modules'
 
 export const useLayoutRoutes = () => {
   const clickableContainers = ['Routes', 'Turnouts', 'TurnoutLabels']

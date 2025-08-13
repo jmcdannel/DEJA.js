@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
-import { useEfx, type Effect, type MacroItem } from '@repo/modules/effects'
+import { useTurnouts, useEfx, type Turnout, type Effect, type MacroItem } from '@repo/modules'
 import TurnoutAdd from '@/Routes/TurnoutAdd.vue'
 
 const emit = defineEmits(['change'])

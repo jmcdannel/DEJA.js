@@ -1,6 +1,6 @@
 import { useStorage } from '@vueuse/core'
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
-import { db } from '@repo/firebase-config/firebase'
+import { db } from '@repo/firebase-config'
 
 export const useRoster = () => {
   const layoutId = useStorage('@DEJA/layoutId', '')

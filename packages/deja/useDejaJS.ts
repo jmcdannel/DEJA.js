@@ -1,6 +1,6 @@
 import { useStorage } from '@vueuse/core'
 import { ref, push, set, serverTimestamp } from 'firebase/database'
-import { rtdb } from '@repo/firebase-config/firebase'
+import { rtdb } from '@repo/firebase-config'
 
 interface DejaCommand {
   action: string

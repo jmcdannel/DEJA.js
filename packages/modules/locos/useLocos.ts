@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useCollection, useDocument } from 'vuefire'
-import { db } from '@repo/firebase-config/firebase'
+import { db } from '@repo/firebase-config'
 import type { Loco, ConsistLoco, LocoThrottle, Throttle } from './types'
 import { ROADNAMES } from './constants'
 

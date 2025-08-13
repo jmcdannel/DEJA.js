@@ -15,9 +15,9 @@ import {
   useDocument,
   useCurrentUser,
 } from 'vuefire'
-import { db } from '@repo/firebase-config/firebase'
+import { db } from '@repo/firebase-config'
 import type { Device, Layout, Tag } from './types'
-import { useDejaJS } from '@repo/deja/useDejaJS'
+import { useDejaJS } from '@repo/deja'
 
 export const useLayout = () => {
   const deviceTypes = [

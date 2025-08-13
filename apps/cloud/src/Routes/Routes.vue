@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { Effect } from '@repo/modules/effects'
+import type { Effect } from '@repo/modules'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import RouteForm from '@/Routes/RouteForm.vue'
 import RoutesList from '@/Routes/RoutesList.vue'

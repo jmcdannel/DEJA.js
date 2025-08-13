@@ -4,7 +4,39 @@ import { useStorage } from '@vueuse/core'
 import { RouterView, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { Login } from '@repo/auth'
-import { LayoutChip, TrackPower } from '@repo/ui'
+import { AppHeader } from '@repo/ui'
+import { useDcc } from '@repo/dccex'
+import { useEfx, useLayout } from '@repo/modules'
+
+const { sendDccCommand } = useDcc()
+const { runEffect, getEffectsByType } = useEfx()
+const { getDevices } = useLayout()
+const devices = getDevices()
+
+// Event handlers for the unified header
+async function handleTrackPowerToggle(newState: boolean) {
+  const DEFAULT_ON = '1 MAIN'
+  const DEFAULT_OFF = '0'
+  await sendDccCommand({ action: 'dcc', payload: newState ? DEFAULT_ON : DEFAULT_OFF })
+}
+
+async function handleLayoutPowerToggle(newState: boolean) {
+  const powerEfx = await getEffectsByType('power')
+  if (powerEfx && Array.isArray(powerEfx)) {
+    powerEfx.forEach((efx: any) => {
+      runEffect({...efx, state: newState })
+    })
+  }
+}
+
+async function handleEmergencyStop() {
+  await sendDccCommand({ action: 'dcc', payload: '!' })
+}
+
+function handleDeviceSelect(deviceId: string) {
+  console.log('Device selected:', deviceId)
+  // Handle device selection if needed
+}
 
 // import { useDccLog } from '@/DCCEX/Log/useDccLog'
 
@@ -13,10 +45,8 @@ const enableLogging = useStorage('@DEJA/pref/ws-logging', false)
 
 const user = useCurrentUser()
 const router = useRouter()
-// const dccLog = useDccLog(enableLogging.value)
 
 const theme = ref('dark')
-const mobile = ref(null)
 
 function handleMenu(item:string) {
   router.push({ name: item })
@@ -30,13 +60,25 @@ function handleLayoutSelect(newLayout: string) {
 
 </script>
 <template>
-  <v-responsive class="border rounded">
+  <v-responsive>
     <v-app v-if="user" :theme="theme">
-      <!-- <DCCLogger v-if="enableLogging" /> -->
-      <v-app-bar title="DEJA JS Monitor" class="px-2">
-        <LayoutChip />
-        <TrackPower />
-      </v-app-bar>
+      <AppHeader 
+        app-name="DEJA Monitor"
+        app-icon="mdi-monitor-dashboard"
+        variant="monitor"
+        color="surface"
+        :dark="true"
+        :devices="devices"
+        :show-layout-power="true"
+        :show-emergency-stop="true"
+        :show-device-status="true"
+        :show-device-status-label="true"
+        :show-user-profile="true"
+        @track-power-toggle="handleTrackPowerToggle"
+        @layout-power-toggle="handleLayoutPowerToggle"
+        @emergency-stop="handleEmergencyStop"
+        @device-select="handleDeviceSelect"
+      />
 
       <v-navigation-drawer expand-on-hover
         rail>

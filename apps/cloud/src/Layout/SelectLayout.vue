@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { collection, query, where } from 'firebase/firestore'
 import { useCollection, useCurrentUser } from 'vuefire'
-import { db } from '@repo/firebase-config/firebase'
+import { db } from '@repo/firebase-config'
 
 const emit = defineEmits(['selected', 'clear'])
 

@@ -10,8 +10,8 @@ import {
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
-import { db } from '@repo/firebase-config/firebase'
-import type { Turnout } from '@repo/modules/turnouts'
+import { db } from '@repo/firebase-config'
+import type { Turnout } from './types'
 
 export function useTurnouts() {
   const layoutId = useStorage('@DEJA/layoutId', '')

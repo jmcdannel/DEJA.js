@@ -8,10 +8,23 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '@repos': fileURLToPath(new URL('../../packages', import.meta.url)),
+      '@repo': fileURLToPath(new URL('../../packages', import.meta.url)),
     },
   },
+  define: {
+    // Provide fallback for process global to prevent "process is not defined" errors
+    'process.env': {},
+    global: 'globalThis',
+  },
+  optimizeDeps: {
+    exclude: ['dotenv']
+  },
+  build: {
+    rollupOptions: {
+      external: ['dotenv']
+    }
+  },
   server: {
-    port: 6001
+    port: 6000
   },
 })

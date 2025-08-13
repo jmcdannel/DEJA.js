@@ -11,7 +11,7 @@ import colors from 'vuetify/util/colors'
 // VueFire
 import { VueFire, VueFireAuth } from 'vuefire'
 // Firebase
-import { firebaseApp } from '@repo/firebase-config/firebase'
+import { firebaseApp } from '@repo/firebase-config'
 
 import App from './App.vue'
 import router from './router'

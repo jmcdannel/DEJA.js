@@ -11,7 +11,7 @@ import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import App from './App.vue'
 import router from './router'
-import { firebaseApp } from '@repo/firebase-config/firebase'
+import { firebaseApp } from '@repo/firebase-config'
 // Style
 import './style.css'
 import '@mdi/font/css/materialdesignicons.css'
