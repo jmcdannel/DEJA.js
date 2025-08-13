@@ -9,7 +9,7 @@
     "jsxImportSource": "vue",
     "paths": {
       "@/*": ["./src/*"],
-      "@repo/*": ["../packages/*"]
+      "@repo/*": ["../../packages/*"]
     }
   }
 }

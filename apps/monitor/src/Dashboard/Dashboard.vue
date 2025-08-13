@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useStorage } from '@vueuse/core' 
-import { useLayout } from '@repo/modules/layouts'
-import { useLocos } from '@repo/modules/locos'
-import { useTurnouts } from '@repo/modules/turnouts'
-import { useEfx } from '@repo/modules/effects'
+import { useLayout, useLocos, useTurnouts, useEfx } from '@repo/modules'
 import LayoutCard from './components/LayoutCard.vue'
 import TurnoutStatsCard from './components/TurnoutStatsCard.vue'
 import EffectStatsCard from './components/EffectStatsCard.vue'
@@ -16,7 +13,7 @@ import EffectLogs from './components/EffectLogs.vue'
 import ThrottleStatus from './components/ThrottleStatus.vue'
 import DCCLog from './components/DCCLog/DCCLog.vue'
 import DeviceSerialMonitors from './components/DeviceSerialMonitor/DeviceSerialMonitors.vue'
-import { db } from '@repo/firebase-config/firebase'
+import { db } from '@repo/firebase-config'
 import { collection, onSnapshot, type DocumentData } from 'firebase/firestore'
 
 const TIMEOUT  = 30000 // 30 seconds for the timeout

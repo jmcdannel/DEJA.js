@@ -7,7 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Tour app loading issues** - Resolved TypeScript compilation errors and dependency problems:
+  - Fixed `currentGuest.value` references in tour store and TourLogin.vue
+  - Replaced problematic `@repo/modules` imports with local implementations
+  - Created local `GuestEffectCard.vue` component to avoid `@repo/ui` dependency issues
+  - Updated Vite configuration to match working app patterns with proper `optimizeDeps.include`
+  - Added `commonjsOptions` and proper package resolution for better compatibility
+  - Tour app now builds successfully and runs on port 3003
+
 ### Added
+- **New features and improvements** - Development continues with ongoing enhancements
+
+---
+
+## [1.0.0] - 2025-08-12
+
+### Added
+
+#### Turnout Labels Feature
+- **Printable turnout labels** - New route and component for generating printable turnout labels
+- **Customizable label styling** - Support for custom colors and styles in turnout labels
+- **LayoutChip enhancements** - Improved event handling for layout selection
+- **Print-ready components** - New `TurnoutLabels.vue` component in UI package
+
+#### Signals Management System
+- **Complete signals feature** - New Signals route and view components for managing signal effects
+- **Signal state management** - `SignalList` component for displaying and interacting with signal states
+- **Cloud app integration** - Signals management in cloud app with enhanced effect forms
+- **Signal wiring support** - EffectForm now supports signal wiring with pin effect references
+- **Navigation enhancements** - Footer includes Signals page navigation button
+
+#### Track Power Management
+- **Centralized TrackPower component** - New unified component in `@repo/ui` package
+- **Optimistic UI updates** - Immediate visual feedback for power state changes
+- **Firebase integration** - Server-side power command handling with Firestore updates
+- **Cross-app consistency** - TrackPower component integrated into cloud, monitor, and throttle apps
+
+#### Application Startup & Management
+- **Enhanced startup scripts** - New Turborepo filters for running specific app combinations
+- **PM2 process management** - Added pm2 as devDependency for production process management
+- **Production runbook** - Comprehensive README documentation for production deployment
+- **Selective app startup** - `start` script runs server and monitor, `start:all` runs everything
 
 #### Effect Components Suite
 - **Complete Effects component suite** in `@repo/ui` package following turnout component pattern:
@@ -50,16 +91,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Error handling** - Added debugging and proper Firebase connection handling
 - **Media content** - Replaced all mock data with realistic content matching actual layout areas
 
+#### Package Dependencies
+- **UI package reorganization** - Updated dependencies and devDependencies for better organization
+- **Enhanced server modules** - Improved layout, effects, and turnouts modules with better error handling
+- **Turbo configuration** - Enhanced build pipeline configuration for better app management
+
 ### Removed
 - **Duplicate components** - Deleted app-specific effect components:
   - `apps/throttle/src/effects/EffectItem.vue`
   - `apps/tour/src/components/EffectCard.vue`
 - **Demo mode logic** - Cleaned up tour store by removing demo effect data and logic
+- **Old TrackPower components** - Replaced with unified component in UI package
 
 ### Fixed
 - **VueFire SSR error** - Resolved "[VueFire SSR]: Could not get the path of the data source" by proper Firebase initialization
 - **TypeScript issues** - Fixed Effect interface usage and type compatibility
 - **Guest effects loading** - Proper filtering and display of `allowGuest: true` effects
+- **Server-side command handling** - Improved command sending logic in effects module
 
 ### Technical Improvements
 - **Consistent UI/UX** - All apps now use standardized effect components
@@ -67,6 +115,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Reduced code duplication** - Eliminated redundant component implementations
 - **Better guest experience** - Enhanced tour app with professional-grade effect controls
 - **Proper Firebase integration** - Tour app now connects to real layout data
+- **Enhanced process management** - Better startup scripts and production deployment options
 
 ---
 

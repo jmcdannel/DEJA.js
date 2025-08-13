@@ -14,30 +14,58 @@ async function main(): Promise<void> {
     log.note('ENABLE_MQTT', ENABLE_MQTT)
     log.note('ENABLE_WS', ENABLE_WS)
     log.note('ENABLE_DEJACLOUD', ENABLE_DEJACLOUD)
-    if (ENABLE_DEJACLOUD) await dejaCloud.connect()
-    if (ENABLE_MQTT) await mqtt.connect()
-    if (ENABLE_WS) await wsServer.connect()
+    
+    if (ENABLE_DEJACLOUD) {
+      try {
+        await dejaCloud.connect()
+        log.start('✅ DEJA Cloud connected')
+      } catch (err) {
+        log.error('❌ DEJA Cloud connection failed:', err)
+      }
+    }
+    
+    if (ENABLE_MQTT) {
+      try {
+        await mqtt.connect()
+        log.start('✅ MQTT connected')
+      } catch (err) {
+        log.error('❌ MQTT connection failed:', err)
+        log.note('💡 To disable MQTT, set ENABLE_MQTT=false in your .env file')
+      }
+    }
+    
+    if (ENABLE_WS) {
+      try {
+        await wsServer.connect()
+        log.start('✅ WebSocket server started')
+      } catch (err) {
+        log.error('❌ WebSocket server failed:', err)
+      }
+    }
+    
+    log.start('🚀 DEJA.js Server is running!')
+    
   } catch (err) {
-    log.fatal(err)
+    log.fatal('Fatal error in main:', err)
   }
 }
 
 process.on('SIGINT', disconnect) // Handles CTRL+C
-process.on('SIGTERM', disconnect) // Handles kill command
-process.on('uncaughtException', async (error) => {
-  log.fatal('Uncaught Exception:', error)
-  await disconnect()
-  process.exit(1) // Exit the process with an error code
-})
-process.on('unhandledRejection', async (reason, promise) => {
-  log.fatal('Unhandled Rejection at:', promise, 'reason:', reason)
-  try {
-    await disconnect()
-  } catch (error) {
-    log.error('Error in cleanup:', error)
-  } finally {
-    process.exit(1) // Exit the process with an error code
-  }
+process.on('SIGTERM', disconnect) // Handles termination signals
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  log.fatal('Uncaught Exception:', err)
+  process.exit(1)
 })
 
-await main()
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  log.fatal('Unhandled Rejection at:', promise, 'reason:', reason)
+  process.exit(1)
+})
+
+main().catch((err) => {
+  log.fatal('Failed to start server:', err)
+  process.exit(1)
+})

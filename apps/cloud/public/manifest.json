@@ -1,0 +1,15 @@
+{
+  "short_name": "DEJACloud",
+  "name": "DEJA Cloud",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1976d2",
+  "background_color": "#121212"
+}

@@ -9,13 +9,13 @@
               
               <h1 class="text-h4 mb-2">Welcome to the Tour</h1>
               <p class="text-h6 text-medium-emphasis mb-6">
-                Sign in to start exploring our model train layout
+                Choose how you'd like to explore our model train layout
               </p>
               
               <!-- Loading State -->
               <div v-if="loading" class="text-center py-4">
                 <v-progress-circular indeterminate class="mb-4"></v-progress-circular>
-                <p>Signing you in...</p>
+                <p>{{ loadingMessage }}</p>
               </div>
               
               <!-- Error State -->
@@ -24,15 +24,61 @@
               </v-alert>
               
               <!-- Success State -->
-              <v-alert v-if="user" type="success" class="mb-4">
+              <v-alert v-if="user || guestUser" type="success" class="mb-4">
                 Welcome! Redirecting to the tour...
               </v-alert>
               
+              <!-- Guest Access Section -->
+              <div v-if="!user && !guestUser && !loading" class="guest-access mb-6">
+                <v-card variant="tonal" color="primary" class="pa-4 mb-4">
+                  <h3 class="text-h6 mb-3">🚂 Quick Guest Access</h3>
+                  <p class="text-body-2 mb-4">
+                    Start exploring immediately with a fun train-themed username!
+                  </p>
+                  
+                  <!-- Username Selection -->
+                  <v-select
+                    v-model="selectedUsername"
+                    :items="availableUsernames"
+                    label="Choose your username"
+                    variant="outlined"
+                    density="compact"
+                    class="mb-3"
+                    :menu-props="{ maxHeight: 200 }"
+                  >
+                    <template v-slot:append>
+                      <v-btn
+                        icon="mdi-dice-multiple"
+                        size="small"
+                        variant="text"
+                        @click="generateRandomUsername"
+                        title="Generate random username"
+                      ></v-btn>
+                    </template>
+                  </v-select>
+                  
+                  <v-btn
+                    @click="handleGuestAccess"
+                    color="primary"
+                    size="large"
+                    block
+                    prepend-icon="mdi-train"
+                  >
+                    Start Tour as Guest
+                  </v-btn>
+                </v-card>
+                
+                <v-divider class="my-4">
+                  <span class="text-caption text-medium-emphasis">OR</span>
+                </v-divider>
+              </div>
+              
               <!-- Login Buttons -->
-              <div v-if="!user && !loading" class="login-buttons">
+              <div v-if="!user && !guestUser && !loading" class="login-buttons">
+                <h3 class="text-h6 mb-3">🔐 Sign in with Account</h3>
                 <v-btn
                   @click="handleGithubSignin"
-                  color="primary"
+                  color="secondary"
                   size="large"
                   block
                   class="mb-3"
@@ -52,11 +98,8 @@
                   Sign in with Google
                 </v-btn>
                 
-                <v-divider class="my-4"></v-divider>
-                
                 <p class="text-body-2 text-medium-emphasis">
-                  Don't have an account? No problem! Just sign in with GitHub or Google 
-                  to start your tour experience.
+                  Sign in with your account to save preferences and access additional features.
                 </p>
               </div>
             </v-card-text>
@@ -79,21 +122,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { GithubAuthProvider, GoogleAuthProvider, signInWithPopup, getRedirectResult } from 'firebase/auth'
 import { useFirebaseAuth, useCurrentUser } from 'vuefire'
+import { useGuestStore } from '../stores/guest'
 import TourLogo from '../components/TourLogo.vue'
 
 const router = useRouter()
 const auth = useFirebaseAuth()
 const user = useCurrentUser()
+const guestStore = useGuestStore()
 
 const loading = ref(false)
+const loadingMessage = ref('')
 const error = ref<string | null>(null)
+const selectedUsername = ref<string>('')
 
 const githubAuthProvider = new GithubAuthProvider()
 const googleAuthProvider = new GoogleAuthProvider()
+
+// Get available usernames from guest store
+const availableUsernames = computed(() => guestStore.getAvailableUsernames)
+
+// Get current guest user
+const guestUser = computed(() => guestStore.currentGuest)
+
+// Generate random username on component mount
+const generateRandomUsername = () => {
+  selectedUsername.value = guestStore.getRandomUsername()
+}
 
 const features = [
   {
@@ -116,6 +174,34 @@ const features = [
   }
 ]
 
+const handleGuestAccess = async () => {
+  if (!selectedUsername.value) {
+    error.value = 'Please select a username'
+    return
+  }
+  
+  try {
+    loading.value = true
+    loadingMessage.value = 'Creating your guest profile...'
+    error.value = null
+    
+    // Create guest user
+    const guestUser = guestStore.createGuestUser(selectedUsername.value)
+    console.log('Guest user created:', guestUser)
+    
+    // Small delay to show success message
+    setTimeout(() => {
+      router.push('/')
+    }, 1500)
+    
+  } catch (err: any) {
+    console.error('Guest access failed:', err)
+    error.value = err.message || 'Failed to create guest profile'
+  } finally {
+    loading.value = false
+  }
+}
+
 const handleGithubSignin = async () => {
   if (!auth) {
     error.value = 'Authentication not available'
@@ -124,6 +210,7 @@ const handleGithubSignin = async () => {
   
   try {
     loading.value = true
+    loadingMessage.value = 'Signing in with GitHub...'
     error.value = null
     
     await signInWithPopup(auth, githubAuthProvider)
@@ -144,6 +231,7 @@ const handleGoogleSignin = async () => {
   
   try {
     loading.value = true
+    loadingMessage.value = 'Signing in with Google...'
     error.value = null
     
     await signInWithPopup(auth, googleAuthProvider)
@@ -156,9 +244,9 @@ const handleGoogleSignin = async () => {
   }
 }
 
-// Watch for successful authentication
-watch(user, (newUser) => {
-  if (newUser) {
+// Watch for successful authentication (Firebase or guest)
+watch([user, () => guestStore.currentGuest], ([newUser, newGuest]) => {
+  if (newUser || newGuest) {
     console.log('User authenticated, redirecting...')
     setTimeout(() => {
       router.push('/')
@@ -167,6 +255,12 @@ watch(user, (newUser) => {
 })
 
 onMounted(async () => {
+  // Initialize guest store
+  guestStore.initialize()
+  
+  // Generate initial random username
+  generateRandomUsername()
+  
   if (!auth) {
     error.value = 'Authentication not available'
     return
@@ -194,6 +288,11 @@ onMounted(async () => {
 
 .login-buttons {
   max-width: 300px;
+  margin: 0 auto;
+}
+
+.guest-access {
+  max-width: 400px;
   margin: 0 auto;
 }
 </style>

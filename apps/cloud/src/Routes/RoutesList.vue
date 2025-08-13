@@ -1,6 +1,6 @@
 <script async setup lang="ts">
 import { useCollection } from 'vuefire'
-import { useEfx, type Effect } from '@repo/modules/effects'
+import { useEfx, type Effect } from '@repo/modules'
 import RouteListItem from '@/Routes/RouteListItem.vue'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 

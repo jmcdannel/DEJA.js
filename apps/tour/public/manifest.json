@@ -1,0 +1,15 @@
+{
+  "short_name": "DEJATour",
+  "name": "DEJA Tour",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#FFD700",
+  "background_color": "#000000"
+}

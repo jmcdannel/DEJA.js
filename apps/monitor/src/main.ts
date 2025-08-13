@@ -13,7 +13,7 @@ import { VCard } from 'vuetify/components/VCard'
 // VueFire
 import { VueFire, VueFireAuth } from 'vuefire'
 // Firebase
-import { firebaseApp } from '@repo/firebase-config/firebase'
+import { firebaseApp } from '@repo/firebase-config'
 
 // Components
 import App from './App.vue'

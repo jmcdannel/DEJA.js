@@ -51,7 +51,7 @@ import { useStorage } from '@vueuse/core'
 import { useCurrentUser } from 'vuefire'
 import { collection, query, where } from 'firebase/firestore'
 import { useCollection } from 'vuefire'
-import { db } from '@repo/firebase-config/firebase'
+import { db } from '@repo/firebase-config'
 import TourLogo from './TourLogo.vue'
 
 const user = useCurrentUser()

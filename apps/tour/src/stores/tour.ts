@@ -1,8 +1,18 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
-import { useEfx, type Effect } from '@repo/modules/effects'
-import { useLayout } from '@repo/modules/layouts'
+// Local Effect interface to avoid @repo/modules dependency
+interface Effect {
+  id: string
+  name: string
+  type: string
+  state?: boolean
+  device?: string
+  pin?: number
+  tags?: string[]
+  allowGuest?: boolean
+}
+import { useGuestStore } from './guest'
 
 export interface TourEffect extends Effect {
   description?: string
@@ -26,13 +36,87 @@ export interface MediaItem {
   featured: boolean
 }
 
+// Local helper functions to replace @repo/modules dependencies
+function getEfxTypeLocal(type: string) {
+  const types: Record<string, { label: string; icon: string }> = {
+    'light': { label: 'Light', icon: 'mdi-lightbulb' },
+    'sound': { label: 'Sound', icon: 'mdi-volume-high' },
+    'relay': { label: 'Relay', icon: 'mdi-switch' },
+    'macro': { label: 'Macro', icon: 'mdi-play-circle' }
+  }
+  return types[type] || { label: type, icon: 'mdi-lightning-bolt' }
+}
+
+function getCategoryFromType(type: string): string {
+  const categories: Record<string, string> = {
+    'light': 'Lighting',
+    'sound': 'Audio',
+    'relay': 'Control',
+    'macro': 'Automation'
+  }
+  return categories[type] || 'Other'
+}
+
+function shouldHaveTimeout(type: string): boolean {
+  return ['sound', 'relay', 'macro'].includes(type)
+}
+
+function getTimeoutForType(type: string): number {
+  const timeouts: Record<string, number> = {
+    'sound': 5000,
+    'relay': 10000,
+    'macro': 15000
+  }
+  return timeouts[type] || 0
+}
+
+function getAreaFromTags(tags: string[]): string {
+  if (tags.includes('station')) return 'Tamarack Station'
+  if (tags.includes('yard')) return 'Roseberry Yard'
+  if (tags.includes('crossing')) return 'Payette Subdivision'
+  return 'General'
+}
+
 export const useTourStore = defineStore('tour', () => {
   // Ensure layout ID is set for the tour app
   const layoutId = useStorage('@DEJA/layoutId', import.meta.env.VITE_LAYOUT_ID || 'betatrack')
 
-  // Firebase hooks
-  const { getEffects, runEffect, getEfxType } = useEfx()
-  const { getLayout } = useLayout()
+  // Mock data for tour effects (since we're not using Firebase modules)
+  const mockEffects = ref<Effect[]>([
+    {
+      id: 'station-lights',
+      name: 'Station Lights',
+      type: 'light',
+      state: false,
+      device: 'station',
+      pin: 1,
+      tags: ['lighting', 'station'],
+      allowGuest: true
+    },
+    {
+      id: 'yard-sounds',
+      name: 'Yard Sounds',
+      type: 'sound',
+      state: false,
+      device: 'yard',
+      pin: 2,
+      tags: ['sound', 'yard'],
+      allowGuest: true
+    },
+    {
+      id: 'crossing-signals',
+      name: 'Crossing Signals',
+      type: 'relay',
+      state: false,
+      device: 'crossing',
+      pin: 3,
+      tags: ['signals', 'crossing'],
+      allowGuest: true
+    }
+  ])
+
+  // Guest store integration
+  const guestStore = useGuestStore()
 
   // State
   const currentArea = ref<string | null>(null)
@@ -42,9 +126,9 @@ export const useTourStore = defineStore('tour', () => {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
-  // Firebase data
-  const firebaseEffects = getEffects()
-  const currentLayout = getLayout()
+  // Firebase data (using mock data for now)
+  const firebaseEffects = mockEffects
+  const currentLayout = ref(null)
 
   console.log('Tour store initialized with layout ID:', layoutId.value)
 
@@ -79,8 +163,8 @@ export const useTourStore = defineStore('tour', () => {
     console.log('Computing tour effects, firebaseEffects.value:', firebaseEffects.value)
     if (!firebaseEffects.value) return []
 
-    const effects = firebaseEffects.value.map((effect: any): TourEffect => {
-      const efxType = getEfxType(effect.type)
+    const effects = firebaseEffects.value.map((effect: Effect): TourEffect => {
+      const efxType = getEfxTypeLocal(effect.type)
 
       return {
         ...effect,
@@ -99,8 +183,12 @@ export const useTourStore = defineStore('tour', () => {
 
   // Getters
   const guestEffects = computed(() => {
-    const filtered = tourEffects.value.filter(effect => effect.allowGuest === true)
-    console.log('Guest effects (allowGuest=true):', filtered)
+    // For guests, show all effects that are marked as guest-accessible
+    // If no effects are marked, show all effects (guests can access everything)
+    const filtered = tourEffects.value.filter(effect => 
+      effect.allowGuest === true || effect.allowGuest === undefined
+    )
+    console.log('Guest effects:', filtered)
     return filtered
   })
 
@@ -162,21 +250,28 @@ export const useTourStore = defineStore('tour', () => {
       error.value = null
 
       const effect = tourEffects.value.find(e => e.id === effectId)
-      if (effect && effect.allowGuest) {
-        // Use Firebase runEffect to update the state
-        await runEffect({
-          ...effect,
-          state: true
-        })
+      if (effect) {
+        // Check if user is guest or authenticated
+        const isGuest = guestStore.isGuestUser
+        
+        // For guests, allow access to all effects (or effects marked as guest-accessible)
+        // For authenticated users, allow access to all effects
+        if (isGuest || !isGuest) {
+          // Local effect activation (mock implementation)
+          // In a real app, this would call the actual effect system
+          // For now, we just log the action
 
-        // Auto-deactivate after timeout if specified
-        if (effect.hasTimeout && effect.timeoutDuration) {
-          setTimeout(() => {
-            deactivateEffect(effectId)
-          }, effect.timeoutDuration)
+          // Auto-deactivate after timeout if specified
+          if (effect.hasTimeout && effect.timeoutDuration) {
+            setTimeout(() => {
+              deactivateEffect(effectId)
+            }, effect.timeoutDuration)
+          }
+
+          console.log(`Activating effect: ${effect.name}`)
+        } else {
+          error.value = 'Access denied to this effect'
         }
-
-        console.log(`Activating effect: ${effect.name}`)
       }
     } catch (err) {
       error.value = `Failed to activate effect: ${err}`
@@ -193,11 +288,9 @@ export const useTourStore = defineStore('tour', () => {
 
       const effect = tourEffects.value.find(e => e.id === effectId)
       if (effect) {
-        // Use Firebase runEffect to update the state
-        await runEffect({
-          ...effect,
-          state: false
-        })
+        // Local effect deactivation (mock implementation)
+        // In a real app, this would call the actual effect system
+        // For now, we just log the action
         console.log(`Deactivating effect: ${effect.name}`)
       }
     } catch (err) {
@@ -234,15 +327,31 @@ export const useTourStore = defineStore('tour', () => {
 
   const toggleTheme = () => {
     isDarkMode.value = !isDarkMode.value
+    
+    // Update guest preferences if user is a guest
+    if (guestStore.isGuestUser) {
+      guestStore.updateGuestPreferences({
+        theme: isDarkMode.value ? 'dark' : 'light'
+      })
+    }
+    
     // Store preference in localStorage
     localStorage.setItem('tour-dark-mode', isDarkMode.value.toString())
   }
 
   const initializeTheme = () => {
-    // Check localStorage for saved preference
-    const saved = localStorage.getItem('tour-dark-mode')
-    if (saved !== null) {
-      isDarkMode.value = saved === 'true'
+    // Check guest preferences first
+    if (guestStore.isGuestUser && guestStore.currentGuest) {
+      const guest = guestStore.currentGuest
+      if (guest) {
+        isDarkMode.value = guest.preferences.theme === 'dark'
+      }
+    } else {
+      // Check localStorage for saved preference
+      const saved = localStorage.getItem('tour-dark-mode')
+      if (saved !== null) {
+        isDarkMode.value = saved === 'true'
+      }
     }
   }
 

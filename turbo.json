@@ -1,5 +1,5 @@
 {
-  "$schema": "https://turborepo.com/schema.json",
+  "$schema": "https://turborepo.org/schema.json",
   "globalDependencies": [
     "**/.env"
   ],
@@ -24,12 +24,12 @@
   "tasks": {
     "build": {},
     "start": {
-      "dependsOn": ["mosquitto"],
+      "dependsOn": ["check-mqtt"],
       "cache": false,
       "persistent": true
     },
     "start:all": {
-      "dependsOn": ["mosquitto"],
+      "dependsOn": ["check-mqtt"],
       "cache": false,
       "persistent": true
     },
@@ -38,20 +38,22 @@
     "format": {},
     "type-check": {},
     "dev": {
-      "dependsOn": ["mosquitto"],
+      "dependsOn": ["check-mqtt"],
       "cache": false,
       "persistent": true
     },
     "mosquitto": {
-      "cache": false
+      "cache": false,
+      "persistent": true
+    },
+    "check-mqtt": {
+      "cache": false,
+      "outputs": []
     },
     "deps:check": {
       "cache": false
     },
     "deps:fix": {
-      "cache": false
-    },
-    "deps:format": {
       "cache": false
     }
   }

@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { requireAuth } from '@repo/auth'
+import { requireGuestOrAuth } from '../auth/guestAuth'
 import Home from '../views/Home.vue'
 import Welcome from '../views/Welcome.vue'
 import EffectsControl from '../views/EffectsControl.vue'
@@ -9,8 +9,8 @@ import TourLogin from '../views/TourLogin.vue'
 
 const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
 
-// Auth guard that respects demo mode
-const authGuard = isDemoMode ? [] : [requireAuth]
+// Auth guard that allows both Firebase users and guest users
+const authGuard = isDemoMode ? [] : [requireGuestOrAuth]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

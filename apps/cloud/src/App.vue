@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { RouterView, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
@@ -8,10 +8,41 @@ import { useTheme } from 'vuetify'
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
 import UserProfileMenu from './Core/Header/UserProfile.vue';
-import DeviceStatus from '@/Layout/Devices/DeviceStatus.vue'
 import LayoutStatus from '@/Layout/LayoutStatus.vue'
 import { Login } from '@repo/auth'
-import { TrackPower } from '@repo/ui'
+import { AppHeader } from '@repo/ui'
+import { useDcc } from '@repo/dccex'
+import { useEfx, useLayout } from '@repo/modules'
+
+const { sendDccCommand } = useDcc()
+const { runEffect, getEffectsByType } = useEfx()
+const { getDevices } = useLayout()
+const devices = getDevices()
+
+// Event handlers for the unified header
+async function handleTrackPowerToggle(newState: boolean) {
+  const DEFAULT_ON = '1 MAIN'
+  const DEFAULT_OFF = '0'
+  await sendDccCommand({ action: 'dcc', payload: newState ? DEFAULT_ON : DEFAULT_OFF })
+}
+
+async function handleLayoutPowerToggle(newState: boolean) {
+  const powerEfx = await getEffectsByType('power')
+  if (powerEfx && Array.isArray(powerEfx)) {
+    powerEfx.forEach((efx: any) => {
+      runEffect({...efx, state: newState })
+    })
+  }
+}
+
+async function handleEmergencyStop() {
+  await sendDccCommand({ action: 'dcc', payload: '!' })
+}
+
+function handleDeviceSelect(deviceId: string) {
+  console.log('Device selected:', deviceId)
+  // Handle device selection if needed
+}
 
 import { useMenu } from '@/Core/Menu/useMenu'
 const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
@@ -23,57 +54,87 @@ const { menu, handleMenu } = useMenu()
 
 const drawer = ref(true)
 const mobile = ref(null)
+const currentTheme = ref(theme.name.value || 'dark')
+
+// Watch for theme changes and update the local state
+watch(() => theme.name.value, (newTheme) => {
+  currentTheme.value = newTheme
+})
 
 function handleLayoutSelect(newLayout: string) {
   layoutId.value = newLayout
   router.push({ name: 'Layout' })
 }
 
+function handleThemeChange(newTheme: string) {
+  theme.change(newTheme)
+}
+
 </script>
 <template>
   <v-responsive class="border rounded">
-    <v-app v-if="user" :theme="theme.name.value">
-      <v-app-bar color="primary">
-        <template v-slot:prepend>
-          <v-app-bar-nav-icon @click="drawer = !drawer"
-            aria-controls="drawer-navigation"
-            class="lg:hidden p-2 mr-2" 
-          ></v-app-bar-nav-icon>
-        </template>
-
-        <v-app-bar-title>
-          <v-icon class="mr-2">mdi-cloud</v-icon>
-          DEJA Cloud
-        </v-app-bar-title>
-          <v-btn
-            @click="theme.change('light')"
-            text="Light"
-          ></v-btn>
-          <v-btn
-            @click="theme.change('dark')"
-            text="Dark"
-          ></v-btn>
-          <LayoutStatus />
-          <DeviceStatus v-if="!!user" />
-          <TrackPower />
-          <UserProfileMenu v-if="!!user" />
-
-      </v-app-bar>
-      <v-navigation-drawer v-model="drawer" :mobile="mobile" mobile-breakpoint="md">
-        <v-spacer class="h-8"></v-spacer>
-        <v-list-item v-for="item in menu" 
-          :key="item.label" 
-          :title="item.label"
-          :color="item.color || 'primary'"
-          :active="router.currentRoute.value.name === item.label"
-          @click="handleMenu(item)"
-          link
+      <v-app v-if="user" :theme="theme.name.value">
+        <AppHeader 
+          app-name="DEJA Cloud"
+          app-icon="mdi-cloud"
+          variant="cloud"
+          color="surface"
+          :dark="true"
+          :devices="devices"
+          :show-layout-power="true"
+          :show-emergency-stop="true"
+          :show-device-status="true"
+          :show-device-status-label="true"
+          :show-user-profile="true"
+          @track-power-toggle="handleTrackPowerToggle"
+          @layout-power-toggle="handleLayoutPowerToggle"
+          @emergency-stop="handleEmergencyStop"
+          @device-select="handleDeviceSelect"
         >
-          <template #prepend>
-            <v-icon size="24" :class="`text-${item.color}-500 dark:text-${item.color}-400`"
-              class="stroke-none" >{{item.icon}}</v-icon>
-          </template>
-        </v-list-item>
+        </AppHeader>
+      <v-navigation-drawer v-model="drawer" :mobile="mobile" mobile-breakpoint="md">
+        
+        
+        <v-spacer class="h-8"></v-spacer>
+        <v-list>
+          <v-list-item v-for="item in menu" 
+            :key="item.label" 
+            :title="item.label"
+            :color="item.color || 'primary'"
+            :active="router.currentRoute.value.name === item.label"
+            @click="handleMenu(item)"
+            link
+          >
+            <template #prepend>
+              <v-icon size="24" :class="`text-${item.color}-500 dark:text-${item.color}-400`"
+                class="stroke-none" >{{item.icon}}</v-icon>
+            </template>
+          </v-list-item>
+        </v-list>
+        <v-divider class="my-2"></v-divider>
+        <!-- Theme Toggle Section -->
+        <v-list>
+          <v-list-item>
+            <v-list-item-title>
+              <v-btn-toggle
+                v-model="currentTheme"
+                mandatory
+                size="small"
+                @update:model-value="handleThemeChange"
+                color="amber"
+              >
+                <v-btn value="light" size="small" :variant="currentTheme === 'light' ? 'flat' : 'outlined'">
+                  <v-icon icon="mdi-white-balance-sunny" size="16"></v-icon>
+                </v-btn>
+                <v-btn value="dark" size="small" :variant="currentTheme === 'dark' ? 'flat' : 'outlined'">
+                  <v-icon icon="mdi-weather-night" size="16"></v-icon>
+                </v-btn>
+              </v-btn-toggle>
+            </v-list-item-title>
+            <template #append>
+            </template>
+          </v-list-item>
+        </v-list>
       </v-navigation-drawer>
       <v-main>
         <v-container v-if="layoutId">

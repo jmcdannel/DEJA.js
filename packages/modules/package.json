@@ -4,12 +4,9 @@
   "private": true,
   "license": "MIT",
   "type": "module",
+  "main": "./index.ts",
   "exports": {
-    "./effects": "./src/effects/index.ts",
-    "./layouts": "./src/layouts/index.ts",
-    "./locos": "./src/locos/index.ts",
-    "./turnouts": "./src/turnouts/index.ts",
-    "./types": "./src/types.ts"
+    ".": "./index.ts"
   },
   "scripts": {
     "type-check": "tsc --noEmit"

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useEfx, efxTypes, type Effect, type MacroItem } from '@repo/modules/effects'
+import { useEfx, efxTypes, type Effect, type MacroItem } from '@repo/modules'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import RouteTurnoutForm from '@/Routes/RouteTurnoutForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
