@@ -30,7 +30,8 @@ export function useTurnouts() {
       })
     }
     
-    let queryRef = query(colRef, orderBy(sortBy.value[0]))
+    let queryRef = query(collection(db, `layouts/${layoutId.value}/turnouts`))
+    // let queryRef = query(colRef, orderBy(sortBy.value[0])) // TODO: debug this, getting error: [VueFire SSR]: Could not get the path of the data source]
     whereClauses.forEach((clause) => {
       console.log(clause)
       queryRef = query(queryRef, clause)

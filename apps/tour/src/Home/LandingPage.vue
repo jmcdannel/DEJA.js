@@ -60,15 +60,15 @@
             Layout Areas
           </h2>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <!-- List of layout areas -->
-            <div class="p-2 bg-background rounded border text-center">Tamarack Station</div>
-            <div class="p-2 bg-background rounded border text-center">Roseberry Yard</div>
-            <div class="p-2 bg-background rounded border text-center">Payette Subdivision</div>
-            <div class="p-2 bg-background rounded border text-center">Deadman's Curve</div>
-            <div class="p-2 bg-background rounded border text-center">Round Valley</div>
-            <div class="p-2 bg-background rounded border text-center">Thunder City</div>
-            <div class="p-2 bg-background rounded border text-center">Eagle Nest</div>
-            <div class="p-2 bg-background rounded border text-center">Tripod Peak</div>
+            <!-- List of layout areas - clickable links to area details -->
+            <router-link to="/area/tamarack-station" class="p-2 bg-background rounded border text-center hover:bg-primary/10 transition-colors cursor-pointer">Tamarack Station</router-link>
+            <router-link to="/area/roseberry-yard" class="p-2 bg-background rounded border text-center hover:bg-primary/10 transition-colors cursor-pointer">Roseberry Yard</router-link>
+            <router-link to="/area/payette-subdivision" class="p-2 bg-background rounded border text-center hover:bg-primary/10 transition-colors cursor-pointer">Payette Subdivision</router-link>
+            <router-link to="/area/deadmans-curve" class="p-2 bg-background rounded border text-center hover:bg-primary/10 transition-colors cursor-pointer">Deadman's Curve</router-link>
+            <router-link to="/area/round-valley" class="p-2 bg-background rounded border text-center hover:bg-primary/10 transition-colors cursor-pointer">Round Valley</router-link>
+            <router-link to="/area/thunder-city" class="p-2 bg-background rounded border text-center hover:bg-primary/10 transition-colors cursor-pointer">Thunder City</router-link>
+            <router-link to="/area/eagle-nest" class="p-2 bg-background rounded border text-center hover:bg-primary/10 transition-colors cursor-pointer">Eagle Nest</router-link>
+            <router-link to="/area/tripod-peak" class="p-2 bg-background rounded border text-center hover:bg-primary/10 transition-colors cursor-pointer">Tripod Peak</router-link>
           </div>
         </div>
       </div>

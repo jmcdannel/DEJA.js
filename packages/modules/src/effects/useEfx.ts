@@ -4,7 +4,7 @@ import {
   doc,
   getDoc,
   orderBy,
-  query, 
+  query,
   serverTimestamp,
   setDoc,
   where
@@ -17,13 +17,13 @@ import { efxTypes } from './constants'
 import type { Effect, EffectType } from './types'
 
 export const useEfx = () => {
-  const layoutId = useStorage('@DEJA/layoutId', '')
-  const sortBy = useStorage<string[]>('@DEJA/prefs/effects/Sort', ['order'])
+  const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+  const sortBy = useStorage<string[]>('@DEJA/prefs/effects/Sort', ['name'])
   const filterBy = useStorage<string[]>('@DEJA/prefs/effects/Filter', [])
   const colRef = collection(db, `layouts/${layoutId.value}/effects`)
 
   const efxCol = () => {
-   const whereClauses: any[] = []
+    const whereClauses: any[] = []
     if (filterBy.value.length > 0) {
       filterBy.value.forEach((filter) => {
         if (filter.startsWith('device:')) {
@@ -32,19 +32,20 @@ export const useEfx = () => {
         }
       })
     }
-    
-    let queryRef = query(colRef, orderBy(sortBy.value[0]))
+
+    let queryRef = query(collection(db, `layouts/${layoutId.value}/effects`))
+    // let queryRef = fquery(colRef, orderBy(sortBy.value[0])) // TODO: debug this, getting error: [VueFire SSR]: Could not get the path of the data source]
     whereClauses.forEach((clause) => {
       console.log(clause)
       queryRef = query(queryRef, clause)
     })
-    
+
     return layoutId.value ? queryRef : null
   }
 
   function getEffects() {
-    const layouts = useCollection(efxCol)
-    return layouts
+    const effects = useCollection(efxCol)
+    return effects
   }
 
   async function getEffect(id: string): Promise<Effect | undefined> {
@@ -57,8 +58,8 @@ export const useEfx = () => {
 
     if (docSnap.exists()) {
       const data = docSnap.data()
-      return { 
-        ...data, 
+      return {
+        ...data,
         id: docSnap.id,
         type: data.type || '',
         state: data.state || false
@@ -72,7 +73,7 @@ export const useEfx = () => {
     try {
       console.log('getEffectsByType', efxType)
       return query(
-        colRef, 
+        colRef,
         where('type', '==', efxType),
       )
     } catch (error) {
@@ -85,7 +86,7 @@ export const useEfx = () => {
     try {
       console.log('getEffectsByDevice', deviceId)
       return query(
-        colRef, 
+        colRef,
         where('device', '==', deviceId),
       )
     } catch (error) {

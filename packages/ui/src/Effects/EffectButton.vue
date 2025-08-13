@@ -1,53 +1,60 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
-import { useEfx, type Effect, type EffectType } from '@repo/modules/effects'
+import { useEfx, type Effect } from '@repo/modules/effects'
 
-const { runEffect, getEfxType } = useEfx()
+const { runEffect } = useEfx()
 
 interface Props {
   effect: Effect
   effectId?: string
+  state?: boolean
 }
 
 const props = defineProps<Props>()
+const emit = defineEmits<{
+  'update:state': [value: boolean]
+}>()
 
-const state = ref(props.effect?.state || false)
-const efxType = ref<EffectType | null>(props.effect?.type ? getEfxType(props.effect?.type) as EffectType : null)
+const internalState = ref(props.state !== undefined ? props.state : props.effect?.state)
 const isRunning = ref(false)
 
-async function handleEffect() {
+// Computed property for state that can be updated
+const state = computed({
+  get: () => props.state !== undefined ? props.state : internalState.value,
+  set: (value: boolean) => {
+    internalState.value = value
+    emit('update:state', value)
+  }
+})
+
+// Watch for prop changes
+watch(() => props.state, (newState) => {
+  if (newState !== undefined) {
+    internalState.value = newState
+  }
+})
+
+async function handleEffect(event: Event) {
   const { isPending } = useTimeoutFn(() => {
     isRunning.value = false
   }, 3000)
   isRunning.value = isPending.value
-  
-  state.value = !state.value
-  await runEffect({
-    ...props.effect,
-    id: props.effectId || props.effect.id,
-    state: state.value
-  })
+  await runEffect({...props.effect, id: props.effectId || props.effect.id, state: state.value})
 }
 </script>
 
 <template>
   <v-btn 
     class="m-1"
-    :color="effect?.color || efxType?.color || 'primary'"
+    :color="effect?.color || 'primary'"
     :disabled="isRunning"
     :loading="isRunning"
     variant="tonal"
     @click="handleEffect"
   >
     <template #prepend>
-      <v-icon 
-        v-if="efxType?.icon" 
-        :icon="efxType?.icon" 
-        class="stroke-none"
-        :size="20"
-        :color="effect?.color || efxType?.color || 'primary'"
-      />
+      <v-icon icon="mdi-lightning-bolt" class="w-6 h-6" />
     </template>
     {{effect?.name}}
   </v-btn>

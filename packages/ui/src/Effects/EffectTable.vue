@@ -1,43 +1,52 @@
 <script setup lang="ts">
-import { useEfx, type Effect } from '@repo/modules/effects'
-
-const { getEffects, runEffect } = useEfx()
+import type { Effect } from '@repo/modules/effects'
 
 interface Props {
-  items?: Effect[]
-  sortBy?: string[]
+  effects: Effect[]
+  sortBy?: string
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  sortBy: () => ['device']
-})
+interface Emits {
+  (e: 'effect-change', effect: Effect): void
+}
 
-const effectItems = props.items || getEffects()
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
 
-function handleEffect(efx: Effect) {
-  runEffect(efx)
+const handleEffect = (effect: Effect) => {
+  emit('effect-change', effect)
 }
 </script>
 
 <template>
-  <v-table :items="effectItems" :sort-by="sortBy" class="w-full p-4">
+  <v-table :items="effects" :sort-by="sortBy" class="w-full p-4">
     <thead>
       <tr>
         <th>Name</th>
         <th>Device</th>
         <th>Type</th>
+        <th>Guest Access</th>
         <th>Status</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="item in effectItems" :key="item.id">
+      <tr v-for="item in effects" :key="item.id">
         <td>{{ item.name }}</td>
         <td>{{ item.device }}</td>
         <td>{{ item.type }}</td>
         <td>
+          <v-chip 
+            :color="item.allowGuest ? 'success' : 'default'"
+            size="small"
+            variant="outlined"
+          >
+            {{ item.allowGuest ? 'Yes' : 'No' }}
+          </v-chip>
+        </td>
+        <td>
           <v-switch 
             v-model="item.state" 
-            @change="handleEffect(item as Effect)" 
+            @change="handleEffect(item)" 
             :color="item.color || 'primary'" 
             hide-details 
           />

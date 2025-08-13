@@ -1,54 +1,65 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
-import { useEfx, type Effect, type EffectType } from '@repo/modules/effects'
+import { useEfx, type Effect } from '@repo/modules/effects'
 
-const { runEffect, getEfxType } = useEfx()
+const { runEffect } = useEfx()
 
 interface Props {
   effect: Effect
   effectId?: string
+  state?: boolean
 }
 
 const props = defineProps<Props>()
+const emit = defineEmits<{
+  'update:state': [value: boolean]
+}>()
 
-const state = ref(props.effect?.state || false)
-const efxType = ref<EffectType | null>(props.effect?.type ? getEfxType(props.effect?.type) as EffectType : null)
+const internalState = ref(props.state !== undefined ? props.state : props.effect?.state)
 const isRunning = ref(false)
 
-watch(state, async () => {
+// Computed property for state that can be updated
+const state = computed({
+  get: () => props.state !== undefined ? props.state : internalState.value,
+  set: (value: boolean) => {
+    internalState.value = value
+    emit('update:state', value)
+  }
+})
+
+// Watch for prop changes
+watch(() => props.state, (newState) => {
+  if (newState !== undefined) {
+    internalState.value = newState
+  }
+})
+
+async function handleEffect(event: Event) {
   const { isPending } = useTimeoutFn(() => {
     isRunning.value = false
   }, 3000)
   isRunning.value = isPending.value
-  await runEffect({
-    ...props.effect,
-    id: props.effectId || props.effect.id,
-    state: state.value
-  })
-})
+  await runEffect({...props.effect, id: props.effectId || props.effect.id, state: state.value})
+}
 </script>
 
 <template>
   <v-card 
     class="m-1 shadow-xl"
-    :color="effect?.color || efxType?.color || 'primary'"
+    :color="effect?.color || 'primary'"
     :disabled="isRunning"
     :loading="isRunning"
     variant="tonal"
+    @click="handleEffect"
   >
     <v-card-title class="flex flex-row items-center gap-4">
-      <v-icon 
-        v-if="efxType?.icon" 
-        :icon="efxType?.icon" 
-        class="stroke-none"
-        :size="32"
-        :color="effect?.color || efxType?.color || 'primary'"
-      />
+      <v-icon icon="mdi-lightning-bolt" class="w-6 h-6" />
       <h4 class="text-md font-bold">{{effect?.name}}</h4>
     </v-card-title>
     <v-card-text class="text-sm">
       <p class="my-4">{{effect?.name}}</p>
+      <p class="my-4">{{ effect.type }}</p>
       <div class="flex flex-wrap gap-2">
         <v-chip 
           v-if="effect?.device" 
@@ -75,12 +86,22 @@ watch(state, async () => {
         >
           {{tag}}
         </v-chip>
+        <v-chip 
+          v-if="effect?.allowGuest" 
+          class="ml-2 text-xs"
+          prepend-icon="mdi-account-check"
+          variant="outlined"
+          color="success"
+        >
+          Guest Access
+        </v-chip>
       </div>
     </v-card-text>
     <v-card-actions class="flex justify-end">
       <v-switch 
-        v-model="state"
-        :color="effect?.color || efxType?.color || 'primary'" 
+        v-model="state" 
+        @change="handleEffect" 
+        :color="effect?.color || 'primary'" 
         :disabled="isRunning" 
         :loading="isRunning" 
         hide-details 

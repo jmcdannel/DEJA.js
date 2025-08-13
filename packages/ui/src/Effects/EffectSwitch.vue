@@ -1,64 +1,69 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
-import { useEfx, type Effect, type EffectType } from '@repo/modules/effects'
+import { useEfx, type Effect } from '@repo/modules/effects'
 
-const { runEffect, getEfxType } = useEfx()
+const { runEffect } = useEfx()
 
 interface Props {
   effect: Effect
   effectId?: string
+  state?: boolean
 }
 
 const props = defineProps<Props>()
+const emit = defineEmits<{
+  'update:state': [value: boolean]
+}>()
 
-const state = ref(props.effect?.state || false)
-const efxType = ref<EffectType | null>(props.effect?.type ? getEfxType(props.effect?.type) as EffectType : null)
+const internalState = ref(props.state !== undefined ? props.state : props.effect?.state)
 const isRunning = ref(false)
 
-watch(state, async () => {
+// Computed property for state that can be updated
+const state = computed({
+  get: () => props.state !== undefined ? props.state : internalState.value,
+  set: (value: boolean) => {
+    internalState.value = value
+    emit('update:state', value)
+  }
+})
+
+// Watch for prop changes
+watch(() => props.state, (newState) => {
+  if (newState !== undefined) {
+    internalState.value = newState
+  }
+})
+
+async function handleEffect(event: Event) {
   const { isPending } = useTimeoutFn(() => {
     isRunning.value = false
   }, 3000)
   isRunning.value = isPending.value
-  await runEffect({
-    ...props.effect,
-    id: props.effectId || props.effect.id,
-    state: state.value
-  })
-})
+  await runEffect({...props.effect, id: props.effectId || props.effect.id, state: internalState.value })
+}
 </script>
 
 <template>
   <v-card 
-    class="shadow-xl my-1 p-[1px] rounded-full text-white"
-    :class="isRunning ? 'bg-gradient-to-r from-indigo-400 to-pink-900' : ''"
-    :color="effect?.color || efxType?.color || 'primary'"
+    class="shadow-xl my-1 p-[1px] rounded-full"
+    :class="isRunning ? 'bg-gradient-to-r from-indigo-400 to-pink-900 ' : ''"
+    :color="effect?.color || 'primary'"
   >
     <v-card-title 
-      class="flex flex-row items-center justify-between relative rounded-full px-2 bg-gray-900 bg-opacity-40"
+      class="flex flex-row items-center gap-4 justify-between rounded-full px-2 bg-gray-900 bg-opacity-40"
       :class="isRunning ? 'shadow-inner shadow-pink-500 bg-opacity-80' : 'bg-opacity-95'"
     >
-      <h4 class="text-sm font-bold flex items-center gap-2">
-        <v-icon 
-          v-if="efxType?.icon" 
-          :icon="efxType?.icon" 
-          class="stroke-none"
-          :size="32"
-          :color="effect?.color || efxType?.color || 'primary'"
-        />
-        {{effect?.name}}
-      </h4>
-      <aside class="flex items-center gap-2">
-        <v-chip size="small" :text="effect?.device || 'device'" />
-        <v-switch 
-          v-model="state" 
-          :color="effect?.color || efxType?.color || 'primary'" 
-          :disabled="isRunning" 
-          :loading="isRunning" 
-          hide-details 
-        />
-      </aside>
+      <v-icon icon="mdi-lightning-bolt" class="w-6 h-6" />
+      <h4 class="text-md font-bold mr-2 text-white">{{effect?.name}}</h4>
+      <v-switch 
+        v-model="state" 
+        @change="handleEffect" 
+        :color="effect?.color || 'primary'" 
+        :disabled="isRunning" 
+        :loading="isRunning" 
+        hide-details 
+      />
     </v-card-title>
   </v-card>
 </template>

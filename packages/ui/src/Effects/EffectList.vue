@@ -1,41 +1,46 @@
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core'
 import { useEfx, type Effect } from '@repo/modules/effects'
+import { ListMenu } from '@repo/ui'
 import EffectItem from './EffectItem.vue'
 import EffectTable from './EffectTable.vue'
-import { ListMenu } from '@repo/ui'
 
-const viewAs = useStorage('@DEJA/prefs/effects/View', ['button'])
+const viewAs = useStorage<string[]>('@DEJA/prefs/effects/View', ['button'])
 const sortBy = useStorage<string[]>('@DEJA/prefs/effects/Sort', ['device'])
 
-const { getEffects } = useEfx()
-const list = getEffects()
+const { getEffects, runEffect } = useEfx()
+const effects = getEffects()
+
+async function handleEffect(effect: Effect) {
+  await runEffect(effect)
+}
 </script>
 
 <template>
-  <v-toolbar color="purple-darken-4" :elevation="8">
+  <v-toolbar color="amber-darken-4" :elevation="8">
     <template #prepend>
-      <v-icon icon="mdi-magic-staff" class="text-xl md:text-3xl"></v-icon>
+      <v-icon icon="mdi-lightning-bolt" class="text-xl md:text-3xl"></v-icon>
     </template>
     <template #append>
       <ListMenu :module-name="'effects'" />
     </template>
-    <v-toolbar-title class="text-xl md:text-3xl">Effects</v-toolbar-title>    
+    <v-toolbar-title class="text-xl md:text-3xl">Effects</v-toolbar-title>
   </v-toolbar>
-  
+  <v-spacer class="my-4"></v-spacer>
   <EffectTable 
-    v-if="viewAs?.[0] === 'table'" 
-    :items="list as Effect[]" 
-    :sort-by="sortBy"
+    v-if="viewAs?.[0] === 'table'"
+    :effects="effects as Effect[]" 
+    :sort-by="sortBy?.[0]" 
+    @effect-change="handleEffect" 
   />
-  
-  <div v-else class="grid grid-cols-1 @[960px]:grid-cols-3 xlg:grid-cols-4 gap-2 w-full p-4">
+  <v-sheet v-else class="grid grid-cols-1 @[960px]:grid-cols-3 xlg:grid-cols-4 gap-2 w-full p-4">
     <EffectItem 
-      v-for="item in list as Effect[]"
+      v-for="item in effects as Effect[]"
       :key="item.id" 
+      :state="item.state"
       :effect="item as Effect" 
-      :effect-id="item.id"
-      :view-as="viewAs?.[0]"
+      :effectId="item?.id"
+      :viewAs="viewAs?.[0]"
     />
-  </div>
+  </v-sheet>
 </template>

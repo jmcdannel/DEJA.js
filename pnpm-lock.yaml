@@ -414,12 +414,21 @@ importers:
 
   apps/tour:
     dependencies:
+      '@repo/modules':
+        specifier: workspace:*
+        version: link:../../packages/modules
+      '@repo/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
       firebase:
         specifier: ^10.14.1
         version: 10.14.1
+      pinia:
+        specifier: ^2.1.6
+        version: 2.3.1(typescript@5.8.3)(vue@3.5.18(typescript@5.8.3))
       vue:
         specifier: ^3.5.17
         version: 3.5.18(typescript@5.8.3)
@@ -451,18 +460,12 @@ importers:
       '@repo/firebase-config':
         specifier: workspace:*
         version: link:../../packages/firebase-config
-      '@repo/modules':
-        specifier: workspace:*
-        version: link:../../packages/modules
       '@repo/prettier-config':
         specifier: workspace:*
         version: link:../../packages/config-prettier
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      '@repo/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       '@repo/utils':
         specifier: workspace:*
         version: link:../../packages/utils

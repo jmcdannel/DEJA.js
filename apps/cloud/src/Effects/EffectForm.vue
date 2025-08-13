@@ -46,6 +46,7 @@ const efxType = ref(props.efx?.type)
 const efxTypeObj = ref(props.efx?.type ? getEfxType(props.efx?.type) : undefined)
 const color = ref(props.efx?.color || efxTypeObj.value?.color || 'purple')  
 const tags = ref<string[]>(props.efx?.tags || [])
+const allowGuest = ref<boolean>(props.efx?.allowGuest || false)
 const loading = ref(false)
 const rules: ValidationRules = {
   required: [(val) => !!val || 'Required.']
@@ -75,6 +76,7 @@ async function submit () {
     type: efxType.value || '',
     color: color.value,
     tags: tags.value,
+    allowGuest: allowGuest.value,
     state: false,
     id: props.efx?.id || ''
   }
@@ -295,6 +297,28 @@ function stopSound() {
 
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
     <TagPicker class="my-4 " v-model="tags"></TagPicker>
+    
+    <!-- Guest Access -->
+    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+    <div class="flex items-center justify-between my-4">
+      <div>
+        <v-label class="text-lg">Guest Access</v-label>
+        <div class="text-sm opacity-70 mt-1">Allow visitors to control this effect in the tour app</div>
+      </div>
+      <v-switch
+        v-model="allowGuest"
+        :color="color"
+        hide-details
+      >
+        <template #label>
+          <v-icon 
+            :icon="allowGuest ? 'mdi-account-check' : 'mdi-account-off'" 
+            class="mr-2"
+          ></v-icon>
+          {{ allowGuest ? 'Enabled' : 'Disabled' }}
+        </template>
+      </v-switch>
+    </div>
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 my-4">
       <v-btn
