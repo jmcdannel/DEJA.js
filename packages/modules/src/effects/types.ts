@@ -13,6 +13,7 @@ export interface Effect {
   range?: string
   config?: string
   tags?: string[]
+  allowGuest?: boolean
   // For 'signal' effect type: references to child pin effects by ID (optional)
   red?: string
   yellow?: string

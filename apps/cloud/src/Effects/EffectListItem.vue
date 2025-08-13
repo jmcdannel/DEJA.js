@@ -63,6 +63,15 @@ async function handleEfx (event: Event) {
           >
             {{ efx?.device }}
           </v-chip>
+          
+          <v-chip
+            v-if="efx?.allowGuest"
+            size="small"
+            color="success"
+            prepend-icon="mdi-account-check"
+          >
+            Guest Access
+          </v-chip>
         </v-chip-group>
         <div class="flex flex-col items-center justify-center">
           <v-icon 
