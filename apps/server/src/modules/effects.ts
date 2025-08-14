@@ -153,9 +153,24 @@ export async function handleEffect(payload: Effect): Promise<void> {
     return await handleMacro(payload)
   }
   
-  // Handle sound effects - skip device connection check and play directly
+  // Handle sound effects - only play on DEJA Server device
   if (payload.type === 'sound') {
     try {
+      // Device is required for sound effects
+      if (!payload.device) {
+        log.error('Device field is required for sound effects:', payload)
+        return
+      }
+      
+      // Only allow sound effects on DEJA Server device
+      if (payload.device !== 'deja-server') {
+        log.error('Sound effects can only be played on DEJA Server device:', { 
+          requestedDevice: payload.device, 
+          effectId: payload.id 
+        })
+        return
+      }
+      
       // Use soundBlobUrl if available, otherwise fall back to sound field
       const soundUrl = (payload as any).soundBlobUrl || payload.sound
       
@@ -164,10 +179,11 @@ export async function handleEffect(payload: Effect): Promise<void> {
         return
       }
       
-      log.log('Processing sound effect:', { 
+      log.log('Processing sound effect on DEJA Server:', { 
         soundUrl: soundUrl, 
         state: payload.state,
-        hasBlobUrl: !!(payload as any).soundBlobUrl
+        hasBlobUrl: !!(payload as any).soundBlobUrl,
+        device: payload.device
       })
       
       // Import and use the playSound function

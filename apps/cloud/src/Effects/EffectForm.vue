@@ -111,6 +111,10 @@ watch(efxType, (newType) => {
     if (efxTypeObj.value?.defaultDevice && !props.efx?.device) {
       device.value = efxTypeObj.value.defaultDevice
     }
+    // For sound effects, always set device to deja-server
+    if (newType === 'sound') {
+      device.value = 'deja-server'
+    }
   } else {
     efxTypeObj.value = undefined
   }
@@ -118,6 +122,13 @@ watch(efxType, (newType) => {
 
 async function submit () {
   loading.value = true
+
+  // Validate that sound effects have a device set
+  if (efxType.value === 'sound' && !device.value) {
+    console.error('Device is required for sound effects')
+    loading.value = false
+    return
+  }
 
   const newEfx: Effect = {
     name: name.value,
@@ -129,7 +140,7 @@ async function submit () {
     id: props.efx?.id || ''
   }
   // set device
-  if (efxTypeObj.value?.require?.includes('device')) {
+  if (efxTypeObj.value?.require?.includes('device') || efxType.value === 'sound') {
     newEfx.device = device.value
   }
   //  set pin
@@ -222,6 +233,20 @@ function stopSound() {
     <template v-if="!efx.device && efxTypeObj?.require?.includes('device')">
       <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
       <v-label class="m-2">Device</v-label>
+      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+      <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large">
+          <v-btn v-for="deviceOpt in devices" :value="deviceOpt.id" :key="deviceOpt.id" 
+            class="min-h-24 min-w-48 border"
+            :color="color" >
+              {{ deviceOpt.id }}
+          </v-btn>
+      </v-btn-toggle>
+    </template>
+    
+    <!-- Show device selection for sound effects -->
+    <template v-if="efxType === 'sound'">
+      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+      <v-label class="m-2">Device (Required for Sound Effects)</v-label>
       <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
       <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large">
           <v-btn v-for="deviceOpt in devices" :value="deviceOpt.id" :key="deviceOpt.id" 

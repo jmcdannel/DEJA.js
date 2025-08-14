@@ -98,7 +98,7 @@ export const useTourStore = defineStore('tour', () => {
       name: 'Yard Sounds',
       type: 'sound',
       state: false,
-      device: 'yard',
+      device: 'deja-server',
       pin: 2,
       tags: ['sound', 'yard'],
       allowGuest: true

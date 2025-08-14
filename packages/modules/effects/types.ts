@@ -1,5 +1,5 @@
 export interface Effect {
-  device?: string
+  device?: string // Required for sound effects, optional for others
   name?: string
   pin?: number
   on?: any[]
