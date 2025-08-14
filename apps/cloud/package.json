@@ -6,7 +6,9 @@
   "scripts": {
     "build": "run-p type-check build-only",
     "build-only": "vite build",
-    "dev": "vite --host",
+    "dev": "vite --host --config vite.dev.config.ts",
+    "dev:proxy": "vite --host --config vite.dev.config.ts --mode development",
+    "dev:mock": "vite --host --config vite.dev.config.ts --mode mock",
     "format": "prettier --write src/",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "preview": "vite preview",

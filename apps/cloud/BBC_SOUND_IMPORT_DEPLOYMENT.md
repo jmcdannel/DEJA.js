@@ -305,9 +305,14 @@ export const BBC_API_CONFIG = {
    ```
 
 2. **Test the importer**:
-   - Navigate to `/effects/bbc-importer`
+turbo dev   - Navigate to `/effects` and click "BBC Sound Importer"
+   - Or go directly to `/effects/bbc-importer`
    - Paste a BBC sound URL
    - Select category and import
+
+3. **Test the 404 page**:
+   - Navigate to any non-existent route (e.g., `/derailed-train`)
+   - Enjoy the train-themed 404 page with puns!
 
 ### Production Testing
 
@@ -318,7 +323,8 @@ export const BBC_API_CONFIG = {
 
 2. **Test the API endpoint**
 3. **Verify file storage**
-4. **Deploy to production**:
+4. **Test the 404 page**
+5. **Deploy to production**:
    ```bash
    vercel --prod
    ```

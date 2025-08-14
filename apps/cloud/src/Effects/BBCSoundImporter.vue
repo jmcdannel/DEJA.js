@@ -7,7 +7,19 @@
           <v-icon icon="mdi-download" class="mr-2" color="blue"></v-icon>
           BBC Sound Effects Importer
         </div>
-        <div class="d-flex align-center">
+        <div class="d-flex align-center gap-2">
+          <!-- Proxy Status Indicator -->
+          <v-chip
+            v-if="isDevelopment"
+            color="info"
+            size="small"
+            variant="outlined"
+            class="mr-2"
+          >
+            <v-icon icon="mdi-server-network" class="mr-1"></v-icon>
+            Proxy: {{ getProxyMode() }}
+          </v-chip>
+          
           <v-chip
             :color="apiStatus === 'online' ? 'success' : 'error'"
             size="small"
@@ -467,6 +479,20 @@ import { ref, computed, onMounted } from 'vue'
 import { soundEffectsService, type SoundEffect, type SoundCategory } from '@repo/modules'
 import { validateBBCUrl, extractSearchQuery } from '@/config/bbc-api'
 
+// Proxy configuration for development
+const PROXY_CONFIG = {
+  // Development proxy endpoints
+  bbcApi: import.meta.env.DEV ? '/api/bbc' : 'https://sound-effects.bbcrewind.co.uk',
+  bbcAudio: import.meta.env.DEV ? '/api/bbc-audio' : 'https://sound-effects.bbcrewind.co.uk/audio',
+  bbcSearch: import.meta.env.DEV ? '/api/bbc-search' : 'https://sound-effects.bbcrewind.co.uk/search',
+  
+  // Local API endpoint
+  localApi: import.meta.env.DEV ? '/api/bbc-sounds/import' : '/api/bbc-sounds/import',
+  
+  // Mock API endpoint
+  mockApi: import.meta.env.DEV ? '/api/mock' : null
+}
+
 interface ImportStatus {
   type: 'success' | 'error' | 'info'
   title: string
@@ -556,6 +582,9 @@ const filterCategories = [
 const canImport = computed(() => {
   return soundPreview.value && selectedCategory.value && !importing.value
 })
+
+// Development mode detection
+const isDevelopment = computed(() => import.meta.env.DEV)
 
 // Filtered sounds based on category and search
 const filteredSounds = computed(() => {
@@ -740,6 +769,21 @@ function formatDuration(ms: number): string {
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = seconds % 60
   return `${minutes}m ${remainingSeconds}s`
+}
+
+// Helper function to get proxy mode for display
+function getProxyMode(): string {
+  if (!import.meta.env.DEV) return 'Production'
+  
+  // Check environment variables for proxy mode
+  const proxyMode = import.meta.env.VITE_PROXY_MODE || 'bbc'
+  const useMock = import.meta.env.VITE_USE_MOCK_API === 'true'
+  
+  if (useMock) return 'Mock API'
+  if (proxyMode === 'bbc') return 'BBC Proxy'
+  if (proxyMode === 'local') return 'Local API'
+  
+  return 'Custom'
 }
 
 // API Status Functions
