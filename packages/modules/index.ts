@@ -6,6 +6,8 @@ export { default as useEfx } from './effects/useEfx'
 export * from './effects/types'
 export * from './effects/constants'
 export * from './effects/soundService'
+export * from './effects/soundStore'
+export { soundStoreService } from './effects/soundStore'
 
 // Layouts module
 export { default as useLayout } from './layouts/useLayout'

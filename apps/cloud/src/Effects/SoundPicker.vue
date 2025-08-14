@@ -29,9 +29,8 @@
     <!-- Sound Browser -->
     <div class="sound-browser">
       <v-tabs v-model="activeTab" color="primary">
-        <v-tab value="curated">Curated Sounds</v-tab>
+        <v-tab value="curated">Sound Store</v-tab>
         <v-tab value="search">Search</v-tab>
-        <v-tab value="libraries">External Libraries</v-tab>
       </v-tabs>
 
       <v-window v-model="activeTab">
@@ -52,7 +51,7 @@
                 :key="sound.id"
                 class="sound-card cursor-pointer"
                 @click="selectSound(sound)"
-                :class="{ 'selected': sound.url === soundUrl }"
+                :class="{ 'selected': sound.filePath === soundUrl }"
               >
                 <v-card-title class="text-sm font-medium">
                   {{ sound.name }}
@@ -73,7 +72,7 @@
                       {{ tag }}
                     </v-chip>
                   </div>
-                  <div class="mt-2 text-xs">
+                  <div v-if="sound.duration" class="mt-2 text-xs">
                     Duration: {{ formatDuration(sound.duration) }}
                   </div>
                 </v-card-text>
@@ -88,13 +87,7 @@
                     size="small"
                     @click.stop="copySoundUrl(sound)"
                   ></v-btn>
-                  <v-btn
-                    icon="mdi-server"
-                    size="small"
-                    @click.stop="testSoundOnServer(sound)"
-                    title="Test on Server"
-                    color="success"
-                  ></v-btn>
+
                 </v-card-actions>
               </v-card>
             </div>
@@ -134,49 +127,7 @@
           </div>
         </v-window-item>
 
-        <!-- External Libraries Tab -->
-        <v-window-item value="libraries">
-          <div class="mt-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <v-card
-                v-for="library in availableLibraries"
-                :key="library.name"
-                class="library-card"
-              >
-                <v-card-title class="text-sm font-medium">
-                  {{ library.name }}
-                </v-card-title>
-                <v-card-text class="text-xs text-gray-600">
-                  <div class="mb-2">
-                    <strong>License:</strong> {{ library.license }}
-                  </div>
-                  <div class="mb-2">
-                    <strong>Categories:</strong>
-                    <div class="flex flex-wrap gap-1 mt-1">
-                      <v-chip
-                        v-for="category in library.categories.slice(0, 5)"
-                        :key="category"
-                        size="x-small"
-                        variant="outlined"
-                      >
-                        {{ category }}
-                      </v-chip>
-                    </div>
-                  </div>
-                </v-card-text>
-                <v-card-actions>
-                  <v-btn
-                    size="small"
-                    @click="searchExternalLibrary(library)"
-                    :disabled="!library.apiKey"
-                  >
-                    Search Library
-                  </v-btn>
-                </v-card-actions>
-              </v-card>
-            </div>
-          </div>
-        </v-window-item>
+
       </v-window>
     </div>
   </div>
@@ -184,7 +135,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { soundEffectsService, type SoundEffect, type SoundCategory } from '@repo/modules'
+import { soundStoreService, type StoredSound } from '@repo/modules/effects/soundStore'
 
 interface Props {
   modelValue?: string
@@ -199,13 +150,13 @@ const emit = defineEmits<Emits>()
 
 const soundUrl = ref(props.modelValue || '')
 const activeTab = ref('curated')
-const selectedCategory = ref<SoundCategory | 'all'>('all')
+const selectedCategory = ref<string>('')
 const searchQuery = ref('')
-const searchResults = ref<SoundEffect[]>([])
+const searchResults = ref<StoredSound[]>([])
 const audioElement = ref<HTMLAudioElement | null>(null)
 
 const soundCategories = computed(() => [
-  { title: 'All Categories', value: 'all' },
+  { title: 'All Categories', value: '' },
   { title: 'Train Sounds', value: 'train' },
   { title: 'Station Sounds', value: 'station' },
   { title: 'City Sounds', value: 'city' },
@@ -216,13 +167,11 @@ const soundCategories = computed(() => [
   { title: 'Industrial', value: 'industrial' }
 ])
 
-const availableLibraries = computed(() => soundEffectsService.getLibraries())
-
 const filteredCuratedSounds = computed(() => {
-  if (selectedCategory.value === 'all') {
-    return soundEffectsService.getAllSounds()
+  if (!selectedCategory.value) {
+    return soundStoreService.getAllSounds()
   }
-  return soundEffectsService.getSoundsByCategory(selectedCategory.value as SoundCategory)
+  return soundStoreService.getSoundsByCategory(selectedCategory.value)
 })
 
 onMounted(() => {
@@ -234,34 +183,21 @@ function handleUrlChange(url: string) {
   emit('update:modelValue', url)
 }
 
-function selectSound(sound: SoundEffect) {
-  // Resolve the asset ID to a web URL for the cloud app
-  const webUrl = soundEffectsService.getWebUrl(sound, '/sounds/')
-  soundUrl.value = webUrl
-  emit('update:modelValue', sound.url) // Keep the original asset ID for the server
+function selectSound(sound: StoredSound) {
+  soundUrl.value = sound.filePath
+  emit('update:modelValue', sound.filePath)
 }
 
-function previewSound(sound: SoundEffect) {
+function previewSound(sound: StoredSound) {
   if (audioElement.value) {
-    // Resolve the asset ID to a web URL for preview
-    const webUrl = soundEffectsService.getWebUrl(sound, '/sounds/')
-    audioElement.value.src = webUrl
+    audioElement.value.src = sound.filePath
     audioElement.value.play()
   }
 }
 
 function playSound() {
   if (audioElement.value && soundUrl.value) {
-    // If it's an asset ID, resolve it to web URL
-    if (soundEffectsService.isAssetIdReference(soundUrl.value)) {
-      const sound = soundEffectsService.getSoundById(soundEffectsService.extractAssetId(soundUrl.value) || '')
-      if (sound) {
-        const webUrl = soundEffectsService.getWebUrl(sound, '/sounds/')
-        audioElement.value.src = webUrl
-      }
-    } else {
-      audioElement.value.src = soundUrl.value
-    }
+    audioElement.value.src = soundUrl.value
     audioElement.value.play()
   }
 }
@@ -273,50 +209,10 @@ function stopSound() {
   }
 }
 
-// New function to test sound on server via Firebase
-async function testSoundOnServer(sound: SoundEffect) {
-  try {
-    // Create a temporary effect in Firebase to trigger server playback
-    const testEffect = {
-      id: `test-sound-${Date.now()}`,
-      name: `Test: ${sound.name}`,
-      type: 'sound',
-      sound: sound.url, // Use the asset ID reference
-      state: true,
-      device: 'test-device',
-      timestamp: new Date().toISOString()
-    }
-    
-    // Import Firebase functions
-    const { db } = await import('@repo/firebase-config')
-    const { doc, setDoc } = await import('firebase/firestore')
-    
-    // Add to a test collection that the server can monitor
-    const testRef = doc(db, 'testEffects', testEffect.id)
-    await setDoc(testRef, testEffect)
-    
-    console.log('Testing sound on server via Firebase:', testEffect)
-    alert(`Sound "${sound.name}" sent to server via Firebase. Check server logs for playback.`)
-    
-    // Clean up the test effect after a delay
-    setTimeout(async () => {
-      try {
-        const { deleteDoc } = await import('firebase/firestore')
-        await deleteDoc(testRef)
-        console.log('Test effect cleaned up')
-      } catch (error) {
-        console.error('Error cleaning up test effect:', error)
-      }
-    }, 5000)
-    
-  } catch (error) {
-    console.error('Error testing sound on server:', error)
-    alert('Error testing sound on server')
-  }
-}
 
-function copySoundUrl(sound: SoundEffect) {
-  navigator.clipboard.writeText(sound.url)
+
+function copySoundUrl(sound: StoredSound) {
+  navigator.clipboard.writeText(sound.filePath)
 }
 
 function filterCuratedSounds() {
@@ -325,19 +221,16 @@ function filterCuratedSounds() {
 
 function searchSounds() {
   if (searchQuery.value.trim()) {
-    searchResults.value = soundEffectsService.searchSounds(searchQuery.value)
+    searchResults.value = soundStoreService.searchSounds(searchQuery.value, selectedCategory.value)
   } else {
     searchResults.value = []
   }
 }
 
-function searchExternalLibrary(library: any) {
-  // Placeholder for external library search
-  console.log('Searching external library:', library.name)
-}
 
-function getCategoryColor(category: SoundCategory): string {
-  const colors: Record<SoundCategory, string> = {
+
+function getCategoryColor(category: string): string {
+  const colors: Record<string, string> = {
     train: 'blue',
     station: 'green',
     city: 'orange',

@@ -112,12 +112,7 @@
         </v-col>
       </v-row>
 
-      <!-- BBC Sound Importer -->
-      <v-row class="mt-6">
-        <v-col cols="12">
-          <BBCSoundImporter />
-        </v-col>
-      </v-row>
+
     </v-container>
   </div>
 </template>
@@ -126,7 +121,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { soundEffectsService, type SoundCategory } from '@repo/modules'
 import SoundPicker from './SoundPicker.vue'
-import BBCSoundImporter from './BBCSoundImporter.vue'
+
 
 const selectedSound = ref('')
 const testResults = ref<any[]>([])

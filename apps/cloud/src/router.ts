@@ -41,17 +41,18 @@ const router = createRouter({
       beforeEnter: [requireAuth, requireLayout],
     },
     {
+      path: '/effects/store',
+      name: 'Sound Store',
+      component: () => import('./Effects/SoundStore.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
       path: '/effects/sound-test',
       name: 'Sound Test',
       component: () => import('./Effects/SoundTest.vue'),
       beforeEnter: [requireAuth, requireLayout],
     },
-    {
-      path: '/effects/bbc-importer',
-      name: 'BBC Sound Importer',
-      component: () => import('./Effects/BBCSoundImporter.vue'),
-      beforeEnter: [requireAuth, requireLayout],
-    },
+
     {
       path: '/routes',
       name: 'Routes',

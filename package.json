@@ -14,7 +14,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lint": "turbo run lint",
     "start": "turbo run start --filter=apps/server --filter=apps/monitor",
-    "start:all": "turbo run start"
+    "start:all": "turbo run start",
+    "scan-sounds": "turbo run scan-sounds --filter=@repo/modules"
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5",
