@@ -211,7 +211,7 @@ export function useSerial(handleMessage: (message: string) => void) {
     if (port) {
       // Close the input stream (reader).
       if (reader) {
-        await reader.cancel() // .cancel is asynchronous so must use await to wave for it to finish
+        await reader.cancel() // .cancel is asynchronous so must use await to wait for it to finish
         await inputDone?.catch(() => {})
         reader = null
         inputDone = null
