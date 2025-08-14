@@ -1,7 +1,8 @@
 import 'dotenv/config'
 import { wsServer } from './src/lib/ws-server.js'
 import { dejaMqtt as mqtt } from './src/lib/mqtt.js'
-import { dejaCloud, disconnect } from './src/dejaCloud.js'
+import { dejaCloud } from './src/dejaCloud.js'
+
 import { log } from './src/utils/logger.js'
 
 const ENABLE_MQTT = process.env.ENABLE_MQTT === 'true' || false
@@ -43,10 +44,29 @@ async function main(): Promise<void> {
       }
     }
     
+
+    
     log.start('🚀 DEJA.js Server is running!')
     
   } catch (err) {
     log.fatal('Fatal error in main:', err)
+  }
+}
+
+async function disconnect(): Promise<void> {
+  try {
+    log.start('Shutting down DEJA.js Server...')
+    
+
+    
+    // Disconnect from DEJA Cloud
+    await dejaCloud.disconnect()
+    
+    log.success('✅ DEJA.js Server shutdown complete')
+    process.exit(0)
+  } catch (error) {
+    log.error('❌ Error during shutdown:', error)
+    process.exit(1)
   }
 }
 

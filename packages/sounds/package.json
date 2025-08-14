@@ -1,0 +1,28 @@
+{
+  "name": "@repo/sounds",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Shared sound assets and utilities for DEJA.js applications",
+  "main": "dist/index.js",
+  "types": "dist/index.js",
+  "files": [
+    "assets/**/*",
+    "index.ts"
+  ],
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "build": "tsc",
+    "scan-sounds": "tsx scripts/scan-sounds.ts",
+    "test-blob": "tsx scripts/test-blob-connection.ts"
+  },
+  "dependencies": {
+    "@vercel/blob": "^0.22.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.20.4",
+    "typescript": "*"
+  }
+}

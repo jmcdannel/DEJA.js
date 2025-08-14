@@ -1,8 +1,16 @@
 {
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
-  ]
+  ],
+
+  "env": {
+    "BLOB_READ_WRITE_TOKEN": "vercel_blob_rw_xNDOZJM68szqABqe_KEdeLVsr36pBcvelnNxQX8gjJzBEFV"
+  }
 }

@@ -70,6 +70,8 @@ export const efxTypes: EffectType[] = [
     label: 'Sound',
     icon: 'mdi-volume-high',
     color: 'cyan',
+    require: ['sound'],
+    defaultDevice: 'deja-server',
   },
   {
     value: 'macro',

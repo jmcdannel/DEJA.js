@@ -1,0 +1,9 @@
+Placeholder for train sound effects.
+
+Add your MP3 sound files here, such as:
+- steam-whistle.mp3
+- diesel-horn.mp3
+- wheel-squeal.mp3
+- steam-chuff.mp3
+
+See the README.md in the parent directory for more information about adding sound effects.

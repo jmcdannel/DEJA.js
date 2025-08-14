@@ -1,9 +1,10 @@
-import type { Effect, MacroItem } from '@repo/modules/effects'
+import type { Effect, MacroItem } from '@repo/modules'
 import { FieldValue, type DocumentData } from 'firebase-admin/firestore'
 import { db } from '@repo/firebase-config/firebase-admin-node'
 import { log } from '../utils/logger.js'
 import { dcc, type OutputPayload } from '../lib/dcc.js'
 import { layout } from './layout.js'
+import { soundCommand } from '../lib/sound.js'
 
 export interface EffectCommand {
   action: string
@@ -52,7 +53,7 @@ async function getEffect(id: string): Promise<Effect | undefined> {
 
 export function getEffectCommand(
   efx: Effect
-): EffectCommand | string | undefined {
+): EffectCommand | string | any {
   try {
     switch (efx?.type) {
       case 'light':
@@ -65,10 +66,10 @@ export function getEffectCommand(
         return pinCommand(efx)
       case 'ialed':
         return ialedCommand(efx)
+      case 'sound':
+        return soundCommand(efx)
       // case 'serial-ialed':
       //   return [ialedCommand(effect)]
-      // case 'sound':
-      //   return [soundCommand(effect)]
       // case 'signal':
       //   const signalCommands = await signalCommand(effect)
       //   return signalCommands;
@@ -151,6 +152,40 @@ export async function handleEffect(payload: Effect): Promise<void> {
   if (payload.type === 'route' || payload.type === 'macro') {
     return await handleMacro(payload)
   }
+  
+  // Handle sound effects - skip device connection check and play directly
+  if (payload.type === 'sound') {
+    try {
+      // Use soundBlobUrl if available, otherwise fall back to sound field
+      const soundUrl = (payload as any).soundBlobUrl || payload.sound
+      
+      if (!soundUrl) {
+        log.error('No sound URL available for sound effect:', payload)
+        return
+      }
+      
+      log.log('Processing sound effect:', { 
+        soundUrl: soundUrl, 
+        state: payload.state,
+        hasBlobUrl: !!(payload as any).soundBlobUrl
+      })
+      
+      // Import and use the playSound function
+      const { playSound, stopSound } = await import('../lib/sound.js')
+      
+      if (payload.state) {
+        // Play the sound
+        await playSound(soundUrl)
+      } else {
+        // Stop the sound
+        await stopSound(soundUrl)
+      }
+    } catch (error) {
+      log.error('Error playing sound effect:', error)
+    }
+    return
+  }
+  
   const conn = payload.device
     ? layout.connections()?.[payload.device]
     : undefined

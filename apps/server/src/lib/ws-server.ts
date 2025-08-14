@@ -90,6 +90,7 @@ const handleMessage = async (ws: WebSocket, payload: string, deviceId?: string):
         log.success('[Device unsubscription]', targetDeviceId, 'disconnected from serial monitor')
       }
     }
+    
   } catch (err) {
     log.error('Error handling WebSocket message:', err)
   }

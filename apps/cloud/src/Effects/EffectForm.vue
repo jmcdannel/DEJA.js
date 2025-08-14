@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { useEfx, efxTypes, useLayout, type Effect } from '@repo/modules'
+import { ref, watch, onErrorCaptured } from 'vue'
+import { useEfx, useLayout, type Effect } from '@repo/modules'
+import { efxTypes } from '@repo/modules/effects/constants'
 import { useSound } from '@vueuse/sound'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import MacroForm from '@/Effects/MacroForm.vue'
@@ -8,7 +9,16 @@ import IALEDForm from '@/Effects//IALEDForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
+import SoundPicker from './SoundPicker.vue'
 // TODO: icon picker
+
+// Error handling
+onErrorCaptured((error, instance, info) => {
+  console.error('EffectForm: Error captured:', error)
+  console.error('EffectForm: Instance:', instance)
+  console.error('EffectForm: Info:', info)
+  return false // Prevent error from propagating
+})
 
 interface ValidationRules {
   required: ((val: any) => boolean | string)[];
@@ -20,25 +30,56 @@ const props = defineProps<{
 
 const emit = defineEmits(['close'])
 const DEFAULT_DEVICE = 'dccex'
-const { getDevices } = useLayout()
+let getDevices: any
 
-const { setEfx, getEfxType } = useEfx()
+try {
+  const layoutHook = useLayout()
+  getDevices = layoutHook.getDevices
+  console.log('EffectForm: useLayout hook loaded successfully')
+} catch (error) {
+  console.error('EffectForm: Failed to load useLayout hook:', error)
+  getDevices = () => []
+}
+
+let setEfx: any, getEfxType: any
+
+try {
+  const efxHook = useEfx()
+  setEfx = efxHook.setEfx
+  getEfxType = efxHook.getEfxType
+  console.log('EffectForm: useEfx hook loaded successfully')
+} catch (error) {
+  console.error('EffectForm: Failed to load useEfx hook:', error)
+  setEfx = () => console.log('setEfx mock called')
+  getEfxType = () => ({})
+}
+
+// Debug imports
+console.log('EffectForm: Imports check:', {
+  useEfx: !!useEfx,
+  efxTypes: !!efxTypes,
+  useLayout: !!useLayout
+})
+
+console.log('EffectForm: efxTypes value:', efxTypes)
+console.log('EffectForm: Component mounting with props:', props.efx)
 
 const editColor = ref(false)
 
 const device = ref(props.efx?.device || DEFAULT_DEVICE)
 const name = ref(props.efx?.name || '')
 const pin = ref(props.efx?.pin)
-  // signal wiring: reference existing pin effects
-  const red = ref((props.efx as any)?.red || '')
-  const yellow = ref((props.efx as any)?.yellow || '')
-  const green = ref((props.efx as any)?.green || '')
+// signal wiring: reference existing pin effects
+const red = ref((props.efx as any)?.red || '')
+const yellow = ref((props.efx as any)?.yellow || '')
+const green = ref((props.efx as any)?.green || '')
 const macroOn = ref(props.efx?.on || [])
 const macroOff = ref(props.efx?.off || [])
 const pattern = ref(props.efx?.pattern || undefined)
 const range = ref(props.efx?.range || undefined)
 const config = ref(props.efx?.config || undefined)
-const sound = ref('')
+const sound = ref(props.efx?.sound || '')
+const soundBlobUrl = ref(props.efx?.soundBlobUrl || '')
 const soundObj = ref(null as null | HTMLAudioElement)
 const efxType = ref(props.efx?.type)
 const efxTypeObj = ref(props.efx?.type ? getEfxType(props.efx?.type) : undefined)
@@ -50,7 +91,12 @@ const rules: ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
 const devices = getDevices()
-console.log('devices', devices)
+console.log('EffectForm initialized with:', {
+  props: props.efx,
+  devices,
+  efxType: efxType.value,
+  efxTypeObj: efxTypeObj.value
+})
 
 
 watch(sound, (newSound) => {
@@ -61,6 +107,10 @@ watch(sound, (newSound) => {
 watch(efxType, (newType) => {
   if (newType) {
     efxTypeObj.value = getEfxType(newType)
+    // Set default device if the effect type has one and no device is currently set
+    if (efxTypeObj.value?.defaultDevice && !props.efx?.device) {
+      device.value = efxTypeObj.value.defaultDevice
+    }
   } else {
     efxTypeObj.value = undefined
   }
@@ -88,7 +138,8 @@ async function submit () {
   }
   //  set sound
   if (efxTypeObj.value?.require?.includes('sound')) {
-    // newEfx.sound = sound.value
+    newEfx.sound = sound.value
+    newEfx.soundBlobUrl = soundBlobUrl.value
   }
   //  set macro
   if (efxType.value === 'macro') {
@@ -144,7 +195,19 @@ function stopSound() {
 
 </script>
 <template>
-  <v-form validate-on="submit lazy" @submit.prevent="submit">
+  <div>
+    <h1>EffectForm Component Loaded</h1>
+    
+    <div class="debug-info" style="background: #f0f0f0; padding: 10px; margin: 10px; border: 1px solid #ccc;">
+      <strong>Debug Info:</strong><br>
+      efx: {{ efx ? JSON.stringify(efx) : 'undefined' }}<br>
+      efxType: {{ efxType || 'undefined' }}<br>
+      efxTypeObj: {{ efxTypeObj ? 'exists' : 'undefined' }}<br>
+      devices: {{ devices?.length || 0 }} devices<br>
+      efxTypes length: {{ efxTypes?.length || 0 }}
+    </div>
+    
+    <v-form validate-on="submit lazy" @submit.prevent="submit">
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
     <div class="flex items-center justify-between">
     <v-label class="m-2 text-4xl">
@@ -156,7 +219,7 @@ function stopSound() {
       {{ efxType }}
     </v-chip>
     </div>
-    <template v-if="!efx.device">
+    <template v-if="!efx.device && efxTypeObj?.require?.includes('device')">
       <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
       <v-label class="m-2">Device</v-label>
       <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
@@ -167,6 +230,17 @@ function stopSound() {
               {{ deviceOpt.id }}
           </v-btn>
       </v-btn-toggle>
+    </template>
+    
+    <!-- Show device info for sound effects -->
+    <template v-if="efxType === 'sound' && device">
+      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+      <v-alert
+        type="info"
+        variant="tonal"
+        :title="`Sound Effect Device: ${device}`"
+        text="This sound will be played on the DEJA Server. No additional hardware required."
+      ></v-alert>
     </template>
     <template v-if="!efx.type">
       <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
@@ -236,18 +310,10 @@ function stopSound() {
 
     <!-- sound -->
     <template v-else-if="efxTypeObj?.require?.includes('sound')">
-      <div class="flex items-center">
-        <v-text-field
-          v-model="sound"
-          label="Sound URL"
-          variant="outlined"
-          min-width="300"
-        ></v-text-field>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 ml-8">
-          <v-btn v-id="sound" @click="playSound" icon="mdi-play"></v-btn>
-          <v-btn v-id="sound" @click="stopSound" icon="mdi-stop"></v-btn>
-        </div>
-      </div>
+      <SoundPicker 
+        v-model="sound" 
+        @update:soundBlobUrl="soundBlobUrl = $event" 
+      />
     </template>
 
     <!-- macro -->
@@ -338,4 +404,5 @@ function stopSound() {
     <ViewJson :json="efxTypeObj" label="efxTypeObj" />
     <ViewJson :json="efxTypes" label="efxTypes" />
   </v-form>
+  </div>
 </template>

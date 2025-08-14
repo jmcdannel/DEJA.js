@@ -1,3 +1,6 @@
 export * from './types'
 export * from './constants'
 export { default as useEfx } from './useEfx'
+export * from './soundService'
+export * from './soundStore'
+export { soundStoreService } from './soundStore'

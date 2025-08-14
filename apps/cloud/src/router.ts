@@ -40,6 +40,9 @@ const router = createRouter({
       component: () => import('./Effects/Effects.vue'),
       beforeEnter: [requireAuth, requireLayout],
     },
+
+
+
     {
       path: '/routes',
       name: 'Routes',
@@ -82,11 +85,12 @@ const router = createRouter({
       component: () => import('./Layout/Devices/DeviceDetails.vue'),
       beforeEnter: [requireAuth, requireLayout],
     },
+    // 404 - Catch all unmatched routes
     {
-      path: '/signals',
-      name: 'Signals',
-      component: () => import('./Signals/SignalsList.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('./views/NotFound.vue'),
+      beforeEnter: [requireAuth],
     }
   ],
 })
