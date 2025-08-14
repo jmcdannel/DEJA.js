@@ -47,6 +47,12 @@ const router = createRouter({
       beforeEnter: [requireAuth, requireLayout],
     },
     {
+      path: '/effects/bbc-importer',
+      name: 'BBC Sound Importer',
+      component: () => import('./Effects/BBCSoundImporter.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
       path: '/routes',
       name: 'Routes',
       component: () => import('./Routes/Routes.vue'),
@@ -88,11 +94,12 @@ const router = createRouter({
       component: () => import('./Layout/Devices/DeviceDetails.vue'),
       beforeEnter: [requireAuth, requireLayout],
     },
+    // 404 - Catch all unmatched routes
     {
-      path: '/signals',
-      name: 'Signals',
-      component: () => import('./Signals/SignalsList.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('./views/NotFound.vue'),
+      beforeEnter: [requireAuth],
     }
   ],
 })

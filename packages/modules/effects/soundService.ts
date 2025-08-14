@@ -11,6 +11,8 @@ export interface SoundEffect {
   source: 'local' | 'freesound' | 'zapsplat' | 'bbc' | 'custom'
   license: string
   attribution?: string
+  licenseUrl?: string // URL to license information
+  usageRestrictions?: string // Usage restrictions and requirements
   assetId?: string // Reference to shared sound asset
 }
 
@@ -246,6 +248,29 @@ export class SoundEffectsService {
   // Add custom sound
   addCustomSound(sound: SoundEffect): void {
     this.sounds.set(sound.id, sound)
+  }
+
+  // Update custom sound
+  updateCustomSound(sound: SoundEffect): void {
+    if (this.sounds.has(sound.id)) {
+      this.sounds.set(sound.id, sound)
+    }
+  }
+
+  // Remove custom sound
+  removeCustomSound(id: string): void {
+    this.sounds.delete(id)
+  }
+
+  // Clear all custom sounds
+  clearAllCustomSounds(): void {
+    // Keep only the curated sounds, remove custom ones
+    const curatedSoundIds = CURATED_SOUNDS.map(sound => sound.id)
+    for (const [id] of this.sounds) {
+      if (!curatedSoundIds.includes(id)) {
+        this.sounds.delete(id)
+      }
+    }
   }
 
   // Get available libraries

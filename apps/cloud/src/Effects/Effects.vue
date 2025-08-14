@@ -24,8 +24,8 @@ const newEfx: Partial<Effect> = {
     <ListMenu :disabledMenus="['view']" :module-name="'effects'" />
   </ModuleTitle>
   
-  <!-- Sound Test Link -->
-  <div class="mb-4">
+  <!-- Sound Management Links -->
+  <div class="mb-4 d-flex gap-3">
     <v-btn
       to="/effects/sound-test"
       color="cyan"
@@ -33,6 +33,15 @@ const newEfx: Partial<Effect> = {
       prepend-icon="mdi-volume-high"
     >
       Test Sound Effects
+    </v-btn>
+    
+    <v-btn
+      to="/effects/bbc-importer"
+      color="blue"
+      variant="outlined"
+      prepend-icon="mdi-download"
+    >
+      BBC Sound Importer
     </v-btn>
   </div>
   
