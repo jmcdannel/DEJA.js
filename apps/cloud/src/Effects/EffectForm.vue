@@ -79,6 +79,7 @@ const pattern = ref(props.efx?.pattern || undefined)
 const range = ref(props.efx?.range || undefined)
 const config = ref(props.efx?.config || undefined)
 const sound = ref(props.efx?.sound || '')
+const soundBlobUrl = ref(props.efx?.soundBlobUrl || '')
 const soundObj = ref(null as null | HTMLAudioElement)
 const efxType = ref(props.efx?.type)
 const efxTypeObj = ref(props.efx?.type ? getEfxType(props.efx?.type) : undefined)
@@ -138,6 +139,7 @@ async function submit () {
   //  set sound
   if (efxTypeObj.value?.require?.includes('sound')) {
     newEfx.sound = sound.value
+    newEfx.soundBlobUrl = soundBlobUrl.value
   }
   //  set macro
   if (efxType.value === 'macro') {
@@ -308,7 +310,10 @@ function stopSound() {
 
     <!-- sound -->
     <template v-else-if="efxTypeObj?.require?.includes('sound')">
-      <SoundPicker v-model="sound" />
+      <SoundPicker 
+        v-model="sound" 
+        @update:soundBlobUrl="soundBlobUrl = $event" 
+      />
     </template>
 
     <!-- macro -->

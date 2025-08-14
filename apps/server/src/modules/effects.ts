@@ -156,29 +156,29 @@ export async function handleEffect(payload: Effect): Promise<void> {
   // Handle sound effects - skip device connection check and play directly
   if (payload.type === 'sound') {
     try {
-      // Get the sound command to extract the sound URL
-      const command = getEffectCommand(payload)
+      // Use soundBlobUrl if available, otherwise fall back to sound field
+      const soundUrl = (payload as any).soundBlobUrl || payload.sound
       
-      if (command && typeof command === 'object' && 'url' in command) {
-        const soundUrl = (command as any).url
-        
-        log.log('Processing sound effect:', { 
-          soundUrl: soundUrl, 
-          state: payload.state 
-        })
-        
-        // Import and use the playSound function
-        const { playSound, stopSound } = await import('../lib/sound.js')
-        
-        if (payload.state) {
-          // Play the sound
-          await playSound(soundUrl)
-        } else {
-          // Stop the sound
-          await stopSound(soundUrl)
-        }
+      if (!soundUrl) {
+        log.error('No sound URL available for sound effect:', payload)
+        return
+      }
+      
+      log.log('Processing sound effect:', { 
+        soundUrl: soundUrl, 
+        state: payload.state,
+        hasBlobUrl: !!(payload as any).soundBlobUrl
+      })
+      
+      // Import and use the playSound function
+      const { playSound, stopSound } = await import('../lib/sound.js')
+      
+      if (payload.state) {
+        // Play the sound
+        await playSound(soundUrl)
       } else {
-        log.error('Invalid sound command generated:', command)
+        // Stop the sound
+        await stopSound(soundUrl)
       }
     } catch (error) {
       log.error('Error playing sound effect:', error)

@@ -13,6 +13,7 @@ export interface Effect {
   range?: string
   config?: string
   sound?: string
+  soundBlobUrl?: string
   tags?: string[]
   allowGuest?: boolean
   // For 'signal' effect type: references to child effects by ID (optional)

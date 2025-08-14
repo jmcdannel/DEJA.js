@@ -143,6 +143,7 @@ interface Props {
 
 interface Emits {
   (e: 'update:modelValue', value: string): void
+  (e: 'update:soundBlobUrl', value: string): void
 }
 
 const props = defineProps<Props>()
@@ -236,8 +237,10 @@ function selectSound(sound: SoundData) {
   soundUrl.value = sound.blobUrl || sound.filePath
   console.log('🔍 SoundPicker: soundUrl set to:', soundUrl.value)
   
-  emit('update:modelValue', sound.filePath) // Keep filePath for server compatibility
-  console.log('🔍 SoundPicker: Emitted update:modelValue with filePath:', sound.filePath)
+  // Emit both the filePath (for display/organization) and blobUrl (for server playback)
+  emit('update:modelValue', sound.filePath)
+  emit('update:soundBlobUrl', sound.blobUrl || '')
+  console.log('🔍 SoundPicker: Emitted filePath:', sound.filePath, 'and blobUrl:', sound.blobUrl)
 }
 
 function previewSound(sound: SoundData) {
