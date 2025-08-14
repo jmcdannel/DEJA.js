@@ -1,4 +1,5 @@
 import { log } from '../utils/logger.js'
+import { SoundPathResolver } from '@repo/sounds'
 
 export interface SoundCommand {
   action: 'play' | 'stop' | 'volume'
@@ -33,9 +34,6 @@ export async function playSound(url: string, volume: number = 1.0): Promise<void
   try {
     // Stop any existing sound with the same URL first
     await stopSound(url)
-    
-    // Import the shared sounds package for path resolution
-    const { SoundPathResolver } = await import('@repo/sounds')
     
     let resolvedUrl: string
     

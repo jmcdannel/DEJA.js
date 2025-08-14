@@ -9,11 +9,7 @@
       "destination": "/"
     }
   ],
-  "functions": {
-    "api/bbc-sounds/import.ts": {
-      "maxDuration": 30
-    }
-  },
+
   "env": {
     "BLOB_READ_WRITE_TOKEN": "vercel_blob_rw_xNDOZJM68szqABqe_KEdeLVsr36pBcvelnNxQX8gjJzBEFV"
   }

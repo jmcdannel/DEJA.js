@@ -1,7 +1,7 @@
 // This module exports the sound data directly, eliminating the need to fetch from JSON files
 // The data is loaded from the sound-store.json and exported as a module
 
-import soundStoreData from '../sound-store.json' assert { type: 'json' }
+import soundStoreData from '../sound-store.json'
 
 export interface SoundData {
   id: string
