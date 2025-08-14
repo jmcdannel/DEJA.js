@@ -6,7 +6,7 @@
         v-model="soundUrl"
         label="Sound URL"
         variant="outlined"
-        placeholder="Enter sound URL or browse curated sounds below"
+        placeholder="Enter sound URL or browse BBC sounds below"
         @update:model-value="handleUrlChange"
       >
         <template #append>
@@ -29,25 +29,25 @@
     <!-- Sound Browser -->
     <div class="sound-browser">
       <v-tabs v-model="activeTab" color="primary">
-        <v-tab value="curated">Sound Store</v-tab>
+        <v-tab value="bbc-sounds">BBC Sounds</v-tab>
         <v-tab value="search">Search</v-tab>
       </v-tabs>
 
       <v-window v-model="activeTab">
-        <!-- Curated Sounds Tab -->
-        <v-window-item value="curated">
+        <!-- BBC Sounds Tab -->
+        <v-window-item value="bbc-sounds">
           <div class="mt-4">
             <v-select
               v-model="selectedCategory"
               :items="soundCategories"
               label="Category"
               variant="outlined"
-              @update:model-value="filterCuratedSounds"
+              @update:model-value="filterBBCSounds"
             ></v-select>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
               <v-card
-                v-for="sound in filteredCuratedSounds"
+                v-for="sound in filteredSounds"
                 :key="sound.id"
                 class="sound-card cursor-pointer"
                 @click="selectSound(sound)"
@@ -72,8 +72,8 @@
                       {{ tag }}
                     </v-chip>
                   </div>
-                  <div v-if="sound.duration" class="mt-2 text-xs">
-                    Duration: {{ formatDuration(sound.duration) }}
+                  <div v-if="sound.metadata?.originalSize" class="mt-2 text-xs">
+                    Size: {{ formatFileSize(sound.metadata.originalSize) }}
                   </div>
                 </v-card-text>
                 <v-card-actions>
@@ -102,7 +102,7 @@
               label="Search sounds"
               variant="outlined"
               placeholder="e.g., train whistle, city traffic, birds"
-              @update:model-value="searchSounds"
+              @update:model-value="debouncedSearch"
             ></v-text-field>
             
             <div v-if="searchResults.length > 0" class="mt-4">
@@ -134,8 +134,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { soundStoreService, type StoredSound } from '@repo/modules/effects/soundStore'
+import { ref, computed, onMounted, watch } from 'vue'
+import { getAllSounds, getSoundsByCategory, searchSounds as searchSoundsData, type SoundData } from '@repo/sounds'
 
 interface Props {
   modelValue?: string
@@ -149,10 +149,10 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const soundUrl = ref(props.modelValue || '')
-const activeTab = ref('curated')
+const activeTab = ref('bbc-sounds')
 const selectedCategory = ref<string>('')
 const searchQuery = ref('')
-const searchResults = ref<StoredSound[]>([])
+const searchResults = ref<SoundData[]>([])
 const audioElement = ref<HTMLAudioElement | null>(null)
 
 const soundCategories = computed(() => [
@@ -167,36 +167,105 @@ const soundCategories = computed(() => [
   { title: 'Industrial', value: 'industrial' }
 ])
 
-const filteredCuratedSounds = computed(() => {
-  if (!selectedCategory.value) {
-    return soundStoreService.getAllSounds()
-  }
-  return soundStoreService.getSoundsByCategory(selectedCategory.value)
+const filteredBBCSounds = computed(() => {
+  console.log('🔍 SoundPicker: filteredBBCSounds computed called')
+  console.log('🔍 SoundPicker: selectedCategory:', selectedCategory.value)
+  
+  // Since the methods are now async, we'll need to handle this differently
+  // For now, return an empty array and load sounds in onMounted
+  return []
 })
 
-onMounted(() => {
+const allSounds = ref<SoundData[]>([])
+const filteredSounds = ref<SoundData[]>([])
+
+// Load sounds when component mounts
+onMounted(async () => {
+  console.log('🔍 SoundPicker: onMounted called')
   audioElement.value = new Audio()
+  console.log('🔍 SoundPicker: Audio element created:', !!audioElement.value)
+  
+      // Load sounds directly from the sounds package
+    try {
+      allSounds.value = getAllSounds()
+      console.log('🔍 SoundPicker: Initial sounds check - total sounds:', allSounds.value.length)
+      updateFilteredSounds()
+    } catch (error) {
+      console.error('❌ SoundPicker: Failed to load sounds:', error)
+    }
 })
+
+// Update filtered sounds based on selected category
+function updateFilteredSounds() {
+  if (!selectedCategory.value) {
+    filteredSounds.value = allSounds.value
+  } else {
+    filteredSounds.value = allSounds.value.filter(sound => sound.category === selectedCategory.value)
+  }
+  console.log('🔍 SoundPicker: Filtered sounds updated:', filteredSounds.value.length)
+}
+
+// Watch for category changes
+watch(selectedCategory, () => {
+  updateFilteredSounds()
+})
+
+// Debounced search function
+let searchTimeout: number | null = null
+function debouncedSearch() {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+  searchTimeout = setTimeout(() => {
+    searchSounds()
+  }, 300)
+}
 
 function handleUrlChange(url: string) {
   soundUrl.value = url
   emit('update:modelValue', url)
 }
 
-function selectSound(sound: StoredSound) {
-  soundUrl.value = sound.filePath
-  emit('update:modelValue', sound.filePath)
+function selectSound(sound: SoundData) {
+  console.log('🔍 SoundPicker: selectSound called for:', sound.name)
+  console.log('🔍 SoundPicker: sound object:', sound)
+  console.log('🔍 SoundPicker: sound.blobUrl:', sound.blobUrl)
+  console.log('🔍 SoundPicker: sound.filePath:', sound.filePath)
+  
+  // Use blob URL directly from Vercel Blob Store, then fallback to filePath
+  soundUrl.value = sound.blobUrl || sound.filePath
+  console.log('🔍 SoundPicker: soundUrl set to:', soundUrl.value)
+  
+  emit('update:modelValue', sound.filePath) // Keep filePath for server compatibility
+  console.log('🔍 SoundPicker: Emitted update:modelValue with filePath:', sound.filePath)
 }
 
-function previewSound(sound: StoredSound) {
+function previewSound(sound: SoundData) {
+  console.log('🔍 SoundPicker: previewSound called for:', sound.name)
+  console.log('🔍 SoundPicker: sound object:', sound)
+  console.log('🔍 SoundPicker: audioElement exists:', !!audioElement.value)
+  
   if (audioElement.value) {
-    audioElement.value.src = sound.filePath
-    audioElement.value.play()
+    // Use blob URL directly from Vercel Blob Store, then fallback to filePath
+    const audioUrl = sound.blobUrl || sound.filePath
+    console.log('🔍 SoundPicker: Using audio URL:', audioUrl)
+    
+    audioElement.value.src = audioUrl
+    console.log('🔍 SoundPicker: Audio src set, attempting to play...')
+    
+    audioElement.value.play().then(() => {
+      console.log('✅ SoundPicker: Audio playback started successfully')
+    }).catch((error) => {
+      console.error('❌ SoundPicker: Audio playback failed:', error)
+    })
+  } else {
+    console.error('❌ SoundPicker: No audio element available')
   }
 }
 
 function playSound() {
   if (audioElement.value && soundUrl.value) {
+    // soundUrl.value is already set to webUrl in selectSound
     audioElement.value.src = soundUrl.value
     audioElement.value.play()
   }
@@ -211,17 +280,22 @@ function stopSound() {
 
 
 
-function copySoundUrl(sound: StoredSound) {
+function copySoundUrl(sound: SoundData) {
   navigator.clipboard.writeText(sound.filePath)
 }
 
-function filterCuratedSounds() {
+function filterBBCSounds() {
   // This is handled by the computed property
 }
 
-function searchSounds() {
+async function searchSounds() {
   if (searchQuery.value.trim()) {
-    searchResults.value = soundStoreService.searchSounds(searchQuery.value, selectedCategory.value)
+    try {
+      searchResults.value = searchSoundsData(searchQuery.value, selectedCategory.value)
+    } catch (error) {
+      console.error('❌ SoundPicker: Search failed:', error)
+      searchResults.value = []
+    }
   } else {
     searchResults.value = []
   }
@@ -251,6 +325,16 @@ function formatDuration(ms: number): string {
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = seconds % 60
   return `${minutes}m ${remainingSeconds}s`
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) {
+    return `${bytes} B`
+  } else if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`
+  } else {
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
 }
 </script>
 

@@ -26,23 +26,9 @@ const newEfx: Partial<Effect> = {
   
   <!-- Sound Management Links -->
   <div class="mb-4 d-flex gap-3">
-    <v-btn
-      to="/effects/sound-test"
-      color="cyan"
-      variant="outlined"
-      prepend-icon="mdi-volume-high"
-    >
-      Test Sound Effects
-    </v-btn>
+
     
-    <v-btn
-      to="/effects/store"
-      color="purple"
-      variant="outlined"
-      prepend-icon="mdi-music-box"
-    >
-      Sound Store
-    </v-btn>
+
     
   </div>
   
@@ -55,7 +41,7 @@ const newEfx: Partial<Effect> = {
     
     <v-card-text>
       <p class="text-body-2 mb-4">
-        Find free sound effects from these external libraries. Download sounds and add them to your local sound store.
+        Find free sound effects from these external libraries. BBC sounds are automatically available in the SoundPicker component.
       </p>
       
       <div class="d-flex flex-wrap gap-3">
@@ -117,7 +103,7 @@ const newEfx: Partial<Effect> = {
           <li>Download audio files (MP3, WAV, OGG, M4A)</li>
           <li>Place files in <code>packages/sounds/assets/</code> organized by category</li>
           <li>Run <code>pnpm run scan-sounds</code> to import them</li>
-          <li>Browse and manage in the Sound Store</li>
+          <li>BBC sounds are automatically loaded from the Vercel blob store</li>
         </ol>
       </div>
     </v-card-text>

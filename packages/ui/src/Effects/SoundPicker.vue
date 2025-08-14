@@ -6,7 +6,7 @@
         v-model="soundUrl"
         label="Sound URL"
         variant="outlined"
-        placeholder="Enter sound URL or browse curated sounds below"
+        placeholder="Enter sound URL or browse BBC sounds below"
         @update:model-value="handleUrlChange"
       >
         <template #append>
@@ -29,26 +29,25 @@
     <!-- Sound Browser -->
     <div class="sound-browser">
       <v-tabs v-model="activeTab" color="primary">
-        <v-tab value="curated">Curated Sounds</v-tab>
+        <v-tab value="bbc-sounds">BBC Sounds</v-tab>
         <v-tab value="search">Search</v-tab>
-        <v-tab value="libraries">External Libraries</v-tab>
       </v-tabs>
 
       <v-window v-model="activeTab">
-        <!-- Curated Sounds Tab -->
-        <v-window-item value="curated">
+        <!-- BBC Sounds Tab -->
+        <v-window-item value="bbc-sounds">
           <div class="mt-4">
             <v-select
               v-model="selectedCategory"
               :items="soundCategories"
               label="Category"
               variant="outlined"
-              @update:model-value="filterCuratedSounds"
+              @update:model-value="filterBBCSounds"
             ></v-select>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
               <v-card
-                v-for="sound in filteredCuratedSounds"
+                v-for="sound in filteredBBCSounds"
                 :key="sound.id"
                 class="sound-card cursor-pointer"
                 @click="selectSound(sound)"
@@ -128,48 +127,7 @@
         </v-window-item>
 
         <!-- External Libraries Tab -->
-        <v-window-item value="libraries">
-          <div class="mt-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <v-card
-                v-for="library in availableLibraries"
-                :key="library.name"
-                class="library-card"
-              >
-                <v-card-title class="text-sm font-medium">
-                  {{ library.name }}
-                </v-card-title>
-                <v-card-text class="text-xs text-gray-600">
-                  <div class="mb-2">
-                    <strong>License:</strong> {{ library.license }}
-                  </div>
-                  <div class="mb-2">
-                    <strong>Categories:</strong>
-                    <div class="flex flex-wrap gap-1 mt-1">
-                      <v-chip
-                        v-for="category in library.categories.slice(0, 5)"
-                        :key="category"
-                        size="x-small"
-                        variant="outlined"
-                      >
-                        {{ category }}
-                      </v-chip>
-                    </div>
-                  </div>
-                </v-card-text>
-                <v-card-actions>
-                  <v-btn
-                    size="small"
-                    @click="searchExternalLibrary(library)"
-                    :disabled="!library.apiKey"
-                  >
-                    Search Library
-                  </v-btn>
-                </v-card-actions>
-              </v-card>
-            </div>
-          </div>
-        </v-window-item>
+
       </v-window>
     </div>
   </div>
@@ -177,7 +135,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { soundEffectsService, type SoundEffect, type SoundCategory } from '@repo/modules/effects'
+import { getAllSounds, getSoundsByCategory, searchSounds as searchSoundsData, type SoundData } from '@repo/sounds'
 
 interface Props {
   modelValue?: string
@@ -191,10 +149,10 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const soundUrl = ref(props.modelValue || '')
-const activeTab = ref('curated')
-const selectedCategory = ref<SoundCategory | 'all'>('all')
+const activeTab = ref('bbc-sounds')
+const selectedCategory = ref<string>('all')
 const searchQuery = ref('')
-const searchResults = ref<SoundEffect[]>([])
+const searchResults = ref<SoundData[]>([])
 const audioElement = ref<HTMLAudioElement | null>(null)
 
 const soundCategories = computed(() => [
@@ -209,13 +167,11 @@ const soundCategories = computed(() => [
   { title: 'Industrial', value: 'industrial' }
 ])
 
-const availableLibraries = computed(() => soundEffectsService.getLibraries())
-
-const filteredCuratedSounds = computed(() => {
+const filteredBBCSounds = computed(() => {
   if (selectedCategory.value === 'all') {
-    return soundEffectsService.getAllSounds()
+    return getAllSounds()
   }
-  return soundEffectsService.getSoundsByCategory(selectedCategory.value as SoundCategory)
+  return getSoundsByCategory(selectedCategory.value)
 })
 
 onMounted(() => {
@@ -227,14 +183,14 @@ function handleUrlChange(url: string) {
   emit('update:modelValue', url)
 }
 
-function selectSound(sound: SoundEffect) {
-  soundUrl.value = sound.url
-  emit('update:modelValue', sound.url)
+function selectSound(sound: SoundData) {
+  soundUrl.value = sound.blobUrl || sound.filePath
+  emit('update:modelValue', sound.filePath)
 }
 
-function previewSound(sound: SoundEffect) {
+function previewSound(sound: SoundData) {
   if (audioElement.value) {
-    audioElement.value.src = sound.url
+    audioElement.value.src = sound.blobUrl || sound.filePath
     audioElement.value.play()
   }
 }
@@ -253,29 +209,26 @@ function stopSound() {
   }
 }
 
-function copySoundUrl(sound: SoundEffect) {
-  navigator.clipboard.writeText(sound.url)
+function copySoundUrl(sound: SoundData) {
+  navigator.clipboard.writeText(sound.filePath)
 }
 
-function filterCuratedSounds() {
+function filterBBCSounds() {
   // This is handled by the computed property
 }
 
 function searchSounds() {
   if (searchQuery.value.trim()) {
-    searchResults.value = soundEffectsService.searchSounds(searchQuery.value)
+    searchResults.value = searchSoundsData(searchQuery.value)
   } else {
     searchResults.value = []
   }
 }
 
-function searchExternalLibrary(library: any) {
-  // Placeholder for external library search
-  console.log('Searching external library:', library.name)
-}
 
-function getCategoryColor(category: SoundCategory): string {
-  const colors: Record<SoundCategory, string> = {
+
+function getCategoryColor(category: string): string {
+  const colors: Record<string, string> = {
     train: 'blue',
     station: 'green',
     city: 'orange',

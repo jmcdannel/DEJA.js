@@ -72,7 +72,7 @@ sounds/
 
 After adding sound files:
 
-1. Update the `CURATED_SOUNDS` array in `packages/modules/effects/soundService.ts`
+1. The sound system now automatically loads sounds from the Vercel blob store BBC sounds collection
 2. Add the sound to the appropriate category
 3. Include relevant tags for searchability
 4. Test the sound in the effects system

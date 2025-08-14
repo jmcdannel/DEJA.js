@@ -41,3 +41,6 @@ yarn-error.log*
 
 # Ignore all settings.toml files
 **/settings.toml
+
+# Ignore archived sound files
+packages/sounds/archive/

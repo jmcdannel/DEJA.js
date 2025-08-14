@@ -68,144 +68,12 @@ export const ZAPSPLAT_LIBRARY: SoundLibrary = {
   attribution: 'Zapsplat'
 }
 
-// Curated sound collections for common railroad scenarios
-export const CURATED_SOUNDS: SoundEffect[] = [
-  // Train Sounds - Using shared sounds package
-  {
-    id: 'train-wheels-ringing',
-    name: 'Train Wheels Ringing Around Bend',
-    category: 'train',
-    url: '@train-wheels-ringing', // Use asset ID format for shared sounds
-    duration: 6300,
-    tags: ['wheels', 'bend', 'ringing', 'locomotive', 'modern'],
-    source: 'local',
-    license: 'Royalty Free',
-    assetId: 'train-wheels-ringing'
-  },
-  {
-    id: 'bbc-trains',
-    name: 'BBC Trains',
-    category: 'train',
-    url: '@bbc-trains', // Use asset ID format for shared sounds
-    duration: 5000,
-    tags: ['bbc', 'diesel', 'locomotive', 'modern'],
-    source: 'local',
-    license: 'Royalty Free',
-    assetId: 'bbc-trains'
-  },
-  
-  // Placeholder sounds for future implementation
-  {
-    id: 'steam-whistle',
-    name: 'Steam Locomotive Whistle',
-    category: 'train',
-    url: '@steam-whistle', // Use asset ID format for shared sounds
-    duration: 3000,
-    tags: ['steam', 'whistle', 'locomotive', 'classic'],
-    source: 'local',
-    license: 'Royalty Free'
-  },
-  {
-    id: 'wheel-squeal',
-    name: 'Train Wheel Squeal',
-    category: 'train',
-    url: '@wheel-squeal', // Use asset ID format for shared sounds
-    duration: 1500,
-    tags: ['wheels', 'squeal', 'friction', 'curve'],
-    source: 'local',
-    license: 'Royalty Free'
-  },
-  {
-    id: 'steam-chuff',
-    name: 'Steam Engine Chuff',
-    category: 'train',
-    url: '@steam-chuff', // Use asset ID format for shared sounds
-    duration: 800,
-    tags: ['steam', 'chuff', 'engine', 'rhythm'],
-    source: 'local',
-    license: 'Royalty Free'
-  },
-  
-  // Station Sounds
-  {
-    id: 'station-announcement',
-    name: 'Station Announcement',
-    category: 'station',
-    url: '@station-announcement', // Use asset ID format for shared sounds
-    duration: 5000,
-    tags: ['announcement', 'public', 'station', 'voice'],
-    source: 'local',
-    license: 'Royalty Free'
-  },
-  {
-    id: 'ticket-machine',
-    name: 'Ticket Machine',
-    category: 'station',
-    url: '@ticket-machine', // Use asset ID format for shared sounds
-    duration: 2000,
-    tags: ['ticket', 'machine', 'electronic', 'beep'],
-    source: 'local',
-    license: 'Royalty Free'
-  },
-  
-  // City Sounds
-  {
-    id: 'city-traffic',
-    name: 'City Traffic',
-    category: 'city',
-    url: '@city-traffic', // Use asset ID format for shared sounds
-    duration: 10000,
-    tags: ['traffic', 'city', 'ambient', 'urban'],
-    source: 'local',
-    license: 'Royalty Free'
-  },
-  {
-    id: 'pedestrian-crossing',
-    name: 'Pedestrian Crossing',
-    category: 'city',
-    url: '@pedestrian-crossing', // Use asset ID format for shared sounds
-    duration: 1500,
-    tags: ['crossing', 'pedestrian', 'signal', 'beep'],
-    source: 'local',
-    license: 'Royalty Free'
-  },
-  
-  // Nature Sounds
-  {
-    id: 'birds-chirping',
-    name: 'Birds Chirping',
-    category: 'nature',
-    url: '@birds-chirping', // Use asset ID format for shared sounds
-    duration: 8000,
-    tags: ['birds', 'nature', 'ambient', 'peaceful'],
-    source: 'local',
-    license: 'Royalty Free'
-  },
-  {
-    id: 'wind-through-trees',
-    name: 'Wind Through Trees',
-    category: 'nature',
-    url: '@wind-through-trees', // Use asset ID format for shared sounds
-    duration: 12000,
-    tags: ['wind', 'trees', 'nature', 'ambient'],
-    source: 'local',
-    license: 'Royalty Free'
-  }
-]
-
 export class SoundEffectsService {
   private sounds: Map<string, SoundEffect> = new Map()
   private libraries: Map<string, SoundLibrary> = new Map()
 
   constructor() {
-    this.initializeSounds()
     this.initializeLibraries()
-  }
-
-  private initializeSounds() {
-    CURATED_SOUNDS.forEach(sound => {
-      this.sounds.set(sound.id, sound)
-    })
   }
 
   private initializeLibraries() {
@@ -264,13 +132,9 @@ export class SoundEffectsService {
 
   // Clear all custom sounds
   clearAllCustomSounds(): void {
-    // Keep only the curated sounds, remove custom ones
-    const curatedSoundIds = CURATED_SOUNDS.map(sound => sound.id)
-    for (const [id] of this.sounds) {
-      if (!curatedSoundIds.includes(id)) {
-        this.sounds.delete(id)
-      }
-    }
+    // Clear all sounds since there are no pre-loaded sounds
+    this.sounds.clear()
+    console.log('🧹 SoundService: Cleared all sounds')
   }
 
   // Get available libraries

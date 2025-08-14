@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Sound Effects System
 - **Complete sound effects management** - New comprehensive system for managing audio effects in railroad layouts:
   - **SoundPicker component** - Advanced sound browser with category tabs, search, and external library integration
-  - **Curated sound collections** - Pre-configured sounds organized by category (train, station, city, nature, ambient, mechanical, transport, industrial)
+  - **BBC Sound Effects Library integration** - High-quality sounds from BBC's royalty-free collection via Vercel blob store
   - **Sound effects service** - Centralized service for managing sound metadata, categories, and search functionality
   - **BBC Sound Effects Library integration** - Ready for integration with BBC's high-quality, royalty-free sound collection
   - **BBC Sound Importer** - Component for importing sounds from BBC Sound Effects Library URLs
