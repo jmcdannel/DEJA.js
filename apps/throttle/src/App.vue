@@ -9,9 +9,9 @@ import { useEfx, useLayout } from '@repo/modules'
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
 const { getDevices, getLayouts } = useLayout()
+const layoutId = useStorage('@DEJA/layoutId', '')
 const devices = getDevices()
 const layouts = getLayouts()
-const layoutId = useStorage('@DEJA/layoutId', '')
 
 // Event handlers for the unified header
 async function handleTrackPowerToggle(newState: boolean) {

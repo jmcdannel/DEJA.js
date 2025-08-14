@@ -9,6 +9,7 @@ import { useTheme } from 'vuetify'
 import SelectLayout from './Layout/SelectLayout.vue'
 import UserProfileMenu from './Core/Header/UserProfile.vue';
 import LayoutStatus from '@/Layout/LayoutStatus.vue'
+import { useMenu } from '@/Core/Menu/useMenu'
 import { Login } from '@repo/auth'
 import { AppHeader } from '@repo/ui'
 import { useDcc } from '@repo/dccex'
@@ -17,6 +18,7 @@ import { useEfx, useLayout } from '@repo/modules'
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
 const { getDevices, getLayouts } = useLayout()
+const layoutId = useStorage('@DEJA/layoutId', '')
 const devices = getDevices()
 const layouts = getLayouts()
 
@@ -45,8 +47,6 @@ function handleDeviceSelect(deviceId: string) {
   // Handle device selection if needed
 }
 
-import { useMenu } from '@/Core/Menu/useMenu'
-const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 
 const user = useCurrentUser()
 const router = useRouter()
