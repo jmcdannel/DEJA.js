@@ -24,7 +24,7 @@ interface Connection {
 }
 
 const baudRate = 115200
-const POOL_INTERVAL = 5000 // 3 seconds
+const POOL_INTERVAL = 3000 // 3 seconds
 
 const layoutId = process.env.LAYOUT_ID || 'betatrack'
 const _connections: { [key: string]: Connection } = {}
