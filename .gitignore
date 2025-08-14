@@ -44,3 +44,7 @@ yarn-error.log*
 
 # Ignore archived sound files
 packages/sounds/archive/
+
+# Ignore temporary sound cache
+temp-sounds-cache/
+**/temp-sounds-cache/
