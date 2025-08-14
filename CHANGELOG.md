@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Sound Effects System
+- **Complete sound effects management** - New comprehensive system for managing audio effects in railroad layouts:
+  - **SoundPicker component** - Advanced sound browser with category tabs, search, and external library integration
+  - **Curated sound collections** - Pre-configured sounds organized by category (train, station, city, nature, ambient, mechanical, transport, industrial)
+  - **Sound effects service** - Centralized service for managing sound metadata, categories, and search functionality
+  - **BBC Sound Effects Library integration** - Ready for integration with BBC's high-quality, royalty-free sound collection
+  - **BBC Sound Importer** - Component for importing sounds from BBC Sound Effects Library URLs
+  - **DEJA Server Device Type** - New device type representing the server machine for playing sound effects
+  - **Vercel API Route Architecture** - Framework for implementing BBC sound import API in Vercel (replaces separate HTTP server)
+  - **External library support** - Framework for FreeSound.org and Zapsplat integration
+  - **Sound test page** - Dedicated testing interface for verifying sound effects functionality
+  - **Category-based organization** - Train sounds (whistles, horns, wheel squeal), station sounds (announcements, machines), city sounds (traffic, pedestrians), nature sounds (birds, wind, water)
+
+#### Sound Effect Types
+- **Sound effect type** - New effect type in the effects system requiring sound URL configuration
+- **Server-side sound handling** - Sound command processing in the effects module
+- **Audio playback controls** - Play/pause/stop functionality with HTML5 Audio API integration
+- **Sound metadata management** - Duration, tags, licensing, and attribution tracking
+
 ### Fixed
 - **Tour app loading issues** - Resolved TypeScript compilation errors and dependency problems:
   - Fixed `currentGuest.value` references in tour store and TourLogin.vue
@@ -16,8 +37,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `commonjsOptions` and proper package resolution for better compatibility
   - Tour app now builds successfully and runs on port 3003
 
-### Added
-- **New features and improvements** - Development continues with ongoing enhancements
+- **Sound effects system** - Resolved import and export issues:
+  - Fixed `soundEffectsService` export errors by creating local sound service
+  - Resolved monorepo package resolution issues with local component copies
+  - Fixed SoundPicker component import dependencies
+  - Sound effects system now builds and runs successfully
+
+### Changed
+- **Sound effects architecture** - Moved from monorepo package dependencies to local implementations:
+  - Created local `soundService.ts` in cloud app for better reliability
+  - Updated SoundPicker and SoundTest components to use local imports
+  - Improved build stability by avoiding problematic monorepo exports
+
+### Technical Improvements
+- **Sound effects infrastructure** - Comprehensive foundation for audio management:
+  - **File organization** - Structured sound directories (`/sounds/train/`, `/sounds/station/`, etc.)
+  - **Metadata system** - Rich sound information including duration, tags, source, and licensing
+  - **Search capabilities** - Tag-based and text-based sound search functionality
+  - **Category management** - Organized sound collections for easy browsing
+  - **External library framework** - Extensible system for integrating additional sound sources
 
 ---
 

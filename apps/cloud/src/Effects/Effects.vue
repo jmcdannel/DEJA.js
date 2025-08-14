@@ -7,16 +7,39 @@ import EffectsList from '@/Effects/EffectsList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 import { ListMenu } from '@repo/ui'
 
-const editEffect = ref(<Effect | null>null)
-const newEfx = {}
+const editEffect = ref<Effect | null>(null)
+const newEfx: Partial<Effect> = {
+  type: '',
+  state: false,
+  id: '',
+  name: '',
+  color: 'purple',
+  tags: [],
+  allowGuest: false
+}
 
 </script>
 <template>
   <ModuleTitle menu="Effects">
     <ListMenu :disabledMenus="['view']" :module-name="'effects'" />
   </ModuleTitle>
+  
+  <!-- Sound Test Link -->
+  <div class="mb-4">
+    <v-btn
+      to="/effects/sound-test"
+      color="cyan"
+      variant="outlined"
+      prepend-icon="mdi-volume-high"
+    >
+      Test Sound Effects
+    </v-btn>
+  </div>
+  
   <Transition name="slide">
-    <EffectForm v-if="editEffect" v-show="editEffect" @close="editEffect = null" :efx="editEffect" />
+    <div v-if="editEffect">
+      <EffectForm v-if="editEffect" @close="editEffect = null" :efx="editEffect" />
+    </div>
     <EffectsList v-else @edit="efx => editEffect = efx">
       <template #prepend>
         <AddTile @click="editEffect = {type: '', state: false, id: '', ...newEfx}" color="purple" />

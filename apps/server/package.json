@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@repo/modules": "workspace:*",
+    "@repo/sounds": "workspace:*",
     "@serialport/parser-readline": "^12.0.0",
     "dotenv": "^16.3.1",
     "firebase": "^10.14.1",

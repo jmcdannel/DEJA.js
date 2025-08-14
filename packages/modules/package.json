@@ -12,6 +12,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@repo/sounds": "workspace:*",
     "firebase": "^10.14.1",
     "vuefire": "^3.2.1"
   },

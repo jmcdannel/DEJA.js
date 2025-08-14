@@ -24,4 +24,10 @@ export const deviceTypes = [
     icon: 'mdi-wifi',
     color: 'blue',
   },
+  {
+    value: 'deja-server',
+    label: 'DEJA Server',
+    icon: 'mdi-server',
+    color: 'purple',
+  },
 ]

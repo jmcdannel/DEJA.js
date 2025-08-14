@@ -29,6 +29,7 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/firebase-config": "workspace:*",
     "@repo/modules": "workspace:*",
+    "@repo/sounds": "workspace:*",
     "@repo/prettier-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@repo/ui": "workspace:*",

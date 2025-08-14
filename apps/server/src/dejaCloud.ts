@@ -19,6 +19,7 @@ let dejaCommandsRef: any = null
 let throttleUnsubscribe: (() => void) | null = null
 let effectUnsubscribe: (() => void) | null = null
 let turnoutUnsubscribe: (() => void) | null = null
+let testEffectUnsubscribe: (() => void) | null = null
 
 async function listen(): Promise<void> {
   dccCommandsRef = rtdb.ref(`dccCommands/${layoutId}`)
@@ -43,6 +44,9 @@ async function listen(): Promise<void> {
   effectUnsubscribe = db.collection(`layouts/${layoutId}/effects`).onSnapshot(handleEffectChange)
   turnoutUnsubscribe = db.collection(`layouts/${layoutId}/turnouts`).onSnapshot(handleTurnoutChange)
   // db.collection(`layouts/${layoutId}/sensors`).onSnapshot(handleSensorChange)
+  
+  // Monitor test effects for sound testing
+  testEffectUnsubscribe = db.collection('testEffects').onSnapshot(handleTestEffectChange)
 }
 
 async function resetThrottles(): Promise<void> {
@@ -104,10 +108,39 @@ async function cleanup(): Promise<void> {
       turnoutUnsubscribe()
       turnoutUnsubscribe = null
     }
+    if (testEffectUnsubscribe) {
+      testEffectUnsubscribe()
+      testEffectUnsubscribe = null
+    }
     
     log.info('Firebase listeners cleaned up')
   } catch (error) {
     log.error('Error cleaning up Firebase listeners:', error)
+  }
+}
+
+// Handle test effect changes (for sound testing from cloud app)
+async function handleTestEffectChange(snapshot: any): Promise<void> {
+  try {
+    snapshot.docChanges().forEach(async (change: any) => {
+      if (change.type === 'added') {
+        const testEffect = change.doc.data()
+        log.info('Test effect added:', testEffect)
+        
+        // Handle the test effect
+        if (testEffect.type === 'sound') {
+          try {
+            const { handleEffect } = await import('./modules/effects.js')
+            await handleEffect(testEffect)
+            log.success('Test sound effect executed:', testEffect.name)
+          } catch (error) {
+            log.error('Error executing test sound effect:', error)
+          }
+        }
+      }
+    })
+  } catch (error) {
+    log.error('Error handling test effect change:', error)
   }
 }
 

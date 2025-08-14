@@ -41,6 +41,12 @@ const router = createRouter({
       beforeEnter: [requireAuth, requireLayout],
     },
     {
+      path: '/effects/sound-test',
+      name: 'Sound Test',
+      component: () => import('./Effects/SoundTest.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
       path: '/routes',
       name: 'Routes',
       component: () => import('./Routes/Routes.vue'),

@@ -12,9 +12,10 @@ export interface Effect {
   point2?: string
   range?: string
   config?: string
+  sound?: string
   tags?: string[]
   allowGuest?: boolean
-  // For 'signal' effect type: references to child pin effects by ID (optional)
+  // For 'signal' effect type: references to child effects by ID (optional)
   red?: string
   yellow?: string
   green?: string
@@ -27,6 +28,7 @@ export interface EffectType {
   icon: string
   color: string
   require?: string[]
+  defaultDevice?: string
 }
 
 export interface MacroItem {

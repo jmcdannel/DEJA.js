@@ -1,0 +1,22 @@
+{
+  "name": "@repo/sounds",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Shared sound assets and utilities for DEJA.js applications",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "assets/**/*",
+    "index.ts"
+  ],
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^20.0.0",
+    "typescript": "*"
+  }
+}
