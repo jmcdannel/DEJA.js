@@ -59,13 +59,15 @@ export const useLayout = () => {
   )
 
   function getLayout() {
-    const layout = useDocument(layoutDoc)
+    console.log('getLayouts')
+    const layout = useDocument(doc(db, 'layouts', layoutId.value))
     return layout
   }
 
   function getLayouts() {
+    console.log('getLayouts')
     const user = useCurrentUser()
-    const layoutsQuery = query(layoutsRef, where('owner', '==', user.value?.email))
+    const layoutsQuery = query(collection(db, 'layouts'), where('owner', '==', user.value?.email))
     console.log('getLayouts', layoutsQuery)
     const layouts = useCollection(layoutsQuery)
     return layouts

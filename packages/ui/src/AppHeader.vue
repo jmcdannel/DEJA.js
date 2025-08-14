@@ -2,11 +2,7 @@
 import { useStorage } from '@vueuse/core'
 import { useCurrentUser } from 'vuefire'
 import Logo from './Logo.vue'
-import TrackPower from './TrackPower.vue'
-import Power from './Power.vue'
-import EmergencyStop from './EmergencyStop.vue'
-import LayoutChip from './LayoutChip.vue'
-import DeviceStatus from './DeviceStatus.vue'
+import ControlBar from './ControlBar.vue'
 import UserProfile from './UserProfile.vue'
 
 defineProps<{
@@ -23,6 +19,7 @@ defineProps<{
   dark?: boolean
   layoutPowerState?: boolean
   devices?: any[]
+  layouts?: any[]
 }>()
 
 const emit = defineEmits<{
@@ -30,6 +27,7 @@ const emit = defineEmits<{
   layoutPowerToggle: [newState: boolean]
   emergencyStop: []
   deviceSelect: [deviceId: string]
+  layoutSelect: [layoutId: string]
 }>()
 
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -52,6 +50,10 @@ function handleDeviceSelect(deviceId: string) {
   emit('deviceSelect', deviceId)
 }
 
+function handleLayoutSelect(layoutId: string) {
+  emit('layoutSelect', layoutId)
+}
+
 const defaultProps = {
   appName: 'DEJA',
   appIcon: 'mdi-train',
@@ -65,7 +67,8 @@ const defaultProps = {
   color: 'surface',
   dark: true,
   layoutPowerState: false,
-  devices: [] as any[]
+  devices: [] as any[],
+  layouts: [] as any[]
 }
 </script>
 
@@ -101,40 +104,23 @@ const defaultProps = {
 
       <!-- Right side - Controls in consistent order -->
       <div class="flex items-center justify-end min-w-0 header-controls">
-        <!-- Layout-specific controls - always in the same order -->
-        <template v-if="layoutId">
-          <!-- Layout Select Chip -->
-          <LayoutChip />
-          
-          <!-- Device Status Chip -->
-          <DeviceStatus 
-            v-if="showDeviceStatus !== false"
-            :devices="devices || []"
-            :show-label="showDeviceStatusLabel"
-            :compact="deviceStatusCompact"
-            @select="handleDeviceSelect"
-          />
-          
-          <!-- Track Power -->
-          <TrackPower 
-            :power-state="layoutPowerState"
-            :is-connected="!!layoutId"
-            @toggle="handleTrackPowerToggle"
-          />
-          
-          <!-- Layout Power -->
-          <Power 
-            v-if="showLayoutPower !== false"
-            :power-state="layoutPowerState"
-            @toggle="handleLayoutPowerToggle"
-          />
-          
-          <!-- Emergency Stop -->
-          <EmergencyStop 
-            v-if="showEmergencyStop !== false"
-            @stop="handleEmergencyStop"
-          />
-        </template>
+        <!-- Unified Control Bar -->
+        <ControlBar 
+          v-if="layoutId"
+          :show-layout-power="showLayoutPower"
+          :show-emergency-stop="showEmergencyStop"
+          :show-device-status="showDeviceStatus"
+          :show-device-status-label="showDeviceStatusLabel"
+          :device-status-compact="deviceStatusCompact"
+          :layout-power-state="layoutPowerState"
+          :devices="devices || []"
+          :layouts="layouts || []"
+          @track-power-toggle="handleTrackPowerToggle"
+          @layout-power-toggle="handleLayoutPowerToggle"
+          @emergency-stop="handleEmergencyStop"
+          @device-select="handleDeviceSelect"
+          @layout-select="handleLayoutSelect"
+        />
         
         <!-- User Profile - always on the far right -->
         <UserProfile v-if="showUserProfile !== false && user" />
@@ -153,12 +139,12 @@ const defaultProps = {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Ensure proper contrast for all elements */
+/* Ensure proper contrast for all elements 
 :deep(.v-btn) {
   backdrop-filter: blur(12px);
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-}
+}*/
 
 :deep(.v-chip) {
   backdrop-filter: blur(12px);
@@ -166,21 +152,21 @@ const defaultProps = {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Consistent spacing and sizing */
+/* Consistent spacing and sizing 
 :deep(.v-btn) {
   min-width: 40px;
   height: 40px;
-}
+}*/
 
 :deep(.v-chip) {
   min-height: 32px;
 }
 
-/* Subtle hover effects */
+/* Subtle hover effects 
 :deep(.v-btn:hover) {
   transform: translateY(-1px);
   transition: transform 0.2s ease;
-}
+}*/
 
 :deep(.v-chip:hover) {
   transform: translateY(-1px);

@@ -8,8 +8,9 @@ import { useEfx, useLayout } from '@repo/modules'
 
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
-const { getDevices } = useLayout()
+const { getDevices, getLayouts } = useLayout()
 const devices = getDevices()
+const layouts = getLayouts()
 const layoutId = useStorage('@DEJA/layoutId', '')
 
 // Event handlers for the unified header
@@ -54,6 +55,7 @@ function handleLayoutSelect(newLayout: string) {
         color="surface"
         :dark="true"
         :devices="devices"
+        :layouts="layouts"
         :show-layout-power="true"
         :show-emergency-stop="true"
         :show-device-status="true"

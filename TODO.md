@@ -1,12 +1,14 @@
 // TODOS
 [x] Signals in Cloud
-[ ] Labels
+[-] Labels
 [ ] Device Details
 [x] Monitor: UI
-[ ] monitor change layout bug
-[ ] Tour App
-  [ ] Auth
-  [ ] Add `allowTour` prop to deja js modules
+[x] monitor change layout bug
+[-] Tour App
+  [-] Auth
+  [x] Add `allowTour` prop to deja js modules
+  [ ] better tour path, ui
+  [ ] generate video/audio
 [ ] Fix routes
 [x] fix serial command pooling.
 [ ] fix AI MAin button in throttle
