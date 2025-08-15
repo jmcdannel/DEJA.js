@@ -2,11 +2,7 @@
 import { useStorage } from '@vueuse/core'
 import { useCurrentUser } from 'vuefire'
 import Logo from './Logo.vue'
-import TrackPower from './TrackPower.vue'
-import Power from './Power.vue'
-import EmergencyStop from './EmergencyStop.vue'
-import LayoutChip from './LayoutChip.vue'
-import DeviceStatus from './DeviceStatus.vue'
+import ControlBar from './ControlBar.vue'
 import UserProfile from './UserProfile.vue'
 
 defineProps<{
@@ -23,6 +19,7 @@ defineProps<{
   dark?: boolean
   layoutPowerState?: boolean
   devices?: any[]
+  layouts?: any[]
 }>()
 
 const emit = defineEmits<{
@@ -30,6 +27,7 @@ const emit = defineEmits<{
   layoutPowerToggle: [newState: boolean]
   emergencyStop: []
   deviceSelect: [deviceId: string]
+  layoutSelect: [layoutId: string]
 }>()
 
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -52,6 +50,10 @@ function handleDeviceSelect(deviceId: string) {
   emit('deviceSelect', deviceId)
 }
 
+function handleLayoutSelect(layoutId: string) {
+  emit('layoutSelect', layoutId)
+}
+
 const defaultProps = {
   appName: 'DEJA',
   appIcon: 'mdi-train',
@@ -65,7 +67,8 @@ const defaultProps = {
   color: 'surface',
   dark: true,
   layoutPowerState: false,
-  devices: [] as any[]
+  devices: [] as any[],
+  layouts: [] as any[]
 }
 </script>
 
@@ -103,36 +106,22 @@ const defaultProps = {
       <div class="flex items-center justify-end min-w-0 header-controls">
         <!-- Layout-specific controls - always in the same order -->
         <template v-if="layoutId">
-          <!-- Layout Select Chip -->
-          <LayoutChip />
           
-          <!-- Device Status Chip -->
-          <DeviceStatus 
-            v-if="showDeviceStatus !== false"
+          <!-- Control Bar with all power controls and device status -->
+          <ControlBar
+            :show-layout-power="showLayoutPower"
+            :show-emergency-stop="showEmergencyStop"
+            :show-device-status="showDeviceStatus"
+            :show-device-status-label="showDeviceStatusLabel"
+            :device-status-compact="deviceStatusCompact"
+            :layout-power-state="layoutPowerState"
             :devices="devices || []"
-            :show-label="showDeviceStatusLabel"
-            :compact="deviceStatusCompact"
-            @select="handleDeviceSelect"
-          />
-          
-          <!-- Track Power -->
-          <TrackPower 
-            :power-state="layoutPowerState"
-            :is-connected="!!layoutId"
-            @toggle="handleTrackPowerToggle"
-          />
-          
-          <!-- Layout Power -->
-          <Power 
-            v-if="showLayoutPower !== false"
-            :power-state="layoutPowerState"
-            @toggle="handleLayoutPowerToggle"
-          />
-          
-          <!-- Emergency Stop -->
-          <EmergencyStop 
-            v-if="showEmergencyStop !== false"
-            @stop="handleEmergencyStop"
+            :layouts="layouts || []"
+            @track-power-toggle="handleTrackPowerToggle"
+            @layout-power-toggle="handleLayoutPowerToggle"
+            @emergency-stop="handleEmergencyStop"
+            @device-select="handleDeviceSelect"
+            @layout-select="handleLayoutSelect"
           />
         </template>
         
