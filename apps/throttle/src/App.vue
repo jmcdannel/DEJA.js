@@ -9,8 +9,8 @@ import { useEfx, useLayout } from '@repo/modules'
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
 const { getDevices } = useLayout()
-const devices = getDevices()
 const layoutId = useStorage('@DEJA/layoutId', '')
+const devices = getDevices()
 
 // Event handlers for the unified header
 async function handleTrackPowerToggle(newState: boolean) {
@@ -54,6 +54,7 @@ function handleLayoutSelect(newLayout: string) {
         color="surface"
         :dark="true"
         :devices="devices"
+        :layouts="layouts"
         :show-layout-power="true"
         :show-emergency-stop="true"
         :show-device-status="true"
