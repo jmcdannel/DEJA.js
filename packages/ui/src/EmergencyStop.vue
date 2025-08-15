@@ -29,6 +29,7 @@ async function stop() {
     class="relative shadow-md"
     icon="mdi-alert-octagon"
     variant="elevated"
+    size="small"
     color="error"
     title="Emergency Stop"
     aria-label="Emergency Stop"

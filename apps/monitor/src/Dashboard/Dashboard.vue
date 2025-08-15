@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
 import { useStorage } from '@vueuse/core' 
 import { useLayout, useLocos, useTurnouts, useEfx } from '@repo/modules'
 import LayoutCard from './components/LayoutCard.vue'
@@ -34,6 +34,10 @@ const sensorChanges = ref<DocumentData[]>([])
 const turnoutsThrownCount = ref(0)
 const efxThrownCount = ref(0)
 
+// Firebase listeners
+let turnoutUnsubscribe: (() => void) | null = null
+let effectUnsubscribe: (() => void) | null = null
+
 watch(turnoutChanges, () => {
   if (turnoutChanges.value.length > 0) {
     setTimeout(() => {
@@ -52,30 +56,60 @@ watch(effectChanges, () => {
   }
 }, { deep: true })
 
-onSnapshot(collection(db, `layouts/${layoutId.value}/turnouts`), (snapshot) => {
-  snapshot.docChanges().forEach((change) => {
-    if (change.type === 'modified') {
-      console.log('Modified turnout: ', change.doc.data())
-      turnoutChanges.value.push(change.doc.data())
-    } else if (change.type === 'added') {
-      console.log('Added turnout: ', change.doc.data())
-    } else if (change.type === 'removed') {
-      console.log('Removed turnout: ', change.doc.data())
-    }
-  })
-})
+// Watch for layoutId changes and set up Firebase listeners
+watch(layoutId, (newLayoutId) => {
+  // Clean up existing listeners
+  if (turnoutUnsubscribe) {
+    turnoutUnsubscribe()
+    turnoutUnsubscribe = null
+  }
+  if (effectUnsubscribe) {
+    effectUnsubscribe()
+    effectUnsubscribe = null
+  }
 
-onSnapshot(collection(db, `layouts/${layoutId.value}/effects`), (snapshot) => {
-  snapshot.docChanges().forEach((change) => {
-    if (change.type === 'modified') {
-      console.log('Modified effect: ', change.doc.data())
-      effectChanges.value.push(change.doc.data())
-    } else if (change.type === 'added') {
-      console.log('Added effect: ', change.doc.data())
-    } else if (change.type === 'removed') {
-      console.log('Removed effect: ', change.doc.data())
-    }
-  })
+  // Only set up listeners if we have a valid layoutId
+  if (newLayoutId && newLayoutId.trim() !== '') {
+    console.log('Setting up Firebase listeners for layout:', newLayoutId)
+    
+    // Set up turnout listener
+    turnoutUnsubscribe = onSnapshot(collection(db, `layouts/${newLayoutId}/turnouts`), (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'modified') {
+          console.log('Modified turnout: ', change.doc.data())
+          turnoutChanges.value.push(change.doc.data())
+        } else if (change.type === 'added') {
+          console.log('Added turnout: ', change.doc.data())
+        } else if (change.type === 'removed') {
+          console.log('Removed turnout: ', change.doc.data())
+        }
+      })
+    })
+
+    // Set up effect listener
+    effectUnsubscribe = onSnapshot(collection(db, `layouts/${newLayoutId}/effects`), (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'modified') {
+          console.log('Modified effect: ', change.doc.data())
+          effectChanges.value.push(change.doc.data())
+        } else if (change.type === 'added') {
+          console.log('Added effect: ', change.doc.data())
+        } else if (change.type === 'removed') {
+          console.log('Removed effect: ', change.doc.data())
+        }
+      })
+    })
+  }
+}, { immediate: true })
+
+// Clean up listeners when component unmounts
+onUnmounted(() => {
+  if (turnoutUnsubscribe) {
+    turnoutUnsubscribe()
+  }
+  if (effectUnsubscribe) {
+    effectUnsubscribe()
+  }
 })
 
 </script>
