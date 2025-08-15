@@ -99,6 +99,14 @@ export const useLayout = () => {
     }
   }
 
+  async function getLayoutDevices(layoutIdParam: string) {
+    const devicesRef = collection(db, `layouts/${layoutIdParam}/devices`)
+    const devices = useCollection(devicesRef, { ssrKey: `devices-${layoutIdParam}` })
+    return devices
+  }
+
+
+
   async function createLayout(id: string, layout: Layout) {
     console.log('createLayout', layout)
     const user = useCurrentUser()
@@ -230,6 +238,7 @@ export const useLayout = () => {
     getLayouts,
     createLayout,
     getDevice,
+    getLayoutDevices,
     getDevices,
     createDevice,
     autoConnectDevice,
