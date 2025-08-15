@@ -17,6 +17,23 @@ const confirmDelete = ref(false)
 const efxType = computed(() => efxTypes.find((type) => type.value === props?.efx?.type))
 const color = ref(props.efx?.color || efxType.value?.color || DEFAULT_COLOR)
 
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = Math.floor(seconds % 60)
+  const parts = []
+  if (h > 0) {
+    parts.push(`${h}h`)
+  }
+  if (m > 0) {
+    parts.push(`${m}m`)
+  }
+  if (s > 0 || parts.length === 0) {
+    parts.push(`${s}s`)
+  }
+  return parts.join('')
+}
+
 async function handleEfx (event: Event) {
   console.log('handleEfx', props.efx, props.efx?.id, event, (event.target as HTMLInputElement)?.checked)
   props?.efx && props?.efxId && await runEffect({
@@ -71,6 +88,17 @@ async function handleEfx (event: Event) {
             prepend-icon="mdi-account-check"
           >
             Guest Access
+          </v-chip>
+          
+          <!-- Sound Duration for Sound Effects -->
+          <v-chip
+            v-if="efx?.type === 'sound' && efx?.soundDuration"
+            size="small"
+            color="info"
+            variant="tonal"
+            prepend-icon="mdi-clock-outline"
+          >
+            {{ formatDuration(efx.soundDuration) }}
           </v-chip>
         </v-chip-group>
         <div class="flex flex-col items-center justify-center">

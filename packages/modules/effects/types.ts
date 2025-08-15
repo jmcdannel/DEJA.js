@@ -14,6 +14,7 @@ export interface Effect {
   config?: string
   sound?: string
   soundBlobUrl?: string
+  soundDuration?: number // Duration in seconds, optional
   tags?: string[]
   allowGuest?: boolean
   // For 'signal' effect type: references to child effects by ID (optional)

@@ -80,6 +80,7 @@ const range = ref(props.efx?.range || undefined)
 const config = ref(props.efx?.config || undefined)
 const sound = ref(props.efx?.sound || '')
 const soundBlobUrl = ref(props.efx?.soundBlobUrl || '')
+const soundDuration = ref(props.efx?.soundDuration || 0)
 const soundObj = ref(null as null | HTMLAudioElement)
 const efxType = ref(props.efx?.type)
 const efxTypeObj = ref(props.efx?.type ? getEfxType(props.efx?.type) : undefined)
@@ -102,6 +103,20 @@ console.log('EffectForm initialized with:', {
 watch(sound, (newSound) => {
   console.log('sound', newSound)
   soundObj.value = new Audio(newSound)
+  
+  // Auto-detect sound duration when sound is set
+  if (newSound) {
+    const audio = new Audio(newSound)
+    audio.addEventListener('loadedmetadata', () => {
+      soundDuration.value = Math.round(audio.duration * 100) / 100 // Round to 2 decimal places
+    })
+    audio.addEventListener('error', () => {
+      console.warn('Could not load audio to detect duration:', newSound)
+      soundDuration.value = 0
+    })
+  } else {
+    soundDuration.value = 0
+  }
 })
 
 watch(efxType, (newType) => {
@@ -151,6 +166,7 @@ async function submit () {
   if (efxTypeObj.value?.require?.includes('sound')) {
     newEfx.sound = sound.value
     newEfx.soundBlobUrl = soundBlobUrl.value
+    newEfx.soundDuration = soundDuration.value || undefined
   }
   //  set macro
   if (efxType.value === 'macro') {
@@ -203,6 +219,23 @@ function stopSound() {
   soundObj.value?.pause()
 }
 // /Users/jmcdannel/trains/trestle-tt-suite/packages/ttt-action-api/sounds/departing-train.wav
+
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = Math.floor(seconds % 60)
+  const parts = []
+  if (h > 0) {
+    parts.push(`${h}h`)
+  }
+  if (m > 0) {
+    parts.push(`${m}m`)
+  }
+  if (s > 0 || parts.length === 0) {
+    parts.push(`${s}s`)
+  }
+  return parts.join('')
+}
 
 </script>
 <template>
@@ -264,7 +297,7 @@ function stopSound() {
         type="info"
         variant="tonal"
         :title="`Sound Effect Device: ${device}`"
-        text="This sound will be played on the DEJA Server. No additional hardware required."
+        :text="`This sound will be played on the DEJA Server. ${soundDuration ? `Duration: ${formatDuration(soundDuration)}` : 'No duration set'}. No additional hardware required.`"
       ></v-alert>
     </template>
     <template v-if="!efx.type">
@@ -339,6 +372,34 @@ function stopSound() {
         v-model="sound" 
         @update:soundBlobUrl="soundBlobUrl = $event" 
       />
+      
+      <!-- Sound Duration -->
+      <div class="mt-4">
+        <v-label class="text-sm opacity-70">Sound Duration</v-label>
+        <div class="flex items-center gap-4 mt-2">
+          <v-text-field
+            v-model="soundDuration"
+            label="Duration (seconds)"
+            type="number"
+            variant="outlined"
+            density="compact"
+            min="0"
+            step="0.01"
+            class="max-w-32"
+            :hint="soundDuration ? `${formatDuration(soundDuration)}` : 'No duration set'"
+            persistent-hint
+          ></v-text-field>
+          <v-chip
+            v-if="soundDuration"
+            size="small"
+            color="info"
+            variant="tonal"
+            prepend-icon="mdi-clock-outline"
+          >
+            {{ formatDuration(soundDuration) }}
+          </v-chip>
+        </div>
+      </div>
     </template>
 
     <!-- macro -->
