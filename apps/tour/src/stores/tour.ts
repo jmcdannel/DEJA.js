@@ -9,6 +9,7 @@ interface Effect {
   state?: boolean
   device?: string
   pin?: number
+  soundDuration?: number // Duration in seconds, optional
   tags?: string[]
   allowGuest?: boolean
 }
@@ -77,6 +78,23 @@ function getAreaFromTags(tags: string[]): string {
   return 'General'
 }
 
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = Math.floor(seconds % 60)
+  const parts = []
+  if (h > 0) {
+    parts.push(`${h}h`)
+  }
+  if (m > 0) {
+    parts.push(`${m}m`)
+  }
+  if (s > 0 || parts.length === 0) {
+    parts.push(`${s}s`)
+  }
+  return parts.join('')
+}
+
 export const useTourStore = defineStore('tour', () => {
   // Ensure layout ID is set for the tour app
   const layoutId = useStorage('@DEJA/layoutId', import.meta.env.VITE_LAYOUT_ID || 'betatrack')
@@ -98,8 +116,9 @@ export const useTourStore = defineStore('tour', () => {
       name: 'Yard Sounds',
       type: 'sound',
       state: false,
-      device: 'yard',
+      device: 'deja-server',
       pin: 2,
+      soundDuration: 15.5, // 15.5 seconds
       tags: ['sound', 'yard'],
       allowGuest: true
     },
@@ -168,7 +187,7 @@ export const useTourStore = defineStore('tour', () => {
 
       return {
         ...effect,
-        description: `${efxType?.label || effect.type} effect${effect.device ? ` on ${effect.device}` : ''}${effect.pin ? ` (Pin ${effect.pin})` : ''}`,
+        description: `${efxType?.label || effect.type} effect${effect.device ? ` on ${effect.device}` : ''}${effect.pin ? ` (Pin ${effect.pin})` : ''}${effect.type === 'sound' && effect.soundDuration ? ` - ${formatDuration(effect.soundDuration)}` : ''}`,
         category: getCategoryFromType(effect.type),
         icon: efxType?.icon || 'mdi-lightning-bolt',
         hasTimeout: shouldHaveTimeout(effect.type),

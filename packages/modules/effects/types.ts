@@ -1,5 +1,5 @@
 export interface Effect {
-  device?: string
+  device?: string // Required for sound effects, optional for others
   name?: string
   pin?: number
   on?: any[]
@@ -14,6 +14,7 @@ export interface Effect {
   config?: string
   sound?: string
   soundBlobUrl?: string
+  soundDuration?: number // Duration in seconds, optional
   tags?: string[]
   allowGuest?: boolean
   // For 'signal' effect type: references to child effects by ID (optional)

@@ -4,6 +4,7 @@ import { useStorage } from '@vueuse/core'
 import { RouterView, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { useTheme } from 'vuetify'
+import { useMenu } from '@/Core/Menu/useMenu'
 
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
@@ -16,8 +17,10 @@ import { useEfx, useLayout } from '@repo/modules'
 
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
-const { getDevices } = useLayout()
+const { getDevices, getLayouts } = useLayout()
+const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 const devices = getDevices()
+const layouts = getLayouts()
 
 // Event handlers for the unified header
 async function handleTrackPowerToggle(newState: boolean) {
@@ -44,8 +47,6 @@ function handleDeviceSelect(deviceId: string) {
   // Handle device selection if needed
 }
 
-import { useMenu } from '@/Core/Menu/useMenu'
-const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 
 const user = useCurrentUser()
 const router = useRouter()
@@ -81,6 +82,7 @@ function handleThemeChange(newTheme: string) {
           color="surface"
           :dark="true"
           :devices="devices"
+          :layouts="layouts"
           :show-layout-power="true"
           :show-emergency-stop="true"
           :show-device-status="true"

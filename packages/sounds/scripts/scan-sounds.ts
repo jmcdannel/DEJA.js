@@ -12,6 +12,18 @@ import { audioConverter, type ConversionResult } from '../src/audioConverter.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
+// Check for required environment variable
+if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  console.error('❌ BLOB_READ_WRITE_TOKEN environment variable not set')
+  console.log('💡 Set it with: export BLOB_READ_WRITE_TOKEN=your_token')
+  console.log('💡 Or create a .env file in the workspace root with:')
+  console.log('   BLOB_READ_WRITE_TOKEN=your_vercel_blob_token_here')
+  console.log('💡 Or run with: BLOB_READ_WRITE_TOKEN=your_token pnpm run scan-sounds')
+  process.exit(1)
+}
+
+console.log('✅ BLOB_READ_WRITE_TOKEN environment variable found')
+
 interface SoundFile {
   name: string
   path: string

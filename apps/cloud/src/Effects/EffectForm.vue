@@ -80,6 +80,7 @@ const range = ref(props.efx?.range || undefined)
 const config = ref(props.efx?.config || undefined)
 const sound = ref(props.efx?.sound || '')
 const soundBlobUrl = ref(props.efx?.soundBlobUrl || '')
+const soundDuration = ref(props.efx?.soundDuration || 0)
 const soundObj = ref(null as null | HTMLAudioElement)
 const efxType = ref(props.efx?.type)
 const efxTypeObj = ref(props.efx?.type ? getEfxType(props.efx?.type) : undefined)
@@ -102,6 +103,20 @@ console.log('EffectForm initialized with:', {
 watch(sound, (newSound) => {
   console.log('sound', newSound)
   soundObj.value = new Audio(newSound)
+  
+  // Auto-detect sound duration when sound is set
+  if (newSound) {
+    const audio = new Audio(newSound)
+    audio.addEventListener('loadedmetadata', () => {
+      soundDuration.value = Math.round(audio.duration * 100) / 100 // Round to 2 decimal places
+    })
+    audio.addEventListener('error', () => {
+      console.warn('Could not load audio to detect duration:', newSound)
+      soundDuration.value = 0
+    })
+  } else {
+    soundDuration.value = 0
+  }
 })
 
 watch(efxType, (newType) => {
@@ -111,6 +126,10 @@ watch(efxType, (newType) => {
     if (efxTypeObj.value?.defaultDevice && !props.efx?.device) {
       device.value = efxTypeObj.value.defaultDevice
     }
+    // For sound effects, always set device to deja-server
+    if (newType === 'sound') {
+      device.value = 'deja-server'
+    }
   } else {
     efxTypeObj.value = undefined
   }
@@ -118,6 +137,13 @@ watch(efxType, (newType) => {
 
 async function submit () {
   loading.value = true
+
+  // Validate that sound effects have a device set
+  if (efxType.value === 'sound' && !device.value) {
+    console.error('Device is required for sound effects')
+    loading.value = false
+    return
+  }
 
   const newEfx: Effect = {
     name: name.value,
@@ -129,7 +155,7 @@ async function submit () {
     id: props.efx?.id || ''
   }
   // set device
-  if (efxTypeObj.value?.require?.includes('device')) {
+  if (efxTypeObj.value?.require?.includes('device') || efxType.value === 'sound') {
     newEfx.device = device.value
   }
   //  set pin
@@ -140,6 +166,7 @@ async function submit () {
   if (efxTypeObj.value?.require?.includes('sound')) {
     newEfx.sound = sound.value
     newEfx.soundBlobUrl = soundBlobUrl.value
+    newEfx.soundDuration = soundDuration.value || undefined
   }
   //  set macro
   if (efxType.value === 'macro') {
@@ -193,6 +220,23 @@ function stopSound() {
 }
 // /Users/jmcdannel/trains/trestle-tt-suite/packages/ttt-action-api/sounds/departing-train.wav
 
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = Math.floor(seconds % 60)
+  const parts = []
+  if (h > 0) {
+    parts.push(`${h}h`)
+  }
+  if (m > 0) {
+    parts.push(`${m}m`)
+  }
+  if (s > 0 || parts.length === 0) {
+    parts.push(`${s}s`)
+  }
+  return parts.join('')
+}
+
 </script>
 <template>
   <div>
@@ -232,6 +276,20 @@ function stopSound() {
       </v-btn-toggle>
     </template>
     
+    <!-- Show device selection for sound effects -->
+    <template v-if="efxType === 'sound'">
+      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+      <v-label class="m-2">Device (Required for Sound Effects)</v-label>
+      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+      <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large">
+          <v-btn v-for="deviceOpt in devices" :value="deviceOpt.id" :key="deviceOpt.id" 
+            class="min-h-24 min-w-48 border"
+            :color="color" >
+              {{ deviceOpt.id }}
+          </v-btn>
+      </v-btn-toggle>
+    </template>
+    
     <!-- Show device info for sound effects -->
     <template v-if="efxType === 'sound' && device">
       <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
@@ -239,7 +297,7 @@ function stopSound() {
         type="info"
         variant="tonal"
         :title="`Sound Effect Device: ${device}`"
-        text="This sound will be played on the DEJA Server. No additional hardware required."
+        :text="`This sound will be played on the DEJA Server. ${soundDuration ? `Duration: ${formatDuration(soundDuration)}` : 'No duration set'}. No additional hardware required.`"
       ></v-alert>
     </template>
     <template v-if="!efx.type">
@@ -314,6 +372,34 @@ function stopSound() {
         v-model="sound" 
         @update:soundBlobUrl="soundBlobUrl = $event" 
       />
+      
+      <!-- Sound Duration -->
+      <div class="mt-4">
+        <v-label class="text-sm opacity-70">Sound Duration</v-label>
+        <div class="flex items-center gap-4 mt-2">
+          <v-text-field
+            v-model="soundDuration"
+            label="Duration (seconds)"
+            type="number"
+            variant="outlined"
+            density="compact"
+            min="0"
+            step="0.01"
+            class="max-w-32"
+            :hint="soundDuration ? `${formatDuration(soundDuration)}` : 'No duration set'"
+            persistent-hint
+          ></v-text-field>
+          <v-chip
+            v-if="soundDuration"
+            size="small"
+            color="info"
+            variant="tonal"
+            prepend-icon="mdi-clock-outline"
+          >
+            {{ formatDuration(soundDuration) }}
+          </v-chip>
+        </div>
+      </div>
     </template>
 
     <!-- macro -->

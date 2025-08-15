@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { deviceTypes } from '@repo/modules/layouts/constants'
 
 interface Device {
   id: string
@@ -30,6 +31,11 @@ const allConnected = computed(() => props.devices.every(device => device.isConne
 
 function handleDeviceSelect(deviceId: string) {
   emit('select', deviceId)
+}
+
+function getDeviceIcon(deviceType: string): string {
+  const deviceTypeConfig = deviceTypes.find(dt => dt.value === deviceType)
+  return deviceTypeConfig?.icon || 'mdi-devices'
 }
 </script>
 
@@ -72,7 +78,7 @@ function handleDeviceSelect(deviceId: string) {
         <v-list-item-title>
           <v-chip
             size="small"
-            :prepend-icon="device.type === 'dcc-ex' ? 'mdi-memory' : 'mdi-usb'"
+            :prepend-icon="getDeviceIcon(device.type)"
             :color="device?.isConnected ? 'green' : 'red'"
           >
             {{ device?.id || 'Device' }}

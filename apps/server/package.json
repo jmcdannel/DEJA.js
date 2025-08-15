@@ -13,6 +13,7 @@
     "start": "tsx index.ts",
     "mosquitto": "tsx src/scripts/start-mqtt.ts",
     "check-mqtt": "tsx src/scripts/check-mqtt.ts",
+    "migrate-sounds": "tsx src/scripts/migrate-sound-effects.ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

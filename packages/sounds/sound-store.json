@@ -562,5 +562,31 @@
       "finalFormat": ".wav",
       "converted": false
     }
+  },
+  "city/464628__sofiesmood__casino-slots-sound-effects.mp3": {
+    "id": "sound-1755218123316-x2u9eoore",
+    "name": "464628  Sofiesmood  Casino Slots Sound Effects",
+    "category": "city",
+    "filePath": "city/464628__sofiesmood__casino-slots-sound-effects.mp3",
+    "tags": [
+      "city",
+      "imported"
+    ],
+    "source": "imported",
+    "importedAt": "2025-08-15T00:35:23.316Z",
+    "blobUrl": "https://xndozjm68szqabqe.public.blob.vercel-storage.com/sounds/city/464628__sofiesmood__casino-slots-sound-effects.mp3",
+    "blobPathname": "sounds/city/464628__sofiesmood__casino-slots-sound-effects.mp3",
+    "metadata": {
+      "description": "Imported from sounds package",
+      "license": "Local",
+      "attribution": "DEJA.js Sounds Package",
+      "originalSize": 7199066,
+      "originalPath": "city/464628__sofiesmood__casino-slots-sound-effects.mp3",
+      "convertedSize": 7199066,
+      "compressionRatio": 1,
+      "originalFormat": ".mp3",
+      "finalFormat": ".mp3",
+      "converted": false
+    }
   }
 }

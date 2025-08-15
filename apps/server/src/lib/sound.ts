@@ -45,6 +45,12 @@ log.info('[SOUND] Audio cache initialized', {
 
 export function soundCommand(efx: any): SoundCommand | undefined {
   try {
+    // Device is required for sound effects
+    if (!efx.device) {
+      log.error('[SOUND] Device field is required for sound effects', efx)
+      return undefined
+    }
+    
     // Use soundBlobUrl if available, otherwise fall back to sound field
     const soundUrl = efx.soundBlobUrl || efx.sound
     
