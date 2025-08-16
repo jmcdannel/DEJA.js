@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useLayout, type Device } from '@repo/modules/layouts'
+import { deviceTypes, useLayout, type Device } from '@repo/modules'
 
 interface ValidationRules {
   required: ((val: any) => boolean | string)[];
@@ -22,7 +22,7 @@ const rules:ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
 
-const { createDevice, deviceTypes } = useLayout()
+const { createDevice } = useLayout()
 
 const connectionTypes = ['usb', 'wifi', 'bluetooth']
 
@@ -47,6 +47,8 @@ function handleClose() {
   reveal.value = false
   emit('close')
 }
+
+console.log('deviceTypes', deviceTypes)
 
 </script>
 <template>

@@ -46,6 +46,12 @@ export const useLayout = () => {
       icon: 'mdi-wifi',
       color: 'blue',
     },
+    {
+      value: 'deja-server',
+      label: 'DEJA Server',
+      icon: 'mdi-laptop',
+      color: 'purple',
+    },
   ]
 
   const { sendDejaCommand } = useDejaJS()

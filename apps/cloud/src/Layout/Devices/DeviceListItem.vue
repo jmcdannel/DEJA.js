@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useColors } from '@/Core/UI/useColors'
-import { deviceTypes, useLayout, type Device } from '@repo/modules/layouts'
+import { deviceTypes, useLayout, type Device } from '@repo/modules'
 import { useTurnouts } from '@repo/modules/turnouts'
 
 const { connectDevice, autoConnectDevice } = useLayout()
@@ -10,7 +10,7 @@ const { colors, DEFAULT_COLOR } = useColors()
 
 const props = defineProps<{
   device: Device,
-  ports: string[],
+  ports: string[] | null | undefined,
 }>()
 
 const turnouts = ref(getTurnouts())

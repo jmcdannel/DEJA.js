@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import type { Effect } from '@repo/modules'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
-import SoundFileList from '@/Effects/Sounds/SoundFileList.vue'
 import EffectForm from '@/Effects/EffectForm.vue'
 import EffectsList from '@/Effects/EffectsList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
@@ -24,8 +23,6 @@ const newEfx: Partial<Effect> = {
   <ModuleTitle menu="Effects">
     <ListMenu :disabledMenus="['view']" :module-name="'effects'" />
   </ModuleTitle>
-
-  <SoundFileList />
     
   <!-- External Sound Library Quicklinks -->
   <v-card class="mb-4">

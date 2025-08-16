@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Shared sound assets and utilities for DEJA.js applications",
   "main": "dist/index.js",
-  "types": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "assets/**/*",
     "index.ts"

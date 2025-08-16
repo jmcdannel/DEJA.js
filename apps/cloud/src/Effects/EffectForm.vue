@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onErrorCaptured } from 'vue'
+import { ref, watch, onErrorCaptured, computed } from 'vue'
 import { useEfx, useLayout, type Effect } from '@repo/modules'
 import { efxTypes } from '@repo/modules/effects/constants'
 import ViewJson from '@/Core/UI/ViewJson.vue'
@@ -8,6 +8,7 @@ import IALEDForm from '@/Effects//IALEDForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
+import SoundFileList from '@/Effects/Sounds/SoundFileList.vue'
 // TODO: icon picker
 
 // Error handling
@@ -82,9 +83,27 @@ const color = ref(props.efx?.color || efxTypeObj.value?.color || 'purple')
 const tags = ref<string[]>(props.efx?.tags || [])
 const allowGuest = ref<boolean>(props.efx?.allowGuest || false)
 const loading = ref(false)
+const selectedSoundFile = ref<string>(props.efx?.sound || '')
+const showSoundDialog = ref(false)
 const rules: ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
+
+// Validation for device when required
+const deviceRules = computed(() => {
+  if (efxTypeObj.value?.require?.includes('device')) {
+    return [(val: any) => !!val || 'Device is required for this effect type.']
+  }
+  return []
+})
+
+// Validation for sound file when required
+const soundFileRules = computed(() => {
+  if (efxType.value === 'sound') {
+    return [(val: any) => !!val || 'Sound file is required for sound effects.']
+  }
+  return []
+})
 const devices = getDevices()
 console.log('EffectForm initialized with:', {
   props: props.efx,
@@ -108,6 +127,20 @@ watch(efxType, (newType) => {
 
 async function submit () {
   loading.value = true
+
+  // Validate device is selected when required
+  if (efxTypeObj.value?.require?.includes('device') && !device.value) {
+    console.error('Device is required for this effect type')
+    loading.value = false
+    return
+  }
+
+  // Validate sound file is selected for sound effects
+  if (efxType.value === 'sound' && !selectedSoundFile.value) {
+    console.error('Sound file is required for sound effects')
+    loading.value = false
+    return
+  }
 
   const newEfx: Effect = {
     name: name.value,
@@ -146,6 +179,11 @@ async function submit () {
     efxAny.green = green.value || undefined
   }
 
+  // set sound file for sound effects
+  if (efxType.value === 'sound') {
+    newEfx.sound = selectedSoundFile.value
+  }
+
   await setEfx(props.efx?.id || '', newEfx)
   loading.value = false
   emit('close')
@@ -166,6 +204,11 @@ function handleIALED(ialedEffectConfig: {
   config.value = ialedEffectConfig.config
 }
 
+function handleSoundFileSelect(soundFile: string) {
+  selectedSoundFile.value = soundFile
+  showSoundDialog.value = false
+}
+
 
 </script>
 <template>
@@ -184,17 +227,23 @@ function handleIALED(ialedEffectConfig: {
       {{ efxType }}
     </v-chip>
     </div>
-    <template v-if="!efx.device && efxTypeObj?.require?.includes('device')">
+    <template v-if="efxTypeObj?.require?.includes('device')">
       <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      <v-label class="m-2">Device</v-label>
+      <v-label class="m-2">
+        Device <span class="text-red-500">*</span>
+        <div class="text-sm opacity-70 mt-1">Required for {{ efxType }} effects</div>
+      </v-label>
       <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large">
+      <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large" :rules="deviceRules">
           <v-btn v-for="deviceOpt in devices" :value="deviceOpt.id" :key="deviceOpt.id" 
             class="min-h-24 min-w-48 border"
             :color="color" >
               {{ deviceOpt.id }}
           </v-btn>
       </v-btn-toggle>
+      <div v-if="efxTypeObj?.defaultDevice" class="text-xs opacity-70 mt-1">
+        Default device: {{ efxTypeObj.defaultDevice }}
+      </div>
     </template>
     
     <template v-if="!efx.type">
@@ -263,6 +312,51 @@ function handleIALED(ialedEffectConfig: {
       <div class="text-xs opacity-70 mt-1">Enter the IDs of existing pin effects for each color.</div>
     </template>
 
+    <!-- sound file selection -->
+    <template v-else-if="efxType === 'sound'">
+      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+      <v-label class="m-2">
+        Sound File <span class="text-red-500">*</span>
+        <div class="text-sm opacity-70 mt-1">Select a sound file to play when this effect is triggered</div>
+      </v-label>
+      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+      
+      <!-- Selected sound file display -->
+      <div v-if="selectedSoundFile" class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <v-icon icon="mdi-check-circle" color="green" class="mr-2"></v-icon>
+            <span class="text-green-800">Selected: {{ selectedSoundFile.split('/').pop() }}</span>
+          </div>
+          <v-btn 
+            size="small" 
+            variant="text" 
+            color="red" 
+            @click="selectedSoundFile = ''"
+            title="Clear selection"
+          >
+            <v-icon icon="mdi-close"></v-icon>
+          </v-btn>
+        </div>
+      </div>
+      
+      <!-- Sound file selection button -->
+      <div class="mb-4">
+        <v-btn
+          class="min-h-48 min-w-48 border flex"
+          :color="color"
+          @click="showSoundDialog = true"
+        >
+          <div class="relative flex flex-col justify-center items-center">
+            <v-icon size="64">mdi-volume-high</v-icon>
+            <div class="mt-4">
+              {{ selectedSoundFile ? 'Change Sound File' : 'Select Sound File' }}
+            </div>
+          </div>
+        </v-btn>
+      </div>
+    </template>
+
     <!-- macro -->
     <template v-else-if="efxType === 'macro'">
       <MacroForm @change="handleMacro" :on="macroOn" :off="macroOff"></MacroForm>
@@ -304,6 +398,40 @@ function handleIALED(ialedEffectConfig: {
     </section>
     <v-dialog max-width="80vw" v-model="editColor">
       <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.efx?.color ?? 'purple'"></ColorPicker>
+    </v-dialog>
+
+    <!-- Sound File Selection Dialog -->
+    <v-dialog max-width="90vw" v-model="showSoundDialog">
+      <v-card>
+        <v-card-title class="flex items-center justify-between">
+          <span>Select Sound File</span>
+          <v-btn icon @click="showSoundDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text>
+          <SoundFileList 
+            :selection-mode="true" 
+            :selected-sound="selectedSoundFile"
+            @select="handleSoundFileSelect"
+          />
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn 
+            variant="tonal" 
+            @click="showSoundDialog = false"
+          >
+            Cancel
+          </v-btn>
+          <v-btn 
+            :color="color" 
+            @click="showSoundDialog = false"
+            :disabled="!selectedSoundFile"
+          >
+            Confirm Selection
+          </v-btn>
+        </v-card-actions>
+      </v-card>
     </v-dialog>
 
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
