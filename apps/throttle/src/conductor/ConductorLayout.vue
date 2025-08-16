@@ -4,6 +4,7 @@ import type { Loco, Throttle } from '@repo/modules/locos'
 import { useLocos } from '@repo/modules/locos'
 import SimpleThrottle from '@/throttle/SimpleThrottle.vue'
 import ThrottleTile from '@/throttle/ThrottleTile.vue'
+import Speedometer from '@/throttle/Speedometer.vue'
 import { TurnoutList, EffectList } from '@repo/ui'
 
 const drawer = ref(false)
@@ -11,9 +12,19 @@ const { getThrottles } = useLocos()
 const throttles = getThrottles()
 
 </script>
-<template>
-  <main class="@container relative">
-    <div class="conductor-layout grid grid-cols-1 @[960px]:grid-cols-3 gap-2 w-full">
+  <template>
+    <main class="@container relative">
+      <div
+        v-if="throttles?.length"
+        class="flex flex-wrap gap-4 p-4 justify-center">
+        <Speedometer
+          v-for="throttle in throttles"
+          :key="throttle.address"
+          :speed="throttle.speed"
+          :label="throttle.address"
+        />
+      </div>
+      <div class="conductor-layout grid grid-cols-1 @[960px]:grid-cols-3 gap-2 w-full">
       <div class=" bg-slate-700 bg-opacity-20 rounded border-1 border-green-500 border-opacity-50 order-2 @[960px]:!order-1 overflow-hidden">
         <div class="@container h-full overflow-y-auto p-4">
           <!-- Column 1 content goes here -->
