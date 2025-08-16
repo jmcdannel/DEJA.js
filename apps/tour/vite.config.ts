@@ -40,6 +40,19 @@ export default defineConfig({
     }
   },
   server: {
-    port: 3003
+    port: 3021,
+        
+    // CORS configuration for development
+    cors: {
+      origin: ['http://localhost:3021', 'http://localhost:3001', 'http://localhost:3011', 'http://localhost:3031'],
+      credentials: true
+    },
+    
+    // Additional headers for development
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    }
   },
 })

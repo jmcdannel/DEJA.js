@@ -1,5 +1,3 @@
-import { head, list } from '@vercel/blob'
-
 export interface SoundFile {
   name: string
   url: string
@@ -11,29 +9,25 @@ export interface SoundFile {
 }
 
 export class SoundFileService {
-  private storeName: string
+  private apiBaseUrl: string
 
   constructor() {
-    this.storeName = 'bbc-sounds'
+    // Use the Next.js API URL - change this to your deployed URL when ready
+    this.apiBaseUrl = 'http://localhost:3001/api'
+    console.log('SoundFileService initialized with API URL:', this.apiBaseUrl)
   }
 
   async listSoundFiles(): Promise<SoundFile[]> {
     try {
-      // Use the official Vercel Blob SDK to list files
-      const { blobs } = await list({
-        limit: 100, // Adjust limit as needed
-        prefix: '', // List all files, or use a prefix to filter by folder
-        token: import.meta.env.VITE_VERCEL_BLOB_TOKEN,
-      })
+      // Call the Next.js API endpoint
+      const response = await fetch(`${this.apiBaseUrl}/sounds`)
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
 
-      return blobs.map((blob) => ({
-        name: this.extractFileName(blob.pathname),
-        url: blob.url,
-        size: blob.size,
-        uploadedAt: blob.uploadedAt?.toISOString() || new Date().toISOString(),
-        contentType: (blob as any).contentType || 'audio/mpeg',
-        pathname: blob.pathname,
-      }))
+      const data = await response.json()
+      return data.sounds || []
     } catch (error) {
       console.error('Error listing sound files:', error)
       throw new Error('Failed to load sound files')
@@ -42,46 +36,30 @@ export class SoundFileService {
 
   async getSoundFileInfo(pathname: string): Promise<SoundFile | null> {
     try {
-      // Use the official Vercel Blob SDK to get file metadata
-      const blob = await head(pathname, {
-        token: import.meta.env.VITE_VERCEL_BLOB_TOKEN,
-      })
-
-      if (!blob) {
+      // Call the Next.js API endpoint for specific file info
+      const response = await fetch(`${this.apiBaseUrl}/sounds/${encodeURIComponent(pathname)}`)
+      
+      if (!response.ok) {
         return null
       }
 
-      return {
-        name: this.extractFileName(blob.pathname),
-        url: blob.url,
-        size: blob.size,
-        uploadedAt: blob.uploadedAt?.toISOString() || new Date().toISOString(),
-        contentType: (blob as any).contentType || 'audio/mpeg',
-        pathname: blob.pathname,
-      }
+      const data = await response.json()
+      return data.sound
     } catch (error) {
       console.error('Error getting sound file info:', error)
       return null
     }
   }
 
-  private extractFileName(pathname: string): string {
-    // Extract filename from pathname and make it human-readable
-    const filename = pathname.split('/').pop() || ''
-    return filename
-      .replace(/\.(mp3|wav|ogg|m4a|flac|aac)$/i, '')
-      .replace(/[-_]/g, ' ')
-      .replace(/\b\w/g, l => l.toUpperCase())
+  // Method to set a different API base URL (useful for switching between dev and production)
+  setApiBaseUrl(url: string): void {
+    this.apiBaseUrl = url
+    console.log('SoundFileService API URL updated to:', this.apiBaseUrl)
   }
 
-  // Method to set a different store name if needed
-  setStoreName(storeName: string): void {
-    this.storeName = storeName
-  }
-
-  // Method to get current store name
-  getStoreName(): string {
-    return this.storeName
+  // Method to get current API base URL
+  getApiBaseUrl(): string {
+    return this.apiBaseUrl
   }
 }
 
