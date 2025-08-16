@@ -41,11 +41,11 @@ export default defineConfig({
     }
   },
   server: {
-    port: 5000,
+    port: 3011,
         
     // CORS configuration for development
     cors: {
-      origin: ['http://localhost:5000', 'http://localhost:3000', 'http://localhost:5173'],
+      origin: ['http://localhost:3011', 'http://localhost:3001', 'http://localhost:3021', 'http://localhost:3031'],
       credentials: true
     },
     
