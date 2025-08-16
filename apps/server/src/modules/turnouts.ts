@@ -1,6 +1,6 @@
 import { type DocumentData } from 'firebase/firestore'
 import { db } from '@repo/firebase-config/firebase-admin-node'
-import type { Turnout } from '@repo/modules/turnouts'
+import type { Turnout } from '@repo/modules'
 import { log } from '../utils/logger.js'
 import { dcc, type TurnoutPayload } from '../lib/dcc.js'
 import { layout } from './layout.js'
@@ -162,7 +162,7 @@ function servoCommand(turnout: Turnout): ServoCommand | undefined {
     )
     return undefined
   }
-  const current = turnout.state ? parseInt(turnout.divergent) : parseInt(turnout.straight)
+  const current = turnout.state ? turnout.divergent : turnout.straight
   if (isNaN(current)) {
     log.error(
       `[COMMANDS] servoCommand: Invalid current value for turnout ${turnout.id}`
@@ -174,8 +174,8 @@ function servoCommand(turnout: Turnout): ServoCommand | undefined {
     device: turnout.device,
     payload: {
       current,
-      servo: parseInt(turnout.turnoutIdx),
-      value: turnout.state ? parseInt(turnout.straight) : parseInt(turnout.divergent),
+      servo: turnout.turnoutIdx,
+      value: turnout.state ? turnout.straight : turnout.divergent,
     },
   }
 }

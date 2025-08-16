@@ -1,194 +1,221 @@
 # DEJA.js Sounds Package
 
-This package manages sound assets for DEJA.js applications using Vercel Blob Store for cloud storage and local archiving.
+A shared sound assets package for DEJA.js applications that integrates with Vercel Blob Store for cloud-based sound management.
 
-## 🚀 New Sound Storage System
+## 🚀 Features
 
-The sounds package now uses a hybrid approach:
-- **Cloud Storage**: Files are uploaded to Vercel Blob Store for web access
-- **Local Archive**: Original files are moved to an archive folder (git-ignored)
-- **Sound Store**: Metadata is maintained in JSON format for easy access
+- **Cloud-based storage**: All sounds are stored in Vercel Blob Store for fast, global access
+- **BBC Sound Effects**: Integration with BBC Sound Effects Library (BBC RemArc Licence)
+- **Automatic categorization**: Sounds are automatically categorized by type and content
+- **Search and filtering**: Powerful search capabilities across all sound assets
+- **Cross-platform**: Works in browser, Node.js, and mobile environments
+- **Caching**: Built-in caching for performance optimization
 
-## 📁 Directory Structure
+## 📦 Installation
 
-```
-packages/sounds/
-├── assets/           # Source sound files (organized by category)
-├── archive/          # Archived files after processing (git-ignored)
-├── scripts/          # Processing scripts
-├── sound-store.json  # Sound metadata and blob URLs
-└── README.md         # This file
-```
+This package is part of the DEJA.js monorepo and is automatically available to all apps.
 
-**Note**: The sound store is no longer copied to the cloud app's public folder. All sounds are accessed directly from Vercel Blob Store.
-
-## 🛠️ Scripts
-
-### `pnpm run scan-sounds`
-Scans the `assets/` directory for new sound files and:
-1. Uploads them to Vercel Blob Store
-2. Moves local files to the `archive/` folder
-3. Updates the sound store with metadata and blob URLs
-4. Saves the sound store to both the package and cloud app
-
-### `pnpm run test-blob`
-Tests the Vercel Blob connection before running the full scan.
-
-### `pnpm run copy-to-public`
-Legacy script - no longer needed since sounds are accessed directly from Vercel Blob Store.
-
-## 🔧 Setup Requirements
+## 🔧 Configuration
 
 ### Environment Variables
-The scan script requires a Vercel Blob read/write token:
+
+Set these environment variables in your app:
 
 ```bash
-export BLOB_READ_WRITE_TOKEN=your_vercel_blob_token_here
+# Vercel Blob Store Configuration
+VITE_BLOB_STORE_URL=https://your-store-id.public.blob.vercel-storage.com
+VITE_VERCEL_BLOB_TOKEN=your_vercel_blob_token_here
+
+# BBC Sound Effects API (optional)
+VITE_BBC_API_KEY=your_bbc_api_key_here
 ```
 
-### Vercel Blob Store
-Ensure you have a Vercel Blob store configured (e.g., `bbc-sounds`) with public access.
+### Default Blob Store
 
-## 📊 Sound Categories
+If no environment variable is set, the package will use the default BBC sounds blob store:
+`https://xndozjm68szqabqe.public.blob.vercel-storage.com`
 
-The scanner automatically categorizes sounds based on:
-- **Directory structure**: Files in `train/` → `train` category
-- **Filename patterns**: `steam-whistle.mp3` → `train` category
-- **Default fallback**: `ambient` for unrecognized files
+## 🎵 Usage
 
-Supported categories:
-- `train` - Locomotive and railway sounds
-- `station` - Station ambience and announcements
-- `city` - Urban environment sounds
-- `nature` - Outdoor and natural sounds
+### Basic Usage
+
+```typescript
+import { getAllSounds, getSoundsByCategory, searchSounds, type SoundData } from '@repo/sounds'
+
+// Get all sounds
+const allSounds = await getAllSounds()
+
+// Get sounds by category
+const trainSounds = await getSoundsByCategory('train')
+
+// Search sounds
+const searchResults = await searchSounds('whistle')
+```
+
+### Sound Data Structure
+
+```typescript
+interface SoundData {
+  id: string
+  name: string
+  category: string
+  filePath: string
+  tags: string[]
+  source: string
+  importedAt: string
+  blobUrl: string
+  blobPathname: string
+  metadata: {
+    description: string
+    license: string
+    attribution: string
+    originalSize: number
+    originalPath: string
+    convertedSize?: number
+    compressionRatio?: number
+    originalFormat?: string
+    finalFormat?: string
+    converted?: boolean
+  }
+}
+```
+
+### Available Categories
+
+- `train` - Locomotive and train-related sounds
+- `station` - Station announcements and ambient sounds
+- `city` - Urban and city environment sounds
+- `nature` - Natural and outdoor sounds
 - `ambient` - Background and atmospheric sounds
 - `mechanical` - Industrial and mechanical sounds
 - `transport` - General transportation sounds
 - `industrial` - Factory and industrial sounds
 
-## 🎵 Supported File Formats
+## 🛠️ Development
 
-- MP3 (`.mp3`)
-- WAV (`.wav`)
-- OGG (`.ogg`)
-- M4A (`.m4a`)
+### Scripts
 
-## 🔄 Workflow
-
-### 1. Add New Sounds
-Place new sound files in the appropriate category folder under `assets/`:
-
-```
-assets/
-├── train/
-│   ├── steam-whistle.mp3
-│   └── diesel-engine.mp3
-├── station/
-│   └── crowd-ambience.mp3
-└── nature/
-    └── birds-chirping.mp3
-```
-
-### 2. Run the Scanner
 ```bash
-# From the root directory
-pnpm run scan-sounds
+# Build the package
+pnpm build
 
-# Or from the sounds package
-cd packages/sounds
-pnpm run scan-sounds
+# Type checking
+pnpm type-check
+
+# Scan and upload new sounds to blob store
+pnpm scan-sounds
+
+# Test blob store connection
+pnpm test-blob
+
+# Upload sound store to blob store
+pnpm upload-sound-store
 ```
 
-### 3. What Happens
-- Files are uploaded to Vercel Blob Store
-- Local files are moved to `archive/` (maintaining structure)
-- Sound store is updated with metadata and blob URLs
-- All sounds are accessible directly from Vercel Blob Store
-- No duplication in cloud app public folders
+### Adding New Sounds
 
-### 4. Access Sounds
-- **Web apps**: Use the sound store JSON or direct blob URLs
-- **Direct URLs**: All sounds load from Vercel Blob Store
-- **Local development**: Files are archived locally
-- **Git**: Sound files are no longer tracked (only metadata)
+1. Place sound files in the `assets/` directory
+2. Run `pnpm scan-sounds` to process and upload them
+3. Files are automatically categorized and tagged
+4. Local files are moved to `archive/` after processing
 
-## 📋 Sound Store Format
+### Blob Store Integration
 
-The sound store contains metadata for each sound file:
+The package automatically:
+- Uploads new sounds to Vercel Blob Store
+- Maintains a sound store index in the blob store
+- Provides direct blob URLs for fast access
+- Handles fallbacks if blob store is unavailable
 
-```json
-{
-  "train/steam-whistle.mp3": {
-    "id": "sound-1234567890-abc123",
-    "name": "Steam Whistle",
-    "category": "train",
-    "filePath": "train/steam-whistle.mp3",
-    "tags": ["train", "locomotive", "whistle", "steam", "imported"],
-    "source": "imported",
-    "importedAt": "2024-01-01T00:00:00.000Z",
-    "blobUrl": "https://vercel-blob.com/...",
-    "blobPathname": "sounds/train/steam-whistle.mp3",
-    "metadata": {
-      "description": "Imported from sounds package",
-      "license": "Local",
-      "attribution": "DEJA.js Sounds Package",
-      "originalSize": 1234567,
-      "originalPath": "train/steam-whistle.mp3"
-    }
-  }
-}
-```
+## 🔗 Integration with Apps
 
-## 🚨 Important Notes
+### Cloud App
 
-### Git Ignorance
-- The `archive/` folder is automatically ignored by git
-- Only the sound store JSON and metadata are committed
-- This significantly reduces repository size
+The cloud app uses the sounds package for:
+- Effect sound selection
+- Sound preview and playback
+- Sound management and organization
 
-### File Management
-- **Don't manually edit** files in the `archive/` folder
-- **Don't commit** the archive folder to git
-- Original files are preserved locally for backup
+### Throttle App
 
-### Blob Store
-- Files are uploaded with public access
-- URLs are permanent and CDN-enabled
-- Storage costs apply based on Vercel's pricing
+The throttle app uses the sounds package for:
+- Mobile sound playback
+- Offline sound access
+- Sound effects for train operations
 
-## 🔍 Troubleshooting
+### Monitor App
 
-### Test Blob Connection
-```bash
-cd packages/sounds
-BLOB_READ_WRITE_TOKEN=your_token pnpm run test-blob
-```
+The monitor app uses the sounds package for:
+- Sound monitoring and logging
+- Audio feedback for system events
 
-### Check Environment
-```bash
-echo $BLOB_READ_WRITE_TOKEN
-```
+## 📚 API Reference
 
-### Verify Archive
-```bash
-ls -la packages/sounds/archive/
-```
+### Core Functions
 
-## 📚 Related Documentation
+- `getAllSounds()` - Get all available sounds
+- `getSoundsByCategory(category)` - Get sounds by category
+- `searchSounds(query, category?)` - Search sounds by text
+- `getSoundById(id)` - Get sound by ID
+- `getSoundByFilePath(filePath)` - Get sound by file path
 
-- [Vercel Blob Documentation](https://vercel.com/docs/storage/vercel-blob)
-- [DEJA.js Sound System Overview](../SOUND_SYSTEM_README.md)
-- [API Documentation](../../API_DOCUMENTATION.md)
+### Data Access
 
-## 🤝 Contributing
+- `soundsData` - Promise that resolves to all sound data
+- `soundsDataSync` - Synchronous access (populated after initial load)
 
-When adding new sounds:
-1. Place files in the appropriate category folder
-2. Use descriptive filenames
-3. Ensure proper licensing and attribution
-4. Run the scanner to process them
-5. Verify the sound store is updated
+## 🚨 Error Handling
+
+The package includes robust error handling:
+- Graceful fallbacks if blob store is unavailable
+- Empty results instead of crashes
+- Detailed logging for debugging
+- Automatic retry mechanisms
 
 ## 📄 License
 
-Sound files maintain their original licenses. The DEJA.js Sounds Package is provided as-is for educational and development purposes.
+All sounds must comply with their respective licenses:
+- **BBC Sounds**: BBC RemArc Licence - See [https://sound-effects.bbcrewind.co.uk/licensing](https://sound-effects.bbcrewind.co.uk/licensing)
+- **Custom Sounds**: Local license as specified in metadata
+- **Imported Sounds**: Original license preserved
+
+## 🤝 Contributing
+
+1. Add new sounds to the `assets/` directory
+2. Run `pnpm scan-sounds` to process them
+3. Test in your app
+4. Commit the updated sound store
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+**"Could not load sound store data"**
+- Check your blob store token
+- Verify the blob store URL is correct
+- Ensure the sound store has been uploaded
+
+**"No sounds found"**
+- Run `pnpm upload-sound-store` to upload the sound store
+- Check blob store permissions
+- Verify environment variables
+
+**"Audio playback failed"**
+- Check blob store accessibility
+- Verify sound file formats
+- Check network connectivity
+
+### Debug Mode
+
+Enable debug logging by setting:
+```bash
+DEBUG=sounds:*
+```
+
+## 📈 Performance
+
+- **Caching**: Built-in caching reduces API calls
+- **Lazy Loading**: Sounds are loaded on-demand
+- **CDN**: Vercel Blob Store provides global CDN
+- **Compression**: Audio files are automatically compressed
+- **Optimization**: Efficient data structures and algorithms

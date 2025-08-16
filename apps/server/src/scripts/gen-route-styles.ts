@@ -2,8 +2,8 @@ import fs from 'fs/promises'
 import path from 'path'
 import { getDocs, collection, query, where } from 'firebase/firestore'
 import { db } from '@repo/firebase-config/firebase-node'
-import type { Effect } from '@repo/modules/effects'
-import type { Turnout } from '@repo/modules/turnouts'
+import type { Effect } from '@repo/modules'
+import type { Turnout } from '@repo/modules'
 
 const layoutId = process.env.LAYOUT_ID
 

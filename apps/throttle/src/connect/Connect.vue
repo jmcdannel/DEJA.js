@@ -1,5 +1,5 @@
 <script setup lang="ts">
-
+import { computed } from 'vue'
 import { collection, query, where } from 'firebase/firestore'
 import { useRouter } from 'vue-router'
 import { useCollection, useCurrentUser } from 'vuefire'
@@ -9,9 +9,25 @@ import { db } from '@repo/firebase-config'
 const user = useCurrentUser()
 const router = useRouter()
 console.log('Loading LayoutsList.vue', user.value)
-const layoutsRef = collection(db, 'layouts')
-const layoutsQuery = query(layoutsRef, where('owner', '==', user.value?.email))
-const layouts = useCollection(layoutsQuery)
+
+// Create a computed property for the layouts query that only runs when user is available
+const layoutsQuery = computed(() => {
+  if (!user.value?.email) {
+    // Return null if no user email, which will prevent the query from running
+    return null
+  }
+  
+  const layoutsRef = collection(db, 'layouts')
+  return query(layoutsRef, where('owner', '==', user.value.email))
+})
+
+// Use the computed query, but only when it's not null
+const layouts = useCollection(layoutsQuery, { 
+  ssrKey: 'layouts',
+  // Only run the query when we have a valid query
+  wait: computed(() => !layoutsQuery.value)
+})
+
 const layoutId = useStorage('@DEJA/layoutId', '')
 
 function handleLayoutSelect(selectedLayoutId: string) {

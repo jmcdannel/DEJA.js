@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { collection, query, where } from 'firebase/firestore'
 import { useCollection, useCurrentUser } from 'vuefire'
 import { db } from '@repo/firebase-config'
@@ -10,14 +11,28 @@ defineProps({
 })
 
 const user = useCurrentUser()
-const layoutsRef = collection(db, 'layouts')
-const layoutsQuery = query(layoutsRef, where('owner', '==', user.value?.email))
-const layouts = useCollection(layoutsQuery)
+
+// Create a computed property for the layouts query that only runs when user is available
+const layoutsQuery = computed(() => {
+  if (!user.value?.email) {
+    // Return null if no user email, which will prevent the query from running
+    return null
+  }
+  
+  const layoutsRef = collection(db, 'layouts')
+  return query(layoutsRef, where('owner', '==', user.value.email))
+})
+
+// Use the computed query, but only when it's not null
+const layouts = useCollection(layoutsQuery, { 
+  ssrKey: 'layouts',
+  // Only run the query when we have a valid query
+  wait: computed(() => !layoutsQuery.value)
+})
 
 async function handleLayoutSelect(newLayout: string) {
   emit('selected', newLayout)
 }
-
 </script>
 <template>
   <div class="flex flex-row flex-wrap gap-2">

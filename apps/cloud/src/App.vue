@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useStorage } from '@vueuse/core'
-import { RouterView, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
+// import { RouterView, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { useTheme } from 'vuetify'
 import { useMenu } from '@/Core/Menu/useMenu'

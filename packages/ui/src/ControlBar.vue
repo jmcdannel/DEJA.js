@@ -60,7 +60,7 @@ const controlBarRef = ref<HTMLElement>()
 const panelPosition = ref({ top: 0, left: 0, width: 0 })
 
 // Auto-open panel on hover with delay
-let hoverTimeout: NodeJS.Timeout | null = null
+let hoverTimeout: number | null = null
 
 // Update panel position when it opens
 function updatePanelPosition() {
