@@ -1,41 +1,46 @@
 <script setup lang="ts">
-import { ref, toRef, watch } from 'vue'
-import { debounce } from 'vue-debounce'
-import ThrottleSlider from './ThrottleSlider.vue'
+import { ref, toRef, watch } from "vue";
+import { debounce } from "vue-debounce";
+import ThrottleSlider from "./ThrottleSlider.vue";
 
-const DEBOUNCE_DELAY = 1000 // debounce speed changes by 100ms to prevent too many requests
+const DEBOUNCE_DELAY = 1000; // debounce speed changes by 100ms to prevent too many requests
 
-const emit = defineEmits(['update:currentSpeed', 'stop'])
+const emit = defineEmits(["update:currentSpeed", "stop"]);
 
-const props  = defineProps({
+const props = defineProps({
   speed: {
     type: Number,
-    required: true
+    required: true,
   },
   direction: {
     type: Boolean,
-    default: null // null means no direction set
+    default: null, // null means no direction set
   },
   disabled: {
     type: Boolean,
-    default: false
-  }
-})
+    default: false,
+  },
+});
 
-const speed = toRef(props, 'speed')
-const setSpeed = debounce((val: number): void => { emit('update:currentSpeed', val); }, `${DEBOUNCE_DELAY}ms`)
+const speed = toRef(props, "speed");
+const direction = toRef(props, "direction");
+const setSpeed = debounce((val: number): void => {
+  emit("update:currentSpeed", val);
+}, `${DEBOUNCE_DELAY}ms`);
 
-function setSliderSpeed(val: number): void { // handle slider changes
-  setSpeed(parseInt(val.toString())) // debounced speed changes
+function setSliderSpeed(val: number): void {
+  // handle slider changes
+  const signed = direction.value ? val : -val;
+  setSpeed(parseInt(signed.toString())); // debounced speed changes
 }
 function handleForward() {
-  console.log('forward')
-  emit('stop')
+  console.log("forward");
+  emit("stop");
 }
 
 function handleReverse() {
-  console.log('reverse')
-  emit('stop')
+  console.log("reverse");
+  emit("stop");
 }
 
 // function handleSliderUpdate(val: number) {
@@ -49,30 +54,22 @@ function handleReverse() {
 // }
 
 function isDisabled() {
-  return props.direction === null
+  return props.direction === null;
 }
-
 </script>
 <template>
   <div class="flex flex-col h-full justify-end">
-    <ThrottleSlider 
-      :speed="speed" 
+    <ThrottleSlider
+      :speed="speed"
       :disabled="isDisabled()"
       :label="direction ? 'FWD' : 'REV'"
-      @update="setSliderSpeed" 
-      @stop="$emit('stop')"  />
+      @update="setSliderSpeed"
+      @stop="$emit('stop')"
+    />
     <div class="flex mt-4 align-middle justify-center">
-      <v-btn 
-        @click="handleReverse" 
-        prepend-icon="mdi-chevron-left"
-      >Rev</v-btn>
-      <v-btn 
-        @click="handleForward"
-        append-icon="mdi-chevron-right"
-      >Fwd</v-btn>
+      <v-btn @click="handleReverse" prepend-icon="mdi-chevron-left">Rev</v-btn>
+      <v-btn @click="handleForward" append-icon="mdi-chevron-right">Fwd</v-btn>
     </div>
   </div>
 </template>
-<style scoped>
-  
-</style>
+<style scoped></style>
