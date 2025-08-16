@@ -21,7 +21,7 @@ const throttles = getThrottles()
           v-for="throttle in throttles"
           :key="throttle.address"
           :speed="throttle.speed"
-          :label="throttle.address"
+          :address="throttle.address"
         />
       </div>
       <div class="conductor-layout grid grid-cols-1 @[960px]:grid-cols-3 gap-2 w-full">
