@@ -1,3 +1,26 @@
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { useTourStore } from '../stores/tour'
+import GuestEffectCard from '../components/GuestEffectCard.vue'
+
+const tourStore = useTourStore()
+const selectedCategory = ref<string | null>(null)
+
+const filteredGuestEffects = computed(() => 
+  tourStore.guestEffects.filter(effect => 
+    selectedCategory.value === null || effect.category === selectedCategory.value
+  )
+)
+
+const categories = computed(() => 
+  [...new Set(tourStore.guestEffects.map(e => e.category || 'Other'))]
+)
+
+const filterEffects = () => {
+  // Filter logic is handled by the computed property
+}
+</script>
+
 <template>
   <div>
     <v-row>
@@ -101,50 +124,6 @@
                     @click="tourStore.deactivateEffect(effect.id)"
                   ></v-btn>
                 </template>
-              </v-list-item>
-            </v-list>
-            <p v-else class="text-medium-emphasis">No effects currently active</p>
-          </v-card-text>
-        </v-card>
 
-        <v-card elevation="2">
-          <v-card-title class="text-h6">Safety Notice</v-card-title>
-          <v-card-text>
-            <v-alert type="info" variant="tonal">
-              <p class="mb-2">
-                <strong>Guest Mode Active</strong>
-              </p>
-              <p class="text-body-2">
-                Only effects marked as "allowGuest" are available. 
-                Some effects have automatic timeouts for safety.
-              </p>
-            </v-alert>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </div>
-</template>
-
-<script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useTourStore } from '../stores/tour'
-import GuestEffectCard from '../components/GuestEffectCard.vue'
-
-const tourStore = useTourStore()
-const selectedCategory = ref<string | null>(null)
-
-const filteredGuestEffects = computed(() => 
-  tourStore.guestEffects.filter(effect => 
-    selectedCategory.value === null || effect.category === selectedCategory.value
-  )
-)
-
-const categories = computed(() => 
-  [...new Set(tourStore.guestEffects.map(e => e.category || 'Other'))]
-)
-
-const filterEffects = () => {
-  // Filter logic is handled by the computed property
-}
-</script>
+<style scoped>
+</style>

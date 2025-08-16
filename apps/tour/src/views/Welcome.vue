@@ -1,3 +1,60 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import TourLogo from '../components/TourLogo.vue'
+
+const videoLoading = ref(false)
+const guestEffectsCount = ref(12) // This would come from your effects data
+const layoutAreas = ref([
+  'Tamarack Station',
+  'Roseberry Yard',
+  'Payette Subdivision',
+  'Deadman\'s Curve',
+  'Round Valley',
+  'Thunder City',
+  'Eagle Nest',
+  'Tripod Peak'
+]) // Layout areas from the actual model train layout
+
+const features = [
+  {
+    title: 'Control Interactive Effects',
+    description: 'Activate lights, sounds, and animations throughout the layout',
+    icon: 'mdi-lightning-bolt'
+  },
+  {
+    title: 'Explore Layout Areas',
+    description: 'Learn about each section with detailed videos and explanations',
+    icon: 'mdi-map'
+  },
+  {
+    title: 'Technical Deep Dives',
+    description: 'Discover how the electronics and automation work',
+    icon: 'mdi-cog'
+  },
+  {
+    title: 'Audio Commentary',
+    description: 'Listen to detailed explanations of construction techniques',
+    icon: 'mdi-volume-high'
+  }
+]
+
+const quickNav = [
+  { title: 'Start Tour', to: '/media', color: 'primary', icon: 'mdi-play' },
+  { title: 'Try Effects', to: '/effects', color: 'secondary', icon: 'mdi-lightning-bolt' },
+  { title: 'Browse Media', to: '/media', color: 'accent', icon: 'mdi-video-library' }
+]
+
+const playIntroVideo = () => {
+  videoLoading.value = true
+  // Simulate video loading
+  setTimeout(() => {
+    videoLoading.value = false
+    // Here you would integrate with your actual video player
+    console.log('Playing intro video...')
+  }, 1000)
+}
+</script>
+
 <template>
   <div>
     <v-row>
@@ -99,63 +156,6 @@
     </v-row>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
-import TourLogo from '../components/TourLogo.vue'
-
-const videoLoading = ref(false)
-const guestEffectsCount = ref(12) // This would come from your effects data
-const layoutAreas = ref([
-  'Tamarack Station',
-  'Roseberry Yard',
-  'Payette Subdivision',
-  'Deadman\'s Curve',
-  'Round Valley',
-  'Thunder City',
-  'Eagle Nest',
-  'Tripod Peak'
-]) // Layout areas from the actual model train layout
-
-const features = [
-  {
-    title: 'Control Interactive Effects',
-    description: 'Activate lights, sounds, and animations throughout the layout',
-    icon: 'mdi-lightning-bolt'
-  },
-  {
-    title: 'Explore Layout Areas',
-    description: 'Learn about each section with detailed videos and explanations',
-    icon: 'mdi-map'
-  },
-  {
-    title: 'Technical Deep Dives',
-    description: 'Discover how the electronics and automation work',
-    icon: 'mdi-cog'
-  },
-  {
-    title: 'Audio Commentary',
-    description: 'Listen to detailed explanations of construction techniques',
-    icon: 'mdi-volume-high'
-  }
-]
-
-const quickNav = [
-  { title: 'Start Tour', to: '/media', color: 'primary', icon: 'mdi-play' },
-  { title: 'Try Effects', to: '/effects', color: 'secondary', icon: 'mdi-lightning-bolt' },
-  { title: 'Browse Media', to: '/media', color: 'accent', icon: 'mdi-video-library' }
-]
-
-const playIntroVideo = () => {
-  videoLoading.value = true
-  // Simulate video loading
-  setTimeout(() => {
-    videoLoading.value = false
-    // Here you would integrate with your actual video player
-    console.log('Playing intro video...')
-  }, 1000)
-}
-</script>
 
 <style scoped>
 .video-placeholder {
