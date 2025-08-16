@@ -1,25 +1,3 @@
-<template>
-  <div class="control-bar-demo">
-    <h2>ControlBar Demo</h2>
-    <ControlBar 
-      :show-layout-power="true"
-      :show-emergency-stop="true"
-      :show-device-status="true"
-      :show-device-status-label="true"
-      :device-status-compact="false"
-      :layout-power-state="false"
-      :devices="demoDevices"
-      :layouts="demoLayouts"
-      :loading="false"
-      @track-power-toggle="handleTrackPowerToggle"
-      @layout-power-toggle="handleLayoutPowerToggle"
-      @emergency-stop="handleEmergencyStop"
-      @device-select="handleDeviceSelect"
-      @layout-select="handleLayoutSelect"
-    />
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref } from 'vue'
 import ControlBar from './ControlBar.vue'
@@ -75,6 +53,28 @@ function handleLayoutSelect(layoutId: string) {
   console.log('Layout selected:', layoutId)
 }
 </script>
+
+<template>
+  <div class="control-bar-demo">
+    <h2>ControlBar Demo</h2>
+    <ControlBar 
+      :show-layout-power="true"
+      :show-emergency-stop="true"
+      :show-device-status="true"
+      :show-device-status-label="true"
+      :device-status-compact="false"
+      :layout-power-state="false"
+      :devices="demoDevices"
+      :layouts="demoLayouts"
+      :loading="false"
+      @track-power-toggle="handleTrackPowerToggle"
+      @layout-power-toggle="handleLayoutPowerToggle"
+      @emergency-stop="handleEmergencyStop"
+      @device-select="handleDeviceSelect"
+      @layout-select="handleLayoutSelect"
+    />
+  </div>
+</template>
 
 <style scoped>
 .control-bar-demo {

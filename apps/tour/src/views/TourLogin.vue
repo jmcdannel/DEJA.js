@@ -1,126 +1,3 @@
-<template>
-  <div class="login-container">
-    <v-container class="fill-height">
-      <v-row justify="center" align="center" class="fill-height">
-        <v-col cols="12" sm="8" md="6" lg="4">
-          <v-card elevation="8" class="pa-6">
-            <v-card-text class="text-center">
-              <TourLogo class="mb-6" style="width: 80px; height: 80px;" />
-              
-              <h1 class="text-h4 mb-2">Welcome to the Tour</h1>
-              <p class="text-h6 text-medium-emphasis mb-6">
-                Choose how you'd like to explore our model train layout
-              </p>
-              
-              <!-- Loading State -->
-              <div v-if="loading" class="text-center py-4">
-                <v-progress-circular indeterminate class="mb-4"></v-progress-circular>
-                <p>{{ loadingMessage }}</p>
-              </div>
-              
-              <!-- Error State -->
-              <v-alert v-if="error" type="error" class="mb-4">
-                {{ error }}
-              </v-alert>
-              
-              <!-- Success State -->
-              <v-alert v-if="user || guestUser" type="success" class="mb-4">
-                Welcome! Redirecting to the tour...
-              </v-alert>
-              
-              <!-- Guest Access Section -->
-              <div v-if="!user && !guestUser && !loading" class="guest-access mb-6">
-                <v-card variant="tonal" color="primary" class="pa-4 mb-4">
-                  <h3 class="text-h6 mb-3">🚂 Quick Guest Access</h3>
-                  <p class="text-body-2 mb-4">
-                    Start exploring immediately with a fun train-themed username!
-                  </p>
-                  
-                  <!-- Username Selection -->
-                  <v-select
-                    v-model="selectedUsername"
-                    :items="availableUsernames"
-                    label="Choose your username"
-                    variant="outlined"
-                    density="compact"
-                    class="mb-3"
-                    :menu-props="{ maxHeight: 200 }"
-                  >
-                    <template v-slot:append>
-                      <v-btn
-                        icon="mdi-dice-multiple"
-                        size="small"
-                        variant="text"
-                        @click="generateRandomUsername"
-                        title="Generate random username"
-                      ></v-btn>
-                    </template>
-                  </v-select>
-                  
-                  <v-btn
-                    @click="handleGuestAccess"
-                    color="primary"
-                    size="large"
-                    block
-                    prepend-icon="mdi-train"
-                  >
-                    Start Tour as Guest
-                  </v-btn>
-                </v-card>
-                
-                <v-divider class="my-4">
-                  <span class="text-caption text-medium-emphasis">OR</span>
-                </v-divider>
-              </div>
-              
-              <!-- Login Buttons -->
-              <div v-if="!user && !guestUser && !loading" class="login-buttons">
-                <h3 class="text-h6 mb-3">🔐 Sign in with Account</h3>
-                <v-btn
-                  @click="handleGithubSignin"
-                  color="secondary"
-                  size="large"
-                  block
-                  class="mb-3"
-                  prepend-icon="mdi-github"
-                >
-                  Sign in with GitHub
-                </v-btn>
-                
-                <v-btn
-                  @click="handleGoogleSignin"
-                  color="secondary"
-                  size="large"
-                  block
-                  class="mb-4"
-                  prepend-icon="mdi-google"
-                >
-                  Sign in with Google
-                </v-btn>
-                
-                <p class="text-body-2 text-medium-emphasis">
-                  Sign in with your account to save preferences and access additional features.
-                </p>
-              </div>
-            </v-card-text>
-          </v-card>
-          
-          <!-- Info Cards -->
-          <v-row class="mt-6">
-            <v-col cols="12" sm="4" v-for="feature in features" :key="feature.title">
-              <v-card variant="tonal" :color="feature.color" class="text-center pa-4">
-                <v-icon :icon="feature.icon" size="32" class="mb-2"></v-icon>
-                <h4 class="text-subtitle-1 mb-1">{{ feature.title }}</h4>
-                <p class="text-body-2">{{ feature.description }}</p>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-col>
-      </v-row>
-    </v-container>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
@@ -275,6 +152,64 @@ onMounted(async () => {
   }
 })
 </script>
+
+<template>
+  <div class="login-container">
+    <v-container class="fill-height">
+      <v-row justify="center" align="center" class="fill-height">
+        <v-col cols="12" sm="8" md="6" lg="4">
+          <v-card elevation="8" class="pa-6">
+            <v-card-text class="text-center">
+              <TourLogo class="mb-6" style="width: 80px; height: 80px;" />
+              
+              <h1 class="text-h4 mb-2">Welcome to the Tour</h1>
+              <p class="text-h6 text-medium-emphasis mb-6">
+                Choose how you'd like to explore our model train layout
+              </p>
+              
+              <!-- Loading State -->
+              <div v-if="loading" class="text-center py-4">
+                <v-progress-circular indeterminate class="mb-4"></v-progress-circular>
+                <p>{{ loadingMessage }}</p>
+              </div>
+              
+              <!-- Error State -->
+              <v-alert v-if="error" type="error" class="mb-4">
+                {{ error }}
+              </v-alert>
+              
+              <!-- Success State -->
+              <v-alert v-if="user || guestUser" type="success" class="mb-4">
+                Welcome! Redirecting to the tour...
+              </v-alert>
+              
+              <!-- Guest Access Section -->
+              <div v-if="!user && !guestUser && !loading" class="guest-access mb-6">
+                <v-card variant="tonal" color="primary" class="pa-4 mb-4">
+                  <h3 class="text-h6 mb-3">🚂 Quick Guest Access</h3>
+                  <p class="text-body-2 mb-4">
+                    Start exploring immediately with a fun train-themed username!
+                  </p>
+                  
+                  <!-- Username Selection -->
+                  <v-select
+                    v-model="selectedUsername"
+                    :items="availableUsernames"
+                    label="Choose your username"
+                    variant="outlined"
+                    density="compact"
+                    class="mb-3"
+                    :menu-props="{ maxHeight: 200 }"
+                  >
+                    <template v-slot:append>
+                      <v-btn
+                        icon="mdi-dice-multiple"
+                        size="small"
+                        variant="text"
+                        @click="generateRandomUsername"
+                        title="Generate random username"
+                      ></v-btn>
+                    </template>
 
 <style scoped>
 .login-container {

@@ -1,3 +1,28 @@
+<script setup lang="ts">
+interface MediaItem {
+  id: string
+  title: string
+  description: string
+  type: 'video' | 'audio'
+  category: 'introduction' | 'technical' | 'overview' | 'area-detail'
+  area: string
+  duration: string
+  thumbnail?: string
+  url: string
+  featured: boolean
+}
+
+interface Props {
+  media: MediaItem
+}
+
+defineProps<Props>()
+defineEmits<{
+  play: [mediaId: string]
+  'view-details': [mediaId: string]
+}>()
+</script>
+
 <template>
   <v-card 
     elevation="2" 
@@ -88,31 +113,6 @@
     </v-card-actions>
   </v-card>
 </template>
-
-<script setup lang="ts">
-interface MediaItem {
-  id: string
-  title: string
-  description: string
-  type: 'video' | 'audio'
-  category: 'introduction' | 'technical' | 'overview' | 'area-detail'
-  area: string
-  duration: string
-  thumbnail?: string
-  url: string
-  featured: boolean
-}
-
-interface Props {
-  media: MediaItem
-}
-
-defineProps<Props>()
-defineEmits<{
-  play: [mediaId: string]
-  'view-details': [mediaId: string]
-}>()
-</script>
 
 <style scoped>
 .media-card {

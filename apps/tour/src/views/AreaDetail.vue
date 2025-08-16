@@ -1,193 +1,3 @@
-<template>
-  <div v-if="area">
-    <v-row>
-      <v-col cols="12">
-        <v-card elevation="4" class="mb-6">
-          <v-card-title class="text-h4">
-            <v-icon :icon="area.icon" class="mr-3"></v-icon>
-            {{ area.name }}
-          </v-card-title>
-          <v-card-subtitle class="text-h6">
-            {{ area.description }}
-          </v-card-subtitle>
-        </v-card>
-      </v-col>
-    </v-row>
-
-    <v-row>
-      <v-col cols="12" lg="8">
-        <v-card elevation="2" class="mb-4">
-          <v-card-title>Featured Media</v-card-title>
-          <v-card-text>
-            <div v-if="area.featuredMedia" class="featured-media">
-              <div class="media-player-placeholder">
-                <v-icon icon="mdi-play" size="64" class="play-icon"></v-icon>
-                <p class="text-h6 mt-4">{{ area.featuredMedia.title }}</p>
-                <p class="text-body-2">{{ area.featuredMedia.description }}</p>
-              </div>
-              <v-btn 
-                color="primary" 
-                size="large" 
-                class="mt-4"
-                @click="playFeaturedMedia"
-              >
-                <v-icon icon="mdi-play" class="mr-2"></v-icon>
-                Play {{ area.featuredMedia.type }}
-              </v-btn>
-            </div>
-          </v-card-text>
-        </v-card>
-
-        <v-card elevation="2" class="mb-4">
-          <v-card-title>Area Details</v-card-title>
-          <v-card-text>
-            <v-row>
-              <v-col cols="12" md="6">
-                <h4 class="text-h6 mb-2">Construction Details</h4>
-                <v-list density="compact">
-                  <v-list-item 
-                    v-for="detail in area.constructionDetails" 
-                    :key="detail.label"
-                  >
-                    <v-list-item-title>{{ detail.label }}</v-list-item-title>
-                    <v-list-item-subtitle>{{ detail.value }}</v-list-item-subtitle>
-                  </v-list-item>
-                </v-list>
-              </v-col>
-              <v-col cols="12" md="6">
-                <h4 class="text-h6 mb-2">Technical Features</h4>
-                <v-chip-group column>
-                  <v-chip 
-                    v-for="feature in area.technicalFeatures" 
-                    :key="feature"
-                    size="small"
-                    color="info"
-                  >
-                    {{ feature }}
-                  </v-chip>
-                </v-chip-group>
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-
-        <v-card elevation="2" v-if="areaEffects.length > 0">
-          <v-card-title>Interactive Effects</v-card-title>
-          <v-card-text>
-            <v-row>
-              <v-col 
-                cols="12" 
-                sm="6" 
-                v-for="effect in areaEffects" 
-                :key="effect.id"
-              >
-                <GuestEffectCard 
-                  :effect="effect" 
-                  @activate="activateEffect"
-                  @deactivate="deactivateEffect"
-                />
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-      </v-col>
-
-      <v-col cols="12" lg="4">
-        <v-card elevation="2" class="mb-4">
-          <v-card-title>Related Media</v-card-title>
-          <v-card-text>
-            <div v-for="media in relatedMedia" :key="media.id" class="mb-3">
-              <v-card 
-                variant="outlined" 
-                class="related-media-card"
-                @click="playMedia(media.id)"
-              >
-                <v-card-text class="pa-3">
-                  <div class="d-flex align-center">
-                    <v-icon 
-                      :icon="media.type === 'video' ? 'mdi-video' : 'mdi-music'" 
-                      class="mr-3"
-                    ></v-icon>
-                    <div class="flex-grow-1">
-                      <p class="text-body-2 font-weight-medium mb-1">{{ media.title }}</p>
-                      <p class="text-caption text-medium-emphasis">{{ media.duration }}</p>
-                    </div>
-                    <v-btn icon="mdi-play" size="small" color="primary"></v-btn>
-                  </div>
-                </v-card-text>
-              </v-card>
-            </div>
-          </v-card-text>
-        </v-card>
-
-        <v-card elevation="2" class="mb-4">
-          <v-card-title>Navigation</v-card-title>
-          <v-card-text>
-            <v-btn 
-              block 
-              color="primary" 
-              class="mb-2"
-              to="/effects"
-            >
-              <v-icon icon="mdi-lightning-bolt" class="mr-2"></v-icon>
-              Control Effects
-            </v-btn>
-            <v-btn 
-              block 
-              color="accent" 
-              class="mb-2"
-              to="/media"
-            >
-              <v-icon icon="mdi-video-library" class="mr-2"></v-icon>
-              All Media
-            </v-btn>
-            <v-btn 
-              block 
-              color="info"
-              to="/"
-            >
-              <v-icon icon="mdi-home" class="mr-2"></v-icon>
-              Back to Home
-            </v-btn>
-          </v-card-text>
-        </v-card>
-
-        <v-card elevation="2">
-          <v-card-title>Area Statistics</v-card-title>
-          <v-card-text>
-            <v-list density="compact">
-              <v-list-item>
-                <v-list-item-title>Media Items</v-list-item-title>
-                <v-list-item-subtitle>{{ relatedMedia.length }}</v-list-item-subtitle>
-              </v-list-item>
-              <v-list-item>
-                <v-list-item-title>Interactive Effects</v-list-item-title>
-                <v-list-item-subtitle>{{ areaEffects.length }}</v-list-item-subtitle>
-              </v-list-item>
-              <v-list-item>
-                <v-list-item-title>Construction Time</v-list-item-title>
-                <v-list-item-subtitle>{{ area.constructionTime }}</v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </div>
-  
-  <div v-else class="text-center py-8">
-    <v-icon icon="mdi-map-marker-off" size="64" class="text-medium-emphasis mb-4"></v-icon>
-    <h3 class="text-h5 text-medium-emphasis mb-2">Area not found</h3>
-    <p class="text-body-1 text-medium-emphasis mb-4">
-      The requested layout area could not be found.
-    </p>
-    <v-btn color="primary" to="/">
-      <v-icon icon="mdi-home" class="mr-2"></v-icon>
-      Back to Home
-    </v-btn>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
@@ -623,6 +433,196 @@ onMounted(() => {
   console.log('Loading area:', areaId.value)
 })
 </script>
+
+<template>
+  <div v-if="area">
+    <v-row>
+      <v-col cols="12">
+        <v-card elevation="4" class="mb-6">
+          <v-card-title class="text-h4">
+            <v-icon :icon="area.icon" class="mr-3"></v-icon>
+            {{ area.name }}
+          </v-card-title>
+          <v-card-subtitle class="text-h6">
+            {{ area.description }}
+          </v-card-subtitle>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="12" lg="8">
+        <v-card elevation="2" class="mb-4">
+          <v-card-title>Featured Media</v-card-title>
+          <v-card-text>
+            <div v-if="area.featuredMedia" class="featured-media">
+              <div class="media-player-placeholder">
+                <v-icon icon="mdi-play" size="64" class="play-icon"></v-icon>
+                <p class="text-h6 mt-4">{{ area.featuredMedia.title }}</p>
+                <p class="text-body-2">{{ area.featuredMedia.description }}</p>
+              </div>
+              <v-btn 
+                color="primary" 
+                size="large" 
+                class="mt-4"
+                @click="playFeaturedMedia"
+              >
+                <v-icon icon="mdi-play" class="mr-2"></v-icon>
+                Play {{ area.featuredMedia.type }}
+              </v-btn>
+            </div>
+          </v-card-text>
+        </v-card>
+
+        <v-card elevation="2" class="mb-4">
+          <v-card-title>Area Details</v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col cols="12" md="6">
+                <h4 class="text-h6 mb-2">Construction Details</h4>
+                <v-list density="compact">
+                  <v-list-item 
+                    v-for="detail in area.constructionDetails" 
+                    :key="detail.label"
+                  >
+                    <v-list-item-title>{{ detail.label }}</v-list-item-title>
+                    <v-list-item-subtitle>{{ detail.value }}</v-list-item-subtitle>
+                  </v-list-item>
+                </v-list>
+              </v-col>
+              <v-col cols="12" md="6">
+                <h4 class="text-h6 mb-2">Technical Features</h4>
+                <v-chip-group column>
+                  <v-chip 
+                    v-for="feature in area.technicalFeatures" 
+                    :key="feature"
+                    size="small"
+                    color="info"
+                  >
+                    {{ feature }}
+                  </v-chip>
+                </v-chip-group>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+
+        <v-card elevation="2" v-if="areaEffects.length > 0">
+          <v-card-title>Interactive Effects</v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col 
+                cols="12" 
+                sm="6" 
+                v-for="effect in areaEffects" 
+                :key="effect.id"
+              >
+                <GuestEffectCard 
+                  :effect="effect" 
+                  @activate="activateEffect"
+                  @deactivate="deactivateEffect"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" lg="4">
+        <v-card elevation="2" class="mb-4">
+          <v-card-title>Related Media</v-card-title>
+          <v-card-text>
+            <div v-for="media in relatedMedia" :key="media.id" class="mb-3">
+              <v-card 
+                variant="outlined" 
+                class="related-media-card"
+                @click="playMedia(media.id)"
+              >
+                <v-card-text class="pa-3">
+                  <div class="d-flex align-center">
+                    <v-icon 
+                      :icon="media.type === 'video' ? 'mdi-video' : 'mdi-music'" 
+                      class="mr-3"
+                    ></v-icon>
+                    <div class="flex-grow-1">
+                      <p class="text-body-2 font-weight-medium mb-1">{{ media.title }}</p>
+                      <p class="text-caption text-medium-emphasis">{{ media.duration }}</p>
+                    </div>
+                    <v-btn icon="mdi-play" size="small" color="primary"></v-btn>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </div>
+          </v-card-text>
+        </v-card>
+
+        <v-card elevation="2" class="mb-4">
+          <v-card-title>Navigation</v-card-title>
+          <v-card-text>
+            <v-btn 
+              block 
+              color="primary" 
+              class="mb-2"
+              to="/effects"
+            >
+              <v-icon icon="mdi-lightning-bolt" class="mr-2"></v-icon>
+              Control Effects
+            </v-btn>
+            <v-btn 
+              block 
+              color="accent" 
+              class="mb-2"
+              to="/media"
+            >
+              <v-icon icon="mdi-video-library" class="mr-2"></v-icon>
+              All Media
+            </v-btn>
+            <v-btn 
+              block 
+              color="info"
+              to="/"
+            >
+              <v-icon icon="mdi-home" class="mr-2"></v-icon>
+              Back to Home
+            </v-btn>
+          </v-card-text>
+        </v-card>
+
+        <v-card elevation="2">
+          <v-card-title>Area Statistics</v-card-title>
+          <v-card-text>
+            <v-list density="compact">
+              <v-list-item>
+                <v-list-item-title>Media Items</v-list-item-title>
+                <v-list-item-subtitle>{{ relatedMedia.length }}</v-list-item-subtitle>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-title>Interactive Effects</v-list-item-title>
+                <v-list-item-subtitle>{{ areaEffects.length }}</v-list-item-subtitle>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-title>Construction Time</v-list-item-title>
+                <v-list-item-subtitle>{{ area.constructionTime }}</v-list-item-subtitle>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </div>
+  
+  <div v-else class="text-center py-8">
+    <v-icon icon="mdi-map-marker-off" size="64" class="text-medium-emphasis mb-4"></v-icon>
+    <h3 class="text-h5 text-medium-emphasis mb-2">Area not found</h3>
+    <p class="text-body-1 text-medium-emphasis mb-4">
+      The requested layout area could not be found.
+    </p>
+    <v-btn color="primary" to="/">
+      <v-icon icon="mdi-home" class="mr-2"></v-icon>
+      Back to Home
+    </v-btn>
+  </div>
+</template>
 
 <style scoped>
 .featured-media {

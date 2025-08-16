@@ -1,22 +1,3 @@
-<template>
-  <div class="tour-logo" :class="{ small: size === 'small' }">
-    <svg viewBox="0 0 100 100" class="logo-svg">
-      <!-- Yellow quarter -->
-      <path d="M 50 50 L 50 10 A 40 40 0 0 1 78.28 21.72 Z" fill="#FFD700" />
-      <!-- Red quarter -->
-      <path d="M 50 50 L 78.28 21.72 A 40 40 0 0 1 78.28 78.28 Z" fill="#FF4444" />
-      <!-- Green quarter -->
-      <path d="M 50 50 L 78.28 78.28 A 40 40 0 0 1 21.72 78.28 Z" fill="#4CAF50" />
-      <!-- Blue quarter -->
-      <path d="M 50 50 L 21.72 78.28 A 40 40 0 0 1 21.72 21.72 Z" fill="#2196F3" />
-      <!-- Center circle -->
-      <circle cx="50" cy="50" r="15" :fill="centerFill" :stroke="centerStroke" stroke-width="2"/>
-      <!-- Train icon in center -->
-      <text x="50" y="58" text-anchor="middle" font-size="16" :fill="centerStroke">🚂</text>
-    </svg>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useTheme } from 'vuetify'
@@ -39,6 +20,25 @@ const centerStroke = computed(() =>
   theme.global.current.value.dark ? '#E0E0E0' : '#333'
 )
 </script>
+
+<template>
+  <div class="tour-logo" :class="{ small: size === 'small' }">
+    <svg viewBox="0 0 100 100" class="logo-svg">
+      <!-- Yellow quarter -->
+      <path d="M 50 50 L 50 10 A 40 40 0 0 1 78.28 21.72 Z" fill="#FFD700" />
+      <!-- Red quarter -->
+      <path d="M 50 50 L 78.28 21.72 A 40 40 0 0 1 78.28 78.28 Z" fill="#FF4444" />
+      <!-- Green quarter -->
+      <path d="M 50 50 L 78.28 78.28 A 40 40 0 0 1 21.72 78.28 Z" fill="#4CAF50" />
+      <!-- Blue quarter -->
+      <path d="M 50 50 L 21.72 78.28 A 40 40 0 0 1 21.72 21.72 Z" fill="#2196F3" />
+      <!-- Center circle -->
+      <circle cx="50" cy="50" r="15" :fill="centerFill" :stroke="centerStroke" stroke-width="2"/>
+      <!-- Train icon in center -->
+      <text x="50" y="58" text-anchor="middle" font-size="16" :fill="centerStroke">🚂</text>
+    </svg>
+  </div>
+</template>
 
 <style scoped>
 .tour-logo {

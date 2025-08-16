@@ -1,50 +1,3 @@
-<template>
-  <v-dialog v-model="showDialog" persistent max-width="600">
-    <v-card>
-      <v-card-title class="text-h5">
-        <TourLogo class="mr-3" size="small" />
-        Select Layout
-      </v-card-title>
-      <v-card-text>
-        <p class="mb-4">Choose a layout to start the tour experience:</p>
-        
-        <v-progress-circular v-if="!layouts" indeterminate class="mb-4"></v-progress-circular>
-        
-        <v-list v-else-if="layouts.length > 0">
-          <v-list-item
-            v-for="layout in layouts"
-            :key="layout.layoutId"
-            @click="selectLayout(layout.layoutId)"
-            class="mb-2"
-          >
-            <template #prepend>
-              <v-icon icon="mdi-train" color="primary"></v-icon>
-            </template>
-            <v-list-item-title>{{ layout.layoutId }}</v-list-item-title>
-            <v-list-item-subtitle>{{ layout.name || 'Model Train Layout' }}</v-list-item-subtitle>
-            <template #append>
-              <v-icon icon="mdi-chevron-right"></v-icon>
-            </template>
-          </v-list-item>
-        </v-list>
-        
-        <v-alert v-else type="info" class="mt-4">
-          <p>No layouts found. Please create a layout in the cloud app first.</p>
-          <v-btn 
-            href="/cloud" 
-            target="_blank" 
-            color="primary" 
-            variant="text" 
-            class="mt-2"
-          >
-            Open Cloud App
-          </v-btn>
-        </v-alert>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
-</template>
-
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useStorage } from '@vueuse/core'
@@ -90,6 +43,29 @@ onMounted(() => {
   console.log('LayoutSelector mounted, current layoutId:', layoutId.value)
 })
 </script>
+
+<template>
+  <v-dialog v-model="showDialog" persistent max-width="600">
+    <v-card>
+      <v-card-title class="text-h5">
+        <TourLogo class="mr-3" size="small" />
+        Select Layout
+      </v-card-title>
+      <v-card-text>
+        <p class="mb-4">Choose a layout to start the tour experience:</p>
+        
+        <v-progress-circular v-if="!layouts" indeterminate class="mb-4"></v-progress-circular>
+        
+        <v-list v-else-if="layouts.length > 0">
+          <v-list-item
+            v-for="layout in layouts"
+            :key="layout.layoutId"
+            @click="selectLayout(layout.layoutId)"
+            class="mb-2"
+          >
+            <template #prepend>
+              <v-icon icon="mdi-train" color="primary"></v-icon>
+            </template>
 
 <style scoped>
 .v-list-item {

@@ -1,80 +1,3 @@
-<template>
-  <v-card 
-    :elevation="effect.state ? 8 : 2" 
-    :class="{ 'active-effect': effect.state }"
-    class="effect-card"
-  >
-    <v-card-title class="d-flex align-center justify-space-between">
-      <div class="d-flex align-center">
-        <v-icon 
-          :icon="effect.icon || 'mdi-lightning-bolt'" 
-          :color="effect.state ? 'primary' : 'grey'"
-          class="mr-2"
-        />
-        <span>{{ effect.name }}</span>
-      </div>
-      <v-chip 
-        v-if="effect.category" 
-        :color="effect.state ? 'primary' : 'grey'"
-        size="small"
-        variant="outlined"
-      >
-        {{ effect.category }}
-      </v-chip>
-    </v-card-title>
-
-    <v-card-text v-if="showDescription && effect.description">
-      <p class="text-body-2">{{ effect.description }}</p>
-    </v-card-text>
-
-    <v-card-text v-if="showTags && effect.tags && effect.tags.length > 0">
-      <v-chip-group>
-        <v-chip 
-          v-for="tag in effect.tags" 
-          :key="tag"
-          size="small"
-          variant="outlined"
-          color="grey"
-        >
-          {{ tag }}
-        </v-chip>
-      </v-chip-group>
-    </v-card-text>
-
-    <v-card-actions>
-      <v-btn
-        v-if="!effect.state"
-        color="primary"
-        variant="elevated"
-        @click="handleActivate"
-        :loading="isRunning"
-        :disabled="!effect.allowGuest"
-      >
-        <v-icon icon="mdi-play" class="mr-1" />
-        Activate
-      </v-btn>
-      
-      <v-btn
-        v-else
-        color="secondary"
-        variant="elevated"
-        @click="handleDeactivate"
-        :loading="isRunning"
-      >
-        <v-icon icon="mdi-stop" class="mr-1" />
-        Deactivate
-      </v-btn>
-    </v-card-actions>
-
-    <v-progress-linear
-      v-if="effect.state && hasTimeout"
-      :model-value="timeoutProgress"
-      color="warning"
-      height="4"
-    />
-  </v-card>
-</template>
-
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 
@@ -194,6 +117,83 @@ async function handleDeactivate() {
   }
 }
 </script>
+
+<template>
+  <v-card 
+    :elevation="effect.state ? 8 : 2" 
+    :class="{ 'active-effect': effect.state }"
+    class="effect-card"
+  >
+    <v-card-title class="d-flex align-center justify-space-between">
+      <div class="d-flex align-center">
+        <v-icon 
+          :icon="effect.icon || 'mdi-lightning-bolt'" 
+          :color="effect.state ? 'primary' : 'grey'"
+          class="mr-2"
+        />
+        <span>{{ effect.name }}</span>
+      </div>
+      <v-chip 
+        v-if="effect.category" 
+        :color="effect.state ? 'primary' : 'grey'"
+        size="small"
+        variant="outlined"
+      >
+        {{ effect.category }}
+      </v-chip>
+    </v-card-title>
+
+    <v-card-text v-if="showDescription && effect.description">
+      <p class="text-body-2">{{ effect.description }}</p>
+    </v-card-text>
+
+    <v-card-text v-if="showTags && effect.tags && effect.tags.length > 0">
+      <v-chip-group>
+        <v-chip 
+          v-for="tag in effect.tags" 
+          :key="tag"
+          size="small"
+          variant="outlined"
+          color="grey"
+        >
+          {{ tag }}
+        </v-chip>
+      </v-chip-group>
+    </v-card-text>
+
+    <v-card-actions>
+      <v-btn
+        v-if="!effect.state"
+        color="primary"
+        variant="elevated"
+        @click="handleActivate"
+        :loading="isRunning"
+        :disabled="!effect.allowGuest"
+      >
+        <v-icon icon="mdi-play" class="mr-1" />
+        Activate
+      </v-btn>
+      
+      <v-btn
+        v-else
+        color="secondary"
+        variant="elevated"
+        @click="handleDeactivate"
+        :loading="isRunning"
+      >
+        <v-icon icon="mdi-stop" class="mr-1" />
+        Deactivate
+      </v-btn>
+    </v-card-actions>
+
+    <v-progress-linear
+      v-if="effect.state && hasTimeout"
+      :model-value="timeoutProgress"
+      color="warning"
+      height="4"
+    />
+  </v-card>
+</template>
 
 <style scoped>
 .effect-card {

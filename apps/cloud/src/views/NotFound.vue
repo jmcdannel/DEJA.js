@@ -1,3 +1,25 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const showErrorDetails = ref(false)
+const currentPath = ref('')
+const timestamp = ref('')
+const userAgent = ref('')
+
+onMounted(() => {
+  currentPath.value = route.fullPath
+  timestamp.value = new Date().toLocaleString()
+  userAgent.value = navigator.userAgent
+  
+  // Add some fun console messages
+  console.log('🚂 Choo choo! Looks like we hit a 404!')
+  console.log('💡 Pro tip: Check your track switches and ensure proper routing!')
+  console.log('☕ Time for a coffee break while we figure this out!')
+})
+</script>
+
 <template>
   <div class="not-found-page">
     <div class="text-center py-16">
@@ -142,28 +164,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-
-const route = useRoute()
-const showErrorDetails = ref(false)
-const currentPath = ref('')
-const timestamp = ref('')
-const userAgent = ref('')
-
-onMounted(() => {
-  currentPath.value = route.fullPath
-  timestamp.value = new Date().toLocaleString()
-  userAgent.value = navigator.userAgent
-  
-  // Add some fun console messages
-  console.log('🚂 Choo choo! Looks like we hit a 404!')
-  console.log('💡 Pro tip: Check your track switches and ensure proper routing!')
-  console.log('☕ Time for a coffee break while we figure this out!')
-})
-</script>
 
 <style scoped>
 .not-found-page {

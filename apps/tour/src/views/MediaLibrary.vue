@@ -1,138 +1,3 @@
-<template>
-  <div>
-    <v-row>
-      <v-col cols="12">
-        <v-card elevation="4" class="mb-6">
-          <v-card-title class="text-h4">
-            <v-icon icon="mdi-video-library" class="mr-3"></v-icon>
-            Media Library
-          </v-card-title>
-          <v-card-subtitle class="text-h6">
-            Explore videos and audio content about each layout area
-          </v-card-subtitle>
-        </v-card>
-      </v-col>
-    </v-row>
-
-    <v-row>
-      <v-col cols="12" md="3">
-        <v-card elevation="2" class="mb-4">
-          <v-card-title class="text-h6">Filters</v-card-title>
-          <v-card-text>
-            <v-select
-              v-model="selectedArea"
-              :items="areas"
-              label="Layout Area"
-              clearable
-              prepend-icon="mdi-map"
-              @update:model-value="filterMedia"
-            ></v-select>
-            
-            <v-select
-              v-model="selectedType"
-              :items="mediaTypes"
-              label="Content Type"
-              clearable
-              prepend-icon="mdi-filter"
-              @update:model-value="filterMedia"
-            ></v-select>
-            
-            <v-select
-              v-model="selectedCategory"
-              :items="categories"
-              label="Category"
-              clearable
-              prepend-icon="mdi-tag"
-              @update:model-value="filterMedia"
-            ></v-select>
-          </v-card-text>
-        </v-card>
-
-        <v-card elevation="2">
-          <v-card-title class="text-h6">Quick Access</v-card-title>
-          <v-card-text>
-            <v-btn 
-              block 
-              color="primary" 
-              class="mb-2"
-              @click="showIntroContent"
-            >
-              <v-icon icon="mdi-play-circle" class="mr-2"></v-icon>
-              Introduction
-            </v-btn>
-            <v-btn 
-              block 
-              color="accent" 
-              class="mb-2"
-              @click="showTechnicalContent"
-            >
-              <v-icon icon="mdi-cog" class="mr-2"></v-icon>
-              Technical Details
-            </v-btn>
-            <v-btn 
-              block 
-              color="info"
-              @click="showOverviewContent"
-            >
-              <v-icon icon="mdi-map" class="mr-2"></v-icon>
-              Layout Overview
-            </v-btn>
-          </v-card-text>
-        </v-card>
-      </v-col>
-
-      <v-col cols="12" md="9">
-        <v-row>
-          <v-col 
-            cols="12" 
-            sm="6" 
-            lg="4" 
-            v-for="media in filteredMedia" 
-            :key="media.id"
-          >
-            <MediaCard 
-              :media="media" 
-              @play="playMedia"
-              @view-details="viewMediaDetails"
-            />
-          </v-col>
-        </v-row>
-
-        <div v-if="filteredMedia.length === 0" class="text-center py-8">
-          <v-icon icon="mdi-video-off" size="64" class="text-medium-emphasis mb-4"></v-icon>
-          <h3 class="text-h5 text-medium-emphasis mb-2">No media found</h3>
-          <p class="text-body-1 text-medium-emphasis">
-            Try adjusting your filters or check back later for new content.
-          </p>
-        </div>
-      </v-col>
-    </v-row>
-
-    <!-- Media Player Dialog -->
-    <v-dialog v-model="playerDialog" max-width="800">
-      <v-card v-if="selectedMedia">
-        <v-card-title>{{ selectedMedia.title }}</v-card-title>
-        <v-card-text>
-          <div class="media-player-placeholder">
-            <v-icon icon="mdi-play" size="64" class="play-icon"></v-icon>
-            <p class="text-h6 mt-4">{{ selectedMedia.title }}</p>
-            <p class="text-body-2">{{ selectedMedia.description }}</p>
-            <p class="text-caption">Duration: {{ selectedMedia.duration }}</p>
-          </div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn @click="playerDialog = false">Close</v-btn>
-          <v-btn color="primary" @click="startPlayback">
-            <v-icon icon="mdi-play" class="mr-2"></v-icon>
-            Play
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
@@ -358,6 +223,141 @@ onMounted(() => {
   }
 })
 </script>
+
+<template>
+  <div>
+    <v-row>
+      <v-col cols="12">
+        <v-card elevation="4" class="mb-6">
+          <v-card-title class="text-h4">
+            <v-icon icon="mdi-video-library" class="mr-3"></v-icon>
+            Media Library
+          </v-card-title>
+          <v-card-subtitle class="text-h6">
+            Explore videos and audio content about each layout area
+          </v-card-subtitle>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-card elevation="2" class="mb-4">
+          <v-card-title class="text-h6">Filters</v-card-title>
+          <v-card-text>
+            <v-select
+              v-model="selectedArea"
+              :items="areas"
+              label="Layout Area"
+              clearable
+              prepend-icon="mdi-map"
+              @update:model-value="filterMedia"
+            ></v-select>
+            
+            <v-select
+              v-model="selectedType"
+              :items="mediaTypes"
+              label="Content Type"
+              clearable
+              prepend-icon="mdi-filter"
+              @update:model-value="filterMedia"
+            ></v-select>
+            
+            <v-select
+              v-model="selectedCategory"
+              :items="categories"
+              label="Category"
+              clearable
+              prepend-icon="mdi-tag"
+              @update:model-value="filterMedia"
+            ></v-select>
+          </v-card-text>
+        </v-card>
+
+        <v-card elevation="2">
+          <v-card-title class="text-h6">Quick Access</v-card-title>
+          <v-card-text>
+            <v-btn 
+              block 
+              color="primary" 
+              class="mb-2"
+              @click="showIntroContent"
+            >
+              <v-icon icon="mdi-play-circle" class="mr-2"></v-icon>
+              Introduction
+            </v-btn>
+            <v-btn 
+              block 
+              color="accent" 
+              class="mb-2"
+              @click="showTechnicalContent"
+            >
+              <v-icon icon="mdi-cog" class="mr-2"></v-icon>
+              Technical Details
+            </v-btn>
+            <v-btn 
+              block 
+              color="info"
+              @click="showOverviewContent"
+            >
+              <v-icon icon="mdi-map" class="mr-2"></v-icon>
+              Layout Overview
+            </v-btn>
+          </v-card-text>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" md="9">
+        <v-row>
+          <v-col 
+            cols="12" 
+            sm="6" 
+            lg="4" 
+            v-for="media in filteredMedia" 
+            :key="media.id"
+          >
+            <MediaCard 
+              :media="media" 
+              @play="playMedia"
+              @view-details="viewMediaDetails"
+            />
+          </v-col>
+        </v-row>
+
+        <div v-if="filteredMedia.length === 0" class="text-center py-8">
+          <v-icon icon="mdi-video-off" size="64" class="text-medium-emphasis mb-4"></v-icon>
+          <h3 class="text-h5 text-medium-emphasis mb-2">No media found</h3>
+          <p class="text-body-1 text-medium-emphasis">
+            Try adjusting your filters or check back later for new content.
+          </p>
+        </div>
+      </v-col>
+    </v-row>
+
+    <!-- Media Player Dialog -->
+    <v-dialog v-model="playerDialog" max-width="800">
+      <v-card v-if="selectedMedia">
+        <v-card-title>{{ selectedMedia.title }}</v-card-title>
+        <v-card-text>
+          <div class="media-player-placeholder">
+            <v-icon icon="mdi-play" size="64" class="play-icon"></v-icon>
+            <p class="text-h6 mt-4">{{ selectedMedia.title }}</p>
+            <p class="text-body-2">{{ selectedMedia.description }}</p>
+            <p class="text-caption">Duration: {{ selectedMedia.duration }}</p>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="playerDialog = false">Close</v-btn>
+          <v-btn color="primary" @click="startPlayback">
+            <v-icon icon="mdi-play" class="mr-2"></v-icon>
+            Play
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </div>
+</template>
 
 <style scoped>
 .media-player-placeholder {
