@@ -1,49 +1,66 @@
 <script setup lang="ts">
-import { LocoAvatar } from '@repo/ui'
-import ThrottleButtonControls from './ThrottleButtonControls.vue'
-import CurrentSpeed from './CurrentSpeed.vue'
-import { useThrottle } from './useThrottle'
+import { LocoAvatar } from "@repo/ui";
+import CurrentSpeed from "./CurrentSpeed.vue";
+import { useThrottle } from "./useThrottle";
+import ThrottleControls from "./ThrottleControls.vue";
 
 const props = defineProps({
   address: {
     type: Number,
-    required: true
-  }
-})
+    required: true,
+  },
+  controls: {
+    type: String,
+    default: "buttons",
+  },
+});
 
-const { 
+const {
   adjustSpeed: handleAdjustSpeed,
   currentSpeed,
   loco,
   releaseThrottle,
   stop: handleStop,
   throttle,
-} = useThrottle(props.address)
-
+  direction,
+} = useThrottle(props.address);
 </script>
 <template>
-  <main v-if="throttle" class="rounded-2xl shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border ">
-    <section class="p-1 flex flex-row flex-wrap items-center justify-between overflow-auto">
-      <div class="order-1 basis-1/3 pl-2" >
+  <main
+    v-if="throttle"
+    class="rounded-2xl shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border"
+  >
+    <section
+      class="p-1 flex flex-row flex-wrap items-center justify-between overflow-auto"
+    >
+      <div class="order-1 basis-1/3 pl-2">
         <CurrentSpeed class="!justify-start =" :speed="currentSpeed" />
       </div>
       <div class="flex-grow order-4 basis-full my-1">
-        <ThrottleButtonControls
+        <ThrottleControls
+          :type="controls"
+          :speed="currentSpeed"
+          :direction="direction"
           horizontal
-          @stop="handleStop" 
-          @update:currentSpeed="handleAdjustSpeed" 
+          @stop="handleStop"
+          @update:currentSpeed="handleAdjustSpeed"
         />
       </div>
-      <div class="order-2 basis-1/3 py-2 flex justify-center text-base @[960px]:text-xl">
-        <span class="bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-cyan-400 font-bold">{{loco?.name || throttle.address}}</span>
+      <div
+        class="order-2 basis-1/3 py-2 flex justify-center text-base @[960px]:text-xl"
+      >
+        <span
+          class="bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-cyan-400 font-bold"
+          >{{ loco?.name || throttle.address }}</span
+        >
       </div>
-      <div class="order-2  basis-1/3 pr-2">
-        <LocoAvatar 
-          v-if="loco" 
-          :loco="loco" 
+      <div class="order-2 basis-1/3 pr-2">
+        <LocoAvatar
+          v-if="loco"
+          :loco="loco"
           class="justify-end"
-          @park="releaseThrottle" 
-          :size="48" 
+          @park="releaseThrottle"
+          :size="48"
           @stop="handleStop"
           showConsist
           showMenu
@@ -55,8 +72,8 @@ const {
   <main v-else>
     <div class="flex items-center justify-center h-full">
       <p class="text-gray-500">Loading throttle...</p>
-      {{address}}
-      {{throttle}}
+      {{ address }}
+      {{ throttle }}
     </div>
   </main>
 </template>
