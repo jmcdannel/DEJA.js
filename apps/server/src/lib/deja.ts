@@ -97,7 +97,7 @@ export async function handleDejaMessages(
 }
 
 export async function handleDejaCommands(
-  snapshot, key
+  snapshot: any, key: string | null
 ): Promise<void> {
   try {
     console.log(snapshot)

@@ -23,15 +23,7 @@ const newEfx: Partial<Effect> = {
   <ModuleTitle menu="Effects">
     <ListMenu :disabledMenus="['view']" :module-name="'effects'" />
   </ModuleTitle>
-  
-  <!-- Sound Management Links -->
-  <div class="mb-4 d-flex gap-3">
-
     
-
-    
-  </div>
-  
   <!-- External Sound Library Quicklinks -->
   <v-card class="mb-4">
     <v-card-title class="text-h6">

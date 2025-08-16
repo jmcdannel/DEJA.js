@@ -1,6 +1,6 @@
 import { FieldValue } from 'firebase-admin/firestore'
 import type { SerialPort } from 'serialport'
-import type { Layout, Device, Sensor } from '@repo/modules/layouts'
+import type { Layout, Device, Sensor } from '@repo/modules'
 import { db } from '@repo/firebase-config/firebase-admin-node'
 import { serial as serialLib } from '../lib/serial'
 import { log } from '../utils/logger'

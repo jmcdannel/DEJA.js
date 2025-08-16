@@ -1,10 +1,14 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useCollection } from 'vuefire'
 import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
 import { TurnoutLabels } from '@repo/ui'
 
 const { getTurnouts } = useTurnouts()
-const turnouts = getTurnouts()
+const turnoutsData = getTurnouts()
+const turnouts = computed(() => 
+  turnoutsData.value?.map(doc => ({ ...doc, id: doc.id } as Turnout)) || []
+)
 </script>
 <template>
   <main class="p-4">

@@ -40,7 +40,7 @@
     "firebase-admin": "^13.4.0",
     "globals": "^16.0.0",
     "mqtt": "^5.13.1",
-    "tsx": "^4.19.4",
+    "tsx": "^4.20.4",
     "typescript": "*"
   },
   "engines": {

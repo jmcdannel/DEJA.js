@@ -2,14 +2,12 @@
 import { ref, watch, onErrorCaptured } from 'vue'
 import { useEfx, useLayout, type Effect } from '@repo/modules'
 import { efxTypes } from '@repo/modules/effects/constants'
-import { useSound } from '@vueuse/sound'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import MacroForm from '@/Effects/MacroForm.vue'
 import IALEDForm from '@/Effects//IALEDForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
-import SoundPicker from './SoundPicker.vue'
 // TODO: icon picker
 
 // Error handling
@@ -78,10 +76,6 @@ const macroOff = ref(props.efx?.off || [])
 const pattern = ref(props.efx?.pattern || undefined)
 const range = ref(props.efx?.range || undefined)
 const config = ref(props.efx?.config || undefined)
-const sound = ref(props.efx?.sound || '')
-const soundBlobUrl = ref(props.efx?.soundBlobUrl || '')
-const soundDuration = ref(props.efx?.soundDuration || 0)
-const soundObj = ref(null as null | HTMLAudioElement)
 const efxType = ref(props.efx?.type)
 const efxTypeObj = ref(props.efx?.type ? getEfxType(props.efx?.type) : undefined)
 const color = ref(props.efx?.color || efxTypeObj.value?.color || 'purple')  
@@ -100,36 +94,13 @@ console.log('EffectForm initialized with:', {
 })
 
 
-watch(sound, (newSound) => {
-  console.log('sound', newSound)
-  soundObj.value = new Audio(newSound)
-  
-  // Auto-detect sound duration when sound is set
-  if (newSound) {
-    const audio = new Audio(newSound)
-    audio.addEventListener('loadedmetadata', () => {
-      soundDuration.value = Math.round(audio.duration * 100) / 100 // Round to 2 decimal places
-    })
-    audio.addEventListener('error', () => {
-      console.warn('Could not load audio to detect duration:', newSound)
-      soundDuration.value = 0
-    })
-  } else {
-    soundDuration.value = 0
-  }
-})
-
 watch(efxType, (newType) => {
   if (newType) {
     efxTypeObj.value = getEfxType(newType)
     // Set default device if the effect type has one and no device is currently set
     if (efxTypeObj.value?.defaultDevice && !props.efx?.device) {
       device.value = efxTypeObj.value.defaultDevice
-    }
-    // For sound effects, always set device to deja-server
-    if (newType === 'sound') {
-      device.value = 'deja-server'
-    }
+    }   
   } else {
     efxTypeObj.value = undefined
   }
@@ -137,13 +108,6 @@ watch(efxType, (newType) => {
 
 async function submit () {
   loading.value = true
-
-  // Validate that sound effects have a device set
-  if (efxType.value === 'sound' && !device.value) {
-    console.error('Device is required for sound effects')
-    loading.value = false
-    return
-  }
 
   const newEfx: Effect = {
     name: name.value,
@@ -155,18 +119,12 @@ async function submit () {
     id: props.efx?.id || ''
   }
   // set device
-  if (efxTypeObj.value?.require?.includes('device') || efxType.value === 'sound') {
+  if (efxTypeObj.value?.require?.includes('device')) {
     newEfx.device = device.value
   }
   //  set pin
   if (efxTypeObj.value?.require?.includes('pin') && pin.value) {
     newEfx.pin = parseInt(pin.value as unknown as string)
-  }
-  //  set sound
-  if (efxTypeObj.value?.require?.includes('sound')) {
-    newEfx.sound = sound.value
-    newEfx.soundBlobUrl = soundBlobUrl.value
-    newEfx.soundDuration = soundDuration.value || undefined
   }
   //  set macro
   if (efxType.value === 'macro') {
@@ -208,48 +166,11 @@ function handleIALED(ialedEffectConfig: {
   config.value = ialedEffectConfig.config
 }
 
-const newSound = useSound(sound.value || '')
-
-function playSound() {
-  console.log('playSound', sound.value, newSound)
-  soundObj.value?.play()
-}
-function stopSound() {
-  console.log('stopSound', sound.value)
-  soundObj.value?.pause()
-}
-// /Users/jmcdannel/trains/trestle-tt-suite/packages/ttt-action-api/sounds/departing-train.wav
-
-function formatDuration(seconds: number): string {
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-  const s = Math.floor(seconds % 60)
-  const parts = []
-  if (h > 0) {
-    parts.push(`${h}h`)
-  }
-  if (m > 0) {
-    parts.push(`${m}m`)
-  }
-  if (s > 0 || parts.length === 0) {
-    parts.push(`${s}s`)
-  }
-  return parts.join('')
-}
 
 </script>
 <template>
   <div>
     <h1>EffectForm Component Loaded</h1>
-    
-    <div class="debug-info" style="background: #f0f0f0; padding: 10px; margin: 10px; border: 1px solid #ccc;">
-      <strong>Debug Info:</strong><br>
-      efx: {{ efx ? JSON.stringify(efx) : 'undefined' }}<br>
-      efxType: {{ efxType || 'undefined' }}<br>
-      efxTypeObj: {{ efxTypeObj ? 'exists' : 'undefined' }}<br>
-      devices: {{ devices?.length || 0 }} devices<br>
-      efxTypes length: {{ efxTypes?.length || 0 }}
-    </div>
     
     <v-form validate-on="submit lazy" @submit.prevent="submit">
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
@@ -276,30 +197,6 @@ function formatDuration(seconds: number): string {
       </v-btn-toggle>
     </template>
     
-    <!-- Show device selection for sound effects -->
-    <template v-if="efxType === 'sound'">
-      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      <v-label class="m-2">Device (Required for Sound Effects)</v-label>
-      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large">
-          <v-btn v-for="deviceOpt in devices" :value="deviceOpt.id" :key="deviceOpt.id" 
-            class="min-h-24 min-w-48 border"
-            :color="color" >
-              {{ deviceOpt.id }}
-          </v-btn>
-      </v-btn-toggle>
-    </template>
-    
-    <!-- Show device info for sound effects -->
-    <template v-if="efxType === 'sound' && device">
-      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      <v-alert
-        type="info"
-        variant="tonal"
-        :title="`Sound Effect Device: ${device}`"
-        :text="`This sound will be played on the DEJA Server. ${soundDuration ? `Duration: ${formatDuration(soundDuration)}` : 'No duration set'}. No additional hardware required.`"
-      ></v-alert>
-    </template>
     <template v-if="!efx.type">
       <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
       <v-label class="m-2">Type</v-label>
@@ -364,42 +261,6 @@ function formatDuration(seconds: number): string {
         <v-text-field v-model="green" label="Green Effect ID" variant="outlined" />
       </div>
       <div class="text-xs opacity-70 mt-1">Enter the IDs of existing pin effects for each color.</div>
-    </template>
-
-    <!-- sound -->
-    <template v-else-if="efxTypeObj?.require?.includes('sound')">
-      <SoundPicker 
-        v-model="sound" 
-        @update:soundBlobUrl="soundBlobUrl = $event" 
-      />
-      
-      <!-- Sound Duration -->
-      <div class="mt-4">
-        <v-label class="text-sm opacity-70">Sound Duration</v-label>
-        <div class="flex items-center gap-4 mt-2">
-          <v-text-field
-            v-model="soundDuration"
-            label="Duration (seconds)"
-            type="number"
-            variant="outlined"
-            density="compact"
-            min="0"
-            step="0.01"
-            class="max-w-32"
-            :hint="soundDuration ? `${formatDuration(soundDuration)}` : 'No duration set'"
-            persistent-hint
-          ></v-text-field>
-          <v-chip
-            v-if="soundDuration"
-            size="small"
-            color="info"
-            variant="tonal"
-            prepend-icon="mdi-clock-outline"
-          >
-            {{ formatDuration(soundDuration) }}
-          </v-chip>
-        </div>
-      </div>
     </template>
 
     <!-- macro -->

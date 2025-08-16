@@ -22,7 +22,7 @@ async function main() {
     console.log(`   Categories: ${Object.keys(stats.categoryMapping).join(', ')}`)
     
     // Get current store stats
-    const storeStats = soundStoreService.getStats()
+    const storeStats = await soundStoreService.getStats()
     console.log(`\n📦 Current Store Status:`)
     console.log(`   Total Sounds: ${storeStats.total}`)
     console.log(`   By Category: ${JSON.stringify(storeStats.byCategory, null, 2)}`)
@@ -56,7 +56,7 @@ async function main() {
       }
       
       // Show updated store stats
-      const newStoreStats = soundStoreService.getStats()
+      const newStoreStats = await soundStoreService.getStats()
       console.log(`\n📦 Updated Store Status:`)
       console.log(`   Total Sounds: ${newStoreStats.total}`)
       console.log(`   By Category: ${JSON.stringify(newStoreStats.byCategory, null, 2)}`)

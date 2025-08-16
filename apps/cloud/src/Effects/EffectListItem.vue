@@ -90,16 +90,6 @@ async function handleEfx (event: Event) {
             Guest Access
           </v-chip>
           
-          <!-- Sound Duration for Sound Effects -->
-          <v-chip
-            v-if="efx?.type === 'sound' && efx?.soundDuration"
-            size="small"
-            color="info"
-            variant="tonal"
-            prepend-icon="mdi-clock-outline"
-          >
-            {{ formatDuration(efx.soundDuration) }}
-          </v-chip>
         </v-chip-group>
         <div class="flex flex-col items-center justify-center">
           <v-icon 

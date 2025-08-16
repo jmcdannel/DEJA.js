@@ -14,10 +14,11 @@
     "type-check": "tsc --noEmit",
     "build": "tsc",
     "scan-sounds": "tsx scripts/scan-sounds.ts",
-    "test-blob": "tsx scripts/test-blob-connection.ts"
+    "test-blob": "tsx scripts/test-blob-connection.ts",
+    "test-sounds": "tsx scripts/test-sounds-package.ts"
   },
   "dependencies": {
-    "@vercel/blob": "^0.22.0"
+    "@vercel/blob": "^1.1.1"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
