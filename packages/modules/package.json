@@ -6,7 +6,12 @@
   "type": "module",
   "main": "./index.ts",
   "exports": {
-    ".": "./index.ts"
+    ".": "./index.ts",
+    "./effects": "./effects/index.ts",
+    "./layouts": "./layouts/index.ts",
+    "./locos": "./locos/index.ts",
+    "./turnouts": "./turnouts/index.ts",
+    "./types": "./types.ts"
   },
   "scripts": {
     "type-check": "tsc --noEmit"

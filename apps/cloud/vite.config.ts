@@ -2,25 +2,9 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
-// Custom plugin to handle workspace package resolution
-const workspacePackagePlugin = () => {
-  return {
-    name: 'workspace-package-resolver',
-    resolveId(id: string) {
-      if (id.startsWith('@repo/')) {
-        // Handle workspace package imports
-        const packageName = id.replace('@repo/', '')
-        const packagePath = fileURLToPath(new URL(`../../packages/${packageName}/index.ts`, import.meta.url))
-        return packagePath
-      }
-      return null
-    }
-  }
-}
-
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), workspacePackagePlugin()],
+  plugins: [vue()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -64,9 +48,6 @@ export default defineConfig({
       origin: ['http://localhost:5000', 'http://localhost:3000', 'http://localhost:5173'],
       credentials: true
     },
-    
-    // HTTPS configuration for development
-    https: false, // Set to true if you need HTTPS locally
     
     // Additional headers for development
     headers: {

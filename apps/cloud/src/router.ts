@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Dashboard from './Dashboard/Dashboard.vue'
 import { Login, requireAuth, requireDccEx, requireLayout } from '@repo/auth'
+import Dashboard from './Dashboard/Dashboard.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
