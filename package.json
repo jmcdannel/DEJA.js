@@ -13,7 +13,7 @@
     "dev": "turbo run dev",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lint": "turbo run lint",
-    "start": "turbo run start --filter=apps/server --filter=apps/monitor",
+    "start": "turbo run start --filter=deja-serverts",
     "start:all": "turbo run start",
     "scan-sounds": "turbo run scan-sounds --filter=@repo/sounds"
   },
