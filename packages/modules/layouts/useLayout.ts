@@ -55,8 +55,7 @@ export const useLayout = () => {
   ]
 
   const { sendDejaCommand } = useDejaJS()
-  const layoutId = useStorage('@DEJA/layoutId', '')
-  const layoutDoc = doc(db, 'layouts', layoutId.value)
+  const layoutId = useStorage('@DEJA/layoutId', null)
 
   const layoutsRef = collection(db, 'layouts')
 
@@ -66,6 +65,7 @@ export const useLayout = () => {
 
   function getLayout() {
     console.log('getLayouts')
+    if (!layoutId.value) return null
     const layout = useDocument(doc(db, 'layouts', layoutId.value))
     return layout
   }
@@ -90,6 +90,10 @@ export const useLayout = () => {
   }
 
   async function getDevice(deviceId: string): Promise<Device | undefined> {
+    if (!layoutId.value) {
+      console.error('No layoutId set, cannot get device')
+      return undefined
+    }
     // const device = useDocument(
     //   doc(db, `layouts/${layoutId.value}/devices`, deviceId)
     // )
@@ -132,6 +136,10 @@ export const useLayout = () => {
   }
 
   async function createDevice(id: string, device: Device) {
+    if (!layoutId.value) {
+      console.error('No layoutId set, cannot create device')
+      return false
+    }
     console.log('createDevice', device)
     try {
       await setDoc(doc(db, `layouts/${layoutId.value}/devices`, id), {
@@ -141,6 +149,7 @@ export const useLayout = () => {
       return true
     } catch (e) {
       console.error('Error adding throttle: ', e)
+      return false
     }
   }
 
@@ -161,6 +170,10 @@ export const useLayout = () => {
   }
 
   async function autoConnectDevice(id: string, autoConnect: boolean) {
+    if (!layoutId.value) {
+      console.error('No layoutId set, cannot auto-connect device')
+      return
+    }
     try {
       const deviceDoc = doc(db, `layouts/${layoutId.value}/devices`, id)
       await setDoc(deviceDoc, { autoConnect: !!autoConnect }, { merge: true })
@@ -174,7 +187,7 @@ export const useLayout = () => {
       console.error('No layoutId set, cannot get tags')
       return []
     }
-    const docSnap = await getDoc(layoutDoc)
+    const docSnap = await getDoc(doc(db, 'layouts', layoutId.value))
     if (docSnap.exists()) {
       const layout = docSnap.data()
       if (layout?.tags) {
@@ -190,7 +203,7 @@ export const useLayout = () => {
       return []
     }
     try {
-      const docSnap = await getDoc(layoutDoc)
+      const docSnap = await getDoc(doc(db, 'layouts', layoutId.value))
       if (docSnap.exists()) {
         console.log('setTags', layoutId.value, tags)
         await setDoc(
@@ -210,11 +223,12 @@ export const useLayout = () => {
       return []
     }
     try {
-      const docSnap = await getDoc(layoutDoc)
+      const docSnap = await getDoc(doc(db, 'layouts', layoutId.value))
       if (docSnap.exists()) {
+        const layoutData = docSnap.data()
         await setDoc(
           doc(db, `layouts`, layoutId.value),
-          { tags: [...(docSnap.data().tags || []), tag] },
+          { tags: [...((layoutData as any)?.tags || []), tag] },
           { merge: true }
         )
       }
@@ -228,11 +242,11 @@ export const useLayout = () => {
       console.error('No layoutId set, cannot get tags')
       return []
     }
-    const docSnap = await getDoc(layoutDoc)
+    const docSnap = await getDoc(doc(db, 'layouts', layoutId.value))
     if (docSnap.exists()) {
       const layout = docSnap.data()
-      if (layout?.tags) {
-        return layout.tags.filter((tag: Tag) => ids.includes(tag.id))
+      if ((layout as any)?.tags) {
+        return (layout as any).tags.filter((tag: Tag) => ids.includes(tag.id))
       }
     }
     return []

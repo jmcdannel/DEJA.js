@@ -35,9 +35,9 @@ function handleLayoutSelect(newLayout: string) {
     <v-list>
       <v-list-item
         v-for="layout in layouts"
-        :key="layout.layoutId"
+        :key="layout.id"
         class="cursor-pointer"
-        @click="handleLayoutSelect(layout.layoutId)"
+        @click="handleLayoutSelect(layout.id)"
       >
         <v-list-item-title>
           <v-chip
@@ -46,7 +46,7 @@ function handleLayoutSelect(newLayout: string) {
             color="primary"
             variant="outlined"
           >
-            {{ layout.name || layout.layoutId }}
+            {{ layout.name || layout.id }}
           </v-chip>
         </v-list-item-title>
       </v-list-item>

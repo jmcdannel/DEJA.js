@@ -76,6 +76,12 @@ const router = createRouter({
       name: 'speedometer-demo',
       component: () => import('../throttle/SpeedometerDemo.vue'),
     },
+    {
+      path: '/select-layout',
+      name: 'Select Layout',
+      component: () => import('../views/SelectLayoutView.vue'),
+      beforeEnter: [requireAuth],
+    },
     // {
     //   path: '/connect/dejajs',
     //   name: 'dejajs',
