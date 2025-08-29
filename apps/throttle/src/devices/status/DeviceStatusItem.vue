@@ -3,7 +3,7 @@
 import { type PropType } from 'vue'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import type { Device } from '@repo/modules/layouts'
+import type { Device } from '@repo/modules'
 
 dayjs.extend(relativeTime)
 

@@ -549,7 +549,7 @@ Functions for layout management and configuration.
 
 **Usage:**
 ```typescript
-import { useLayout } from '@repo/modules/layouts';
+import { useLayout } from '@repo/modules';
 
 const { layout, saveLayout, loadLayout } = useLayout();
 ```
@@ -901,7 +901,7 @@ watch(direction, () => {
 <script setup>
 import { ref } from 'vue';
 import { SelectLayout, TurnoutList, LocoAvatar } from '@repo/ui';
-import { useLayout } from '@repo/modules/layouts';
+import { useLayout } from '@repo/modules';
 
 const { currentLayout, setLayout } = useLayout();
 

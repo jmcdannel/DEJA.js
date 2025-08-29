@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { Tag } from '@repo/modules/layouts'
-import { useLayout } from '@repo/modules/layouts'
+import type { Tag } from '@repo/modules'
+import { useLayout } from '@repo/modules'
 import TagCmp from './Tag.vue'
 
 const model = defineModel()

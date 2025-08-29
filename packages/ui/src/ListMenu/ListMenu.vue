@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useStorage } from '@vueuse/core'
-import { useLayout } from '@repo/modules/layouts'
+import { useLayout } from '@repo/modules'
 
 const props = defineProps<{
   disabledMenus?: string[]

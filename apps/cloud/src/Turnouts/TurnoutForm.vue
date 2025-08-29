@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
-import { useLayout } from '@repo/modules/layouts'
+import { useLayout } from '@repo/modules'
 // import { useEfx } from '@repo/modules/effects'
 import { slugify } from '@repo/utils/slugify'
 import TurnoutTypePicker from '@/Turnouts/TurnoutTypePicker.vue'

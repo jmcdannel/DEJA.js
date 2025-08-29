@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { useLayout } from '@repo/modules/layouts'
+import { useLayout } from '@repo/modules'
 
 export async function requireDccEx() {
   const { getDevices } = useLayout()

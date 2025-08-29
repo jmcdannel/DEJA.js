@@ -4,6 +4,7 @@ import { useCurrentUser } from 'vuefire'
 import Logo from './Logo.vue'
 import ControlBar from './ControlBar.vue'
 import UserProfile from './UserProfile.vue'
+import { useLayout } from '@repo/modules'
 
 defineProps<{
   appName?: string
@@ -21,6 +22,10 @@ defineProps<{
   devices?: any[]
   layouts?: any[]
 }>()
+
+const { getLayouts, getDevices } = useLayout()
+const layouts = getLayouts()
+const devices = getDevices()
 
 const emit = defineEmits<{
   trackPowerToggle: [newState: boolean]
