@@ -19,8 +19,6 @@ defineProps<{
   color?: string
   dark?: boolean
   layoutPowerState?: boolean
-  devices?: any[]
-  layouts?: any[]
 }>()
 
 const { getLayouts, getDevices } = useLayout()
@@ -72,8 +70,6 @@ const defaultProps = {
   color: 'surface',
   dark: true,
   layoutPowerState: false,
-  devices: [] as any[],
-  layouts: [] as any[]
 }
 </script>
 
