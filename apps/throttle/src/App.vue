@@ -4,14 +4,11 @@ import { useStorage } from '@vueuse/core'
 import { AppHeader } from '@repo/ui'
 import Footer from '@/core/Footer.vue'
 import { useDcc } from '@repo/dccex'
-import { useEfx, useLayout } from '@repo/modules'
+import { useEfx } from '@repo/modules'
 
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
-const { getDevices, getLayouts } = useLayout()
 const layoutId = useStorage('@DEJA/layoutId', '')
-const devices = getDevices()
-const layouts = getLayouts()
 
 // Event handlers for the unified header
 async function handleTrackPowerToggle(newState: boolean) {
@@ -54,8 +51,6 @@ function handleLayoutSelect(newLayout: string) {
         variant="throttle"
         color="surface"
         :dark="true"
-        :devices="devices"
-        :layouts="layouts"
         :show-layout-power="true"
         :show-emergency-stop="true"
         :show-device-status="true"
