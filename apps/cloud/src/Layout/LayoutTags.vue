@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { Tag } from '@repo/modules/layouts'
+import type { Tag } from '@repo/modules'
 import TagList from '@/Common/Tags/TagList.vue'
 import TagForm from '@/Common/Tags/TagForm.vue'
 const editTag = ref<Tag | null>(null)

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useLayout } from '@repo/modules/layouts'
+import { useLayout } from '@repo/modules'
 
 const emit = defineEmits(['selected', 'clear'])
 

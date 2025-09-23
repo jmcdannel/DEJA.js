@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
-import { useLayout } from '@repo/modules/layouts'
+import { useLayout } from '@repo/modules'
 
 const router = useRouter()
 const { getLayouts } = useLayout()

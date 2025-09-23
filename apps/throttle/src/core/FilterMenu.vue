@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useLayout } from '@repo/modules/layouts'
+import { useLayout } from '@repo/modules'
 
 const props = defineProps<{
   modelValue: string[]

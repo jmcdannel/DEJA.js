@@ -4,6 +4,7 @@ import { useCurrentUser } from 'vuefire'
 import Logo from './Logo.vue'
 import ControlBar from './ControlBar.vue'
 import UserProfile from './UserProfile.vue'
+import { useLayout } from '@repo/modules'
 
 defineProps<{
   appName?: string
@@ -18,9 +19,11 @@ defineProps<{
   color?: string
   dark?: boolean
   layoutPowerState?: boolean
-  devices?: any[]
-  layouts?: any[]
 }>()
+
+const { getLayouts, getDevices } = useLayout()
+const layouts = getLayouts()
+const devices = getDevices()
 
 const emit = defineEmits<{
   trackPowerToggle: [newState: boolean]
@@ -28,6 +31,7 @@ const emit = defineEmits<{
   emergencyStop: []
   deviceSelect: [deviceId: string]
   layoutSelect: [layoutId: string]
+  logoClick: []
 }>()
 
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -54,6 +58,10 @@ function handleLayoutSelect(layoutId: string) {
   emit('layoutSelect', layoutId)
 }
 
+function handleLogoClick() {
+  emit('logoClick')
+}
+
 const defaultProps = {
   appName: 'DEJA',
   appIcon: 'mdi-train',
@@ -67,8 +75,6 @@ const defaultProps = {
   color: 'surface',
   dark: true,
   layoutPowerState: false,
-  devices: [] as any[],
-  layouts: [] as any[]
 }
 </script>
 
@@ -93,6 +99,7 @@ const defaultProps = {
           :app-name="appName || defaultProps.appName"
           :app-icon="appIcon || defaultProps.appIcon"
           :variant="variant || defaultProps.variant"
+          @click="handleLogoClick"
         />
       </div>
 

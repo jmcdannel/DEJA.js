@@ -64,7 +64,7 @@ export const useLayout = () => {
   )
 
   function getLayout() {
-    console.log('getLayouts')
+    console.log('getLayout', layoutId.value)
     if (!layoutId.value) return null
     const layout = useDocument(doc(db, 'layouts', layoutId.value))
     return layout

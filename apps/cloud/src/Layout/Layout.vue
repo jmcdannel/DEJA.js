@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue' 
-import { useLayout, type Device } from '@repo/modules/layouts'
+import { useLayout, type Device } from '@repo/modules'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import PortList from '@/Layout/PortList.vue'

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Tag } from '@repo/modules/layouts'
+import type { Tag } from '@repo/modules'
 
 defineProps<{
   tag: Tag

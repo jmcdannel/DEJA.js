@@ -14,14 +14,11 @@ import LayoutStatus from '@/Layout/LayoutStatus.vue'
 import { Login } from '@repo/auth'
 import { AppHeader } from '@repo/ui'
 import { useDcc } from '@repo/dccex'
-import { useEfx, useLayout } from '@repo/modules'
+import { useEfx } from '@repo/modules'
 
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
-const { getDevices, getLayouts } = useLayout()
 const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
-const devices = getDevices()
-const layouts = getLayouts()
 
 // Event handlers for the unified header
 async function handleTrackPowerToggle(newState: boolean) {
@@ -72,6 +69,10 @@ function handleThemeChange(newTheme: string) {
   theme.change(newTheme)
 }
 
+function handleLogoClick() {
+  router.push({ path: '/' })
+}
+
 </script>
 <template>
   <v-responsive class="border rounded">
@@ -82,8 +83,6 @@ function handleThemeChange(newTheme: string) {
           variant="cloud"
           color="surface"
           :dark="true"
-          :devices="devices"
-          :layouts="layouts"
           :show-layout-power="true"
           :show-emergency-stop="true"
           :show-device-status="true"
@@ -93,6 +92,7 @@ function handleThemeChange(newTheme: string) {
           @layout-power-toggle="handleLayoutPowerToggle"
           @emergency-stop="handleEmergencyStop"
           @device-select="handleDeviceSelect"
+          @logo-click="handleLogoClick"
         >
         </AppHeader>
       <v-navigation-drawer v-model="drawer" :mobile="mobile" mobile-breakpoint="md">

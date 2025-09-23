@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import type { Device } from '@repo/modules/layouts'
+import type { Device } from '@repo/modules'
 import type { Effect } from '@repo/modules/effects'
 // import type { Device } from '@/Devices/types'
-import { useLayout } from '@repo/modules/layouts'
+import { useLayout } from '@repo/modules'
 
 const pattern = defineModel('pattern')
 const range = defineModel('range')

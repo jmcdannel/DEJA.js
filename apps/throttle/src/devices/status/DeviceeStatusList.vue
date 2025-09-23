@@ -2,7 +2,7 @@
 import { useStorage } from '@vueuse/core'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { useLayout, type Device } from '@repo/modules/layouts'
+import { useLayout, type Device } from '@repo/modules'
 import DeviceStatusItem from './DeviceStatusItem.vue'
 
 dayjs.extend(relativeTime)

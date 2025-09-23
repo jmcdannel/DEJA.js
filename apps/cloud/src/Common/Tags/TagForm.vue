@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { slugify } from '@repo/utils/slugify'
-import { useLayout } from '@repo/modules/layouts'
+import { useLayout } from '@repo/modules'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 
 const emit = defineEmits(['close'])

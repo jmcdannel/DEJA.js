@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useLayout } from '@repo/modules/layouts'
+import { useLayout } from '@repo/modules'
 
 defineEmits(['select', 'cancel'])
 defineProps({

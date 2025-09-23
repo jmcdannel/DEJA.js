@@ -2,7 +2,7 @@
 // import { computed } from 'vue'
 // import { useCurrentUser } from 'vuefire'
 // import { useStorage } from '@vueuse/core'
-// import { useLayout, type Device } from '@repo/modules/layouts'
+// import { useLayout, type Device } from '@repo/modules'
 
 // const layoutId = useStorage('@DEJA/layoutId', '')
 // const user = useCurrentUser()

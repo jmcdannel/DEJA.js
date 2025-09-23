@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
-import { useLayout } from '@repo/modules/layouts'
+import { useLayout } from '@repo/modules'
 import TurnoutListItem from '@/Turnouts/TurnoutListItem.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
