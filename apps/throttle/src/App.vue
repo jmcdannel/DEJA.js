@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { useStorage } from '@vueuse/core'
+import { useRouter } from 'vue-router'
 import { AppHeader } from '@repo/ui'
 import Footer from '@/core/Footer.vue'
 import { useDcc } from '@repo/dccex'
@@ -9,6 +10,7 @@ import { useEfx } from '@repo/modules'
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
 const layoutId = useStorage('@DEJA/layoutId', '')
+const router = useRouter()
 
 // Event handlers for the unified header
 async function handleTrackPowerToggle(newState: boolean) {
@@ -40,6 +42,11 @@ function handleLayoutSelect(newLayout: string) {
   
   window.location.reload()
 }
+
+function handleLogoClick() {
+  router.push({ path: '/' })
+}
+
 </script>
 
 <template>
@@ -60,6 +67,7 @@ function handleLayoutSelect(newLayout: string) {
         @layout-power-toggle="handleLayoutPowerToggle"
         @emergency-stop="handleEmergencyStop"
         @device-select="handleDeviceSelect"
+        @logo-click="handleLogoClick"
       />
 
       <v-navigation-drawer expand-on-hover

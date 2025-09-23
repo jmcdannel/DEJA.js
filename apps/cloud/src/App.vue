@@ -69,6 +69,10 @@ function handleThemeChange(newTheme: string) {
   theme.change(newTheme)
 }
 
+function handleLogoClick() {
+  router.push({ path: '/' })
+}
+
 </script>
 <template>
   <v-responsive class="border rounded">
@@ -88,6 +92,7 @@ function handleThemeChange(newTheme: string) {
           @layout-power-toggle="handleLayoutPowerToggle"
           @emergency-stop="handleEmergencyStop"
           @device-select="handleDeviceSelect"
+          @logo-click="handleLogoClick"
         >
         </AppHeader>
       <v-navigation-drawer v-model="drawer" :mobile="mobile" mobile-breakpoint="md">

@@ -59,6 +59,10 @@ function handleLayoutSelect(newLayout: string) {
   window.location.reload()
 }
 
+function handleLogoClick() {
+  router.push({ path: '/' })
+}
+
 </script>
 <template>
   <v-responsive>
@@ -80,6 +84,7 @@ function handleLayoutSelect(newLayout: string) {
         @layout-power-toggle="handleLayoutPowerToggle"
         @emergency-stop="handleEmergencyStop"
         @device-select="handleDeviceSelect"
+        @logo-click="handleLogoClick"
       />
 
       <v-navigation-drawer expand-on-hover

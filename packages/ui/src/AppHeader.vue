@@ -31,6 +31,7 @@ const emit = defineEmits<{
   emergencyStop: []
   deviceSelect: [deviceId: string]
   layoutSelect: [layoutId: string]
+  logoClick: []
 }>()
 
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -55,6 +56,10 @@ function handleDeviceSelect(deviceId: string) {
 
 function handleLayoutSelect(layoutId: string) {
   emit('layoutSelect', layoutId)
+}
+
+function handleLogoClick() {
+  emit('logoClick')
 }
 
 const defaultProps = {
@@ -94,6 +99,7 @@ const defaultProps = {
           :app-name="appName || defaultProps.appName"
           :app-icon="appIcon || defaultProps.appIcon"
           :variant="variant || defaultProps.variant"
+          @click="handleLogoClick"
         />
       </div>
 
