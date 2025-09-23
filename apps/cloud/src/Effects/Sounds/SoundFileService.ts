@@ -13,7 +13,7 @@ export class SoundFileService {
 
   constructor() {
     // Use the Next.js API URL - change this to your deployed URL when ready
-    this.apiBaseUrl = 'http://localhost:3001/api'
+    this.apiBaseUrl = `${import.meta.env.VITE_API_BASE_URL || ''}/api`
     console.log('SoundFileService initialized with API URL:', this.apiBaseUrl)
   }
 
