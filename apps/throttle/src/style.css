@@ -20,6 +20,12 @@
   }
 }
 
+@media (max-width: 960px) {
+  :root {
+    --layout-top: 56px;
+  }
+  /* ... existing mobile styles ... */
+}
 .bg-gradient-border {
   border-radius: var(--rounded-box, 1rem);
   position: relative;

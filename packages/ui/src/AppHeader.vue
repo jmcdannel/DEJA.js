@@ -82,7 +82,9 @@ const defaultProps = {
   <v-app-bar 
     class="px-2 relative overflow-hidden header-gradient"
     :color="color || defaultProps.color" 
-    :dark="dark !== undefined ? dark : defaultProps.dark">
+    :dark="dark !== undefined ? dark : defaultProps.dark"
+    extended
+    extension-height="72">
     
     <!-- Large blurred circular backgrounds for subtle depth -->
     <div class="absolute inset-0 pointer-events-none overflow-hidden">
@@ -91,54 +93,36 @@ const defaultProps = {
       <div class="absolute w-[300px] h-[300px] rounded-full bg-violet-500/10 blur-[60px] top-[20%] left-[30%]"></div>
     </div>
     
-    <!-- Content with proper z-index -->
-    <div class="relative z-10 flex items-center w-[100%] w-full justify-between">
-      <!-- Left side - Logo and App Name -->
-      <div class="flex items-center min-w-0">
-        <Logo 
-          :app-name="appName || defaultProps.appName"
-          :app-icon="appIcon || defaultProps.appIcon"
-          :variant="variant || defaultProps.variant"
-          @click="handleLogoClick"
-        />
-      </div>
-
-      <!-- Center - Title (optional, can be overridden by slot) -->
-      <div class="flex items-center justify-center flex-1 min-w-0">
-        <slot name="title">
-        </slot>
-      </div>
-
-      <!-- Right side - Controls in consistent order -->
-      <div class="flex items-center justify-end min-w-0 header-controls">
-        <!-- Layout-specific controls - always in the same order -->
-        <template v-if="layoutId">
-          
-          <!-- Control Bar with all power controls and device status -->
-          <ControlBar
-            :show-layout-power="showLayoutPower"
-            :show-emergency-stop="showEmergencyStop"
-            :show-device-status="showDeviceStatus"
-            :show-device-status-label="showDeviceStatusLabel"
-            :device-status-compact="deviceStatusCompact"
-            :layout-power-state="layoutPowerState"
-            :devices="devices || []"
-            :layouts="layouts || []"
-            @track-power-toggle="handleTrackPowerToggle"
-            @layout-power-toggle="handleLayoutPowerToggle"
-            @emergency-stop="handleEmergencyStop"
-            @device-select="handleDeviceSelect"
-            @layout-select="handleLayoutSelect"
-          />
-        </template>
-        
+    <template v-slot:title>
+      <Logo 
+        :app-name="appName || defaultProps.appName"
+        :app-icon="appIcon || defaultProps.appIcon"
+        :variant="variant || defaultProps.variant"
+        @click="handleLogoClick"
+      />
+    </template>
+    <template v-slot:append>
         <!-- User Profile - always on the far right -->
         <UserProfile v-if="showUserProfile !== false && user" />
-        
-        <!-- Additional app-specific actions -->
-        <slot name="actions" />
-      </div>
-    </div>
+    </template>
+    <template v-if="layoutId" v-slot:extension>          
+        <!-- Control Bar with all power controls and device status -->
+        <ControlBar
+          :show-layout-power="showLayoutPower"
+          :show-emergency-stop="showEmergencyStop"
+          :show-device-status="showDeviceStatus"
+          :show-device-status-label="showDeviceStatusLabel"
+          :device-status-compact="deviceStatusCompact"
+          :layout-power-state="layoutPowerState"
+          :devices="devices || []"
+          :layouts="layouts || []"
+          @track-power-toggle="handleTrackPowerToggle"
+          @layout-power-toggle="handleLayoutPowerToggle"
+          @emergency-stop="handleEmergencyStop"
+          @device-select="handleDeviceSelect"
+          @layout-select="handleLayoutSelect"
+        />
+      </template>
   </v-app-bar>
 </template>
 

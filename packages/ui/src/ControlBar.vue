@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 import TrackPower from './TrackPower.vue'
 import Power from './Power.vue'
@@ -54,46 +54,8 @@ const emit = defineEmits<{
 }>()
 
 const layoutId = useStorage('@DEJA/layoutId', '')
-const isHovered = ref(false)
-const isPanelOpen = ref(false)
-const controlBarRef = ref<HTMLElement>()
-const panelPosition = ref({ top: 0, left: 0, width: 0 })
-
-// Auto-open panel on hover with delay
-let hoverTimeout: number | null = null
-
-// Update panel position when it opens
-function updatePanelPosition() {
-  if (controlBarRef.value) {
-    const rect = controlBarRef.value.getBoundingClientRect()
-    panelPosition.value = {
-      top: rect.bottom,
-      left: rect.left,
-      width: rect.width
-    }
-  }
-}
-
-function handleMouseEnter() {
-  isHovered.value = true
-  if (hoverTimeout) clearTimeout(hoverTimeout)
-  hoverTimeout = setTimeout(async () => {
-    if (isHovered.value) {
-      updatePanelPosition()
-      isPanelOpen.value = true
-    }
-  }, 400)
-}
-
-function handleMouseLeave() {
-  isHovered.value = false
-  if (hoverTimeout) clearTimeout(hoverTimeout)
-  setTimeout(() => {
-    if (!isHovered.value) {
-      isPanelOpen.value = false
-    }
-  }, 200)
-}
+const isLayoutModalOpen = ref(false)
+const isDeviceModalOpen = ref(false)
 
 // Event handlers
 function handleTrackPowerToggle(newState: boolean) {
@@ -115,9 +77,17 @@ function handleDeviceSelect(deviceId: string) {
 function handleLayoutSelect(newLayoutId: string) {
   layoutId.value = newLayoutId
   emit('layoutSelect', newLayoutId)
-  isPanelOpen.value = false
+  isLayoutModalOpen.value = false
   // Refresh the page when a new layout is selected
   window.location.reload()
+}
+
+function openLayoutModal() {
+  isLayoutModalOpen.value = true
+}
+
+function openDeviceModal() {
+  isDeviceModalOpen.value = true
 }
 
 const allConnected = computed(() => props.devices.every(device => device.isConnected))
@@ -132,29 +102,11 @@ const currentLayout = computed(() => {
   return props.layouts.find(l => l.id === layoutId.value) || { id: layoutId.value, name: layoutId.value }
 })
 
-// Handle window resize to update panel position
-function handleResize() {
-  if (isPanelOpen.value) {
-    updatePanelPosition()
-  }
-}
-
-onMounted(() => {
-  window.addEventListener('resize', handleResize)
-  window.addEventListener('scroll', handleResize)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
-  window.removeEventListener('scroll', handleResize)
-  if (hoverTimeout) clearTimeout(hoverTimeout)
-})
 </script>
 
 <template>
   <div class="control-bar-container">
-    <div ref="controlBarRef" class="control-bar" :class="{ 'panel-open': isPanelOpen, 'hovered': isHovered }"
-      @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
+    <div class="control-bar">
       <!-- Status Indicators Section -->
       <div class="status-section">
         <template v-if="loading">
@@ -175,8 +127,8 @@ onUnmounted(() => {
 
         <template v-else>
           <!-- Layout Status -->
-          <v-chip size="small" class="status-chip" prepend-icon="mdi-home" :color="layoutId ? 'success' : 'error'"
-            variant="elevated">
+          <v-chip size="small" class="status-chip clickable-chip" prepend-icon="mdi-home" :color="layoutId ? 'success' : 'error'"
+            variant="elevated" @click="openLayoutModal">
             <template #append>
               <span v-if="layoutId" class="status-dot success-dot"></span>
               <span v-else class="status-dot error-dot"></span>
@@ -185,8 +137,8 @@ onUnmounted(() => {
           </v-chip>
 
           <!-- Device Status -->
-          <v-chip v-if="showDeviceStatus && hasDevices" size="small" class="status-chip" prepend-icon="mdi-devices"
-            :color="allConnected ? 'success' : 'warning'" variant="elevated">
+          <v-chip v-if="showDeviceStatus && hasDevices" size="small" class="status-chip clickable-chip" prepend-icon="mdi-devices"
+            :color="allConnected ? 'success' : 'warning'" variant="elevated" @click="openDeviceModal">
             <template #append>
               <span v-if="allConnected" class="status-dot success-dot"></span>
               <span v-else class="status-dot warning-dot"></span>
@@ -230,116 +182,99 @@ onUnmounted(() => {
         </template>
       </div>
 
-      <!-- Hover indicator -->
-      <div class="hover-indicator"></div>
     </div>
 
-    <!-- Teleported Dropdown Panel -->
-    <Teleport to="body">
-      <Transition name="panel">
-        <div v-if="isPanelOpen" class="dropdown-panel-overlay" :style="{
-          top: `${panelPosition.top}px`,
-          left: `${panelPosition.left}px`,
-          width: `${Math.max(panelPosition.width, 400)}px`
-        }" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
-          <div class="panel-content">
-            <!-- Layouts Section -->
-            <div v-if="layouts.length > 0" class="panel-section">
-              <h3 class="section-title">
-                <v-icon class="section-icon">mdi-home</v-icon>
-                Layouts
-              </h3>
-              <div class="items-grid">
-                <div v-for="layout in layouts" :key="layout.id" class="panel-item"
-                  :class="{ 'active': layout.id === layoutId }" @click="handleLayoutSelect(layout.id)">
-                  <div class="item-header">
-                    <v-icon class="item-icon" :color="layout.id === layoutId ? 'success' : 'grey'">
-                      mdi-home
-                    </v-icon>
-                    <span class="item-name">{{ layout.name }}</span>
-                    <v-icon v-if="layout.id === layoutId" class="active-indicator" color="success">
-                      mdi-check-circle
-                    </v-icon>
-                  </div>
-                  <p v-if="layout.description" class="item-description">
-                    {{ layout.description }}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div v-else class="panel-section empty-state">
-              <div class="empty-content">
-                <div class="empty-icon">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <line x1="9" y1="9" x2="15" y2="15"/>
-                    <line x1="15" y1="9" x2="9" y2="15"/>
-                  </svg>
-                </div>
-                <h3 class="empty-title">No Layouts Available</h3>
-                <p class="empty-description">
-                  There are currently no layouts configured.
-                </p>
-              </div>
-            </div>
-
-            <!-- Devices Section -->
-            <div v-if="hasDevices" class="panel-section">
-              <h3 class="section-title">
-                <v-icon class="section-icon">mdi-devices</v-icon>
-                Devices
-              </h3>
-              <div class="items-grid">
-                <div v-for="device in devices" :key="device.id" class="panel-item"
-                  :class="{ 'connected': device.isConnected, 'disconnected': !device.isConnected }"
-                  @click="handleDeviceSelect(device.id)">
-                  <div class="item-header">
-                    <v-icon class="item-icon" :color="device.isConnected ? 'success' : 'error'">
-                      {{ device.type === 'dcc-ex' ? 'mdi-memory' : device.type === 'wifi' ? 'mdi-wifi' : 'mdi-bluetooth' }}
-                    </v-icon>
-                    <span class="item-name">{{ device.id }}</span>
-                    <div class="connection-status">
-                      <span class="status-dot" :class="device.isConnected ? 'success-dot' : 'error-dot'"></span>
-                    </div>
-                  </div>
-                  <div class="item-details">
-                    <span class="detail-item">{{ device.connection }}</span>
-                    <span v-if="device.port" class="detail-item">{{ device.port }}</span>
-                    <span v-if="device.topic" class="detail-item">{{ device.topic }}</span>
+    <!-- Layout Selection Modal -->
+    <v-dialog v-model="isLayoutModalOpen" max-width="600px">
+      <v-card>
+        <v-card-title class="flex items-center gap-2">
+          <v-icon>mdi-home</v-icon>
+          Select Layout
+        </v-card-title>
+        <v-card-text>
+          <div v-if="layouts.length > 0" class="space-y-3">
+            <div v-for="layout in layouts" :key="layout.id" 
+              class="p-4 rounded-lg border cursor-pointer transition-all hover:bg-gray-50"
+              :class="{ 'border-green-500 bg-green-50': layout.id === layoutId, 'border-gray-200': layout.id !== layoutId }"
+              @click="handleLayoutSelect(layout.id)">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <v-icon :color="layout.id === layoutId ? 'success' : 'grey'">mdi-home</v-icon>
+                  <div>
+                    <h4 class="font-medium">{{ layout.name }}</h4>
+                    <p v-if="layout.description" class="text-sm text-gray-600">{{ layout.description }}</p>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="panel-section">
-              <h3 class="section-title">
-                <v-icon class="section-icon">mdi-lightning-bolt</v-icon>
-                Quick Actions
-              </h3>
-              <div class="quick-actions">
-                <v-btn variant="outlined" size="small" prepend-icon="mdi-refresh" class="quick-action-btn">
-                  Refresh
-                </v-btn>
-                <v-btn variant="outlined" size="small" prepend-icon="mdi-cog" class="quick-action-btn">
-                  Settings
-                </v-btn>
-                <v-btn variant="outlined" size="small" prepend-icon="mdi-information" class="quick-action-btn">
-                  System Info
-                </v-btn>
+                <v-icon v-if="layout.id === layoutId" color="success">mdi-check-circle</v-icon>
               </div>
             </div>
           </div>
-        </div>
-      </Transition>
-    </Teleport>
+          <div v-else class="text-center py-8">
+            <v-icon size="48" color="grey">mdi-home-outline</v-icon>
+            <h3 class="text-lg font-medium text-gray-900 mt-2">No Layouts Available</h3>
+            <p class="text-gray-600">There are currently no layouts configured.</p>
+          </div>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn variant="text" @click="isLayoutModalOpen = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Device Selection Modal -->
+    <v-dialog v-model="isDeviceModalOpen" max-width="600px">
+      <v-card>
+        <v-card-title class="flex items-center gap-2">
+          <v-icon>mdi-devices</v-icon>
+          Device Status
+        </v-card-title>
+        <v-card-text>
+          <div v-if="hasDevices" class="space-y-3">
+            <div v-for="device in devices" :key="device.id" 
+              class="p-4 rounded-lg border cursor-pointer transition-all hover:bg-gray-50"
+              :class="{ 'border-green-500 bg-green-50': device.isConnected, 'border-red-500 bg-red-50': !device.isConnected }"
+              @click="handleDeviceSelect(device.id)">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <v-icon :color="device.isConnected ? 'success' : 'error'">
+                    {{ device.type === 'dcc-ex' ? 'mdi-memory' : device.type === 'wifi' ? 'mdi-wifi' : 'mdi-bluetooth' }}
+                  </v-icon>
+                  <div>
+                    <h4 class="font-medium">{{ device.id }}</h4>
+                    <div class="flex gap-2 text-sm text-gray-600">
+                      <span>{{ device.connection }}</span>
+                      <span v-if="device.port">{{ device.port }}</span>
+                      <span v-if="device.topic">{{ device.topic }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="status-dot" :class="device.isConnected ? 'success-dot' : 'error-dot'"></span>
+                  <span class="text-sm font-medium" :class="device.isConnected ? 'text-green-600' : 'text-red-600'">
+                    {{ device.isConnected ? 'Connected' : 'Disconnected' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-center py-8">
+            <v-icon size="48" color="grey">mdi-devices-outline</v-icon>
+            <h3 class="text-lg font-medium text-gray-900 mt-2">No Devices Available</h3>
+            <p class="text-gray-600">There are currently no devices configured.</p>
+          </div>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn variant="text" @click="isDeviceModalOpen = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <style scoped>
 .control-bar-container {
   @apply relative;
-  margin: 8px;
+  margin: 0 8px;
 }
 
 .control-bar {
@@ -357,20 +292,6 @@ onUnmounted(() => {
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-.control-bar.hovered {
-  transform: translateY(-2px);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.2),
-    0 4px 8px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.25);
-}
-
-.control-bar.panel-open {
-  background: rgba(15, 23, 42, 0.9);
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
-}
 
 .status-section,
 .power-section {
@@ -389,26 +310,6 @@ onUnmounted(() => {
   margin: 0 4px;
 }
 
-.hover-indicator {
-  position: absolute;
-  bottom: -2px;
-  left: 50%;
-  transform: translateX(-50%) scaleX(0);
-  width: 60%;
-  height: 2px;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(139, 92, 246, 0.6) 20%,
-      rgba(59, 130, 246, 0.8) 50%,
-      rgba(139, 92, 246, 0.6) 80%,
-      transparent);
-  border-radius: 1px;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.control-bar.hovered .hover-indicator {
-  transform: translateX(-50%) scaleX(1);
-}
 
 /* Status chips styling */
 .status-chip {
@@ -420,6 +321,16 @@ onUnmounted(() => {
 }
 
 .status-chip:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.clickable-chip {
+  cursor: pointer;
+}
+
+.clickable-chip:hover {
   transform: translateY(-1px);
   background: rgba(255, 255, 255, 0.12) !important;
   border-color: rgba(255, 255, 255, 0.25);
@@ -477,125 +388,6 @@ onUnmounted(() => {
   }
 }
 
-/* Teleported Dropdown Panel */
-.dropdown-panel-overlay {
-  position: fixed;
-  z-index: 9999;
-  background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 0 0 16px 16px;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    0 4px 16px rgba(0, 0, 0, 0.2);
-  max-height: 400px;
-  overflow-y: auto;
-  min-width: 400px;
-}
-
-.panel-content {
-  @apply p-4;
-}
-
-.panel-section {
-  @apply mb-6 last:mb-0;
-}
-
-.section-title {
-  @apply flex items-center text-sm font-semibold text-gray-200 mb-3;
-  gap: 8px;
-}
-
-.section-icon {
-  @apply text-base;
-}
-
-.items-grid {
-  @apply grid gap-2;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-}
-
-.panel-item {
-  @apply p-3 rounded-lg cursor-pointer transition-all duration-200;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.panel-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
-}
-
-.panel-item.active {
-  background: rgba(34, 197, 94, 0.1);
-  border-color: rgba(34, 197, 94, 0.3);
-}
-
-.panel-item.connected {
-  border-left: 3px solid #22c55e;
-}
-
-.panel-item.disconnected {
-  border-left: 3px solid #ef4444;
-}
-
-.item-header {
-  @apply flex items-center justify-between mb-1;
-}
-
-.item-icon {
-  @apply text-lg mr-2;
-}
-
-.item-name {
-  @apply font-medium text-white flex-1;
-}
-
-.active-indicator {
-  @apply text-sm;
-}
-
-.connection-status {
-  @apply flex items-center;
-}
-
-.item-description {
-  @apply text-xs text-gray-400 mt-1;
-}
-
-.item-details {
-  @apply flex flex-wrap gap-2 mt-2;
-}
-
-.detail-item {
-  @apply text-xs px-2 py-1 rounded bg-gray-700 text-gray-300;
-}
-
-.quick-actions {
-  @apply flex gap-2 flex-wrap;
-}
-
-.quick-action-btn {
-  @apply text-xs;
-  min-width: auto;
-}
-
-/* Panel transitions */
-.panel-enter-active,
-.panel-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.panel-enter-from {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-.panel-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
 
 /* Enhanced button styling within the control bar */
 :deep(.v-btn) {
@@ -624,6 +416,10 @@ onUnmounted(() => {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  :root {
+    --layout-top: 60px;
+  }
+  
   .control-bar {
     padding: 4px 8px;
     gap: 6px;
@@ -633,45 +429,12 @@ onUnmounted(() => {
   .power-section {
     gap: 4px;
   }
-
-  .items-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .dropdown-panel-overlay {
-    max-height: 300px;
-    min-width: 300px;
-  }
 }
 
 /* Focus states for accessibility */
 .control-bar:focus-within {
   outline: 2px solid rgba(59, 130, 246, 0.5);
   outline-offset: 2px;
-}
-
-.panel-item:focus-visible {
-  outline: 2px solid rgba(59, 130, 246, 0.8);
-  outline-offset: 2px;
-}
-
-/* Scrollbar styling for the panel */
-.dropdown-panel-overlay::-webkit-scrollbar {
-  width: 6px;
-}
-
-.dropdown-panel-overlay::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-.dropdown-panel-overlay::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 3px;
-}
-
-.dropdown-panel-overlay::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
 }
 
 /* Skeleton Loading Styles */
@@ -756,36 +519,6 @@ onUnmounted(() => {
   animation: skeleton-pulse 2s ease-in-out infinite;
 }
 
-.empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-  padding: 2rem;
-}
-
-.empty-content {
-  text-align: center;
-  max-width: 300px;
-}
-
-.empty-icon {
-  color: #9ca3af;
-  margin-bottom: 1rem;
-}
-
-.empty-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0.5rem;
-}
-
-.empty-description {
-  color: #6b7280;
-  margin-bottom: 1.5rem;
-  line-height: 1.5;
-}
 
 
 </style>
