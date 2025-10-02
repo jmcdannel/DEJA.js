@@ -109,6 +109,14 @@ const quickStartSteps = [
                     :color="layoutId ? 'success' : 'warning'"
                   ></v-icon>
                 </template>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </div>
+</template>
 
 <style scoped>
 .tour-card {
