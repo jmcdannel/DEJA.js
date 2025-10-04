@@ -128,7 +128,7 @@ async function handelAutoConnect (checked: boolean | null) {
         variant="outlined"
         item-title="label"
         density="compact"
-        :items="ports"
+        :items="ports || []"
         :disabled="device?.isConnected"
       ></v-combobox>
 

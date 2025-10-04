@@ -7,8 +7,8 @@ import baseConfig from "./base.js";
 import jsxA11yConfig from "./rules/jsx-a11y.js";
 import reactConfig from "./rules/react.js";
 
-/** @type {import('eslint').Linter.Config} */
-export default [
+/** @type {import('eslint').Linter.FlatConfig[]} */
+const config = [
   ...baseConfig,
   {
     files: ["**/*.{js,jsx,mjs,cjs,ts,tsx}"],
@@ -38,3 +38,5 @@ export default [
   jsxA11yConfig,
   reactConfig,
 ];
+
+export default config;

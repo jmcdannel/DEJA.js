@@ -24,11 +24,7 @@ const layoutsQuery = computed(() => {
 })
 
 // Use the computed query, but only when it's not null
-const layouts = useCollection(layoutsQuery, { 
-  ssrKey: 'layouts',
-  // Only run the query when we have a valid query
-  wait: computed(() => !layoutsQuery.value)
-})
+const layouts = useCollection(layoutsQuery)
 
 async function handleLayoutSelect(newLayout: string) {
   emit('selected', newLayout)
