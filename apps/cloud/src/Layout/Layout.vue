@@ -56,6 +56,6 @@ const showAdd = ref(false)
       </v-card-text>
     </v-card>
   </div>
-  <ViewJson :json="layout" label="RAW Layout Data"></ViewJson>
-  <ViewJson :json="devices" label="RAW Device Data"></ViewJson>
+  <!-- <ViewJson :json="JSON.parse(layout)" label="RAW Layout Data"></ViewJson>
+  <ViewJson :json="JSON.parse(devices)" label="RAW Device Data"></ViewJson> -->
 </template>

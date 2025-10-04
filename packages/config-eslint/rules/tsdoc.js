@@ -1,7 +1,7 @@
 import eslintPluginTsdoc from "eslint-plugin-tsdoc";
 
-/** @type {import('eslint').Linter.Config} */
-export default {
+/** @type {import('eslint').Linter.FlatConfig} */
+const config = {
   plugins: {
     tsdoc: eslintPluginTsdoc,
   },
@@ -14,3 +14,5 @@ export default {
     "tsdoc/syntax": "off",
   },
 };
+
+export default config;

@@ -20,8 +20,8 @@ const compat = new FlatCompat({
   baseDirectory: import.meta.dirname,
 });
 
-/** @type {import('eslint').Linter.Config[]} */
-export default [
+/** @type {import('eslint').Linter.FlatConfig[]} */
+const config = [
   // Apply the compat layers
   ...compat.config({
     extends: ["next", "next/core-web-vitals"],
@@ -59,3 +59,5 @@ export default [
     },
   },
 ];
+
+export default config;

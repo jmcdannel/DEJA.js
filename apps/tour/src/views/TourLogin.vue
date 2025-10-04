@@ -210,6 +210,16 @@ onMounted(async () => {
                         title="Generate random username"
                       ></v-btn>
                     </template>
+                  </v-select>
+              </v-card>
+            </div>
+          </v-card-text>
+        </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
+</template>
 
 <style scoped>
 .login-container {

@@ -43,7 +43,8 @@ const tsCombinedConfig = {
 };
 
 // Merge configurations
-export default [
+/** @type {import('eslint').Linter.FlatConfig[]} */
+const config = [
   ...tseslint.config(
     eslint.configs.recommended,
     tseslint.configs.recommended,
@@ -88,3 +89,5 @@ export default [
     ignores: ["node_modules/**", "dist/**"],
   },
 ];
+
+export default config;

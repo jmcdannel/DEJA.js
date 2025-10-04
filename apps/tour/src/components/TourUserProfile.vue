@@ -114,6 +114,8 @@ const watchDialog = computed(() => {
         </v-avatar>
       </v-btn>
     </template>
+  </v-menu>
+</template>
 
 <style scoped>
 </style>

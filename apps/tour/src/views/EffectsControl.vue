@@ -124,6 +124,14 @@ const filterEffects = () => {
                     @click="tourStore.deactivateEffect(effect.id)"
                   ></v-btn>
                 </template>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </div>
+</template>
 
 <style scoped>
 </style>

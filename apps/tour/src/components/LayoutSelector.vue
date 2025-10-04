@@ -52,10 +52,8 @@ onMounted(() => {
         Select Layout
       </v-card-title>
       <v-card-text>
-        <p class="mb-4">Choose a layout to start the tour experience:</p>
-        
+        <p class="mb-4">Choose a layout to start the tour experience:</p>        
         <v-progress-circular v-if="!layouts" indeterminate class="mb-4"></v-progress-circular>
-        
         <v-list v-else-if="layouts.length > 0">
           <v-list-item
             v-for="layout in layouts"
@@ -66,6 +64,12 @@ onMounted(() => {
             <template #prepend>
               <v-icon icon="mdi-train" color="primary"></v-icon>
             </template>
+          </v-list-item>
+        </v-list>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
+</template>
 
 <style scoped>
 .v-list-item {
