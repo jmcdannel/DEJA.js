@@ -1,41 +1,38 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useStorage } from '@vueuse/core'
+import { useRouter } from 'vue-router'
 import type { Turnout } from '@repo/modules/turnouts'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import TurnoutsList from '@/Turnouts/TurnoutsList.vue'
 import TurnoutSorter from '@/Turnouts/TurnoutSorter.vue'
-import TurnoutForm from '@/Turnouts/TurnoutForm.vue'
 import Addtile from '@/Core/UI/AddTile.vue'
 
 const VIEW_OPTIONS = [
   { title: 'Card', value: 'card' },
   { title: 'By Device', value: 'device' },
 ]
-const showForm = ref(false)
 const showSorter = ref(false)
 const showViewMenu = ref(false)
 const showFilters = ref(false)
 const viewAs = useStorage('@DEJA/prefs/turnoutsView', 'card')
-const editTurnout = ref<Turnout | null>(null)
+const router = useRouter()
 
-function handleEdit(turnout: Turnout | null) {
-  console.log('handleEdit', turnout)
-  editTurnout.value = turnout ? { ...turnout, id: turnout.id } : null
-  showForm.value = true
+function handleEdit(turnout: Turnout) {
+  router.push({ name: 'Edit Turnout', params: { turnoutId: turnout.id } })
 }
-function handleClose() {
-  showForm.value = false
-  editTurnout.value = null
+
+function handleAdd() {
+  router.push({ name: 'Add Turnout' })
 }
 
 </script>
 <template>
   <ModuleTitle menu="Turnouts" />
 
-  <v-toolbar 
-    class="bg-clip-text bg-gradient-to-r from-purple-300 to-pink-600"  
-    color="purple" 
+  <v-toolbar
+    class="bg-clip-text bg-gradient-to-r from-purple-300 to-pink-600"
+    color="purple"
     variant="tonal"
   >
     <v-toolbar-title class="text-3xl text-yellow-400">Turnouts</v-toolbar-title>
@@ -52,15 +49,14 @@ function handleClose() {
       </v-list>
     </v-card>
   </v-dialog>
-  
+
   <v-dialog v-model="showSorter" max-width="80vw">
     <TurnoutSorter @close="showSorter = false" />
   </v-dialog>
   <v-divider class="my-2" />
-  <TurnoutForm v-if="showForm" v-show="showForm" @close="handleClose" :turnout="editTurnout" />
-  <TurnoutsList v-else @edit="handleEdit" :viewAs="viewAs">
+  <TurnoutsList @edit="handleEdit" :viewAs="viewAs">
     <template #prepend>
-      <Addtile @click="showForm = true" color="yellow" />
+      <Addtile @click="handleAdd" color="yellow" />
     </template>
   </TurnoutsList>
 </template>
