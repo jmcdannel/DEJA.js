@@ -29,13 +29,21 @@ const logoComponent = computed(() => {
 </script>
 
 <template>
-  <div class="flex items-center logo-container">
-    <img 
+  <div class="flex items-start">
+    <!-- <img 
       :src="logoComponent" 
       :alt="`${appName} Logo`" 
       class="w-10 h-10 drop-shadow-sm" 
+    /> -->
+    <v-icon
+      v-if="appIcon"
+      :icon="appIcon"
+      size="32"
+      style="filter: drop-shadow(1px 1px 0 #fff2);"
     />
-    <span class="ml-2 text-xl font-bold drop-shadow-sm">
+    <span
+      class="ml-2 font-bold drop-shadow-sm hidden sm:inline text-xl lg:text-2xl"
+    >
       {{ appName }}
     </span>
   </div>
