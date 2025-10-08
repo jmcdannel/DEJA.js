@@ -124,19 +124,6 @@ const defaultProps = {
         <UserProfile v-if="showUserProfile !== false && user" />
     </template>
   </v-app-bar>
-  <!-- <ControlBar v-if="layoutId"
-    :show-layout-power="showLayoutPower"
-    :show-emergency-stop="showEmergencyStop"
-    :show-device-status="showDeviceStatus"
-    :show-device-status-label="showDeviceStatusLabel"
-    :device-status-compact="deviceStatusCompact"
-    :layout-power-state="layoutPowerState"
-    @track-power-toggle="handleTrackPowerToggle"
-    @layout-power-toggle="handleLayoutPowerToggle"
-    @emergency-stop="handleEmergencyStop"
-    @device-select="handleDeviceSelect"
-    @layout-select="handleLayoutSelect"
-  /> -->
   <v-app-bar class="px-2 relative overflow-hidden">
     <template v-slot:prepend>
       <v-row>
