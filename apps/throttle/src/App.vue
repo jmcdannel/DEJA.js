@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { RouterView } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
+import { useCurrentUser } from 'vuefire'
 import { AppHeader } from '@repo/ui'
 import Footer from '@/core/Footer.vue'
 import { useDcc } from '@repo/dccex'
@@ -9,8 +11,10 @@ import { useEfx } from '@repo/modules'
 
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
-const layoutId = useStorage('@DEJA/layoutId', '')
+const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+const user = useCurrentUser()
 const router = useRouter()
+const showFooter = ref(!!user.value && !!layoutId.value)
 
 // Event handlers for the unified header
 async function handleTrackPowerToggle(newState: boolean) {
@@ -69,46 +73,12 @@ function handleLogoClick() {
         @device-select="handleDeviceSelect"
         @logo-click="handleLogoClick"
       />
-
-      <v-navigation-drawer expand-on-hover
-        rail>
-        <v-list>
-          
-        </v-list>
-        <v-divider />
-        <v-list>
-          <v-list-item @click="handleLayoutSelect('betatrack')">
-            <template #prepend>
-              <v-avatar size="32" color="primary">BT</v-avatar>
-            </template>
-            <v-list-item-title>Betatrack</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="handleLayoutSelect('tam')">
-            <template #prepend>
-              <v-avatar size="32" color="primary">TJ</v-avatar>
-            </template>
-            <v-list-item-title>Tamarack Junction</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="handleLayoutSelect('shef')">
-            <template #prepend>
-              <v-avatar size="32" color="primary">HO</v-avatar>
-            </template>
-            <v-list-item-title>HO Clockwork Shelf</v-list-item-title>
-          </v-list-item>
-        </v-list>
-        <v-divider />
-        <v-list>
-          <v-list-item prepend-icon="mdi-logout">
-            <v-list-item-title>Logout</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-navigation-drawer>
       <v-main>
         <v-container class="p-0 min-h-full flex flex-col" fluid>
           <RouterView />
         </v-container>
       </v-main>
-      <Footer />
+      <Footer v-if="showFooter" />
     </v-app>
   </v-responsive>
 </template>
