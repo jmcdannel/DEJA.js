@@ -49,3 +49,4 @@ packages/sounds/archive/
 temp-sounds-cache/
 **/temp-sounds-cache/
 packages/sounds/assets/
+.idea/
