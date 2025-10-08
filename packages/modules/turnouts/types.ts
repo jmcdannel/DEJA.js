@@ -11,6 +11,7 @@ export interface Turnout {
   state: boolean
   straight?: number
   tags?: Array<string>
+  timestamp?: number
   turnoutIdx?: number
   type: string
 }

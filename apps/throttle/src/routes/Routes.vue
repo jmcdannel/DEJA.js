@@ -1,26 +1,25 @@
 <script setup lang="ts">
 // @ts-nocheck
 import { ref, watch }  from 'vue'
-import { useLayoutRoutes } from './useLayoutRoutes'
+import { useLayoutRoutes } from '@repo/modules'
+import { useLayoutRoutesMap } from './useLayoutRoutesMap'
 import TamarackJunction from './maps/tam/TamarackJunction.vue'
 import PayetteSub from './maps/tam/PayetteSub.vue'
 import './route-styles.css'
 
 const activeMap = ref('PayetteSub')
 
+const { runRoute, isRunning, percentComplete } = useLayoutRoutes()
 const { 
   clearP1,
   clearP2,
   getMapClasses,
   handleMapClick,
-  isRunning,
-  percentComplete,
   p1,
   p2,
   routes,
-  routeTurnouts,
-  runRoute
-} = useLayoutRoutes()
+  routeTurnouts
+} = useLayoutRoutesMap()
 
 </script>
 <template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useTurnouts, useEfx, type Turnout, type Effect, type MacroItem } from '@repo/modules'
+import { useTurnouts, type Turnout, type Effect, type MacroItem } from '@repo/modules'
 import TurnoutAdd from '@/Routes/TurnoutAdd.vue'
 
 const emit = defineEmits(['change'])
@@ -12,7 +12,6 @@ const ondialog = ref(false)
 const onChips = ref(props.on || [])
 
 const { setTurnout } = useTurnouts()
-const { runEffect } = useEfx()
 
 function handleOnUpdate(e: Array<string> | undefined) {
   console.log('handleOnUpdate', onChips.value)
@@ -62,24 +61,6 @@ function handleChipClick(chip: MacroItem) {
   }
 }
 
-async function handleRoute(state: boolean) {
-  console.log('handleRoute', state)
-
-  for (let i = 0; i < onChips.value.length; i++) {
-    const chip = onChips.value[i] as MacroItem;
-    if (chip.type === 'turnout') {
-      const turnout: Turnout = {
-        id: chip.id?.toString() || '',
-        name: chip.name || '',
-        device: chip.device || '',
-        type: chip.type || '',
-        state: state ? (chip.state || false) : !(chip.state || false)
-      }
-      setTurnout(turnout.id, { ...turnout, state: chip.state || false })
-    }
-  }
-}
-
 </script>
 <template>
   <v-card title="TURNOUTS" color="green" variant="tonal">
@@ -123,13 +104,6 @@ async function handleRoute(state: boolean) {
       </v-chip-group>
     </v-card-text>
   </v-card>
-
-<v-sheet>
-  <v-btn text="Turn Route ON" @click="handleRoute(true)">
-    <v-icon left>mdi-rocket-launch</v-icon>
-    Turn Route ON
-  </v-btn>
-</v-sheet>
 
   <v-dialog
     v-model="ondialog"
