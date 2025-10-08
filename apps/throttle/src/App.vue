@@ -14,7 +14,8 @@ const { runEffect, getEffectsByType } = useEfx()
 const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 const user = useCurrentUser()
 const router = useRouter()
-const showFooter = ref(!!user.value && !!layoutId.value)
+console.log('Current user:', user)
+console.log('Current layoutId:', layoutId.value)
 
 // Event handlers for the unified header
 async function handleTrackPowerToggle(newState: boolean) {
@@ -78,7 +79,7 @@ function handleLogoClick() {
           <RouterView />
         </v-container>
       </v-main>
-      <Footer v-if="showFooter" />
+      <Footer v-if="Boolean(user) && Boolean(layoutId)" />
     </v-app>
   </v-responsive>
 </template>

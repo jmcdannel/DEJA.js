@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useEfx, efxTypes, type Effect, type MacroItem } from '@repo/modules'
+import { useEfx, efxTypes, useLayoutRoutes, type Effect, type MacroItem } from '@repo/modules'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import RouteTurnoutForm from '@/Routes/RouteTurnoutForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
@@ -19,6 +19,7 @@ const props = defineProps<{
 const emit = defineEmits(['close'])
 
 const { setEfx, getEfxType } = useEfx()
+const { runRoute } = useLayoutRoutes()
 
 const editColor = ref(false)
 
@@ -112,10 +113,18 @@ function handleMacro({on , off}: {on: string[], off: string[]}) {
       </div>
     </div>
 
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
 
     <RouteTurnoutForm @change="handleMacro" :on="macroOn" :off="macroOff"></RouteTurnoutForm>
 
+
+    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+    <v-sheet>
+      <v-btn text="Turn Route ON" @click="runRoute(efx)">
+        <v-icon left>mdi-rocket-launch</v-icon>
+        Run Route
+      </v-btn>
+    </v-sheet>
+    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
     <!-- color -->
     <section class="h-auto  my-4">
       <v-btn

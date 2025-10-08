@@ -1,17 +1,18 @@
 import { computed, ref, watch } from 'vue'
 import { useCollection } from 'vuefire'
-import { useEfx, useTurnouts, type Effect } from '@repo/modules'
+import { useEfx, useTurnouts, useLayoutRoutes, type Effect } from '@repo/modules'
 
-export const useLayoutRoutes = () => {
+const DELAY = 2000 // ms delay between turnouts being set in a route
+
+export const useLayoutRoutesMap = () => {
   const clickableContainers = ['Routes', 'Turnouts', 'TurnoutLabels']
 
   const p1 = ref<string | null>(null)
   const p2 = ref<string | null>(null)
-  const isRunning = ref(false)
-  const percentComplete = ref(0)
 
   const { getTurnout, getTurnouts, switchTurnout } = useTurnouts()
-  const { getEffectsByType, runEffect, getEffect } = useEfx()
+  const { getEffectsByType } = useEfx()
+  const { runRoute } = useLayoutRoutes()
   const list = useCollection(getEffectsByType('route'), { ssrKey: 'routes' })
   const turnouts = getTurnouts()
   const routeTurnouts = ref<any[]>([])
@@ -29,28 +30,13 @@ export const useLayoutRoutes = () => {
           (r.point1 === newP2 && r.point2 === newP1)
       )
       if (route) {
-        isRunning.value = true
-        percentComplete.value = 0
-        routeTurnouts.value = [...(route.on || []), ...(route.off || [])]
-        runEffect({ ...route, id: route.id, state: true, type: route.type })
-        const steps = (route?.on?.length || 0) + (route?.off?.length || 0)
-        console.log('Route found:', steps, route)
-
-        const interval = setInterval(() => {
-          if (percentComplete.value < 100) {
-            percentComplete.value += 100 / steps
-            console.log('Percent complete:', percentComplete.value)
-          }
-        }, 1000)
-
-        // Clear the interval after the effect is done
+        routeTurnouts.value = [...(route.on || [])]
+        await runRoute(route as Effect)   
         setTimeout(() => {
-          clearInterval(interval)
-          percentComplete.value = 0
           p1.value = null
           p2.value = null
-          isRunning.value = false
-        }, steps * 1000 + 500)
+          routeTurnouts.value = []
+        }, routeTurnouts.value.length * DELAY + 500)
       } else {
         console.log('No route found between', newP1, 'and', newP2, routes.value)
       }
@@ -157,7 +143,7 @@ export const useLayoutRoutes = () => {
       if (routeId) {
         const route = routes.value?.find((r) => r.id === routeId)
         if (route) {
-          await runRoute(route as Effect)
+          // await runRoute(route as Effect)
         }
       }
     }
@@ -192,29 +178,29 @@ export const useLayoutRoutes = () => {
     }
   }
 
-  async function runRoute(route: Effect): Promise<void> {
-    if (!route.id) return
+  // async function runRoute(route: Effect): Promise<void> {
+    // if (!route.id) return
 
-    isRunning.value = true
-    percentComplete.value = 0
+    // isRunning.value = true
+    // percentComplete.value = 0
 
-    const steps = (route?.on?.length || 0) + (route?.off?.length || 0)
-    console.log('Running route:', steps, route)
+    // const steps = (route?.on?.length || 0) + (route?.off?.length || 0)
+    // console.log('Running route:', steps, route)
 
-    await runEffect({ ...route, state: true, type: route.type })
+    // await runEffect({ ...route, state: true, type: route.type })
 
-    const interval = setInterval(() => {
-      if (percentComplete.value < 100) {
-        percentComplete.value += 100 / steps
-      }
-    }, 1000)
+    // const interval = setInterval(() => {
+    //   if (percentComplete.value < 100) {
+    //     percentComplete.value += 100 / steps
+    //   }
+    // }, 1000)
 
-    setTimeout(() => {
-      clearInterval(interval)
-      percentComplete.value = 0
-      isRunning.value = false
-    }, steps * 1000 + 500)
-  }
+    // setTimeout(() => {
+    //   clearInterval(interval)
+    //   percentComplete.value = 0
+    //   isRunning.value = false
+    // }, steps * 1000 + 500)
+  // }
 
   function clearP1() {
     p1.value = null
@@ -227,8 +213,6 @@ export const useLayoutRoutes = () => {
   return {
     p1,
     p2,
-    isRunning,
-    percentComplete,
     routes,
     routeTurnouts,
     getMapClasses,
