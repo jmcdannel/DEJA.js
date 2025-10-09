@@ -86,7 +86,7 @@ const dccexConnected = computed(() => {
 })
 
 const currentLayout = computed(() => {
-  return layouts.value.find(l => l.id === layoutId.value) || { id: layoutId.value, name: layoutId.value }
+  return layouts?.value.find(l => l.id === layoutId.value) || { id: layoutId.value, name: layoutId.value }
 })
 
 const defaultProps = {
@@ -176,7 +176,7 @@ const defaultProps = {
           Select Layout
         </v-card-title>
         <v-card-text>
-          <div v-if="layouts.length > 0" class="space-y-3">
+          <div v-if="layouts && layouts.length > 0" class="space-y-3">
             <div v-for="layout in layouts" :key="layout.id" 
               class="p-4 rounded-lg border cursor-pointer transition-all hover:bg-gray-50"
               :class="{ 'border-green-500 bg-green-50': layout.id === layoutId, 'border-gray-200': layout.id !== layoutId }"
@@ -221,7 +221,7 @@ const defaultProps = {
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <v-icon :color="device.isConnected ? 'success' : 'error'">
-                    {{ device.type === 'dcc-ex' ? 'mdi-memory' : device.type === 'wifi' ? 'mdi-wifi' : 'mdi-bluetooth' }}
+                    {{ device.type === 'dcc-ex' || device.connection === 'usb' ? 'mdi-memory' : device.connection === 'wifi' ? 'mdi-wifi' : 'mdi-bluetooth' }}
                   </v-icon>
                   <div>
                     <h4 class="font-medium">{{ device.id }}</h4>
