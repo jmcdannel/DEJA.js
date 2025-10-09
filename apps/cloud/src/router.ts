@@ -40,6 +40,18 @@ const router = createRouter({
       component: () => import('./Effects/Effects.vue'),
       beforeEnter: [requireAuth, requireLayout],
     },
+    {
+      path: '/effects/new',
+      name: 'Add Effect',
+      component: () => import('./Effects/AddEffect.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
+      path: '/effects/:effectId',
+      name: 'Edit Effect',
+      component: () => import('./Effects/EditEffect.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
 
 
 
@@ -50,15 +62,51 @@ const router = createRouter({
       beforeEnter: [requireAuth, requireLayout],
     },
     {
+      path: '/routes/new',
+      name: 'Add Route',
+      component: () => import('./Routes/AddRoute.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
+      path: '/routes/:routeId',
+      name: 'Edit Route',
+      component: () => import('./Routes/EditRoute.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
       path: '/signals',
       name: 'Signals',
       component: () => import('./Signals/Signals.vue'),
       beforeEnter: [requireAuth, requireLayout],
     },
     {
+      path: '/signals/new',
+      name: 'Add Signal',
+      component: () => import('./Signals/AddSignal.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
+      path: '/signals/:signalId',
+      name: 'Edit Signal',
+      component: () => import('./Signals/EditSignal.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
       path: '/turnouts',
       name: 'Turnouts',
       component: () => import('./Turnouts/Turnouts.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
+      path: '/turnouts/new',
+      name: 'Add Turnout',
+      component: () => import('./Turnouts/AddTurnout.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
+      path: '/turnouts/:turnoutId',
+      name: 'Edit Turnout',
+      component: () => import('./Turnouts/EditTurnout.vue'),
       beforeEnter: [requireAuth, requireLayout],
     },
     {

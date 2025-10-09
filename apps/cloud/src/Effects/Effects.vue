@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import type { Effect } from '@repo/modules'
+import { useRouter } from 'vue-router'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
-import EffectForm from '@/Effects/EffectForm.vue'
 import EffectsList from '@/Effects/EffectsList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 import { ListMenu } from '@repo/ui'
 
-const editEffect = ref<Effect | null>(null)
-const newEfx: Partial<Effect> = {
-  type: '',
-  state: false,
-  id: '',
-  name: '',
-  color: 'purple',
-  tags: [],
-  allowGuest: false
+const router = useRouter()
+
+function handleEdit(effect: Effect) {
+  router.push({ name: 'Edit Effect', params: { effectId: effect.id } })
+}
+
+function handleAdd() {
+  router.push({ name: 'Add Effect' })
 }
 
 </script>
@@ -23,19 +21,19 @@ const newEfx: Partial<Effect> = {
   <ModuleTitle menu="Effects">
     <ListMenu :disabledMenus="['view']" :module-name="'effects'" />
   </ModuleTitle>
-    
+
   <!-- External Sound Library Quicklinks -->
   <v-card class="mb-4">
     <v-card-title class="text-h6">
       <v-icon icon="mdi-link" class="mr-2" color="info"></v-icon>
       External Sound Libraries
     </v-card-title>
-    
+
     <v-card-text>
       <p class="text-body-2 mb-4">
         Find free sound effects from these external libraries. BBC sounds are automatically available in the SoundPicker component.
       </p>
-      
+
       <div class="d-flex flex-wrap gap-3">
         <v-btn
           href="https://sound-effects.bbcrewind.co.uk"
@@ -46,7 +44,7 @@ const newEfx: Partial<Effect> = {
         >
           BBC Sound Effects
         </v-btn>
-        
+
         <v-btn
           href="https://freesound.org"
           target="_blank"
@@ -56,7 +54,7 @@ const newEfx: Partial<Effect> = {
         >
           Freesound.org
         </v-btn>
-        
+
         <v-btn
           href="https://mixkit.co/free-sound-effects"
           target="_blank"
@@ -66,7 +64,7 @@ const newEfx: Partial<Effect> = {
         >
           Mixkit
         </v-btn>
-        
+
         <v-btn
           href="https://pixabay.com/sound-effects"
           target="_blank"
@@ -76,7 +74,7 @@ const newEfx: Partial<Effect> = {
         >
           Pixabay
         </v-btn>
-        
+
         <v-btn
           href="https://www.zapsplat.com"
           target="_blank"
@@ -87,7 +85,7 @@ const newEfx: Partial<Effect> = {
           Zapsplat
         </v-btn>
       </div>
-      
+
       <div class="mt-4 p-3 bg-grey-lighten-4 rounded">
         <div class="text-caption font-weight-medium mb-2">💡 How to use external libraries:</div>
         <ol class="text-caption text-grey-darken-1">
@@ -100,39 +98,10 @@ const newEfx: Partial<Effect> = {
       </div>
     </v-card-text>
   </v-card>
-  
-  <Transition name="slide">
-    <div v-if="editEffect">
-      <EffectForm v-if="editEffect" @close="editEffect = null" :efx="editEffect" />
-    </div>
-    <EffectsList v-else @edit="efx => editEffect = efx">
-      <template #prepend>
-        <AddTile @click="editEffect = {type: '', state: false, id: '', ...newEfx}" color="purple" />
-      </template>
-    </EffectsList>
-  </Transition>
+
+  <EffectsList @edit="handleEdit">
+    <template #prepend>
+      <AddTile @click="handleAdd" color="purple" />
+    </template>
+  </EffectsList>
 </template>
-<style>
-
-.slide-move,
-.slide-leave-active,
-.slide-enter-active {
-  transition: .5s;
-}
-.slide-enter {
-  transform: translateX(100%);
-  opacity: 0;
-}
-.slide-enter-from {
-  transform: translateX(-100%);
-  opacity: 0;
-}
-.slide-leave-to {
-  transform: translateX(100%);
-  opacity: 0;
-}
-
-.slide-leave-active {
-  position: absolute;
-}
-</style>
