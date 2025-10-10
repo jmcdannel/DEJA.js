@@ -29,21 +29,18 @@ export const useLayoutRoutes = () => {
             const chip = onChips.value[i] as MacroItem;
             if (chip.type === 'turnout') {
                 const newState = chip.state || true
-                const turnout: Turnout = {
-                    id: chip.id?.toString() || '',
-                    name: chip.name || '',
-                    device: chip.device || '',
-                    type: chip.type || '',
+                const turnout: Partial<Turnout> = {
                     state: newState,
                     timestamp: Date.now()
                 }
+                if (chip.id) {
+                    setTurnout(chip.id?.toString(), { ...turnout })
+                    percentComplete.value = ((i + 1) / onChips.value.length) * 100
 
-                setTurnout(turnout.id, { ...turnout })
-                percentComplete.value = ((i + 1) / onChips.value.length) * 100
-
-                // wait 1000ms before processing the next turnout
-                // eslint-disable-next-line no-await-in-loop
-                await sleep(DELAY)
+                    // wait 1000ms before processing the next turnout
+                    // eslint-disable-next-line no-await-in-loop
+                    await sleep(DELAY)
+                }
             }
         }
         percentComplete.value = 0
