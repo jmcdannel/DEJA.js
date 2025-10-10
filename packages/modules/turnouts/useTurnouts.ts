@@ -88,7 +88,7 @@ export function useTurnouts() {
     }
   }
 
-  async function setTurnout(id: string, turnout: Turnout) {
+  async function setTurnout(id: string, turnout: Partial<Turnout>): Promise<boolean | void> {
     try {
       await setDoc(doc(db, `layouts/${layoutId.value}/turnouts`, id), {
         ...turnout,
