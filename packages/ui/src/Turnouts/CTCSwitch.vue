@@ -28,11 +28,6 @@ const locked = ref<boolean>(props.locked ?? false)
 const occupied = ref<boolean>(props.occupied ?? false)
 
 const label = computed(() => props.label ?? props.turnout?.name ?? 'Switch 12')
-const labelNumber = computed(() => label.value.match(/\d+/)?.[0] ?? label.value)
-const labelText = computed(() => {
-  const stripped = label.value.replace(/\d+/g, '').trim()
-  return stripped ? stripped.toUpperCase() : 'SWITCH'
-})
 const displayState = computed<CTCSwitchState>(() => (internalState.value ? 'reverse' : 'normal'))
 
 const disabledReason = computed(() => {
@@ -102,11 +97,6 @@ function handleThrow() {
         <svg viewBox="0 0 180 200" class="ctc-base" aria-hidden="true">
           <path d="M20 186 L90 20 L160 186 Z" class="ctc-base-fill" />
           <path d="M20 186 L90 20 L160 186 Z" class="ctc-base-stroke" />
-          <g class="ctc-label-group">
-            <rect x="45" y="72" width="90" height="62" rx="10" class="ctc-label-plate" />
-            <text x="90" y="100" class="ctc-label-number">{{ labelNumber }}</text>
-            <text x="90" y="128" class="ctc-label-text">{{ labelText }}</text>
-          </g>
           <text x="40" y="170" class="ctc-legends">N</text>
           <text x="140" y="170" class="ctc-legends">R</text>
         </svg>
@@ -135,12 +125,13 @@ function handleThrow() {
         <span class="ctc-lamp-label">R</span>
       </div>
     </section>
+    <p class="ctc-label-caption">{{ label }}</p>
   </div>
 </template>
 
 <style scoped>
 .ctc-panel {
-  @apply w-full max-w-[11rem] border-[6px] text-[10px] uppercase tracking-[0.25em] text-neutral-100 shadow-lg;
+  @apply w-full border-[6px] text-[10px] uppercase tracking-[0.25em] text-neutral-100 shadow-lg;
   border-color: #1e3a2a;
   font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
   display: flex;
@@ -214,32 +205,6 @@ function handleThrow() {
   fill: none;
   stroke: #050505;
   stroke-width: 4.5;
-}
-
-.ctc-label-group {
-  paint-order: stroke fill;
-}
-
-.ctc-label-plate {
-  fill: #12192a;
-  stroke: #9ca3af;
-  stroke-width: 1.8;
-}
-
-.ctc-label-number {
-  fill: #f8fafc;
-  font-size: 34px;
-  text-anchor: middle;
-  dominant-baseline: middle;
-  font-weight: 700;
-}
-
-.ctc-label-text {
-  fill: #e2e8f0;
-  font-size: 13px;
-  text-anchor: middle;
-  dominant-baseline: middle;
-  letter-spacing: 0.3em;
 }
 
 .ctc-legends {
@@ -319,6 +284,15 @@ function handleThrow() {
   background: linear-gradient(180deg, #cbd5f5 0%, #94a3b8 85%, #64748b 100%);
   border: 2px solid #303030;
   box-shadow: 0 4px 0 rgba(55, 65, 81, 0.55);
+}
+
+.ctc-label-caption {
+  font-size: 0.6rem;
+  letter-spacing: 0.35em;
+  text-align: center;
+  color: rgba(241, 245, 249, 0.9);
+  padding-top: 0.35rem;
+  margin-top: auto;
 }
 
 .ctc-pivot {
