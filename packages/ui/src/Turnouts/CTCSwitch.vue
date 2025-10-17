@@ -7,13 +7,10 @@ type CTCSwitchState = 'normal' | 'reverse'
 type CTCSwitchEmits = {
   (event: 'update:state', state: boolean): void
   (event: 'state-change', state: boolean): void
-  (event: 'update:locked', locked: boolean): void
-  (event: 'update:occupied', occupied: boolean): void
 }
 
 const props = withDefaults(defineProps<{
   label?: string
-  trackSegment?: string
   turnout?: Turnout
   turnoutId?: string
   state?: boolean
@@ -36,8 +33,6 @@ const labelText = computed(() => {
   const stripped = label.value.replace(/\d+/g, '').trim()
   return stripped ? stripped.toUpperCase() : 'SWITCH'
 })
-const trackSegment = computed(() => props.trackSegment ?? props.turnout?.device ?? '12R–12L')
-
 const displayState = computed<CTCSwitchState>(() => (internalState.value ? 'reverse' : 'normal'))
 
 const disabledReason = computed(() => {
@@ -90,18 +85,6 @@ function updateState(next: boolean) {
   emit('state-change', next)
 }
 
-function toggleLocked() {
-  const next = !locked.value
-  locked.value = next
-  emit('update:locked', next)
-}
-
-function toggleOccupied() {
-  const next = !occupied.value
-  occupied.value = next
-  emit('update:occupied', next)
-}
-
 function handleThrow() {
   if (disabledReason.value) return
   updateState(!internalState.value)
@@ -110,22 +93,6 @@ function handleThrow() {
 
 <template>
   <div class="ctc-panel">
-    <section class="ctc-track-diagram" aria-hidden="true">
-      <svg viewBox="0 0 220 60" class="h-full w-full">
-        <g stroke="#111" stroke-width="6" stroke-linecap="round" fill="none">
-          <line x1="10" y1="12" x2="70" y2="12" />
-          <line x1="150" y1="12" x2="210" y2="12" />
-          <line x1="70" y1="12" x2="110" y2="46" />
-          <line x1="150" y1="12" x2="110" y2="46" />
-          <line x1="10" y1="46" x2="70" y2="46" stroke-dasharray="16 8" />
-          <line x1="150" y1="46" x2="210" y2="46" />
-        </g>
-        <g fill="#111" font-size="12" font-family="'IBM Plex Sans', 'Segoe UI', sans-serif" font-weight="600">
-          <text x="18" y="50">{{ trackSegment }}</text>
-        </g>
-      </svg>
-    </section>
-
     <section class="ctc-indicators" aria-label="Switch state indicators">
       <div class="ctc-lamp">
         <span class="ctc-lamp-light" :class="displayState === 'normal' ? 'ctc-lamp-active-green' : ''" />
@@ -168,95 +135,62 @@ function handleThrow() {
         <span class="ctc-lamp-label">R</span>
       </div>
     </section>
-
-    <section class="ctc-controls">
-      <button
-        type="button"
-        class="ctc-control"
-        :class="{ 'ctc-control-active-red': locked }"
-        :aria-pressed="locked"
-        @click="toggleLocked"
-      >
-        <span class="ctc-control-label">LOCK</span>
-        <span class="ctc-control-indicator" :class="locked ? 'ctc-lamp-active-red' : ''" />
-      </button>
-      <button
-        type="button"
-        class="ctc-control"
-        :class="{ 'ctc-control-active-amber': occupied }"
-        :aria-pressed="occupied"
-        @click="toggleOccupied"
-      >
-        <span class="ctc-control-label">TRACK</span>
-        <span class="ctc-control-indicator" :class="occupied ? 'ctc-lamp-active-amber' : ''" />
-      </button>
-    </section>
-
-    <footer class="ctc-status">
-      <div class="ctc-status-heading">STATUS</div>
-      <div class="ctc-status-state">{{ displayState.toUpperCase() }}</div>
-      <div class="ctc-status-note">{{ disabledReason ? disabledReason : 'LEVER FREE' }}</div>
-    </footer>
   </div>
 </template>
 
 <style scoped>
 .ctc-panel {
-  @apply w-full max-w-xs border-[6px] border-blue-700 text-[10px] uppercase tracking-[0.25em] text-neutral-900 shadow-lg;
+  @apply w-full max-w-[11rem] border-[6px] text-[10px] uppercase tracking-[0.25em] text-neutral-100 shadow-lg;
+  border-color: #1e3a2a;
   font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  padding: 1.5rem 1rem 1.75rem;
-  background: radial-gradient(circle at top, #f8fafc 0%, #dbeafe 55%, #bfdbfe 100%);
-}
-
-.ctc-track-diagram {
-  height: 60px;
-  border: 2px solid #111827;
-  border-radius: 6px;
-  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
-  padding: 0.25rem 0.5rem;
+  align-items: stretch;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 1.75rem 1.25rem 1.5rem;
+  background: linear-gradient(130deg, #48684b 0%, #2f4a34 45%, #203524 100%);
 }
 
 .ctc-indicators {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.85rem;
 }
 
 .ctc-lamp {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.25rem;
   font-weight: 600;
+  color: #f8fafc;
+}
+
+.ctc-lamp-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
 }
 
 .ctc-lamp-light {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.45rem;
+  height: 1.45rem;
   border-radius: 9999px;
-  border: 2px solid #111;
-  background: #d4d4d8;
-  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
+  border: 2px solid #0b0b0b;
+  background: #6b7280;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.35);
   transition: box-shadow 0.3s ease, background 0.3s ease;
 }
 
 .ctc-lamp-active-green {
-  background: #16a34a;
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.85);
+  background: #5fe072;
+  box-shadow: 0 0 8px rgba(111, 231, 132, 0.95);
 }
 
 .ctc-lamp-active-amber {
-  background: #facc15;
-  box-shadow: 0 0 8px rgba(250, 204, 21, 0.85);
-}
-
-.ctc-lamp-active-red {
-  background: #ef4444;
-  box-shadow: 0 0 8px rgba(248, 113, 113, 0.9);
+  background: #f8d067;
+  box-shadow: 0 0 8px rgba(248, 208, 103, 0.9);
 }
 
 .ctc-lever {
@@ -264,22 +198,22 @@ function handleThrow() {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 0;
+  padding: 0.4rem 0;
 }
 
 .ctc-base {
-  width: 7.25rem;
-  height: 9.75rem;
+  width: 7rem;
+  height: 9.5rem;
 }
 
 .ctc-base-fill {
-  fill: #0f172a;
+  fill: #121214;
 }
 
 .ctc-base-stroke {
   fill: none;
-  stroke: #1f2937;
-  stroke-width: 6;
+  stroke: #050505;
+  stroke-width: 4.5;
 }
 
 .ctc-label-group {
@@ -287,14 +221,14 @@ function handleThrow() {
 }
 
 .ctc-label-plate {
-  fill: rgba(15, 23, 42, 0.55);
-  stroke: rgba(148, 163, 184, 0.6);
-  stroke-width: 2;
+  fill: #12192a;
+  stroke: #9ca3af;
+  stroke-width: 1.8;
 }
 
 .ctc-label-number {
-  fill: #f1f5f9;
-  font-size: 36px;
+  fill: #f8fafc;
+  font-size: 34px;
   text-anchor: middle;
   dominant-baseline: middle;
   font-weight: 700;
@@ -302,16 +236,16 @@ function handleThrow() {
 
 .ctc-label-text {
   fill: #e2e8f0;
-  font-size: 15px;
+  font-size: 13px;
   text-anchor: middle;
   dominant-baseline: middle;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.3em;
 }
 
 .ctc-legends {
-  fill: #e5e7eb;
-  font-size: 16px;
-  font-weight: 600;
+  fill: #f8fafc;
+  font-size: 15px;
+  font-weight: 700;
   text-anchor: middle;
 }
 
@@ -346,133 +280,62 @@ function handleThrow() {
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.5rem;
+  gap: 0.45rem;
   transform-origin: center bottom;
   transition: transform 0.45s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 .ctc-handle-pointer {
-  width: 2.1rem;
-  height: 3.9rem;
+  width: 2.05rem;
+  height: 3.8rem;
   display: grid;
   place-items: center;
-  clip-path: polygon(50% 0%, 88% 18%, 88% 100%, 12% 100%, 12% 18%);
-  background: linear-gradient(180deg, #f8fafc 0%, #cbd5f5 45%, #93c5fd 100%);
-  border: 2px solid #1f2937;
-  box-shadow: inset 0 -6px 0 rgba(15, 23, 42, 0.55);
+  clip-path: polygon(50% 0%, 85% 18%, 92% 100%, 8% 100%, 15% 18%);
+  background: linear-gradient(180deg, #f5f7fa 0%, #cfd8e3 45%, #b1bac7 100%);
+  border: 2px solid #303030;
+  box-shadow: inset 0 -6px 0 rgba(31, 41, 55, 0.55);
 }
 
 .ctc-handle-pointer-core {
   width: 55%;
   height: 70%;
-  background: radial-gradient(circle at 50% 20%, #f1f5f9 0%, #93c5fd 75%);
-  clip-path: polygon(50% 0%, 86% 22%, 86% 100%, 14% 100%, 14% 22%);
+  background: radial-gradient(circle at 50% 20%, #f8fafc 0%, #d5dce5 70%);
+  clip-path: polygon(50% 0%, 83% 24%, 88% 100%, 12% 100%, 17% 24%);
   border-radius: 0 0 6px 6px;
 }
 
 .ctc-handle-rod {
   width: 0.55rem;
-  height: 4.75rem;
-  border-radius: 9999px;
-  background: linear-gradient(180deg, #e2e8f0 0%, #9ca3af 100%);
-  box-shadow: inset 0 0 4px rgba(30, 41, 59, 0.5);
+  height: 4.7rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(180deg, #e5e7eb 0%, #a0aec0 100%);
+  box-shadow: inset 0 0 4px rgba(30, 41, 59, 0.45);
 }
 
 .ctc-handle-counterweight {
-  width: 2.25rem;
-  height: 1.5rem;
-  border-radius: 12px 12px 20px 20px;
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-  border: 2px solid #111827;
-  box-shadow: 0 4px 0 rgba(15, 23, 42, 0.65);
+  width: 2.2rem;
+  height: 1.45rem;
+  border-radius: 12px 12px 18px 18px;
+  background: linear-gradient(180deg, #cbd5f5 0%, #94a3b8 85%, #64748b 100%);
+  border: 2px solid #303030;
+  box-shadow: 0 4px 0 rgba(55, 65, 81, 0.55);
 }
 
 .ctc-pivot {
   position: absolute;
-  bottom: 0.65rem;
-  width: 3.5rem;
-  height: 1.5rem;
-  border-radius: 9999px;
-  background: #1f2937;
-  box-shadow: inset 0 -4px 0 rgba(15, 23, 42, 0.7);
-}
-
-.ctc-controls {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-.ctc-control {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.75rem 0.5rem;
-  border: 2px solid #0f172a;
-  background: #f8fafc;
-  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.ctc-control-label {
-  font-weight: 700;
-  letter-spacing: 0.35em;
-}
-
-.ctc-control-indicator {
-  width: 1rem;
-  height: 1rem;
-  border-radius: 9999px;
-  border: 2px solid #111;
-  background: #d4d4d8;
-  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
-  transition: box-shadow 0.3s ease, background 0.3s ease;
-}
-
-.ctc-control-active-red {
-  background: #fee2e2;
-  color: #7f1d1d;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-}
-
-.ctc-control-active-amber {
-  background: #fef3c7;
-  color: #78350f;
-  box-shadow: 0 0 10px rgba(251, 191, 36, 0.45);
-}
-
-.ctc-status {
-  border: 2px solid #0f172a;
-  text-align: center;
-  padding: 0.75rem 0.5rem;
-  display: grid;
-  gap: 0.35rem;
-  letter-spacing: 0.3em;
-}
-
-.ctc-status-heading {
-  font-weight: 700;
-}
-
-.ctc-status-state {
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.45em;
-}
-
-.ctc-status-note {
-  font-size: 0.6rem;
+  bottom: 0.6rem;
+  width: 3.4rem;
+  height: 1.45rem;
+  border-radius: 0.9rem;
+  background: linear-gradient(180deg, #111827 0%, #020617 90%);
+  box-shadow: inset 0 -4px 0 rgba(15, 23, 42, 0.65);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ctc-handle {
     transition: none;
   }
-  .ctc-lamp-light,
-  .ctc-control-indicator {
-    transition: none;
-  }
-  .ctc-control {
+  .ctc-lamp-light {
     transition: none;
   }
 }
