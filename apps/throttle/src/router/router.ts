@@ -77,6 +77,11 @@ const router = createRouter({
       component: () => import('../views/SelectLayoutView.vue'),
       beforeEnter: [requireAuth],
     },
+    {
+      path: '/proto-throttle-demo',
+      name: 'proto-throttle-demo',
+      component: () => import('../views/ProtoThrottleDemoView.vue'),
+    },
     // {
     //   path: '/connect/dejajs',
     //   name: 'dejajs',
