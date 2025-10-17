@@ -94,11 +94,17 @@ function handleThrow() {
         <span class="ctc-lamp-label">N</span>
       </div>
       <div class="ctc-lever">
-        <svg viewBox="0 0 180 200" class="ctc-base" aria-hidden="true">
-          <path d="M20 186 L90 20 L160 186 Z" class="ctc-base-fill" />
-          <path d="M20 186 L90 20 L160 186 Z" class="ctc-base-stroke" />
-          <text x="40" y="170" class="ctc-legends">N</text>
-          <text x="140" y="170" class="ctc-legends">R</text>
+        <svg viewBox="0 0 200 210" class="ctc-base" aria-hidden="true">
+          <path
+            d="M46 46 C92 8 108 8 154 46 L182 178 C184 188 178 196 168 196 H32 C22 196 16 188 18 178 Z"
+            class="ctc-base-fill"
+          />
+          <path
+            d="M46 46 C92 8 108 8 154 46 L182 178 C184 188 178 196 168 196 H32 C22 196 16 188 18 178 Z"
+            class="ctc-base-stroke"
+          />
+          <text x="60" y="168" class="ctc-legends">N</text>
+          <text x="140" y="168" class="ctc-legends">R</text>
         </svg>
         <button
           type="button"
@@ -111,13 +117,18 @@ function handleThrow() {
           @click="handleThrow"
         >
           <div class="ctc-handle" :style="{ transform: `rotate(${leverAngle}deg)` }">
-            <div class="ctc-handle-pointer">
-              <div class="ctc-handle-pointer-core" />
+            <div class="ctc-handle-assembly">
+              <span class="ctc-handle-pin" />
+              <div class="ctc-handle-pointer">
+                <span class="ctc-handle-notch" />
+              </div>
+              <div class="ctc-handle-rod" />
+              <div class="ctc-handle-counterweight" />
             </div>
-            <div class="ctc-handle-rod" />
-            <div class="ctc-handle-counterweight" />
           </div>
-          <div class="ctc-pivot" />
+          <div class="ctc-pivot">
+            <span class="ctc-pivot-screw" />
+          </div>
         </button>
       </div>
       <div class="ctc-lamp">
@@ -131,15 +142,15 @@ function handleThrow() {
 
 <style scoped>
 .ctc-panel {
-  @apply w-full border-[6px] text-[10px] uppercase tracking-[0.25em] text-neutral-100 shadow-lg;
+  @apply w-full border-[5px] text-[9px] uppercase tracking-[0.25em] text-neutral-100 shadow-lg;
   border-color: #1e3a2a;
   font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
-  gap: 1.25rem;
-  padding: 1.75rem 1.25rem 1.5rem;
+  gap: 0.9rem;
+  padding: 1.1rem 1rem 1rem;
   background: linear-gradient(130deg, #48684b 0%, #2f4a34 45%, #203524 100%);
 }
 
@@ -147,14 +158,14 @@ function handleThrow() {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.65rem;
 }
 
 .ctc-lamp {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.2rem;
   font-weight: 600;
   color: #f8fafc;
 }
@@ -184,43 +195,46 @@ function handleThrow() {
   box-shadow: 0 0 8px rgba(248, 208, 103, 0.9);
 }
 
+
 .ctc-lever {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.4rem 0;
+  padding: 0.15rem 0;
 }
 
 .ctc-base {
-  width: 7rem;
-  height: 9.5rem;
+  width: 6.35rem;
+  height: 8.8rem;
 }
 
 .ctc-base-fill {
-  fill: #121214;
+  fill: #0f0f11;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
 }
 
 .ctc-base-stroke {
   fill: none;
-  stroke: #050505;
-  stroke-width: 4.5;
+  stroke: #d9d9d9;
+  stroke-width: 3.6;
 }
 
 .ctc-legends {
   fill: #f8fafc;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
+  letter-spacing: 0.4em;
   text-anchor: middle;
 }
 
 .ctc-lever-handle {
   position: absolute;
-  bottom: 1.25rem;
+  bottom: 1rem;
   left: 50%;
   transform: translateX(-50%);
-  width: 5.5rem;
-  height: 7.75rem;
+  width: 5.2rem;
+  height: 7.1rem;
   background: transparent;
   border: none;
   padding: 0;
@@ -239,70 +253,98 @@ function handleThrow() {
   cursor: not-allowed;
 }
 
+
 .ctc-handle {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.45rem;
-  transform-origin: center bottom;
-  transition: transform 0.45s cubic-bezier(0.33, 1, 0.68, 1);
+  transform-origin: center 88%;
+  transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.ctc-handle-assembly {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ctc-handle-pin {
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f9fbff 0%, #cfd8e3 55%, #9ca3af 100%);
+  border: 2px solid #2d2d2f;
+  box-shadow: inset 0 2px 1px rgba(255, 255, 255, 0.45);
 }
 
 .ctc-handle-pointer {
-  width: 2.05rem;
-  height: 3.8rem;
-  display: grid;
-  place-items: center;
-  clip-path: polygon(50% 0%, 85% 18%, 92% 100%, 8% 100%, 15% 18%);
-  background: linear-gradient(180deg, #f5f7fa 0%, #cfd8e3 45%, #b1bac7 100%);
-  border: 2px solid #303030;
-  box-shadow: inset 0 -6px 0 rgba(31, 41, 55, 0.55);
+  width: 2.2rem;
+  height: 3.45rem;
+  position: relative;
+  background: linear-gradient(175deg, #f2f4f7 0%, #cbd5e1 55%, #9ca8ba 100%);
+  clip-path: polygon(50% 0%, 82% 16%, 88% 44%, 92% 100%, 8% 100%, 12% 44%, 18% 16%);
+  border: 2px solid #2d2d2f;
+  box-shadow: inset 0 -8px 0 rgba(31, 41, 55, 0.55);
 }
 
-.ctc-handle-pointer-core {
-  width: 55%;
-  height: 70%;
-  background: radial-gradient(circle at 50% 20%, #f8fafc 0%, #d5dce5 70%);
-  clip-path: polygon(50% 0%, 83% 24%, 88% 100%, 12% 100%, 17% 24%);
-  border-radius: 0 0 6px 6px;
+.ctc-handle-notch {
+  position: absolute;
+  bottom: 0.35rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 0.6rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #d1d9e6 95%);
+  border-radius: 0 0 10px 10px;
+  box-shadow: inset 0 -2px 0 rgba(55, 65, 81, 0.45);
 }
 
 .ctc-handle-rod {
-  width: 0.55rem;
-  height: 4.7rem;
-  border-radius: 0.5rem;
+  width: 0.5rem;
+  height: 3.65rem;
+  border-radius: 0.4rem;
   background: linear-gradient(180deg, #e5e7eb 0%, #a0aec0 100%);
-  box-shadow: inset 0 0 4px rgba(30, 41, 59, 0.45);
+  box-shadow: inset 0 0 4px rgba(30, 41, 59, 0.35);
 }
 
 .ctc-handle-counterweight {
-  width: 2.2rem;
-  height: 1.45rem;
-  border-radius: 12px 12px 18px 18px;
-  background: linear-gradient(180deg, #cbd5f5 0%, #94a3b8 85%, #64748b 100%);
-  border: 2px solid #303030;
-  box-shadow: 0 4px 0 rgba(55, 65, 81, 0.55);
+  width: 2rem;
+  height: 1.3rem;
+  border-radius: 16px 16px 22px 22px;
+  background: linear-gradient(180deg, #d7deef 0%, #9ba6bc 85%, #6b7280 100%);
+  border: 2px solid #2d2d2f;
+  box-shadow: 0 3px 0 rgba(31, 41, 55, 0.55);
 }
 
 .ctc-label-caption {
-  font-size: 0.6rem;
-  letter-spacing: 0.35em;
+  font-size: 0.55rem;
+  letter-spacing: 0.32em;
   text-align: center;
-  color: rgba(241, 245, 249, 0.9);
-  padding-top: 0.35rem;
-  margin-top: auto;
+  color: rgba(241, 245, 249, 0.86);
+  padding-top: 0.2rem;
 }
 
 .ctc-pivot {
   position: absolute;
-  bottom: 0.6rem;
-  width: 3.4rem;
-  height: 1.45rem;
-  border-radius: 0.9rem;
-  background: linear-gradient(180deg, #111827 0%, #020617 90%);
-  box-shadow: inset 0 -4px 0 rgba(15, 23, 42, 0.65);
+  bottom: 0.55rem;
+  width: 3.05rem;
+  height: 1.3rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(180deg, #090b12 0%, #020308 95%);
+  box-shadow: inset 0 -3px 0 rgba(15, 23, 42, 0.6);
+  display: grid;
+  place-items: center;
+}
+
+.ctc-pivot-screw {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 40% 35%, #f9fbff 0%, #d1d5db 65%, #6b7280 100%);
+  border: 1.5px solid #20252d;
 }
 
 @media (prefers-reduced-motion: reduce) {
