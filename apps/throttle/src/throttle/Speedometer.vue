@@ -146,7 +146,7 @@ const valueLabels = computed(() => {
           :y="label.y + 20"
           :text-anchor="label.angle > 90 || label.angle < -90 ? 'end' : 'start'"
           :dominant-baseline="label.angle > 0 ? 'hanging' : 'auto'"
-          class="text-xs font-medium fill-gray-700"
+          class="text-xs font-medium fill-gray-100"
         >
           {{ label.value }}
         </text>
@@ -187,8 +187,7 @@ const valueLabels = computed(() => {
     
     <!-- Address label -->
     <div class="text-center">
-      <div class="text-lg font-bold text-gray-800">#{{ address }}</div>
-      <div class="text-xs text-gray-500 font-medium">Address</div>
+      <div class="text-lg font-bold text-gray-100">#{{ address }}</div>
     </div>
   </div>
 </template>

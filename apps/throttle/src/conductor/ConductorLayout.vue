@@ -14,7 +14,7 @@ const throttles = getThrottles()
 </script>
   <template>
     <main class="@container relative">
-      <div
+      <!-- <div
         v-if="throttles?.length"
         class="flex flex-wrap gap-4 p-4 justify-center">
         <Speedometer
@@ -23,7 +23,7 @@ const throttles = getThrottles()
           :speed="throttle.speed"
           :address="throttle.address"
         />
-      </div>
+      </div> -->
       <div class="conductor-layout grid grid-cols-1 @[960px]:grid-cols-3 gap-2 w-full">
       <div class=" bg-slate-700 bg-opacity-20 rounded border-1 border-green-500 border-opacity-50 order-2 @[960px]:!order-1 overflow-hidden">
         <div class="@container h-full overflow-y-auto p-4">
