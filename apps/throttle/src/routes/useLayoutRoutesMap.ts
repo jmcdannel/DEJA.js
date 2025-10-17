@@ -121,7 +121,7 @@ export const useLayoutRoutesMap = () => {
   async function toggleTurnout(id: string): Promise<void> {
     const turnout = await getTurnout(id)
     if (turnout) {
-      await switchTurnout({ ...turnout, state: !turnout.state })
+      await switchTurnout({ ...turnout })
     }
   }
 
@@ -169,7 +169,7 @@ export const useLayoutRoutesMap = () => {
           break
         case 'Turnouts':
         case 'TurnoutLabels':
-          await toggleTurnout(svgBtn.target.id)
+            await toggleTurnout(svgBtn.target.id.replace('lbl', ''))
           break
         default:
           // noop

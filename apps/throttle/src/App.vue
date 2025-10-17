@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RouterView } from 'vue-router'
+import { getDocs } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
-import { useCurrentUser } from 'vuefire'
+import { useCollection, useCurrentUser } from 'vuefire'
 import { AppHeader } from '@repo/ui'
 import Footer from '@/core/Footer.vue'
 import { useDcc } from '@repo/dccex'
@@ -26,11 +27,10 @@ async function handleTrackPowerToggle(newState: boolean) {
 
 async function handleLayoutPowerToggle(newState: boolean) {
   const powerEfx = await getEffectsByType('power')
-  if (powerEfx && Array.isArray(powerEfx)) {
-    powerEfx.forEach((efx: any) => {
-      runEffect({...efx, state: newState })
-    })
-  }
+  const querySnapshot = await getDocs(powerEfx);
+  querySnapshot.forEach((doc) => {
+    runEffect({...doc, id: doc.id, state: newState});
+  });
 }
 
 async function handleEmergencyStop() {
