@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60" aria-labelledby="title desc" role="img">
+  <title id="title">BNSF Railway logo</title>
+  <desc id="desc">Stylised BNSF lettering on an orange ribbon</desc>
+  <linearGradient id="bnsfGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#ea580c" />
+    <stop offset="100%" stop-color="#f97316" />
+  </linearGradient>
+  <rect x="3" y="6" width="154" height="48" rx="12" fill="url(#bnsfGradient)" />
+  <path d="M10 40h140" stroke="#fb923c" stroke-width="6" stroke-linecap="round" opacity="0.35" />
+  <text x="80" y="36" font-family="'Montserrat', 'Helvetica Neue', Arial, sans-serif" font-size="24" fill="#fff" font-weight="700" text-anchor="middle" letter-spacing="4">
+    BNSF
+  </text>
+</svg>

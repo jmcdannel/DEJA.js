@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60" aria-labelledby="title desc" role="img">
+  <title id="title">Santa Fe logo</title>
+  <desc id="desc">Cross medallion in red and gold</desc>
+  <defs>
+    <radialGradient id="sfGlow" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#fee2e2" />
+      <stop offset="100%" stop-color="#dc2626" />
+    </radialGradient>
+  </defs>
+  <rect x="8" y="10" width="144" height="40" rx="14" fill="#7f1d1d" opacity="0.45" />
+  <g transform="translate(64 18)">
+    <circle cx="16" cy="12" r="12" fill="url(#sfGlow)" stroke="#fca5a5" stroke-width="2" />
+    <rect x="8" y="4" width="16" height="16" fill="#f97316" rx="4" />
+    <rect x="4" y="8" width="24" height="8" fill="#facc15" rx="2" />
+  </g>
+  <text x="112" y="36" font-family="'Poppins', 'Helvetica Neue', Arial, sans-serif" font-size="18" fill="#fecaca" font-weight="700" letter-spacing="3">
+    SF
+  </text>
+</svg>

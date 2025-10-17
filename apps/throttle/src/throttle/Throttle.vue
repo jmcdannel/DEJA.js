@@ -7,6 +7,7 @@ import ThrottleSliderControls from '@/throttle/ThrottleSliderControls.vue'
 import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
+import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
 import { Consist, LocoAvatar, MiniConsist, FunctionsSpeedDial } from '@repo/ui'
 import { useThrottle } from '@/throttle/useThrottle'
 
@@ -69,7 +70,14 @@ function openFunctionSettings() {
         <MiniConsist v-if="loco" :loco="loco" />
       </template>
       <template v-slot:center>
-        <h1 class="text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 drop-shadow-lg">{{ loco?.name }}</h1>
+        <div class="flex flex-col items-center justify-center gap-1">
+          <RoadnameLogo v-if="loco" :roadname="loco.meta?.roadname" />
+          <h1
+            class="text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 drop-shadow-lg"
+          >
+            {{ loco?.name }}
+          </h1>
+        </div>
       </template>
       <template v-slot:right>
         <ThrottleActionMenu 

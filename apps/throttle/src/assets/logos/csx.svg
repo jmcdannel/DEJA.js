@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60" aria-labelledby="title desc" role="img">
+  <title id="title">CSX logo</title>
+  <desc id="desc">Framed CSX lettering in deep indigo</desc>
+  <rect x="8" y="10" width="144" height="40" rx="10" fill="#312e81" opacity="0.85" />
+  <rect x="18" y="18" width="124" height="24" rx="6" fill="none" stroke="#6366f1" stroke-width="3" stroke-dasharray="6 6" />
+  <text x="80" y="36" font-family="'Poppins', 'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#c7d2fe" font-weight="700" text-anchor="middle" letter-spacing="5">
+    CSX
+  </text>
+</svg>
