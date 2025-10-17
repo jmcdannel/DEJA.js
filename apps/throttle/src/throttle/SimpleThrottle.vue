@@ -6,6 +6,7 @@ import { FunctionsSpeedDial } from '@repo/ui'
 import { LocoAvatar, MiniConsist } from '@repo/ui'
 import { useThrottle } from '@/throttle/useThrottle'
 import { useRouter } from 'vue-router'
+import { toRef } from 'vue'
 
 const emit = defineEmits(['release'])
 const props = defineProps({
@@ -17,13 +18,14 @@ const props = defineProps({
 
 const $router = useRouter()
 
+const addressRef = toRef(props, 'address')
 const { 
   adjustSpeed: handleAdjustSpeed, 
   currentSpeed, 
   throttle,
   loco,
   stop: handleStop,
-} = useThrottle(props.address)
+} = useThrottle(addressRef)
 
 </script>
 <template>

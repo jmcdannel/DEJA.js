@@ -1,34 +1,27 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
-import type { Loco } from '@repo/modules/locos'
-import type { Throttle } from '@/throttle/types'
+import { ref } from 'vue'
 import { useLocos } from '@repo/modules/locos'
+import ThrottleNavItem from './ThrottleNavItem.vue'
 import { LocoAvatar } from '@repo/ui'
 
-const { getLoco, getThrottles } = useLocos()
+const emit = defineEmits(['select'])
+const { getThrottles } = useLocos()
 const throttles = getThrottles()
 
-const getLocoData = (address: Number) => computed(() => {
-  const loco = getLoco<Loco>(address)
-  return loco?.value || { 
-    id: address.toString(), 
-    address: address as number, 
-    name: `Loco ${address}`,
-    functions: [],
-    consist: []
-  } as Loco
-})
+function handleSelect(address: number) {
+  emit('select', address)
+}
 </script>
 
 <template>
-  <div v-if="throttles?.length" 
-    class="p-1" 
-    v-for="item in throttles" 
-    :key="item.id">
-    <LocoAvatar
-      :loco="getLocoData(item.address).value"
-      :throttle="item.throttle as Throttle"
-      :size="48"
-    />
-  </div>
+  <v-slide-group
+      selected-class="bg-success"
+      show-arrows
+    >
+    <v-slide-group-item 
+      v-for="item in throttles"
+      :key="item.id">
+      <ThrottleNavItem :address="item.address" @select="handleSelect(item.address)" />
+    </v-slide-group-item>
+  </v-slide-group>
 </template>

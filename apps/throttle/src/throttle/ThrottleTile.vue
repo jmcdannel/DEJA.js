@@ -11,6 +11,9 @@ const props = defineProps({
   }
 })
 
+import { toRef } from 'vue'
+
+const addressRef = toRef(props, 'address')
 const { 
   adjustSpeed: handleAdjustSpeed,
   currentSpeed,
@@ -18,7 +21,7 @@ const {
   releaseThrottle,
   stop: handleStop,
   throttle,
-} = useThrottle(props.address)
+} = useThrottle(addressRef)
 
 </script>
 <template>

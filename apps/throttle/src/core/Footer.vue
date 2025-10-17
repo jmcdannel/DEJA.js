@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useLocos } from '@repo/modules/locos'
-import ThrottleNav from '@/throttle/ThrottleNav.vue'
 
 const route = useRoute()
 const { getThrottles } = useLocos()
@@ -88,9 +87,6 @@ const throttles = getThrottles()
         </v-btn-toggle>
         <v-spacer />
       </v-row>
-      <!-- <v-row class="p-2 bg-gradient-to-r from-zinc-950 to-gray-950">
-        <ThrottleNav v-if="!!layoutId" />
-      </v-row> -->
     </v-container>
   </v-footer>
 </template>
