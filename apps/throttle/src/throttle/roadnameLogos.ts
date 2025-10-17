@@ -1,4 +1,4 @@
-import bnsfLogo from '@/assets/logos/bnsf.svg'
+import bnsfLogo from '@/assets/logos/bnsf.png'
 import amtrakLogo from '@/assets/logos/amtrak.svg'
 import upLogo from '@/assets/logos/up.svg'
 import cnLogo from '@/assets/logos/cn.svg'
