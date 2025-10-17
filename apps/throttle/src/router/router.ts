@@ -72,11 +72,6 @@ const router = createRouter({
       beforeEnter: [requireAuth, requireDccEx, requireLayout],
     },
     {
-      path: '/speedometer-demo',
-      name: 'speedometer-demo',
-      component: () => import('../throttle/SpeedometerDemo.vue'),
-    },
-    {
       path: '/select-layout',
       name: 'Select Layout',
       component: () => import('../views/SelectLayoutView.vue'),

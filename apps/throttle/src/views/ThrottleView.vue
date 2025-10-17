@@ -1,10 +1,21 @@
 <script async setup lang="ts">
-  import { ref } from 'vue'
-  import { useRoute } from 'vue-router'
-  import Throttle from '@/throttle/Throttle.vue'
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import Throttle from '@/throttle/Throttle.vue'
+import ThrottleNav from '@/throttle/ThrottleNav.vue'
 
-  const route = useRoute()
-  const address = ref(parseInt(route.params.address?.toString()))
+const route = useRoute()
+const address = ref(parseInt(route.params.address?.toString()))
+
+console.log('ThrottleView.vue initial address:', address.value)
+
+watch(() => route.params.address, (newVal) => {
+  address.value = parseInt(newVal?.toString())
+})
+
+function handleNavSelect(newAddress: number) {
+  address.value = newAddress
+}
 
 </script>
 
@@ -16,5 +27,6 @@
       <div class="absolute w-[400px] h-[400px] rounded-full bg-violet-500/10 blur-[90px] top-[30%] left-[40%]"></div>
     </div>
     <Throttle :address="address" />
+    <ThrottleNav @select="handleNavSelect" />
   </div>
 </template>

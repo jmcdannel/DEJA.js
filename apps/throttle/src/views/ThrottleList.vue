@@ -1,12 +1,8 @@
 <script async setup lang="ts">
-import { useStorage } from '@vueuse/core'
 import type { Throttle } from '@repo/modules/locos'
 import ThrottleTile from '@/throttle/ThrottleTile.vue'
 import { useLocos } from '@repo/modules/locos'
 import { ListMenu } from '@repo/ui'
-
-const viewAs = useStorage('@DEJA/prefs/throttles/View', ['button'])
-const sortBy = useStorage<string[]>('@DEJA/prefs/throttles/Sort', ['device'])
 
 const { getThrottles } = useLocos()
 const throttles = getThrottles()

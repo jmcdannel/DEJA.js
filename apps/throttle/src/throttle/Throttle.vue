@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, toRef } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Loco } from '@repo/modules/locos'
 import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.vue'
@@ -17,6 +17,8 @@ const props = defineProps({
   }
 })
 
+const address = toRef(props, 'address')
+
 const { 
   adjustSpeed: handleAdjustSpeed,
   currentSpeed, 
@@ -25,7 +27,7 @@ const {
   releaseThrottle,
   stop: handleStop,
   throttle,
-} = useThrottle(props.address)
+} = useThrottle(address)
 
 const $router = useRouter()
 // const consistCmp = ref<InstanceType<typeof Consist> | null>(null)
