@@ -74,8 +74,6 @@ function openFunctionSettings() {
       <template v-slot:right>
         <ThrottleActionMenu 
           @park="clearLoco" 
-          @functions="openFunctions" 
-          @consist="openConsist"
         />
       </template>
     </ThrottleHeader>

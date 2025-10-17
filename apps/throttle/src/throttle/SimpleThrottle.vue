@@ -29,7 +29,7 @@ const {
 
 </script>
 <template>
-  <main v-if="throttle" class="flex flex-col gap-2 p-3 overflow-hidden w-full h-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border">
+  <main v-if="throttle" class="flex flex-col gap-2 p-3 overflow-auto w-full h-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border min-h-[70vh] md:min-h-auto">
     <ThrottleHeader>
       <template v-slot:left>
         <LocoAvatar 

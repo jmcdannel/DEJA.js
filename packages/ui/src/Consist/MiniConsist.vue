@@ -7,7 +7,17 @@ defineProps({
     type: Object as PropType<Loco>,
     required: true
   }
+  ,
+  selectedAddress: {
+    type: Number as PropType<number | null>,
+    required: false,
+    default: null
+  }
 })
+
+const emit = defineEmits<{
+  (e: 'select', loco: Loco): void
+}>()
 
 const opacityClasses: { [key: number]: string } = {
   10: 'opacity-10',
@@ -44,10 +54,11 @@ const leftOffsetClasses: { [key: number]: string } = {
       v-if="loco?.consist?.length" 
       v-for="(cloco, index) in loco?.consist" 
       :key="cloco.address"
-      :class="`${leftOffsetClasses[index * 2] || 'left-22'} ${opacityClasses[80-(index+1) * 10] || 'opacity-20'}`"
+      :class="`${leftOffsetClasses[index * 2] || 'left-22'} ${opacityClasses[80-(index+1) * 10] || 'opacity-20'} cursor-pointer ${cloco.address === selectedAddress ? 'ring-2 ring-offset-1 ring-primary' : ''}`"
       :color="loco?.meta?.color || 'primary'"
       size="28"      
       variant="flat"
+      @click="emit('select', cloco)"
     ><span class="text-xs">{{ cloco.address?.toString() || '?' }}</span></v-avatar>
   </div>
 </template>

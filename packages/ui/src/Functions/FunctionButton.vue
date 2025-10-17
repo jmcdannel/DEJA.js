@@ -39,10 +39,18 @@
 </script>
 <template>
   <v-btn 
-    v-if="func && !mobile" 
+    v-if="func && showLabel && !mobile" 
     @click="cabFuction()"
     :prepend-icon="icon"
     class="relative bg-gradient-to-br from-cyan-600 to-indigo-600 p-2">
+    {{ func?.label }}
+  </v-btn>
+  <v-btn 
+    v-else-if="func && showLabel" 
+    @click="cabFuction()"
+    :prepend-icon="icon"
+    class="relative bg-gradient-to-br from-cyan-600 to-indigo-600 p-2"
+  >
     {{ func?.label }}
   </v-btn>
   <v-btn 
@@ -51,4 +59,5 @@
     :icon="icon"
     class="relative bg-gradient-to-br from-cyan-600 to-indigo-600 p-2"
   />
+    
 </template>
