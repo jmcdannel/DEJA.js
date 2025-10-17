@@ -39,6 +39,7 @@ const DEFAULT_VIEW_OPTIONS = [
   { title: 'Button', value: 'button' },
   { title: 'Card', value: 'card' },
   { title: 'Switch', value: 'switch' },
+  { title: 'CTC Lever', value: 'ctc' },
   { title: 'Table', value: 'table' },
   { title: 'Raw', value: 'raw' }
 ]
