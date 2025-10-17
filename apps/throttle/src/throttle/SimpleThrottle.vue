@@ -4,6 +4,7 @@ import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import { FunctionsSpeedDial } from '@repo/ui'
 import { LocoAvatar, MiniConsist } from '@repo/ui'
+import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
 import { useThrottle } from '@/throttle/useThrottle'
 import { useRouter } from 'vue-router'
 import { toRef } from 'vue'
@@ -40,7 +41,12 @@ const {
         <MiniConsist v-if="loco" :loco="loco" />
       </template>
       <template v-slot:center>
-        <span v-if="loco" class="text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 font-bold">{{loco.name}}</span>
+        <div v-if="loco" class="flex flex-col items-center gap-1">
+          <RoadnameLogo :roadname="loco.meta?.roadname" />
+          <span class="text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 font-bold">
+            {{ loco.name }}
+          </span>
+        </div>
       </template>
       <template v-slot:right>
       </template>

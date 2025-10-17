@@ -7,6 +7,7 @@ import ThrottleSliderControls from '@/throttle/ThrottleSliderControls.vue'
 import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
+import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
 import { Consist, LocoAvatar, MiniConsist, FunctionsSpeedDial } from '@repo/ui'
 import { useThrottle } from '@/throttle/useThrottle'
 
@@ -65,11 +66,18 @@ function openFunctionSettings() {
     <!-- <pre>props.throttle {{ props.throttle }}</pre> -->
     <ThrottleHeader class="bg-gradient-to-r from-purple-300/10 to-pink-600/10 text-purple-400/10">
       <template v-slot:left>
-        <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" />
-        <MiniConsist v-if="loco" :loco="loco" />
-      </template>
-      <template v-slot:center>
-        <h1 class="text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 drop-shadow-lg">{{ loco?.name }}</h1>
+        <div class="flex flex-row items-center justify-center gap-1 px-4 bg-gray-900">
+          <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" :variant="'flat'" />
+          <MiniConsist v-if="loco" :loco="loco" />
+          <v-spacer class="w-2 md:w-6" />
+          <h1
+            class="text-xl md:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600 drop-shadow-lg"
+          >
+            {{ loco?.name }}
+          </h1>
+          <v-spacer class="w-2 md:w-6" />
+          <RoadnameLogo class="hidden sm:flex" v-if="loco" :roadname="loco.meta?.roadname" :size="'md'" />
+        </div>
       </template>
       <template v-slot:right>
         <ThrottleActionMenu 
@@ -78,8 +86,10 @@ function openFunctionSettings() {
       </template>
     </ThrottleHeader>
     <section class="throttle w-full h-full flex flex-row justify-around flex-grow relative z-10">
-      <section class="px-1 text-center flex-1 hidden sm:block">
-      <!-- <ThrottleSliderControls :direction="direction" :speed="currentSpeed" @update:currentSpeed="handleSlider" @stop="handleStop" /> -->
+      <section class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-center h-full flex-1/2 sm:flex-1">
+        <v-spacer />
+        <RoadnameLogo v-if="loco" :roadname="loco.meta?.roadname" :size="'3xl'" />
+        <!-- <ThrottleSliderControls :direction="direction" :speed="currentSpeed" @update:currentSpeed="handleSlider" @stop="handleStop" /> -->
       </section>
       <section v-if="loco" class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
         <Consist v-if="loco" :loco="loco" />

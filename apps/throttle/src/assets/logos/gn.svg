@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60" aria-labelledby="title desc" role="img">
+  <title id="title">Great Northern logo</title>
+  <desc id="desc">Circle badge in orange with goat silhouette</desc>
+  <defs>
+    <radialGradient id="gnGlow" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#ffedd5" />
+      <stop offset="100%" stop-color="#ea580c" />
+    </radialGradient>
+  </defs>
+  <rect x="10" y="8" width="140" height="44" rx="16" fill="#7c2d12" opacity="0.4" />
+  <circle cx="56" cy="30" r="18" fill="url(#gnGlow)" stroke="#f97316" stroke-width="3" />
+  <path d="M48 32c2-6 6-10 12-10 6 0 10 4 12 10" fill="none" stroke="#7c2d12" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <text x="104" y="36" font-family="'Poppins', 'Helvetica Neue', Arial, sans-serif" font-size="18" fill="#fed7aa" font-weight="700" letter-spacing="4">
+    GN
+  </text>
+</svg>
