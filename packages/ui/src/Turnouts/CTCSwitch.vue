@@ -135,10 +135,13 @@ function handleThrow() {
         <svg viewBox="0 0 180 200" class="ctc-base" aria-hidden="true">
           <path d="M20 186 L90 20 L160 186 Z" class="ctc-base-fill" />
           <path d="M20 186 L90 20 L160 186 Z" class="ctc-base-stroke" />
-          <text x="90" y="88" class="ctc-label-number">{{ labelNumber }}</text>
-          <text x="90" y="120" class="ctc-label-text">{{ labelText }}</text>
-          <text x="40" y="168" class="ctc-legends">N</text>
-          <text x="140" y="168" class="ctc-legends">R</text>
+          <g class="ctc-label-group">
+            <rect x="45" y="72" width="90" height="62" rx="10" class="ctc-label-plate" />
+            <text x="90" y="100" class="ctc-label-number">{{ labelNumber }}</text>
+            <text x="90" y="128" class="ctc-label-text">{{ labelText }}</text>
+          </g>
+          <text x="40" y="170" class="ctc-legends">N</text>
+          <text x="140" y="170" class="ctc-legends">R</text>
         </svg>
         <button
           type="button"
@@ -151,10 +154,11 @@ function handleThrow() {
           @click="handleThrow"
         >
           <div class="ctc-handle" :style="{ transform: `rotate(${leverAngle}deg)` }">
-            <div class="ctc-handle-rod" />
-            <div class="ctc-handle-knob">
-              <div class="ctc-handle-knob-inner" />
+            <div class="ctc-handle-pointer">
+              <div class="ctc-handle-pointer-core" />
             </div>
+            <div class="ctc-handle-rod" />
+            <div class="ctc-handle-counterweight" />
           </div>
           <div class="ctc-pivot" />
         </button>
@@ -198,12 +202,13 @@ function handleThrow() {
 
 <style scoped>
 .ctc-panel {
-  @apply w-full max-w-xs border-[6px] border-blue-700 bg-white text-[10px] uppercase tracking-[0.25em] text-neutral-900 shadow-lg;
+  @apply w-full max-w-xs border-[6px] border-blue-700 text-[10px] uppercase tracking-[0.25em] text-neutral-900 shadow-lg;
   font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   padding: 1.5rem 1rem 1.75rem;
+  background: radial-gradient(circle at top, #f8fafc 0%, #dbeafe 55%, #bfdbfe 100%);
 }
 
 .ctc-track-diagram {
@@ -277,6 +282,16 @@ function handleThrow() {
   stroke-width: 6;
 }
 
+.ctc-label-group {
+  paint-order: stroke fill;
+}
+
+.ctc-label-plate {
+  fill: rgba(15, 23, 42, 0.55);
+  stroke: rgba(148, 163, 184, 0.6);
+  stroke-width: 2;
+}
+
 .ctc-label-number {
   fill: #f1f5f9;
   font-size: 36px;
@@ -287,10 +302,10 @@ function handleThrow() {
 
 .ctc-label-text {
   fill: #e2e8f0;
-  font-size: 16px;
+  font-size: 15px;
   text-anchor: middle;
   dominant-baseline: middle;
-  letter-spacing: 0.35em;
+  letter-spacing: 0.28em;
 }
 
 .ctc-legends {
@@ -330,36 +345,46 @@ function handleThrow() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  gap: 0.75rem;
+  justify-content: flex-end;
+  gap: 0.5rem;
   transform-origin: center bottom;
   transition: transform 0.45s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
+.ctc-handle-pointer {
+  width: 2.1rem;
+  height: 3.9rem;
+  display: grid;
+  place-items: center;
+  clip-path: polygon(50% 0%, 88% 18%, 88% 100%, 12% 100%, 12% 18%);
+  background: linear-gradient(180deg, #f8fafc 0%, #cbd5f5 45%, #93c5fd 100%);
+  border: 2px solid #1f2937;
+  box-shadow: inset 0 -6px 0 rgba(15, 23, 42, 0.55);
+}
+
+.ctc-handle-pointer-core {
+  width: 55%;
+  height: 70%;
+  background: radial-gradient(circle at 50% 20%, #f1f5f9 0%, #93c5fd 75%);
+  clip-path: polygon(50% 0%, 86% 22%, 86% 100%, 14% 100%, 14% 22%);
+  border-radius: 0 0 6px 6px;
+}
+
 .ctc-handle-rod {
   width: 0.55rem;
-  height: 6rem;
+  height: 4.75rem;
   border-radius: 9999px;
-  background: linear-gradient(180deg, #f8fafc 0%, #94a3b8 100%);
+  background: linear-gradient(180deg, #e2e8f0 0%, #9ca3af 100%);
   box-shadow: inset 0 0 4px rgba(30, 41, 59, 0.5);
 }
 
-.ctc-handle-knob {
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 9999px;
-  background: linear-gradient(180deg, #f8fafc 0%, #cbd5f5 100%);
-  border: 2px solid #0f172a;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 6px 0 rgba(15, 23, 42, 0.6);
-}
-
-.ctc-handle-knob-inner {
-  width: 70%;
-  height: 70%;
-  border-radius: 9999px;
-  background: radial-gradient(circle at 30% 30%, #f8fafc 0%, #94a3b8 85%);
+.ctc-handle-counterweight {
+  width: 2.25rem;
+  height: 1.5rem;
+  border-radius: 12px 12px 20px 20px;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border: 2px solid #111827;
+  box-shadow: 0 4px 0 rgba(15, 23, 42, 0.65);
 }
 
 .ctc-pivot {
