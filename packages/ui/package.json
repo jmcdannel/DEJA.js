@@ -23,6 +23,7 @@
     "./TurnoutRaw": "./src/Turnouts/TurnoutRaw.vue",
     "./TurnoutTable": "./src/Turnouts/TurnoutTable.vue",
     "./TrackPower": "./src/TrackPower.vue",
+    "./CTCSwitch": "./src/CTCSwitch.vue",
     "./EffectList": "./src/Effects/EffectList.vue",
     "./EffectItem": "./src/Effects/EffectItem.vue",
     "./EffectSwitch": "./src/Effects/EffectSwitch.vue",
