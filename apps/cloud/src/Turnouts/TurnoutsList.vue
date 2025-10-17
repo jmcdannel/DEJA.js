@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
 import { useLayout } from '@repo/modules'
+import { TurnoutItem } from '@repo/ui'
 import TurnoutListItem from '@/Turnouts/TurnoutListItem.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
@@ -11,13 +12,18 @@ defineProps<{
   viewAs: string
 }>()
 
-const { getTurnouts } = useTurnouts()
+const { getTurnouts, setTurnout } = useTurnouts()
 const { getDevices } = useLayout()
 const list = getTurnouts()
 const devices = getDevices()
 
 // Group products by category
 const listByDevice = computed(() => list.value ? Object.groupBy(list.value, t => t.device) : null)
+
+async function handleCtcStateChange(turnout: Turnout, state: boolean) {
+  if (turnout.state === state) return
+  await setTurnout(turnout.id, { ...turnout, state })
+}
 
 </script>
 <template>
@@ -35,6 +41,23 @@ const listByDevice = computed(() => list.value ? Object.groupBy(list.value, t =>
                 @edit="$emit('edit', item)" 
               />
             </v-col>
+        </v-row>
+      </template>
+      <template v-else-if="viewAs === 'ctc'">
+        <v-row>
+          <v-col cols="12" xs="12" sm="6" lg="4">
+            <slot name="prepend"></slot>
+          </v-col>
+          <v-col v-for="item in list" :key="item.id" cols="12" xs="12" sm="6" lg="4">
+            <TurnoutItem
+              class="w-full"
+              :turnout="item as Turnout"
+              :turnoutId="item.id"
+              :state="item.state"
+              view-as="ctc"
+              @update:state="value => handleCtcStateChange(item as Turnout, value)"
+            />
+          </v-col>
         </v-row>
       </template>
       <template v-else-if="viewAs === 'device'">

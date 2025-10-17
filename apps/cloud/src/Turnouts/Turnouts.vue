@@ -10,6 +10,7 @@ import Addtile from '@/Core/UI/AddTile.vue'
 
 const VIEW_OPTIONS = [
   { title: 'Card', value: 'card' },
+  { title: 'CTC Lever', value: 'ctc' },
   { title: 'By Device', value: 'device' },
 ]
 const showSorter = ref(false)

@@ -4,6 +4,7 @@ import TurnoutSwitch from './TurnoutSwitch.vue'
 import TurnoutCard from './TurnoutCard.vue'
 import TurnoutButton from './TurnoutButton.vue'
 import TurnoutRaw from './TurnoutRaw.vue'
+import CTCSwitch from './CTCSwitch.vue'
 
 interface Props {
   state?: boolean
@@ -37,16 +38,23 @@ const handleStateUpdate = (newState: boolean) => {
     :state="state"
     @update:state="handleStateUpdate"
   />
-  <TurnoutButton 
-    v-else-if="viewAs === 'button'" 
-    :turnout="turnout" 
-    :turnout-id="turnoutId" 
+  <TurnoutButton
+    v-else-if="viewAs === 'button'"
+    :turnout="turnout"
+    :turnout-id="turnoutId"
     :state="state"
     @update:state="handleStateUpdate"
   />
-  <TurnoutRaw 
-    v-else-if="viewAs === 'raw'" 
-    :turnout="turnout" 
+  <CTCSwitch
+    v-else-if="viewAs === 'ctc'"
+    :turnout="turnout"
+    :turnout-id="turnoutId"
+    :state="state"
+    @update:state="handleStateUpdate"
+  />
+  <TurnoutRaw
+    v-else-if="viewAs === 'raw'"
+    :turnout="turnout"
     :state="state"
   />
   <TurnoutButton 
