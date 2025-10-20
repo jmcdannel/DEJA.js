@@ -109,7 +109,7 @@ const props = withDefaults(
   }
 )
 
-const idPrefix = useId()
+const idPrefix = 'lbl'
 
 const labelText = computed(() => props.label || 'Switch')
 
