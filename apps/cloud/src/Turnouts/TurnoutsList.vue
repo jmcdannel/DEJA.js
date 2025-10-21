@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
-import { useLayout } from '@repo/modules'
+import { useTurnouts, type Turnout } from '@repo/modules'
 import TurnoutListItem from '@/Turnouts/TurnoutListItem.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
@@ -12,13 +11,7 @@ defineProps<{
 }>()
 
 const { getTurnouts } = useTurnouts()
-const { getDevices } = useLayout()
 const list = getTurnouts()
-const devices = getDevices()
-
-// Group products by category
-const listByDevice = computed(() => list.value ? Object.groupBy(list.value, t => t.device) : null)
-
 </script>
 <template>
   <v-container>
@@ -50,6 +43,5 @@ const listByDevice = computed(() => list.value ? Object.groupBy(list.value, t =>
         />
       </template>
   </v-container>
-  <ViewJson :json="listByDevice || {}" label="Turnouts By Device"></ViewJson>
   <ViewJson :json="list" label="Turnouts"></ViewJson>
 </template>

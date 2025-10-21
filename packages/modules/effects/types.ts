@@ -12,6 +12,7 @@ export interface Effect {
   point2?: string
   range?: string
   config?: string
+  order?: number
   sound?: string
   soundBlobUrl?: string
   soundDuration?: number // Duration in seconds, optional

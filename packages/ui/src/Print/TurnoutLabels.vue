@@ -1,7 +1,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Turnout } from '@repo/modules/turnouts'
+import type { Turnout } from '@repo/modules'
 
 interface Props {
   turnouts: Turnout[]

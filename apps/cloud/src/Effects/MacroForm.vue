@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { type Effect, MacroItem } from '@repo/modules/effects'
 import { type Loco } from '@repo/modules/locos'
-import { type Turnout } from '@repo/modules/turnouts'
+import { type Turnout } from '@repo/modules'
 import MacroAdd from '@/Effects/MacroAdd.vue'
 
 interface MacroLoco extends Loco {

@@ -4,6 +4,7 @@ import EffectListItem from '@/Effects/EffectListItem.vue'
 
 const emit = defineEmits(['edit'])
 
+console.log('EffectsList.vue loaded')
 const { getEffects } = useEfx()
 const list = getEffects()
 

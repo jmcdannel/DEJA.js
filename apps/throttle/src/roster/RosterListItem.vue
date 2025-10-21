@@ -21,10 +21,10 @@ defineProps({
     :title="loco.name"
   >
     <template v-slot:prepend>
-      <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" :variant="'flat'" /> 
+      <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" :variant="'flat'" /> 
     </template>
     <v-card-text>
-      <RoadnameLogo :roadname="loco?.meta.roadname" size="lg" />
+      <RoadnameLogo :roadname="loco?.meta?.roadname" size="lg" />
     </v-card-text>
     <v-card-actions class="flex justify-end">
       <v-btn 

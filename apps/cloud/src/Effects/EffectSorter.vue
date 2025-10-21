@@ -1,28 +1,28 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import draggable from 'vuedraggable'
-import { useTurnouts, type Turnout } from '@repo/modules'
+import { useEfx, type Effect } from '@repo/modules'
 
 const emit = defineEmits(['close'])
 
-const { getTurnouts, setTurnout } = useTurnouts()
-const list = getTurnouts()
+const { getEffects, setEfx } = useEfx()
+const list = getEffects()
 const dragging = ref(false)
 
 function handleSave() {
   console.log('Saving new order:', list.value.map(async (item: any, order: number) => {
-    const turnout = item as Turnout
-    console.log('Setting turnout', turnout.name, 'to order', order)
-    await setTurnout(turnout.id, { ...turnout, order })
+    const efx = item as Effect
+    console.log('Setting effect', efx.name, 'to order', order)
+    await setEfx(efx.id, { ...efx, order })
   }))
   emit('close')
-} 
+}
 
 </script>
 <template>
-  <v-card title="Sort Turnouts" color="primary" variant="flat">
+  <v-card title="Sort Effects" color="primary" variant="flat">
     <v-card-text>
-      <p class="text-white">Drag and drop to sort turnouts.</p>
+      <p class="text-white">Drag and drop to sort effects.</p>
       <draggable
         :list="list"
         item-key="name"

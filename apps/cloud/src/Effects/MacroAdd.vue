@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { useEfx, type Effect } from '@repo/modules/effects'
 import { useLocos, type Loco } from '@repo/modules/locos'
-import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
+import { useTurnouts, type Turnout } from '@repo/modules'
 
 const emit = defineEmits(['add', 'close'])
 

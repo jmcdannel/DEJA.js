@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
 import { useEfx } from '@repo/modules/effects'
-import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
+import { useTurnouts, type Turnout } from '@repo/modules'
 
 const { setTurnout } = useTurnouts()
 const { runEffect, getEffect } = useEfx()
