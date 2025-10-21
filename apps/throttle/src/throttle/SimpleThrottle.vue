@@ -4,6 +4,7 @@ import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import { FunctionsSpeedDial } from '@repo/ui'
 import { LocoAvatar, MiniConsist } from '@repo/ui'
+import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
 import { useThrottle } from '@/throttle/useThrottle'
 import { useRouter } from 'vue-router'
 import { toRef } from 'vue'
@@ -30,19 +31,19 @@ const {
 </script>
 <template>
   <main v-if="throttle" class="flex flex-col gap-2 p-3 overflow-auto w-full h-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border min-h-[70vh] md:min-h-auto">
-    <ThrottleHeader>
+    <ThrottleHeader
+          v-if="loco" >
       <template v-slot:left>
         <LocoAvatar 
-          v-if="loco" 
           :loco="loco" 
           :size="48" 
           @select="$router.push({ name: 'throttle', params: { address } })" />
         <MiniConsist v-if="loco" :loco="loco" />
       </template>
-      <template v-slot:center>
-        <span v-if="loco" class="text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 font-bold">{{loco.name}}</span>
-      </template>
       <template v-slot:right>
+          <span class="text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 font-bold">
+            {{ loco.name }}
+          </span>
       </template>
     </ThrottleHeader>
     <section class="throttle w-full min-h-0 flex flex-col justify-around flex-grow relative z-10">
