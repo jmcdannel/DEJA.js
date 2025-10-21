@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
-import type { Turnout } from '@repo/modules/turnouts'
+import type { Turnout } from '@repo/modules'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import TurnoutsList from '@/Turnouts/TurnoutsList.vue'
 import TurnoutSorter from '@/Turnouts/TurnoutSorter.vue'

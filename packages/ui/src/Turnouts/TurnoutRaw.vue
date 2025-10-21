@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Turnout } from '@repo/modules/turnouts'
+import type { Turnout } from '@repo/modules'
 
 interface Props {
   turnout: Turnout

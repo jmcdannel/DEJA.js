@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core'
-import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
+import { useTurnouts, type Turnout } from '@repo/modules'
 import { ListMenu } from '@repo/ui'
 import TurnoutItem from './TurnoutItem.vue'
 import TurnoutTable from './TurnoutTable.vue'

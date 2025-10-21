@@ -591,7 +591,7 @@ Functions for turnout (switch) management and control.
 
 **Usage:**
 ```typescript
-import { useTurnouts } from '@repo/modules/turnouts';
+import { useTurnouts } from '@repo/modules';
 
 const { turnouts, throwTurnout, closeTurnout } = useTurnouts();
 ```

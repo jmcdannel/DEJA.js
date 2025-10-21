@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useCollection } from 'vuefire'
-import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
+import { useTurnouts, type Turnout } from '@repo/modules'
 import { TurnoutLabels } from '@repo/ui'
 
 const { getTurnouts } = useTurnouts()

@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import TurnoutForm from '@/Turnouts/TurnoutForm.vue'
-import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
+import { useTurnouts, type Turnout } from '@repo/modules'
 
 const route = useRoute()
 const router = useRouter()

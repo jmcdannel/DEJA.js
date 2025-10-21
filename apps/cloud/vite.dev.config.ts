@@ -43,7 +43,7 @@ export default defineConfig(({ mode }) => {
         '@repo/modules/effects',
         '@repo/modules/layouts',
         '@repo/modules/locos',
-        '@repo/modules/turnouts',
+        '@repo/modules',
         '@repo/dccex',
         '@repo/deja',
         '@repo/utils',

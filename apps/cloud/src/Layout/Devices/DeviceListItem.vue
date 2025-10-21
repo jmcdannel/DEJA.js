@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useColors } from '@/Core/UI/useColors'
 import { deviceTypes, useLayout, type Device } from '@repo/modules'
-import { useTurnouts } from '@repo/modules/turnouts'
+import { useTurnouts } from '@repo/modules'
 
 const { connectDevice, autoConnectDevice } = useLayout()
 const { getTurnouts } = useTurnouts()

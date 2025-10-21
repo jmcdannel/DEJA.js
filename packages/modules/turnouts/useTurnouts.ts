@@ -19,6 +19,9 @@ export function useTurnouts() {
   const filterBy = useStorage<string[]>('@DEJA/prefs/turnouts/Filter', [])
   const colRef = collection(db, `layouts/${layoutId.value}/turnouts`)
 
+  console.log('useTurnouts layoutId', layoutId.value)
+  console.log('useTurnouts sortBy', sortBy.value)
+
   const turnoutsCol = () => {
     const whereClauses: any[] = []
     if (filterBy.value.length > 0) {
@@ -29,8 +32,8 @@ export function useTurnouts() {
         }
       })
     }
-    
-    let queryRef = query(collection(db, `layouts/${layoutId.value}/turnouts`))
+    console.log('sortby', sortBy.value)
+    let queryRef = query(collection(db, `layouts/${layoutId.value}/turnouts`), orderBy(sortBy.value[0]))
     // let queryRef = query(colRef, orderBy(sortBy.value[0])) // TODO: debug this, getting error: [VueFire SSR]: Could not get the path of the data source]
     whereClauses.forEach((clause) => {
       console.log(clause)
@@ -42,7 +45,8 @@ export function useTurnouts() {
   
 
   function getTurnouts() {
-    const turnouts = useCollection(turnoutsCol)
+    console.log('getTurnouts called')
+    const turnouts = useCollection(turnoutsCol, { ssrKey: 'turnouts' })
     return turnouts
   }
   

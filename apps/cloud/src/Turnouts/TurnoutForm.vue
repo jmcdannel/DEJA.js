@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
+import { useTurnouts, type Turnout } from '@repo/modules'
 import { useLayout } from '@repo/modules'
 // import { useEfx } from '@repo/modules/effects'
 import { slugify } from '@repo/utils/slugify'

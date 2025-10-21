@@ -71,10 +71,10 @@ export const useLayout = () => {
   }
 
   function getLayouts() {
-    console.log('getLayouts')
     const user = useCurrentUser()
+    console.log('getLayouts', user?.value?.email)
     return user?.value?.email  
-      ? useCollection(query(collection(db, 'layouts'), where('owner', '==', user.value?.email)))
+      ? useCollection(query(collection(db, 'layouts'), where('owner', '==', user.value?.email)), { ssrKey: 'layouts' })
       : null
   }
 

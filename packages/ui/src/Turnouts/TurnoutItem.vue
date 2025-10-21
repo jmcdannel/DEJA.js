@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Turnout } from '@repo/modules/turnouts'
+import type { Turnout } from '@repo/modules'
 import TurnoutSwitch from './TurnoutSwitch.vue'
 import TurnoutCard from './TurnoutCard.vue'
 import TurnoutButton from './TurnoutButton.vue'

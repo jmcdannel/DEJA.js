@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
-import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
+import { useTurnouts, type Turnout } from '@repo/modules'
 
 const { setTurnout } = useTurnouts()
 

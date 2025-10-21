@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import draggable from 'vuedraggable'
-import { useTurnouts, type Turnout } from '@repo/modules/turnouts'
+import { useTurnouts, type Turnout } from '@repo/modules'
 
 const emit = defineEmits(['close'])
 
@@ -12,6 +12,7 @@ const dragging = ref(false)
 function handleSave() {
   console.log('Saving new order:', list.value.map(async (item: any, order: number) => {
     const turnout = item as Turnout
+    console.log('Setting turnout', turnout.name, 'to order', order)
     await setTurnout(turnout.id, { ...turnout, order })
   }))
   emit('close')
