@@ -2,6 +2,7 @@
 import { LocoAvatar } from '@repo/ui'
 import ThrottleButtonControls from './ThrottleButtonControls.vue'
 import CurrentSpeed from './CurrentSpeed.vue'
+import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
 import { useThrottle } from './useThrottle'
 
 const props = defineProps({
@@ -37,7 +38,8 @@ const {
           @update:currentSpeed="handleAdjustSpeed" 
         />
       </div>
-      <div class="order-2 basis-1/3 py-2 flex justify-center text-base @[960px]:text-xl">
+      <div class="order-2 basis-1/3 py-2 flex justify-center text-base @[960px]:text-xl gap-2 items-center">
+        <RoadnameLogo :roadname="loco?.meta.roadname" size="sm" />
         <span class="bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-cyan-400 font-bold">{{loco?.name || throttle.address}}</span>
       </div>
       <div class="order-2  basis-1/3 pr-2">

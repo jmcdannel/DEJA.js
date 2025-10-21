@@ -1,10 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60" aria-labelledby="title desc" role="img">
-  <title id="title">Burlington Northern logo</title>
-  <desc id="desc">Abstract BN monogram in green</desc>
-  <rect x="6" y="8" width="148" height="44" rx="14" fill="#14532d" opacity="0.4" />
-  <path d="M42 20h36c10 0 18 8 18 18v10H42z" fill="#22c55e" opacity="0.85" />
-  <path d="M42 20v28h-14V34c0-8 6-14 14-14z" fill="#4ade80" opacity="0.9" />
-  <text x="112" y="38" font-family="'Poppins', 'Helvetica Neue', Arial, sans-serif" font-size="18" fill="#bbf7d0" font-weight="700" letter-spacing="5">
-    BN
-  </text>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 26.5.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 609.8 347.1" style="enable-background:new 0 0 609.8 347.1;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#049B33;}
+</style>
+<g>
+	<path class="st0" d="M498.4,177.3h-45.7l-20.6,58.6H301.4l-84.1-59.5c-8.4-5.8-20-2-23.4,7.6l-18.7,51.9H39l-39,111l468.8,0.2
+		c46.9-0.8,91-39.4,98.4-86.3S545.3,176.5,498.4,177.3L498.4,177.3z"/>
+	<path class="st0" d="M534.3,0.2V0H121.9L83.6,109.1h136.3l90.3,61.8c8.4,5.8,20,2,23.4-7.7l19-54.2h124.1L456,167.8h58.9
+		c46.3-0.5,88.6-38.5,94.4-84.8C615,37.2,580,0.3,534.3,0.2z"/>
+</g>
 </svg>

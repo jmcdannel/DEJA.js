@@ -48,6 +48,12 @@ const router = createRouter({
       beforeEnter: [requireAuth, requireLayout],
     },
     {
+      path: '/roadname-logos',
+      name: 'roadname-logos',
+      component: () => import('../views/RoadnameLogosView.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
       path: '/turnouts',
       name: 'turnouts',
       component: () => import('../views/TurnoutsView.vue'),

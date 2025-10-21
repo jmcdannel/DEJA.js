@@ -31,24 +31,19 @@ const {
 </script>
 <template>
   <main v-if="throttle" class="flex flex-col gap-2 p-3 overflow-auto w-full h-full flex-1 shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border min-h-[70vh] md:min-h-auto">
-    <ThrottleHeader>
+    <ThrottleHeader
+          v-if="loco" >
       <template v-slot:left>
         <LocoAvatar 
-          v-if="loco" 
           :loco="loco" 
           :size="48" 
           @select="$router.push({ name: 'throttle', params: { address } })" />
         <MiniConsist v-if="loco" :loco="loco" />
       </template>
-      <template v-slot:center>
-        <div v-if="loco" class="flex flex-col items-center gap-1">
-          <RoadnameLogo :roadname="loco.meta?.roadname" />
-          <span class="text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 font-bold">
+      <template v-slot:right>
+          <span class="text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 font-bold">
             {{ loco.name }}
           </span>
-        </div>
-      </template>
-      <template v-slot:right>
       </template>
     </ThrottleHeader>
     <section class="throttle w-full min-h-0 flex flex-col justify-around flex-grow relative z-10">
