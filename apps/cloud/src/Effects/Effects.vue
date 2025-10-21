@@ -1,12 +1,15 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import type { Effect } from '@repo/modules'
 import { useRouter } from 'vue-router'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import EffectsList from '@/Effects/EffectsList.vue'
+import EffectSorter from '@/Effects/EffectSorter.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 import { ListMenu } from '@repo/ui'
 
 const router = useRouter()
+const showSorter = ref(false)
 
 function handleEdit(effect: Effect) {
   router.push({ name: 'Edit Effect', params: { effectId: effect.id } })
@@ -20,7 +23,12 @@ function handleAdd() {
 <template>
   <ModuleTitle menu="Effects">
     <ListMenu :disabledMenus="['view']" :module-name="'effects'" />
+    <v-btn @click="showSorter = !showSorter" icon="mdi-sort-variant"></v-btn>
   </ModuleTitle>
+
+  <v-dialog v-model="showSorter" max-width="80vw">
+    <EffectSorter @close="showSorter = false" />
+  </v-dialog>
 
   <!-- External Sound Library Quicklinks -->
   <v-card class="mb-4">

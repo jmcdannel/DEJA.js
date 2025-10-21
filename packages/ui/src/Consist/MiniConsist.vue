@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { type PropType } from 'vue'
-import type { Loco } from '@repo/modules/locos'
+import type { Loco, ConsistLoco } from '@repo/modules/locos'
 
 defineProps({
   loco: {
@@ -16,7 +16,7 @@ defineProps({
 })
 
 const emit = defineEmits<{
-  (e: 'select', loco: Loco): void
+  (e: 'select', loco: ConsistLoco): void
 }>()
 
 const opacityClasses: { [key: number]: string } = {

@@ -19,9 +19,6 @@ export function useTurnouts() {
   const filterBy = useStorage<string[]>('@DEJA/prefs/turnouts/Filter', [])
   const colRef = collection(db, `layouts/${layoutId.value}/turnouts`)
 
-  console.log('useTurnouts layoutId', layoutId.value)
-  console.log('useTurnouts sortBy', sortBy.value)
-
   const turnoutsCol = () => {
     const whereClauses: any[] = []
     if (filterBy.value.length > 0) {

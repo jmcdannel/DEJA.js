@@ -8,7 +8,7 @@ import { useCollection, useCurrentUser } from 'vuefire'
 import { AppHeader } from '@repo/ui'
 import Footer from '@/core/Footer.vue'
 import { useDcc } from '@repo/dccex'
-import { useEfx } from '@repo/modules'
+import { useEfx, type Effect } from '@repo/modules'
 
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
@@ -27,9 +27,13 @@ async function handleTrackPowerToggle(newState: boolean) {
 
 async function handleLayoutPowerToggle(newState: boolean) {
   const powerEfx = await getEffectsByType('power')
+  if (!powerEfx) {
+    console.warn('No power effects found for layout', layoutId.value)
+    return
+  }
   const querySnapshot = await getDocs(powerEfx);
   querySnapshot.forEach((doc) => {
-    runEffect({...doc, id: doc.id, state: newState});
+    runEffect({...doc.data(), id: doc.id, state: newState} as Effect);
   });
 }
 

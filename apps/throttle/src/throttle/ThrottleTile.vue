@@ -39,7 +39,7 @@ const {
         />
       </div>
       <div class="order-2 basis-1/3 py-2 flex justify-center text-base @[960px]:text-xl gap-2 items-center">
-        <RoadnameLogo :roadname="loco?.meta.roadname" size="sm" />
+        <RoadnameLogo :roadname="loco?.meta?.roadname" size="sm" />
         <span class="bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-cyan-400 font-bold">{{loco?.name || throttle.address}}</span>
       </div>
       <div class="order-2  basis-1/3 pr-2">

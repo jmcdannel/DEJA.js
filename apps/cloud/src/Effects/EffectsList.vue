@@ -4,7 +4,8 @@ import EffectListItem from '@/Effects/EffectListItem.vue'
 
 const emit = defineEmits(['edit'])
 
-const { getEffects } = useEfx()
+console.log('EffectsList.vue loaded')
+const { getEffects } = useEfx('order')
 const list = getEffects()
 
 function handleEdit(item: Effect) {

@@ -1,6 +1,6 @@
 <script async setup lang="ts">
 import { ref, watch, useTemplateRef } from 'vue'
-import { useSwipe } from '@vueuse/core'
+import { useSwipe, type UseSwipeDirection } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
 import { useLocos } from '@repo/modules/locos'
 import ThrottleNavItem from '@/throttle/ThrottleNavItem.vue'

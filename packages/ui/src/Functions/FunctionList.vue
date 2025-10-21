@@ -1,9 +1,8 @@
 <script lang="ts" setup>
   import { ref } from 'vue'
   import FunctionButton from './FunctionButton.vue'
-  import { defaultFunctions, type Loco } from '@repo/modules/locos'
+  import { defaultFunctions, useLocos, type Loco, type ConsistLoco } from '@repo/modules'
   import { LocoAvatar, MiniConsist } from '@repo/ui'
-  import { useLocos } from '@repo/modules/locos'
 
   const props = defineProps<{
     loco: Loco | null,
@@ -19,7 +18,7 @@
   // when the modal opens, default the selected consist to the current loco
 
   // update functions when a consist loco is selected
-  function handleConsistSelect(selected: Loco) {
+  function handleConsistSelect(selected: ConsistLoco) {
     // Replace the current loco with the selected loco to show its functions
     selectedConsistAddress.value = selected.address ?? null
     // try to find a full loco entry from the locos collection
@@ -29,10 +28,6 @@
       _functions.value = defaultFunctions.map(f => ({...f, ...full.functions?.find((lf: any) => lf.id === f.id)}))
       return
     }
-
-    // final fallback: use the minimal selected object now (consist entries are minimal)
-    currentLoco.value = selected as Loco
-    _functions.value = defaultFunctions.map(f => ({...f, ...selected.functions?.find((lf: any) => lf.id === f.id)}))
   }
 
   function handleLocoSelect() {
