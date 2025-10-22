@@ -97,7 +97,7 @@ const valueLabels = computed(() => {
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-2">
+  <v-list-item class="flex flex-col items-center gap-2" base-color="red">
     <!-- SVG Speedometer -->
     <svg 
       :width="size" 
@@ -187,9 +187,9 @@ const valueLabels = computed(() => {
     
     <!-- Address label -->
     <div class="text-center">
-      <div class="text-lg font-bold text-gray-100">#{{ address }}</div>
+      <v-label color="red" class="text-lg font-bold">#{{ address }}</v-label>
     </div>
-  </div>
+  </v-list-item>
 </template>
 
 <style scoped>
