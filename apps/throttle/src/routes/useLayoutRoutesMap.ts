@@ -79,6 +79,7 @@ export const useLayoutRoutesMap = () => {
     target: EventTarget | null
   ): { target: HTMLElement; type: string } | null {
     if (!target) return null
+    console.log('findClickableParent', target)
 
     const currentTarget = target as HTMLElement
     
@@ -168,8 +169,10 @@ export const useLayoutRoutesMap = () => {
           }
           break
         case 'Turnouts':
+          await toggleTurnout(svgBtn.target.id.replace('_', ''))
+          break
         case 'TurnoutLabels':
-            await toggleTurnout(svgBtn.target.id.replace('lbl', ''))
+          await toggleTurnout(svgBtn.target.id.replace('lbl', ''))
           break
         default:
           // noop
