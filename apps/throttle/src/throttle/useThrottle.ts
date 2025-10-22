@@ -3,7 +3,7 @@ import { useStorage } from '@vueuse/core'
 import { deleteDoc, doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { useDocument } from 'vuefire'
 import type { Throttle } from '@/throttle/types'
-import { type Loco, useLocos } from '@repo/modules/locos'
+import { type Loco, useLocos } from '@repo/modules'
 import { db } from '@repo/firebase-config'
 import { getSignedSpeed } from '@/throttle/utils'
 

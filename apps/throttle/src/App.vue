@@ -82,7 +82,7 @@ function handleLogoClick() {
         @logo-click="handleLogoClick"
         @drawer-toggle="drawer = !drawer"
       />
-  <Menu v-model:drawer="drawer" />
+      <Menu v-model:drawer="drawer" />
       <v-main>
         <v-container class="p-0 min-h-full flex flex-col" fluid>
           <RouterView />

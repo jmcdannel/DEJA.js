@@ -1,47 +1,27 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { useTimeoutFn } from '@vueuse/core'
 import { useTurnouts, type Turnout } from '@repo/modules'
 
 const { setTurnout } = useTurnouts()
 
 interface Props {
-  turnout: Turnout
-  turnoutId?: string
-  state?: boolean
+  turnout: Turnout,
+  isRunning: boolean
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{
-  'update:state': [value: boolean]
-}>()
-
-const internalState = ref(props.state !== undefined ? props.state : props.turnout?.state)
-const isRunning = ref(false)
-
-// Computed property for state that can be updated
-const state = computed({
-  get: () => props.state !== undefined ? props.state : internalState.value,
-  set: (value: boolean) => {
-    internalState.value = value
-    emit('update:state', value)
-  }
+const state = defineModel('state', {
+  type: Boolean
 })
 
-// Watch for prop changes
-watch(() => props.state, (newState) => {
-  if (newState !== undefined) {
-    internalState.value = newState
-  }
-})
-
-async function handleTurnouts(event: Event) {
-  const { isPending } = useTimeoutFn(() => {
-    isRunning.value = false
-  }, 3000)
-  isRunning.value = isPending.value
-  await setTurnout(props.turnoutId || props.turnout.id, {...props.turnout, id: props.turnoutId || props.turnout.id, state: state.value})
+function handleSetTurnout(newState: boolean) {
+  setTurnout(props.turnout.id, {
+    ...props.turnout,
+    state: newState
+  })
+  state.value = newState
 }
+
 </script>
 
 <template>
@@ -51,15 +31,13 @@ async function handleTurnouts(event: Event) {
     :disabled="isRunning"
     :loading="isRunning"
     variant="tonal"
-    @click="handleTurnouts"
   >
     <v-card-title class="flex flex-row items-center gap-4">
-      <v-icon icon="mdi-call-split" class="w-6 h-6" />
+      <v-icon :icon="turnout?.type === 'servo' ? 'mdi-call-split' : 'mdi-electric-switch'" class="w-6 h-6" />
       <h4 class="text-md font-bold">{{turnout?.name}}</h4>
     </v-card-title>
     <v-card-text class="text-sm">
       <p class="my-4">{{turnout?.desc || turnout?.name}}</p>
-      <p class="my-4">{{ turnout.type }}</p>
       <div class="flex flex-wrap gap-2">
         <v-chip 
           v-if="turnout?.device" 
@@ -89,12 +67,26 @@ async function handleTurnouts(event: Event) {
       </div>
     </v-card-text>
     <v-card-actions class="flex justify-end">
+      <v-btn 
+        :color="turnout?.color || 'primary'"
+        :disabled="isRunning"
+        :loading="isRunning"
+        variant="tonal"
+        @click="handleSetTurnout(true)"  
+      >Set On</v-btn>
+      <v-btn
+        :color="turnout?.color || 'primary'"
+        :disabled="isRunning"
+        :loading="isRunning"
+        variant="tonal"
+        @click="handleSetTurnout(false)"
+      >Set Off</v-btn>
       <v-switch 
         v-model="state" 
-        @change="handleTurnouts" 
         :color="turnout?.color || 'primary'" 
         :disabled="isRunning" 
         :loading="isRunning" 
+        label="Toggle Turnout"
         hide-details 
       />    
     </v-card-actions>

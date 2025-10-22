@@ -8,6 +8,7 @@ export function useColors() {
       text: 'text-slate-500 dard:text-slate-400',
       border: 'border-slate-500 dark:border-slate-400',
       bg: 'bg-slate-500 dark:bg-slate-400',
+      fill: 'fill-slate-500 dark:fill-slate-400',
     },
     {
       value: 'zinc',
@@ -16,6 +17,7 @@ export function useColors() {
       text: 'text-zinc-500 dark:text-zinc-400',
       border: 'border-zinc-500 dark:border-zinc-400',
       bg: 'bg-zinc-500 dark:bg-zinc-400',
+      fill: 'fill-zinc-500 dark:fill-zinc-400',
     },
     {
       value: 'stone',
@@ -24,6 +26,7 @@ export function useColors() {
       text: 'text-stone-500 dark:text-stone-400',
       border: 'border-stone-500 dark:border-stone-400',
       bg: 'bg-stone-500 dark:bg-stone-400',
+      fill: 'fill-stone-500 dark:fill-stone-400',
     },
     {
       value: 'red',
@@ -32,6 +35,7 @@ export function useColors() {
       text: 'text-red-500 dark:text-red-400',
       border: 'border-red-500 dark:border-red-400',
       bg: 'bg-red-500 dark:bg-red-400',
+      fill: 'fill-red-500 dark:fill-red-400',
     },
     {
       value: 'orange',
@@ -40,6 +44,7 @@ export function useColors() {
       text: 'text-orange-500 dark:text-orange-400',
       border: 'border-orange-500 dark:border-orange-400',
       bg: 'bg-orange-500 dark:bg-orange-400',
+      fill: 'fill-orange-500 dark:fill-orange-400',
     },
     {
       value: 'amber',
@@ -48,6 +53,7 @@ export function useColors() {
       text: 'text-amber-500 dark:text-amber-400',
       border: 'border-amber-500 dark:border-amber-400',
       bg: 'bg-amber-500 dark:bg-amber-400',
+      fill: 'fill-amber-500 dark:fill-amber-400',
     },
     {
       value: 'yellow',
@@ -56,6 +62,7 @@ export function useColors() {
       text: 'text-yellow-500 dark:text-yellow-400',
       border: 'border-yellow-500 dark:border-yellow-400',
       bg: 'bg-yellow-500 dark:bg-yellow-400',
+      fill: 'fill-yellow-500 dark:fill-yellow-400',
     },
     {
       value: 'lime',
@@ -64,6 +71,7 @@ export function useColors() {
       text: 'text-lime-500 dark:text-lime-400',
       border: 'border-lime-500 dark:border-lime-400',
       bg: 'bg-lime-500 dark:bg-lime-400',
+      fill: 'fill-lime-500 dark:fill-lime-400',
     },
     {
       value: 'green',
@@ -72,6 +80,7 @@ export function useColors() {
       text: 'text-green-500 dark:text-green-400',
       border: 'border-green-500 dark:border-green-400',
       bg: 'bg-green-500 dark:bg-green-400',
+      fill: 'fill-green-500 dark:fill-green-400',
     },
     {
       value: 'emerald',
@@ -80,6 +89,7 @@ export function useColors() {
       text: 'text-emerald-500 dark:text-emerald-400',
       border: 'border-emerald-500 dark:border-emerald-400',
       bg: 'bg-emerald-500 dark:bg-emerald-400',
+      fill: ' fill-emerald-500 dark:fill-emerald-400',
     },
     {
       value: 'teal',
@@ -88,6 +98,7 @@ export function useColors() {
       text: 'text-teal-500 dark:text-teal-400',
       border: 'border-teal-500 dark:border-teal-400',
       bg: 'bg-teal-500 dark:bg-teal-400',
+      fill: 'fill-teal-500 dark:fill-teal-400',
     },
     {
       value: 'cyan',
@@ -96,6 +107,7 @@ export function useColors() {
       text: 'text-cyan-500 dark:text-cyan-400',
       border: 'border-cyan-500 dark:border-cyan-400',
       bg: 'bg-cyan-500 dark:bg-cyan-400',
+      fill: 'fill-cyan-500 dark:fill-cyan-400',
     },
     {
       value: 'sky',
@@ -104,6 +116,7 @@ export function useColors() {
       text: 'text-sky-500 dark:text-sky-400',
       border: 'border-sky-500 dark:border-sky-400',
       bg: 'bg-sky-500 dark:bg-sky-400',
+      fill: 'fill-sky-500 dark:fill-sky-400',
     },
     {
       value: 'blue',
@@ -112,6 +125,7 @@ export function useColors() {
       text: 'text-blue-500 dark:text-blue-400',
       border: 'border-blue-500 dark:border-blue-400',
       bg: 'bg-blue-500 dark:bg-blue-400',
+      fill: 'fill-blue-500 dark:fill-blue-400',
     },
     {
       value: 'indigo',
@@ -120,6 +134,7 @@ export function useColors() {
       text: 'text-indigo-500 dark:text-indigo-400',
       border: 'border-indigo-500 dark:border-indigo-400',
       bg: 'bg-indigo-500 dark:bg-indigo-400',
+      fill: 'fill-indigo-500 dark:fill-indigo-400',
     },
     {
       value: 'violet',
@@ -128,6 +143,7 @@ export function useColors() {
       text: 'text-violet-500 dark:text-violet-400',
       border: 'border-violet-500 dark:border-violet-400',
       bg: 'bg-violet-500 dark:bg-violet-400',
+      fill: 'fill-violet-500 dark:fill-violet-400',
     },
     {
       value: 'purple',
@@ -136,6 +152,7 @@ export function useColors() {
       text: 'text-purple-500 dark:text-purple-400',
       border: 'border-purple-500 dark:border-purple-400',
       bg: 'bg-purple-500 dark:bg-purple-400',
+      fill: 'fill-purple-500 dark:fill-purple-400',
     },
     {
       value: 'fuchsia',
@@ -144,6 +161,7 @@ export function useColors() {
       text: 'text-fuchsia-500 dark:text-fuchsia-400',
       border: 'border-fiushia-500 dark:border-fuchsia-400',
       bg: 'bg-fuchsia-500 dark:bg-fuchsia-400',
+      fill: 'fill-fuchsia-500 dark:fill-fuchsia-400',
     },
     {
       value: 'pink',
@@ -152,6 +170,7 @@ export function useColors() {
       text: 'text-pink-500 dark:text-pink-400',
       border: 'border-pink-500 dark:border-pink-400',
       bg: 'bg-pink-500 dark:bg-pink-400',
+      fill: 'fill-pink-500 dark:fill-pink-400',
     },
     {
       value: 'rose',
@@ -160,6 +179,7 @@ export function useColors() {
       text: 'text-rose-500 dark:text-rose-400',
       border: 'border-rose-500 dark:border-rose-400',
       bg: 'bg-rose-500 dark:bg-rose-400',
+      fill: 'fill-rose-500 dark:fill-rose-400',
     },
   ]
 
