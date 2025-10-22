@@ -22,11 +22,7 @@ export const useEfx = () => {
   const filterBy = useStorage<string[]>('@DEJA/prefs/effects/Filter', [])
   const colRef = collection(db, `layouts/${layoutId.value}/effects`)
 
-  console.log('useEfx layoutId', layoutId.value)
-  console.log('useEfx sortBy', sortBy.value)
-
   const efxCol = () => {
-    console.log('efxCol called')
     const whereClauses: any[] = []
     if (filterBy.value.length > 0) {
       filterBy.value.forEach((filter) => {
@@ -40,7 +36,6 @@ export const useEfx = () => {
     let queryRef = query(collection(db, `layouts/${layoutId.value}/effects`), orderBy(sortBy.value[0]))
     // let queryRef = fquery(colRef, orderBy(sortBy.value[0])) // TODO: debug this, getting error: [VueFire SSR]: Could not get the path of the data source]
     whereClauses.forEach((clause) => {
-      console.log(clause)
       queryRef = query(queryRef, clause)
     })
 
@@ -48,7 +43,6 @@ export const useEfx = () => {
   }
 
   function getEffects() {
-    console.log('getEffects called')
     const effects = useCollection(efxCol, { ssrKey: 'effects' })
     return effects
   }
