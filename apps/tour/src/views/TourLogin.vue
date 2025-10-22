@@ -67,9 +67,9 @@ const handleGuestAccess = async () => {
     console.log('Guest user created:', guestUser)
     
     // Small delay to show success message
-    setTimeout(() => {
-      router.push('/')
-    }, 1500)
+    // setTimeout(() => {
+    //   router.push('/')
+    // }, 1500)
     
   } catch (err: any) {
     console.error('Guest access failed:', err)
@@ -124,7 +124,7 @@ const handleGoogleSignin = async () => {
 // Watch for successful authentication (Firebase or guest)
 watch([user, () => guestStore.currentGuest], ([newUser, newGuest]) => {
   if (newUser || newGuest) {
-    console.log('User authenticated, redirecting...')
+    console.log('User authenticated, redirecting...', newUser, newGuest)
     setTimeout(() => {
       router.push('/')
     }, 1500)
@@ -156,7 +156,7 @@ onMounted(async () => {
 <template>
   <div class="login-container">
     <v-container class="fill-height">
-      <v-row justify="center" align="center" class="fill-height">
+      <v-row justify="center" halign="center" class="fill-height">
         <v-col cols="12" sm="8" md="6" lg="4">
           <v-card elevation="8" class="pa-6">
             <v-card-text class="text-center">
@@ -211,10 +211,20 @@ onMounted(async () => {
                       ></v-btn>
                     </template>
                   </v-select>
-              </v-card>
-            </div>
-          </v-card-text>
-        </v-card>
+                  <v-card-actions>
+                    <v-btn
+                      color="primary"
+                      variant="flat"
+                      :disabled="!selectedUsername || loading"
+                      @click="handleGuestAccess"
+                    >
+                      Continue as Guest
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </div>
+            </v-card-text>
+          </v-card>
         </v-col>
       </v-row>
     </v-container>

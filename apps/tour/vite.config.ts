@@ -19,9 +19,6 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       '@repo/firebase-config',
-      '@repo/modules/effects',
-      '@repo/modules/layouts',
-      '@repo/modules/locos',
       '@repo/modules',
       '@repo/dccex',
       '@repo/deja',

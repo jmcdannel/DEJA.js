@@ -52,7 +52,6 @@ const router = useRouter()
 const theme = useTheme()
 const { menu, handleMenu } = useMenu()
 
-const mobile = ref(null)
 const currentTheme = ref(theme.name.value || 'dark')
 
 // Watch for theme changes and update the local state
@@ -96,7 +95,7 @@ function handleLogoClick() {
           @drawer-toggle="drawer = !drawer"
         >
         </AppHeader>
-      <v-navigation-drawer v-model="drawer" :mobile="mobile" mobile-breakpoint="md">
+      <v-navigation-drawer v-model="drawer" mobile-breakpoint="md">
         <v-spacer class="h-8"></v-spacer>
         <v-list>
           <v-list-item v-for="item in menu" 

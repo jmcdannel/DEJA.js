@@ -43,8 +43,15 @@ export const useEfx = () => {
   }
 
   function getEffects() {
+    console.log('Getting effects for layout:', layoutId.value)
     const effects = useCollection(efxCol, { ssrKey: 'effects' })
     return effects
+  }
+
+  function getGuestEffects() {
+    console.log('Getting guest effects for layout:', layoutId.value)
+    const guestEffects = useCollection(query(collection(db, `layouts/${layoutId.value}/effects`), where('allowGuest', '==', true)), { ssrKey: 'guestEffects' })
+    return guestEffects
   }
 
   async function getEffect(id: string): Promise<Effect | undefined> {
@@ -162,6 +169,7 @@ export const useEfx = () => {
     efxCol,
     getEffect,
     getEffects,
+    getGuestEffects,
     getEffectsByDevice,
     getEffectsByType,
     getEfxType,

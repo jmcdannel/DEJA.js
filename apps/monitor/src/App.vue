@@ -14,6 +14,7 @@ const { getDevices, getLayouts } = useLayout()
 const layoutId = useStorage('@DEJA/layoutId', '')
 const devices = getDevices()
 const layouts = getLayouts()
+const drawer = ref(false)
 
 // Event handlers for the unified header
 async function handleTrackPowerToggle(newState: boolean) {
@@ -68,10 +69,10 @@ function handleLogoClick() {
   <v-responsive>
     <v-app v-if="user" :theme="theme">
       <AppHeader 
-        app-name="DEJA Monitor"
+        app-name="Monitor"
         app-icon="mdi-monitor-dashboard"
         variant="monitor"
-        color="surface"
+        color="red"
         :dark="true"
         :devices="devices"
         :layouts="layouts"
@@ -85,10 +86,10 @@ function handleLogoClick() {
         @emergency-stop="handleEmergencyStop"
         @device-select="handleDeviceSelect"
         @logo-click="handleLogoClick"
+          @drawer-toggle="drawer = !drawer"
       />
 
-      <v-navigation-drawer expand-on-hover
-        rail>
+      <v-navigation-drawer v-model="drawer" mobile-breakpoint="md">
         <v-list>
           <v-list-item @click="handleMenu('Dashboard')" prepend-icon="mdi-view-dashboard">
             <v-list-item-title>Dashboard</v-list-item-title>

@@ -141,7 +141,56 @@ export interface GuestUser {
 
 export const useGuestStore = defineStore('guest', () => {
   // Guest user state
-  const currentGuest = useStorage<GuestUser | null>('@DEJA/guest-user', null)
+  // useStorage serializes to JSON by default which will turn Dates into strings.
+  // Provide a custom serializer to revive Date objects when reading and
+  // serialize Dates as ISO strings when writing so the in-memory type stays consistent.
+  const guestStorageSerializer: { read: (v: string | null) => GuestUser | null; write: (v: GuestUser | null) => string } = {
+    read: (raw: string | null) => {
+      if (!raw) return null
+      try {
+        let parsed: unknown = JSON.parse(raw)
+
+        // Handle legacy case where the stored value was a JSON string of the object
+        // e.g. stored value is '"{...}"' -> JSON.parse(raw) returns a string.
+        if (typeof parsed === 'string') {
+          try {
+            parsed = JSON.parse(parsed)
+          } catch (e) {
+            // If double-parse fails, fall back to null
+            console.warn('Failed to double-parse legacy guest value', e)
+            return null
+          }
+        }
+
+        const guest = parsed as GuestUser
+        if (guest) {
+          // revive date strings into Date objects
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ;(guest as any).createdAt = guest.createdAt ? new Date(guest.createdAt as unknown as string) : undefined
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ;(guest as any).lastActive = guest.lastActive ? new Date(guest.lastActive as unknown as string) : undefined
+        }
+        return guest
+      } catch (e) {
+        console.error('Failed to parse guest from storage', e)
+        return null
+      }
+    },
+    write: (val: GuestUser | null) => {
+      // convert Date objects to ISO strings for storage
+      if (!val) return ''
+      const copy = {
+        ...val,
+        createdAt: val.createdAt ? val.createdAt.toISOString() : null,
+        lastActive: val.lastActive ? val.lastActive.toISOString() : null
+      }
+      return JSON.stringify(copy)
+    }
+  }
+
+  // Explicitly tell useStorage the stored type is GuestUser | null
+  const currentGuest = useStorage<GuestUser | null>('@DEJA/guest-user', null, localStorage, { serializer: guestStorageSerializer as any })
+  console.log('Guest store initialized, current guest:', currentGuest.value)
   const availableUsernames = ref<string[]>([...GUEST_USERNAMES])
   const usedUsernames = ref<Set<string>>(new Set())
 
@@ -198,6 +247,7 @@ export const useGuestStore = defineStore('guest', () => {
       }
     }
 
+    // Store the guest user object directly. useStorage will handle serialization.
     currentGuest.value = guestUser
     return guestUser
   }
@@ -224,6 +274,8 @@ export const useGuestStore = defineStore('guest', () => {
 
   // Check if user is guest
   const isGuestUser = computed(() => {
+    // currentGuest is stored as an object via useStorage, so we can read properties directly.
+    console.log('Checking if current user is guest:', currentGuest.value, currentGuest.value?.isGuest, typeof currentGuest.value)
     return currentGuest.value?.isGuest === true
   })
 
