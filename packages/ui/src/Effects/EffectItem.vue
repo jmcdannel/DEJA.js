@@ -1,59 +1,62 @@
 <script setup lang="ts">
-import type { Effect } from '@repo/modules/effects'
+import { ref, computed, watch } from 'vue'
+import { useTimeoutFn } from '@vueuse/core'
+import { useEfx, type Effect } from '@repo/modules/effects'
 import EffectSwitch from './EffectSwitch.vue'
 import EffectCard from './EffectCard.vue'
 import EffectButton from './EffectButton.vue'
 import EffectRaw from './EffectRaw.vue'
 
 interface Props {
-  state?: boolean
   effect: Effect
-  effectId?: string
   viewAs?: string
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{
-  'update:state': [value: boolean]
-}>()
+const { runEffect } = useEfx()
+const state = ref(props.effect?.state)
+const isRunning = ref(false)
 
-const handleStateUpdate = (newState: boolean) => {
-  emit('update:state', newState)
-}
+const { start, stop } = useTimeoutFn(() => {
+  isRunning.value = false
+}, 2000)
+
+watch(state, async (newState) => {
+  console.log('Effect state watched to:', newState)
+  isRunning.value = true
+  stop()
+  start()
+  await runEffect({...props.effect, state: newState})
+})
 </script>
 
 <template>
   <EffectSwitch 
     v-if="viewAs === 'switch'" 
     :effect="effect" 
-    :effect-id="effectId" 
-    :state="state"
-    @update:state="handleStateUpdate"
+    :is-running="isRunning"
+    v-model:state.sync="state"
   />
   <EffectCard 
     v-else-if="viewAs === 'card'" 
     :effect="effect" 
-    :effect-id="effectId" 
-    :state="state"
-    @update:state="handleStateUpdate"
+    :is-running="isRunning"
+    v-model:state.sync="state"
   />
   <EffectButton 
     v-else-if="viewAs === 'button'" 
     :effect="effect" 
-    :effect-id="effectId" 
-    :state="state"
-    @update:state="handleStateUpdate"
+    :is-running="isRunning"
+    v-model:state.sync="state"
   />
   <EffectRaw 
     v-else-if="viewAs === 'raw'" 
     :effect="effect" 
-    :state="state"
   />
   <EffectButton 
     v-else 
     :effect="effect" 
-    :effect-id="effectId" 
-    :state="state"
-    @update:state="handleStateUpdate"
+    :is-running="isRunning"
+    v-model:state.sync="state"
   />
 </template>

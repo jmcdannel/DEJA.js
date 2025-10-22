@@ -4,9 +4,9 @@ import { useRouter, useRoute } from 'vue-router'
 import { useLocos } from '@repo/modules'
 
 const route = useRoute()
-// const { getThrottles } = useLocos()
+const { getThrottles } = useLocos()
 const active = ref(route.path)
-// const throttles = getThrottles()
+const throttles = getThrottles()
 </script>
 <template>
   <v-footer app class="bg-transparent">
@@ -35,7 +35,7 @@ const active = ref(route.path)
             icon="mdi-view-list"
             value="/throttle-list"
           />
-          <!-- <v-btn
+          <v-btn
             :disabled="!throttles.length"
             class="sm:px-12"
             :class="$route.path === '/throttle' ? 'bg-lime-500' : 'text-lime-500'"
@@ -43,7 +43,7 @@ const active = ref(route.path)
             color="lime"
             icon="mdi-speedometer"
             value="/throttle"
-          /> -->
+          />
           <v-btn 
             class="sm:px-12"
             :class="$route.path === '/conductor' ? 'bg-red-500' : 'text-red-500'"

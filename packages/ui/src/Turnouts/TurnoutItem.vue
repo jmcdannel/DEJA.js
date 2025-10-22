@@ -9,7 +9,6 @@ import TurnoutRaw from './TurnoutRaw.vue'
 
 interface Props {
   turnout: Turnout
-  turnoutId?: string
   viewAs?: string
 }
 
@@ -29,16 +28,6 @@ watch(state, () => {
   stop()
   start()
 })
-
-async function handleStateUpdate (newState: boolean) {
-  console.log('Turnout state updated to:', newState)
-  emit('update:state', newState)
-  await setTurnout(props.turnoutId || props.turnout.id, {
-    ...props.turnout,
-    id: props.turnoutId || props.turnout?.id,
-    state: newState
-  })
-}
 
 watch(state, async (newState) => {
   console.log('Turnout state watched to:', newState)

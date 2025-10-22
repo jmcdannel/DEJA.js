@@ -40,8 +40,8 @@ const DEFAULT_VIEW_OPTIONS = [
   { title: 'Card', value: 'card' },
   { title: 'Switch', value: 'switch' },
   { title: 'Table', value: 'table' },
-  props.moduleName === 'turnouts' ? { title: 'CTC Switch', value: 'ctc' } : null,
-  { title: 'Raw', value: 'raw' }
+  { title: 'Raw', value: 'raw' },
+  ...(props.moduleName === 'turnouts' ? [{ title: 'CTC Switch', value: 'ctc' }] : [])
 ]
 const DEFAULT_SORT_OPTIONS = [
   { title: 'Default', value: 'order' },

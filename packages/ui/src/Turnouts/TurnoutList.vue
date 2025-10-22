@@ -68,7 +68,6 @@ const cols = {
         :key="item.id">
         <TurnoutItem          
           :turnout="item as Turnout" 
-          :turnoutId="item?.id"
           :viewAs="viewAs?.[0]"
         />
       </v-col>
