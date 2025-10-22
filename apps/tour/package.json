@@ -34,6 +34,7 @@
     "@repo/typescript-config": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
+    "firebase-admin": "^13.4.0",
     "@vitejs/plugin-vue": "^4.4.0",
     "@vue/tsconfig": "^0.7.0",
     "@vueuse/core": "^11.0.3",
