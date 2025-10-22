@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
+import { useDisplay } from 'vuetify'
 import { useCurrentUser } from 'vuefire'
 import Logo from './Logo.vue'
 import UserProfile from './UserProfile.vue'
@@ -10,9 +11,10 @@ import EmergencyStop from './EmergencyStop.vue'
 import BackgroundDecor from './BackgroundDecor.vue'
 import { useLayout } from '@repo/modules'
 
-defineProps<{
+const props = defineProps<{
   appName?: string
   appIcon?: string
+  drawer?: boolean
   variant?: 'default' | 'cloud' | 'throttle' | 'monitor'
   showLayoutPower?: boolean
   showEmergencyStop?: boolean
@@ -28,6 +30,7 @@ defineProps<{
 const { getLayouts, getDevices } = useLayout()
 const layouts = getLayouts()
 const devices = getDevices()
+const { mdAndUp, mobile } = useDisplay()
 
 const emit = defineEmits<{
   trackPowerToggle: [newState: boolean]
@@ -36,6 +39,7 @@ const emit = defineEmits<{
   deviceSelect: [deviceId: string]
   layoutSelect: [layoutId: string]
   logoClick: []
+  drawerToggle: [newState: boolean]
 }>()
 
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -77,6 +81,10 @@ function openDeviceModal() {
   isDeviceModalOpen.value = true
 }
 
+function handleDrawerToggle() {
+  emit('drawerToggle', !(props.drawer ?? false))
+}
+
 const allConnected = computed(() => devices.value.every(device => device.isConnected))
 const hasDevices = computed(() => devices.value.length > 0)
 const connectedDevicesCount = computed(() => devices.value.filter(d => d.isConnected).length)
@@ -93,6 +101,7 @@ const defaultProps = {
   appName: 'DEJA',
   appIcon: 'mdi-train',
   variant: 'default' as const,
+  color: 'primary',
   showLayoutPower: true,
   showEmergencyStop: true,
   showUserProfile: true,
@@ -106,67 +115,61 @@ const defaultProps = {
 </script>
 
 <template>
-  <v-app-bar 
-    class="px-2 relative overflow-hidden header-gradient"
-    :color="color || defaultProps.color" 
+  <v-app-bar
+    class="header-gradient relative overflow-hidden flex flex-col"
     :dark="dark !== undefined ? dark : defaultProps.dark">
     <BackgroundDecor variant="blurred-bubbles-1" />
+    <template v-slot:prepend>
+      <v-app-bar-nav-icon variant="text" @click.stop="handleDrawerToggle" class="!h-10 !w-10 ml-4"></v-app-bar-nav-icon>
+    </template>
     <template v-slot:title>
       <Logo 
         :app-name="appName || defaultProps.appName"
         :app-icon="appIcon || defaultProps.appIcon"
+        :app-color="color || defaultProps.color"
         :variant="variant || defaultProps.variant"
         @click="handleLogoClick"
       />
     </template>
     <template v-slot:append>
-        <!-- User Profile - always on the far right -->
-        <UserProfile v-if="showUserProfile !== false && user" />
+      <!-- User Profile - always on the far right --> 
+      <template v-if="mdAndUp">
+        <v-chip size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-home" :color="layoutId ? 'success' : 'error'"
+          variant="elevated" @click="openLayoutModal">
+          <template #append>
+            <span v-if="layoutId" class="status-dot success-dot"></span>
+            <span v-else class="status-dot error-dot"></span>
+          </template>
+          <span class="font-medium">{{ currentLayout.name || 'No Layout' }}</span>
+        </v-chip>
+        <v-chip v-if="showDeviceStatus && hasDevices" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-devices"
+          :color="allConnected ? 'success' : 'warning'" variant="elevated" @click="openDeviceModal">
+          <template #append>
+            <span v-if="allConnected" class="status-dot success-dot"></span>
+            <span v-else class="status-dot warning-dot"></span>
+          </template>
+          <span v-if="showDeviceStatusLabel" class="font-medium">
+            {{ connectedDevicesCount }}/{{ devices.length }}
+          </span>
+        </v-chip>
+        <v-spacer class="ma-2"></v-spacer>
+      </template>
+      <UserProfile v-if="showUserProfile !== false && user" />
+      <TrackPower class="ma-1" :power-state="layoutPowerState" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
+      <Power class="ma-1" v-if="showLayoutPower" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />
+      <EmergencyStop class="ma-1" v-if="showEmergencyStop" @stop="handleEmergencyStop" />
     </template>
   </v-app-bar>
-  <v-app-bar class="px-2 relative overflow-hidden">
+  <!-- <v-app-bar class="header-gradient2 elative overflow-hidden"
+    :dark="dark !== undefined ? dark : defaultProps.dark">
+    <BackgroundDecor variant="blurred-bubbles-1" />
     <template v-slot:prepend>
-      <v-row>
-        <v-col>
-          <v-chip size="small" class="status-chip clickable-chip" prepend-icon="mdi-home" :color="layoutId ? 'success' : 'error'"
-            variant="elevated" @click="openLayoutModal">
-            <template #append>
-              <span v-if="layoutId" class="status-dot success-dot"></span>
-              <span v-else class="status-dot error-dot"></span>
-            </template>
-            <span class="font-medium">{{ currentLayout.name || 'No Layout' }}</span>
-          </v-chip>
-          </v-col> 
-          <v-col>
-          <!-- Device Status -->
-          <v-chip v-if="showDeviceStatus && hasDevices" size="small" class="status-chip clickable-chip" prepend-icon="mdi-devices"
-            :color="allConnected ? 'success' : 'warning'" variant="elevated" @click="openDeviceModal">
-            <template #append>
-              <span v-if="allConnected" class="status-dot success-dot"></span>
-              <span v-else class="status-dot warning-dot"></span>
-            </template>
-            <span v-if="showDeviceStatusLabel" class="font-medium">
-              {{ connectedDevicesCount }}/{{ devices.length }}
-            </span>
-          </v-chip>
-        </v-col>
-      </v-row>
+      
     </template>
     <template v-slot:append>
-      <v-row>
-        <v-col>
-          <TrackPower :power-state="layoutPowerState" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
-        </v-col>
-        <v-col>
-          <Power v-if="showLayoutPower" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />
-        </v-col>
-        <v-col>
-          <EmergencyStop v-if="showEmergencyStop" @stop="handleEmergencyStop" />
-        </v-col>
-      </v-row>
 
     </template>
-  </v-app-bar>
+  </v-app-bar> -->
 
     <!-- Layout Selection Modal -->
     <v-dialog v-model="isLayoutModalOpen" max-width="600px">
@@ -256,9 +259,12 @@ const defaultProps = {
 
 <style scoped>
 .header-gradient {
-  background: rgba(15, 23, 42, 0.95);
+  background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.header-gradient2 {
+  background: rgba(15, 23, 42, 0.25);
+  backdrop-filter: blur(20px);
 }
 
 /* Ensure proper contrast for all elements */

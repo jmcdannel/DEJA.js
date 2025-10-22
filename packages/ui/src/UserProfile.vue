@@ -10,7 +10,7 @@ const user = useCurrentUser()
         <v-avatar
           type="button"
           v-bind="props"
-          class="shadow-md border-2 border-white/20"
+          class="shadow-md border-2 border-white/20 mr-2"
         >
           <v-img
             v-if="user?.photoURL"

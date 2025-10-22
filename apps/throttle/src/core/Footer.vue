@@ -19,14 +19,14 @@ const throttles = getThrottles()
           rounded="pill" 
           variant="flat" 
           v-model="active">
-          <v-btn 
+          <!-- <v-btn 
             class="sm:px-12"
             :class="$route.path === '/locos' ? 'bg-pink-500' : 'text-pink-500'"
             @click="$router.push('/locos')"
             color="pink"
             icon="mdi-train"
             value="/locos"
-          />
+          /> -->
           <v-btn 
             class="sm:px-12"
             :class="$route.path === '/throttle-list' ? 'bg-green-500' : 'text-green-500'"
@@ -76,14 +76,14 @@ const throttles = getThrottles()
             icon="mdi-call-split"
             value="/turnouts"
           />
-          <v-btn 
+          <!-- <v-btn 
             class="sm:px-12"
             :class="$route.path === '/signals' ? 'bg-blue-500' : 'text-blue-500'"
             @click="$router.push('/signals')"
             color="blue"
             icon="mdi-traffic-light"
             value="/signals"
-          />
+          /> -->
         </v-btn-toggle>
         <v-spacer />
       </v-row>
