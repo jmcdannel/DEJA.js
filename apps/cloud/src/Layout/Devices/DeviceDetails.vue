@@ -12,8 +12,8 @@ const { getEffectsByDevice } = useEfx()
 const { colors, DEFAULT_COLOR } = useColors()
 
 const route = useRouter()
-const turnouts = useCollection(getTurnoutsByDevice(route.currentRoute.value.params.deviceId as string))
-const effects = useCollection(getEffectsByDevice(route.currentRoute.value.params.deviceId as string))
+const turnouts = useCollection(computed(() => route.currentRoute.value.params.deviceId ? getTurnoutsByDevice(route.currentRoute.value.params.deviceId as string) : []))
+const effects = useCollection(computed(() => route.currentRoute.value.params.deviceId ? getEffectsByDevice(route.currentRoute.value.params.deviceId as string) : []))
 
 const device = ref(null as Device | null)
 

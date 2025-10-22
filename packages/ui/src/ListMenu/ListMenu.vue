@@ -12,7 +12,7 @@ const props = defineProps<{
   viewOptions?: { title: string; value: string }[]
 }>()
 
-const viewAsPref = useStorage<string[]>(`@DEJA/prefs/${props.moduleName}/View`, ['button'])
+const viewAsPref = useStorage<string[]>(`@DEJA/prefs/${props.moduleName}/View`, ['switch'])
 const sortByPref = useStorage<string[]>(`@DEJA/prefs/${props.moduleName}/Sort`, ['device'])
 const filterByPref = useStorage<string[]>(`@DEJA/prefs/${props.moduleName}/Filter`, [])
 
@@ -40,6 +40,7 @@ const DEFAULT_VIEW_OPTIONS = [
   { title: 'Card', value: 'card' },
   { title: 'Switch', value: 'switch' },
   { title: 'Table', value: 'table' },
+  props.moduleName === 'turnouts' ? { title: 'CTC Switch', value: 'ctc' } : null,
   { title: 'Raw', value: 'raw' }
 ]
 const DEFAULT_SORT_OPTIONS = [

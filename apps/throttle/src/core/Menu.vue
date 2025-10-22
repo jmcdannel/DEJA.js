@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter, } from 'vue-router'
+import { useDisplay } from 'vuetify'
 import { computed } from 'vue'
 
 interface MenuItem {
@@ -20,6 +21,8 @@ const boundDrawer = computed({
   get: () => props.drawer,
   set: (val: boolean) => emit('update:drawer', val)
 })
+
+const { mobile } = useDisplay()
 
 const menuConfig: MenuItem[] = [
   {

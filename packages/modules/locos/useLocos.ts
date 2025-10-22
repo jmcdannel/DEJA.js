@@ -39,7 +39,7 @@ export function useLocos() {
   }
 
   function getLocos() {
-    const result = useCollection(locosCol)
+    const result = useCollection(locosCol, { ssrKey: `locos-${layoutId.value}` })
     return result
   }
 
@@ -47,7 +47,7 @@ export function useLocos() {
     const locoDoc = () =>
       layoutId.value ? doc(db, `layouts/${layoutId.value}/locos`, address.toString()) : null
 
-    return useDocument<Loco>(locoDoc)
+    return useDocument<Loco>(locoDoc, { ssrKey: `loco-${layoutId.value}-${address}` })
   }
 
   async function getLocoThrottle(address: number) {
