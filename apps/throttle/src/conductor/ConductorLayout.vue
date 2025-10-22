@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { Loco, Throttle } from '@repo/modules/locos'
-import { useLocos } from '@repo/modules/locos'
+import { useLocos, type Loco, type Throttle } from '@repo/modules'
 import SimpleThrottle from '@/throttle/SimpleThrottle.vue'
 import ThrottleTile from '@/throttle/ThrottleTile.vue'
 import Speedometer from '@/throttle/Speedometer.vue'

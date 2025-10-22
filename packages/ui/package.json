@@ -29,7 +29,9 @@
     "./EffectCard": "./src/Effects/EffectCard.vue",
     "./EffectButton": "./src/Effects/EffectButton.vue",
     "./EffectRaw": "./src/Effects/EffectRaw.vue",
-    "./EffectTable": "./src/Effects/EffectTable.vue"
+    "./EffectTable": "./src/Effects/EffectTable.vue",
+    "./Stat": "./src/Stat.vue",
+    "./useColors": "./src/useColors.ts"
   },
   "dependencies": {
     "@repo/dccex": "workspace:^0.0.0",

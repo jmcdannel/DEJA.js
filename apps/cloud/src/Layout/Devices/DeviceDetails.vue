@@ -3,9 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useCollection } from 'vuefire'
 import { useRouter } from 'vue-router'
 import { useColors } from '@/Core/UI/useColors'
-import { deviceTypes, useLayout, type Device } from '@repo/modules'
-import { useTurnouts } from '@repo/modules'
-import { useEfx } from '@repo/modules/effects'
+import { deviceTypes, useTurnouts, useEfx, useLayout, type Device } from '@repo/modules'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 
 const { connectDevice, autoConnectDevice, getDevice } = useLayout()
