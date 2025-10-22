@@ -4,12 +4,14 @@ import { computed } from 'vue'
 interface Props {
   appName?: string
   appIcon?: string
+  appColor?: string
   variant?: 'default' | 'cloud' | 'throttle' | 'monitor'
 }
 
 const props = withDefaults(defineProps<Props>(), {
   appName: 'DEJA',
   appIcon: 'mdi-train',
+  appColor: 'primary',
   variant: 'default'
 })
 
@@ -26,6 +28,7 @@ const logoComponent = computed(() => {
   }
 })
 
+
 </script>
 
 <template>
@@ -39,10 +42,16 @@ const logoComponent = computed(() => {
       v-if="appIcon"
       :icon="appIcon"
       size="32"
+      :color="appColor"
       style="filter: drop-shadow(1px 1px 0 #fff2);"
     />
     <span
-      class="ml-2 font-bold drop-shadow-sm hidden sm:inline text-xl lg:text-2xl"
+      class="ml-2 font-bold drop-shadow-sm hidden sm:inline text-xl lg:text-2xl bg-gradient-to-r from-blue-500 to-cyan-400 text-transparent bg-clip-text"
+    >
+      DEJA
+    </span>
+    <span
+      class="ml-2 font-bold drop-shadow-sm text-xl lg:text-2xl"
     >
       {{ appName }}
     </span>

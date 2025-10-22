@@ -18,6 +18,7 @@ import { useEfx } from '@repo/modules'
 
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
+const drawer = ref(true)
 const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 
 // Event handlers for the unified header
@@ -51,7 +52,6 @@ const router = useRouter()
 const theme = useTheme()
 const { menu, handleMenu } = useMenu()
 
-const drawer = ref(true)
 const mobile = ref(null)
 const currentTheme = ref(theme.name.value || 'dark')
 
@@ -78,10 +78,10 @@ function handleLogoClick() {
   <v-responsive class="border rounded">
       <v-app v-if="user" :theme="theme.name.value">
         <AppHeader 
-          app-name="DEJA Cloud"
+          app-name="Cloud"
           app-icon="mdi-cloud"
           variant="cloud"
-          color="surface"
+          color="blue"
           :dark="true"
           :show-layout-power="true"
           :show-emergency-stop="true"
@@ -93,11 +93,10 @@ function handleLogoClick() {
           @emergency-stop="handleEmergencyStop"
           @device-select="handleDeviceSelect"
           @logo-click="handleLogoClick"
+          @drawer-toggle="drawer = !drawer"
         >
         </AppHeader>
       <v-navigation-drawer v-model="drawer" :mobile="mobile" mobile-breakpoint="md">
-        
-        
         <v-spacer class="h-8"></v-spacer>
         <v-list>
           <v-list-item v-for="item in menu" 

@@ -7,11 +7,13 @@ import { useRouter } from 'vue-router'
 import { useCollection, useCurrentUser } from 'vuefire'
 import { AppHeader } from '@repo/ui'
 import Footer from '@/core/Footer.vue'
+import Menu from '@/core/Menu.vue'
 import { useDcc } from '@repo/dccex'
 import { useEfx, type Effect } from '@repo/modules'
 
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
+const drawer = ref(false)
 const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 const user = useCurrentUser()
 const router = useRouter()
@@ -62,10 +64,11 @@ function handleLogoClick() {
   <v-responsive>
     <v-app theme="dark">
       <AppHeader 
-        app-name="DEJA Throttle"
+        app-name="Throttle"
         app-icon="mdi-gamepad-variant"
         variant="throttle"
-        color="surface"
+        color="blue"
+        :drawer="drawer"
         :dark="true"
         :show-layout-power="true"
         :show-emergency-stop="true"
@@ -77,7 +80,9 @@ function handleLogoClick() {
         @emergency-stop="handleEmergencyStop"
         @device-select="handleDeviceSelect"
         @logo-click="handleLogoClick"
+        @drawer-toggle="drawer = !drawer"
       />
+  <Menu v-model:drawer="drawer" />
       <v-main>
         <v-container class="p-0 min-h-full flex flex-col" fluid>
           <RouterView />
