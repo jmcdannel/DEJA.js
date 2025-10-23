@@ -30,6 +30,8 @@
     "./EffectButton": "./src/Effects/EffectButton.vue",
     "./EffectRaw": "./src/Effects/EffectRaw.vue",
     "./EffectTable": "./src/Effects/EffectTable.vue",
+    "./BackgroundFallingStars": "./src/BackgroundFallingStars.vue",
+    "./BackgroundDecor": "./src/BackgroundDecor.vue",
     "./Stat": "./src/Stat.vue",
     "./useColors": "./src/useColors.ts"
   },

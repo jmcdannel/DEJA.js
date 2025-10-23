@@ -23,17 +23,14 @@ const { start, stop } = useTimeoutFn(() => {
   isRunning.value = false
 }, 2000)
 
-watch(state, () => {
+watch(state, async (newState) => {
+  console.log('Turnout state watched to:', newState)
   isRunning.value = true
   stop()
   start()
-})
-
-watch(state, async (newState) => {
-  console.log('Turnout state watched to:', newState)
-  await setTurnout(props.turnoutId || props.turnout.id, {
+  await setTurnout(props.turnout.id, {
     ...props.turnout,
-    id: props.turnoutId || props.turnout?.id,
+    id: props.turnout?.id,
     state: newState
   })
 })

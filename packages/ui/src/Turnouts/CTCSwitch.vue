@@ -2,7 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
 import { useTurnouts, type Turnout } from '@repo/modules'
-import { useColors } from '@repo/ui/src/useColors'
+import { useColors } from '@repo/ui'
 import CTCSwitchSVG from './ctc-switch-svg.vue'
 
 const { setTurnout } = useTurnouts()

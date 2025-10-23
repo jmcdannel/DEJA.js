@@ -13,7 +13,6 @@ const throttles = getThrottles()
 </script>
   <template>
     <main class="@container relative">
-      <h1>Conductor Layout</h1>
       <!-- <div
         v-if="throttles?.length"
         class="flex flex-wrap gap-4 p-4 justify-center">

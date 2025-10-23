@@ -76,12 +76,13 @@ const playIntroVideo = () => {
             Introduction Video
           </v-card-title>
           <v-card-text>
-            <div class="video-placeholder">
+            <!-- <div class="video-placeholder">
               <v-icon icon="mdi-play" size="64" class="play-icon"></v-icon>
               <p class="text-h6 mt-4">Layout Overview & Welcome</p>
               <p class="text-body-2">Duration: 3:45</p>
-            </div>
-            <v-btn 
+            </div> -->
+            <video src="/Adventure Awaits at Tamarack-VEED.mp4?cb=1" controls class="w-full my-2"></video>
+            <!-- <v-btn 
               color="primary" 
               size="large" 
               class="mt-4"
@@ -90,7 +91,7 @@ const playIntroVideo = () => {
             >
               <v-icon icon="mdi-play" class="mr-2"></v-icon>
               Play Introduction
-            </v-btn>
+            </v-btn> -->
           </v-card-text>
         </v-card>
 
@@ -113,19 +114,24 @@ const playIntroVideo = () => {
 
       <v-col cols="12" lg="4">
         <v-card elevation="2" class="mb-4">
-          <v-card-title class="text-h6">Quick Navigation</v-card-title>
+          <v-card-title class="text-h6">Where would you like to start the tour?</v-card-title>
           <v-card-text>
-            <v-btn 
-              v-for="nav in quickNav" 
-              :key="nav.title"
-              :color="nav.color"
-              :to="nav.to"
-              block
-              class="mb-2"
-              :prepend-icon="nav.icon"
-            >
-              {{ nav.title }}
-            </v-btn>
+            <v-row>
+              <v-col cols="12" sm="6" v-for="area in layoutAreas" :key="area">
+                <v-card class="area-card" elevation="1" @click="$router.push({ name: 'area-detail', params: { id: area.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/gi, '') } })">
+                  <v-card-title class="d-flex align-center justify-space-between">
+                    <div>
+                      <div class="font-weight-medium">{{ area }}</div>
+                      <div class="text-caption text-medium-emphasis">Learn about operations, media and effects</div>
+                    </div>
+                    <div>
+                      <v-chip v-if="area === 'Tamarack Station'" color="secondary" size="small">Recommended</v-chip>
+                      <v-icon icon="mdi-chevron-right" class="ml-2"></v-icon>
+                    </div>
+                  </v-card-title>
+                </v-card>
+              </v-col>
+            </v-row>
           </v-card-text>
         </v-card>
 

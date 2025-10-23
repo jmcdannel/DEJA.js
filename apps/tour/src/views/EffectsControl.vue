@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { useTourStore } from '../stores/tour'
 import { useCollection } from 'vuefire'
-import { useEfx } from '@repo/modules/effects/useEfx'
+import { useEfx } from '@repo/modules'
 import GuestEffectCard from '../components/GuestEffectCard.vue'
 
 const tourStore = useTourStore()

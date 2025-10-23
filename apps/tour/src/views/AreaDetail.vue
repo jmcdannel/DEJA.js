@@ -28,7 +28,7 @@ const areas = ref<AreaDetail[]>([
   {
     id: 'tamarack-station',
     name: 'Tamarack Station',
-    description: 'The main passenger station with detailed platform scenes and working signals.',
+    description: 'The main passenger station with detailed platform scenes and working signals. Passenger operations, station announcements and platform workflows occur here.',
     icon: 'mdi-train',
     constructionTime: '8 months',
     constructionDetails: [
@@ -52,9 +52,18 @@ const areas = ref<AreaDetail[]>([
     }
   },
   {
+    id: 'tamarack-station-technical',
+    name: 'Tamarack Station (Technical)',
+    description: 'Technical dive into the signals, DCC detection and announcements used at the station.',
+    icon: 'mdi-cog',
+    constructionTime: 'n/a',
+    constructionDetails: [],
+    technicalFeatures: ['Signal Logic', 'DCC Detection']
+  },
+  {
     id: 'roseberry-yard',
     name: 'Roseberry Yard',
-    description: 'Busy freight yard with multiple tracks and switching operations.',
+    description: 'Busy freight yard with multiple tracks and switching operations. Includes an adjacent Industrial Auto Park for freight loading and unloading.',
     icon: 'mdi-train-car',
     constructionTime: '6 months',
     constructionDetails: [
@@ -78,9 +87,18 @@ const areas = ref<AreaDetail[]>([
     }
   },
   {
+    id: 'roseberry-technical',
+    name: 'Roseberry Yard (Technical)',
+    description: 'Detailed look at automated switching and yard control systems.',
+    icon: 'mdi-cog',
+    constructionTime: 'n/a',
+    constructionDetails: [],
+    technicalFeatures: ['Automated Switching', 'Yard Routing']
+  },
+  {
     id: 'payette-subdivision',
     name: 'Payette Subdivision',
-    description: 'Rural mainline section with scenic countryside and small towns.',
+    description: 'Rural mainline section with scenic countryside and small towns. Trains operate longer runs and encounter grade crossings and scenic bridges.',
     icon: 'mdi-pine-tree',
     constructionTime: '10 months',
     constructionDetails: [
@@ -102,6 +120,15 @@ const areas = ref<AreaDetail[]>([
       type: 'video',
       url: '/media/payette-scenic.mp4'
     }
+  },
+  {
+    id: 'payette-technical',
+    name: 'Payette Subdivision (Technical)',
+    description: 'Technical dive into crossing controls, longer block detection and scenic automation.',
+    icon: 'mdi-cog',
+    constructionTime: 'n/a',
+    constructionDetails: [],
+    technicalFeatures: ['Crossing Controls', 'Long Block Detection']
   },
   {
     id: 'deadmans-curve',
@@ -158,7 +185,7 @@ const areas = ref<AreaDetail[]>([
   {
     id: 'thunder-city',
     name: 'Thunder City',
-    description: 'Urban area with city sounds and busy railroad activity.',
+    description: 'Urban area with city sounds and busy railroad activity. Street scenes, vehicle traffic and urban lighting are central operations.',
     icon: 'mdi-city-variant',
     constructionTime: '9 months',
     constructionDetails: [
@@ -182,9 +209,18 @@ const areas = ref<AreaDetail[]>([
     }
   },
   {
+    id: 'thunder-city-technical',
+    name: 'Thunder City (Technical)',
+    description: 'Technical systems that control lighting, traffic and animated signage in the city area.',
+    icon: 'mdi-cog',
+    constructionTime: 'n/a',
+    constructionDetails: [],
+    technicalFeatures: ['Traffic Control', 'Animated Signs']
+  },
+  {
     id: 'eagle-nest',
     name: 'Eagle Nest',
-    description: 'High mountain area with spectacular views and challenging operations.',
+    description: 'High mountain area with spectacular views and challenging operations. Includes Payette Canyon approaches and trestle work.',
     icon: 'mdi-bird',
     constructionTime: '6 months',
     constructionDetails: [
@@ -206,6 +242,15 @@ const areas = ref<AreaDetail[]>([
       type: 'video',
       url: '/media/eagle-nest-tour.mp4'
     }
+  },
+  {
+    id: 'eagle-nest-technical',
+    name: 'Eagle Nest (Technical)',
+    description: 'Technical dive into mountain signalling, trestle detection and canyon operations.',
+    icon: 'mdi-cog',
+    constructionTime: 'n/a',
+    constructionDetails: [],
+    technicalFeatures: ['Trestle Detection', 'Echo Effects']
   },
   {
     id: 'tripod-peak',
@@ -250,7 +295,22 @@ const allEffects = ref([
     allowGuest: true,
     isActive: false,
     hasTimeout: false,
-    area: 'tamarack-station'
+    area: 'tamarack-station',
+    type: 'light',
+    state: false
+  },
+  {
+    id: 'station-announcements',
+    name: 'Station Announcements',
+    description: 'Play recorded station announcements for Tamarack Station',
+    category: 'Sound',
+    icon: 'mdi-microphone',
+    allowGuest: true,
+    isActive: false,
+    hasTimeout: false,
+    area: 'tamarack-station',
+    type: 'sound',
+    state: false
   },
   {
     id: 'yard-tower-light',
@@ -261,7 +321,22 @@ const allEffects = ref([
     allowGuest: true,
     isActive: false,
     hasTimeout: false,
-    area: 'roseberry-yard'
+    area: 'roseberry-yard',
+    type: 'light',
+    state: false
+  },
+  {
+    id: 'auto-park-spotlight',
+    name: 'Industrial Auto Park Spotlight',
+    description: 'Illuminate the industrial auto park at Roseberry',
+    category: 'Lighting',
+    icon: 'mdi-factory',
+    allowGuest: true,
+    isActive: false,
+    hasTimeout: false,
+    area: 'roseberry-yard',
+    type: 'light',
+    state: false
   },
   {
     id: 'crossing-bell',
@@ -273,7 +348,48 @@ const allEffects = ref([
     isActive: false,
     hasTimeout: true,
     timeoutDuration: 10000,
-    area: 'payette-subdivision'
+    area: 'payette-subdivision',
+    type: 'sound',
+    state: false
+  },
+  {
+    id: 'bridge-lights',
+    name: 'Bridge Lights',
+    description: 'Toggle lights on scenic bridges along Payette Subdivision',
+    category: 'Lighting',
+    icon: 'mdi-bridge',
+    allowGuest: true,
+    isActive: false,
+    hasTimeout: false,
+    area: 'payette-subdivision',
+    type: 'light',
+    state: false
+  },
+  {
+    id: 'city-street-lights',
+    name: 'City Street Lights',
+    description: 'Toggle Thunder City street lighting',
+    category: 'Lighting',
+    icon: 'mdi-street-lamp',
+    allowGuest: true,
+    isActive: false,
+    hasTimeout: false,
+    area: 'thunder-city',
+    type: 'light',
+    state: false
+  },
+  {
+    id: 'urban-traffic',
+    name: 'Urban Traffic Sounds',
+    description: 'Activate traffic ambience in Thunder City',
+    category: 'Sound',
+    icon: 'mdi-car',
+    allowGuest: true,
+    isActive: false,
+    hasTimeout: false,
+    area: 'thunder-city',
+    type: 'sound',
+    state: false
   },
   {
     id: 'train-horn',
@@ -285,7 +401,9 @@ const allEffects = ref([
     isActive: false,
     hasTimeout: true,
     timeoutDuration: 8000,
-    area: 'deadmans-curve'
+    area: 'deadmans-curve',
+    type: 'sound',
+    state: false
   },
   {
     id: 'valley-windmill',
@@ -296,18 +414,9 @@ const allEffects = ref([
     allowGuest: true,
     isActive: false,
     hasTimeout: false,
-    area: 'round-valley'
-  },
-  {
-    id: 'city-street-lights',
-    name: 'City Street Lights',
-    description: 'Toggle Thunder City street lighting',
-    category: 'Lighting',
-    icon: 'mdi-street-lamp',
-    allowGuest: true,
-    isActive: false,
-    hasTimeout: false,
-    area: 'thunder-city'
+    area: 'round-valley',
+    type: 'relay',
+    state: false
   },
   {
     id: 'peak-beacon',
@@ -318,7 +427,9 @@ const allEffects = ref([
     allowGuest: true,
     isActive: false,
     hasTimeout: false,
-    area: 'tripod-peak'
+    area: 'tripod-peak',
+    type: 'light',
+    state: false
   }
 ])
 
@@ -330,70 +441,26 @@ const areaEffects = computed(() =>
 
 // Media data for the actual layout areas
 const allMedia = ref([
-  {
-    id: 'tamarack-overview',
-    title: 'Tamarack Station Overview',
-    description: 'Complete tour of the main passenger station',
-    type: 'video' as const,
-    area: 'tamarack-station',
-    duration: '6:45'
-  },
-  {
-    id: 'roseberry-operations',
-    title: 'Roseberry Yard Operations',
-    description: 'Freight yard switching and operations',
-    type: 'video' as const,
-    area: 'roseberry-yard',
-    duration: '8:20'
-  },
-  {
-    id: 'payette-journey',
-    title: 'Payette Subdivision Journey',
-    description: 'Scenic ride through the countryside',
-    type: 'video' as const,
-    area: 'payette-subdivision',
-    duration: '7:15'
-  },
-  {
-    id: 'deadmans-challenge',
-    title: 'Deadman\'s Curve Challenge',
-    description: 'Heavy freight tackles the mountain grade',
-    type: 'video' as const,
-    area: 'deadmans-curve',
-    duration: '5:30'
-  },
-  {
-    id: 'thunder-city-sounds',
-    title: 'Thunder City Ambience',
-    description: 'Urban sounds and railroad activity',
-    type: 'audio' as const,
-    area: 'thunder-city',
-    duration: '4:45'
-  },
-  {
-    id: 'round-valley-pastoral',
-    title: 'Round Valley Pastoral',
-    description: 'Peaceful valley scenes with farm activity',
-    type: 'video' as const,
-    area: 'round-valley',
-    duration: '5:15'
-  },
-  {
-    id: 'eagle-nest-summit',
-    title: 'Eagle Nest Summit Views',
-    description: 'Spectacular mountain vistas and operations',
-    type: 'video' as const,
-    area: 'eagle-nest',
-    duration: '6:30'
-  },
-  {
-    id: 'tripod-peak-ascent',
-    title: 'Tripod Peak Ascent',
-    description: 'Challenging climb to the highest point',
-    type: 'video' as const,
-    area: 'tripod-peak',
-    duration: '8:45'
-  }
+  { id: 'tamarack-overview', title: 'Tamarack Station Overview', description: 'Complete tour of the main passenger station', type: 'video' as const, area: 'tamarack-station', duration: '6:45' },
+  { id: 'tamarack-technical', title: 'Tamarack Station: Technical Dive', description: 'Detailed look at signals, DCC and detection at the station', type: 'video' as const, area: 'tamarack-station', duration: '9:10' },
+
+  { id: 'roseberry-operations', title: 'Roseberry Yard Operations', description: 'Freight yard switching and operations', type: 'video' as const, area: 'roseberry-yard', duration: '8:20' },
+  { id: 'roseberry-technical', title: 'Roseberry Yard: Technical Dive', description: 'Automated switching and yard control systems', type: 'video' as const, area: 'roseberry-yard', duration: '7:50' },
+
+  { id: 'payette-journey', title: 'Payette Subdivision Journey', description: 'Scenic ride through the countryside', type: 'video' as const, area: 'payette-subdivision', duration: '7:15' },
+  { id: 'payette-technical', title: 'Payette Subdivision: Technical Dive', description: 'Crossing controls and long block detection details', type: 'video' as const, area: 'payette-subdivision', duration: '6:40' },
+
+  { id: 'deadmans-challenge', title: 'Deadman\'s Curve Challenge', description: 'Heavy freight tackles the mountain grade', type: 'video' as const, area: 'deadmans-curve', duration: '5:30' },
+
+  { id: 'thunder-city-sounds', title: 'Thunder City Ambience', description: 'Urban sounds and railroad activity', type: 'audio' as const, area: 'thunder-city', duration: '4:45' },
+  { id: 'thunder-city-technical', title: 'Thunder City: Technical Dive', description: 'How the city lighting and animated signs are controlled', type: 'video' as const, area: 'thunder-city', duration: '7:00' },
+
+  { id: 'round-valley-pastoral', title: 'Round Valley Pastoral', description: 'Peaceful valley scenes with farm activity', type: 'video' as const, area: 'round-valley', duration: '5:15' },
+
+  { id: 'eagle-nest-summit', title: 'Eagle Nest Summit Views', description: 'Spectacular mountain vistas and operations', type: 'video' as const, area: 'eagle-nest', duration: '6:30' },
+  { id: 'payette-canyon-technical', title: 'Payette Canyon Technical Dive', description: 'Technical systems for canyon approaches and trestles', type: 'video' as const, area: 'eagle-nest', duration: '8:05' },
+
+  { id: 'tripod-peak-ascent', title: 'Tripod Peak Ascent', description: 'Challenging climb to the highest point', type: 'video' as const, area: 'tripod-peak', duration: '8:45' }
 ])
 
 const relatedMedia = computed(() => 
