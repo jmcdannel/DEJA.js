@@ -45,15 +45,15 @@ const vuetify = createVuetify({
       tourLight: {
         dark: false,
         colors: {
-          primary: '#FFD700', // Yellow
-          secondary: '#FF4444'
+          primary: '#511784ff', // Yellow
+          secondary: '#236ab0ff'
         }
       },
       tourDark: {
         dark: true,
         colors: {
-          primary: '#FFD700', // Yellow
-          secondary: '#FF4444'
+          primary: '#7846a3ff', // Yellow
+          secondary: '#4080c0ff'
         }
       }
     }

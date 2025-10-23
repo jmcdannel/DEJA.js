@@ -22,7 +22,8 @@ console.log('Device in DeviceStatusItem:', props.device.id)
 const turnouts = useCollection(computed(() => props.device ? getTurnoutsByDevice(props.device.id as string) : null))
 const effects = useCollection(computed(() => props.device ? getEffectsByDevice(props.device.id as string) : null))
 
-const color = colors[props.device.type?.color || DEFAULT_COLOR]
+const deviceType = computed(() => deviceTypes.find((type) => type.value === props?.device?.type))
+const color = computed(() => colors[deviceType.value?.color || DEFAULT_COLOR])
 
 
 </script>

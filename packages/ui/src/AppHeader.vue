@@ -108,7 +108,6 @@ const defaultProps = {
   showDeviceStatus: true,
   showDeviceStatusLabel: true,
   deviceStatusCompact: false,
-  color: 'surface',
   dark: true,
   layoutPowerState: false,
 }

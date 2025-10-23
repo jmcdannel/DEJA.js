@@ -9,7 +9,7 @@
 
 <template>
     <div class="mt-4">
-        <div v-if="stat === 0" class="text-sm text-gray-400">{{ emptyLabel }}</div>
+        <div v-if="value === 0" class="text-sm text-gray-400">{{ emptyLabel }}</div>
 
         <div v-else class="flex items-center space-x-3">
         <v-sheet

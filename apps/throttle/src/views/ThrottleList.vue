@@ -27,7 +27,7 @@ const throttles = getThrottles()
     <div v-if="throttles" class="flex-grow flex flex-row flex-wrap relative overflow-auto items-end content-end justify-end">
       <!-- <div class="basis-full @[960px]:basis-1/2 flex-grow"></div> -->
       <div 
-        class="basis-full @[960px]:basis-1/2 p-1"  
+        class="basis-full md:basis-1/2 p-1"  
         v-for="item in throttles"
         :key="((item as unknown) as Throttle).id">
           <ThrottleTile 

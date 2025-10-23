@@ -5,6 +5,7 @@ import { useTourStore } from './stores/tour'
 import TourLogo from './components/TourLogo.vue'
 import LayoutSelector from './components/LayoutSelector.vue'
 import TourUserProfile from './components/TourUserProfile.vue'
+import { BackgroundDecor } from '@repo/ui'
 
 const drawer = ref(false)
 const theme = useTheme()
@@ -14,6 +15,7 @@ const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
 const navigationItems = [
   { title: 'Home', icon: 'mdi-home', to: '/' },
   { title: 'Welcome Tour', icon: 'mdi-play-circle', to: '/welcome' },
+  { title: 'Explore Sections', icon: 'mdi-map', to: '/sections' },
   { title: 'Control Effects', icon: 'mdi-lightning-bolt', to: '/effects' },
   { title: 'Media Library', icon: 'mdi-video-library', to: '/media' },
 ]
@@ -30,10 +32,21 @@ onMounted(() => {
 
 <template>
   <v-app>
-    <v-app-bar color="primary" elevation="2">
+    <v-app-bar color="black" elevation="2">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <TourLogo class="mr-4" />
-      <v-app-bar-title>Model Train Layout Tour</v-app-bar-title>
+      <TourLogo />
+      <v-app-bar-title class=" sm:block">        
+        <span
+          class="font-bold drop-shadow-sm text-sm lg:text-xl bg-gradient-to-r from-blue-500 to-cyan-400 text-transparent bg-clip-text"
+        >
+          DEJA
+        </span>
+        <span
+          class="ml-1 font-bold drop-shadow-sm text-sm lg:text-xl"
+        >
+          Tour App
+        </span>
+      </v-app-bar-title>
       
       <!-- Demo Mode Indicator -->
       <v-chip 
@@ -52,7 +65,7 @@ onMounted(() => {
       <TourUserProfile />
       
       <!-- Theme Toggle Button -->
-      <v-btn
+      <!-- <v-btn
         :icon="tourStore.isDarkMode ? 'mdi-weather-sunny' : 'mdi-weather-night'"
         @click="tourStore.toggleTheme"
         class="mr-2"
@@ -61,7 +74,7 @@ onMounted(() => {
         <v-tooltip activator="parent" location="bottom">
           Switch to {{ tourStore.isDarkMode ? 'light' : 'dark' }} mode
         </v-tooltip>
-      </v-btn>
+      </v-btn> -->
     </v-app-bar>
 
     <v-navigation-drawer v-model="drawer" temporary>
@@ -86,7 +99,8 @@ onMounted(() => {
       </v-list>
     </v-navigation-drawer>
 
-    <v-main>
+    <v-main class="relative bg-gradient">
+      <BackgroundDecor />
       <v-container fluid>
         <router-view />
       </v-container>
@@ -98,6 +112,10 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.bg-gradient {
+  background: rgba(3, 8, 19, 0.75);
+  backdrop-filter: blur(20px);
+}
 .logo {
   height: 6em;
   padding: 1.5em;

@@ -41,14 +41,6 @@ watch(state, async (newState) => {
           class="text-5xl m-3"></v-icon>
         <span>{{ effect.name }}</span>
       </div>
-      <v-chip 
-        v-if="effect.category" 
-        :color="effect.state ? 'primary' : 'grey'"
-        size="small"
-        variant="outlined"
-      >
-        {{ effect.category }}
-      </v-chip>
     </v-card-title>
 
     <v-card-text v-if="effect.tags && effect.tags.length > 0">
@@ -58,7 +50,7 @@ watch(state, async (newState) => {
           :key="tag"
           size="small"
           variant="outlined"
-          :color="tag.color || 'secondary'"
+          :color="'secondary'"
         >
           {{ tag }}
         </v-chip>

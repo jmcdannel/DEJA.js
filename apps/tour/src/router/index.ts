@@ -6,6 +6,7 @@ import EffectsControl from '../views/EffectsControl.vue'
 import MediaLibrary from '../views/MediaLibrary.vue'
 import AreaDetail from '../views/AreaDetail.vue'
 import TourLogin from '../views/TourLogin.vue'
+import ExploreSections from '../views/ExploreSections.vue'
 
 const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
 
@@ -42,6 +43,12 @@ const router = createRouter({
       path: '/media',
       name: 'media',
       component: MediaLibrary,
+      beforeEnter: authGuard
+    },
+    {
+      path: '/sections',
+      name: 'sections',
+      component: ExploreSections,
       beforeEnter: authGuard
     },
     {
