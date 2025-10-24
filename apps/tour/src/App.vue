@@ -36,16 +36,18 @@ onMounted(() => {
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <TourLogo />
       <v-app-bar-title class=" sm:block">        
-        <span
-          class="font-bold drop-shadow-sm text-sm lg:text-xl bg-gradient-to-r from-blue-500 to-cyan-400 text-transparent bg-clip-text"
-        >
-          DEJA
-        </span>
-        <span
-          class="ml-1 font-bold drop-shadow-sm text-sm lg:text-xl"
-        >
-          Tour App
-        </span>
+        <router-link to="/" class="flex items-center" aria-label="Home">
+          <span
+            class="font-bold drop-shadow-sm text-sm lg:text-xl bg-gradient-to-r from-blue-500 to-cyan-400 text-transparent bg-clip-text"
+          >
+            DEJA
+          </span>
+          <span
+            class="ml-1 font-bold drop-shadow-sm text-sm lg:text-xl"
+          >
+            Tour App
+          </span>
+        </router-link>
       </v-app-bar-title>
       
       <!-- Demo Mode Indicator -->
