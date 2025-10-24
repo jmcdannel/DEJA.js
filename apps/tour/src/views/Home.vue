@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core'
 import TourLogo from '../components/TourLogo.vue'
-import { BackgroundFallingStars } from '@repo/ui'
+import { BackgroundFallingStars } from '@repo/ui/src/index.ts'
 
 const layoutId = useStorage('@DEJA/layoutId', '')
 

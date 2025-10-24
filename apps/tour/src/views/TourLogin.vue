@@ -158,11 +158,11 @@ onMounted(async () => {
     <v-container class="fill-height">
       <v-row justify="center" halign="center" class="fill-height">
         <v-col cols="12" sm="8" md="6" lg="4">
-          <v-card elevation="8" class="pa-6">
+          <v-card elevation="8" class="pa-0 bg-transparent">
             <v-card-text class="text-center">
-              <TourLogo class="mb-6" style="width: 80px; height: 80px;" />
+              <img src="/TamarackJunctionLogo.png" alt="Tamarack Logo" />
               
-              <h1 class="text-h4 mb-2">Welcome to the Tour</h1>
+              <h1 class="text-h4 my-2">Welcome to the Tour</h1>
               <p class="text-h6 text-medium-emphasis mb-6">
                 Choose how you'd like to explore our model train layout
               </p>
