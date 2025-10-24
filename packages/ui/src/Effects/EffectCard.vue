@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useEfx, efxTypes, type Effect } from '@repo/modules'
+import PlaySound from './PlaySound.vue'
 
 const { runEffect } = useEfx()
 
@@ -69,7 +70,8 @@ const efxType = computed(() => efxTypes.find((type) => type.value === props?.eff
       </div>
     </v-card-text>
     <v-card-actions class="flex justify-end">
-      <v-switch 
+      <PlaySound v-if="effect?.type === 'sound'" :effect="effect" view-as="card" />
+      <v-switch v-else
         v-model="state" 
         :color="effect?.color || 'primary'" 
         :disabled="isRunning" 

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import GuestEffectCard from '../components/GuestEffectCard.vue'
+import { useEfx } from '@repo/modules/effects/useEfx'
+import { GuestEffectCard } from '@repo/ui'
 
 interface AreaDetail {
   id: string
@@ -20,8 +21,10 @@ interface AreaDetail {
   }
 }
 
+const { getEffectsByTag } = useEfx()
 const route = useRoute()
 const areaId = computed(() => route.params.id as string)
+const areaEffects = getEffectsByTag(areaId.value, true)
 
 // Layout area data from the actual model train layout
 const areas = ref<AreaDetail[]>([
@@ -284,161 +287,6 @@ const area = computed(() =>
   areas.value.find(a => a.id === areaId.value)
 )
 
-// Effects data for the actual layout areas
-const allEffects = ref([
-  {
-    id: 'station-lights',
-    name: 'Station Platform Lights',
-    description: 'Toggle Tamarack Station platform lighting',
-    category: 'Lighting',
-    icon: 'mdi-lightbulb',
-    allowGuest: true,
-    isActive: false,
-    hasTimeout: false,
-    area: 'tamarack-station',
-    type: 'light',
-    state: false
-  },
-  {
-    id: 'station-announcements',
-    name: 'Station Announcements',
-    description: 'Play recorded station announcements for Tamarack Station',
-    category: 'Sound',
-    icon: 'mdi-microphone',
-    allowGuest: true,
-    isActive: false,
-    hasTimeout: false,
-    area: 'tamarack-station',
-    type: 'sound',
-    state: false
-  },
-  {
-    id: 'yard-tower-light',
-    name: 'Yard Tower Light',
-    description: 'Control Roseberry Yard tower beacon',
-    category: 'Lighting',
-    icon: 'mdi-lighthouse',
-    allowGuest: true,
-    isActive: false,
-    hasTimeout: false,
-    area: 'roseberry-yard',
-    type: 'light',
-    state: false
-  },
-  {
-    id: 'auto-park-spotlight',
-    name: 'Industrial Auto Park Spotlight',
-    description: 'Illuminate the industrial auto park at Roseberry',
-    category: 'Lighting',
-    icon: 'mdi-factory',
-    allowGuest: true,
-    isActive: false,
-    hasTimeout: false,
-    area: 'roseberry-yard',
-    type: 'light',
-    state: false
-  },
-  {
-    id: 'crossing-bell',
-    name: 'Grade Crossing Bell',
-    description: 'Activate crossing warning on Payette Subdivision',
-    category: 'Sound',
-    icon: 'mdi-bell',
-    allowGuest: true,
-    isActive: false,
-    hasTimeout: true,
-    timeoutDuration: 10000,
-    area: 'payette-subdivision',
-    type: 'sound',
-    state: false
-  },
-  {
-    id: 'bridge-lights',
-    name: 'Bridge Lights',
-    description: 'Toggle lights on scenic bridges along Payette Subdivision',
-    category: 'Lighting',
-    icon: 'mdi-bridge',
-    allowGuest: true,
-    isActive: false,
-    hasTimeout: false,
-    area: 'payette-subdivision',
-    type: 'light',
-    state: false
-  },
-  {
-    id: 'city-street-lights',
-    name: 'City Street Lights',
-    description: 'Toggle Thunder City street lighting',
-    category: 'Lighting',
-    icon: 'mdi-street-lamp',
-    allowGuest: true,
-    isActive: false,
-    hasTimeout: false,
-    area: 'thunder-city',
-    type: 'light',
-    state: false
-  },
-  {
-    id: 'urban-traffic',
-    name: 'Urban Traffic Sounds',
-    description: 'Activate traffic ambience in Thunder City',
-    category: 'Sound',
-    icon: 'mdi-car',
-    allowGuest: true,
-    isActive: false,
-    hasTimeout: false,
-    area: 'thunder-city',
-    type: 'sound',
-    state: false
-  },
-  {
-    id: 'train-horn',
-    name: 'Mountain Echo Horn',
-    description: 'Sound horn with mountain echo at Deadman\'s Curve',
-    category: 'Sound',
-    icon: 'mdi-bullhorn',
-    allowGuest: true,
-    isActive: false,
-    hasTimeout: true,
-    timeoutDuration: 8000,
-    area: 'deadmans-curve',
-    type: 'sound',
-    state: false
-  },
-  {
-    id: 'valley-windmill',
-    name: 'Valley Windmill',
-    description: 'Animate the windmill in Round Valley',
-    category: 'Animation',
-    icon: 'mdi-wind-turbine',
-    allowGuest: true,
-    isActive: false,
-    hasTimeout: false,
-    area: 'round-valley',
-    type: 'relay',
-    state: false
-  },
-  {
-    id: 'peak-beacon',
-    name: 'Peak Beacon',
-    description: 'Activate the beacon at Tripod Peak summit',
-    category: 'Lighting',
-    icon: 'mdi-lighthouse-on',
-    allowGuest: true,
-    isActive: false,
-    hasTimeout: false,
-    area: 'tripod-peak',
-    type: 'light',
-    state: false
-  }
-])
-
-const areaEffects = computed(() => 
-  allEffects.value.filter(effect => 
-    effect.area === areaId.value && effect.allowGuest
-  )
-)
-
 // Media data for the actual layout areas
 const allMedia = ref([
   { id: 'tamarack-overview', title: 'Tamarack Station Overview', description: 'Complete tour of the main passenger station', type: 'video' as const, area: 'tamarack-station', duration: '6:45' },
@@ -588,6 +436,7 @@ onMounted(() => {
                   :effect="effect" 
                   @activate="activateEffect"
                   @deactivate="deactivateEffect"
+                  :showDescription="false"
                 />
               </v-col>
             </v-row>

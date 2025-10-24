@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
-import { useEfx, type Effect } from '@repo/modules/effects'
+import { useEfx, efxTypes, type Effect } from '@repo/modules/effects'
+import PlaySound from './PlaySound.vue'
 
-const { runEffect, getEfxType } = useEfx()
 
 interface Props {
   effect: Effect
-  effectId?: string
   state?: boolean
   showDescription?: boolean
   showTags?: boolean
@@ -17,120 +16,37 @@ const props = withDefaults(defineProps<Props>(), {
   showDescription: true,
   showTags: true
 })
-
-const emit = defineEmits<{
-  'update:state': [value: boolean]
-  'activate': [effectId: string]
-  'deactivate': [effectId: string]
-}>()
-
-const internalState = ref(props.state !== undefined ? props.state : props.effect?.state)
+const { runEffect, getEfxType } = useEfx()
+const state = ref(props.effect?.state)
+const efxType = computed(() => efxTypes.find((type) => type.value === props?.effect?.type))
 const isRunning = ref(false)
-const timeoutProgress = ref(0)
-const remainingTime = ref(0)
 
-// Computed property for state that can be updated
-const state = computed({
-  get: () => props.state !== undefined ? props.state : internalState.value,
-  set: (value: boolean) => {
-    internalState.value = value
-    emit('update:state', value)
-  }
+const { start, stop } = useTimeoutFn(() => {
+  isRunning.value = false
+}, 2000)
+
+watch(state, async (newState) => {
+  console.log('Effect state watched to:', newState)
+  isRunning.value = true
+  stop()
+  start()
+  await runEffect({...props.effect, state: newState})
 })
-
-// Get effect type info for better icons and labels
-const effectType = computed(() => getEfxType(props.effect.type))
-
-// Determine if this effect has a timeout
-const hasTimeout = computed(() => ['sound', 'relay', 'macro'].includes(props.effect.type))
-const timeoutDuration = computed(() => {
-  const timeouts: Record<string, number> = {
-    'sound': 5000,
-    'relay': 10000,
-    'macro': 15000
-  }
-  return timeouts[props.effect.type] || 0
-})
-
-// Watch for prop changes
-watch(() => props.state, (newState) => {
-  if (newState !== undefined) {
-    internalState.value = newState
-  }
-})
-
-// Watch for state changes to handle timeout progress
-watch(() => state.value, (isActive) => {
-  if (isActive && hasTimeout.value && timeoutDuration.value) {
-    remainingTime.value = timeoutDuration.value
-    const interval = setInterval(() => {
-      remainingTime.value -= 100
-      timeoutProgress.value = ((timeoutDuration.value - remainingTime.value) / timeoutDuration.value) * 100
-      if (remainingTime.value <= 0) {
-        clearInterval(interval)
-        timeoutProgress.value = 0
-      }
-    }, 100)
-  } else {
-    timeoutProgress.value = 0
-    remainingTime.value = 0
-  }
-})
-
-async function handleActivate() {
-  if (isRunning.value) return
-  
-  const { isPending } = useTimeoutFn(() => {
-    isRunning.value = false
-  }, 3000)
-  
-  isRunning.value = isPending.value
-  
-  try {
-    await runEffect({...props.effect, id: props.effectId || props.effect.id, state: true})
-    emit('activate', props.effectId || props.effect.id)
-    
-    // Auto-deactivate after timeout if specified
-    if (hasTimeout.value && timeoutDuration.value) {
-      setTimeout(() => {
-        handleDeactivate()
-      }, timeoutDuration.value)
-    }
-  } catch (error) {
-    console.error('Error activating effect:', error)
-  }
-}
-
-async function handleDeactivate() {
-  if (isRunning.value) return
-  
-  const { isPending } = useTimeoutFn(() => {
-    isRunning.value = false
-  }, 3000)
-  
-  isRunning.value = isPending.value
-  
-  try {
-    await runEffect({...props.effect, id: props.effectId || props.effect.id, state: false})
-    emit('deactivate', props.effectId || props.effect.id)
-  } catch (error) {
-    console.error('Error deactivating effect:', error)
-  }
-}
 </script>
 
 <template>
   <v-card 
-    :color="effect.state ? 'success' : 'surface'"
-    :elevation="effect.state ? 8 : 2"
+    :color="effect?.color || 'primary'"
+    :elevation="state ? 8 : 2"
     class="effect-card"
-    :class="{ active: effect.state }"
+    :class="{ active: state }"
+    variant="tonal"
   >
     <v-card-text class="text-center pa-4">
       <v-icon 
-        :icon="effectType?.icon || 'mdi-lightning-bolt'" 
+        :icon="efxType?.icon || 'mdi-lightning-bolt'" 
         size="48" 
-        :color="effect.state ? 'white' : 'primary'"
+        :color="state ? 'white' : 'primary'"
         class="mb-3"
       ></v-icon>
       
@@ -160,14 +76,19 @@ async function handleDeactivate() {
           {{ tag }}
         </v-chip>
       </div>
+    </v-card-text>
       
-      <div class="d-flex justify-center">
+    <v-card-actions class="flex justify-end">
+      <PlaySound v-if="effect?.type === 'sound'" :effect="effect" view-as="card" />
+      <template v-else>
         <v-btn
-          v-if="!effect.state"
-          color="primary"
-          @click="handleActivate"
+          v-if="!state"
+          :color="effect?.color || 'primary'" 
+          @click="state = true"
           :disabled="isRunning"
           :loading="isRunning"
+          variant="flat"
+
         >
           <v-icon icon="mdi-play" class="mr-1"></v-icon>
           Activate
@@ -175,29 +96,17 @@ async function handleDeactivate() {
         
         <v-btn
           v-else
-          color="white"
-          variant="outlined"
-          @click="handleDeactivate"
+          :color="effect?.color || 'primary'" 
+          @click="state = false"
           :disabled="isRunning"
           :loading="isRunning"
+          variant="flat"
         >
           <v-icon icon="mdi-stop" class="mr-1"></v-icon>
           Stop
         </v-btn>
-      </div>
-      
-      <div v-if="hasTimeout && effect.state" class="mt-3">
-        <v-progress-linear
-          :model-value="timeoutProgress"
-          color="white"
-          height="4"
-          rounded
-        ></v-progress-linear>
-        <p class="text-caption mt-1" :class="{ 'text-white': effect.state }">
-          Auto-stop in {{ Math.ceil(remainingTime / 1000) }}s
-        </p>
-      </div>
-    </v-card-text>
+    </template>
+    </v-card-actions>
   </v-card>
 </template>
 

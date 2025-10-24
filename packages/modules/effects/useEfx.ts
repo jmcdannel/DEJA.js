@@ -22,7 +22,7 @@ export const useEfx = () => {
   const filterBy = useStorage<string[]>('@DEJA/prefs/effects/Filter', [])
   const colRef = collection(db, `layouts/${layoutId.value}/effects`)
 
-  const efxCol = () => {
+  const efxCol = () => { // fitlered and sorted collection reference
     const whereClauses: any[] = []
     if (filterBy.value.length > 0) {
       filterBy.value.forEach((filter) => {
@@ -50,8 +50,75 @@ export const useEfx = () => {
 
   function getGuestEffects() {
     console.log('Getting guest effects for layout:', layoutId.value)
-    const guestEffects = useCollection(query(collection(db, `layouts/${layoutId.value}/effects`), where('allowGuest', '==', true)), { ssrKey: 'guestEffects' })
+    const guestEffects = useCollection(
+      query(
+        collection(db, `layouts/${layoutId.value}/effects`), 
+        where('allowGuest', '==', true),
+      ), { ssrKey: 'guestEffects' })
     return guestEffects
+  }
+
+  function getEffectsList() {
+    console.log('Getting effects list for layout:', layoutId.value)
+    const baseQuery = efxCol()
+    if (!baseQuery) {
+      return null
+    }
+    const queryRef = query(baseQuery, where('type', 'not-in', ['macro', 'route']))
+    const effects = useCollection(queryRef, { ssrKey: 'effects' })
+    return effects
+  }
+
+  function getEffectsByTag(tag: string, allowGuest: boolean = false) {
+    console.log('Getting effects by tag for layout:', layoutId.value)
+    const baseQuery = query(
+      collection(db, `layouts/${layoutId.value}/effects`),
+      where('tags', 'array-contains', tag)
+    )
+    const queryRef = allowGuest
+      ? query(baseQuery, where('allowGuest', '==', true))
+      : baseQuery
+
+    const effects = useCollection(queryRef, { ssrKey: `taggedEffects-${tag}` })
+    return effects
+  }
+
+  function getEffectsByType(efxType: string, allowGuest: boolean = false) {
+    try {
+      console.log('getEffectsByType', efxType)
+      const baseQuery = query(
+        collection(db, `layouts/${layoutId.value}/effects`),
+        where('type', '==', efxType),
+      )
+      const queryRef = allowGuest
+      ? query(baseQuery, where('allowGuest', '==', true))
+      : baseQuery
+
+    const effects = useCollection(queryRef, { ssrKey: `effects-${efxType}` })
+    return effects
+    } catch (error) {
+      console.error('Error getting effects by type:', error)
+      return null
+    }
+  }
+
+  function getEffectsByDevice(deviceId: string, allowGuest: boolean = false) {
+    try {
+      console.log('getEffectsByDevice', deviceId)
+      const baseQuery = query(
+        collection(db, `layouts/${layoutId.value}/effects`),
+        where('device', '==', deviceId),
+      )
+      const queryRef = allowGuest
+      ? query(baseQuery, where('allowGuest', '==', true))
+      : baseQuery
+
+    const effects = useCollection(queryRef, { ssrKey: `deviceEffects-${deviceId}` })
+    return effects
+    } catch (error) {
+      console.error('Error getting effects by device:', error)
+      return null
+    }
   }
 
   async function getEffect(id: string): Promise<Effect | undefined> {
@@ -72,32 +139,6 @@ export const useEfx = () => {
       } as Effect
     } else {
       console.error('No such document!')
-    }
-  }
-
-  function getEffectsByType(efxType: string) {
-    try {
-      console.log('getEffectsByType', efxType)
-      return query(
-        colRef,
-        where('type', '==', efxType),
-      )
-    } catch (error) {
-      console.error('Error getting effects by type:', error)
-      return null
-    }
-  }
-
-  function getEffectsByDevice(deviceId: string) {
-    try {
-      console.log('getEffectsByDevice', deviceId)
-      return query(
-        colRef,
-        where('device', '==', deviceId),
-      )
-    } catch (error) {
-      console.error('Error getting effects by device:', error)
-      return null
     }
   }
 
@@ -169,8 +210,10 @@ export const useEfx = () => {
     efxCol,
     getEffect,
     getEffects,
+    getEffectsList,
     getGuestEffects,
     getEffectsByDevice,
+    getEffectsByTag,
     getEffectsByType,
     getEfxType,
     setEfx,

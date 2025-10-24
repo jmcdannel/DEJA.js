@@ -84,6 +84,8 @@ const tags = ref<string[]>(props.efx?.tags || [])
 const allowGuest = ref<boolean>(props.efx?.allowGuest || false)
 const loading = ref(false)
 const selectedSoundFile = ref<string>(props.efx?.sound || '')
+const soundDuration = ref<number>(props.efx?.soundDuration || 0)
+const loadingSoundDuration = ref(false)
 const showSoundDialog = ref(false)
 const rules: ValidationRules = {
   required: [(val) => !!val || 'Required.']
@@ -124,6 +126,13 @@ watch(efxType, (newType) => {
     efxTypeObj.value = undefined
   }
 })
+
+// Watch for changes to selectedSoundFile to determine duration
+watch(selectedSoundFile, (newSoundFile) => {
+  if (newSoundFile && soundDuration.value === 0) {
+    determineSoundDuration(newSoundFile)
+  }
+}, { immediate: true }) // immediate: true to run on component mount
 
 async function submit () {
   loading.value = true
@@ -182,6 +191,7 @@ async function submit () {
   // set sound file for sound effects
   if (efxType.value === 'sound') {
     newEfx.sound = selectedSoundFile.value
+    newEfx.soundDuration = soundDuration.value
   }
 
   await setEfx(props.efx?.id || '', newEfx)
@@ -207,6 +217,46 @@ function handleIALED(ialedEffectConfig: {
 function handleSoundFileSelect(soundFile: string) {
   selectedSoundFile.value = soundFile
   showSoundDialog.value = false
+  
+  // Determine sound duration
+  if (soundFile) {
+    determineSoundDuration(soundFile)
+  } else {
+    soundDuration.value = 0
+  }
+}
+
+async function determineSoundDuration(soundUrl: string): Promise<void> {
+  loadingSoundDuration.value = true
+  try {
+    // Create a temporary audio element to get duration
+    const tempAudio = document.createElement('audio')
+    tempAudio.src = soundUrl
+    tempAudio.preload = 'metadata'
+    
+    // Return a promise that resolves when metadata is loaded
+    await new Promise<void>((resolve, reject) => {
+      tempAudio.addEventListener('loadedmetadata', () => {
+        soundDuration.value = tempAudio.duration
+        console.log(`Sound duration determined: ${tempAudio.duration} seconds for ${soundUrl}`)
+        resolve()
+      })
+      
+      tempAudio.addEventListener('error', (error) => {
+        console.error('Error loading audio metadata:', error)
+        soundDuration.value = 0
+        reject(error)
+      })
+      
+      // Trigger metadata loading
+      tempAudio.load()
+    })
+  } catch (error) {
+    console.error('Failed to determine sound duration:', error)
+    soundDuration.value = 0
+  } finally {
+    loadingSoundDuration.value = false
+  }
 }
 
 
@@ -326,13 +376,22 @@ function handleSoundFileSelect(soundFile: string) {
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <v-icon icon="mdi-check-circle" color="green" class="mr-2"></v-icon>
-            <span class="text-green-800">Selected: {{ selectedSoundFile.split('/').pop() }}</span>
+            <div>
+              <span class="text-green-800">Selected: {{ selectedSoundFile.split('/').pop() }}</span>
+              <div v-if="loadingSoundDuration" class="text-sm text-blue-600 mt-1 flex items-center">
+                <v-progress-circular size="12" width="2" indeterminate class="mr-1"></v-progress-circular>
+                Determining duration...
+              </div>
+              <div v-else-if="soundDuration > 0" class="text-sm text-green-600 mt-1">
+                Duration: {{ Math.floor(soundDuration / 60) }}:{{ String(Math.floor(soundDuration % 60)).padStart(2, '0') }}
+              </div>
+            </div>
           </div>
           <v-btn 
             size="small" 
             variant="text" 
             color="red" 
-            @click="selectedSoundFile = ''"
+            @click="selectedSoundFile = ''; soundDuration = 0"
             title="Clear selection"
           >
             <v-icon icon="mdi-close"></v-icon>
