@@ -16,7 +16,7 @@ import DeviceSerialMonitors from './components/DeviceSerialMonitor/DeviceSerialM
 import { db } from '@repo/firebase-config'
 import { collection, onSnapshot, type DocumentData } from 'firebase/firestore'
 
-const TIMEOUT  = 30000 // 30 seconds for the timeout
+const TIMEOUT  = 1000 * 60 * 5 // 5 minutes for the timeout
 
 const { getLayout, getDevices } = useLayout()
 const { getThrottles } = useLocos()
