@@ -224,7 +224,7 @@ export async function handleEffect(payload: Effect): Promise<void> {
     conn.send &&
     conn.port
   ) {
-    conn.send(conn, JSON.stringify([command]))
+    conn.send(conn, command)
   } else if (
     layoutDevice?.connection === 'wifi' &&
     conn.publish &&

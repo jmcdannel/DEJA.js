@@ -20,6 +20,7 @@ interface Connection {
   publish?: (topic: string, message: string, keepAlive: boolean) => void
   send?: (conn: Connection, data: string) => void
   topic?: string
+  deviceType?: string
   commandPool?: CommandPool
 }
 
@@ -98,6 +99,23 @@ const sendPooled = (connection: Connection, data: string): void => {
       return
     }
 
+    // If this device is an LED arduino, send immediately without pooling
+    if (connection.deviceType === 'deja-arduino-led') {
+      log.debug('[LAYOUT] Immediate send for deja-arduino-led:', data)
+      if (connection.port) {
+      connection.port.write(data, handleSend)
+      } else if (connection.publish && connection.topic) {
+      try {
+        connection.publish(connection.topic, `[${data}]`, true)
+      } catch (err) {
+        log.error('[LAYOUT] MQTT publish error:', err)
+      }
+      } else {
+      log.warn('[LAYOUT] No transport available for immediate send:', data)
+      }
+      return
+    }
+
     // Initialize command pool if not exists
     if (!connection.commandPool) {
       connection.commandPool = { commands: [], timer: null }
@@ -133,6 +151,12 @@ async function autoConnect(devices: Device[]): Promise<void> {
         serial: device.port,
       })
       connectDevice({ device: device.id, serial: device.port, topic: device.topic })
+    } else if (device.autoConnect && device.connection === 'wifi' && device.topic) {  
+      log.start('Auto connect device', device.autoConnect, {
+        device: device.id,
+        topic: device.topic,
+      })
+      connectDevice({ device: device.id, topic: device.topic })
     }
   })
 }
@@ -232,6 +256,7 @@ async function connectUsbDevice(
     const connection: Connection = {
       isConnected: true,
       port: port ? port : undefined,
+      deviceType: device.type,
       send: (conn: Connection, data: string) => sendPooled(conn, data),
     }
     _connections[device.id] = connection
@@ -270,6 +295,7 @@ async function connectMqttDevice(device: Device): Promise<void> {
       _connections[device.id] = {
         isConnected: true,
         publish: mqtt.publish,
+        deviceType: device.type,
         topic,
       }
     }
