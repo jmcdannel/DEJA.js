@@ -3,17 +3,17 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import RouteForm from '@/Routes/RouteForm.vue'
-import type { Effect } from '@repo/modules'
+import { routeType, type Route } from '@repo/modules'
 
 const router = useRouter()
-const defaultRoute = computed<Effect>(() => ({
+const defaultRoute = computed<Route>(() => ({
   id: '',
   name: '',
-  type: 'route',
-  color: 'purple',
+  color: routeType.color,
   tags: [],
-  allowGuest: false,
-  state: false,
+  turnouts: [],
+  point1: '',
+  point2: '',
 }))
 
 function handleClose() {
@@ -22,5 +22,5 @@ function handleClose() {
 </script>
 <template>
   <ModuleTitle menu="Routes" />
-  <RouteForm :efx="defaultRoute" @close="handleClose" />
+  <RouteForm :route="defaultRoute" @close="handleClose" />
 </template>

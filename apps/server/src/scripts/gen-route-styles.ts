@@ -1,8 +1,8 @@
 import fs from 'fs/promises'
 import path from 'path'
-import { getDocs, collection, query, where } from 'firebase/firestore'
+import { getDocs, collection, query } from 'firebase/firestore'
 import { db } from '@repo/firebase-config/firebase-node'
-import type { Effect } from '@repo/modules'
+import type { Route } from '@repo/modules'
 import type { Turnout } from '@repo/modules'
 
 const layoutId = process.env.LAYOUT_ID
@@ -18,17 +18,16 @@ function formatPoint(point: string) {
 
 async function generateRouteCss() {
   const routesQuery = query(
-    collection(db, `layouts/${layoutId}/effects`),
-    where('type', '==', 'route')
+    collection(db, `layouts/${layoutId}/routes`)
   )
 
   const routeSnapshots = await getDocs(routesQuery)
-  const routes: Effect[] = routeSnapshots.docs.map(
+  const routes: Route[] = routeSnapshots.docs.map(
     (doc) =>
       ({
         ...doc.data(),
         id: doc.id,
-      } as Effect)
+      } as Route)
   )
   const points = routes.reduce((acc, route) => {
     if (route.point1) acc.add(formatPoint(route.point1))

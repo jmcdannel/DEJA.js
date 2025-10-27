@@ -1,64 +1,68 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useTurnouts, type Turnout, type Effect, type MacroItem } from '@repo/modules'
+import { ref, watch } from 'vue'
+import { useTurnouts, type Turnout, type RouteTurnoutConfig } from '@repo/modules'
 import TurnoutAdd from '@/Routes/TurnoutAdd.vue'
 
 const emit = defineEmits(['change'])
 const props = defineProps<{
-  on: Array<any>
+  turnouts: RouteTurnoutConfig[]
 }>()
 
 const ondialog = ref(false)
-const onChips = ref(props.on || [])
+const turnoutChips = ref<RouteTurnoutConfig[]>(props.turnouts || [])
+
+watch(() => props.turnouts, (newTurnouts) => {
+  turnoutChips.value = [...(newTurnouts || [])]
+}, { deep: true })
 
 const { setTurnout } = useTurnouts()
 
-function handleOnUpdate(e: Array<string> | undefined) {
-  console.log('handleOnUpdate', onChips.value)
-  // remove e from onChips
-  onChips.value = onChips.value.filter((c: MacroItem) => c.id !== e?.[0])
-  emitChanges()  
+function handleRemove(ids: Array<string> | undefined) {
+  turnoutChips.value = turnoutChips.value.filter((chip) => !ids?.includes(String(chip.id ?? '')))
+  emitChanges()
 }
 
-function handleAddOn(effects: Effect[], turnouts: Turnout[]) {
-  console.log('handleAddOn', effects, turnouts)
-  onChips.value = onChips.value.concat(effects.map((e) => ({
-    id: e.id,
-    name: e.name,
-    device: e.device,
-    type: 'effect',
-    state: true,
-  })))
-  onChips.value = onChips.value.concat(turnouts.map((t) => ({
-    id: t.id,
-    name: t.name,
-    device: t.device,
-    type: 'turnout',
-    state: true,
-  })))
+function handleAddTurnouts(_effects: unknown[], turnouts: Turnout[]) {
+  const merged = turnoutChips.value.concat(
+    turnouts.map((t) => ({
+      id: t.id,
+      name: t.name,
+      device: t.device,
+      type: 'turnout',
+      state: t.state ?? true,
+    }))
+  )
+  const deduped = new Map<string, RouteTurnoutConfig>()
+  merged.forEach((chip, index) => {
+    const key = chip.id ? String(chip.id) : `generated-${index}`
+    deduped.set(key, { ...chip })
+  })
+  turnoutChips.value = Array.from(deduped.values())
   emitChanges()
   ondialog.value = false
 }
 
-
 function emitChanges() {
-  emit('change', {
-    on: onChips.value
-  })
+  emit('change', [...turnoutChips.value])
 }
 
-function handleChipClick(chip: MacroItem) {
+function handleChipClick(chip: RouteTurnoutConfig) {
   if (chip.type === 'turnout') {
-    // Create a proper Turnout object from the MacroItem
-    const turnout: Turnout = {
-      id: chip.id?.toString() || '',
-      name: chip.name || '',
-      device: chip.device || '',
-      type: chip.type || '',
-      state: chip.state || false
+    const turnout: Partial<Turnout> = {
+      id: chip.id?.toString(),
+      name: chip.name,
+      device: chip.device,
+      state: chip.state,
     }
-    setTurnout(turnout.id, { ...turnout, state: chip.state || false })
+    if (turnout.id) {
+      setTurnout(turnout.id, { ...turnout, state: chip.state ?? true })
+    }
   }
+}
+
+function toggleChipState(chip: RouteTurnoutConfig) {
+  chip.state = !(chip.state ?? true)
+  emitChanges()
 }
 
 </script>
@@ -71,29 +75,29 @@ function handleChipClick(chip: MacroItem) {
       <v-btn @click="ondialog = true" icon="mdi-plus" color="purple"></v-btn>
     </template>
     <v-card-text>
-      <v-chip-group column multiple 
-        color="purple" 
+      <v-chip-group column multiple
+        color="purple"
         variant="flat"
-        :model-value="onChips" >
-        <v-chip v-for="chip in onChips" :key="chip.id" :value="chip.id"          
+        :model-value="turnoutChips" >
+        <v-chip v-for="chip in turnoutChips" :key="chip.id" :value="chip.id"
           size="small"
           @click="handleChipClick(chip)"
           color="primary"
           variant="outlined"
           selected
-        >        
+        >
           <template #prepend>
-            <v-icon 
-              @click="chip.state = !chip.state"
+            <v-icon
+              @click.stop="toggleChipState(chip)"
               class="mr-2"
-              :icon="chip.type === 'effect' ? 'mdi-rocket-launch' : 'mdi-directions-fork'" 
-              :color="chip.state ? 'green' : 'red'">
+              :icon="chip.type === 'turnout' ? 'mdi-directions-fork' : 'mdi-rocket-launch'"
+              :color="(chip.state ?? true) ? 'green' : 'red'">
             </v-icon>
-            {{ chip.state }}
-          </template>  
+            {{ (chip.state ?? true) ? 'Straight' : 'Divergent' }}
+          </template>
           <template #append>
-            <v-icon 
-              @click="handleOnUpdate([chip.id])"
+            <v-icon
+              @click.stop="handleRemove([chip.id?.toString() || ''])"
               class="ml-2"
               icon="mdi-delete"
               color="grey">
@@ -109,8 +113,6 @@ function handleChipClick(chip: MacroItem) {
     v-model="ondialog"
     width="auto"
   >
-   <TurnoutAdd @close="ondialog = false" @add="handleAddOn" defaultState="on" />
+   <TurnoutAdd @close="ondialog = false" @add="handleAddTurnouts" defaultState="on" />
   </v-dialog>
-
-
 </template>

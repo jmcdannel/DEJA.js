@@ -84,7 +84,7 @@ const {
           >
             <template #opposite>
               <!-- <span class="text-xs">{{ t.state ? 'Straight' : 'Divergent' }}</span> -->
-              <span class="text-xs">{{ t.name }}</span>
+              <span class="text-xs">{{ t.name }} • {{ (t.state ?? true) ? 'Straight' : 'Divergent' }}</span>
             </template>
           </v-timeline-item>
         </template>
@@ -136,20 +136,23 @@ const {
     <v-container v-if="activeMap === 'RoutesList'" class="overflow-y-auto" >
       <v-row>
         <v-col v-for="r in routes" :key="r.id" cols="12" xs="12" sm="6" lg="4">
-          <v-card color="cyan" variant="tonal">
-            <v-card-title class="text-lg font-bold">{{ r.id }}</v-card-title>
-            <v-card-subtitle>State: {{ r.state }}</v-card-subtitle>
+          <v-card :color="r?.color || 'cyan'" variant="tonal">
+            <v-card-title class="text-lg font-bold">{{ r.name || r.id }}</v-card-title>
             <v-card-text>
               <v-chip-group>
                 <v-chip
                   prepend-icon="mdi-map-marker"
                   size="small"
                 >{{ r?.point1 }}</v-chip>
-                <v-chip v-for="t in r?.on" :key="t.id" size="small" prepend-icon="mdi-call-split">{{ t.name }}</v-chip>
-                <v-chip v-for="t in r?.off" :key="t.id" size="small" prepend-icon="mdi-call-split">{{ t.name }}</v-chip>
+                <v-chip
+                  v-for="(t, idx) in r?.turnouts"
+                  :key="t.id ?? idx"
+                  size="small"
+                  prepend-icon="mdi-call-split"
+                >{{ t.name }} ({{ (t.state ?? true) ? 'Straight' : 'Divergent' }})</v-chip>
                 <v-chip
                   append-icon="mdi-map-marker"
-                  :color="color"
+                  :color="r?.color || 'primary'"
                   size="small"
                 >{{ r?.point2 }}</v-chip>
               </v-chip-group>
@@ -166,7 +169,7 @@ const {
       </v-row>
     </v-container>
     <!-- <pre v-for="r in routes">
-{{ r.id }}, {{ r.state }}, {{ r.on?.map(e => e.name) }}, {{ r.off?.map(e => e.name) }}, 
+{{ r.id }}, {{ r.turnouts?.map(e => `${e.name}:${e.state}`) }}
     </pre>
     <p>{{  getMapClasses() }}</p> -->
   </div>

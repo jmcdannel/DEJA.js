@@ -24,3 +24,6 @@ export * from './turnouts/types'
 
 // Routes module
 export { default as useLayoutRoutes } from './routes/useLayoutRoutes'
+export { default as useRoutes } from './routes/useRoutes'
+export * from './routes/types'
+export * from './routes/constants'

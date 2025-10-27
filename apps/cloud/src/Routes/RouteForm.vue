@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useEfx, efxTypes, useLayoutRoutes, type Effect, type MacroItem } from '@repo/modules'
+import { computed, ref } from 'vue'
+import { useLayoutRoutes, useRoutes, routeType, type Route, type RouteTurnoutConfig, type RouteInput } from '@repo/modules'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import RouteTurnoutForm from '@/Routes/RouteTurnoutForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
@@ -13,60 +13,74 @@ interface ValidationRules {
 }
 
 const props = defineProps<{
-  efx: Effect
+  route: Route
 }>()
 
 const emit = defineEmits(['close'])
 
-const { setEfx, getEfxType } = useEfx()
+const { setRoute } = useRoutes()
 const { runRoute } = useLayoutRoutes()
 
 const editColor = ref(false)
 
-const name = ref(props.efx?.name || '')
-const point1 = ref(props.efx?.point1)
-const point2 = ref(props.efx?.point2)
-const macroOn = ref(props.efx?.on || [])
-const macroOff = ref(props.efx?.off || [])
-const efxType = ref('route')
-const efxTypeObj = ref(props.efx?.type ?  getEfxType(props.efx?.type) : null)
-const color = ref(props.efx?.color || efxTypeObj.value?.color || 'purple')  
-const tags = ref<string[]>(props.efx?.tags || [])
+const name = ref(props.route?.name || '')
+const point1 = ref(props.route?.point1)
+const point2 = ref(props.route?.point2)
+const turnouts = ref<RouteTurnoutConfig[]>(props.route?.turnouts || [])
+const color = ref(props.route?.color || routeType.color || 'purple')
+const tags = ref<string[]>(props.route?.tags || [])
 const loading = ref(false)
+const isEditing = computed(() => Boolean(props.route?.id))
 const rules: ValidationRules = {
   required: [(val) => !!val || 'Required.']
+}
+
+function resolveRouteId() {
+  return props.route?.id || `route-${slugify(point1.value || '')}-${slugify(point2.value || '')}`
+}
+
+function buildRoutePayload(): Route {
+  return {
+    ...(props.route || { id: resolveRouteId() }),
+    id: props.route?.id || resolveRouteId(),
+    name: name.value,
+    color: color.value,
+    tags: tags.value,
+    point1: point1.value || '',
+    point2: point2.value || '',
+    turnouts: turnouts.value,
+    order: props.route?.order,
+    description: props.route?.description,
+  }
 }
 
 async function submit () {
   loading.value = true
 
-  const newEfx: Effect = {
+  const routeId = props.route?.id || `route-${slugify(point1.value || '')}-${slugify(point2.value || '')}`
+  const newRoute: RouteInput = {
     name: name.value,
-    type: efxType.value,
     color: color.value,
     tags: tags.value,
-    state: false,
-    id: props.efx?.id || ''
+    point1: point1.value || '',
+    point2: point2.value || '',
+    turnouts: turnouts.value,
+    order: props.route?.order,
+    description: props.route?.description,
   }
-  //  set pin
-  newEfx.point1 = point1.value || ''
-  newEfx.point2 = point2.value || ''
 
-  //  set macro
-  newEfx.on = macroOn.value
-  newEfx.off = macroOff.value
- 
-  await setEfx(props.efx?.id || `route-${slugify(newEfx.point1)}-${slugify(newEfx.point2)}`, newEfx)
+  await setRoute(routeId, newRoute)
 
-  console.log(props.efx, newEfx)
   loading.value = false
   emit('close')
 }
 
-function handleMacro({on , off}: {on: string[], off: string[]}) {
-  console.log('handleMacro', on, off)
-  macroOn.value = on
-  macroOff.value = off
+function handleTurnouts(updated: RouteTurnoutConfig[]) {
+  turnouts.value = updated
+}
+
+function runCurrentRoute() {
+  runRoute(buildRoutePayload())
 }
 
 </script>
@@ -75,12 +89,12 @@ function handleMacro({on , off}: {on: string[], off: string[]}) {
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
     <div class="flex items-center justify-between">
       <v-label class="m-2 text-4xl">
-        <component v-if="efxTypeObj?.icon" :is="efxTypeObj?.icon" :color="color" class="w-16 h-16 stoke-none mr-4"></component>
-        {{ efx ? 'Edit' : 'Add'}} Route
+        <v-icon :icon="routeType.icon" :color="color" class="w-16 h-16 stoke-none mr-4"></v-icon>
+        {{ isEditing ? 'Edit' : 'Add'}} Route
       </v-label>
       <v-chip class="m-2" :color="color" size="x-large">
-        <v-icon v-if="efxTypeObj?.icon" :icon="efxTypeObj.icon" class="mr-2"></v-icon>
-        {{ efxType }}
+        <v-icon :icon="routeType.icon" class="mr-2"></v-icon>
+        {{ routeType.label }}
       </v-chip>
     </div>
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
@@ -114,12 +128,12 @@ function handleMacro({on , off}: {on: string[], off: string[]}) {
     </div>
 
 
-    <RouteTurnoutForm @change="handleMacro" :on="macroOn" :off="macroOff"></RouteTurnoutForm>
+    <RouteTurnoutForm @change="handleTurnouts" :turnouts="turnouts"></RouteTurnoutForm>
 
 
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
     <v-sheet>
-      <v-btn text="Turn Route ON" @click="runRoute(efx)">
+      <v-btn text="Run Route" @click="runCurrentRoute">
         <v-icon left>mdi-rocket-launch</v-icon>
         Run Route
       </v-btn>
@@ -130,7 +144,7 @@ function handleMacro({on , off}: {on: string[], off: string[]}) {
       <v-btn
         class="min-h-48 min-w-48 border flex"
         :color="color"
-        @click="editColor = true" >       
+        @click="editColor = true" >
         <div class="relative flex flex-col justify-center items-center">
           <v-icon size="64">mdi-palette</v-icon>
           <div class="mt-4">Color [{{ color }}]</div>
@@ -138,7 +152,7 @@ function handleMacro({on , off}: {on: string[], off: string[]}) {
       </v-btn>
     </section>
     <v-dialog max-width="80vw" v-model="editColor">
-      <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.efx?.color ?? 'purple'"></ColorPicker>
+      <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.route?.color ?? routeType.color"></ColorPicker>
     </v-dialog>
 
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
@@ -161,10 +175,9 @@ function handleMacro({on , off}: {on: string[], off: string[]}) {
         text="Submit"
         type="submit"
         :color="color"
-      ></v-btn>  
+      ></v-btn>
     </div>
-    <ViewJson :json="efx" label="Efx" />
-    <ViewJson :json="efxTypeObj || {}" label="efxTypeObj" />
-    <ViewJson :json="efxTypes" label="efxTypes" />
+    <ViewJson :json="route" label="Route" />
+    <ViewJson :json="routeType" label="routeType" />
   </v-form>
 </template>

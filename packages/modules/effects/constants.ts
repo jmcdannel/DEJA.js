@@ -79,10 +79,4 @@ export const efxTypes: EffectType[] = [
     icon: 'mdi-magic-staff',
     color: 'purple',
   },
-  {
-    value: 'route',
-    label: 'Route',
-    icon: 'mdi-map',
-    color: 'purple',
-  },
 ]
