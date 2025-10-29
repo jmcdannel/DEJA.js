@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
 import { useCurrentUser } from 'vuefire'
+import { useRouter } from 'vue-router'
 import Logo from './Logo.vue'
 import UserProfile from './UserProfile.vue'
 import TrackPower from './TrackPower.vue'
@@ -10,6 +11,17 @@ import Power from './Power.vue'
 import EmergencyStop from './EmergencyStop.vue'
 import BackgroundDecor from './BackgroundDecor.vue'
 import { useLayout } from '@repo/modules'
+
+
+const emit = defineEmits<{
+  trackPowerToggle: [newState: boolean]
+  layoutPowerToggle: [newState: boolean]
+  emergencyStop: []
+  deviceSelect: [deviceId: string]
+  layoutSelect: [layoutId: string]
+  logoClick: []
+  drawerToggle: [newState: boolean]
+}>()
 
 const props = defineProps<{
   appName?: string
@@ -28,22 +40,14 @@ const props = defineProps<{
 }>()
 
 const { getLayouts, getDevices } = useLayout()
-const layouts = getLayouts()
-const devices = getDevices()
-const { mdAndUp, mobile } = useDisplay()
-
-const emit = defineEmits<{
-  trackPowerToggle: [newState: boolean]
-  layoutPowerToggle: [newState: boolean]
-  emergencyStop: []
-  deviceSelect: [deviceId: string]
-  layoutSelect: [layoutId: string]
-  logoClick: []
-  drawerToggle: [newState: boolean]
-}>()
-
 const layoutId = useStorage('@DEJA/layoutId', '')
 const user = useCurrentUser()
+const router = useRouter()
+const { mdAndUp, mobile } = useDisplay()
+
+const layouts = getLayouts(user.value?.email)
+const devices = getDevices()
+
 const isLayoutModalOpen = ref(false)
 const isDeviceModalOpen = ref(false)
 
@@ -65,8 +69,11 @@ function handleDeviceSelect(deviceId: string) {
   emit('deviceSelect', deviceId)
 }
 
-function handleLayoutSelect(layoutId: string) {
-  emit('layoutSelect', layoutId)
+function handleLayoutSelect(selectedLayoutId: string) {
+  emit('layoutSelect', selectedLayoutId)
+  layoutId.value = selectedLayoutId
+  router.push({ name: 'home' })
+  isLayoutModalOpen.value = false
 }
 
 function handleLogoClick() {
@@ -180,18 +187,18 @@ const defaultProps = {
         <v-card-text>
           <div v-if="layouts && layouts.length > 0" class="space-y-3">
             <div v-for="layout in layouts" :key="layout.id" 
-              class="p-4 rounded-lg border cursor-pointer transition-all hover:bg-gray-50"
-              :class="{ 'border-green-500 bg-green-50': layout.id === layoutId, 'border-gray-200': layout.id !== layoutId }"
+              class="p-4 rounded-lg border cursor-pointer transition-all hover:bg-gray-800"
+              :class="{ 'border-green-500 bg-green-800': layout.id === layoutId, 'border-gray-200 bg-gray-900': layout.id !== layoutId }"
               @click="handleLayoutSelect(layout.id)">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <v-icon :color="layout.id === layoutId ? 'success' : 'grey'">mdi-home</v-icon>
+                  <v-icon :color="layout.id === layoutId ? 'green' : 'grey'">mdi-home</v-icon>
                   <div>
                     <h4 class="font-medium">{{ layout.name }}</h4>
                     <p v-if="layout.description" class="text-sm text-gray-600">{{ layout.description }}</p>
                   </div>
                 </div>
-                <v-icon v-if="layout.id === layoutId" color="success">mdi-check-circle</v-icon>
+                <v-icon v-if="layout.id === layoutId" color="green">mdi-check-circle</v-icon>
               </div>
             </div>
           </div>
