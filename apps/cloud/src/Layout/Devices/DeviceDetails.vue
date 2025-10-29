@@ -204,7 +204,7 @@ const turnoutPulsers = computed(() => {
           </tr>
         </thead>
         <tbody>
-          <!-- <tr v-for="turnout in turnouts" :key="turnout?.turnoutIdx">
+          <tr v-for="turnout in turnouts" :key="turnout?.turnoutIdx">
             <td>{{ turnout?.name }}</td>
             <td>{{ turnout?.turnoutIdx }}</td>
             <td>{{ turnout?.straight }}</td>
@@ -213,25 +213,29 @@ const turnoutPulsers = computed(() => {
             <td>{{ turnout?.state }}</td>
             <td>{{ turnout?.id }}</td>
             <td>{{ turnout?.desc }}</td>
-          </tr> -->
+          </tr>
         </tbody>
       </v-table>
-      <!-- <v-row v-if="effects">
+      <v-spacer class="mt-4"></v-spacer>
+      <h2>Effects</h2>
+      <v-row v-if="effects">
         <v-col v-for="effect in effects" :key="effect?.id">
-          <v-card>
+          <v-card class="pb-2">
             <v-card-title>{{ effect.name }}</v-card-title>
             <v-card-subtitle>{{ effect.type }}</v-card-subtitle>
           </v-card>
         </v-col>
       </v-row>
+      <v-spacer class="mt-4"></v-spacer>
+      <h2>Turnouts</h2>
       <v-row v-if="turnouts">
         <v-col v-for="turnout in turnouts" :key="turnout?.turnoutIdx">
-          <v-card>
+          <v-card class="pb-2">
             <v-card-title>{{ turnout.name }}</v-card-title>
             <v-card-subtitle>{{ turnout.type }}</v-card-subtitle>
           </v-card>
         </v-col>
-      </v-row> -->
+      </v-row>
 
 
     </v-card-text>
