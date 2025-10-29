@@ -60,6 +60,30 @@ export function useTurnouts() {
     }
   }
 
+  function getTurnoutsByIds(turnoutIds: string[] | null ) {
+    try {
+      console.log('getTurnoutsByIds', turnoutIds)
+      if (!turnoutIds) {
+        return null
+      }
+      if (turnoutIds.length === 0) {
+        return colRef
+      } else if (turnoutIds.length === 1) {
+        return query(colRef, where('__name__', '==', turnoutIds[0]))
+      } else if (turnoutIds.length > 10) {
+        console.warn('Too many turnout ids for "in" query; returning all turnouts instead')
+        return colRef
+      }
+      return query(
+        colRef,
+        where('__name__', 'in', turnoutIds),
+      )
+    } catch (error) {
+      console.error('Error getting turnouts by ids:', error)
+      return null
+    }
+  }
+
   async function getTurnout(id: string): Promise<Turnout> {
     const deviceRef = doc(db, `layouts/${layoutId.value}/turnouts`, id)
     const docSnap = await getDoc(deviceRef)
@@ -106,6 +130,7 @@ export function useTurnouts() {
     getTurnout,
     getTurnouts,
     getTurnoutsByDevice,
+    getTurnoutsByIds,
     setTurnout,
     switchTurnout,
   }

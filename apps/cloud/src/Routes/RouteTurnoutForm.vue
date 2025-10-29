@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useTurnouts, type Turnout, type RouteTurnoutConfig } from '@repo/modules'
+import { useCollection } from 'vuefire'
+import { useTurnouts, type Turnout, type RouteTurnoutConfig } from '@repo/modules/index.ts'
 import TurnoutAdd from '@/Routes/TurnoutAdd.vue'
 
 const emit = defineEmits(['change'])
@@ -15,7 +16,8 @@ watch(() => props.turnouts, (newTurnouts) => {
   turnoutChips.value = [...(newTurnouts || [])]
 }, { deep: true })
 
-const { setTurnout } = useTurnouts()
+const { setTurnout, getTurnoutsByIds } = useTurnouts()
+const turnouts = useCollection(props?.turnouts ? getTurnoutsByIds(props.turnouts.map(t => t.id?.toString() || '')) : null)
 
 function handleRemove(ids: Array<string> | undefined) {
   turnoutChips.value = turnoutChips.value.filter((chip) => !ids?.includes(String(chip.id ?? '')))
@@ -60,9 +62,25 @@ function handleChipClick(chip: RouteTurnoutConfig) {
   }
 }
 
+function handleTurnoutToggle(tId: string) {
+  if (!turnouts.value) return
+  if (!tId) return
+  const turnout = turnouts.value.find(t => t.id === tId)
+  if (!turnout) return
+  setTurnout(turnout.id, { ...turnout, state: !turnout.state })
+
+}
+
 function toggleChipState(chip: RouteTurnoutConfig) {
   chip.state = !(chip.state ?? true)
   emitChanges()
+}
+
+function getTurnoutState(tId: string) {
+  if (!turnouts.value) return true
+  console.log('turnouts', turnouts.value)
+  const turnout = turnouts.value.find(t => t.id === tId)
+  return turnout?.state ?? true
 }
 
 </script>
@@ -75,37 +93,35 @@ function toggleChipState(chip: RouteTurnoutConfig) {
       <v-btn @click="ondialog = true" icon="mdi-plus" color="purple"></v-btn>
     </template>
     <v-card-text>
-      <v-chip-group column multiple
-        color="purple"
-        variant="flat"
-        :model-value="turnoutChips" >
-        <v-chip v-for="chip in turnoutChips" :key="chip.id" :value="chip.id"
-          size="small"
-          @click="handleChipClick(chip)"
-          color="primary"
-          variant="outlined"
-          selected
-        >
-          <template #prepend>
-            <v-icon
-              @click.stop="toggleChipState(chip)"
-              class="mr-2"
-              :icon="chip.type === 'turnout' ? 'mdi-directions-fork' : 'mdi-rocket-launch'"
-              :color="(chip.state ?? true) ? 'green' : 'red'">
-            </v-icon>
-            {{ (chip.state ?? true) ? 'Straight' : 'Divergent' }}
-          </template>
-          <template #append>
-            <v-icon
-              @click.stop="handleRemove([chip.id?.toString() || ''])"
-              class="ml-2"
-              icon="mdi-delete"
-              color="grey">
-            </v-icon>
-          </template>
-        {{ chip.name }}
-        </v-chip>
-      </v-chip-group>
+        <template v-for="chip in turnoutChips" :key="chip.id" :value="chip.id">
+          <v-chip 
+            size="small"
+            @click="handleChipClick(chip)"
+            color="primary"
+            variant="outlined"
+            selected
+          >
+            <template #prepend>
+              <v-icon
+                @click.stop="toggleChipState(chip)"
+                class="mr-2"
+                :icon="chip.type === 'turnout' ? 'mdi-directions-fork' : 'mdi-rocket-launch'"
+                :color="(chip.state ?? true) ? 'green' : 'red'">
+              </v-icon>
+              {{ (chip.state ?? true) ? 'Straight' : 'Divergent' }}
+            </template>
+            <template #append>
+              <v-icon
+                @click.stop="handleRemove([chip.id?.toString() || ''])"
+                class="ml-2"
+                icon="mdi-delete"
+                color="grey">
+              </v-icon>
+            </template>
+          {{ chip.name }}
+          </v-chip>
+          <v-icon @click="handleTurnoutToggle(chip.id?.toString() || '')" class="ml-1 mr-3" :color="(getTurnoutState(chip.id) ?? true) ? 'green' : 'red'" icon="mdi-circle-slice-8" size="20" />
+        </template>
     </v-card-text>
   </v-card>
 

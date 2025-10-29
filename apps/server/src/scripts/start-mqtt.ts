@@ -4,7 +4,7 @@ import { execSync } from 'child_process'
 import { join } from 'path'
 import { log } from '../utils/logger.js'
 
-function startMosquitto(): void {
+export function startMosquitto(): void {
   try {
     // Copy config file
     const sourcePath = join(process.cwd(), 'mosquitto.conf')

@@ -3,7 +3,8 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import RouteForm from '@/Routes/RouteForm.vue'
-import { useRoutes, type Route } from '@repo/modules'
+import { type Route } from '@repo/modules/index.ts'
+import { useRoutes } from '@repo/modules/routes/useRoutes'
 
 const route = useRoute()
 const router = useRouter()

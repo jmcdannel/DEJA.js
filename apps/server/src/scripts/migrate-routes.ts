@@ -7,6 +7,15 @@ interface Options {
   layoutFilter?: Set<string>
 }
 
+interface RouteTurnoutConfig {
+  id?: string | number
+  name?: string
+  device?: string
+  state?: boolean
+  type?: string
+  direction?: boolean | string
+}
+
 interface RouteEffectPayload {
   id?: string
   name?: string
@@ -14,7 +23,7 @@ interface RouteEffectPayload {
   point2?: string
   on?: any[]
   off?: any[]
-  turnouts?: any[]
+  turnouts?: RouteTurnoutConfig[]
   color?: string
   tags?: string[]
   order?: number
@@ -63,28 +72,39 @@ async function migrateLayout(layoutId: string, options: Options) {
       on,
       off,
       allowGuest: _allowGuest,
-      turnouts: _legacyTurnouts,
+      turnouts: existingTurnouts,
       ...rest
     } = data
 
-    const turnouts: any[] = []
-    if (Array.isArray(on)) {
-      turnouts.push(
-        ...on.map((item) => ({
-          ...item,
-          state: item?.state ?? true,
-          type: item?.type ?? 'turnout',
-        }))
-      )
-    }
-    if (Array.isArray(off)) {
-      turnouts.push(
-        ...off.map((item) => ({
-          ...item,
-          state: item?.state ?? false,
-          type: item?.type ?? 'turnout',
-        }))
-      )
+    // Use existing turnouts if available, otherwise convert from on/off arrays
+    let turnouts: RouteTurnoutConfig[] = []
+    
+    if (Array.isArray(existingTurnouts) && existingTurnouts.length > 0) {
+      // If turnouts already exist, use them directly
+      turnouts = existingTurnouts.map((item) => ({
+        ...item,
+        type: item?.type ?? 'turnout',
+      }))
+    } else {
+      // Convert legacy on/off arrays to turnouts format
+      if (Array.isArray(on)) {
+        turnouts.push(
+          ...on.map((item) => ({
+            ...item,
+            state: item?.state ?? true,
+            type: item?.type ?? 'turnout',
+          }))
+        )
+      }
+      if (Array.isArray(off)) {
+        turnouts.push(
+          ...off.map((item) => ({
+            ...item,
+            state: item?.state ?? false,
+            type: item?.type ?? 'turnout',
+          }))
+        )
+      }
     }
 
     const routePayload: RouteEffectPayload = {

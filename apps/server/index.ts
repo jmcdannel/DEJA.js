@@ -28,7 +28,7 @@ async function main(): Promise<void> {
     if (ENABLE_MQTT) {
       try {
         await mqtt.connect()
-        log.start('✅ MQTT connected')
+        log.start('✅ MQTT initialized')
       } catch (err) {
         log.error('❌ MQTT connection failed:', err)
         log.note('💡 To disable MQTT, set ENABLE_MQTT=false in your .env file')
@@ -56,8 +56,6 @@ async function main(): Promise<void> {
 async function disconnect(): Promise<void> {
   try {
     log.start('Shutting down DEJA.js Server...')
-    
-
     
     // Disconnect from DEJA Cloud
     await dejaCloud.disconnect()

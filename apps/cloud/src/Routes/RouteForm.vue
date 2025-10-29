@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useLayoutRoutes, useRoutes, routeType, type Route, type RouteTurnoutConfig, type RouteInput } from '@repo/modules'
+import { useLayoutRoutes, routeType, type Route, type RouteTurnoutConfig, type RouteInput } from '@repo/modules/index.ts'
+import { useRoutes } from '@repo/modules/routes/useRoutes'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import RouteTurnoutForm from '@/Routes/RouteTurnoutForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
@@ -76,6 +77,7 @@ async function submit () {
 }
 
 function handleTurnouts(updated: RouteTurnoutConfig[]) {
+  console.log('updated turnouts', updated)
   turnouts.value = updated
 }
 

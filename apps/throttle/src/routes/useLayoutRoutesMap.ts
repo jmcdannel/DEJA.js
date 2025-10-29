@@ -1,5 +1,6 @@
 import { computed, ref, watch } from 'vue'
-import { useRoutes, useTurnouts, useLayoutRoutes, type Route, type RouteTurnoutConfig } from '@repo/modules'
+import { useTurnouts, useLayoutRoutes, type Route, type RouteTurnoutConfig } from '@repo/modules/index.ts'
+import { useRoutes } from '@repo/modules/routes/useRoutes'
 
 const DELAY = 2000 // ms delay between turnouts being set in a route
 

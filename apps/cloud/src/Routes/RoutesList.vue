@@ -1,8 +1,8 @@
 <script async setup lang="ts">
 import { useCollection } from 'vuefire'
-import { useRoutes, type Route } from '@repo/modules'
+import { type Route } from '@repo/modules/index.ts'
+import { useRoutes } from '@repo/modules/routes/useRoutes'
 import RouteListItem from '@/Routes/RouteListItem.vue'
-import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 
 const emit = defineEmits(['edit'])
 
@@ -35,14 +35,8 @@ function handleEdit(item: Route) {
         lg="12"
       >
         <RouteListItem :route="item" :route-id="item.id" @edit="handleEdit"></RouteListItem>
+         <!-- <pre>{{item}}</pre> -->
     </v-col>
     </v-row>
-    <LcdDisplay 
-      :content="list.map(item => `${item.name}: ${item.point1 ?? ''} → ${item.point2 ?? ''}`)"
-      title="ROUTES LIST"
-      color="blue"
-      size="sm"
-      :max-lines="10"
-    />
   </v-container>
 </template>
