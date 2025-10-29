@@ -78,7 +78,6 @@ function toggleChipState(chip: RouteTurnoutConfig) {
 
 function getTurnoutState(tId: string) {
   if (!turnouts.value) return true
-  console.log('turnouts', turnouts.value)
   const turnout = turnouts.value.find(t => t.id === tId)
   return turnout?.state ?? true
 }
@@ -108,7 +107,6 @@ function getTurnoutState(tId: string) {
                 :icon="chip.type === 'turnout' ? 'mdi-directions-fork' : 'mdi-rocket-launch'"
                 :color="(chip.state ?? true) ? 'green' : 'red'">
               </v-icon>
-              {{ (chip.state ?? true) ? 'Straight' : 'Divergent' }}
             </template>
             <template #append>
               <v-icon

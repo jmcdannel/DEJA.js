@@ -28,20 +28,18 @@ export const useLayoutRoutes = () => {
 
         for (let i = 0; i < turnoutSteps.value.length; i++) {
             const chip = turnoutSteps.value[i];
-            if ((chip.type ?? 'turnout') === 'turnout') {
-                const newState = chip.state ?? true
-                const turnout: Partial<Turnout> = {
-                    state: newState,
-                    timestamp: Date.now()
-                }
-                if (chip.id) {
-                    setTurnout(chip.id?.toString(), { ...turnout })
-                    percentComplete.value = ((i + 1) / turnoutSteps.value.length) * 100
+            const newState = chip.state ?? true
+            const turnout: Partial<Turnout> = {
+                state: newState,
+                timestamp: Date.now()
+            }
+            if (chip.id) {
+                setTurnout(chip.id?.toString(), { ...turnout })
+                percentComplete.value = ((i + 1) / turnoutSteps.value.length) * 100
 
-                    // wait 1000ms before processing the next turnout
-                    // eslint-disable-next-line no-await-in-loop
-                    await sleep(DELAY)
-                }
+                // wait DELAYms before processing the next turnout
+                // eslint-disable-next-line no-await-in-loop
+                // await sleep(DELAY)
             }
         }
         percentComplete.value = 0
