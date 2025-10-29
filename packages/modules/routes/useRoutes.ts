@@ -1,12 +1,15 @@
+import { ref } from 'vue'
 import { collection, deleteDoc, doc, getDoc, orderBy, query, serverTimestamp, setDoc } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
 import { db } from '@repo/firebase-config'
-import type { Route, RouteInput } from './types'
+import { useTurnouts, type Turnout } from '@repo/modules'
+import type { Route, RouteInput, RouteTurnoutConfig } from './types'
 
 export const useRoutes = () => {
   const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
   const sortBy = useStorage<string[]>('@DEJA/prefs/routes/Sort', ['name'])
+  const { setTurnout } = useTurnouts()
 
   const routesCol = () => {
     if (!layoutId.value) return null
@@ -38,6 +41,24 @@ export const useRoutes = () => {
     } catch (error) {
       console.error('Error fetching route:', error)
     }
+  }
+  
+  async function runRoute(route: Route ) {
+      console.log('runRoute', route)
+
+      const turnoutSteps = ref<RouteTurnoutConfig[]>(route.turnouts || [])
+
+      for (let i = 0; i < turnoutSteps.value.length; i++) {
+          const chip = turnoutSteps.value[i];
+          const newState = chip.state ?? true
+          const turnout: Partial<Turnout> = {
+              state: newState,
+              timestamp: Date.now()
+          }
+          if (chip.id) {
+              setTurnout(chip.id?.toString(), { ...turnout })
+          }
+      }
   }
 
   async function setRoute(routeId: string, route: RouteInput): Promise<boolean> {
@@ -82,6 +103,7 @@ export const useRoutes = () => {
     getRoute,
     getRoutes,
     routesCol,
+    runRoute,
     setRoute,
   }
 }

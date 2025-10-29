@@ -1,24 +1,28 @@
 [-] ttt-io as packages
 [-] ttt-io build scripts - output arduino configs, dcc config commands
 [ ] throttle slider
-[ ] signals (+turnout)
-[-] add sounds
-[ ] led
-[ ] onboarding / create layout
-[ ] throttle list grid cols
-[ ] account menu
-[ ] switch layout menu
+[-] led
+[x] throttle list grid cols
+[x] switch layout menu
 [ ] function map - momentary, latching (see ex-webthrottle)
 [ ] store roster on dccex
 [ ] handle unknown power state
+[x] add loco CTA on throttle list
+[ ] sort throttles
+[ ] fix route turnouts
+[ ] optimize command pool to flush at an interval instead of waiting DELAYms
+[ ] fix @repo/* imports 
+[ ] Refactor signals to own module (+turnout)
+[ ] add more sounds and hook up speakers
+[ ] sound mixer / mute
+[ ] led designer
+[ ] account menu
+[ ] onboarding / create layout
 [ ] DEJA Suite Nav
-
-
-
 
 [ ] monitor app
   - enable auto-clear
-  - layout
+  - layout select
   - mqtt / serial monitor
   - nav
 
@@ -31,6 +35,7 @@
   - play intro
   - guest user management (cloud?)
 
+[x] add sounds
 [x] ctc switch
 [x] fix broken views / buttons
 [x] better header

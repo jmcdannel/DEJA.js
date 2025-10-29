@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { toRef } from 'vue'
 import { LocoAvatar } from '@repo/ui'
 import ThrottleButtonControls from './ThrottleButtonControls.vue'
 import CurrentSpeed from './CurrentSpeed.vue'
@@ -11,8 +12,6 @@ const props = defineProps({
     required: true
   }
 })
-
-import { toRef } from 'vue'
 
 const addressRef = toRef(props, 'address')
 const { 
