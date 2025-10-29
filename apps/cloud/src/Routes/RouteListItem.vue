@@ -19,7 +19,6 @@ const confirmDelete = ref(false)
 const running = ref(false)
 const color = computed(() => props.route?.color || routeType.color || DEFAULT_COLOR)
 const routeId = computed(() => props.routeId || props.route?.id || '')
-console.log('routeId.value', routeId.value)
 const turnouts = useCollection(props?.route?.turnouts ? getTurnoutsByIds(props.route.turnouts.map(t => t.id?.toString() || '')) : null, { ssrKey: `route-turnouts-${routeId.value}` })
 
 async function handleRun() {
@@ -41,7 +40,6 @@ async function handleDelete() {
 
 function getTurnoutState(tId: string) {
   if (!turnouts.value) return true
-  console.log('turnouts', turnouts.value)
   const turnout = turnouts.value.find(t => t.id === tId)
   return turnout?.state ?? true
 }

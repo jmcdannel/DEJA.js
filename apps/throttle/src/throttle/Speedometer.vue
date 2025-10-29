@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, toRef, ref } from 'vue'
+import { useLocos, type Loco } from '@repo/modules/locos'
+import { useThrottle } from './useThrottle'
 
 const props = defineProps({
   speed: {
@@ -19,6 +21,12 @@ const props = defineProps({
     default: 120,
   },
 })
+
+const addressRef = toRef(props, 'address')
+const { getRoadname, deleteLoco } = useLocos()
+const { 
+  loco,
+} = useThrottle(addressRef)
 
 const rotation = computed(() => {
   const safeSpeed = Math.min(Math.max(props.speed, 0), props.max)
@@ -97,7 +105,7 @@ const valueLabels = computed(() => {
 </script>
 
 <template>
-  <v-list-item class="flex flex-col items-center gap-2" base-color="red">
+  <v-list-item class="flex flex-col items-center gap-2" :base-color="loco?.meta?.color || getRoadname(loco?.meta?.roadname || '')?.color || 'green'">
     <!-- SVG Speedometer -->
     <svg 
       :width="size" 
@@ -187,7 +195,7 @@ const valueLabels = computed(() => {
     
     <!-- Address label -->
     <div class="text-center">
-      <v-label color="red" class="text-lg font-bold">#{{ address }}</v-label>
+      <v-label  class="text-lg font-bold">#{{ address }}</v-label>
     </div>
   </v-list-item>
 </template>

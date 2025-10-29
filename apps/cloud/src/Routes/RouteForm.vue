@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useLayoutRoutes, routeType, type Route, type RouteTurnoutConfig, type RouteInput } from '@repo/modules/index.ts'
+import { routeType, type Route, type RouteTurnoutConfig, type RouteInput } from '@repo/modules/index.ts'
 import { useRoutes } from '@repo/modules/routes/useRoutes'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import RouteTurnoutForm from '@/Routes/RouteTurnoutForm.vue'
@@ -19,8 +19,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['close'])
 
-const { setRoute } = useRoutes()
-const { runRoute } = useLayoutRoutes()
+const { setRoute, runRoute } = useRoutes()
 
 const editColor = ref(false)
 
@@ -50,8 +49,8 @@ function buildRoutePayload(): Route {
     point1: point1.value || '',
     point2: point2.value || '',
     turnouts: turnouts.value,
-    order: props.route?.order,
-    description: props.route?.description,
+    order: props.route?.order || 0,
+    description: props.route?.description || name.value,
   }
 }
 
@@ -66,10 +65,9 @@ async function submit () {
     point1: point1.value || '',
     point2: point2.value || '',
     turnouts: turnouts.value,
-    order: props.route?.order,
-    description: props.route?.description,
+    order: props.route?.order || 0,
+    description: props.route?.description || name.value,
   }
-
   await setRoute(routeId, newRoute)
 
   loading.value = false
@@ -134,9 +132,8 @@ function runCurrentRoute() {
 
 
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <v-sheet>
-      <v-btn text="Run Route" @click="runCurrentRoute">
-        <v-icon left>mdi-rocket-launch</v-icon>
+    <v-sheet class="p-4">
+      <v-btn text="Run Route" @click="runCurrentRoute" variant="flat" :color="color" prepend-icon="mdi-rocket-launch">
         Run Route
       </v-btn>
     </v-sheet>
@@ -180,6 +177,5 @@ function runCurrentRoute() {
       ></v-btn>
     </div>
     <ViewJson :json="route" label="Route" />
-    <ViewJson :json="routeType" label="routeType" />
   </v-form>
 </template>

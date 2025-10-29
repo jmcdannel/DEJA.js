@@ -1,11 +1,18 @@
 <script async setup lang="ts">
+import { ref } from 'vue'
 import type { Throttle } from '@repo/modules/locos'
 import ThrottleTile from '@/throttle/ThrottleTile.vue'
-import { useLocos } from '@repo/modules/locos'
-import { ListMenu } from '@repo/ui'
+import { useLocos, type Loco } from '@repo/modules/locos'
+import { useRoster } from '@/roster/useRoster'
+import { LocoAvatar, ListMenu } from '@repo/ui'
 
-const { getThrottles } = useLocos()
+const { getLocos, getThrottles } = useLocos()
+const locos = getLocos()
+const { acquireThrottle } = useRoster()
 const throttles = getThrottles()
+
+const isRosterOpen = ref(false)
+
 </script>
 
 <template>
@@ -24,7 +31,7 @@ const throttles = getThrottles()
       </template>
       <v-toolbar-title class="text-xl md:text-3xl">Throttles</v-toolbar-title>    
     </v-toolbar>
-    <div v-if="throttles" class="flex-grow flex flex-row flex-wrap relative overflow-auto items-end content-end justify-end">
+    <div v-if="throttles" class="flex-grow flex pb-16 flex-row flex-wrap relative overflow-auto items-end content-end justify-end">
       <!-- <div class="basis-full @[960px]:basis-1/2 flex-grow"></div> -->
       <div 
         class="basis-full md:basis-1/2 p-1"  
@@ -34,6 +41,27 @@ const throttles = getThrottles()
             :address="((item as unknown) as Throttle).address" 
           />
       </div>
+      <v-fab icon="mdi-plus" color="primary" size="56" @click="isRosterOpen = true"  app />
     </div>
   </main>
+  <v-dialog v-model="isRosterOpen" max-width="800px">
+    <template v-slot:default>
+      <v-sheet class="p-4">
+        <v-row class="flex justify-center">
+          <v-col cols="auto"
+            v-for="loco in locos" 
+            :key="loco.address" 
+            >
+            <LocoAvatar 
+              :loco="loco as Loco"
+              @select="async () => { await acquireThrottle(loco.address); isRosterOpen = false }"
+              :showMenu="false" 
+              variant="flat"
+              class="m-2"
+            />
+          </v-col>
+        </v-row>
+      </v-sheet>
+    </template>    
+  </v-dialog>
 </template>

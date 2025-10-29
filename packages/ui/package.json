@@ -33,13 +33,16 @@
     "./BackgroundFallingStars": "./src/BackgroundFallingStars.vue",
     "./BackgroundDecor": "./src/BackgroundDecor.vue",
     "./Stat": "./src/Stat.vue",
-    "./useColors": "./src/useColors.ts"
+    "./useColors": "./src/useColors.ts",
+    "./DeviceStatusItem": "./src/DeviceStatus/DeviceStatusItem.vue",
+    "./DeviceStatusList": "./src/DeviceStatus/DeviceStatusList.vue"
   },
   "dependencies": {
     "@repo/dccex": "workspace:^0.0.0",
     "@repo/firebase-config": "workspace:*",
     "@repo/modules": "workspace:*",
     "@vueuse/core": "^11.0.3",
+    "dayjs": "^1.11.13",
     "firebase": "^10.14.1",
     "vue": "^3.5.17",
     "vue-router": "^4.2.2",

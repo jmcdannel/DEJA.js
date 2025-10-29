@@ -12,6 +12,7 @@
     "./locos": "./locos/index.ts",
     "./signals": "./signals/index.ts",
     "./turnouts": "./turnouts/index.ts",
+    "./routes": "./routes/index.ts",
     "./types": "./types.ts"
   },
   "scripts": {

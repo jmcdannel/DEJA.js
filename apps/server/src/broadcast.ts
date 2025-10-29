@@ -19,6 +19,7 @@ async function dejaSend(data: string | BroadcastMessage): Promise<void> {
 
 export const broadcast = (data: string | BroadcastMessage): void => {
   try {
+    log.fav('[DEJA.js] Broadcasting message:', data, ENABLE_MQTT, ENABLE_WS, ENABLE_DEJACLOUD)
     if (ENABLE_MQTT) {
       dejaMqtt.send(JSON.stringify(data))
     }
