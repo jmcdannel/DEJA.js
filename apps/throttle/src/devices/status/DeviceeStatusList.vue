@@ -74,7 +74,7 @@ function handleThrottleClick(address: number) {
     <v-col cols="12" sm="6">
       <v-list
         v-if="throttles?.length"
-        class="flex flex-wrap gap-4 p-4 justify-center">
+        class="flex flex-wrap gap-4 p-4 justify-center bg-transparent">
         <Speedometer
           v-for="throttle in throttles"
           :key="throttle.address"
@@ -82,7 +82,7 @@ function handleThrottleClick(address: number) {
           :address="throttle.address"
           @click="handleThrottleClick(throttle.address)"
         />
-    </v-list>
+      </v-list>
     </v-col>
    </v-row>
         
