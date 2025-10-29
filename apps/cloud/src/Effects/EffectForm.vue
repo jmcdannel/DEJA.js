@@ -68,10 +68,6 @@ const editColor = ref(false)
 const device = ref(props.efx?.device || DEFAULT_DEVICE)
 const name = ref(props.efx?.name || '')
 const pin = ref(props.efx?.pin)
-// signal wiring: reference existing pin effects
-const red = ref((props.efx as any)?.red || '')
-const yellow = ref((props.efx as any)?.yellow || '')
-const green = ref((props.efx as any)?.green || '')
 const macroOn = ref(props.efx?.on || [])
 const macroOff = ref(props.efx?.off || [])
 const pattern = ref(props.efx?.pattern || undefined)
@@ -170,13 +166,6 @@ async function submit () {
     newEfx.pattern = pattern.value
     newEfx.range = range.value
     newEfx.config = config.value
-  }
-  // set signal references
-  if (efxType.value === 'signal') {
-    const efxAny: any = newEfx
-    efxAny.red = red.value || undefined
-    efxAny.yellow = yellow.value || undefined
-    efxAny.green = green.value || undefined
   }
 
   // set sound file for sound effects
@@ -300,16 +289,6 @@ function handleSoundFileSelect(soundFile: string) {
         max-width="200"
       >
       </v-text-field>
-    </template>
-
-    <!-- signal references -->
-    <template v-else-if="efxType === 'signal'">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <v-text-field v-model="red" label="Red Effect ID" variant="outlined" />
-        <v-text-field v-model="yellow" label="Yellow Effect ID" variant="outlined" />
-        <v-text-field v-model="green" label="Green Effect ID" variant="outlined" />
-      </div>
-      <div class="text-xs opacity-70 mt-1">Enter the IDs of existing pin effects for each color.</div>
     </template>
 
     <!-- sound file selection -->

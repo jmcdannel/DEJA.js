@@ -1,51 +1,35 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useCollection } from 'vuefire'
-import { useEfx, type Effect } from '@repo/modules/effects'
+import { computed } from 'vue'
+import { useSignals, type Signal, type SignalAspect } from '@repo/modules/signals'
 
 const emit = defineEmits(['edit'])
-const { getEffectsByType, runEffect, getEffect } = useEfx()
-const list = useCollection<Effect>(() => getEffectsByType('signal'), { ssrKey: 'signals' })
+const { getSignals, setSignalAspect } = useSignals()
+const signals = getSignals()
 
-// Helpers to toggle signal lights
-async function setPinEffect(id?: string, state?: boolean) {
-  if (!id) return
-  const efx = await getEffect(id)
-  if (!efx) return
-  await runEffect({ ...efx, state: Boolean(state), id })
+const aspectLabels: Record<Exclude<SignalAspect, null>, string> = {
+  red: 'Red',
+  yellow: 'Yellow',
+  green: 'Green',
 }
 
-async function setSignal(signal: Effect, color: 'red' | 'yellow' | 'green') {
-  const redOn = color === 'red'
-  const yellowOn = color === 'yellow'
-  const greenOn = color === 'green'
-
-  // If clicking the already lit color, turn entire signal off
-  const current = await getSignalActiveColor(signal)
-  if (current === color) {
-    await setPinEffect(signal.red, false)
-    await setPinEffect(signal.yellow, false)
-    await setPinEffect(signal.green, false)
-    return
+function canToggle(signal: Signal, aspect: Exclude<SignalAspect, null>): boolean {
+  const pinMap: Record<Exclude<SignalAspect, null>, number | undefined> = {
+    red: signal.red,
+    yellow: signal.yellow,
+    green: signal.green,
   }
-
-  // Otherwise, set selected on and others off
-  await setPinEffect(signal.red, redOn)
-  await setPinEffect(signal.yellow, yellowOn)
-  await setPinEffect(signal.green, greenOn)
+  return typeof pinMap[aspect] === 'number'
 }
 
-async function getSignalActiveColor(signal: Effect): Promise<'red' | 'yellow' | 'green' | undefined> {
-  const [r,y,g] = await Promise.all([
-    signal.red ? getEffect(signal.red) : undefined,
-    signal.yellow ? getEffect(signal.yellow) : undefined,
-    signal.green ? getEffect(signal.green) : undefined,
-  ])
-  if (r?.state) return 'red'
-  if (y?.state) return 'yellow'
-  if (g?.state) return 'green'
-  return undefined
+async function toggleAspect(signal: Signal, aspect: Exclude<SignalAspect, null>) {
+  if (!canToggle(signal, aspect)) return
+  const nextAspect: SignalAspect = signal.aspect === aspect ? null : aspect
+  await setSignalAspect(signal.id, nextAspect)
 }
+
+const wiring = (signal: Signal) => signal.commonAnode ? 'Common Anode' : 'Common Cathode'
+
+const sortedSignals = computed(() => signals.value || [])
 
 </script>
 <template>
@@ -55,34 +39,63 @@ async function getSignalActiveColor(signal: Effect): Promise<'red' | 'yellow' | 
         <slot name="prepend"></slot>
       </v-col>
       <v-col
-        v-for="item in list"
+        v-for="item in sortedSignals"
         :key="item.id"
         cols="12" xs="12" sm="12" lg="12"
       >
         <v-card class="w-full">
           <v-card-title class="flex items-center justify-between">
             <span>{{ item.name || item.id }}</span>
-            <v-btn icon="mdi-pencil" variant="text" size="small" @click="$emit('edit', item as any)" />
+            <v-btn icon="mdi-pencil" variant="text" size="small" @click="$emit('edit', item)" />
           </v-card-title>
           <v-card-text>
-            <div class="flex items-center gap-4">
-              <!-- Traffic light UI -->
-              <div class="flex flex-col items-center p-3 rounded-lg bg-neutral-900 border border-neutral-700" style="width: 64px;">
-                <v-btn :color="'red'" variant="flat" icon size="small" @click="setSignal(item as any, 'red')"/>
-                <v-btn :color="'amber'" class="my-2" variant="flat" icon size="small" @click="setSignal(item as any, 'yellow')"/>
-                <v-btn :color="'green'" variant="flat" icon size="small" @click="setSignal(item as any, 'green')"/>
+            <div class="flex flex-wrap gap-6 items-center">
+              <div class="flex items-center gap-3">
+                <div class="flex flex-col items-center p-3 rounded-lg bg-neutral-900 border border-neutral-700" style="width: 72px;">
+                  <v-btn
+                    icon="mdi-circle"
+                    size="small"
+                    :color="item.aspect === 'red' ? 'red-darken-1' : 'red'"
+                    :variant="item.aspect === 'red' ? 'flat' : 'tonal'"
+                    :disabled="!canToggle(item, 'red')"
+                    @click="toggleAspect(item, 'red')"
+                  />
+                  <v-btn
+                    icon="mdi-circle"
+                    class="my-2"
+                    size="small"
+                    :color="item.aspect === 'yellow' ? 'amber-darken-2' : 'amber'"
+                    :variant="item.aspect === 'yellow' ? 'flat' : 'tonal'"
+                    :disabled="!canToggle(item, 'yellow')"
+                    @click="toggleAspect(item, 'yellow')"
+                  />
+                  <v-btn
+                    icon="mdi-circle"
+                    size="small"
+                    :color="item.aspect === 'green' ? 'green-darken-2' : 'green'"
+                    :variant="item.aspect === 'green' ? 'flat' : 'tonal'"
+                    :disabled="!canToggle(item, 'green')"
+                    @click="toggleAspect(item, 'green')"
+                  />
+                </div>
+                <div>
+                  <div class="text-xs opacity-70">Pins</div>
+                  <div class="text-sm">R: {{ item.red ?? '-' }} • Y: {{ item.yellow ?? '-' }} • G: {{ item.green ?? '-' }}</div>
+                </div>
               </div>
-              <div>
-                <div class="text-xs opacity-70">Pins</div>
-                <div class="text-sm">R: {{ (item as any).red || '-' }} • Y: {{ (item as any).yellow || '-' }} • G: {{ (item as any).green || '-' }}</div>
-              </div>
+              <v-chip variant="tonal" color="emerald">
+                {{ wiring(item) }}
+              </v-chip>
+              <v-chip v-if="item.aspect" variant="tonal" color="blue">
+                Active: {{ aspectLabels[item.aspect] }}
+              </v-chip>
             </div>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
   </v-container>
-  
+
 </template>
 
 
