@@ -828,6 +828,9 @@ importers:
       '@vueuse/core':
         specifier: ^11.0.3
         version: 11.3.0(vue@3.5.22(typescript@5.9.3))
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.18
       firebase:
         specifier: ^10.14.1
         version: 10.14.1
