@@ -3,11 +3,12 @@
 [ ] throttle slider
 [-] led
 [x] throttle list grid cols
-[ ] switch layout menu
+[x] switch layout menu
 [ ] function map - momentary, latching (see ex-webthrottle)
 [ ] store roster on dccex
 [ ] handle unknown power state
-[ ] add loco CTA on throttle list
+[x] add loco CTA on throttle list
+[ ] sort throttles
 [ ] fix route turnouts
 [ ] optimize command pool to flush at an interval instead of waiting DELAYms
 [ ] fix @repo/* imports 

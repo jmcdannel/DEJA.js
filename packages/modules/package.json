@@ -11,6 +11,7 @@
     "./layouts": "./layouts/index.ts",
     "./locos": "./locos/index.ts",
     "./turnouts": "./turnouts/index.ts",
+    "./routes": "./routes/index.ts",
     "./types": "./types.ts"
   },
   "scripts": {
@@ -34,3 +35,4 @@
     "vue": "^3.5.17"
   }
 }
+p
