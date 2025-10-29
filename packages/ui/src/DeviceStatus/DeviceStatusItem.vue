@@ -1,10 +1,9 @@
-
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
 import { useCollection } from 'vuefire'
 import { useColors } from '@repo/ui/src/useColors'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { deviceTypes, useTurnouts, useEfx, useLayout, type Device } from '@repo/modules'
+import { deviceTypes, useTurnouts, useEfx, type Device } from '@repo/modules'
 import Stat from '@repo/ui/src/Stat.vue'
 
 const props = defineProps({

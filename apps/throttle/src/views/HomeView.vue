@@ -2,12 +2,17 @@
 import { useCurrentUser } from 'vuefire'
 import { useRouter } from 'vue-router'
 import { useStorage } from '@vueuse/core'
-import DeviceeStatusList from '@/devices/status/DeviceeStatusList.vue'
-import Signout from '@/auth/Signout.vue'
+import DeviceStatusList from '@repo/ui/src/DeviceStatus/DeviceStatusList.vue'
+import Speedometer from '@/throttle/Speedometer.vue'
 
 const user = useCurrentUser()
 const router = useRouter()
 const layoutId = useStorage('@DEJA/layoutId', '')
+
+
+function handleThrottleClick(address: number) {
+  router.push({ name: 'throttle', params: { address } })
+}
 </script>
 <template>
   <main class="flex flex-col flex-grow p-8 w-full viaduct-background bg-opacity-50 bg-fixed overflow-auto">
@@ -19,7 +24,21 @@ const layoutId = useStorage('@DEJA/layoutId', '')
         <span class="text-6xl font-bold uppercase bg-clip-text bg-gradient-to-r from-violet-600 to-cyan-400">Throttle</span>
       </h2>
     </header>
-    <DeviceeStatusList v-if="user && layoutId" @disconnect="router.push('/connect')" />
+    
+    <DeviceStatusList v-if="user && layoutId"
+      :show-throttles="true"
+      @disconnect="router.push('/connect')"
+      @throttle-click="handleThrottleClick">
+      <template #throttles="{ throttles, handleThrottleClick }">
+        <Speedometer
+          v-for="throttle in throttles"
+          :key="throttle.address"
+          :speed="throttle.speed"
+          :address="throttle.address"
+          @click="handleThrottleClick(throttle.address)"
+        />
+      </template>
+    </DeviceStatusList>
     <template v-else-if="!user">
       <p class="text-lg mb-4">
         Please connect to a layout to see the status.
