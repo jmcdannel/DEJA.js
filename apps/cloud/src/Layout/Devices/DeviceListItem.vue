@@ -42,6 +42,10 @@ async function handelAutoConnect (checked: boolean | null) {
   }
 }
 
+async function handleDisconnect () {
+  // Disconnect logic here
+}
+
 </script>
 <template>
   <v-card
@@ -172,7 +176,7 @@ async function handelAutoConnect (checked: boolean | null) {
         :color="color.value"
         variant="outlined"
         prepend-icon="mdi-usb"
-        disabled
+        @click="handleDisconnect"
       ></v-btn>      
     </v-card-actions>
   </v-card>

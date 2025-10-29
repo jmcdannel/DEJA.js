@@ -1,15 +1,15 @@
 <script async setup lang="ts">
 import { useCollection } from 'vuefire'
-import { useEfx, type Effect } from '@repo/modules'
+import { type Route } from '@repo/modules/index.ts'
+import { useRoutes } from '@repo/modules/routes/useRoutes'
 import RouteListItem from '@/Routes/RouteListItem.vue'
-import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 
 const emit = defineEmits(['edit'])
 
-const { getEffectsByType } = useEfx()
-const list = useCollection(getEffectsByType('route'), { ssrKey: 'routes' })
+const { routesCol } = useRoutes()
+const list = useCollection<Route>(routesCol, { ssrKey: 'routes' })
 
-function handleEdit(item: Effect) {
+function handleEdit(item: Route) {
   console.log('handleEdit', item)
   emit('edit', item)
 }
@@ -34,15 +34,9 @@ function handleEdit(item: Effect) {
         sm="12"
         lg="12"
       >
-        <RouteListItem :efx="item" :efxId="item.id" @edit="handleEdit"></RouteListItem>
+        <RouteListItem :route="item" :route-id="item.id" @edit="handleEdit"></RouteListItem>
+         <!-- <pre>{{item}}</pre> -->
     </v-col>
     </v-row>
-    <LcdDisplay 
-      :content="list.map(item => `${item.name}: ${item.type}`)"
-      title="ROUTES LIST"
-      color="blue"
-      size="sm"
-      :max-lines="10"
-    />
   </v-container>
 </template>

@@ -3,13 +3,13 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import RouteForm from '@/Routes/RouteForm.vue'
-import type { Effect } from '@repo/modules'
-import { useEfx } from '@repo/modules'
+import { type Route } from '@repo/modules/index.ts'
+import { useRoutes } from '@repo/modules/routes/useRoutes'
 
 const route = useRoute()
 const router = useRouter()
-const { getEffect } = useEfx()
-const routeEffect = ref<Effect | null>(null)
+const { getRoute } = useRoutes()
+const routeEffect = ref<Route | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
 
@@ -18,7 +18,7 @@ async function loadRoute() {
   error.value = null
   const routeId = route.params.routeId as string
   try {
-    const result = await getEffect(routeId)
+    const result = await getRoute(routeId)
     if (result) {
       routeEffect.value = result
     } else {
@@ -44,5 +44,5 @@ onMounted(loadRoute)
     <v-progress-circular indeterminate color="purple" />
   </div>
   <v-alert v-else-if="error" type="error" class="ma-4" :text="error" closable @click:close="handleClose" />
-  <RouteForm v-else-if="routeEffect" :efx="routeEffect" @close="handleClose" />
+  <RouteForm v-else-if="routeEffect" :route="routeEffect" @close="handleClose" />
 </template>

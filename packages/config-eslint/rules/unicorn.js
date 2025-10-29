@@ -1,6 +1,7 @@
 import unicorn from "eslint-plugin-unicorn";
+
 /** @type {import('eslint').Linter.Config} */
-export default {
+const config = {
   plugins: { unicorn: unicorn },
   rules: {
     /**
@@ -22,3 +23,5 @@ export default {
     "unicorn/prefer-node-protocol": "warn",
   },
 };
+
+export default config;

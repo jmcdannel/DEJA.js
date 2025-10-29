@@ -2,7 +2,7 @@
 import noUnusedVarsConfig from "../variables.js";
 
 /** @type {import('eslint').Linter.Config} */
-export default {
+const config = {
   rules: {
     /**
      * Require default parameters to be last.
@@ -38,3 +38,5 @@ export default {
     "@typescript-eslint/no-useless-constructor": "error",
   },
 };
+
+export default config;

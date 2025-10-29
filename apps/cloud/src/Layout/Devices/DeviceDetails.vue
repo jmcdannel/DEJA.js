@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useCollection } from 'vuefire'
 import { useRouter } from 'vue-router'
 import { useColors } from '@/Core/UI/useColors'
-import { deviceTypes, useTurnouts, useEfx, useLayout, type Device } from '@repo/modules'
+import { deviceTypes, useTurnouts, useEfx, useLayout, type Device } from '@repo/modules/index.ts'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 
 const { connectDevice, autoConnectDevice, getDevice } = useLayout()
@@ -12,13 +12,16 @@ const { getEffectsByDevice } = useEfx()
 const { colors, DEFAULT_COLOR } = useColors()
 
 const route = useRouter()
-const turnouts = useCollection(computed(() => route.currentRoute.value.params.deviceId ? getTurnoutsByDevice(route.currentRoute.value.params.deviceId as string) : []))
-const effects = useCollection(computed(() => route.currentRoute.value.params.deviceId ? getEffectsByDevice(route.currentRoute.value.params.deviceId as string) : []))
+const deviceIdParam = route.currentRoute.value.params.deviceId || '' 
+const deviceId = Array.isArray(deviceIdParam) ? deviceIdParam[0] : deviceIdParam
+const turnouts = useCollection(getTurnoutsByDevice(deviceId))
+const effects = useCollection(getEffectsByDevice(deviceId))
 
 const device = ref(null as Device | null)
 
 onMounted(async () => {
-  const deviceId = route.currentRoute.value.params.deviceId as string
+  const deviceIdParam = route.currentRoute.value.params.deviceId
+  const deviceId = Array.isArray(deviceIdParam) ? deviceIdParam[0] : deviceIdParam
   if (deviceId) {
     device.value = await getDevice(deviceId) as Device
   }
@@ -29,6 +32,12 @@ onMounted(async () => {
 
 const deviceType = computed(() => deviceTypes.find((type) => type.value === device.value?.type))
 const color = colors[deviceType.value?.color || DEFAULT_COLOR]
+const effectNames = computed(() => {
+  return effects.value ? effects.value.map(effect => effect.name) : []
+})
+const turnoutNames = computed(() => {
+  return turnouts.value ? turnouts.value.map(turnout => turnout.name) : []
+})
 const turnoutPins = computed(() => {
   return turnouts.value ? turnouts.value.map(turnout => `${turnout.straight}, ${turnout.divergent}`) : []
 })
@@ -58,7 +67,6 @@ const turnoutPulsers = computed(() => {
 
 </script>
 <template>
-  {{ route.currentRoute.value.params.deviceId }}
   <!-- <pre>{{ device }}</pre> -->
   <v-card
     class="mx-auto w-full h-full justify-between flex flex-col"
@@ -137,7 +145,7 @@ const turnoutPulsers = computed(() => {
       <v-spacer class="mt-4"></v-spacer>
       
       <!-- Turnout Pins LCD Display -->
-      <div class="mb-4 relative">
+      <div class="mb-4 relative" v-if="turnoutPins">
         <LcdDisplay 
           :content="turnoutPins"
           title="PIN CONFIG"
@@ -148,7 +156,7 @@ const turnoutPulsers = computed(() => {
       </div>
       
       <!-- Turnout Pulsers LCD Display -->
-      <div class="mb-4 relative">
+      <div class="mb-4 relative" v-if="turnoutPulsers">
         <LcdDisplay 
           :content="turnoutPulsers"
           title="PULSER CODE"
@@ -159,30 +167,30 @@ const turnoutPulsers = computed(() => {
       </div>
       
       <!-- Turnout Labels LCD Display -->
-      <div class="mb-4 relative">
+      <div class="mb-4 relative" v-if="turnoutNames">
         <LcdDisplay 
-          :content="turnouts.map(turnout => turnout.name)"
+          :content="turnoutNames"
           title="TURNOUT LABELS"
           color="blue"
           size="md"
-          :max-lines="turnouts.length"
+          :max-lines="turnoutNames.length"
         />
       </div>
       
       <!-- Effects Labels LCD Display -->
-      <div class="mb-4 relative">
+      <div class="mb-4 relative" v-if="effectNames">
         <LcdDisplay 
-          :content="effects.map(effect => effect.name)"
+          :content="effectNames"
           title="EFFECT LABELS"
           color="blue"
           size="md"
-          :max-lines="effects.length"
+          :max-lines="effectNames.length"
         />
       </div>
       
       <v-spacer class="mt-4"></v-spacer>
-
-      <v-table>
+      <!-- <pre>{{turnouts}}</pre> -->
+      <v-table v-if="turnouts">
         <thead>
           <tr>
             <th>Name</th>
@@ -196,34 +204,34 @@ const turnoutPulsers = computed(() => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="turnout in turnouts" :key="turnout.id">
-            <td>{{ turnout.name }}</td>
-            <td>{{ turnout.turnoutIdx }}</td>
-            <td>{{ turnout.straight }}</td>
-            <td>{{ turnout.divergent }}</td>
-            <td>{{ turnout.type }}</td>
-            <td>{{ turnout.state }}</td>
-            <td>{{ turnout.id }}</td>
-            <td>{{ turnout.desc }}</td>
-          </tr>
+          <!-- <tr v-for="turnout in turnouts" :key="turnout?.turnoutIdx">
+            <td>{{ turnout?.name }}</td>
+            <td>{{ turnout?.turnoutIdx }}</td>
+            <td>{{ turnout?.straight }}</td>
+            <td>{{ turnout?.divergent }}</td>
+            <td>{{ turnout?.type }}</td>
+            <td>{{ turnout?.state }}</td>
+            <td>{{ turnout?.id }}</td>
+            <td>{{ turnout?.desc }}</td>
+          </tr> -->
         </tbody>
       </v-table>
-      <v-row>
-        <v-col v-for="effect in effects" :key="effect.id">
+      <!-- <v-row v-if="effects">
+        <v-col v-for="effect in effects" :key="effect?.id">
           <v-card>
             <v-card-title>{{ effect.name }}</v-card-title>
             <v-card-subtitle>{{ effect.type }}</v-card-subtitle>
           </v-card>
         </v-col>
       </v-row>
-      <v-row>
-        <v-col v-for="turnout in turnouts" :key="turnout.id">
+      <v-row v-if="turnouts">
+        <v-col v-for="turnout in turnouts" :key="turnout?.turnoutIdx">
           <v-card>
             <v-card-title>{{ turnout.name }}</v-card-title>
             <v-card-subtitle>{{ turnout.type }}</v-card-subtitle>
           </v-card>
         </v-col>
-      </v-row>
+      </v-row> -->
 
 
     </v-card-text>

@@ -1,6 +1,6 @@
 import { computed, ref, watch } from 'vue'
-import { useCollection } from 'vuefire'
-import { useEfx, useTurnouts, useLayoutRoutes, type Effect } from '@repo/modules'
+import { useTurnouts, useLayoutRoutes, type Route, type RouteTurnoutConfig } from '@repo/modules/index.ts'
+import { useRoutes } from '@repo/modules/routes/useRoutes'
 
 const DELAY = 2000 // ms delay between turnouts being set in a route
 
@@ -11,15 +11,13 @@ export const useLayoutRoutesMap = () => {
   const p2 = ref<string | null>(null)
 
   const { getTurnout, getTurnouts, switchTurnout } = useTurnouts()
-  const { getEffectsByType } = useEfx()
+  const { getRoutes } = useRoutes()
   const { runRoute } = useLayoutRoutes()
-  const list = useCollection(getEffectsByType('route'), { ssrKey: 'routes' })
+  const list = getRoutes()
   const turnouts = getTurnouts()
-  const routeTurnouts = ref<any[]>([])
+  const routeTurnouts = ref<RouteTurnoutConfig[]>([])
 
-  const routes = computed(() =>
-    list.data.value?.filter((item) => item.type === 'route')
-  )
+  const routes = computed(() => list.data.value || [])
 
   watch([p1, p2], async ([newP1, newP2]) => {
     if (newP1 !== null && newP2 !== null) {
@@ -30,8 +28,8 @@ export const useLayoutRoutesMap = () => {
           (r.point1 === newP2 && r.point2 === newP1)
       )
       if (route) {
-        routeTurnouts.value = [...(route.on || [])]
-        await runRoute(route as Effect)   
+        routeTurnouts.value = [...(route.turnouts || [])]
+        await runRoute(route as Route)
         setTimeout(() => {
           p1.value = null
           p2.value = null
@@ -181,13 +179,13 @@ export const useLayoutRoutesMap = () => {
     }
   }
 
-  // async function runRoute(route: Effect): Promise<void> {
+  // async function runRoute(route: Route): Promise<void> {
     // if (!route.id) return
 
     // isRunning.value = true
     // percentComplete.value = 0
 
-    // const steps = (route?.on?.length || 0) + (route?.off?.length || 0)
+    // const steps = route.turnouts?.length || 0
     // console.log('Running route:', steps, route)
 
     // await runEffect({ ...route, state: true, type: route.type })

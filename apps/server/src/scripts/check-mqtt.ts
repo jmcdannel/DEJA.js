@@ -2,6 +2,7 @@ import 'dotenv/config'
 import { execSync } from 'child_process'
 import { join } from 'path'
 import { log } from '../utils/logger.js'
+import { startMosquitto } from './start-mqtt.js'
 
 function isMosquittoRunning(): boolean {
   try {
@@ -31,7 +32,8 @@ function startMosquittoService(): void {
     log.note('Starting Mosquitto as a system service...')
     
     // Start the service
-    execSync('brew services start mosquitto', { stdio: 'inherit' })
+    // execSync('brew services start mosquitto', { stdio: 'inherit' })
+    startMosquitto()
     
     // Wait a moment for it to start
     setTimeout(() => {

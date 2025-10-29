@@ -1,34 +1,50 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useEfx, efxTypes } from '@repo/modules'
+import { computed, ref } from 'vue'
+import { useCollection } from 'vuefire'
+import { useTurnouts, routeType, useLayoutRoutes, type Route } from '@repo/modules/index.ts'
+import { useRoutes } from '@repo/modules/routes/useRoutes'
 import { useColors } from '@/Core/UI/useColors'
 
 const { DEFAULT_COLOR } = useColors()
-const { runEffect, deleteEfx } = useEfx()
+const { runRoute } = useLayoutRoutes()
+const { deleteRoute } = useRoutes()
+const { getTurnoutsByIds } = useTurnouts()
 
-const props = defineProps({
-  efx: Object,
-  efxId: String,
-})
+const props = defineProps<{
+  route: Route
+  routeId?: string
+}>()
 
 const confirmDelete = ref(false)
+const running = ref(false)
+const color = computed(() => props.route?.color || routeType.color || DEFAULT_COLOR)
+const routeId = computed(() => props.routeId || props.route?.id || '')
+console.log('routeId.value', routeId.value)
+const turnouts = useCollection(props?.route?.turnouts ? getTurnoutsByIds(props.route.turnouts.map(t => t.id?.toString() || '')) : null, { ssrKey: `route-turnouts-${routeId.value}` })
 
-const efxType = computed(() => efxTypes.find((type) => type.value === props?.efx?.type))
-const color = ref(props.efx?.color || efxType.value?.color || DEFAULT_COLOR)
-const state = ref(props.efx?.state || false)
-
-async function handleEfx (state: boolean) {
-  props?.efx?.type && props?.efx && props?.efxId && await runEffect({
-    ...props.efx,
-    type: props.efx.type,
-    id: props.efxId,
-    state,
-  })
+async function handleRun() {
+  if (!props.route) return
+  try {
+    running.value = true
+    await runRoute(props.route)
+  } finally {
+    running.value = false
+  }
 }
 
-watch(state, (newState) => {
-  handleEfx(newState)
-})
+async function handleDelete() {
+  const id = props.routeId || props.route?.id
+  if (!id) return
+  await deleteRoute(id)
+  confirmDelete.value = false
+}
+
+function getTurnoutState(tId: string) {
+  if (!turnouts.value) return true
+  console.log('turnouts', turnouts.value)
+  const turnout = turnouts.value.find(t => t.id === tId)
+  return turnout?.state ?? true
+}
 
 </script>
 <template>
@@ -39,28 +55,15 @@ watch(state, (newState) => {
     density="compact"
   >
     <template #title>
-      <span class="text-md">{{efx?.name}}</span>
+      <span class="text-md">{{ route?.name }}</span>
     </template>
     <template #prepend>
-      <v-icon 
-        :icon="efxType?.icon || 'mdi-help'"
+      <v-icon
+        :icon="routeType.icon"
         class="text-2xl m-3"></v-icon>
     </template>
     <v-card-text 
-      class="min-h-8 flex py-2 justify-space-between"
-      variant="flat">
-      <!-- <v-chip-group>
-        <v-chip
-          prepend-icon="mdi-map-marker"
-          size="small"
-        >{{ efx?.point1 }}</v-chip>
-        <v-chip v-for="t in efx?.on" :key="t.id" size="small" prepend-icon="mdi-call-split">{{ t.name }}</v-chip>
-        <v-chip
-          append-icon="mdi-map-marker"
-          :color="color"
-          size="small"
-        >{{ efx?.point2 }}</v-chip>
-      </v-chip-group> -->
+      class="min-h-8 flex py-2 justify-space-between">
       <v-stepper>
         <v-stepper-header>
           <v-stepper-item :value="'A'">
@@ -70,26 +73,31 @@ watch(state, (newState) => {
                 color="blue"
                 variant="flat"
                 size="small"
-              >{{ efx?.point1 }}</v-chip>
+              >
+              {{ route?.point1 }}
+            </v-chip>
             </template>
           </v-stepper-item>
           <v-divider></v-divider>
-          <template v-for="(t, index) in efx?.on" :key="t.id">
+          <template v-for="(t, index) in route?.turnouts" :key="t.id ?? index">
             <v-stepper-item :value="(index + 1)">
               <template #title>
-                <v-chip :color="t.state ? 'green' : 'red'" size="small" variant="flat" prepend-icon="mdi-call-split">{{ t.name }}</v-chip>
+                <v-chip :color="(t.state ?? true) ? 'green' : 'red'" size="small" variant="flat" prepend-icon="mdi-call-split">
+                  {{ t.name }}
+                </v-chip>
+                <v-icon class="ml-1" :color="(getTurnoutState(t.id) ?? true) ? 'green' : 'red'" icon="mdi-circle-slice-8" size="20" />
               </template>
             </v-stepper-item>
             <v-divider></v-divider>
           </template>
-          <v-stepper-item :value="'B'">
+        <v-stepper-item :value="'B'">
             <template #title>
               <v-chip
                 append-icon="mdi-map-marker"
                 color="blue"
                 variant="flat"
                 size="small"
-              >{{ efx?.point2 }}</v-chip>
+              >{{ route?.point2 }}</v-chip>
             </template>
           </v-stepper-item>
         </v-stepper-header>
@@ -118,7 +126,7 @@ watch(state, (newState) => {
           variant="tonal"
           size="small"
           prepend-icon="mdi-delete"
-          @click="deleteEfx(efx?.id)" />
+          @click="handleDelete" />
       </template>
       <v-spacer></v-spacer>
       <v-btn
@@ -126,14 +134,15 @@ watch(state, (newState) => {
         variant="tonal"
         prepend-icon="mdi-pencil"
         size="small"
-        @click="$emit('edit', efx)"
+        @click="$emit('edit', route)"
       ></v-btn>
       <v-btn
         text="Run"
         variant="tonal"
         prepend-icon="mdi-play"
         size="small"
-        @click="state = !state"
+        :loading="running"
+        @click="handleRun"
       ></v-btn>
     </v-card-actions>
   </v-card>
