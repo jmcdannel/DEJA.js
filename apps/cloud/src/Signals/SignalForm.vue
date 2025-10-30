@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useLayout, useSignals, type Signal } from '@repo/modules'
+import { useLayout } from '@repo/modules'
+import { useSignals, type Signal, type SignalAspect } from '@repo/modules/signals'
+import ColorPicker from '@/Common/Color/ColorPicker.vue'
+import TagPicker from '@/Common/Tags/TagPicker.vue'
+
+interface ValidationRules {
+  required: ((val: any) => boolean | string)[];
+}
 
 const props = defineProps<{ signal: Signal | null }>()
 const emit = defineEmits(['close'])
@@ -10,6 +17,7 @@ const { setSignal } = useSignals()
 
 const devices = getDevices()
 
+const editColor = ref(false)
 const name = ref(props.signal?.name ?? '')
 const device = ref(props.signal?.device ?? '')
 const red = ref<number | string | undefined>(props.signal?.red)
@@ -21,6 +29,12 @@ const description = ref(props.signal?.description ?? '')
 const tags = ref<string[]>(props.signal?.tags ?? [])
 const loading = ref(false)
 const error = ref<string | null>(null)
+const color = ref('cyan')
+
+// Validation for device when required
+const deviceRules = computed(() => {
+  return [(val: any) => !!val || 'Device is required for this effect type.']
+})
 
 watch(() => props.signal, (next) => {
   name.value = next?.name ?? ''
@@ -62,17 +76,33 @@ async function submit() {
   }
 
   try {
-    await setSignal(props.signal?.id || '', {
+    const payload = {
       name: name.value,
       device: device.value,
-      red: red.value as any,
-      yellow: yellow.value as any,
-      green: green.value as any,
-      aspect: aspect.value,
       commonAnode: commonAnode.value,
-      description: description.value || undefined,
-      tags: tags.value?.length ? tags.value : undefined,
-    })
+    }
+    if (red.value !== '' && red.value !== undefined) {
+      Object.assign(payload, { red: Number(red.value) })
+    }
+    if (yellow.value !== '' && yellow.value !== undefined) {
+      Object.assign(payload, { yellow: Number(yellow.value) })
+    }
+    if (green.value !== '' && green.value !== undefined) {
+      Object.assign(payload, { green: Number(green.value) })
+    }
+    if (aspect.value !== null) {
+      Object.assign(payload, { aspect: aspect.value })
+    } else {
+      Object.assign(payload, { aspect: null })
+    }
+    if (description.value) {
+      Object.assign(payload, { description: description.value })
+    }
+    if (tags.value.length > 0) {
+      Object.assign(payload, { tags: tags.value })
+    }
+    
+    await setSignal(props.signal?.id || '', payload)
     emit('close')
   } catch (err) {
     console.error('Failed to save signal', err)
@@ -86,6 +116,22 @@ async function submit() {
 <template>
   <div class="p-6">
     <v-form @submit.prevent="submit">
+      <v-label class="m-2 text-4xl">
+        {{ signal ? 'Edit' : 'Add'}} Signal
+      </v-label>
+      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+      <v-label class="m-2">
+        Device
+      </v-label>
+      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+      <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large" :rules="deviceRules">
+          <v-btn v-for="deviceOpt in devices" :value="deviceOpt.id" :key="deviceOpt.id" 
+            class="min-h-24 min-w-48 border"
+            :color="color" >
+              {{ deviceOpt.id }}
+          </v-btn>
+      </v-btn-toggle>
+      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
       <v-row>
         <v-col cols="12" md="6">
           <v-text-field
@@ -93,62 +139,6 @@ async function submit() {
             label="Signal name"
             required
             variant="outlined"
-          />
-        </v-col>
-        <v-col cols="12" md="6">
-          <v-select
-            v-model="device"
-            :items="devices"
-            item-value="id"
-            item-title="name"
-            label="Controller device"
-            variant="outlined"
-            required
-          />
-        </v-col>
-      </v-row>
-
-      <v-row>
-        <v-col cols="12" md="4">
-          <v-text-field
-            v-model="red"
-            label="Red pin"
-            type="number"
-            variant="outlined"
-            hint="Pin number for the red LED"
-            persistent-hint
-          />
-        </v-col>
-        <v-col cols="12" md="4">
-          <v-text-field
-            v-model="yellow"
-            label="Yellow pin"
-            type="number"
-            variant="outlined"
-            hint="Pin number for the yellow LED"
-            persistent-hint
-          />
-        </v-col>
-        <v-col cols="12" md="4">
-          <v-text-field
-            v-model="green"
-            label="Green pin"
-            type="number"
-            variant="outlined"
-            hint="Pin number for the green LED"
-            persistent-hint
-          />
-        </v-col>
-      </v-row>
-
-      <v-row class="items-center">
-        <v-col cols="12" md="6">
-          <v-switch
-            v-model="commonAnode"
-            color="emerald"
-            inset
-            :label="`Wiring: ${wiringLabel}`"
-            density="comfortable"
           />
         </v-col>
         <v-col cols="12" md="6">
@@ -166,10 +156,60 @@ async function submit() {
             persistent-hint
           />
         </v-col>
+      </v-row>      
+      <v-row>
+        <v-col cols="12" md="4">
+          <v-text-field
+            v-model="red"
+            label="Red pin"
+            type="number"
+            variant="outlined"
+            color="red"
+            hint="Pin number for the red LED"
+          >
+          <template #prepend-inner>
+            <v-icon icon="mdi-circle" :color="'red'" />
+          </template>
+        </v-text-field>
+        </v-col>
+        <v-col cols="12" md="4">
+          <v-text-field
+            v-model="yellow"
+            label="Yellow pin"
+            type="number"
+            color="yellow"
+            variant="outlined"
+            hint="Pin number for the yellow LED"
+          >
+          <template #prepend-inner>
+            <v-icon icon="mdi-circle" :color="'yellow'" />
+          </template>
+        </v-text-field>
+        </v-col>
+        <v-col cols="12" md="4">
+          <v-text-field
+            v-model="green"
+            label="Green pin"
+            color="green"
+            type="number"
+            variant="outlined"
+            hint="Pin number for the green LED"
+          >
+          <template #prepend-inner>
+            <v-icon icon="mdi-circle" :color="'green'" />
+          </template>
+        </v-text-field>
+        </v-col>
       </v-row>
 
-      <v-row>
+      <v-row class="items-center">
         <v-col cols="12" md="6">
+          <v-switch
+            v-model="commonAnode"
+            :color="color"
+            :label="`Wiring: ${wiringLabel}`"
+            density="comfortable"
+          />
           <v-textarea
             v-model="description"
             label="Description"
@@ -179,17 +219,28 @@ async function submit() {
           />
         </v-col>
         <v-col cols="12" md="6">
-          <v-combobox
-            v-model="tags"
-            label="Tags"
-            multiple
-            chips
-            variant="outlined"
-            hint="Organize signals with optional tags"
-            persistent-hint
-          />
+
+          <!-- color -->
+          <section class="h-auto  my-4">
+            <v-btn
+              class="min-h-48 min-w-48 border flex"
+              :color="color"
+              @click="editColor = true" >
+              <!-- <v-icon :icon="efxOpt.icon" :color="efxOpt.color"></v-icon> -->
+              <div class="relative flex flex-col justify-center items-center">
+                <v-icon size="64">mdi-palette</v-icon>
+                <div class="mt-4">Color [{{ color }}]</div>
+              </div>        
+            </v-btn>
+          </section>
+          <v-dialog max-width="80vw" v-model="editColor">
+            <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.efx?.color ?? 'purple'"></ColorPicker>
+          </v-dialog>
         </v-col>
       </v-row>
+
+      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+      <TagPicker class="my-4 " v-model="tags"></TagPicker>
 
       <v-alert
         v-if="error"
@@ -203,7 +254,7 @@ async function submit() {
           Cancel
         </v-btn>
         <v-btn
-          color="emerald"
+          :color="color"
           type="submit"
           :loading="loading"
         >

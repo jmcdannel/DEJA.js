@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useSignals, type Signal, type SignalAspect } from '@repo/modules/signals'
 
 defineEmits(['edit'])
 
-const { getSignals, setSignalAspect } = useSignals()
+const { getSignals, setSignalAspect, deleteSignal } = useSignals()
 const signals = getSignals()
 
+const color = ref('cyan')
 const aspectLabels: Record<Exclude<SignalAspect, null>, string> = {
   red: 'Red',
   yellow: 'Yellow',
@@ -23,6 +24,7 @@ function canToggle(signal: Signal, aspect: Exclude<SignalAspect, null>): boolean
 }
 
 async function toggleAspect(signal: Signal, aspect: Exclude<SignalAspect, null>) {
+  console.log('Toggling aspect', aspect, 'for signal', signal.id)
   if (!canToggle(signal, aspect)) return
   const nextAspect: SignalAspect = signal.aspect === aspect ? null : aspect
   await setSignalAspect(signal.id, nextAspect)
@@ -34,64 +36,43 @@ const list = computed(() => signals.value || [])
 <template>
   <v-container>
     <v-row>
-      <v-col cols="12">
-        <slot name="prepend"></slot>
-      </v-col>
-      <v-col v-for="item in list" :key="item.id" cols="12" xs="12" sm="12" lg="12">
-        <v-card class="w-full">
-          <v-card-title class="flex items-center justify-between">
-            <span>{{ item.name || item.id }}</span>
-            <slot name="actions" :item="item">
-              <v-btn icon="mdi-pencil" variant="text" size="small" @click="$emit('edit', item)" />
-            </slot>
-          </v-card-title>
+      <v-col v-for="item in list" :key="item.id" 
+        cols="auto">
+        <v-card class="p-2 flex flex-col items-center bg-opacity-50" :color="color" variant="tonal" rounded>
+          <v-card-title :color="color">{{ item.name || item.id }}</v-card-title>
           <v-card-text>
-            <div class="flex flex-wrap gap-6 items-center">
-              <div class="flex items-center gap-3">
-                <div class="flex flex-col items-center p-3 rounded-lg bg-neutral-900 border border-neutral-700" style="width: 72px;">
-                  <v-btn
-                    icon="mdi-circle"
-                    size="small"
-                    :color="item.aspect === 'red' ? 'red-darken-1' : 'red'"
-                    :variant="item.aspect === 'red' ? 'flat' : 'tonal'"
-                    :disabled="!canToggle(item, 'red')"
-                    @click="toggleAspect(item, 'red')"
-                  />
-                  <v-btn
-                    icon="mdi-circle"
-                    class="my-2"
-                    size="small"
-                    :color="item.aspect === 'yellow' ? 'amber-darken-2' : 'amber'"
-                    :variant="item.aspect === 'yellow' ? 'flat' : 'tonal'"
-                    :disabled="!canToggle(item, 'yellow')"
-                    @click="toggleAspect(item, 'yellow')"
-                  />
-                  <v-btn
-                    icon="mdi-circle"
-                    size="small"
-                    :color="item.aspect === 'green' ? 'green-darken-2' : 'green'"
-                    :variant="item.aspect === 'green' ? 'flat' : 'tonal'"
-                    :disabled="!canToggle(item, 'green')"
-                    @click="toggleAspect(item, 'green')"
-                  />
-                </div>
-                <div>
-                  <div class="text-xs opacity-70">Pins</div>
-                  <div class="text-sm">R: {{ item.red ?? '-' }} • Y: {{ item.yellow ?? '-' }} • G: {{ item.green ?? '-' }}</div>
-                </div>
-              </div>
-              <v-chip variant="tonal" color="emerald">
-                {{ wiring(item) }}
-              </v-chip>
-              <v-chip v-if="item.aspect" variant="tonal" color="blue">
-                Active: {{ aspectLabels[item.aspect] }}
-              </v-chip>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+          <div class="flex flex-col items-center p-3 rounded-lg bg-neutral-900 border border-neutral-700" style="width: 72px;">
+            <v-btn
+              icon="mdi-circle"
+              size="small"
+              :color="item.aspect === 'red' ? 'red-darken-1' : 'red'"
+              :variant="item.aspect === 'red' ? 'flat' : 'tonal'"
+              :disabled="!canToggle(item, 'red')"
+              @click="toggleAspect(item, 'red')"
+            />
+            <v-btn
+              icon="mdi-circle"
+              class="my-2"
+              size="small"
+              :color="item.aspect === 'yellow' ? 'amber-darken-2' : 'amber'"
+              :variant="item.aspect === 'yellow' ? 'flat' : 'tonal'"
+              :disabled="!canToggle(item, 'yellow')"
+              @click="toggleAspect(item, 'yellow')"
+            />
+            <v-btn
+              icon="mdi-circle"
+              size="small"
+              :color="item.aspect === 'green' ? 'green-darken-2' : 'green'"
+              :variant="item.aspect === 'green' ? 'flat' : 'tonal'"
+              :disabled="!canToggle(item, 'green')"
+              @click="toggleAspect(item, 'green')"
+            />
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-col>
+  </v-row>
+</v-container>
 </template>
 
 

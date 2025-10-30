@@ -238,7 +238,7 @@ async function connectUsbDevice(
     }
     const port = await serialLib.connect({
       baudRate,
-      handleMessage: handleSerialMessage,
+      handleMessage: (payload: string) => handleSerialMessage(payload, device),
       path: serialPort,
       deviceId: device.id,
     })
@@ -304,7 +304,7 @@ async function connectMqttDevice(device: Device): Promise<void> {
   }
 }
 
-async function handleSerialMessage(payload: string): Promise<void> {
+async function handleSerialMessage(payload: string, device: Device): Promise<void> {
   try {
     if (payload?.startsWith('{ "sensor')) {
       const data = JSON.parse(payload)
@@ -357,7 +357,7 @@ async function handleSerialMessage(payload: string): Promise<void> {
         await db.collection('layouts').doc(layoutId).set({ dccEx: updates }, { merge: true })
       }
 
-      await broadcast({ action: 'serial', payload })
+      await broadcast({ action: 'serial', payload: { device, response: payload } })
     }
   } catch (err) {
     log.fatal('Error handling serial message:', err)

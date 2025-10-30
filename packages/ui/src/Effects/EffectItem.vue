@@ -26,7 +26,7 @@ watch(state, async (newState) => {
   isRunning.value = true
   stop()
   start()
-  await runEffect({...props.effect, state: newState})
+  await runEffect({...props.effect, id: props.effect.id, state: newState})
 })
 </script>
 

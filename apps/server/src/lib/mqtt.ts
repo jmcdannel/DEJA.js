@@ -233,7 +233,7 @@ const publish = (topic: string, message: string): void => {
 const send = (data: string): void => {
   try {
     if (mqttClient && mqttClient.connected) {
-      const topic = `${layoutId}/broadcast`
+      const topic = `DEJA/${layoutId}/broadcast`
       mqttClient.publish(topic, data)
       log.note('Sent data to topic:', topic, data)
     } else {

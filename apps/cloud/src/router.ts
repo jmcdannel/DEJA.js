@@ -52,9 +52,6 @@ const router = createRouter({
       component: () => import('./Effects/EditEffect.vue'),
       beforeEnter: [requireAuth, requireLayout],
     },
-
-
-
     {
       path: '/routes',
       name: 'Routes',

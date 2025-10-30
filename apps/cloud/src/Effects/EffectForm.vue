@@ -7,7 +7,6 @@ import MacroForm from '@/Effects/MacroForm.vue'
 import IALEDForm from '@/Effects//IALEDForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
-import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 import SoundFileList from '@/Effects/Sounds/SoundFileList.vue'
 // TODO: icon picker
 
@@ -201,9 +200,7 @@ function handleSoundFileSelect(soundFile: string) {
 
 </script>
 <template>
-  <div>
-    <h1>EffectForm Component Loaded</h1>
-    
+  <div>    
     <v-form validate-on="submit lazy" @submit.prevent="submit">
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
     <div class="flex items-center justify-between">
@@ -219,8 +216,7 @@ function handleSoundFileSelect(soundFile: string) {
     <template v-if="efxTypeObj?.require?.includes('device')">
       <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
       <v-label class="m-2">
-        Device <span class="text-red-500">*</span>
-        <div class="text-sm opacity-70 mt-1">Required for {{ efxType }} effects</div>
+        Device
       </v-label>
       <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
       <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large" :rules="deviceRules">
@@ -261,23 +257,6 @@ function handleSoundFileSelect(soundFile: string) {
         :rules="rules.required"
       ></v-text-field>
     </div>   
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-      <LcdDisplay 
-        :content="`efxType: ${efxType}`"
-        title="EFFECT TYPE"
-        color="blue"
-        size="sm"
-        :max-lines="3"
-      />
-      <LcdDisplay 
-        :content="efxTypeObj ? JSON.stringify(efxTypeObj, null, 2).split('\n') : []"
-        title="TYPE OBJECT"
-        color="green"
-        size="sm"
-        :max-lines="8"
-      />
-    </div>
 
     <!-- pin -->
     <template v-if="efxTypeObj?.require?.includes('pin')">

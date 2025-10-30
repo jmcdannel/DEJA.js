@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import SignalForm from '@/Signals/SignalForm.vue'
 import type { Signal } from '@repo/modules/signals'
-import { useSignals } from '@repo/modules'
+import { useSignals } from '@repo/modules/signals'
 
 const route = useRoute()
 const router = useRouter()
@@ -39,9 +39,9 @@ function handleClose() {
 onMounted(loadSignal)
 </script>
 <template>
-  <ModuleTitle menu="Signals" />
+  <ModuleTitle menu="Signals" color="cyan" />
   <div v-if="loading" class="p-6 flex justify-center">
-    <v-progress-circular indeterminate color="emerald" />
+    <v-progress-circular indeterminate color="cyan" />
   </div>
   <v-alert v-else-if="error" type="error" class="ma-4" :text="error" closable @click:close="handleClose" />
   <SignalForm v-else-if="signal" :signal="signal" @close="handleClose" />
