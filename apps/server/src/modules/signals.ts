@@ -26,7 +26,7 @@ async function applySignalAspect(signal: Signal): Promise<void> {
 
     const isActive = signal.aspect === color
     const state = toBooleanState(isActive, signal.commonAnode)
-
+    console.log(`[SIGNALS] Setting signal ${signal.id} color ${color} (pin ${pinValue}) to state:`, state, isActive)
     try {
       await handleEffect({
         id: `${signal.id}-${color}`,
