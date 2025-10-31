@@ -4,7 +4,7 @@ import { useSignals, type Signal, type SignalAspect } from '@repo/modules/signal
 
 defineEmits(['edit'])
 
-const { getSignals, setSignalAspect, deleteSignal } = useSignals()
+const { getSignals, setSignalAspect } = useSignals()
 const signals = getSignals()
 
 const color = ref('cyan')

@@ -357,7 +357,7 @@ async function handleSerialMessage(payload: string, device: Device): Promise<voi
         await db.collection('layouts').doc(layoutId).set({ dccEx: updates }, { merge: true })
       }
 
-      await broadcast({ action: 'serial', payload: { device, response: payload } })
+      await broadcast({ action: 'serial', payload: { payload } })
     }
   } catch (err) {
     log.fatal('Error handling serial message:', err)
