@@ -22,6 +22,10 @@ export * from './locos/constants'
 export { default as useTurnouts } from './turnouts/useTurnouts'
 export * from './turnouts/types'
 
+// Signals module
+export { default as useSignals } from './signals/useSignals'
+export * from './signals/types'
+
 // Routes module
 export { default as useLayoutRoutes } from './routes/useLayoutRoutes'
 export { default as useRoutes } from './routes/useRoutes'

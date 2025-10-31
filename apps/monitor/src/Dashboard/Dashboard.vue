@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onUnmounted } from 'vue'
 import { useStorage } from '@vueuse/core' 
-import { useLayout, useLocos, useTurnouts, useEfx } from '@repo/modules'
+import { useLayout, useLocos, useTurnouts, useEfx, useSignals } from '@repo/modules'
 import LayoutCard from './components/LayoutCard.vue'
 import TurnoutStatsCard from './components/TurnoutStatsCard.vue'
 import EffectStatsCard from './components/EffectStatsCard.vue'
@@ -22,21 +22,26 @@ const { getLayout, getDevices } = useLayout()
 const { getThrottles } = useLocos()
 const { getTurnouts } = useTurnouts()
 const { getEffects } = useEfx()
+const { getSignals } = useSignals()
 const layoutId = useStorage('@DEJA/layoutId', '')
 const layout = getLayout()
 const devices = getDevices()
 const throttles = getThrottles()
 const turnouts = getTurnouts()
 const effects = getEffects()
+const signals = getSignals()
 const turnoutChanges = ref<DocumentData[]>([])
 const effectChanges = ref<DocumentData[]>([])
+const signalChanges = ref<DocumentData[]>([])
 const sensorChanges = ref<DocumentData[]>([])
 const turnoutsThrownCount = ref(0)
 const efxThrownCount = ref(0)
+const signalsActiveCount = ref(0)
 
 // Firebase listeners
 let turnoutUnsubscribe: (() => void) | null = null
 let effectUnsubscribe: (() => void) | null = null
+let signalUnsubscribe: (() => void) | null = null
 
 watch(turnoutChanges, () => {
   if (turnoutChanges.value.length > 0) {
@@ -56,6 +61,15 @@ watch(effectChanges, () => {
   }
 }, { deep: true })
 
+watch(signalChanges, () => {
+  if (signalChanges.value.length > 0) {
+    setTimeout(() => {
+      signalsActiveCount.value++
+      signalChanges.value.shift()
+    }, TIMEOUT)
+  }
+}, { deep: true })
+
 // Watch for layoutId changes and set up Firebase listeners
 watch(layoutId, (newLayoutId) => {
   // Clean up existing listeners
@@ -66,6 +80,10 @@ watch(layoutId, (newLayoutId) => {
   if (effectUnsubscribe) {
     effectUnsubscribe()
     effectUnsubscribe = null
+  }
+  if (signalUnsubscribe) {
+    signalUnsubscribe()
+    signalUnsubscribe = null
   }
 
   // Only set up listeners if we have a valid layoutId
@@ -99,6 +117,19 @@ watch(layoutId, (newLayoutId) => {
         }
       })
     })
+
+    signalUnsubscribe = onSnapshot(collection(db, `layouts/${newLayoutId}/signals`), (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'modified') {
+          console.log('Modified signal: ', change.doc.data())
+          signalChanges.value.push(change.doc.data())
+        } else if (change.type === 'added') {
+          console.log('Added signal: ', change.doc.data())
+        } else if (change.type === 'removed') {
+          console.log('Removed signal: ', change.doc.data())
+        }
+      })
+    })
   }
 }, { immediate: true })
 
@@ -109,6 +140,9 @@ onUnmounted(() => {
   }
   if (effectUnsubscribe) {
     effectUnsubscribe()
+  }
+  if (signalUnsubscribe) {
+    signalUnsubscribe()
   }
 })
 
@@ -127,6 +161,8 @@ onUnmounted(() => {
         <EffectStatsCard
           :total-count="effects.length"
           :active-count="efxThrownCount"
+          :signal-count="signals.length"
+          :active-signal-count="signalsActiveCount"
         />
         <ThrottleStatsCard
           :total-count="throttles.length"

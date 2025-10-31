@@ -16,7 +16,7 @@ function handleEdit(item: Effect) {
 </script>
 <template>
   <v-container>
-    <v-row no-gutters>
+    <v-row>
       <v-col
         cols="12"
         xs="12"

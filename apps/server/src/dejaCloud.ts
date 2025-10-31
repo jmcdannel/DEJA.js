@@ -4,6 +4,7 @@ import { initialize } from './modules/layout'
 import { handleThrottleChange, listenToLocoChanges } from './modules/throttles'
 import { handleTurnoutChange } from './modules/turnouts'
 import { handleEffectChange } from './modules/effects'
+import { handleSignalChange } from './modules/signals'
 // import { handleSensorChange } from './modules/sensors'
 import { handleDccChange } from './lib/dcc'
 import { handleDejaCommands } from './lib/deja'
@@ -19,6 +20,7 @@ let dejaCommandsRef: any = null
 let throttleUnsubscribe: (() => void) | null = null
 let effectUnsubscribe: (() => void) | null = null
 let turnoutUnsubscribe: (() => void) | null = null
+let signalUnsubscribe: (() => void) | null = null
 let testEffectUnsubscribe: (() => void) | null = null
 
 async function listen(): Promise<void> {
@@ -39,9 +41,10 @@ async function listen(): Promise<void> {
   })
 
   listenToLocoChanges()
-  
+
   throttleUnsubscribe = db.collection(`layouts/${layoutId}/throttles`).onSnapshot(handleThrottleChange)
   effectUnsubscribe = db.collection(`layouts/${layoutId}/effects`).onSnapshot(handleEffectChange)
+  signalUnsubscribe = db.collection(`layouts/${layoutId}/signals`).onSnapshot(handleSignalChange)
   turnoutUnsubscribe = db.collection(`layouts/${layoutId}/turnouts`).onSnapshot(handleTurnoutChange)
   // db.collection(`layouts/${layoutId}/sensors`).onSnapshot(handleSensorChange)
   
@@ -103,6 +106,10 @@ async function cleanup(): Promise<void> {
     if (effectUnsubscribe) {
       effectUnsubscribe()
       effectUnsubscribe = null
+    }
+    if (signalUnsubscribe) {
+      signalUnsubscribe()
+      signalUnsubscribe = null
     }
     if (turnoutUnsubscribe) {
       turnoutUnsubscribe()

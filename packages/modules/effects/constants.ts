@@ -2,14 +2,6 @@ import type { EffectType } from './types'
 
 export const efxTypes: EffectType[] = [
   {
-    value: 'signal',
-    label: 'Signal',
-    icon: 'mdi-traffic-light',
-    color: 'emerald',
-    // requires the IDs of existing pin effects for each color
-    require: ['red', 'green'],
-  },
-  {
     value: 'ialed',
     label: 'IALED',
     icon: 'mdi-led-strip-variant',

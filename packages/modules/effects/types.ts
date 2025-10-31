@@ -18,10 +18,6 @@ export interface Effect {
   soundDuration?: number // Duration in seconds, optional
   tags?: string[]
   allowGuest?: boolean
-  // For 'signal' effect type: references to child effects by ID (optional)
-  red?: string
-  yellow?: string
-  green?: string
   id: string
 }
 

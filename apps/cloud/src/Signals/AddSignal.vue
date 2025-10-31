@@ -2,18 +2,19 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
-import EffectForm from '@/Effects/EffectForm.vue'
-import type { Effect } from '@repo/modules/effects'
+import SignalForm from '@/Signals/SignalForm.vue'
+import type { Signal } from '@repo/modules/signals'
 
 const router = useRouter()
-const defaultSignal = computed<Effect>(() => ({
+const defaultSignal = computed<Signal>(() => ({
   id: '',
   name: '',
-  type: 'signal',
-  color: 'emerald',
-  tags: [],
-  allowGuest: false,
-  state: false,
+  device: '',
+  red: undefined,
+  yellow: undefined,
+  green: undefined,
+  aspect: null,
+  commonAnode: false,
 }))
 
 function handleClose() {
@@ -22,5 +23,5 @@ function handleClose() {
 </script>
 <template>
   <ModuleTitle menu="Signals" />
-  <EffectForm :efx="defaultSignal" @close="handleClose" />
+  <SignalForm :signal="defaultSignal" @close="handleClose" />
 </template>

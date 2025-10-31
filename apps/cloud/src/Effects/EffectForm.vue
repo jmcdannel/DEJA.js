@@ -7,7 +7,6 @@ import MacroForm from '@/Effects/MacroForm.vue'
 import IALEDForm from '@/Effects//IALEDForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
-import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 import SoundFileList from '@/Effects/Sounds/SoundFileList.vue'
 // TODO: icon picker
 
@@ -68,10 +67,6 @@ const editColor = ref(false)
 const device = ref(props.efx?.device || DEFAULT_DEVICE)
 const name = ref(props.efx?.name || '')
 const pin = ref(props.efx?.pin)
-// signal wiring: reference existing pin effects
-const red = ref((props.efx as any)?.red || '')
-const yellow = ref((props.efx as any)?.yellow || '')
-const green = ref((props.efx as any)?.green || '')
 const macroOn = ref(props.efx?.on || [])
 const macroOff = ref(props.efx?.off || [])
 const pattern = ref(props.efx?.pattern || undefined)
@@ -171,13 +166,6 @@ async function submit () {
     newEfx.range = range.value
     newEfx.config = config.value
   }
-  // set signal references
-  if (efxType.value === 'signal') {
-    const efxAny: any = newEfx
-    efxAny.red = red.value || undefined
-    efxAny.yellow = yellow.value || undefined
-    efxAny.green = green.value || undefined
-  }
 
   // set sound file for sound effects
   if (efxType.value === 'sound') {
@@ -212,9 +200,7 @@ function handleSoundFileSelect(soundFile: string) {
 
 </script>
 <template>
-  <div>
-    <h1>EffectForm Component Loaded</h1>
-    
+  <div>    
     <v-form validate-on="submit lazy" @submit.prevent="submit">
     <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
     <div class="flex items-center justify-between">
@@ -230,8 +216,7 @@ function handleSoundFileSelect(soundFile: string) {
     <template v-if="efxTypeObj?.require?.includes('device')">
       <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
       <v-label class="m-2">
-        Device <span class="text-red-500">*</span>
-        <div class="text-sm opacity-70 mt-1">Required for {{ efxType }} effects</div>
+        Device
       </v-label>
       <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
       <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large" :rules="deviceRules">
@@ -272,23 +257,6 @@ function handleSoundFileSelect(soundFile: string) {
         :rules="rules.required"
       ></v-text-field>
     </div>   
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-      <LcdDisplay 
-        :content="`efxType: ${efxType}`"
-        title="EFFECT TYPE"
-        color="blue"
-        size="sm"
-        :max-lines="3"
-      />
-      <LcdDisplay 
-        :content="efxTypeObj ? JSON.stringify(efxTypeObj, null, 2).split('\n') : []"
-        title="TYPE OBJECT"
-        color="green"
-        size="sm"
-        :max-lines="8"
-      />
-    </div>
 
     <!-- pin -->
     <template v-if="efxTypeObj?.require?.includes('pin')">
@@ -300,16 +268,6 @@ function handleSoundFileSelect(soundFile: string) {
         max-width="200"
       >
       </v-text-field>
-    </template>
-
-    <!-- signal references -->
-    <template v-else-if="efxType === 'signal'">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <v-text-field v-model="red" label="Red Effect ID" variant="outlined" />
-        <v-text-field v-model="yellow" label="Yellow Effect ID" variant="outlined" />
-        <v-text-field v-model="green" label="Green Effect ID" variant="outlined" />
-      </div>
-      <div class="text-xs opacity-70 mt-1">Enter the IDs of existing pin effects for each color.</div>
     </template>
 
     <!-- sound file selection -->
