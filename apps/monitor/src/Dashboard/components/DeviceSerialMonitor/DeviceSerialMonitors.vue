@@ -52,8 +52,8 @@ function getDeviceType(device: Device): string {
 </script>
 
 <template>
-  <v-card title="Device Serial Monitors" class="flex flex-col overflow-hidden h-full" color="indigo">
-    <v-card-text class="flex flex-1 flex-col gap-4 overflow-hidden">
+  <v-card title="Device Serial Monitors" class="flex flex-col " color="indigo">
+    <v-card-text class="flex flex-1 flex-col gap-4">
       <!-- No devices connected -->
       <div v-if="connectedDevices.length === 0" class="text-center py-8 text-gray-500">
         <v-icon icon="mdi-devices" size="large" class="mb-2" />
