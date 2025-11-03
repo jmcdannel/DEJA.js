@@ -54,6 +54,5 @@ const cols = {
           />
         </v-col>
       </v-row>
-    />
     </div>
 </template>

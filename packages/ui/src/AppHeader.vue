@@ -11,15 +11,11 @@ import Power from './Power.vue'
 import EmergencyStop from './EmergencyStop.vue'
 import BackgroundDecor from './BackgroundDecor.vue'
 import { useLayout } from '@repo/modules'
+import { useDcc } from '@repo/dccex'
+import { useEfx, type Effect } from '@repo/modules'
 
 
 const emit = defineEmits<{
-  trackPowerToggle: [newState: boolean]
-  layoutPowerToggle: [newState: boolean]
-  emergencyStop: []
-  deviceSelect: [deviceId: string]
-  layoutSelect: [layoutId: string]
-  logoClick: []
   drawerToggle: [newState: boolean]
 }>()
 
@@ -39,11 +35,13 @@ const props = defineProps<{
   layoutPowerState?: boolean
 }>()
 
+const { runEffect, getEffectsByType } = useEfx()
+const { sendDccCommand } = useDcc()
 const { getLayouts, getDevices } = useLayout()
 const layoutId = useStorage('@DEJA/layoutId', '')
 const user = useCurrentUser()
 const router = useRouter()
-const { mdAndUp, mobile } = useDisplay()
+const { mdAndUp } = useDisplay()
 
 const layouts = getLayouts(user.value?.email)
 const devices = getDevices()
@@ -53,16 +51,23 @@ const isDeviceModalOpen = ref(false)
 
 
 // Event handlers
-function handleTrackPowerToggle(newState: boolean) {
-  emit('trackPowerToggle', newState)
+async function handleTrackPowerToggle(newState: boolean) {
+  const DEFAULT_ON = '1 MAIN'
+  const DEFAULT_OFF = '0'
+  await sendDccCommand({ action: 'dcc', payload: newState ? DEFAULT_ON : DEFAULT_OFF })
 }
 
 function handleLayoutPowerToggle(newState: boolean) {
-  emit('layoutPowerToggle', newState)
+  const powerEfx = getEffectsByType('power')
+  if (powerEfx && Array.isArray(powerEfx)) {
+    powerEfx.forEach((efx: any) => {
+      runEffect({...efx, state: newState })
+    })
+  }
 }
 
-function handleEmergencyStop() {
-  emit('emergencyStop')
+async function handleEmergencyStop() {
+  await sendDccCommand({ action: 'dcc', payload: '!' })
 }
 
 function handleDeviceSelect(deviceId: string) {
@@ -77,7 +82,7 @@ function handleLayoutSelect(selectedLayoutId: string) {
 }
 
 function handleLogoClick() {
-  emit('logoClick')
+  router.push({ path: '/' })
 }
 
 function openLayoutModal() {
@@ -101,7 +106,10 @@ const dccexConnected = computed(() => {
 })
 
 const currentLayout = computed(() => {
-  return layouts?.value.find(l => l.id === layoutId.value) || { id: layoutId.value, name: layoutId.value }
+  console.log('Current layoutId in AppHeader:', layoutId?.value, user?.value, layouts?.value)
+  return layouts?.value ? 
+    layouts.value?.find(l => l.id === layoutId.value)
+    : { id: layoutId.value, name: layoutId.value }
 })
 
 const defaultProps = {
@@ -146,7 +154,7 @@ const defaultProps = {
             <span v-if="layoutId" class="status-dot success-dot"></span>
             <span v-else class="status-dot error-dot"></span>
           </template>
-          <span class="font-medium">{{ currentLayout.name || 'No Layout' }}</span>
+          <span class="font-medium">{{ currentLayout?.name || 'No Layout' }}</span>
         </v-chip>
         <v-chip v-if="showDeviceStatus && hasDevices" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-devices"
           :color="allConnected ? 'success' : 'warning'" variant="elevated" @click="openDeviceModal">

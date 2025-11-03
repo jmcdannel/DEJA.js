@@ -9,8 +9,6 @@ import { useMenu } from '@/Core/Menu/useMenu'
 
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
-import UserProfileMenu from './Core/Header/UserProfile.vue';
-import LayoutStatus from '@/Layout/LayoutStatus.vue'
 import { Login } from '@repo/auth'
 import { AppHeader } from '@repo/ui'
 import { useDcc } from '@repo/dccex'

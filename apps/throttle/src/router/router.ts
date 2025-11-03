@@ -83,6 +83,12 @@ const router = createRouter({
       component: () => import('../views/SelectLayoutView.vue'),
       beforeEnter: [requireAuth],
     },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('../views/SettingsView.vue'),
+      beforeEnter: [requireAuth],
+    },
     // {
     //   path: '/connect/dejajs',
     //   name: 'dejajs',

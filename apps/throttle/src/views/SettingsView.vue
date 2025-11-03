@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import SelectFavorites from '@/core/Menu/SelectFavorites.vue'
 
-const enableAutoDeploy = ref(true)
-const allowedNotifications = ref(['email'])
+const enableExperimentalSync = ref(true)
+const notificationChannels = ref(['email'])
 const defaultTheme = ref('system')
-const logRetention = ref(30)
-const betaFeatures = ref(false)
+const speedSteps = ref('128')
+const autoSaveSessions = ref(false)
 const notificationOptions = [
-  { title: 'Email updates', value: 'email' },
+  { title: 'Email alerts', value: 'email' },
   { title: 'SMS alerts', value: 'sms' },
   { title: 'Push notifications', value: 'push' },
 ]
@@ -16,25 +17,31 @@ const themeOptions = [
   { title: 'Light', value: 'light' },
   { title: 'Dark', value: 'dark' },
 ]
-</script>
+const speedStepOptions = [
+  { title: '14 steps', value: '14' },
+  { title: '28 steps', value: '28' },
+  { title: '128 steps', value: '128' },
+]
+</script>``
 
 <template>
   <v-container class="py-8">
     <v-row justify="center">
       <v-col cols="12" md="8" lg="6">
+        <SelectFavorites />
         <v-card>
-          <v-card-title>Cloud Settings</v-card-title>
-          <v-card-subtitle class="pb-0">Placeholder controls for configuration work.</v-card-subtitle>
+          <v-card-title>Throttle Settings</v-card-title>
+          <v-card-subtitle class="pb-0">Prototype controls for upcoming features.</v-card-subtitle>
           <v-divider class="my-2" />
           <v-card-text class="space-y-6">
             <v-switch
-              v-model="enableAutoDeploy"
-              label="Enable auto-deploy for layout changes"
+              v-model="enableExperimentalSync"
+              label="Enable experimental consist sync"
               color="primary"
               hide-details
             />
             <v-select
-              v-model="allowedNotifications"
+              v-model="notificationChannels"
               :items="notificationOptions"
               label="Notification channels"
               multiple
@@ -44,21 +51,16 @@ const themeOptions = [
             <v-select
               v-model="defaultTheme"
               :items="themeOptions"
-              label="Dashboard theme"
+              label="Interface theme"
             />
-            <div>
-              <div class="text-subtitle-2 mb-2">Log retention (days)</div>
-              <v-slider
-                v-model="logRetention"
-                :min="7"
-                :max="90"
-                :step="1"
-                thumb-label="always"
-              />
-            </div>
+            <v-select
+              v-model="speedSteps"
+              :items="speedStepOptions"
+              label="Default throttle speed steps"
+            />
             <v-switch
-              v-model="betaFeatures"
-              label="Join cloud feature preview program"
+              v-model="autoSaveSessions"
+              label="Auto-save active throttles on close"
               color="primary"
               hide-details
             />

@@ -125,6 +125,12 @@ const router = createRouter({
       beforeEnter: [requireAuth, requireLayout],
     },
     {
+      path: '/settings',
+      name: 'Settings',
+      component: () => import('./Settings/Settings.vue'),
+      beforeEnter: [requireAuth],
+    },
+    {
       path: '/layout/device/:deviceId',
       name: 'Device',
       component: () => import('./Layout/Devices/DeviceDetails.vue'),
