@@ -67,7 +67,6 @@ async function resetThrottles(): Promise<void> {
 }
 
 async function resetDevices(): Promise<void> {
-  log.complete('reset devices', layoutId)
 
   const devicesSnapshot = await db.collection('layouts').doc(layoutId).collection('devices').get()
   devicesSnapshot.docs.map((doc) => {
@@ -79,6 +78,7 @@ async function resetDevices(): Promise<void> {
       lastConnected: null,
     }, { merge: true })
   })
+  log.complete('reset devices', layoutId)
 }
 
 async function reset(): Promise<void> {
