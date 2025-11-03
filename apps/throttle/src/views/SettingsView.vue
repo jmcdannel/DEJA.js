@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import SelectFavorites from '@/core/Menu/SelectFavorites.vue'
 
 const enableExperimentalSync = ref(true)
 const notificationChannels = ref(['email'])
@@ -21,12 +22,13 @@ const speedStepOptions = [
   { title: '28 steps', value: '28' },
   { title: '128 steps', value: '128' },
 ]
-</script>
+</script>``
 
 <template>
   <v-container class="py-8">
     <v-row justify="center">
       <v-col cols="12" md="8" lg="6">
+        <SelectFavorites />
         <v-card>
           <v-card-title>Throttle Settings</v-card-title>
           <v-card-subtitle class="pb-0">Prototype controls for upcoming features.</v-card-subtitle>

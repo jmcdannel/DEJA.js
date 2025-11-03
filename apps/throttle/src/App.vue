@@ -1,15 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RouterView } from 'vue-router'
-import { useStorage } from '@vueuse/core'
-import { useCurrentUser } from 'vuefire'
 import { AppHeader } from '@repo/ui'
 import Footer from '@/core/Footer.vue'
-import Menu from '@/core/Menu.vue'
+import Menu from '@/core/Menu/Menu.vue'
 
 const drawer = ref(false)
-const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
-const user = useCurrentUser()
 
 </script>
 
@@ -36,7 +32,7 @@ const user = useCurrentUser()
           <RouterView />
         </v-container>
       </v-main>
-      <Footer v-if="Boolean(user) && Boolean(layoutId)" />
+      <Footer />
     </v-app>
   </v-responsive>
 </template>
