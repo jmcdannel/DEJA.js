@@ -17,6 +17,12 @@ const router = createRouter({
       path: '/login',
     },
     {
+      path: '/settings',
+      name: 'Settings',
+      component: () => import('./Settings/Settings.vue'),
+      beforeEnter: [requireAuth],
+    },
+    {
       path: '/demo',
       name: 'Device Monitor Demo',
       component: () => import('./Dashboard/components/DeviceSerialMonitor/DeviceSerialMonitorDemo.vue'),

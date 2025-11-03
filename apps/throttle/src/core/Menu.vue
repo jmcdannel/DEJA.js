@@ -73,6 +73,12 @@ const menuConfig: MenuItem[] = [
   icon: 'mdi-traffic-light',
   color: 'blue',
   name: 'signals',
+  },
+  {
+    label: "Settings",
+    icon: 'mdi-cog',
+    color: 'grey',
+    name: 'Settings',
   }
 ]
 
