@@ -150,9 +150,9 @@ onUnmounted(() => {
 
 <template>
   <v-sheet class="h-full">
-    <div class="p-6 h-full flex flex-col gap-6">
+    <div class="h-full max-h-full flex flex-col">
       <!-- First Row - Takes only the height it needs -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 flex-shrink-0">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 flex-shrink-0">
         <LayoutCard />
         <TurnoutStatsCard 
           :total-count="turnouts.length"
@@ -171,21 +171,31 @@ onUnmounted(() => {
       </div>
 
       <!-- Second Row - Uses half of remaining height with scrolling -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
-        <div class="overflow-auto">
-          <DCCLog />
+      <div class="grid grid-cols-1 lg:grid-cols-3 flex-1 min-h-0 bg-gray-950 max-h-[50vh]">
+        <div class="flex flex-col min-h-0">
+          <div class="overflow-auto flex-1 min-h-0">
+            <DCCLog />
+          </div>
         </div>
-        <div class="overflow-auto">
-          <TurnoutLogs :logs="turnoutChanges" />
+
+        <div class="flex flex-col min-h-0">
+          <div class="overflow-auto flex-1 min-h-0">
+            <TurnoutLogs :logs="turnoutChanges" />
+          </div>
         </div>
-        <div class="overflow-auto">
-          <EffectLogs :logs="effectChanges" />
+
+        <div class="flex flex-col min-h-0">
+          <div class="overflow-auto flex-1 min-h-0">
+            <EffectLogs :logs="effectChanges" />
+          </div>
         </div>
       </div>
 
       <!-- Third Row - Uses half of remaining height with scrolling -->
-      <div class="flex-1 min-h-0 overflow-auto">
-        <DeviceSerialMonitors :devices="devices" />
+      <div class="grid grid-cols-1 flex-1 min-h-0 bg-cyan-950 max-h-[50vh]">
+        <div class="overflow-auto flex-1 min-h-0">
+          <DeviceSerialMonitors :devices="devices" />
+        </div>
       </div>
     </div>
   </v-sheet>

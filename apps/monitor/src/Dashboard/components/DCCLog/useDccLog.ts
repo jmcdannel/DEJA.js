@@ -10,7 +10,7 @@ export function useDccLog(isEnabled: boolean) {
       append: (_entry: string) => {},
     }
   }
-  const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.22:8082')
+  const wshost = useStorage('@DEJA/pref/ws-host', 'localhost:8082')
   const dccRegex = /<\*\s(.*?)\s\*>/
 
   const log = ref<LogEntry[]>([])

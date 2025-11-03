@@ -157,6 +157,8 @@ async function autoConnect(devices: Device[]): Promise<void> {
         topic: device.topic,
       })
       connectDevice({ device: device.id, topic: device.topic })
+    } else {
+      disconnectDevice(device.id)
     }
   })
 }

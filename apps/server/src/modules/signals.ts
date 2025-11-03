@@ -53,7 +53,11 @@ export async function handleSignalChange(snapshot: DocumentData): Promise<void> 
       id: change.doc.id,
     }
 
-    if (change.type === 'added' || change.type === 'modified') {
+    if (change.type === 'added') {
+      // TODO: initialize
+    }
+
+    if (change.type === 'modified') {
       await applySignalAspect(signal)
     }
 

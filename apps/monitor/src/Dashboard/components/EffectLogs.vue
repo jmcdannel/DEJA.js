@@ -19,29 +19,27 @@ watch(() => props.logs, () => {
 </script>
 
 <template>
-  <v-card color="light-blue-darken-3"class="flex flex-col overflow-hidden ">
+  <v-card color="cyan-darken-3" class="flex flex-col">
     <v-card-title>Effect Logs</v-card-title>
-    <v-card-text class="flex flex-1 flex-col-reverse gap-4 overflow-hidden">
-      <div class="h-full overflow-y-auto scrollbar-thin">
-        <v-alert 
-          v-for="log in logs" 
-          :key="log.id" 
-          :color="log?.color || 'info'" 
-          variant="tonal"
-        >
-          <div class="flex items-center gap-x-8">
-            <v-icon 
-              :color="log.state ? 'green' : 'red'" 
-              :icon="log.state ? 'mdi-toggle-switch' : 'mdi-toggle-switch-off'" 
-              size="64" 
-            />
-            <span class="font-semibold text-xm">{{ log.name }}</span>
-            <!-- <span class="text-sm">{{ log.state ? 'On' : 'Off' }}</span> -->
-            <v-spacer></v-spacer>
-            <v-chip>{{ log.device }}</v-chip>
-          </div>
-        </v-alert>
-      </div>
+    <v-card-text class="flex flex-1 flex-col-reverse gap-1">
+      <v-alert 
+        v-for="log in logs" 
+        :key="log.id" 
+        :color="log?.color || 'info'" 
+        variant="tonal"
+      >
+        <div class="flex items-center gap-x-8">
+          <v-icon 
+            :color="log.state ? 'green' : 'red'" 
+            :icon="log.state ? 'mdi-toggle-switch' : 'mdi-toggle-switch-off'" 
+            size="32" 
+          />
+          <span class="font-semibold text-xm">{{ log.name }}</span>
+          <!-- <span class="text-sm">{{ log.state ? 'On' : 'Off' }}</span> -->
+          <v-spacer></v-spacer>
+          <v-chip>{{ log.device }}</v-chip>
+        </div>
+      </v-alert>
     </v-card-text>
   </v-card>
 </template>
