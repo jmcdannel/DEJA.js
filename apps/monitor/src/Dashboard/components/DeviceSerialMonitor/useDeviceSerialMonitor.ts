@@ -1,4 +1,4 @@
-import { ref, watch, onUnmounted } from 'vue'
+import { computed, ref, watch, onUnmounted } from 'vue'
 import { useWebSocket } from '@vueuse/core'
 import { useStorage } from '@vueuse/core'
 
@@ -10,32 +10,76 @@ export interface SerialMessage {
   timestamp: string
 }
 
+function getDefaultWsHost(): string {
+  if (typeof window === 'undefined') {
+    return 'localhost:8082'
+  }
+
+  return window.location.host || 'localhost:8082'
+}
+
+function resolveWsUrl(host: string | undefined): string | undefined {
+  if (!host) {
+    return undefined
+  }
+
+  const trimmed = host.trim()
+  if (!trimmed) {
+    return undefined
+  }
+
+  if (trimmed.startsWith('ws://') || trimmed.startsWith('wss://')) {
+    return trimmed
+  }
+
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://'
+    return `${protocol}${trimmed}`
+  }
+
+  return `ws://${trimmed}`
+}
+
+function createMessageId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
 export function useDeviceSerialMonitor(deviceId: string) {
-  const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.22:8082')
+  const wshost = useStorage('@DEJA/pref/ws-host', getDefaultWsHost())
   const enabled = ref(true)
   const messages = ref<SerialMessage[]>([])
   const maxMessages = ref(100) // Limit messages to prevent memory issues
   const isSubscribed = ref(false)
-  
+
   // WebSocket connection
-  const { data, status, open, close, send } = useWebSocket(`ws://${wshost.value}/`)
+  const wsUrl = computed(() => resolveWsUrl(wshost.value))
+
+  const { data, status, open, close, send } = useWebSocket(wsUrl, {
+    autoReconnect: {
+      delay: 1000,
+      retries: 10
+    }
+  })
   
   // Subscribe to device
   function subscribe() {
-    if (status.value === 'OPEN' && deviceId) {
+    if (status.value === 'OPEN' && deviceId && !isSubscribed.value) {
       const subscribeMessage = {
         action: 'subscribe-device',
         deviceId: deviceId
       }
-      
+
       // Send subscription message
       send(JSON.stringify(subscribeMessage))
-      
-      isSubscribed.value = true
-      console.log(`[DeviceMonitor] Unsubscribed from device: ${deviceId}`)
+
+      console.log(`[DeviceMonitor] Subscribing to device: ${deviceId}`)
     }
   }
-  
+
   // Unsubscribe from device
   function unsubscribe() {
     if (status.value === 'OPEN' && deviceId && isSubscribed.value) {
@@ -43,10 +87,10 @@ export function useDeviceSerialMonitor(deviceId: string) {
         action: 'unsubscribe-device',
         deviceId: deviceId
       }
-      
+
       // Send unsubscription message
       send(JSON.stringify(unsubscribeMessage))
-      
+
       isSubscribed.value = false
       console.log(`[DeviceMonitor] Unsubscribed from device: ${deviceId}`)
     }
@@ -55,7 +99,7 @@ export function useDeviceSerialMonitor(deviceId: string) {
   // Add a serial message
   function addMessage(message: SerialMessage) {
     messages.value.unshift(message)
-    
+
     // Limit messages to prevent memory issues
     if (messages.value.length > maxMessages.value) {
       messages.value = messages.value.slice(0, maxMessages.value)
@@ -76,26 +120,28 @@ export function useDeviceSerialMonitor(deviceId: string) {
       
       // Handle subscription confirmation
       if (message.action === 'device-subscribed' && message.payload?.deviceId === deviceId) {
+        isSubscribed.value = true
         console.log(`[DeviceMonitor] Successfully subscribed to device: ${deviceId}`)
         return
       }
-      
+
       // Handle unsubscription confirmation
       if (message.action === 'device-unsubscribed' && message.payload?.deviceId === deviceId) {
         console.log(`[DeviceMonitor] Successfully unsubscribed from device: ${deviceId}`)
+        isSubscribed.value = false
         return
       }
-      
+
       // Handle serial data messages
       if (message.action === 'serial-data' && message.payload?.deviceId === deviceId) {
         const serialMessage: SerialMessage = {
-          id: Date.now().toString(),
+          id: createMessageId(),
           deviceId: message.payload.deviceId,
-          data: message.payload.data,
-          direction: message.payload.direction,
-          timestamp: message.payload.timestamp
+          data: String(message.payload.data ?? ''),
+          direction: (message.payload.direction as 'incoming' | 'outgoing') || 'incoming',
+          timestamp: message.payload.timestamp || new Date().toISOString()
         }
-        
+
         addMessage(serialMessage)
         return
       }
@@ -120,8 +166,8 @@ export function useDeviceSerialMonitor(deviceId: string) {
     } else if (newStatus === 'CLOSED') {
       isSubscribed.value = false
     }
-  })
-  
+  }, { immediate: true })
+
   // Watch enabled state
   watch(enabled, (newEnabled) => {
     if (newEnabled && status.value === 'OPEN') {
@@ -135,6 +181,9 @@ export function useDeviceSerialMonitor(deviceId: string) {
   onUnmounted(() => {
     if (isSubscribed.value) {
       unsubscribe()
+    }
+    if (status.value === 'OPEN') {
+      close()
     }
   })
   
