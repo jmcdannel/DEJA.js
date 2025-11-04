@@ -89,6 +89,7 @@ export function useMenu() {
     )
 
     function handleMenu(item: MenuItem) {
+        console.log('Navigating to menu item:', item)
         router.push({ name: item.name })
     }
 

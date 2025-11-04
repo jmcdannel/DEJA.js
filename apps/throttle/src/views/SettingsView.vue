@@ -22,7 +22,7 @@ const speedStepOptions = [
   { title: '28 steps', value: '28' },
   { title: '128 steps', value: '128' },
 ]
-</script>``
+</script>
 
 <template>
   <v-container class="py-8">

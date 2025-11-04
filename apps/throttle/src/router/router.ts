@@ -72,6 +72,12 @@ const router = createRouter({
       beforeEnter: [requireAuth, requireDccEx, requireLayout],
     },
     {
+      path: '/throttles',
+      name: 'throttles',
+      component: () => import('../views/ThrottleView.vue'),
+      beforeEnter: [requireAuth, requireDccEx, requireLayout],
+    },
+    {
       path: '/throttle-list',
       name: 'throttle-list',
       component: () => import('../views/ThrottleList.vue'),
