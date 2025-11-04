@@ -21,7 +21,7 @@ const { isSwiping, direction } = useSwipe(throttleNavRef, {
     },
     onSwipeEnd(e: TouchEvent, direction: UseSwipeDirection) {
       if (direction === 'left') {
-        const currentIndex = throttles.value.findIndex(t => t.address === address.value)
+        const currentIndex = throttles.value.findIndex(t => t.address === lastThrottleAddress.value)
         const nextIndex = (currentIndex + 1) % throttles.value.length
         const nextAddress = throttles.value[nextIndex]?.address
         if (nextAddress !== undefined) {
@@ -29,7 +29,7 @@ const { isSwiping, direction } = useSwipe(throttleNavRef, {
           router.push({ name: 'throttle', params: { address: nextAddress } })
         }
       } else if (direction === 'right') {
-        const currentIndex = throttles.value.findIndex(t => t.address === address.value)
+        const currentIndex = throttles.value.findIndex(t => t.address === lastThrottleAddress.value)
         const prevIndex = (currentIndex - 1 + throttles.value.length) % throttles.value.length
         const prevAddress = throttles.value[prevIndex]?.address
         if (prevAddress !== undefined) {
@@ -39,8 +39,6 @@ const { isSwiping, direction } = useSwipe(throttleNavRef, {
       }
     },
   },)
-
-console.log('ThrottleView.vue initial address:', address.value)
 
 watch(() => route.params.address, (newVal) => {
   lastThrottleAddress.value = parseInt(newVal?.toString())
