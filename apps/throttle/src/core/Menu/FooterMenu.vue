@@ -2,12 +2,9 @@
 import { ref } from 'vue'
 import { useMenu } from './useMenu'
 import { useRoute } from 'vue-router'
-import { useLocos } from '@repo/modules'
 
 const route = useRoute()
-const { getThrottles } = useLocos()
 const active = ref(route.path)
-const throttles = getThrottles()
 const { menuFavorites } = useMenu()
 </script>
 <template>

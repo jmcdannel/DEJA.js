@@ -71,11 +71,11 @@ async function handleEmergencyStop() {
 }
 
 function handleDeviceSelect(deviceId: string) {
-  emit('deviceSelect', deviceId)
+  console.log('Device selected:', deviceId)
+  // Handle device selection if needed
 }
 
 function handleLayoutSelect(selectedLayoutId: string) {
-  emit('layoutSelect', selectedLayoutId)
   layoutId.value = selectedLayoutId
   router.push({ name: 'home' })
   isLayoutModalOpen.value = false
