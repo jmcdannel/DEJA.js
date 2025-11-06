@@ -12,6 +12,7 @@ import { broadcast } from '../broadcast'
 interface CommandPool {
   commands: string[]
   timer: NodeJS.Timeout | null
+  lastSentAt: number | null
 }
 
 interface Connection {
@@ -34,51 +35,79 @@ let sensors: Sensor[] = []
 
 // Flush the command pool for a specific connection
 const flushCommandPool = (connection: Connection): void => {
-  if (!connection.commandPool || connection.commandPool.commands.length === 0) {
+  if (!connection.commandPool) {
     return
   }
 
-  const commands = [...connection.commandPool.commands]
-  connection.commandPool.commands = []
-  
+  const commandPool = connection.commandPool
+
+  if (commandPool.timer) {
+    clearTimeout(commandPool.timer)
+    commandPool.timer = null
+  }
+
+  if (commandPool.commands.length === 0) {
+    return
+  }
+
+  const commands = [...commandPool.commands]
+  commandPool.commands = []
+
   if (!connection.port || !connection.isConnected) {
     log.warn('[LAYOUT] Port not available for sending commands')
     return
   }
 
+  const payload = `[${commands.join(',')}]`
+
   if (commands.length === 1) {
     // Single command - send directly
     log.await('[LAYOUT] Sending command:', commands[0])
-    connection.port.write(`[${commands.join(',')}]`, handleSend)
   } else {
     // Multiple commands - join with newlines and send as batch
     log.await('[LAYOUT] Sending batched commands:', commands.length + ' commands')
     log.debug('[LAYOUT] Batched commands:', commands)
-    connection.port.write(`[${commands.join(',')}]`, handleSend)
   }
+
+  connection.port.write(payload, handleSend)
+  commandPool.lastSentAt = Date.now()
 }
 
 // Start the command pool timer for a specific connection
 const startCommandPoolTimer = (connection: Connection): void => {
   if (!connection.commandPool) {
-    connection.commandPool = { commands: [], timer: null }
+    connection.commandPool = { commands: [], timer: null, lastSentAt: null }
   }
 
-  if (connection.commandPool.timer) {
-    clearInterval(connection.commandPool.timer)
+  const commandPool = connection.commandPool
+
+  if (commandPool.timer) {
+    return
   }
-  
-  connection.commandPool.timer = setInterval(() => {
+
+  const now = Date.now()
+  const lastSentAt = commandPool.lastSentAt
+  const delay = lastSentAt !== null
+    ? Math.max(POOL_INTERVAL - (now - lastSentAt), 0)
+    : POOL_INTERVAL
+
+  if (delay === 0) {
+    log.debug('[LAYOUT] Command pool flush executing immediately')
     flushCommandPool(connection)
-  }, POOL_INTERVAL)
-  
-  log.debug('[LAYOUT] Command pool timer started (3s interval)')
+    return
+  }
+
+  commandPool.timer = setTimeout(() => {
+    flushCommandPool(connection)
+  }, delay)
+
+  log.debug('[LAYOUT] Command pool timer scheduled (delay: ' + delay + 'ms)')
 }
 
 // Stop the command pool timer for a specific connection
 const stopCommandPoolTimer = (connection: Connection): void => {
   if (connection.commandPool?.timer) {
-    clearInterval(connection.commandPool.timer)
+    clearTimeout(connection.commandPool.timer)
     connection.commandPool.timer = null
     log.debug('[LAYOUT] Command pool timer stopped')
   }
@@ -103,30 +132,44 @@ const sendPooled = (connection: Connection, data: string): void => {
     if (connection.deviceType === 'deja-arduino-led') {
       log.debug('[LAYOUT] Immediate send for deja-arduino-led:', data)
       if (connection.port) {
-      connection.port.write(data, handleSend)
+        connection.port.write(data, handleSend)
       } else if (connection.publish && connection.topic) {
-      try {
-        connection.publish(connection.topic, `[${data}]`, true)
-      } catch (err) {
-        log.error('[LAYOUT] MQTT publish error:', err)
-      }
+        try {
+          connection.publish(connection.topic, `[${data}]`, true)
+        } catch (err) {
+          log.error('[LAYOUT] MQTT publish error:', err)
+        }
       } else {
-      log.warn('[LAYOUT] No transport available for immediate send:', data)
+        log.warn('[LAYOUT] No transport available for immediate send:', data)
       }
       return
     }
 
     // Initialize command pool if not exists
     if (!connection.commandPool) {
-      connection.commandPool = { commands: [], timer: null }
+      connection.commandPool = { commands: [], timer: null, lastSentAt: null }
+    }
+
+    const commandPool = connection.commandPool
+    const now = Date.now()
+    const lastSentAt = commandPool.lastSentAt ?? 0
+    const isCooldownComplete = !lastSentAt || now - lastSentAt >= POOL_INTERVAL
+
+    if (commandPool.commands.length === 0 && isCooldownComplete) {
+      // Send immediately when we're not in cooldown and no queued commands exist
+      const payload = `[${data}]`
+      log.await('[LAYOUT] Sending immediate command:', data)
+      connection.port.write(payload, handleSend)
+      commandPool.lastSentAt = now
+      return
     }
 
     // Add command to the pool
-    connection.commandPool.commands.push(data)
-    log.debug('[LAYOUT] Command queued:', data, '(queue size: ' + connection.commandPool.commands.length + ')')
+    commandPool.commands.push(data)
+    log.debug('[LAYOUT] Command queued:', data, '(queue size: ' + commandPool.commands.length + ')')
 
     // Start timer if not already running
-    if (!connection.commandPool.timer) {
+    if (!commandPool.timer) {
       startCommandPoolTimer(connection)
     }
   } catch (err) {
