@@ -1,10 +1,12 @@
 <script async setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { Throttle } from '@repo/modules/locos'
 import ThrottleTile from '@/throttle/ThrottleTile.vue'
 import { useLocos, type Loco } from '@repo/modules/locos'
 import { useRoster } from '@/roster/useRoster'
 import { LocoAvatar, ListMenu } from '@repo/ui'
+import { useStorage } from '@vueuse/core'
+import draggable from 'vuedraggable'
 
 const { getLocos, getThrottles } = useLocos()
 const locos = getLocos()
@@ -12,6 +14,54 @@ const { acquireThrottle } = useRoster()
 const throttles = getThrottles()
 
 const isRosterOpen = ref(false)
+
+const throttleOrder = useStorage<number[]>('@DEJA/throttles/order', [])
+
+const orderedThrottles = computed<Throttle[]>({
+  get: () => {
+    const list = (throttles.value || []) as unknown as Throttle[]
+    const order = throttleOrder.value
+    const byOrder = [...list].sort((a, b) => {
+      const indexA = order.indexOf(a.address)
+      const indexB = order.indexOf(b.address)
+
+      if (indexA === -1 && indexB === -1) {
+        return a.address - b.address
+      }
+      if (indexA === -1) return 1
+      if (indexB === -1) return -1
+      return indexA - indexB
+    })
+
+    return byOrder
+  },
+  set: (newOrder) => {
+    throttleOrder.value = newOrder.map((item) => item.address)
+  }
+})
+
+watch(
+  throttles,
+  (newThrottles) => {
+    const items = (newThrottles || []) as unknown as Throttle[]
+    const addresses = items.map((item) => item.address)
+    const filteredOrder = throttleOrder.value.filter((address) =>
+      addresses.includes(address)
+    )
+    const missingAddresses = addresses.filter(
+      (address) => !filteredOrder.includes(address)
+    )
+    const updatedOrder = [...filteredOrder, ...missingAddresses]
+
+    if (
+      updatedOrder.length !== throttleOrder.value.length ||
+      updatedOrder.some((address, index) => address !== throttleOrder.value[index])
+    ) {
+      throttleOrder.value = updatedOrder
+    }
+  },
+  { immediate: true }
+)
 
 </script>
 
@@ -32,15 +82,19 @@ const isRosterOpen = ref(false)
       <v-toolbar-title class="text-xl md:text-3xl">Throttles</v-toolbar-title>    
     </v-toolbar>
     <div v-if="throttles" class="flex-grow flex pb-16 flex-row flex-wrap relative overflow-auto items-end content-end justify-end">
-      <!-- <div class="basis-full @[960px]:basis-1/2 flex-grow"></div> -->
-      <div 
-        class="basis-full md:basis-1/2 p-1"  
-        v-for="item in throttles"
-        :key="((item as unknown) as Throttle).id">
-          <ThrottleTile 
-            :address="((item as unknown) as Throttle).address" 
-          />
-      </div>
+      <draggable
+        v-model="orderedThrottles"
+        item-key="address"
+        handle=".drag-handle"
+        class="flex flex-row flex-wrap content-end items-end justify-end w-full"
+        :animation="150"
+      >
+        <template #item="{ element }">
+          <div class="basis-full md:basis-1/2 p-1">
+            <ThrottleTile :address="element.address" />
+          </div>
+        </template>
+      </draggable>
       <v-fab icon="mdi-plus" color="primary" size="56" @click="isRosterOpen = true"  app />
     </div>
   </main>

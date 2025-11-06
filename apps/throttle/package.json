@@ -27,7 +27,8 @@
     "vue-debounce": "^5.0.0",
     "vue-router": "^4.2.2",
     "vue3-icons": "^0.1.13",
-    "vuetify": "^3.7.3"
+    "vuetify": "^3.7.3",
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@repo/auth": "workspace:*",
