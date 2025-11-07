@@ -37,6 +37,15 @@ const ialedCommand = (effect: Effect): string => {
   return command
 }
 
+const multimediaCommand = (effect: Effect): EffectCommand => ({
+  action: 'multimedia',
+  device: effect?.device || 'deja-server',
+  payload: {
+    config: effect?.config || '{}',
+    state: effect.state,
+  },
+})
+
 async function getEffect(id: string): Promise<Effect | undefined> {
   if (!layoutId) {
     log.error('Layout ID is not set')
@@ -66,6 +75,8 @@ export function getEffectCommand(
         return pinCommand(efx)
       case 'ialed':
         return ialedCommand(efx)
+      case 'multimedia':
+        return multimediaCommand(efx)
       case 'sound':
         return soundCommand(efx)
       // case 'serial-ialed':
