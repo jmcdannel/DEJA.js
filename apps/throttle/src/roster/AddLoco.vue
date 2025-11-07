@@ -6,11 +6,12 @@ const emit = defineEmits(['added'])
 const { createLoco } = useLocos()
 const address = ref<number | null>(null)
 const name = ref<string | null>(null)
+const hasSound = ref(true)
 
 async function handleAdd() {
   const newAddress = address.value
   if (newAddress && name.value) {
-    await createLoco(newAddress, name.value, '')
+    await createLoco(newAddress, name.value, '', hasSound.value)
   }
   emit('added', address.value)
 }
@@ -25,5 +26,9 @@ async function handleAdd() {
       <input v-model="address" placeholder="DCC Address" class="input input-bordered w-36 max-w-xs" pattern="[0-9]*" inputmode="numeric">
       <button @click="handleAdd" class="ml-4 btn btn-primary w-24">Add</button>
     </div>
+    <label class="p-2 flex items-center space-x-2 text-sm">
+      <input type="checkbox" v-model="hasSound" class="checkbox checkbox-primary">
+      <span>Locomotive has onboard sound</span>
+    </label>
   </form>
 </template>

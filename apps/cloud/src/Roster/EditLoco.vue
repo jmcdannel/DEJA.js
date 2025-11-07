@@ -28,6 +28,7 @@ const editColor = ref(false)
 
 const roadname = ref<RoadName | undefined>(undefined)
 const color = ref<string>('pink')
+const hasSound = ref(true)
 const loading = ref(false)
 const rules:ValidationRules = {
   required: [(val) => !!val || 'Required.']
@@ -37,6 +38,7 @@ watch(loco, (newLoco) => {
   if (newLoco) {
     roadname.value = getRoadname(newLoco.meta?.roadname || '')
     color.value = newLoco.meta?.color || roadname.value?.color || 'pink'
+    hasSound.value = newLoco.hasSound !== false
   }
 }, { immediate: true })
 
@@ -46,6 +48,7 @@ async function submit () {
   newLoco.meta = newLoco.meta || {}
   newLoco.meta.roadname = roadname.value?.value || ''
   newLoco.meta.color = color.value || 'primary'
+  newLoco.hasSound = hasSound.value
   
   console.log('Submitting loco', {
     ...loco.value,
@@ -90,6 +93,14 @@ async function submit () {
       </v-text-field>
     </div>
     <v-divider class="my-4"></v-divider>
+    <v-switch
+      v-model="hasSound"
+      class="mb-4"
+      color="pink"
+      inset
+      hide-details
+      label="Locomotive has onboard sound"
+    ></v-switch>
     <p>{{ (getRoadname(loco.meta?.roadname || ''))?.label }}</p>
     <v-chip-group
         v-model="roadname"
