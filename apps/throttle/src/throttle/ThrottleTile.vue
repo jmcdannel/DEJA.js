@@ -28,7 +28,10 @@ const {
   <main v-if="throttle" class="rounded-2xl shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border ">
     <section class="p-1 flex flex-row flex-wrap items-center justify-between overflow-auto">
       <div class="order-1 basis-1/3 pl-2" >
-        <CurrentSpeed class="!justify-start =" :speed="currentSpeed" />
+        <CurrentSpeed
+          class="!justify-start drag-handle cursor-grab active:cursor-grabbing select-none"
+          :speed="currentSpeed"
+        />
       </div>
       <div class="flex-grow order-4 basis-full my-1">
         <ThrottleButtonControls

@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useLocos, type Loco, type Throttle } from '@repo/modules'
 import SimpleThrottle from '@/throttle/SimpleThrottle.vue'
 import ThrottleTile from '@/throttle/ThrottleTile.vue'
-import Speedometer from '@/throttle/Speedometer.vue'
+import ThrottleList from '@/throttle/ThrottleList.vue'
 import { TurnoutList, EffectList } from '@repo/ui'
 
 const drawer = ref(false)
@@ -29,12 +29,13 @@ const throttles = getThrottles()
           <!-- Column 1 content goes here -->
           <div v-if="throttles?.length" class="flex-grow flex flex-row flex-wrap gap-1 relative overflow-auto items-end content-end">
             <div class="flex-grow"></div>
-            <div 
+            <!-- <div 
               class="basis-full @[960px]:basis-1/2"
               v-for="item in throttles" 
               :key="item.address">
                 <ThrottleTile :address="item.address" />
-            </div>
+            </div> -->
+            <ThrottleList />
           </div>
         </div>
       </div>
