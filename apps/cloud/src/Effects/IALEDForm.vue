@@ -458,22 +458,30 @@ function ensureRangeWithinBounds(): void {
 function normalizeEvents(): void {
   const globalStart = rangeMode.value === 'all' ? 0 : clampRange(rangeSelection[0])
   const globalEnd = rangeMode.value === 'all' ? maxRangeValue.value : clampRange(rangeSelection[1])
-  events.value = events.value.map((event) => {
+
+  events.value.forEach((event) => {
     if (event.type !== 'color') {
-      return {
-        ...event,
-        start: clampRange(event.start),
-        end: clampRange(event.end)
+      const clampedStart = clampRange(event.start)
+      const clampedEnd = clampRange(event.end)
+      if (event.start !== clampedStart) {
+        event.start = clampedStart
       }
+      if (event.end !== clampedEnd) {
+        event.end = clampedEnd
+      }
+      return
     }
+
     const normalizedStart = event.rangeMode === 'all' ? globalStart : clampRange(event.start)
     const normalizedEnd = event.rangeMode === 'all'
       ? globalEnd
       : clampRange(event.end < normalizedStart ? normalizedStart : event.end)
-    return {
-      ...event,
-      start: normalizedStart,
-      end: normalizedEnd
+
+    if (event.start !== normalizedStart) {
+      event.start = normalizedStart
+    }
+    if (event.end !== normalizedEnd) {
+      event.end = normalizedEnd
     }
   })
 }
