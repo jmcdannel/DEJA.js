@@ -48,7 +48,7 @@ const enableLogging = useStorage('@DEJA/pref/ws-logging', false)
 const user = useCurrentUser()
 const router = useRouter()
 
-const theme = ref('dark')
+const theme = ref('monitorDark')
 
 function handleMenu(item:string) {
   router.push({ name: item })
@@ -68,11 +68,11 @@ function handleLogoClick() {
 <template>
   <v-responsive>
     <v-app v-if="user" :theme="theme">
-      <AppHeader 
+      <AppHeader
         app-name="Monitor"
         app-icon="mdi-monitor-dashboard"
         variant="monitor"
-        color="red"
+        color="primary"
         :dark="true"
         :devices="devices"
         :layouts="layouts"

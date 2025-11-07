@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+[data-app] {
+  font-family: 'Roboto Mono', 'Roboto', 'Segoe UI', sans-serif;
+}
+
+body,
+html,
+#app {
+  background-color: transparent;
+}
+
+body {
+  background-color: #020617;
+  color: #e2e8f0;
+  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+}
+
 [type='text'],
 [type='email'],
 [type='url'],

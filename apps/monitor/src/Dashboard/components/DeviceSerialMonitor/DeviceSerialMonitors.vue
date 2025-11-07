@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import DeviceSerialMonitor from './DeviceSerialMonitor.vue'
 
 interface Device {
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const router = useRouter()
 
 // Filter to only show connected devices
 const connectedDevices = computed(() => 
@@ -49,10 +51,28 @@ function getDeviceName(device: Device): string {
 function getDeviceType(device: Device): string {
   return device.type || 'unknown'
 }
+
+function openFullScreen() {
+  router.push({ name: 'log-view', params: { logType: 'devices' } })
+}
 </script>
 
 <template>
-  <v-card title="Device Serial Monitors" class="flex flex-col " color="indigo">
+  <v-card class="flex flex-col ">
+    <template #title>
+      <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
+        <span>Device Serial Monitors</span>
+        <v-spacer />
+        <v-btn
+          icon="mdi-arrow-expand"
+          variant="text"
+          size="small"
+          density="comfortable"
+          aria-label="Open device serial monitors in full screen"
+          @click="openFullScreen"
+        />
+      </div>
+    </template>
     <v-card-text class="flex flex-1 flex-col gap-4">
       <!-- No devices connected -->
       <div v-if="connectedDevices.length === 0" class="text-center py-8 text-gray-500">

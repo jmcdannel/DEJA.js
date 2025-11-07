@@ -26,13 +26,34 @@ import '@mdi/font/css/materialdesignicons.css'
 const vuetify = createVuetify({
   components,
   defaults: {
+    global: {
+      density: 'compact',
+    },
     VBtn: {
-      color: 'purple',
-      rounded: 'lg',
+      color: 'primary',
+      rounded: 'sm',
+      size: 'small',
       variant: 'tonal',
     },
     VCard: {
-      color: 'purple',
+      color: 'surface',
+      elevation: 3,
+    },
+    VTextField: {
+      color: 'primary',
+      density: 'compact',
+      variant: 'outlined',
+    },
+    VSwitch: {
+      color: 'primary',
+      inset: true,
+    },
+    VAlert: {
+      density: 'compact',
+    },
+    VChip: {
+      color: 'primary',
+      size: 'small',
       variant: 'tonal',
     },
   },
@@ -42,6 +63,29 @@ const vuetify = createVuetify({
     defaultSet: 'mdi',
     sets: {
       mdi,
+    },
+  },
+  theme: {
+    defaultTheme: 'monitorDark',
+    themes: {
+      monitorDark: {
+        dark: true,
+        colors: {
+          background: '#020617',
+          surface: '#0f172a',
+          primary: '#38bdf8',
+          secondary: '#22d3ee',
+          info: '#0ea5e9',
+          success: '#10b981',
+          warning: '#f97316',
+          error: '#ef4444',
+        },
+        variables: {
+          'border-color': '#1e293b',
+          'overlay-scrim-background': '#020617cc',
+          'selection-control-size': 18,
+        },
+      },
     },
   },
 })
