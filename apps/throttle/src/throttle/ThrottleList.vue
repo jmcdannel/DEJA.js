@@ -66,7 +66,6 @@ watch(
 </script>
 
 <template>
-  <main class="@containerp p-2 md:p-4  flex-grow flex flex-col relative overflow-auto w-full h-full flex-1">
     <div class="absolute inset-0 overflow-hidden">
       <div class="absolute w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[100px] -top-[200px] -left-[300px]"></div>
       <div class="absolute w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[80px] -bottom-[100px] -right-[200px]"></div>
@@ -91,13 +90,12 @@ watch(
       >
         <template #item="{ element }">
           <div class="basis-full md:basis-1/2 p-1">
-            <ThrottleTile :address="element.address" />
+            <ThrottleTile v-if="element.address" :address="element.address" />
           </div>
         </template>
       </draggable>
       <v-fab icon="mdi-plus" color="primary" size="56" @click="isRosterOpen = true"  app />
     </div>
-  </main>
   <v-dialog v-model="isRosterOpen" max-width="800px">
     <template v-slot:default>
       <v-sheet class="p-4">
