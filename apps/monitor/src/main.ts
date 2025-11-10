@@ -36,8 +36,10 @@ const vuetify = createVuetify({
       variant: 'tonal',
     },
     VCard: {
+      class: 'monitor-card',
       color: 'surface',
-      elevation: 3,
+      elevation: 0,
+      rounded: 'lg',
     },
     VTextField: {
       color: 'primary',

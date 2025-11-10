@@ -27,35 +27,37 @@ function openFullScreen() {
 <template>
   <v-card class="flex flex-col">
     <template #title>
-      <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
-        <span>Turnout Logs</span>
+      <div class="monitor-card__header">
+        <span class="monitor-card__title">Turnout Logs</span>
         <v-spacer />
         <v-btn
           icon="mdi-arrow-expand"
           variant="text"
           size="small"
           density="comfortable"
+          class="monitor-card__icon-btn"
           aria-label="Open turnout logs in full screen"
           @click="openFullScreen"
         />
       </div>
     </template>
-    <v-card-text class="flex flex-1 flex-col-reverse gap-1">
+    <v-card-text class="monitor-card__body flex flex-1 flex-col-reverse gap-1">
       <v-alert
         v-for="log in logs"
         :key="log.id"
         :color="log?.color || 'info'"
         variant="tonal"
+        class="monitor-card__alert"
       >
         <div class="flex items-center gap-x-8">
-          <v-icon 
-            :icon="log.state ? 'mdi-toggle-switch' : 'mdi-toggle-switch-off'" 
+          <v-icon
+            :icon="log.state ? 'mdi-toggle-switch' : 'mdi-toggle-switch-off'"
             size="32" 
           />
           <span class="font-semibold text-sm">{{ log.name }}</span>
           <!-- <span class="text-sm">{{ log.state ? 'Thrown' : 'Closed' }}</span> -->
           <v-spacer></v-spacer>
-          <v-chip>{{ log.device }}</v-chip>
+          <v-chip class="monitor-chip">{{ log.device }}</v-chip>
         </div>
       </v-alert>
     </v-card-text>

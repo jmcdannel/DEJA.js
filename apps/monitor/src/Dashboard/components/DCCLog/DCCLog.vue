@@ -17,29 +17,37 @@ function openFullScreen() {
 <template>
   <v-card class="flex flex-col">
     <template #title>
-      <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
-        <span>DCC Logger</span>
+      <div class="monitor-card__header w-full">
+        <div class="flex flex-col gap-1">
+          <span class="monitor-card__title">DCC Logger</span>
+          <span class="monitor-card__subtitle">WebSocket host: {{ wshost || 'not configured' }}</span>
+        </div>
         <v-spacer />
-        <v-btn
-          icon="mdi-arrow-expand"
-          variant="text"
-          size="small"
-          density="comfortable"
-          aria-label="Open DCC log in full screen"
-          @click="openFullScreen"
-        />
+        <div class="monitor-card__toolbar">
+          <v-btn
+            icon="mdi-arrow-expand"
+            variant="text"
+            size="small"
+            density="comfortable"
+            class="monitor-card__icon-btn"
+            aria-label="Open DCC log in full screen"
+            @click="openFullScreen"
+          />
+        </div>
       </div>
     </template>
-    <v-card-actions class="gap-2">
+    <v-card-actions class="monitor-card__toolbar-row flex-wrap gap-3">
       <v-switch v-model="enabled" label="Enabled" />
       <v-text-field v-model="wshost" label="Host" hide-details density="compact" />
     </v-card-actions>
-    <v-card-text class="flex flex-1 flex-col-reverse gap-4 overflow-hidden">
-        <ul class="flex flex-col-reverse">
-          <li v-for="entry in log" :key="entry.id" class="border-b">
+    <v-card-text class="monitor-card__body flex flex-1 flex-col overflow-hidden">
+      <div class="monitor-card__scroll flex-1 overflow-y-auto">
+        <ul class="monitor-card__log-list flex flex-col-reverse">
+          <li v-for="entry in log" :key="entry.id">
             <DCCLogItem :entry="entry" />
           </li>
         </ul>
+      </div>
     </v-card-text>
   </v-card>
 </template>

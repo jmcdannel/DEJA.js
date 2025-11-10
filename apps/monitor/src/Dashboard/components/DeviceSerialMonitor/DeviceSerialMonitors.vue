@@ -27,7 +27,7 @@ const connectedDevices = computed(() =>
 // Group devices by type for better organization
 const devicesByType = computed(() => {
   const groups: Record<string, Device[]> = {}
-  
+
   connectedDevices.value.forEach(device => {
     const type = device.type || 'unknown'
     if (!groups[type]) {
@@ -38,6 +38,8 @@ const devicesByType = computed(() => {
   
   return groups
 })
+
+const deviceTypeCount = computed(() => Object.keys(devicesByType.value).length)
 
 // Get device display name
 function getDeviceName(device: Device): string {
@@ -58,22 +60,38 @@ function openFullScreen() {
 </script>
 
 <template>
-  <v-card class="flex flex-col ">
+  <v-card class="flex flex-col">
     <template #title>
-      <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
-        <span>Device Serial Monitors</span>
+      <div class="monitor-card__header w-full">
+        <div class="flex flex-col gap-1">
+          <span class="monitor-card__title">Device Serial Monitors</span>
+          <span class="monitor-card__subtitle">Live serial feeds</span>
+        </div>
         <v-spacer />
-        <v-btn
-          icon="mdi-arrow-expand"
-          variant="text"
-          size="small"
-          density="comfortable"
-          aria-label="Open device serial monitors in full screen"
-          @click="openFullScreen"
-        />
+        <div class="monitor-card__toolbar">
+          <v-chip
+            class="monitor-chip"
+            size="x-small"
+            :text="`${connectedDevices.length} active`"
+          />
+          <v-chip
+            class="monitor-chip"
+            size="x-small"
+            :text="`${deviceTypeCount} types`"
+          />
+          <v-btn
+            icon="mdi-arrow-expand"
+            variant="text"
+            size="small"
+            density="comfortable"
+            class="monitor-card__icon-btn"
+            aria-label="Open device serial monitors in full screen"
+            @click="openFullScreen"
+          />
+        </div>
       </div>
     </template>
-    <v-card-text class="flex flex-1 flex-col gap-4">
+    <v-card-text class="monitor-card__body flex flex-1 flex-col gap-4">
       <!-- No devices connected -->
       <div v-if="connectedDevices.length === 0" class="text-center py-8 text-gray-500">
         <v-icon icon="mdi-devices" size="large" class="mb-2" />
@@ -86,12 +104,13 @@ function openFullScreen() {
         <div v-for="(devices, type) in devicesByType" :key="type" class="space-y-3">
           <!-- Type Header -->
           <div class="flex items-center gap-2">
-            <v-icon 
+            <v-icon
               :icon="type === 'dcc-ex' ? 'mdi-train' : 'mdi-chip'"
               :color="type === 'dcc-ex' ? 'teal' : 'blue'"
             />
             <h3 class="text-lg font-semibold capitalize">{{ type }} Devices</h3>
-            <v-chip 
+            <v-chip
+              class="monitor-chip"
               :text="devices.length.toString()"
               size="small"
               variant="tonal"
@@ -114,13 +133,13 @@ function openFullScreen() {
     </v-card-text>
 
     <!-- Footer Info -->
-    <v-card-actions class="flex items-center justify-between text-sm text-gray-500">
-      <span>
+    <v-card-actions class="monitor-card__actions flex items-center justify-between text-sm text-gray-400">
+      <span class="monitor-card__meta">
         {{ connectedDevices.length }} device{{ connectedDevices.length !== 1 ? 's' : '' }} connected
       </span>
-      <span>
-        {{ Object.keys(devicesByType).length }} device type{{ Object.keys(devicesByType).length !== 1 ? 's' : '' }}
+      <span class="monitor-card__meta">
+        {{ deviceTypeCount }} device type{{ deviceTypeCount !== 1 ? 's' : '' }}
       </span>
     </v-card-actions>
   </v-card>
-</template> 
+</template>

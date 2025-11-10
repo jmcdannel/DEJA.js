@@ -19,6 +19,257 @@ body {
   letter-spacing: 0.01em;
 }
 
+:root {
+  color-scheme: dark;
+}
+
+.monitor-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.85rem !important;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: radial-gradient(120% 140% at 0% 0%, rgba(56, 189, 248, 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(2, 6, 23, 0.9) 100%);
+  box-shadow: 0 28px 65px -40px rgba(56, 189, 248, 0.55);
+  transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+  backdrop-filter: blur(6px);
+}
+
+.monitor-card::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 8px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.6), rgba(34, 211, 238, 0.35));
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.monitor-card:hover {
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 32px 80px -36px rgba(34, 211, 238, 0.65);
+  transform: translateY(-2px);
+}
+
+.monitor-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.16), rgba(15, 23, 42, 0));
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  font-weight: 600;
+  color: #bae6fd;
+}
+
+.monitor-card__header .v-spacer {
+  margin-inline: 0.25rem;
+}
+
+.monitor-card__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.monitor-card__subtitle {
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.75);
+}
+
+.monitor-card__toolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.monitor-card__icon-btn {
+  border-radius: 999px !important;
+  background-color: rgba(15, 23, 42, 0.55) !important;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #e0f2fe !important;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.monitor-card__icon-btn:hover {
+  background-color: rgba(56, 189, 248, 0.2) !important;
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #f8fafc !important;
+}
+
+.monitor-card__icon-btn:focus-visible {
+  outline: 2px solid rgba(56, 189, 248, 0.65);
+  outline-offset: 2px;
+}
+
+.monitor-card__body {
+  padding: 1.25rem !important;
+}
+
+.monitor-card__footer,
+.monitor-card__actions,
+.monitor-card__toolbar-row {
+  padding: 0.85rem 1.25rem !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0), rgba(2, 6, 23, 0.45));
+}
+
+.monitor-card__log-list {
+  font-family: 'Roboto Mono', 'Roboto', 'Segoe UI', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.monitor-card__log-list li {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.monitor-card__log-list li:last-child {
+  border-bottom-width: 0;
+}
+
+.monitor-card__alert {
+  border-radius: 0.65rem !important;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.monitor-card__meta {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.7);
+}
+
+.monitor-chip {
+  background-color: rgba(56, 189, 248, 0.18) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #e0f2fe !important;
+  letter-spacing: 0.08em;
+}
+
+.monitor-card__scroll {
+  background: rgba(2, 6, 23, 0.6);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(30, 41, 59, 0.7);
+}
+
+.monitor-card__scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.monitor-card__scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(56, 189, 248, 0.3);
+  border-radius: 999px;
+}
+
+.monitor-card__scroll::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.monitor-card__status-chip {
+  border-radius: 999px !important;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.monitor-card--accent-teal::after {
+  background: linear-gradient(90deg, rgba(20, 184, 166, 0.7), rgba(34, 211, 238, 0.4));
+}
+
+.monitor-card--accent-teal:hover {
+  border-color: rgba(45, 212, 191, 0.48);
+  box-shadow: 0 32px 80px -36px rgba(45, 212, 191, 0.55);
+}
+
+.monitor-card--accent-blue::after {
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.6), rgba(14, 165, 233, 0.45));
+}
+
+.monitor-card--accent-blue:hover {
+  border-color: rgba(14, 165, 233, 0.5);
+  box-shadow: 0 32px 80px -36px rgba(14, 165, 233, 0.6);
+}
+
+.monitor-card__terminal {
+  position: relative;
+  padding: 1rem 1.1rem;
+  border-radius: 0.8rem;
+  background: radial-gradient(140% 120% at 100% 0%, rgba(37, 99, 235, 0.08), transparent 55%),
+    rgba(2, 6, 23, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.4);
+}
+
+.monitor-card__terminal-lines {
+  font-family: 'Roboto Mono', 'Roboto', 'Segoe UI', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.monitor-card__terminal-line {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.65rem;
+  transition: background-color 120ms ease, transform 120ms ease;
+}
+
+.monitor-card__terminal-line:hover {
+  background-color: rgba(56, 189, 248, 0.1);
+  transform: translateX(2px);
+}
+
+.monitor-card__timestamp {
+  font-size: 0.68rem;
+  color: rgba(148, 163, 184, 0.85);
+  min-width: 72px;
+}
+
+.monitor-card__payload {
+  font-size: 0.72rem;
+  color: rgba(226, 232, 240, 0.95);
+  word-break: break-word;
+}
+
+.monitor-card__ghost-btn {
+  border-radius: 999px !important;
+  padding-inline: 1rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.65rem !important;
+  background: rgba(56, 189, 248, 0.14) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #e0f2fe !important;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.monitor-card__ghost-btn:hover:not(.v-btn--disabled) {
+  background: rgba(56, 189, 248, 0.25) !important;
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #f8fafc !important;
+}
+
+.monitor-card__ghost-btn.v-btn--disabled {
+  opacity: 0.5;
+  border-color: rgba(148, 163, 184, 0.25);
+  background: rgba(30, 41, 59, 0.45) !important;
+  color: rgba(148, 163, 184, 0.6) !important;
+}
+
 [type='text'],
 [type='email'],
 [type='url'],
