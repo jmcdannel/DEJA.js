@@ -23,6 +23,7 @@ body {
   color-scheme: dark;
 }
 
+
 .monitor-card {
   position: relative;
   overflow: hidden;
@@ -33,6 +34,32 @@ body {
   box-shadow: 0 28px 65px -40px rgba(56, 189, 248, 0.55);
   transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
   backdrop-filter: blur(6px);
+}
+
+.v-theme--monitorDark .monitor-card.v-card--variant-tonal {
+  background: transparent;
+  border-color: color-mix(in srgb, currentColor 28%, rgba(148, 163, 184, 0.18));
+  box-shadow: 0 24px 60px -48px color-mix(in srgb, currentColor 45%, transparent);
+}
+
+.v-theme--monitorDark .monitor-card.v-card--variant-tonal::after {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, currentColor 68%, transparent),
+    color-mix(in srgb, currentColor 22%, transparent)
+  );
+  opacity: 0.6;
+}
+
+.v-theme--monitorDark .monitor-card.v-card--variant-tonal .v-card__underlay {
+  opacity: 1;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, currentColor 18%, transparent) 55%,
+    color-mix(in srgb, currentColor 55%, transparent) 100%
+  );
+  filter: saturate(120%);
 }
 
 .monitor-card::after {
