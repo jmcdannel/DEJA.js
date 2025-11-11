@@ -14,6 +14,7 @@ const address = ref(null)
 const name = ref('')
 const roadname = ref(null)
 const loading = ref(false)
+const hasSound = ref(true)
 const rules:ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
@@ -23,7 +24,7 @@ async function submit () {
 
   const newAddress = parseInt(address.value as unknown as string) 
   if (!!newAddress) {
-    await createLoco( newAddress, name.value, roadname.value || undefined)
+    await createLoco( newAddress, name.value, roadname.value || undefined, hasSound.value)
   }
 
   loading.value = false
@@ -77,6 +78,14 @@ async function submit () {
           filter
         ></v-chip>
     </v-chip-group>
+    <v-switch
+      v-model="hasSound"
+      class="mt-4"
+      color="pink"
+      inset
+      hide-details
+      label="Locomotive has onboard sound"
+    ></v-switch>
     <div class="grid grid-cols-2 gap-8 my-4">   
       <v-btn
         class="mt-2"

@@ -1,3 +1,5 @@
+import type { LayoutDefaultSound } from './types'
+
 export const deviceTypes = [
   {
     value: 'dcc-ex',
@@ -30,4 +32,11 @@ export const deviceTypes = [
     icon: 'mdi-server',
     color: 'purple',
   },
+]
+
+export const defaultLayoutSounds: LayoutDefaultSound[] = [
+  { effectId: 'deja-server-sound-default-horn', label: 'Horn', icon: 'mdi-bullhorn' },
+  { effectId: 'bell', label: 'Bell', icon: 'mdi-bell' },
+  { effectId: 'coupler', label: 'Coupler', icon: 'mdi-link-variant' },
+  { effectId: 'wheel-squeal', label: 'Wheel Squeal', icon: 'mdi-sine-wave' },
 ]

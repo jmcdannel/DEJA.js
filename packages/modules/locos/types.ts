@@ -10,6 +10,7 @@ export interface Loco {
   name: string
   consist?: ConsistLoco[]
   functions?: LocoFunction[]
+  hasSound?: boolean
   id: string
   meta?: {
     color?: string
