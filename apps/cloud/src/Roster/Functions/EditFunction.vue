@@ -76,13 +76,13 @@ watch(customIcon, (value) => {
         hide-details
       ></v-text-field>
       <v-spacer></v-spacer>
-      <LcdDisplay 
+      <!-- <LcdDisplay 
         :content="JSON.stringify(func, null, 2).split('\n')"
         title="FUNCTION"
         color="blue"
         size="sm"
         :max-lines="8"
-      />
+      /> -->
     </div>
     <v-sheet v-if="showPresets">
       <v-btn v-for="icon in allIcons" :key="icon.name" 

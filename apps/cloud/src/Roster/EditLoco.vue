@@ -97,7 +97,6 @@ async function submit () {
       v-model="hasSound"
       class="mb-4"
       color="pink"
-      inset
       hide-details
       label="Locomotive has onboard sound"
     ></v-switch>

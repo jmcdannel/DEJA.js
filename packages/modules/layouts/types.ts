@@ -4,10 +4,17 @@ export interface Tag {
   id: string
   name: string
 }
+
+export interface LayoutDefaultSound {
+  effectId: string
+  label: string
+  icon: string
+}
 export interface Layout {
   author?: string
   createdAt?: Date
   description?: string
+  defaultSounds?: LayoutDefaultSound[]
   devices?: string[]
   effects?: string[]
   id: string

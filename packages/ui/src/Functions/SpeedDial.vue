@@ -1,16 +1,11 @@
 <script setup lang="ts">
-  import { computed, ref, type PropType } from 'vue'
+  import { computed, ref, type PropType, watch } from 'vue'
   import FunctionButton from './FunctionButton.vue'
   import FunctionList from './FunctionList.vue'
   import type { Loco, LocoFunction } from '@repo/modules/locos'
   import { useEfx, type Effect } from '@repo/modules/effects'
-
-  const SOUND_BUTTONS = [
-    { tag: 'horn', label: 'Horn', icon: 'mdi-bullhorn' },
-    { tag: 'bell', label: 'Bell', icon: 'mdi-bell' },
-    { tag: 'coupler', label: 'Coupler', icon: 'mdi-link-variant' },
-    { tag: 'wheel-squeal', label: 'Wheel Squeal', icon: 'mdi-sine-wave' },
-  ] as const
+  import { useLayout, defaultLayoutSounds } from '@repo/modules'
+  import type { LayoutDefaultSound } from '@repo/modules'
 
   const props = defineProps({
     loco: {
@@ -25,8 +20,64 @@
     openAll: () => listRef.value?.showModal(),
   })
 
-  const { getEffects, runEffect } = useEfx()
-  const effects = getEffects()
+  const { getEffect, runEffect } = useEfx()
+  const { getLayout } = useLayout()
+
+  const layout = getLayout()
+
+  const layoutDefaultSounds = computed<LayoutDefaultSound[]>(() => {
+    const sounds = layout?.value?.defaultSounds
+    if (Array.isArray(sounds) && sounds.length > 0) {
+      return sounds
+    }
+    return defaultLayoutSounds
+  })
+
+  type SoundButtonWithEffect = LayoutDefaultSound & { effect?: Effect }
+
+  const soundEffects = ref<Record<string, Effect | undefined>>({})
+  const isLoadingEffects = ref(false)
+
+  async function loadSoundEffects() {
+    if (isLoadingEffects.value) {
+      return
+    }
+    isLoadingEffects.value = true
+    try {
+      const buttons = layoutDefaultSounds.value
+
+      if (!buttons.length) {
+        soundEffects.value = {}
+      } else {
+        const entries = await Promise.all(
+          buttons.map(async (button) => {
+            try {
+              const effect = await getEffect(button.effectId)
+              return [button.effectId, effect ?? undefined] as const
+            } catch (error) {
+              console.error('Failed to load sound effect', button.effectId, error)
+              return [button.effectId, undefined] as const
+            }
+          })
+        )
+
+        soundEffects.value = entries.reduce<Record<string, Effect | undefined>>((acc, [id, effect]) => {
+          acc[id] = effect
+          return acc
+        }, {})
+      }
+    } finally {
+      isLoadingEffects.value = false
+    }
+  }
+
+  watch(
+    [() => props.loco?.id, layoutDefaultSounds],
+    () => {
+      loadSoundEffects()
+    },
+    { immediate: true, deep: true }
+  )
 
   const hasSound = computed(() => props.loco?.hasSound !== false)
   const baseFunctions = computed(() => props.loco?.functions ?? [])
@@ -53,28 +104,11 @@
     return favoriteFunctions.value
   })
 
-  const soundEffectButtons = computed(() => {
-    const availableEffects = (effects.value || []) as Effect[]
-    return SOUND_BUTTONS.map((button) => {
-      const tag = button.tag.toLowerCase()
-      const candidates = [tag, tag.replace(/-/g, ' '), tag.replace(/-/g, '')]
-      const matchingEffect = availableEffects.find((effect) => {
-        const tags = (effect.tags || []).map((t) => t.toLowerCase())
-        if (candidates.some((candidate) => tags.includes(candidate))) {
-          return true
-        }
-        const name = effect.name?.toLowerCase() || ''
-        return candidates.some((candidate) => candidate && name.includes(candidate))
-      })
-      return {
-        ...button,
-        effect: matchingEffect,
-      }
-    })
-  })
-
-  const hasAnySoundEffect = computed(() =>
-    soundEffectButtons.value.some((button) => Boolean(button.effect))
+  const soundEffectButtons = computed<SoundButtonWithEffect[]>(() =>
+    layoutDefaultSounds.value.map((button) => ({
+      ...button,
+      effect: soundEffects.value[button.effectId],
+    }))
   )
 
   function openAllFunctions() {
@@ -96,6 +130,15 @@
         <li v-for="locoFunc in displayFunctions" :key="locoFunc.id">
           <FunctionButton :func="locoFunc" :address="loco.address" class="w-full" />
         </li>
+        <template v-if="!hasSound">
+          <li v-for="button in soundEffectButtons" :key="button.effectId">
+            <v-btn
+              class="relative bg-gradient-to-br from-red-600 to-indigo-600 p-2"
+              :icon="button.icon"
+              :disabled="!button.effect"
+              @click="triggerSoundEffect(button.effect)" />
+          </li>
+        </template>
       </ul>
       <v-btn
         class="relative w-full mx-2 mt-2 bg-gradient-to-br from-green-600 to-teal-600 p-2"
@@ -104,23 +147,7 @@
       >
         View All
       </v-btn>
-      <div v-if="!hasSound" class="mt-3 flex flex-col gap-2 px-2">
-        <div class="grid grid-cols-2 gap-2 w-full">
-          <v-btn
-            v-for="button in soundEffectButtons"
-            :key="button.tag"
-            class="relative w-full bg-gradient-to-br from-amber-600 to-orange-600 p-2"
-            :prepend-icon="button.icon"
-            :disabled="!button.effect"
-            @click="triggerSoundEffect(button.effect)"
-          >
-            {{ button.label }}
-          </v-btn>
-        </div>
-        <p v-if="!hasAnySoundEffect" class="text-xs text-slate-400 text-center">
-          Assign horn, bell, coupler, and wheel squeal sound effects in the Effects panel to enable these triggers.
-        </p>
-      </div>
+      
     </section>
     <!-- <pre>{{ loco.functions?.filter(lf => lf.isFavorite) }}</pre> -->
     <FunctionList
