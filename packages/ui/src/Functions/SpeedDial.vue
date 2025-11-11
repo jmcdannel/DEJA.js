@@ -124,7 +124,7 @@
 
 </script>
 <template>
-  <template v-if="loco">
+  <template v-if="props.loco">
     <section class="flex flex-col flex-grow justify-center">
       <ul v-if="displayFunctions.length" class="grid grid-cols-3 justify-center mx-2 items-center gap-1">
         <li v-for="locoFunc in displayFunctions" :key="locoFunc.id">
