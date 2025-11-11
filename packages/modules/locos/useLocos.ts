@@ -122,13 +122,15 @@ export function useLocos() {
   async function createLoco(
     address: number,
     name: string | undefined,
-    roadname: string | undefined = undefined
+    roadname: string | undefined = undefined,
+    hasSound = true,
   ): Promise<number | undefined> {
     console.log('dejaCloud createLoco', address)
     try {
       const loco = {
         address,
         name,
+        hasSound,
         meta: {},
         timestamp: serverTimestamp(),
       }

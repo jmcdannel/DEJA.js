@@ -10,7 +10,6 @@ import {
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import {
-  firestoreDefaultConverter,
   useCollection,
   useDocument,
   useCurrentUser,
@@ -18,6 +17,7 @@ import {
 import { db } from '@repo/firebase-config'
 import type { Device, Layout, Tag } from './types'
 import { useDejaJS } from '@repo/deja'
+import { defaultLayoutSounds } from './constants'
 
 export const useLayout = () => {
   const deviceTypes = [
@@ -120,6 +120,7 @@ export const useLayout = () => {
     try {
       await setDoc(doc(db, `layouts`, id), {
         ...layout,
+        defaultSounds: layout.defaultSounds ?? defaultLayoutSounds,
         owner: user.value?.email,
         dcc: {
           client: 'dejaJs',
