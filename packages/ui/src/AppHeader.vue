@@ -145,6 +145,7 @@ const defaultProps = {
         @click="handleLogoClick"
       />
     </template>
+    <slot></slot>
     <template v-slot:append>
       <!-- User Profile - always on the far right --> 
       <template v-if="mdAndUp">

@@ -1,7 +1,38 @@
-import { ref, watch } from 'vue'
+import { computed, ref, watch, onUnmounted } from 'vue'
 import { isObject, useStorage, useWebSocket } from '@vueuse/core'
 import type { LogEntry } from './types'
 import { defuaultEntry, dccMessages} from './constants'
+
+
+function getDefaultWsHost(): string {
+  if (typeof window === 'undefined') {
+    return 'localhost:8082'
+  }
+
+  return window.location.host || 'localhost:8082'
+}
+
+function resolveWsUrl(host: string | undefined): string | undefined {
+  if (!host) {
+    return undefined
+  }
+
+  const trimmed = host.trim()
+  if (!trimmed) {
+    return undefined
+  }
+
+  if (trimmed.startsWith('ws://') || trimmed.startsWith('wss://')) {
+    return trimmed
+  }
+
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://'
+    return `${protocol}${trimmed}`
+  }
+
+  return `ws://${trimmed}`
+}
 
 export function useDccLog(isEnabled: boolean) {
   if (!isEnabled) {
@@ -10,10 +41,12 @@ export function useDccLog(isEnabled: boolean) {
       append: (_entry: string) => {},
     }
   }
-  const wshost = useStorage('@DEJA/pref/ws-host', 'localhost:8082')
+  const wshost = useStorage('@DEJA/pref/ws-host', getDefaultWsHost())
   const dccRegex = /<\*\s(.*?)\s\*>/
 
   const log = ref<LogEntry[]>([])
+  // WebSocket connection
+  const wsUrl = computed(() => resolveWsUrl(wshost.value))
   const { data } = useWebSocket(`ws://${wshost.value}/`)
 
   function append(entry: string) {

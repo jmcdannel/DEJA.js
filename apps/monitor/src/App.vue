@@ -12,6 +12,8 @@ const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
 const { getDevices, getLayouts } = useLayout()
 const layoutId = useStorage('@DEJA/layoutId', '')
+const enabled = useStorage('@DEJA/pref/ws-logging', false)
+const wshost = useStorage('@DEJA/pref/ws-host', 'localhost:8082')
 const devices = getDevices()
 const layouts = getLayouts()
 const drawer = ref(false)
@@ -87,7 +89,12 @@ function handleLogoClick() {
         @device-select="handleDeviceSelect"
         @logo-click="handleLogoClick"
           @drawer-toggle="drawer = !drawer"
-      />
+      >
+      <template #default>
+        <v-switch v-model="enabled" label="Enabled" />
+        <v-text-field v-model="wshost" label="Host" hide-details density="compact" />
+      </template>
+    </AppHeader>
 
       <v-navigation-drawer v-model="drawer" mobile-breakpoint="md">
         <v-list>

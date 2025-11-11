@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { useStorage } from '@vueuse/core'
 import { useDccLog } from './useDccLog'
 import DCCLogItem from './DCCLogItem.vue'
 
-const enabled = useStorage('@DEJA/pref/ws-logging', false)
-const wshost = useStorage('@DEJA/pref/ws-host', 'localhost:8082')
-const { log } = useDccLog(enabled.value)
+const { log } = useDccLog(true)
 const router = useRouter()
 
 function openFullScreen() {
@@ -19,8 +16,7 @@ function openFullScreen() {
     <template #title>
       <div class="monitor-card__header w-full">
         <div class="flex flex-col gap-1">
-          <span class="monitor-card__title">DCC Logger</span>
-          <span class="monitor-card__subtitle">WebSocket host: {{ wshost || 'not configured' }}</span>
+          <span class="monitor-card__title">DCC Logger</span>          
         </div>
         <v-spacer />
         <div class="monitor-card__toolbar">
@@ -36,10 +32,6 @@ function openFullScreen() {
         </div>
       </div>
     </template>
-    <v-card-actions class="monitor-card__toolbar-row flex-wrap gap-3">
-      <v-switch v-model="enabled" label="Enabled" />
-      <v-text-field v-model="wshost" label="Host" hide-details density="compact" />
-    </v-card-actions>
     <v-card-text class="monitor-card__body flex flex-1 flex-col overflow-hidden">
       <div class="monitor-card__scroll flex-1 overflow-y-auto">
         <ul class="monitor-card__log-list flex flex-col-reverse">
