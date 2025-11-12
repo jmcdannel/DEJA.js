@@ -51,17 +51,20 @@ export function useDccLog(isEnabled: boolean) {
 
   function append(entry: string) {
     console.log('append', entry, log.value)
-    log.value = [...log.value, parseEntry(entry)]
-    console.log('appended', log.value)
-  }
+    const formattedEntry = parseEntry(entry)
+    if (formattedEntry) {
+      log.value = [...log.value, formattedEntry]
+      console.log('appended', log.value)
+    }
+    }
 
   function parseEntry(entry: string) {
     const { action, payload } = JSON.parse(entry)
     let formattedEntry = { ...defuaultEntry, id: Date.now(), action, payload }
-    if (action === 'broadcast' && !isObject(payload)) {
+    if (action === 'dcc' && !isObject(payload)) {
       // parse message
       const dcc =
-        action === 'broadcast' &&
+        action === 'dcc' &&
         !isObject(payload) &&
         dccMessages.find((m) => m.key === payload?.charAt(1))
       const match = payload && payload?.match(dccRegex)
@@ -70,8 +73,11 @@ export function useDccLog(isEnabled: boolean) {
         payload: match?.[1] || payload,
         ...dcc,
       }
+      return formattedEntry
+    } else {
+      return null
     }
-    return formattedEntry
+      
   }
 
 

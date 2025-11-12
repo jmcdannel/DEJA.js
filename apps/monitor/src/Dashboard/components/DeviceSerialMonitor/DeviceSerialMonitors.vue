@@ -57,6 +57,10 @@ function getDeviceType(device: Device): string {
 function openFullScreen() {
   router.push({ name: 'log-view', params: { logType: 'devices' } })
 }
+
+function openDeviceMonitor(deviceId: string) {
+  router.push({ name: 'device-log-view', params: { deviceId } })
+}
 </script>
 
 <template>
@@ -118,15 +122,30 @@ function openFullScreen() {
           </div>
 
           <!-- Device Monitors Grid -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <DeviceSerialMonitor
+          <div class="grid grid-cols-1 gap-4">
+            <div
               v-for="device in devices"
               :key="device.id"
-              :device-id="device.id"
-              :device-name="getDeviceName(device)"
-              :device-type="getDeviceType(device)"
-              :is-connected="device.isConnected"
-            />
+              class="relative"
+            >
+              <DeviceSerialMonitor
+                :device-id="device.id"
+                :device-name="getDeviceName(device)"
+                :device-type="getDeviceType(device)"
+                :is-connected="device.isConnected"
+                class="h-full"
+              />
+              <v-btn
+                icon="mdi-arrow-expand"
+                size="small"
+                variant="tonal"
+                color="teal"
+                density="comfortable"
+                class="absolute top-2 right-2 monitor-card__icon-btn"
+                aria-label="Open serial monitor in full screen"
+                @click.stop="openDeviceMonitor(device.id)"
+              />
+            </div>
           </div>
         </div>
       </div>

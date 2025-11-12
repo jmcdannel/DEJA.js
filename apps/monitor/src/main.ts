@@ -22,6 +22,7 @@ import router from './router'
 // Styles
 import './style.css'
 import '@mdi/font/css/materialdesignicons.css'
+import { pad } from 'vuetify/lib/components/VTimePicker/util.mjs'
 
 const vuetify = createVuetify({
   components,
@@ -39,7 +40,11 @@ const vuetify = createVuetify({
       class: 'monitor-card',
       color: 'surface',
       elevation: 0,
+      padding: 0,
       rounded: 'lg',
+    },
+    VCardIten: {
+      padding: 0,
     },
     VTextField: {
       color: 'primary',

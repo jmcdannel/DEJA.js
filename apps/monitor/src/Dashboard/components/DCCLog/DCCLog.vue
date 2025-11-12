@@ -12,7 +12,7 @@ function openFullScreen() {
 
 </script>
 <template>
-  <v-card class="flex flex-col">
+  <v-card class="flex flex-col flex flex-col min-h-0 overflow-auto flex-1">
     <template #title>
       <div class="monitor-card__header w-full">
         <div class="flex flex-col gap-1">

@@ -68,7 +68,7 @@ watch(signalChanges, () => {
   <v-sheet class="h-full">
     <div class="h-full max-h-full flex flex-col">
       <!-- First Row - Takes only the height it needs -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 flex-shrink-0">
+      <!-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 flex-shrink-0">
         <LayoutCard />
         <TurnoutStatsCard 
           :total-count="turnouts.length"
@@ -84,27 +84,13 @@ watch(signalChanges, () => {
           :total-count="throttles.length"
           :active-count="throttles.filter(t => t.speed > 0).length"
         />
-      </div>
+      </div> -->
 
       <!-- Second Row - Uses half of remaining height with scrolling -->
       <div class="grid grid-cols-1 lg:grid-cols-3 flex-1 min-h-0 bg-gray-950 max-h-[50vh]">
-        <div class="flex flex-col min-h-0">
-          <div class="overflow-auto flex-1 min-h-0">
-            <DCCLog />
-          </div>
-        </div>
-
-        <div class="flex flex-col min-h-0">
-          <div class="overflow-auto flex-1 min-h-0">
-            <TurnoutLogs :logs="turnoutChanges" />
-          </div>
-        </div>
-
-        <div class="flex flex-col min-h-0">
-          <div class="overflow-auto flex-1 min-h-0">
-            <EffectLogs :logs="effectChanges" />
-          </div>
-        </div>
+        <DCCLog />
+        <TurnoutLogs :logs="turnoutChanges" />
+        <EffectLogs :logs="effectChanges" />
       </div>
 
       <!-- Third Row - Uses half of remaining height with scrolling -->

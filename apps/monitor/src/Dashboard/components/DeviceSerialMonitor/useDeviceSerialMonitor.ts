@@ -10,6 +10,8 @@ export interface SerialMessage {
   timestamp: string
 }
 
+const SERIAL_MESSAGE_ACTIONS = ['serial-data']
+
 function getDefaultWsHost(): string {
   if (typeof window === 'undefined') {
     return 'localhost:8082'
@@ -135,7 +137,7 @@ export function useDeviceSerialMonitor(deviceId: string) {
       }
 
       // Handle serial data messages
-      if (message.action === 'serial' && message.payload?.deviceId === deviceId) {
+      if (SERIAL_MESSAGE_ACTIONS.includes(message.action) && message.payload?.deviceId === deviceId) {
         const serialMessage: SerialMessage = {
           id: createMessageId(),
           deviceId: message.payload.deviceId,
@@ -149,16 +151,16 @@ export function useDeviceSerialMonitor(deviceId: string) {
       }
       
       // Handle general broadcast messages (ignore these for device-specific monitors)
-      if (message.action !== 'serial-data') {
-        const serialMessage: SerialMessage = {
-          id: createMessageId(),
-          deviceId: 'broadcast',
-          data: `[Broadcast] ${JSON.stringify(message)}`,
-          direction: 'incoming',
-          timestamp: new Date().toISOString()
-        }
+      if (!SERIAL_MESSAGE_ACTIONS.includes(message.action)) {
+        // const serialMessage: SerialMessage = {
+        //   id: createMessageId(),
+        //   deviceId: 'broadcast',
+        //   data: `[Broadcast] ${JSON.stringify(message)}`,
+        //   direction: 'incoming',
+        //   timestamp: new Date().toISOString()
+        // }
 
-        addMessage(serialMessage)
+        // addMessage(serialMessage)
         return
       }
       
