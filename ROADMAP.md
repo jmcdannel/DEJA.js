@@ -2,6 +2,9 @@
 [-] ttt-io build scripts - output arduino configs, dcc config commands
 [ ] store roster on dccex
 [ ] throttle slider
+[ ] trim for consist
+[ ] quick consist?
+[ ] add loco FAB on throttle-list
 [x] throttle list grid cols
 [x] switch layout menu
 [ ] function map - momentary, latching (see ex-webthrottle)
