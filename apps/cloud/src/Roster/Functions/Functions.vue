@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useLocos, defaultFunctions, type LocoFunction } from '@repo/modules/locos'
+import { defaultFunctions, type LocoFunction } from '@repo/modules/locos'
+import { useLocos } from '@repo/modules/locos/useLocos'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import EditFunc from '@/Roster/Functions/EditFunction.vue'
 // import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
