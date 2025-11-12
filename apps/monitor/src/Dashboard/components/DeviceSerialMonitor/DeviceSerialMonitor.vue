@@ -28,8 +28,8 @@ const {
 const displayName = computed(() => props.deviceName || props.deviceId)
 const statusColor = computed(() => {
   if (!enabled.value) return 'grey'
-  if (status.value === 'OPEN' && isSubscribed.value) return 'green'
-  if (status.value === 'OPEN') return 'blue'
+  if (status.value === 'OPEN' && isSubscribed.value) return 'teal'
+  if (status.value === 'OPEN') return 'cyan'
   return 'red'
 })
 
@@ -40,6 +40,10 @@ const statusText = computed(() => {
   if (status.value === 'CONNECTING') return 'Connecting...'
   return 'Disconnected'
 })
+
+const accentClass = computed(() =>
+  props.deviceType === 'dcc-ex' ? 'monitor-card--accent-teal' : 'monitor-card--accent-blue'
+)
 
 // Format timestamp for display
 function formatTime(timestamp: string): string {
@@ -62,66 +66,69 @@ function getDirectionInfo(direction: 'incoming' | 'outgoing') {
 </script>
 
 <template>
-  <v-card 
-    :title="displayName" 
-    class="flex flex-col overflow-hidden h-full"
-    :color="deviceType === 'dcc-ex' ? 'teal' : 'blue'"
-  >
-    <v-card-text class="flex flex-1 flex-col gap-2 overflow-hidden">
-      <!-- Device Info Header -->
-      <div class="flex items-center justify-between text-sm">
-        <div class="flex items-center gap-2">
-          <v-chip 
-            :text="deviceType.toUpperCase()"
-            size="small"
-            variant="tonal"
-          />
-          <v-chip 
-            :text="isConnected ? 'Connected' : 'Disconnected'"
-            :color="isConnected ? 'green' : 'red'"
-            size="small"
-          />
+  <v-card :class="['flex flex-col overflow-hidden h-full', accentClass]">
+    <template #title>
+      <div class="monitor-card__header w-full">
+        <div class="flex flex-col gap-1">
+          <span class="monitor-card__title">{{ displayName }}</span>
+          <span class="monitor-card__subtitle">Serial channel</span>
         </div>
-        
-        <div class="flex items-center gap-2">
-          <v-chip 
-            :text="statusText"
+        <v-spacer />
+        <div class="monitor-card__toolbar">
+          <v-chip class="monitor-chip" size="x-small">
+            {{ deviceType.toUpperCase() }}
+          </v-chip>
+          <v-chip
+            class="monitor-chip monitor-card__status-chip"
+            size="x-small"
+            :color="isConnected ? 'teal' : 'red'"
+            variant="tonal"
+          >
+            {{ isConnected ? 'Connected' : 'Disconnected' }}
+          </v-chip>
+          <v-chip
+            class="monitor-chip monitor-card__status-chip"
+            size="x-small"
             :color="statusColor"
-            size="small"
-          />
-          <span class="text-xs text-gray-500">
-            {{ messages.length }}/{{ maxMessages }}
+            variant="tonal"
+          >
+            {{ statusText }}
+          </v-chip>
+          <span class="monitor-card__meta hidden sm:inline-flex">
+            {{ messages.length }}/{{ maxMessages }} msgs
           </span>
         </div>
       </div>
+    </template>
 
+    <v-card-text class="monitor-card__body flex flex-1 flex-col gap-3 overflow-hidden">
       <!-- Serial Messages -->
-      <div class="flex-1 overflow-y-auto bg-gray-900 rounded p-2 font-mono text-xs">
-        <div v-if="messages.length === 0" class="text-gray-500 text-center py-4">
+      <div class="monitor-card__terminal monitor-card__scroll flex-1 overflow-y-auto">
+        <div v-if="messages.length === 0" class="monitor-card__meta text-center py-6">
           No serial messages yet
         </div>
-        
-        <div v-else class="space-y-1">
-          <div 
-            v-for="message in messages" 
+
+        <div v-else class="monitor-card__terminal-lines space-y-2">
+          <div
+            v-for="message in messages"
             :key="message.id"
-            class="flex items-start gap-2 p-1 rounded hover:bg-gray-800"
+            class="monitor-card__terminal-line"
           >
             <!-- Direction Icon -->
             <div :class="getDirectionInfo(message.direction).color">
-              <v-icon 
-                :icon="getDirectionInfo(message.direction).icon" 
+              <v-icon
+                :icon="getDirectionInfo(message.direction).icon"
                 size="small"
               />
             </div>
-            
+
             <!-- Timestamp -->
-            <span class="text-gray-400 text-xs min-w-[60px]">
+            <span class="monitor-card__timestamp">
               {{ formatTime(message.timestamp) }}
             </span>
-            
+
             <!-- Data -->
-            <span class="text-white break-all">
+            <span class="monitor-card__payload">
               {{ message.data }}
             </span>
           </div>
@@ -130,20 +137,21 @@ function getDirectionInfo(direction: 'incoming' | 'outgoing') {
     </v-card-text>
 
     <!-- Actions -->
-    <v-card-actions class="flex items-center justify-between">
+    <v-card-actions class="monitor-card__actions flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <v-switch 
-          v-model="enabled" 
-          label="Monitor" 
-          :color="deviceType === 'dcc-ex' ? 'teal' : 'blue'"
+        <v-switch
+          v-model="enabled"
+          label="Monitor"
+          :color="deviceType === 'dcc-ex' ? 'teal' : 'cyan'"
           density="compact"
           hide-details
         />
       </div>
-      
+
       <div class="flex items-center gap-2">
         <v-btn
           size="small"
+          class="monitor-card__ghost-btn"
           variant="text"
           @click="clearMessages"
           :disabled="messages.length === 0"
@@ -153,4 +161,4 @@ function getDirectionInfo(direction: 'incoming' | 'outgoing') {
       </div>
     </v-card-actions>
   </v-card>
-</template> 
+</template>

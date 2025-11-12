@@ -201,6 +201,9 @@ async function autoConnect(devices: Device[]): Promise<void> {
       })
       connectDevice({ device: device.id, topic: device.topic })
     } else {
+      log.start('Disconnecting device (autoConnect disabled)', device.autoConnect, {
+        device: device.id,
+      })
       disconnectDevice(device.id)
     }
   })

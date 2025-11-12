@@ -1,17 +1,17 @@
 [-] ttt-io as packages
 [-] ttt-io build scripts - output arduino configs, dcc config commands
+[ ] store roster on dccex
 [ ] throttle slider
 [x] throttle list grid cols
 [x] switch layout menu
 [ ] function map - momentary, latching (see ex-webthrottle)
-[ ] store roster on dccex
 [ ] handle unknown power state
-[ ] sort throttles
-[ ] optimize command pool to flush at an interval instead of waiting DELAYms
+[x] sort throttles
+[x] optimize command pool to flush at an interval instead of waiting DELAYms
 [ ] fix @repo/* imports 
 [ ] add more sounds and hook up speakers
-[ ] sound mixer / mute
-[ ] led designer
+[-] sound mixer / mute
+[-] led designer
 [ ] account menu
 [ ] onboarding / create layout
 [ ] DEJA Suite Nav
@@ -19,7 +19,7 @@
 
 [ ] monitor app
   - enable auto-clear
-  - nav
+  - reafactor to optimize
 
 [ ] tour app
   - drive locos w/max

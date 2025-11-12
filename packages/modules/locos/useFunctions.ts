@@ -8,6 +8,7 @@ export function useFunctions() {
 
   async function updateFunctions(id: string, functions: LocoFunction[]) {
     try {
+      console.log('Updating functions for loco ', id, functions)
       const locoDoc = doc(db, `layouts/${layoutId.value}/locos`, id)
       await setDoc(locoDoc, { functions }, { merge: true })
     } catch (e) {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useFunctions, defaultFunctions, type LocoFunction } from '@repo/modules/locos'
+import { defaultFunctions, type LocoFunction } from '@repo/modules/locos'
+import { useLocos } from '@repo/modules/locos/useLocos'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import EditFunc from '@/Roster/Functions/EditFunction.vue'
 // import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
@@ -11,7 +12,7 @@ const props = defineProps({
 const locoFunctions = ref(props.loco?.functions)
 const address = ref(props.loco?.id)
 const isModified = ref(false)
-const { updateFunctions } = useFunctions()
+const { updateFunctions } = useLocos()
 
 async function handleSave() {
   console.log('handleSave', address.value, locoFunctions.value)

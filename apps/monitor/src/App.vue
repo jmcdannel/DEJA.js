@@ -12,6 +12,8 @@ const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
 const { getDevices, getLayouts } = useLayout()
 const layoutId = useStorage('@DEJA/layoutId', '')
+const enabled = useStorage('@DEJA/pref/ws-logging', false)
+const wshost = useStorage('@DEJA/pref/ws-host', 'localhost:8082')
 const devices = getDevices()
 const layouts = getLayouts()
 const drawer = ref(false)
@@ -48,7 +50,7 @@ const enableLogging = useStorage('@DEJA/pref/ws-logging', false)
 const user = useCurrentUser()
 const router = useRouter()
 
-const theme = ref('dark')
+const theme = ref('monitorDark')
 
 function handleMenu(item:string) {
   router.push({ name: item })
@@ -68,11 +70,11 @@ function handleLogoClick() {
 <template>
   <v-responsive>
     <v-app v-if="user" :theme="theme">
-      <AppHeader 
+      <AppHeader
         app-name="Monitor"
         app-icon="mdi-monitor-dashboard"
         variant="monitor"
-        color="red"
+        color="primary"
         :dark="true"
         :devices="devices"
         :layouts="layouts"
@@ -87,7 +89,12 @@ function handleLogoClick() {
         @device-select="handleDeviceSelect"
         @logo-click="handleLogoClick"
           @drawer-toggle="drawer = !drawer"
-      />
+      >
+      <template #default>
+        <v-switch v-model="enabled" label="Enabled" />
+        <v-text-field v-model="wshost" label="Host" hide-details density="compact" />
+      </template>
+    </AppHeader>
 
       <v-navigation-drawer v-model="drawer" mobile-breakpoint="md">
         <v-list>

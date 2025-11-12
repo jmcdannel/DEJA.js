@@ -10,6 +10,8 @@ export interface SerialMessage {
   timestamp: string
 }
 
+const SERIAL_MESSAGE_ACTIONS = ['serial-data']
+
 function getDefaultWsHost(): string {
   if (typeof window === 'undefined') {
     return 'localhost:8082'
@@ -58,6 +60,7 @@ export function useDeviceSerialMonitor(deviceId: string) {
   // WebSocket connection
   const wsUrl = computed(() => resolveWsUrl(wshost.value))
 
+  console.log('[DeviceMonitor] WebSocket URL:', wsUrl.value)
   const { data, status, open, close, send } = useWebSocket(wsUrl, {
     autoReconnect: {
       delay: 1000,
@@ -113,6 +116,7 @@ export function useDeviceSerialMonitor(deviceId: string) {
   
   // Watch for WebSocket messages
   watch(data, (newData) => {
+    console.log('[DeviceMonitor] Received WebSocket data:', newData)
     if (!newData || !enabled.value) return
     
     try {
@@ -133,7 +137,7 @@ export function useDeviceSerialMonitor(deviceId: string) {
       }
 
       // Handle serial data messages
-      if (message.action === 'serial-data' && message.payload?.deviceId === deviceId) {
+      if (SERIAL_MESSAGE_ACTIONS.includes(message.action) && message.payload?.deviceId === deviceId) {
         const serialMessage: SerialMessage = {
           id: createMessageId(),
           deviceId: message.payload.deviceId,
@@ -147,7 +151,16 @@ export function useDeviceSerialMonitor(deviceId: string) {
       }
       
       // Handle general broadcast messages (ignore these for device-specific monitors)
-      if (message.action !== 'serial-data') {
+      if (!SERIAL_MESSAGE_ACTIONS.includes(message.action)) {
+        // const serialMessage: SerialMessage = {
+        //   id: createMessageId(),
+        //   deviceId: 'broadcast',
+        //   data: `[Broadcast] ${JSON.stringify(message)}`,
+        //   direction: 'incoming',
+        //   timestamp: new Date().toISOString()
+        // }
+
+        // addMessage(serialMessage)
         return
       }
       

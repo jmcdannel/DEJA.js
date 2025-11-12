@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue'
-import { useStorage } from '@vueuse/core' 
+import { ref, watch } from 'vue'
+import { useStorage } from '@vueuse/core'
 import { useLayout, useLocos, useTurnouts, useEfx, useSignals } from '@repo/modules'
 import LayoutCard from './components/LayoutCard.vue'
 import TurnoutStatsCard from './components/TurnoutStatsCard.vue'
@@ -13,8 +13,8 @@ import EffectLogs from './components/EffectLogs.vue'
 import ThrottleStatus from './components/ThrottleStatus.vue'
 import DCCLog from './components/DCCLog/DCCLog.vue'
 import DeviceSerialMonitors from './components/DeviceSerialMonitor/DeviceSerialMonitors.vue'
-import { db } from '@repo/firebase-config'
-import { collection, onSnapshot, type DocumentData } from 'firebase/firestore'
+import type { DocumentData } from 'firebase/firestore'
+import { useLayoutLogListeners } from '../composables/useLayoutLogListeners'
 
 const TIMEOUT  = 1000 * 60 * 5 // 5 minutes for the timeout
 
@@ -30,18 +30,10 @@ const throttles = getThrottles()
 const turnouts = getTurnouts()
 const effects = getEffects()
 const signals = getSignals()
-const turnoutChanges = ref<DocumentData[]>([])
-const effectChanges = ref<DocumentData[]>([])
-const signalChanges = ref<DocumentData[]>([])
-const sensorChanges = ref<DocumentData[]>([])
+const { turnoutChanges, effectChanges, signalChanges } = useLayoutLogListeners()
 const turnoutsThrownCount = ref(0)
 const efxThrownCount = ref(0)
 const signalsActiveCount = ref(0)
-
-// Firebase listeners
-let turnoutUnsubscribe: (() => void) | null = null
-let effectUnsubscribe: (() => void) | null = null
-let signalUnsubscribe: (() => void) | null = null
 
 watch(turnoutChanges, () => {
   if (turnoutChanges.value.length > 0) {
@@ -70,89 +62,13 @@ watch(signalChanges, () => {
   }
 }, { deep: true })
 
-// Watch for layoutId changes and set up Firebase listeners
-watch(layoutId, (newLayoutId) => {
-  // Clean up existing listeners
-  if (turnoutUnsubscribe) {
-    turnoutUnsubscribe()
-    turnoutUnsubscribe = null
-  }
-  if (effectUnsubscribe) {
-    effectUnsubscribe()
-    effectUnsubscribe = null
-  }
-  if (signalUnsubscribe) {
-    signalUnsubscribe()
-    signalUnsubscribe = null
-  }
-
-  // Only set up listeners if we have a valid layoutId
-  if (newLayoutId && newLayoutId.trim() !== '') {
-    console.log('Setting up Firebase listeners for layout:', newLayoutId)
-    
-    // Set up turnout listener
-    turnoutUnsubscribe = onSnapshot(collection(db, `layouts/${newLayoutId}/turnouts`), (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === 'modified') {
-          console.log('Modified turnout: ', change.doc.data())
-          turnoutChanges.value.push(change.doc.data())
-        } else if (change.type === 'added') {
-          console.log('Added turnout: ', change.doc.data())
-        } else if (change.type === 'removed') {
-          console.log('Removed turnout: ', change.doc.data())
-        }
-      })
-    })
-
-    // Set up effect listener
-    effectUnsubscribe = onSnapshot(collection(db, `layouts/${newLayoutId}/effects`), (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === 'modified') {
-          console.log('Modified effect: ', change.doc.data())
-          effectChanges.value.push(change.doc.data())
-        } else if (change.type === 'added') {
-          console.log('Added effect: ', change.doc.data())
-        } else if (change.type === 'removed') {
-          console.log('Removed effect: ', change.doc.data())
-        }
-      })
-    })
-
-    signalUnsubscribe = onSnapshot(collection(db, `layouts/${newLayoutId}/signals`), (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === 'modified') {
-          console.log('Modified signal: ', change.doc.data())
-          signalChanges.value.push(change.doc.data())
-        } else if (change.type === 'added') {
-          console.log('Added signal: ', change.doc.data())
-        } else if (change.type === 'removed') {
-          console.log('Removed signal: ', change.doc.data())
-        }
-      })
-    })
-  }
-}, { immediate: true })
-
-// Clean up listeners when component unmounts
-onUnmounted(() => {
-  if (turnoutUnsubscribe) {
-    turnoutUnsubscribe()
-  }
-  if (effectUnsubscribe) {
-    effectUnsubscribe()
-  }
-  if (signalUnsubscribe) {
-    signalUnsubscribe()
-  }
-})
-
 </script>
 
 <template>
   <v-sheet class="h-full">
     <div class="h-full max-h-full flex flex-col">
       <!-- First Row - Takes only the height it needs -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 flex-shrink-0">
+      <!-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 flex-shrink-0">
         <LayoutCard />
         <TurnoutStatsCard 
           :total-count="turnouts.length"
@@ -168,27 +84,13 @@ onUnmounted(() => {
           :total-count="throttles.length"
           :active-count="throttles.filter(t => t.speed > 0).length"
         />
-      </div>
+      </div> -->
 
       <!-- Second Row - Uses half of remaining height with scrolling -->
       <div class="grid grid-cols-1 lg:grid-cols-3 flex-1 min-h-0 bg-gray-950 max-h-[50vh]">
-        <div class="flex flex-col min-h-0">
-          <div class="overflow-auto flex-1 min-h-0">
-            <DCCLog />
-          </div>
-        </div>
-
-        <div class="flex flex-col min-h-0">
-          <div class="overflow-auto flex-1 min-h-0">
-            <TurnoutLogs :logs="turnoutChanges" />
-          </div>
-        </div>
-
-        <div class="flex flex-col min-h-0">
-          <div class="overflow-auto flex-1 min-h-0">
-            <EffectLogs :logs="effectChanges" />
-          </div>
-        </div>
+        <DCCLog />
+        <TurnoutLogs :logs="turnoutChanges" />
+        <EffectLogs :logs="effectChanges" />
       </div>
 
       <!-- Third Row - Uses half of remaining height with scrolling -->

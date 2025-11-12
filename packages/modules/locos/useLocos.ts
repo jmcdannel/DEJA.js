@@ -13,7 +13,7 @@ import {
 import { useStorage } from '@vueuse/core'
 import { useCollection, useDocument } from 'vuefire'
 import { db } from '@repo/firebase-config'
-import type { Loco, ConsistLoco, LocoThrottle, Throttle } from './types'
+import type { Loco, ConsistLoco, LocoFunction, LocoThrottle, Throttle } from './types'
 import { ROADNAMES } from './constants'
 
 export function useLocos() {
@@ -118,6 +118,16 @@ export function useLocos() {
       console.error('Error updating consist: ', e)
     }
   }
+  
+  async function updateFunctions(id: string, functions: LocoFunction[]) {
+    try {
+      console.log('Updating functions for loco ', id, functions)
+      const locoDoc = doc(db, `layouts/${layoutId.value}/locos`, id)
+      await setDoc(locoDoc, { functions }, { merge: true })
+    } catch (e) {
+      console.error('Error updating functions: ', e)
+    }
+  }
 
   async function createLoco(
     address: number,
@@ -158,6 +168,7 @@ export function useLocos() {
     getThrottles,
     getThrottlesWithLocos,
     throttlesWithLocos,
+    updateFunctions,
     updateLoco,
     updateConsist,
   }

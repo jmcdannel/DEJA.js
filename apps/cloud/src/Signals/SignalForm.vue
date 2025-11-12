@@ -234,7 +234,7 @@ async function submit() {
             </v-btn>
           </section>
           <v-dialog max-width="80vw" v-model="editColor">
-            <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.efx?.color ?? 'purple'"></ColorPicker>
+            <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = 'purple'"></ColorPicker>
           </v-dialog>
         </v-col>
       </v-row>

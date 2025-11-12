@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import type { DocumentData } from 'firebase/firestore'
 
 const props = defineProps<{
@@ -8,6 +9,7 @@ const props = defineProps<{
 
 const TIMEOUT = 30000
 const turnoutsThrownCount = ref(0)
+const router = useRouter()
 
 watch(() => props.logs, () => {
   if (props.logs.length > 0) {
@@ -16,27 +18,46 @@ watch(() => props.logs, () => {
     }, TIMEOUT)
   }
 }, { deep: true })
+
+function openFullScreen() {
+  router.push({ name: 'log-view', params: { logType: 'turnouts' } })
+}
 </script>
 
 <template>
-  <v-card color="blue-darken-3" class="flex flex-col">
-    <v-card-title>Turnout Logs</v-card-title>
-    <v-card-text class="flex flex-1 flex-col-reverse gap-1">
-      <v-alert 
-        v-for="log in logs" 
-        :key="log.id" 
-        :color="log?.color || 'info'" 
+  <v-card class="flex flex-col flex flex-col min-h-0 overflow-auto flex-1">
+    <template #title>
+      <div class="monitor-card__header">
+        <span class="monitor-card__title">Turnout Logs</span>
+        <v-spacer />
+        <v-btn
+          icon="mdi-arrow-expand"
+          variant="text"
+          size="small"
+          density="comfortable"
+          class="monitor-card__icon-btn"
+          aria-label="Open turnout logs in full screen"
+          @click="openFullScreen"
+        />
+      </div>
+    </template>
+    <v-card-text class="monitor-card__body flex flex-1 flex-col-reverse gap-1">
+      <v-alert
+        v-for="log in logs"
+        :key="log.id"
+        :color="log?.color || 'info'"
         variant="tonal"
+        class="monitor-card__alert"
       >
         <div class="flex items-center gap-x-8">
-          <v-icon 
-            :icon="log.state ? 'mdi-toggle-switch' : 'mdi-toggle-switch-off'" 
+          <v-icon
+            :icon="log.state ? 'mdi-toggle-switch' : 'mdi-toggle-switch-off'"
             size="32" 
           />
           <span class="font-semibold text-sm">{{ log.name }}</span>
           <!-- <span class="text-sm">{{ log.state ? 'Thrown' : 'Closed' }}</span> -->
           <v-spacer></v-spacer>
-          <v-chip>{{ log.device }}</v-chip>
+          <v-chip class="monitor-chip">{{ log.device }}</v-chip>
         </div>
       </v-alert>
     </v-card-text>

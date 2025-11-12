@@ -23,6 +23,18 @@ const router = createRouter({
       beforeEnter: [requireAuth],
     },
     {
+      path: '/logs/:logType',
+      name: 'log-view',
+      component: () => import('./views/LogView.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
+      path: '/logs/devices/:deviceId',
+      name: 'device-log-view',
+      component: () => import('./views/DeviceSerialMonitorView.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
       path: '/demo',
       name: 'Device Monitor Demo',
       component: () => import('./Dashboard/components/DeviceSerialMonitor/DeviceSerialMonitorDemo.vue'),
