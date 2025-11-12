@@ -78,12 +78,12 @@ function getTurnoutState(tId: string) {
           </v-stepper-item>
           <v-divider></v-divider>
           <template v-for="(t, index) in route?.turnouts" :key="t.id ?? index">
-            <v-stepper-item :value="(index + 1)">
+            <v-stepper-item v-if="t.id" :value="(index + 1)">
               <template #title>
                 <v-chip :color="(t.state ?? true) ? 'green' : 'red'" size="small" variant="flat" prepend-icon="mdi-call-split">
                   {{ t.name }}
                 </v-chip>
-                <v-icon class="ml-1" :color="(getTurnoutState(t.id) ?? true) ? 'green' : 'red'" icon="mdi-circle-slice-8" size="20" />
+                <v-icon class="ml-1" :color="(getTurnoutState(t.id.toString()) ?? true) ? 'green' : 'red'" icon="mdi-circle-slice-8" size="20" />
               </template>
             </v-stepper-item>
             <v-divider></v-divider>

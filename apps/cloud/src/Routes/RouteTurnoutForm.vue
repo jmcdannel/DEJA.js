@@ -118,7 +118,7 @@ function getTurnoutState(tId: string) {
             </template>
           {{ chip.name }}
           </v-chip>
-          <v-icon @click="handleTurnoutToggle(chip.id?.toString() || '')" class="ml-1 mr-3" :color="(getTurnoutState(chip.id) ?? true) ? 'green' : 'red'" icon="mdi-circle-slice-8" size="20" />
+          <v-icon v-if="chip.id" @click="handleTurnoutToggle(chip.id?.toString() || '')" class="ml-1 mr-3" :color="(getTurnoutState(chip?.id?.toString()) ?? true) ? 'green' : 'red'" icon="mdi-circle-slice-8" size="20" />
         </template>
     </v-card-text>
   </v-card>
