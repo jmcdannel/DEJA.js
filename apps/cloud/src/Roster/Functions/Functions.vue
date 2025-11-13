@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { defaultFunctions, type LocoFunction } from '@repo/modules/locos'
 import { useLocos } from '@repo/modules/locos/useLocos'
-import ViewJson from '@/Core/UI/ViewJson.vue'
 import EditFunc from '@/Roster/Functions/EditFunction.vue'
 // import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 
@@ -42,35 +41,37 @@ async function handleEdit(func: LocoFunction) {
 
 </script>
 <template>
-  <v-btn class="m-2" color="pink" @click="handleSave" :disabled="!isModified">
+  <v-card-actions class="flex justify-end">
+  <v-btn variant="flat" class="m-2" color="pink" @click="handleSave" :disabled="!isModified">
     <v-icon>mdi-content-save</v-icon>
     Save
   </v-btn>
-  <v-btn class="m-2" color="pink" variant="tonal">
+  <!-- <v-btn class="m-2" color="pink" variant="tonal">
     All <v-icon>mdi-eye</v-icon>     
   </v-btn>
   <v-btn class="m-2" color="pink" variant="tonal">
     All <v-icon>mdi-eye-off</v-icon>     
+  </v-btn> -->
+  </v-card-actions>
+  <v-card-body>
+    <EditFunc 
+      v-for="defaultFunc in defaultFunctions" 
+      :key="defaultFunc.label" 
+      :locoFunction="locoFunctions?.find((lf: LocoFunction) => lf.id === defaultFunc.id)" 
+      :defaultFunction="defaultFunc" 
+      @edit="handleEdit"
+    />
+  </v-card-body>
+  <v-card-actions class="flex justify-end">
+  <v-btn variant="flat" class="m-2" color="pink" @click="handleSave" :disabled="!isModified">
+    <v-icon>mdi-content-save</v-icon>
+    Save
   </v-btn>
-  <EditFunc 
-    v-for="defaultFunc in defaultFunctions" 
-    :key="defaultFunc.label" 
-    :locoFunction="locoFunctions?.find((lf: LocoFunction) => lf.id === defaultFunc.id)" 
-    :defaultFunction="defaultFunc" 
-    @edit="handleEdit"
-  />
-  <!-- <template v-for="defaultFunc in defaultFunctions" :key="defaultFunc.label">
-    <ViewJson :json="defaultFunc" label="RAW DEFAULT"></ViewJson>
-    <ViewJson :json="loco?.functions.find(lf => lf.id === defaultFunc.id)" label="RAW LOCO"></ViewJson>
-  </template> -->
-  <!-- <LcdDisplay 
-    :content="`address: ${address}`"
-    title="LOCO ADDRESS"
-    color="blue"
-    size="sm"
-    :max-lines="3"
-  /> -->
-  <ViewJson :json="loco?.functions || {}" label="RAW loco Data"></ViewJson>
-  <ViewJson :json="locoFunctions" label="RAW locoFunctions Data"></ViewJson>
-  <ViewJson :json="defaultFunctions" label="RAW DEFAULT FUNCTIONS"></ViewJson>
+  <!-- <v-btn class="m-2" color="pink" variant="tonal">
+    All <v-icon>mdi-eye</v-icon>     
+  </v-btn>
+  <v-btn class="m-2" color="pink" variant="tonal">
+    All <v-icon>mdi-eye-off</v-icon>     
+  </v-btn> -->
+  </v-card-actions>
 </template>

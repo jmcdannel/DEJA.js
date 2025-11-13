@@ -1,6 +1,7 @@
 export { default as AppHeader } from './AppHeader.vue'
 export { default as LocoAvatar } from './LocoAvatar.vue'
 export { default as Consist } from './Consist/Consist.vue'
+export { default as EditConsist } from './Consist/EditConsist.vue'
 export { default as MiniConsist } from './Consist/MiniConsist.vue'
 export { default as Functions } from './Functions/Functions.vue'
 export { default as FunctionList } from './Functions/FunctionList.vue'
