@@ -9,6 +9,7 @@
 [x] switch layout menu
 [ ] function map - momentary, latching (see ex-webthrottle)
 [ ] handle unknown power state
+[ ] add documenation, other meta data to loco
 [x] sort throttles
 [x] optimize command pool to flush at an interval instead of waiting DELAYms
 [ ] fix @repo/* imports 

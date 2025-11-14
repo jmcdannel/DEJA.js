@@ -1,24 +1,30 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useFunctionIcon } from '@repo/modules/locos'
+import { useFunctionIcon, type LocoFunction } from '@repo/modules/locos'
 const emit = defineEmits(['edit'])
 const props = defineProps({
   defaultFunction: Object,
   locoFunction: Object
 })
 
-const func = ref({ ...props.defaultFunction, ...props.locoFunction })
+const func = ref<LocoFunction>({
+  ...({ isMomentary: false } as Partial<LocoFunction>),
+  ...props.defaultFunction,
+  ...props.locoFunction,
+} as LocoFunction)
 const customLabel = ref(func.value?.label)
 const isFav = ref(func.value?.isFavorite)
 const customIcon = ref(func.value?.icon)
+const isMomentary = ref(func.value?.isMomentary ?? false)
 const showPresets = ref(false)
 
 const { getIconComponent, getAllIcons, DEFAULT_ICON } = useFunctionIcon()
 
 const allIcons = computed(() => getAllIcons())
 
-const iconCmp = computed(() => customIcon.value ? getIconComponent(customIcon.value)
-  : DEFAULT_ICON)
+const iconCmp = computed(() =>
+  customIcon.value ? getIconComponent(customIcon.value) : DEFAULT_ICON
+)
 
 watch(isFav, (value) => {
   func.value.isFavorite = value
@@ -32,6 +38,11 @@ watch(customLabel, (value) => {
 
 watch(customIcon, (value) => {
   func.value.icon = value
+  emit('edit', func.value)
+})
+
+watch(isMomentary, (value) => {
+  func.value.isMomentary = value
   emit('edit', func.value)
 })
 
@@ -66,6 +77,14 @@ watch(customIcon, (value) => {
       >
       </v-btn>
       {{  func?.label }}
+      <v-switch
+        v-model="isMomentary"
+        inset
+        color="pink"
+        hide-details
+        class="min-w-[7rem]"
+        label="Momentary"
+      ></v-switch>
       <v-text-field
         v-model="customLabel"
         label="Label"

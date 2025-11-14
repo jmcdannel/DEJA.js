@@ -53,40 +53,13 @@ export const ROADNAMES: RoadName[] = [
   },
 ]
 
-export const defaultFunctions = [
-  { id: 0, label: 'F0' },
-  { id: 1, label: 'F1' },
-  { id: 2, label: 'F2' },
-  { id: 3, label: 'F3' },
-  { id: 4, label: 'F4' },
-  { id: 5, label: 'F5' },
-  { id: 6, label: 'F6' },
-  { id: 7, label: 'F7' },
-  { id: 8, label: 'F8' },
-  { id: 9, label: 'F9' },
-  { id: 10, label: 'F10' },
-  { id: 11, label: 'F11' },
-  { id: 12, label: 'F12' },
-  { id: 13, label: 'F13' },
-  { id: 14, label: 'F14' },
-  { id: 15, label: 'F15' },
-  { id: 16, label: 'F16' },
-  { id: 17, label: 'F17' },
-  { id: 18, label: 'F18' },
-  { id: 19, label: 'F19' },
-  { id: 20, label: 'F20' },
-  { id: 21, label: 'F21' },
-  { id: 22, label: 'F22' },
-  { id: 23, label: 'F23' },
-  { id: 24, label: 'F24' },
-  { id: 25, label: 'F25' },
-  { id: 26, label: 'F26' },
-  { id: 27, label: 'F27' },
-  { id: 28, label: 'F28' },
-  { id: 29, label: 'F29' },
-  { id: 30, label: 'F30' },
-  { id: 31, label: 'F31' },
-] as LocoFunction[]
+export const defaultFunctions: LocoFunction[] = Array.from({ length: 32 }, (_, id) => ({
+  id,
+  label: `F${id}`,
+  icon: null,
+  isFavorite: false,
+  isMomentary: false,
+}))
 
 export const FUNCTION_ICONS = [
   { name: 'light', icon: 'mdi-car-light-high' },

@@ -43,6 +43,10 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
     updateSpeed(currentSpeed.value + val)
   }
 
+  function setSpeed(val: number): void {
+    updateSpeed(val)
+  }
+
   function stop() {
     updateSpeed(0)
   }
@@ -74,6 +78,7 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
 
   return {
     adjustSpeed,
+    setSpeed,
     currentSpeed,
     direction,
     loco: loco as unknown as Loco,

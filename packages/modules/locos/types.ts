@@ -30,6 +30,7 @@ export interface LocoFunction {
   label: string
   icon: string | null | undefined
   isFavorite: boolean | undefined
+  isMomentary: boolean | undefined
 }
 
 export interface ConsistSettingsProps {

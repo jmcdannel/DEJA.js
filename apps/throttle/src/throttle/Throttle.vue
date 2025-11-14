@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import type { Loco } from '@repo/modules/locos'
 import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.vue'
 import ThrottleSliderControls from '@/throttle/ThrottleSliderControls.vue'
+import SliderControls from '@/throttle/SliderControls.vue'
 import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
@@ -23,7 +24,7 @@ const address = toRef(props, 'address')
 const { 
   adjustSpeed: handleAdjustSpeed,
   currentSpeed, 
-  direction,
+  setSpeed,
   loco,
   releaseThrottle,
   stop: handleStop,
@@ -38,32 +39,24 @@ function handleSlider(val: number): void { // handle slider changes
   // currentSpeed.value = parseInt(val.toString()) // debounced speed changes
 }
 
+async function handleAdjustSliderSpeed(val: number) {
+  // currentSpeed.value = val
+  console.log('handleAdjustSliderSpeed', val, currentSpeed.value)
+  if (currentSpeed.value === val) {
+    return
+  }
+  setSpeed(val)
+}
+
 async function clearLoco() {
   handleStop()
   releaseThrottle()
   $router.push({ name: 'throttle-list' })
 }
 
-function openFunctions() {
-  // functionsCmp.value && functionsCmp.value.openAll()
-}
-
-function openConsist() {
-  // consistCmp.value && consistCmp.value.openSettings()
-}
-
-function openFunctionSettings() {
-  // functionsCmp.value && functionsCmp.value.openSettings()
-}
-
 </script>
 <template>
   <main v-if="throttle" class="flex flex-col gap-2 p-2 overflow-hidden w-full h-full flex-1 shadow-xl relative  ">
-    <!-- <pre>locoDocId:{{locoDocId}}</pre>-->
-    <!-- <pre>loco:{{loco.functions}}</pre>  -->
-    <!-- <pre>currentSpeed {{ currentSpeed }}</pre> -->
-    <!-- <pre>throttleDir {{ throttleDir }}</pre> -->
-    <!-- <pre>props.throttle {{ props.throttle }}</pre> -->
     <ThrottleHeader class="bg-gradient-to-r from-purple-300/10 to-pink-600/10 text-purple-400/10">
       <template v-slot:left>
         <div class="flex flex-row items-center justify-center gap-1 px-4 bg-gray-900">
@@ -88,7 +81,8 @@ function openFunctionSettings() {
     <section class="throttle w-full h-full flex flex-row justify-around flex-grow relative z-10">
       <section class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-center h-full flex-1/2 sm:flex-1">
         <v-spacer />
-        <RoadnameLogo v-if="loco" :roadname="loco.meta?.roadname" :size="'3xl'" />
+        <RoadnameLogo v-if="loco" :roadname="loco.meta?.roadname" :size="'xl'" />
+        <SliderControls @update:currentSpeed="handleAdjustSliderSpeed" @stop="handleStop" :speed="currentSpeed" />
         <!-- <ThrottleSliderControls :direction="direction" :speed="currentSpeed" @update:currentSpeed="handleSlider" @stop="handleStop" /> -->
       </section>
       <section v-if="loco" class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
