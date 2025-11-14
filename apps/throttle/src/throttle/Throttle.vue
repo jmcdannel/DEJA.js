@@ -81,7 +81,7 @@ async function clearLoco() {
     <section class="throttle w-full h-full flex flex-row justify-around flex-grow relative z-10">
       <section class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-center h-full flex-1/2 sm:flex-1">
         <v-spacer />
-        <!-- <RoadnameLogo v-if="loco" :roadname="loco.meta?.roadname" :size="'3xl'" /> -->
+        <RoadnameLogo v-if="loco" :roadname="loco.meta?.roadname" :size="'xl'" />
         <SliderControls @update:currentSpeed="handleAdjustSliderSpeed" @stop="handleStop" :speed="currentSpeed" />
         <!-- <ThrottleSliderControls :direction="direction" :speed="currentSpeed" @update:currentSpeed="handleSlider" @stop="handleStop" /> -->
       </section>
