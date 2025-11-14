@@ -31,11 +31,20 @@ const pinCommand = (effect: Effect): EffectCommand => ({
 const ialedCommand = (effect: Effect): string => {
   const pin = effect?.pin
   const pattern = effect?.state ? effect?.pattern : 'off'
-  // const range = effect?.range
-  const config = effect?.config
-  const command = `${pin}, ${pattern}, all, ${config}\n`
+  const range = effect?.range || 'all'
+  const config = effect?.config || '{}'
+  const command = `${pin}, ${pattern}, ${range}, ${config}\n`
   return command
 }
+
+const multimediaCommand = (effect: Effect): EffectCommand => ({
+  action: 'multimedia',
+  device: effect?.device || 'deja-server',
+  payload: {
+    config: effect?.config || '{}',
+    state: effect.state,
+  },
+})
 
 async function getEffect(id: string): Promise<Effect | undefined> {
   if (!layoutId) {
@@ -66,6 +75,8 @@ export function getEffectCommand(
         return pinCommand(efx)
       case 'ialed':
         return ialedCommand(efx)
+      case 'multimedia':
+        return multimediaCommand(efx)
       case 'sound':
         return soundCommand(efx)
       // case 'serial-ialed':
