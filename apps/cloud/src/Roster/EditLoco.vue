@@ -63,114 +63,112 @@ async function submit () {
 
 </script>
 <template>
-
-
-  <v-card class="my-4 bg-zinc-900">
-    <v-card-title class="text-pink-400 text-2xl">Edit Loco</v-card-title>
-    <v-card-actions class="flex justify-end">
-      <v-btn
-        class="mt-2"
-        text="Close"
-        type="button"
-        variant="tonal"
-        @click="$router.push({ name: 'Roster' })"
-      ></v-btn>
-      <v-btn
-        :loading="loading"
-        class="mt-2"
-        text="Submit"
-        variant="flat"
-        type="submit"
-        :color="color"
-      ></v-btn>  
-    </v-card-actions>
-    <v-card-body class="pt-4">
-      <v-form v-if="loco" validate-on="submit lazy" @submit.prevent="submit" class="my-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-          <v-text-field
-            v-model="loco.address"
-            label="DCC Address"
-            variant="outlined"
-            prepend-icon="mdi-train"
-            hint="2/4-digit DCC address"
-            :color="color"
-            class="mr-4"
-            :rules="rules.required"
-            clearable
-          >
-            <template #append>
-              <v-icon icon="mdi-check" color="gray" class="opacity-10"></v-icon>
-            </template>
-          </v-text-field>
-          <v-text-field
-            v-model="loco.name"
-            label="Name"
-            variant="outlined"
-            :color="color"
-            class="col-span-2"
-            clearable
-          >
-          </v-text-field>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-          <v-chip-group
-              v-model="roadname"
-              selected-class="text-primary"
-              column
-              mandatory
-            >
-              <v-chip
-                v-for="road in ROADNAMES" :key="road.value" :value="road" :text="road.label"
-                variant="outlined"
-                filter
-              ></v-chip>
-          </v-chip-group>
-
-          <!-- color -->
-          <section class="h-auto  my-4">
-            <v-btn
-              class="min-h-24 min-w-12 border flex"
+  <v-form v-if="loco" validate-on="submit lazy" @submit.prevent="submit" class="my-8">
+    <v-card class="my-4 bg-zinc-900">
+      <v-card-title class="text-pink-400 text-2xl">Edit Loco</v-card-title>
+      <v-card-actions class="flex justify-end">
+        <v-btn
+          class="mt-2"
+          text="Close"
+          type="button"
+          variant="tonal"
+          @click="$router.push({ name: 'Roster' })"
+        ></v-btn>
+        <v-btn
+          :loading="loading"
+          class="mt-2"
+          text="Submit"
+          variant="flat"
+          type="submit"
+          :color="color"
+        ></v-btn>  
+      </v-card-actions>
+      <v-card-body class="pt-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <v-text-field
+              v-model="loco.address"
+              label="DCC Address"
+              variant="outlined"
+              prepend-icon="mdi-train"
+              hint="2/4-digit DCC address"
               :color="color"
-              @click="editColor = true" >
-              <!-- <v-icon :icon="efxOpt.icon" :color="efxOpt.color"></v-icon> -->
-              <div class="relative flex flex-col justify-center items-center">
-                <v-icon size="16">mdi-palette</v-icon>
-                <div class="mt-4">Color [{{ color }}]</div>
-              </div>        
-            </v-btn>
-          </section>
-          <v-dialog max-width="80vw" v-model="editColor">
-            <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = loco?.meta?.color ?? 'pink'"></ColorPicker>
-          </v-dialog>
-          
-          <v-switch
-            v-model="hasSound"
-            class="mb-4"
-            color="pink"
-            hide-details
-            label="Locomotive has onboard sound"
-          ></v-switch>
-        </div>
-      </v-form>  
-    </v-card-body>
-    <v-card-actions class="flex justify-end bg-zinc-950">
-      <v-btn
-        class="mt-2"
-        text="Close"
-        type="button"
-        variant="tonal"
-        @click="$router.push({ name: 'Roster' })"
-      ></v-btn>
-      <v-btn
-        :loading="loading"
-        class="mt-2"
-        text="Submit"
-        variant="flat"
-        type="submit"
-        :color="color"
-      ></v-btn>  
-    </v-card-actions>
-  </v-card>
+              class="mr-4"
+              :rules="rules.required"
+              clearable
+            >
+              <template #append>
+                <v-icon icon="mdi-check" color="gray" class="opacity-10"></v-icon>
+              </template>
+            </v-text-field>
+            <v-text-field
+              v-model="loco.name"
+              label="Name"
+              variant="outlined"
+              :color="color"
+              class="col-span-2"
+              clearable
+            >
+            </v-text-field>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <v-chip-group
+                v-model="roadname"
+                selected-class="text-primary"
+                column
+                mandatory
+              >
+                <v-chip
+                  v-for="road in ROADNAMES" :key="road.value" :value="road" :text="road.label"
+                  variant="outlined"
+                  filter
+                ></v-chip>
+            </v-chip-group>
+
+            <!-- color -->
+            <section class="h-auto  my-4">
+              <v-btn
+                class="min-h-24 min-w-12 border flex"
+                :color="color"
+                @click="editColor = true" >
+                <!-- <v-icon :icon="efxOpt.icon" :color="efxOpt.color"></v-icon> -->
+                <div class="relative flex flex-col justify-center items-center">
+                  <v-icon size="16">mdi-palette</v-icon>
+                  <div class="mt-4">Color [{{ color }}]</div>
+                </div>        
+              </v-btn>
+            </section>
+            <v-dialog max-width="80vw" v-model="editColor">
+              <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = loco?.meta?.color ?? 'pink'"></ColorPicker>
+            </v-dialog>
+            
+            <v-switch
+              v-model="hasSound"
+              class="mb-4"
+              color="pink"
+              hide-details
+              label="Locomotive has onboard sound"
+            ></v-switch>
+          </div>
+      </v-card-body>
+      <v-card-actions class="flex justify-end bg-zinc-950">
+        <v-btn
+          class="mt-2"
+          text="Close"
+          type="button"
+          variant="tonal"
+          @click="$router.push({ name: 'Roster' })"
+        ></v-btn>
+        <v-btn
+          :loading="loading"
+          class="mt-2"
+          text="Submit"
+          variant="flat"
+          type="submit"
+          :color="color"
+        ></v-btn>  
+      </v-card-actions>
+    </v-card>
+  </v-form>  
   
   <v-divider class="my-4 border-pink-500"></v-divider>
   
