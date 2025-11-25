@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 import { requireAuth, requireDccEx, requireLayout } from '@repo/auth'
 import HomeView from './views/HomeView.vue'
 import Connect from './connect/Connect.vue'
-import { DEFAULT_MENU_CONFIG } from './Core/Menu/useMenu'
+import { DEFAULT_MENU_CONFIG } from './core/Menu/useMenu'
 import { Login } from '@repo/auth'
 
 type MenuItem = {
