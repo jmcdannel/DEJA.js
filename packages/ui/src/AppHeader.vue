@@ -170,9 +170,11 @@ const defaultProps = {
         <v-spacer class="ma-2"></v-spacer>
       </template>
       <UserProfile v-if="showUserProfile !== false && user" />
-      <TrackPower class="ma-1" :power-state="layoutPowerState" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
-      <Power class="ma-1" v-if="showLayoutPower" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />
-      <EmergencyStop class="ma-1" v-if="showEmergencyStop" @stop="handleEmergencyStop" />
+      <template v-if="layoutId && user">
+        <TrackPower class="ma-1" :power-state="layoutPowerState" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
+        <Power class="ma-1" v-if="showLayoutPower" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />
+        <EmergencyStop class="ma-1" v-if="showEmergencyStop" @stop="handleEmergencyStop" />
+      </template>
     </template>
   </v-app-bar>
   <!-- <v-app-bar class="header-gradient2 elative overflow-hidden"

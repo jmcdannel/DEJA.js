@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import RosterList from '@/roster/RosterList.vue';
-import { useLayout, type Tag } from '@repo/modules'
 import { LocoAvatar } from '@repo/ui'
 import { useLocos, type Loco } from '@repo/modules/locos'
 import ModuleList from '@repo/ui/src/ModuleList/List.vue'

@@ -3,14 +3,12 @@ import { computed, ref, watch } from 'vue'
 import type { Throttle } from '@repo/modules/locos'
 import ThrottleTile from '@/throttle/ThrottleTile.vue'
 import { useLocos, type Loco } from '@repo/modules/locos'
-import { useRoster } from '@/roster/useRoster'
 import { LocoAvatar, ListMenu } from '@repo/ui'
 import { useStorage } from '@vueuse/core'
 import draggable from 'vuedraggable'
 
-const { getLocos, getThrottles } = useLocos()
+const { getLocos, getThrottles, acquireThrottle } = useLocos()
 const locos = getLocos()
-const { acquireThrottle } = useRoster()
 const throttles = getThrottles()
 
 const isRosterOpen = ref(false)

@@ -36,7 +36,7 @@ const editDevice = ref(false) // TODO: remove - don't allow this to be changed
 
 const name = ref(props.turnout?.name || '')
 const desc = ref(props.turnout?.desc || '')
-const index = ref(props.turnout?.turnoutIdx || '')
+const index = ref(props.turnout?.turnoutIdx)
 const effectId = ref(props.turnout?.effectId)
 const device = ref(props.turnout?.device || DEFAULT_DEVICE)
 const straight = ref<number | undefined>(props.turnout?.straight)
@@ -46,7 +46,7 @@ const tags = ref<string[]>(props.turnout?.tags || [])
 const turnoutType = ref(props.turnout?.type || DEFAULT_TYPE)
 const loading = ref(false)
 const rules: ValidationRules = {
-  required: [(val) => !!val || 'Required.']
+  required: [(val: any) => (val === 0 || !!val) || 'Required.']
 }
 
 function autoId() {
@@ -104,7 +104,7 @@ function reset(){
   desc.value = ''
   color.value = ''
   tags.value = []
-  index.value = ''
+  index.value = undefined
   effectId.value = ''
   device.value = DEFAULT_DEVICE
   straight.value = undefined
