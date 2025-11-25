@@ -36,22 +36,29 @@ function handleLayoutSelect(selectedLayoutId: string) {
 </script>
 
 <template>
-  <v-card
-    class="mx-auto"
-    max-width="400"
-  >
-    <v-card-text>
-      <h2 class="text-h6 mb-2">Your Layouts</h2>
-      <v-chip-group column >
-        <v-chip v-for="layout in layouts" 
-          @click="handleLayoutSelect(layout.layoutId)"
-          :key="layout.layoutId" 
-          variant="outlined"
-          color="primary"
-        >
-          {{ layout.layoutId }}
-        </v-chip>
-      </v-chip-group>
-    </v-card-text>
-  </v-card>
+  <main class="flex flex-col flex-grow p-8 w-full viaduct-background bg-opacity-50 bg-fixed overflow-auto">
+    <v-card
+      class="mx-auto my-8"
+      max-width="400"
+    >
+      <v-card-text>
+        <h2 class="text-h6 mb-2">Your Layouts</h2>
+        <div v-for="layout in layouts" :key="layout.id" 
+          class="p-4 rounded-lg border cursor-pointer transition-all hover:bg-gray-800 my-2"
+          :class="{ 'border-green-500 bg-green-800': layout.id === layoutId, 'border-gray-200 bg-gray-900': layout.id !== layoutId }"
+          @click="handleLayoutSelect(layout.id)">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <v-icon :color="layout.id === layoutId ? 'green' : 'grey'">mdi-home</v-icon>
+              <div>
+                <h4 class="font-medium">{{ layout.name }}</h4>
+                <p v-if="layout.description" class="text-sm text-gray-600">{{ layout.description }}</p>
+              </div>
+            </div>
+            <v-icon v-if="layout.id === layoutId" color="green">mdi-check-circle</v-icon>
+          </div>
+        </div>
+      </v-card-text>
+    </v-card>
+  </main>
 </template>

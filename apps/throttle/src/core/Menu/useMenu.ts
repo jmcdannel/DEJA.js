@@ -9,68 +9,54 @@ export const DEFAULT_MENU_CONFIG: MenuItem[] = [
     icon: 'mdi-train',
     color: 'pink',
     name: 'roster',
-    path: '/locos',
-    componentPath: './views/RosterView.vue',
-    requireDccEx: true
   },
   {
     label: 'Throttles',
     icon: 'mdi-gamepad-variant',
     color: 'green',
     name: 'throttle-list',
-    path: '/throttles',
-    componentPath: './views/ThrottleListView.vue',
-    requireDccEx: true
   },
   {
     label: 'Effects',
     icon: 'mdi-rocket',
     color: 'purple',
     name: 'effects',
-    path: '/effects',
-    componentPath: './views/EffectsView.vue'
   },
   {
     label: "Conductor",
     icon: 'mdi-account-tie-hat',
     color: 'red',
     name: 'conductor',
-    path: '/conductor',
-    componentPath: './views/ConductorView.vue',
-    requireDccEx: true
   },
   {
     label: "Throttle",
     icon: 'mdi-speedometer',
     color: 'lime',
     name: 'throttle',
-    path: '/throttle/:address',
-    componentPath: './views/ThrottleView.vue',
-    requireDccEx: true
   },
   {
     label: "Routes",
     icon: 'mdi-map',
     color: 'teal',
     name: 'routes',
-    path: '/routes',
-    componentPath: './views/RoutesView.vue'
   },
   {
     label: "Turnouts",
     icon: 'mdi-call-split',
     color: 'blue',
     name: 'turnouts',
-    path: '/turnouts',
-    componentPath: './views/TurnoutsView.vue'
   },
   {
     label: "Signals",
     icon: 'mdi-traffic-light',
     color: 'blue',
     name: 'signals',
-    path: '/signals',
-    componentPath: './views/SignalsView.vue'
+  },
+  {
+    label: 'Settings',
+    icon: 'mdi-cog',
+    color: 'gray',
+    name: 'settings'
   }
 ]
 

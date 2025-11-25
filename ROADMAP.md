@@ -1,7 +1,9 @@
+[ ] Guest Mode / Demo Mode
+[-] Login Page / w/signup u/p login
 [-] ttt-io as packages
 [-] ttt-io build scripts - output arduino configs, dcc config commands
 [ ] store roster on dccex
-[ ] throttle slider
+[x] throttle slider
 [ ] trim for consist
 [ ] quick consist?
 [ ] add loco FAB on throttle-list
@@ -20,6 +22,9 @@
 [ ] onboarding / create layout
 [ ] DEJA Suite Nav
 [ ] welding arduino
+[ ] DCC-EX page on cloud app
+[ ] Remove sound libs from effects page on cloud app
+
 
 [ ] monitor app
   - enable auto-clear
@@ -33,6 +38,10 @@
   - improve sound ui & features (one at a time or allow multiple?)
   - play intro
   - guest user management (cloud?)
+
+[ ] DEJA.js site
+[ ] TTT Site
+
 
 [x] Refactor signals to own module (+turnout)
 [x] fix route turnouts
