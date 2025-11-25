@@ -10,11 +10,15 @@ const route = useRoute()
 const router = useRouter()
 const { getThrottles } = useLocos()
 const throttles = getThrottles()
-const lastThrottleAddress = useStorage<number>('@DEJA/lastThrottleAddress', parseInt(route.params.address?.toString()) || throttles.value[0]?.address || 3)
-console.log('lastThrottleAddress:', lastThrottleAddress.value)
-const address = ref(lastThrottleAddress.value)
+const lastThrottleAddress = useStorage<number>('@DEJA/lastThrottleAddress', throttles.value[0]?.address || 3)
+const routeAddr = route.params.address ? parseInt(route.params.address.toString()) : NaN
+if (!Number.isNaN(routeAddr)) {
+  lastThrottleAddress.value = routeAddr
+} else if (lastThrottleAddress.value === undefined || Number.isNaN(lastThrottleAddress.value)) {
+  lastThrottleAddress.value = 3
+}
 const throttleNavRef = useTemplateRef('throttleNavRef')
-const { isSwiping, direction } = useSwipe(throttleNavRef, {
+useSwipe(throttleNavRef, {
     passive: false,
     onSwipe(e: TouchEvent) {
       
@@ -58,7 +62,7 @@ function handleSelect(newAddress: number) {
       <div class="absolute w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[80px] -bottom-[100px] -right-[200px]"></div>
       <div class="absolute w-[400px] h-[400px] rounded-full bg-violet-500/10 blur-[90px] top-[30%] left-[40%]"></div>
     </div>
-    <Throttle :address="lastThrottleAddress" />
+    <Throttle :address="routeAddr" />
     <v-slide-group
       
       selected-class="bg-success"

@@ -6,21 +6,21 @@ import type { Throttle } from '@/throttle/types'
 import { type Loco, useLocos } from '@repo/modules'
 import { db } from '@repo/firebase-config'
 import { getSignedSpeed } from '@/throttle/utils'
+import { throttle } from 'vuetify/lib/util/index.mjs'
 
 
 export const useThrottle = (address: Ref<number | null | undefined>) => {
-  console.log('useThrottle', address)
+  console.log('useThrottle', address.value)
   const { getLocos } = useLocos()
   const layoutId = useStorage('@DEJA/layoutId', '')
 
   const throttle = useDocument<Throttle>(
-    () => {
-      const addr = address.value
-      return addr !== undefined && addr !== null
-        ? doc(db, `layouts/${layoutId.value}/throttles`, addr.toString())
+    address.value
+        ? doc(db, `layouts/${layoutId.value}/throttles`, address.value.toString())
         : null
-    }
   )
+
+  console.log('throttle doc ref:', throttle)
 
   // Derive loco from the locos collection so we use the shared `getLocos` hook
   const locos = getLocos()

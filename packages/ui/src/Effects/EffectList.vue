@@ -1,18 +1,32 @@
 <script setup lang="ts">
-import { useStorage } from '@vueuse/core'
-import { useEfx, type Effect } from '@repo/modules/effects'
-import { ListMenu } from '@repo/ui'
-import EffectItem from './EffectItem.vue'
-import EffectTable from './EffectTable.vue'
-
-const viewAs = useStorage<string[]>('@DEJA/prefs/effects/View', ['button'])
-const sortBy = useStorage<string[]>('@DEJA/prefs/effects/Sort', ['device'])
+import { computed } from 'vue'
+import { efxTypes, useEfx, type Effect } from '@repo/modules/effects'
+import { useLayout, type Tag } from '@repo/modules'
+import List from '../ModuleList/List.vue'
+import { type ListFilter } from '../ModuleList/types'
 
 const { getEffects, runEffect } = useEfx()
+const { getDevices, getLayout } = useLayout()
+const devices = getDevices()
+const layout = getLayout()
 const effects = getEffects()
+const effectsList = computed(() => effects?.value ? effects.value.map((effect) => ({...effect, id: effect.id,icon: efxTypes.find((type) => type.value === effect.type)?.icon || 'mdi-help'})) : [])
+const deviceOptions = computed(() => devices?.value ? devices.value.map((device) => ({ label: device.id, value: device.id })) : [])
+const tagOptions = computed(() =>
+  layout?.value?.tags
+    ? layout.value.tags.map((tag: Tag) => ({ label: tag.name, value: tag.id }))
+    : []
+)
+const typeOptions = [...new Set(efxTypes.map((type) => ({ label: type.label, value: type.value })))]
 
-async function handleEffect(effect: Effect) {
-  await runEffect(effect)
+const filters = computed<ListFilter[]>(() => [
+  { type: 'device', label: 'Device', options: deviceOptions.value },
+  { type: 'type', label: 'Type', options: typeOptions },
+  { type: 'tags', label: 'Tags', options: tagOptions.value },
+])
+
+async function handleEffect(effect: Effect, newState: boolean) {
+  await runEffect({...effect, state: newState})
 }
 
 const cols = {
@@ -25,34 +39,14 @@ const cols = {
   }
 
 </script>
-
 <template>
-  <v-toolbar color="amber-darken-4" :elevation="8">
-    <template #prepend>
-      <v-icon icon="mdi-lightning-bolt" class="text-xl md:text-3xl"></v-icon>
-    </template>
-    <template #append>
-      <ListMenu :module-name="'effects'" />
-    </template>
-    <v-toolbar-title class="text-xl md:text-3xl">Effects</v-toolbar-title>
-  </v-toolbar>
-  <v-spacer class="my-4"></v-spacer>
-  <EffectTable 
-    v-if="viewAs?.[0] === 'table'"
-    :effects="effects as Effect[]" 
-    :sort-by="sortBy?.[0]" 
-    @effect-change="handleEffect" 
-  />
-  <div v-else class="w-full p-4">
-    <v-row>
-      <v-col :cols="cols.xs" :sm="cols.sm" :md="cols.md" :lg="cols.lg" :xl="cols.xl" :xxl="cols.xxl"
-        v-for="item in effects as Effect[]"
-        :key="item.id">
-          <EffectItem 
-            :effect="item as Effect" 
-            :viewAs="viewAs?.[0]"
-          />
-        </v-col>
-      </v-row>
-    </div>
+    <List 
+      module-name="effects"
+      color="purple-darken-4"
+      title="Effects"
+      icon="mdi-lightning-bolt"
+      :list="effectsList"
+      :filters="filters"
+      @update:state="handleEffect"
+    />
 </template>

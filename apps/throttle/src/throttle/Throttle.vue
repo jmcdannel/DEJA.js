@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, toRef } from 'vue'
+import { toRef } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Loco } from '@repo/modules/locos'
 import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.vue'
-import ThrottleSliderControls from '@/throttle/ThrottleSliderControls.vue'
 import SliderControls from '@/throttle/SliderControls.vue'
 import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
@@ -18,8 +17,11 @@ const props = defineProps({
     required: true
   }
 })
+console.log('ThrottleView address prop:', props.address)
 
 const address = toRef(props, 'address')
+
+console.log('Using throttle for address:', address.value)
 
 const { 
   adjustSpeed: handleAdjustSpeed,
@@ -35,13 +37,8 @@ const $router = useRouter()
 // const consistCmp = ref<InstanceType<typeof Consist> | null>(null)
 // const functionsCmp = ref<InstanceType<typeof Functions> | null>(null)
 
-function handleSlider(val: number): void { // handle slider changes
-  // currentSpeed.value = parseInt(val.toString()) // debounced speed changes
-}
 
 async function handleAdjustSliderSpeed(val: number) {
-  // currentSpeed.value = val
-  console.log('handleAdjustSliderSpeed', val, currentSpeed.value)
   if (currentSpeed.value === val) {
     return
   }
@@ -81,12 +78,12 @@ async function clearLoco() {
     <section class="throttle w-full h-full flex flex-row justify-around flex-grow relative z-10">
       <section class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-center h-full flex-1/2 sm:flex-1">
         <v-spacer />
-        <RoadnameLogo v-if="loco" :roadname="loco.meta?.roadname" :size="'xl'" />
         <SliderControls @update:currentSpeed="handleAdjustSliderSpeed" @stop="handleStop" :speed="currentSpeed" />
-        <!-- <ThrottleSliderControls :direction="direction" :speed="currentSpeed" @update:currentSpeed="handleSlider" @stop="handleStop" /> -->
       </section>
       <section v-if="loco" class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
         <Consist v-if="loco" :loco="loco" />
+        <v-spacer />
+        <RoadnameLogo v-if="loco" :roadname="loco.meta?.roadname" :size="'xl'" />
         <v-spacer />
         <FunctionsSpeedDial :loco="loco" />
       </section>
@@ -95,5 +92,13 @@ async function clearLoco() {
       <ThrottleButtonControls @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" />
       </section>
     </section>
+  </main>
+  <main v-else>
+    <div class="flex flex-col items-center justify-center h-full w-full gap-4">
+      <h2 class="text-2xl font-bold text-gray-700">No Throttle Assigned</h2>
+      <v-btn color="pink" variant="outlined" @click="$router.push({ name: 'throttle-list' })">
+        Go to Throttle List
+      </v-btn>
+    </div>
   </main>
 </template>
