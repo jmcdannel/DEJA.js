@@ -1,21 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import type { RouteRecordRaw } from 'vue-router'
 import { requireAuth, requireDccEx, requireLayout } from '@repo/auth'
 import HomeView from './views/HomeView.vue'
 import Connect from './connect/Connect.vue'
-import { DEFAULT_MENU_CONFIG } from './core/Menu/useMenu'
 import { Login } from '@repo/auth'
-
-type MenuItem = {
-  color: string
-  icon: string
-  label: string
-  name: string
-  path: string
-  componentPath: string
-  isFavorite?: boolean
-  requireDccEx?: boolean
-}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,6 +16,66 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: Login,
+    },
+    {
+      path: '/connect',
+      name: 'connect',
+      component: Connect,
+      beforeEnter: [requireAuth],
+    },
+    {
+      path: '/locos',
+      name: 'roster',
+      component: () => import('./views/RosterView.vue'),
+      beforeEnter: [requireAuth, requireDccEx, requireLayout],
+    },
+    {
+      path: '/effects',
+      name: 'effects',
+      component: () => import('./views/EffectsView.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
+      path: '/signals',
+      name: 'signals',
+      component: () => import('./views/SignalsView.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
+      path: '/routes',
+      name: 'routes',
+      component: () => import('./views/RoutesView.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
+      path: '/turnouts',
+      name: 'turnouts',
+      component: () => import('./views/TurnoutsView.vue'),
+      beforeEnter: [requireAuth, requireLayout],
+    },
+    {
+      path: '/conductor',
+      name: 'conductor',
+      component: () => import('./views/ConductorView.vue'),
+      beforeEnter: [requireAuth, requireDccEx, requireLayout],
+    },
+    {
+      path: '/throttle/:address',
+      name: 'throttle',
+      component: () => import('./views/ThrottleView.vue'),
+      beforeEnter: [requireAuth, requireDccEx, requireLayout],
+    },
+    {
+      path: '/throttles',
+      name: 'throttles',
+      component: () => import('./views/ThrottleListView.vue'),
+      beforeEnter: [requireAuth, requireDccEx, requireLayout],
+    },
+    {
+      path: '/throttle-list',
+      name: 'throttle-list',
+      component: () => import('./views/ThrottleListView.vue'),
+      beforeEnter: [requireAuth, requireDccEx, requireLayout],
     },
     {
       path: '/select-layout',
@@ -48,24 +95,21 @@ const router = createRouter({
       component: () => import('./views/RoadnameLogosView.vue'),
       beforeEnter: [requireAuth, requireLayout],
     },
-    ...DEFAULT_MENU_CONFIG.map((m: MenuItem): RouteRecordRaw => {
-      const component = m.componentPath
-        ? // dynamic import from string (allow non-literal with Vite)
-          () => import(/* @vite-ignore */ m.componentPath)
-        : undefined
-
-      const beforeEnter = m.requireDccEx ? [requireDccEx] : undefined
-
-      const route: RouteRecordRaw = {
-        path: m.path,
-        name: m.name,
-        // only include component/beforeEnter when defined to avoid matching the redirect route type
-        ...(component ? { component } : {}),
-        ...(beforeEnter ? { beforeEnter } : {}),
-      }
-
-      return route
-    }),
+    // {
+    //   path: '/connect/dejajs',
+    //   name: 'dejajs',
+    //   component: () => import('../connections/deja/DejaJs.vue'),
+    // },
+    // {
+    //   path: '/connect/deja-cloud',
+    //   name: 'deja-cloud',
+    //   component: () => import('../connections/deja/DejaCloud.vue'),
+    // },
+    // {
+    //   path: '/connect/deja-direct',
+    //   name: 'deja-direct',
+    //   component: () => import('../connections/deja/DejaServer.vue'),
+    // },
   ],
 })
 
