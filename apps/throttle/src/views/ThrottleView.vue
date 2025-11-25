@@ -71,7 +71,7 @@ function handleSelect(newAddress: number) {
     <v-slide-group-item 
       v-for="item in throttles"
       :key="item.id">
-      <ThrottleNavItem :address="item.address" @select="handleSelect(item.address)" />
+      <ThrottleNavItem v-if="item.address" :address="item.address" @select="handleSelect(item.address)" />
     </v-slide-group-item>
   </v-slide-group>
   </div>
