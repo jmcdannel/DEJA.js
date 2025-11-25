@@ -22,10 +22,10 @@ const { colors, DEFAULT_COLOR } = useColors()
 const color = computed(() => colors[props.turnout.color || DEFAULT_COLOR])
 
 const indicatorNColor = computed(() => {
-  return props.state ? 'rgb(67,242,13)' : 'rgb(200,200,200)'
+  return props.state ? 'rgb(200,200,200)' : 'rgb(67,242,13)'
 })
 const indicatorRColor = computed(() => {
-  return props.state ? 'rgb(200,200,200)' : 'rgb(242,13,13)'
+  return props.state ? 'rgb(242,13,13)' : 'rgb(200,200,200)'
 })
 
 const internalState = ref(props.state !== undefined ? props.state : props.turnout?.state)
@@ -73,7 +73,7 @@ async function handleTurnouts() {
         <text x="293.038px" y="624.217px" style="font-family:'BMDoHyeon-OTF', 'BM Dohyeon', sans-serif;font-size:12px;">SWITCH</text>
       </g>
       <g id="turnout-label" transform="matrix(0.99944,0,0,1.00463,-34.4061,-25.8633)">
-        <text x="293.038px" y="624.217px" style="font-family:'BMDoHyeon-OTF', 'BM Dohyeon', sans-serif;font-size:13px;">{{ turnout.name }}</text>
+        <text x="293.038px" y="624.217px" style="font-size:13px;">{{ turnout.name }}</text>
       </g>
       <g
         id="handle-rot"
@@ -91,10 +91,10 @@ async function handleTurnouts() {
         <path d="M318.84,687.498C332.223,687.498 343.088,698.363 343.088,711.746C343.088,725.129 332.223,735.994 318.84,735.994C305.457,735.994 294.592,725.129 294.592,711.746C294.592,698.363 305.457,687.498 318.84,687.498ZM318.84,699.622C325.531,699.622 330.964,705.055 330.964,711.746C330.964,718.437 325.531,723.87 318.84,723.87C312.148,723.87 306.716,718.437 306.716,711.746C306.716,705.055 312.148,699.622 318.84,699.622Z" style="fill:rgb(128,128,128);stroke:black;stroke-width:6px;"/>
       </g>
       <g id="n-label" transform="matrix(0.939974,-0.341366,0.339601,0.944858,-198.297,142.945)">
-        <text x="259.717px" y="612.003px" style="font-family:'BMDoHyeon-OTF', 'BM Dohyeon', sans-serif;font-size:15px;">N</text>
+        <text x="259.717px" y="612.003px" style="font-size:15px;">N</text>
       </g>
       <g id="r-label" transform="matrix(0.93837,0.345797,-0.344009,0.943246,303.806,-37.8071)">
-        <text x="259.717px" y="612.003px" style="font-family:'BMDoHyeon-OTF', 'BM Dohyeon', sans-serif;font-size:15px;">R</text>
+        <text x="259.717px" y="612.003px" style="font-size:15px;">R</text>
       </g>
       <g id="n-indicator" transform="matrix(0.99944,0,0,1.00463,35.9905,-56.4729)">
         <circle cx="225.703" cy="595.685" r="15.911" :style="{ fill: indicatorNColor, stroke: 'black', strokeWidth: '3px' }"/>

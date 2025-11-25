@@ -201,12 +201,14 @@ watch(debouncedSpeed, (speed) => {
           v-model="sliderModel"
           :disabled="dirModel === 1"
           show-ticks="always"
+          s
           step="1"
           tick-size="1"
           width="100%"
           :ticks="ticks"
           track-size="20"
           track-color="black"
+          thumb-label
           track-fill-color="zinc-950"
           class="shadow-lg border-2 rounded-full py-2 px-8 bg-zinc-950 border-zinc-800"
           max="126"
@@ -240,6 +242,9 @@ watch(debouncedSpeed, (speed) => {
           tick-size="5"
           hide-details
           track-size="8"
+          thumb-label
+          prepend-icon="mdi-octagon-outline"
+          append-icon="mdi-octagon"
           thumb-size="32"
           thumb-color="red-darken-4"
           base-color="red-800"
@@ -257,12 +262,4 @@ watch(debouncedSpeed, (speed) => {
       <v-btn icon="mdi-car-light-dimmed" elevation="12" class="mr-12 border-2"></v-btn>
     </div>
   </div>
-  <pre>
-props.speed: {{ speed }}
-sliderVal: {{ sliderVal }} 
-pendingSpeed: {{ pendingSpeed }} 
-dirRef: {{ dirRef }} 
-brakeRef: {{ brakeRef }}
-sliderModel: {{ sliderModel }}
-  </pre>
 </template>

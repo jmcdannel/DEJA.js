@@ -66,36 +66,27 @@ watch(
 </script>
 
 <template>
-    <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[100px] -top-[200px] -left-[300px]"></div>
-      <div class="absolute w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[80px] -bottom-[100px] -right-[200px]"></div>
-      <div class="absolute w-[400px] h-[400px] rounded-full bg-violet-500/10 blur-[90px] top-[30%] left-[40%]"></div>
-    </div>
-    <v-toolbar color="green-darken-2" :elevation="8">
-      <template #prepend>
-        <v-icon icon="mdi-speedometer" class="text-xl md:text-3xl"></v-icon>
+  <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[100px] -top-[200px] -left-[300px]"></div>
+    <div class="absolute w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[80px] -bottom-[100px] -right-[200px]"></div>
+    <div class="absolute w-[400px] h-[400px] rounded-full bg-violet-500/10 blur-[90px] top-[30%] left-[40%]"></div>
+  </div>
+  <div v-if="throttles" class="flex-grow flex pb-16 flex-row flex-wrap relative overflow-auto items-end content-end justify-end">
+    <draggable
+      v-model="orderedThrottles"
+      item-key="address"
+      handle=".drag-handle"
+      class="flex flex-row flex-wrap content-end items-end justify-end w-full"
+      :animation="150"
+    >
+      <template #item="{ element }">
+        <div class="basis-full md:basis-1/2 p-1">
+          <ThrottleTile v-if="element.address" :address="element.address" />
+        </div>
       </template>
-      <template #append>
-        <ListMenu :module-name="'throttles'" />
-      </template>
-      <v-toolbar-title class="text-xl md:text-3xl">Throttles</v-toolbar-title>    
-    </v-toolbar>
-    <div v-if="throttles" class="flex-grow flex pb-16 flex-row flex-wrap relative overflow-auto items-end content-end justify-end">
-      <draggable
-        v-model="orderedThrottles"
-        item-key="address"
-        handle=".drag-handle"
-        class="flex flex-row flex-wrap content-end items-end justify-end w-full"
-        :animation="150"
-      >
-        <template #item="{ element }">
-          <div class="basis-full md:basis-1/2 p-1">
-            <ThrottleTile v-if="element.address" :address="element.address" />
-          </div>
-        </template>
-      </draggable>
-      <v-fab icon="mdi-plus" color="primary" size="56" @click="isRosterOpen = true"  app />
-    </div>
+    </draggable>
+    <v-fab icon="mdi-plus" color="primary" size="56" @click="isRosterOpen = true"  app />
+  </div>
   <v-dialog v-model="isRosterOpen" max-width="800px">
     <template v-slot:default>
       <v-sheet class="p-4">
