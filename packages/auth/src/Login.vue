@@ -101,7 +101,7 @@ onMounted(() => {
       <v-card elevation="2" class="pa-2 bg-transparent w-full">
         <v-card-title class="text-h6">Sign in with email</v-card-title>
         <v-card-text>
-          <v-form ref="loginForm" @submit.prevent="handleEmailSignin" v-slot="{ isValid }">
+          <v-form ref="loginForm" v-slot="{ isValid }">
             <p>isValid:{{ isValid }}</p>
             <v-text-field
               v-model="email"
@@ -130,7 +130,7 @@ onMounted(() => {
                 </v-btn>
               </v-col>  
               <v-col cols="12" sm="6">
-                <v-btn type="submit" :disabled="!isValid" color="primary" block>
+                <v-btn type="button" @click="handleEmailSignin" :disabled="!isValid" color="primary" block>
                   Sign in
                 </v-btn>
               </v-col>            
