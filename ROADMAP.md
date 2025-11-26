@@ -1,7 +1,7 @@
 MVP
 [ ] Guest Mode / Demo Mode
-[ ] account menu
-[ ] DEJA Suite Nav
+[x] account menu
+[x] DEJA Suite Nav
 [-] Login Page / w/signup u/p login
 [-] ttt-io as packages
 [-] ttt-io build scripts - output arduino configs, dcc config commands
@@ -10,7 +10,7 @@ MVP
 [ ] handle unknown power state
 [ ] onboarding / create layout
 [ ] DCC-EX page on cloud app
-
+[ ] sensors
 
 [ ] monitor app
   - enable auto-clear

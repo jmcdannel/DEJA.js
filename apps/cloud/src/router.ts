@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { Login, requireAuth, requireDccEx, requireLayout } from '@repo/auth'
+import { requireAuth, requireDccEx, requireLayout } from '@repo/auth'
 import Dashboard from './Dashboard/Dashboard.vue'
+import Login from './views/Login.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,6 +16,12 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: Login,
+    },
+    {
+      path: '/select-layout',
+      name: 'Select Layout',
+      component: () => import('./Layout/SelectLayout.vue'),
+      beforeEnter: [requireAuth],
     },
     {
       path: '/locos',

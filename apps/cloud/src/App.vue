@@ -11,11 +11,11 @@ import { useMenu } from '@/Core/Menu/useMenu'
 import SelectLayout from './Layout/SelectLayout.vue'
 import { Login } from '@repo/auth'
 import { AppHeader } from '@repo/ui'
-import { useDcc } from '@repo/dccex'
-import { useEfx } from '@repo/modules'
+// import { useDcc } from '@repo/dccex'
+// import { useEfx } from '@repo/modules'
 
-const { sendDccCommand } = useDcc()
-const { runEffect, getEffectsByType } = useEfx()
+// const { sendDccCommand } = useDcc()
+// const { runEffect, getEffectsByType } = useEfx()
 const drawer = ref(true)
 const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 
@@ -23,20 +23,20 @@ const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 async function handleTrackPowerToggle(newState: boolean) {
   const DEFAULT_ON = '1 MAIN'
   const DEFAULT_OFF = '0'
-  await sendDccCommand({ action: 'dcc', payload: newState ? DEFAULT_ON : DEFAULT_OFF })
+  // await sendDccCommand({ action: 'dcc', payload: newState ? DEFAULT_ON : DEFAULT_OFF })
 }
 
 async function handleLayoutPowerToggle(newState: boolean) {
-  const powerEfx = await getEffectsByType('power')
-  if (powerEfx && Array.isArray(powerEfx)) {
-    powerEfx.forEach((efx: any) => {
-      runEffect({...efx, state: newState })
-    })
-  }
+  // const powerEfx = await getEffectsByType('power')
+  // if (powerEfx && Array.isArray(powerEfx)) {
+  //   powerEfx.forEach((efx: any) => {
+  //     runEffect({...efx, state: newState })
+  //   })
+  // }
 }
 
 async function handleEmergencyStop() {
-  await sendDccCommand({ action: 'dcc', payload: '!' })
+  // await sendDccCommand({ action: 'dcc', payload: '!' })
 }
 
 function handleDeviceSelect(deviceId: string) {
@@ -69,7 +69,7 @@ function handleLogoClick() {
 </script>
 <template>
   <v-responsive class="border rounded">
-      <v-app v-if="user" :theme="theme.name.value">
+      <v-app :theme="theme.name.value">
         <AppHeader 
           app-name="Cloud"
           app-icon="mdi-cloud"
@@ -89,21 +89,12 @@ function handleLogoClick() {
           @drawer-toggle="drawer = !drawer"
         >
         </AppHeader>
-        <Menu v-model:drawer="drawer" :menu="menu" @handle-menu="handleMenu" />
+        <Menu v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
       <v-main>
-        <v-container v-if="layoutId">
+        <v-container >
           <RouterView />
         </v-container>
-        <v-container v-else>
-          <v-alert type="error" class="text-center mb-4">
-            No Layout Selected. Please select a layout to continue.
-          </v-alert>
-          <SelectLayout @selected="handleLayoutSelect" />
-        </v-container>
       </v-main>
-    </v-app>
-    <v-app v-else :theme="theme.name.value">
-      <Login />
     </v-app>
   </v-responsive>
 </template>

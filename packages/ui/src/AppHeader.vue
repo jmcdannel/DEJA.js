@@ -10,9 +10,10 @@ import TrackPower from './TrackPower.vue'
 import Power from './Power.vue'
 import EmergencyStop from './EmergencyStop.vue'
 import BackgroundDecor from './BackgroundDecor.vue'
+import SelectLayout from './SelectLayout.vue'
 import { useLayout } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
-import { useEfx, type Effect } from '@repo/modules'
+// import { useEfx, type Effect } from '@repo/modules'
 
 
 const emit = defineEmits<{
@@ -35,7 +36,7 @@ const props = defineProps<{
   layoutPowerState?: boolean
 }>()
 
-const { runEffect, getEffectsByType } = useEfx()
+// const { runEffect, getEffectsByType } = useEfx()
 const { sendDccCommand } = useDcc()
 const { getLayouts, getDevices } = useLayout()
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -58,12 +59,12 @@ async function handleTrackPowerToggle(newState: boolean) {
 }
 
 function handleLayoutPowerToggle(newState: boolean) {
-  const powerEfx = getEffectsByType('power')
-  if (powerEfx && Array.isArray(powerEfx)) {
-    powerEfx.forEach((efx: any) => {
-      runEffect({...efx, state: newState })
-    })
-  }
+  // const powerEfx = getEffectsByType('power')
+  // if (powerEfx && Array.isArray(powerEfx)) {
+  //   powerEfx.forEach((efx: any) => {
+  //     runEffect({...efx, state: newState })
+  //   })
+  // }
 }
 
 async function handleEmergencyStop() {
@@ -149,7 +150,7 @@ const defaultProps = {
     <template v-slot:append>
       <!-- User Profile - always on the far right --> 
       <template v-if="mdAndUp">
-        <v-chip size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-home" :color="layoutId ? 'success' : 'error'"
+        <v-chip v-if="user" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-home" :color="layoutId ? 'success' : 'error'"
           variant="elevated" @click="openLayoutModal">
           <template #append>
             <span v-if="layoutId" class="status-dot success-dot"></span>
@@ -196,28 +197,7 @@ const defaultProps = {
           Select Layout
         </v-card-title>
         <v-card-text>
-          <div v-if="layouts && layouts.length > 0" class="space-y-3">
-            <div v-for="layout in layouts" :key="layout.id" 
-              class="p-4 rounded-lg border cursor-pointer transition-all hover:bg-gray-800"
-              :class="{ 'border-green-500 bg-green-800': layout.id === layoutId, 'border-gray-200 bg-gray-900': layout.id !== layoutId }"
-              @click="handleLayoutSelect(layout.id)">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <v-icon :color="layout.id === layoutId ? 'green' : 'grey'">mdi-home</v-icon>
-                  <div>
-                    <h4 class="font-medium">{{ layout.name }}</h4>
-                    <p v-if="layout.description" class="text-sm text-gray-600">{{ layout.description }}</p>
-                  </div>
-                </div>
-                <v-icon v-if="layout.id === layoutId" color="green">mdi-check-circle</v-icon>
-              </div>
-            </div>
-          </div>
-          <div v-else class="text-center py-8">
-            <v-icon size="48" color="grey">mdi-home-outline</v-icon>
-            <h3 class="text-lg font-medium text-gray-900 mt-2">No Layouts Available</h3>
-            <p class="text-gray-600">There are currently no layouts configured.</p>
-          </div>
+          <SelectLayout @select="isLayoutModalOpen = false" />
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn variant="text" @click="isLayoutModalOpen = false">Close</v-btn>

@@ -6,12 +6,13 @@ export const googleAuthProvider = new GoogleAuthProvider()
 </script>
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getRedirectResult, signInWithPopup } from 'firebase/auth'
+import { getRedirectResult, signInWithPopup, getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { useFirebaseAuth, useCurrentUser } from 'vuefire'
 import { useRouter } from 'vue-router'
 
 const emit = defineEmits(['auth'])
 const router = useRouter()
+const fbauth = getAuth()
 const auth = useFirebaseAuth()
 const user = useCurrentUser()
 const email = ref('')
@@ -51,7 +52,21 @@ async function handleGoogleSignin() {
 }
 
 async function handleEmailSignin() {
-  console.log('Email signin not yet implemented')
+  signInWithEmailAndPassword(fbauth, email, password)
+    .then((userCredential) => {
+      // Signed in 
+      const user = userCredential.user;
+      console.log('Email signin success', user)
+      authComplete()
+      // ...
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.error('Failed email signin', errorCode, errorMessage)
+      error.value = errorMessage
+    });
+
   
 }
 
@@ -86,7 +101,8 @@ onMounted(() => {
       <v-card elevation="2" class="pa-2 bg-transparent w-full">
         <v-card-title class="text-h6">Sign in with email</v-card-title>
         <v-card-text>
-          <v-form ref="loginForm" @submit.prevent="handleEmailSignin" v-slot="{ valid }">
+          <v-form ref="loginForm" @submit.prevent="handleEmailSignin" v-slot="{ isValid }">
+            <p>isValid:{{ isValid }}</p>
             <v-text-field
               v-model="email"
               label="Email"
@@ -114,7 +130,7 @@ onMounted(() => {
                 </v-btn>
               </v-col>  
               <v-col cols="12" sm="6">
-                <v-btn type="submit" :disabled="!valid" color="primary" block>
+                <v-btn type="submit" :disabled="!isValid" color="primary" block>
                   Sign in
                 </v-btn>
               </v-col>            
