@@ -2,20 +2,20 @@
 import { ref, watch } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
-// import { RouterView, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { useTheme } from 'vuetify'
+import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { useMenu } from '@/Core/Menu/useMenu'
 
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
 import { Login } from '@repo/auth'
 import { AppHeader } from '@repo/ui'
-import { useDcc } from '@repo/dccex'
-import { useEfx } from '@repo/modules'
+// import { useDcc } from '@repo/dccex'
+// import { useEfx } from '@repo/modules'
 
-const { sendDccCommand } = useDcc()
-const { runEffect, getEffectsByType } = useEfx()
+// const { sendDccCommand } = useDcc()
+// const { runEffect, getEffectsByType } = useEfx()
 const drawer = ref(true)
 const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 
@@ -23,20 +23,20 @@ const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 async function handleTrackPowerToggle(newState: boolean) {
   const DEFAULT_ON = '1 MAIN'
   const DEFAULT_OFF = '0'
-  await sendDccCommand({ action: 'dcc', payload: newState ? DEFAULT_ON : DEFAULT_OFF })
+  // await sendDccCommand({ action: 'dcc', payload: newState ? DEFAULT_ON : DEFAULT_OFF })
 }
 
 async function handleLayoutPowerToggle(newState: boolean) {
-  const powerEfx = await getEffectsByType('power')
-  if (powerEfx && Array.isArray(powerEfx)) {
-    powerEfx.forEach((efx: any) => {
-      runEffect({...efx, state: newState })
-    })
-  }
+  // const powerEfx = await getEffectsByType('power')
+  // if (powerEfx && Array.isArray(powerEfx)) {
+  //   powerEfx.forEach((efx: any) => {
+  //     runEffect({...efx, state: newState })
+  //   })
+  // }
 }
 
 async function handleEmergencyStop() {
-  await sendDccCommand({ action: 'dcc', payload: '!' })
+  // await sendDccCommand({ action: 'dcc', payload: '!' })
 }
 
 function handleDeviceSelect(deviceId: string) {
@@ -62,10 +62,6 @@ function handleLayoutSelect(newLayout: string) {
   router.push({ name: 'Layout' })
 }
 
-function handleThemeChange(newTheme: string) {
-  theme.change(newTheme)
-}
-
 function handleLogoClick() {
   router.push({ path: '/' })
 }
@@ -73,7 +69,7 @@ function handleLogoClick() {
 </script>
 <template>
   <v-responsive class="border rounded">
-      <v-app v-if="user" :theme="theme.name.value">
+      <v-app :theme="theme.name.value">
         <AppHeader 
           app-name="Cloud"
           app-icon="mdi-cloud"
@@ -93,62 +89,12 @@ function handleLogoClick() {
           @drawer-toggle="drawer = !drawer"
         >
         </AppHeader>
-      <v-navigation-drawer v-model="drawer" mobile-breakpoint="md">
-        <v-spacer class="h-8"></v-spacer>
-        <v-list>
-          <v-list-item v-for="item in menu" 
-            :key="item.label" 
-            :title="item.label"
-            :color="item.color || 'primary'"
-            :active="router.currentRoute.value.name === item.label"
-            @click="handleMenu(item)"
-            link
-          >
-            <template #prepend>
-              <v-icon size="24" :class="`text-${item.color}-500 dark:text-${item.color}-400`"
-                class="stroke-none" >{{item.icon}}</v-icon>
-            </template>
-          </v-list-item>
-        </v-list>
-        <v-divider class="my-2"></v-divider>
-        <!-- Theme Toggle Section -->
-        <v-list>
-          <v-list-item>
-            <v-list-item-title>
-              <v-btn-toggle
-                v-model="currentTheme"
-                mandatory
-                size="small"
-                @update:model-value="handleThemeChange"
-                color="amber"
-              >
-                <v-btn value="light" size="small" :variant="currentTheme === 'light' ? 'flat' : 'outlined'">
-                  <v-icon icon="mdi-white-balance-sunny" size="16"></v-icon>
-                </v-btn>
-                <v-btn value="dark" size="small" :variant="currentTheme === 'dark' ? 'flat' : 'outlined'">
-                  <v-icon icon="mdi-weather-night" size="16"></v-icon>
-                </v-btn>
-              </v-btn-toggle>
-            </v-list-item-title>
-            <template #append>
-            </template>
-          </v-list-item>
-        </v-list>
-      </v-navigation-drawer>
+        <Menu v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
       <v-main>
-        <v-container v-if="layoutId">
+        <v-container >
           <RouterView />
         </v-container>
-        <v-container v-else>
-          <v-alert type="error" class="text-center mb-4">
-            No Layout Selected. Please select a layout to continue.
-          </v-alert>
-          <SelectLayout @selected="handleLayoutSelect" />
-        </v-container>
       </v-main>
-    </v-app>
-    <v-app v-else :theme="theme.name.value">
-      <Login />
     </v-app>
   </v-responsive>
 </template>

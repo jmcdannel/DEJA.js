@@ -1,7 +1,7 @@
 import { computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
-import type { MenuItem } from './types'
+import type { MenuItem } from '@repo/ui/src/Menu/types'
 
 export const DEFAULT_MENU_CONFIG: MenuItem[] = [
   {

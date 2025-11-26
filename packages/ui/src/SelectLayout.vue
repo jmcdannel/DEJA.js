@@ -1,55 +1,42 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { useCurrentUser } from 'vuefire'
+import { useRouter } from 'vue-router'
 import { useLayout } from '@repo/modules'
+import { useStorage } from '@vueuse/core'
 
-const emit = defineEmits(['selected', 'clear'])
+const emit = defineEmits(['select'])
 
-defineProps({
-  layoutId: String
-})
-
+const user = useCurrentUser()
+const router = useRouter()
 const { getLayouts } = useLayout()
-const layouts = getLayouts()
+const layoutId = useStorage('@DEJA/layoutId', '')
 
-const isMenuOpen = ref(false)
+const layouts = getLayouts(user.value?.email)
 
-function handleLayoutSelect(newLayout: string) {
-  emit('selected', newLayout)
-  isMenuOpen.value = false
+async function handleLayoutSelect(newLayout: string) {
+  layoutId.value = newLayout
+  router.push({ name: 'home' })
+  emit('select', newLayout)
 }
 </script>
 <template>
-  <v-menu location="bottom" v-model="isMenuOpen">
-    <template v-slot:activator="{ props }">
-      <v-chip
-        v-bind="props"
-        size="small"
-        class="ma-1 cursor-pointer"
-        prepend-icon="mdi-home"
-        color="primary"
-        variant="elevated"
-      >
-        Select Layout
-      </v-chip>
-    </template>
-    <v-list>
-      <v-list-item
-        v-for="layout in layouts"
-        :key="layout.id"
-        class="cursor-pointer"
-        @click="handleLayoutSelect(layout.id)"
-      >
-        <v-list-item-title>
-          <v-chip
-            size="small"
-            prepend-icon="mdi-home"
-            color="primary"
-            variant="outlined"
-          >
-            {{ layout.name || layout.id }}
-          </v-chip>
-        </v-list-item-title>
-      </v-list-item>
-    </v-list>
-  </v-menu>
+  <v-list>
+    <v-list-item
+      v-for="layout in layouts"
+      :key="layout.id"
+      class="cursor-pointer"
+      @click="handleLayoutSelect(layout.id)"
+    >
+      <v-list-item-title>
+        <v-chip
+          size="small"
+          prepend-icon="mdi-home"
+          color="primary"
+          variant="outlined"
+        >
+          {{ layout.name || layout.id }}
+        </v-chip>
+      </v-list-item-title>
+    </v-list-item>
+  </v-list>
 </template>
