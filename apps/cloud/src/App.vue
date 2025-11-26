@@ -2,9 +2,9 @@
 import { ref, watch } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
-// import { RouterView, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { useTheme } from 'vuetify'
+import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { useMenu } from '@/Core/Menu/useMenu'
 
 // Components
@@ -62,10 +62,6 @@ function handleLayoutSelect(newLayout: string) {
   router.push({ name: 'Layout' })
 }
 
-function handleThemeChange(newTheme: string) {
-  theme.change(newTheme)
-}
-
 function handleLogoClick() {
   router.push({ path: '/' })
 }
@@ -93,48 +89,7 @@ function handleLogoClick() {
           @drawer-toggle="drawer = !drawer"
         >
         </AppHeader>
-      <v-navigation-drawer v-model="drawer" mobile-breakpoint="md">
-        <v-spacer class="h-8"></v-spacer>
-        <v-list>
-          <v-list-item v-for="item in menu" 
-            :key="item.label" 
-            :title="item.label"
-            :color="item.color || 'primary'"
-            :active="router.currentRoute.value.name === item.label"
-            @click="handleMenu(item)"
-            link
-          >
-            <template #prepend>
-              <v-icon size="24" :class="`text-${item.color}-500 dark:text-${item.color}-400`"
-                class="stroke-none" >{{item.icon}}</v-icon>
-            </template>
-          </v-list-item>
-        </v-list>
-        <v-divider class="my-2"></v-divider>
-        <!-- Theme Toggle Section -->
-        <v-list>
-          <v-list-item>
-            <v-list-item-title>
-              <v-btn-toggle
-                v-model="currentTheme"
-                mandatory
-                size="small"
-                @update:model-value="handleThemeChange"
-                color="amber"
-              >
-                <v-btn value="light" size="small" :variant="currentTheme === 'light' ? 'flat' : 'outlined'">
-                  <v-icon icon="mdi-white-balance-sunny" size="16"></v-icon>
-                </v-btn>
-                <v-btn value="dark" size="small" :variant="currentTheme === 'dark' ? 'flat' : 'outlined'">
-                  <v-icon icon="mdi-weather-night" size="16"></v-icon>
-                </v-btn>
-              </v-btn-toggle>
-            </v-list-item-title>
-            <template #append>
-            </template>
-          </v-list-item>
-        </v-list>
-      </v-navigation-drawer>
+        <Menu v-model:drawer="drawer" :menu="menu" @handle-menu="handleMenu" />
       <v-main>
         <v-container v-if="layoutId">
           <RouterView />

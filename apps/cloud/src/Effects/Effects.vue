@@ -31,7 +31,7 @@ function handleAdd() {
   </v-dialog>
 
   <!-- External Sound Library Quicklinks -->
-  <v-card class="mb-4">
+  <!-- <v-card class="mb-4">
     <v-card-title class="text-h6">
       <v-icon icon="mdi-link" class="mr-2" color="info"></v-icon>
       External Sound Libraries
@@ -105,7 +105,7 @@ function handleAdd() {
         </ol>
       </div>
     </v-card-text>
-  </v-card>
+  </v-card> -->
 
   <EffectsList @edit="handleEdit">
     <template #prepend>

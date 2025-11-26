@@ -1,29 +1,15 @@
+MVP
 [ ] Guest Mode / Demo Mode
+[ ] account menu
+[ ] DEJA Suite Nav
 [-] Login Page / w/signup u/p login
 [-] ttt-io as packages
 [-] ttt-io build scripts - output arduino configs, dcc config commands
 [ ] store roster on dccex
-[x] throttle slider
-[ ] trim for consist
-[ ] quick consist?
-[ ] add loco FAB on throttle-list
-[x] throttle list grid cols
-[x] switch layout menu
-[ ] function map - momentary, latching (see ex-webthrottle)
+[-] function map - momentary, latching (see ex-webthrottle)
 [ ] handle unknown power state
-[ ] add documenation, other meta data to loco
-[x] sort throttles
-[x] optimize command pool to flush at an interval instead of waiting DELAYms
-[ ] fix @repo/* imports 
-[ ] add more sounds and hook up speakers
-[-] sound mixer / mute
-[-] led designer
-[ ] account menu
 [ ] onboarding / create layout
-[ ] DEJA Suite Nav
-[ ] welding arduino
 [ ] DCC-EX page on cloud app
-[ ] Remove sound libs from effects page on cloud app
 
 
 [ ] monitor app
@@ -39,8 +25,20 @@
   - play intro
   - guest user management (cloud?)
 
-[ ] DEJA.js site
-[ ] TTT Site
+[-] DEJA.js site
+[-] TTT Site
+---
+
+[ ] use UI controls in cloud app, everywhere
+[ ] quick consist?
+[ ] fix @repo/* imports 
+[ ] add documenation, other meta data to loco
+[ ] add more sounds and hook up speakers
+[-] sound mixer / mute
+[-] led designer
+[ ] welding arduino
+
+
 
 
 [x] Refactor signals to own module (+turnout)
@@ -71,4 +69,12 @@
 [x] cloud device detail page
 [x] auto-connect pico
 [x] filter / view / sort everything
+[x] throttle slider
+[x] trim for consist
+[x] throttle list grid cols
+[x] switch layout menu
+[x] add loco FAB on throttle-list
+[x] sort throttles
+[x] optimize command pool to flush at an interval instead of waiting DELAYms
+[x] Remove sound libs from effects page on cloud app
 
