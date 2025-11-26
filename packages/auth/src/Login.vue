@@ -52,7 +52,7 @@ async function handleGoogleSignin() {
 }
 
 async function handleEmailSignin() {
-  signInWithEmailAndPassword(fbauth, email, password)
+  signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed in 
       const user = userCredential.user;
