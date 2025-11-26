@@ -33,7 +33,7 @@ const user = useCurrentUser()
               >{{ user?.email }}</span>
           </v-list-item-title>          
         </v-list-item>
-        <v-list-item>
+        <!-- <v-list-item>
           <a
             href="#"
             class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white"
@@ -67,7 +67,7 @@ const user = useCurrentUser()
               Pro version
             </span>
           </a>
-        </v-list-item>
+        </v-list-item> -->
         <v-list-item>
           <SignOut />
         </v-list-item>
