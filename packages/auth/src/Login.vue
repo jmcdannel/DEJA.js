@@ -52,6 +52,10 @@ async function handleGoogleSignin() {
 }
 
 async function handleEmailSignin() {
+  try {
+  if (!auth) {
+    throw new Error('auth is null')
+  }
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed in 
@@ -66,6 +70,10 @@ async function handleEmailSignin() {
       console.error('Failed email signin', errorCode, errorMessage)
       error.value = errorMessage
     });
+  } catch (err) {
+    console.error('Failed email signin', err)
+    // error.value = err
+  }
 
   
 }

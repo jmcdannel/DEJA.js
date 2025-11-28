@@ -2,7 +2,7 @@ MVP
 [ ] Guest Mode / Demo Mode
 [x] account menu
 [x] DEJA Suite Nav
-[-] Login Page / w/signup u/p login
+[x] Login Page / w/signup u/p login
 [-] ttt-io as packages
 [-] ttt-io build scripts - output arduino configs, dcc config commands
 [ ] store roster on dccex

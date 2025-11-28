@@ -46,9 +46,9 @@ function handleRequestAccess() {
       </template>
     </DeviceStatusList>
     <template v-else-if="!user">
-      <div class="flex gap-4">
+      <div class="flex gap-4 flex-col md:flex-row w-full">
         <v-card
-          class="mx-auto bg-slate-900 bg-opacity-70 rounded-lg basis-1/2"
+          class="mx-auto bg-slate-900 bg-opacity-70 rounded-lg basis-full md:basis-1/2 w-full"
           title="Login"
           color="primary"
           variant="outlined"
@@ -58,7 +58,7 @@ function handleRequestAccess() {
           </v-card-text>
         </v-card>
         <v-card
-          class="mx-auto bg-slate-900 bg-opacity-70 rounded-lg basis-1/2"
+          class="mx-auto bg-slate-900 bg-opacity-70 rounded-lg basis-full md:basis-1/2 w-full"
           title="Sign up"
           color="primary"
           variant="outlined"
