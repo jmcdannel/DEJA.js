@@ -34,6 +34,11 @@
       "cache": false,
       "persistent": true
     },
+    "deja": {
+      "dependsOn": ["check-mqtt"],
+      "cache": false,
+      "persistent": true
+    },
     "predev": {},
     "lint": {},
     "format": {},

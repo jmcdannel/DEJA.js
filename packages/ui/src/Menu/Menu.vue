@@ -30,35 +30,35 @@ const DEJA_SUITE_MENU = [
     icon: 'mdi-cloud',
     name: 'cloud',
     color: 'pink',
-    href: 'http://localhost:3011/'
+    href: 'https://cloud.dejajs.com/'
   },
   {
     label: 'Throttle',
     icon: 'mdi-gamepad-variant',
     name: 'throttle',
     color: 'green',
-    href: 'http://localhost:3012/'
+    href: 'https://throttle.dejajs.com/'
   },
   {
     label: 'Monitor',
     icon: 'mdi-monitor',
     name: 'monitor',
     color: 'red',
-    href: 'http://localhost:3013/'
+    href: 'http://localhost:4014/'
   },
   {
     label: 'Tour',
     icon: 'mdi-account-tie-hat',
     name: 'tour',
     color: 'purple',
-    href: 'http://localhost:3014/'
+    href: 'https://www.dejajs.com/'
   },
   {
     label: 'Deja.js',
     icon: 'mdi-chip',
     name: 'deja.js',
     color: 'cyan',
-    href: 'https://deja.js.org/'
+    href: 'https://www.dejajs.com/'
   }
 ]
 
