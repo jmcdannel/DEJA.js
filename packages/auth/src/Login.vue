@@ -5,6 +5,7 @@ export const githubAuthProvider = new GithubAuthProvider()
 export const googleAuthProvider = new GoogleAuthProvider()
 </script>
 <script setup>
+
 import { ref, onMounted } from 'vue'
 import { getRedirectResult, signInWithPopup, getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { useFirebaseAuth, useCurrentUser } from 'vuefire'
@@ -56,7 +57,7 @@ async function handleEmailSignin() {
   if (!auth) {
     throw new Error('auth is null')
   }
-  signInWithEmailAndPassword(auth, email, password)
+  signInWithEmailAndPassword(auth, email.value, password.value)
     .then((userCredential) => {
       // Signed in 
       const user = userCredential.user;
@@ -110,7 +111,6 @@ onMounted(() => {
         <v-card-title class="text-h6">Sign in with email</v-card-title>
         <v-card-text>
           <v-form ref="loginForm" v-slot="{ isValid }">
-            <p>isValid:{{ isValid }}</p>
             <v-text-field
               v-model="email"
               label="Email"

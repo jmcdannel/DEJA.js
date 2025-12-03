@@ -9,8 +9,13 @@ MVP
 [-] function map - momentary, latching (see ex-webthrottle)
 [ ] handle unknown power state
 [ ] onboarding / create layout
-[ ] DCC-EX page on cloud app
+[ ] update DCC-EX page on cloud app
 [ ] sensors
+[ ] sign out buttons
+[ ] readme screenshots
+[ ] docs (ai)
+[ ] test connection button on cloud home
+[ ] rename "layout" to "devices" in Cloud
 
 [ ] monitor app
   - enable auto-clear
@@ -26,7 +31,14 @@ MVP
   - guest user management (cloud?)
 
 [-] DEJA.js site
+
+  [ ] App Pages
+  [ ] Sign up
+
 [-] TTT Site
+  [ ] Logo
+  [ ] Conent
+  [ ] Contact
 ---
 
 [ ] use UI controls in cloud app, everywhere

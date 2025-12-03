@@ -11,6 +11,7 @@
     "build": "tsc",
     "dev": "tsx watch index.ts",
     "start": "tsx index.ts",
+    "deja": "npm run start",
     "mosquitto": "tsx src/scripts/start-mqtt.ts",
     "check-mqtt": "tsx src/scripts/check-mqtt.ts",
     "migrate-sounds": "tsx src/scripts/migrate-sound-effects.ts",
