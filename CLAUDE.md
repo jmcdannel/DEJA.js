@@ -275,6 +275,79 @@ Serial baud rate: **115200**. DCC-EX commands are wrapped in angle brackets: `<t
 
 ---
 
+## DCC-EX Command Reference
+
+DCC-EX uses a simple text protocol over serial. Every command is wrapped in angle brackets and terminated with a newline: `<command>\n`. The server's `send()` function in `apps/server/src/lib/dcc.ts` performs this wrapping automatically — callers pass only the inner string.
+
+> Full upstream docs: https://dcc-ex.com/reference/software/command-reference.html
+
+### Serial Commands (as sent by DEJA.js)
+
+| Operation | DCC-EX format | DEJA.js source |
+|---|---|---|
+| Track power ON | `<1>` | `dcc.power('1')` |
+| Track power OFF | `<0>` | `dcc.power('0')` |
+| Main track power ON/OFF | `<1 MAIN>` / `<0 MAIN>` | `dcc.send('1 MAIN')` |
+| Prog track power ON/OFF | `<1 PROG>` / `<0 PROG>` | `dcc.send('1 PROG')` |
+| Throttle (speed+direction) | `<t addr speed dir>` | `dcc.sendSpeed({ address, speed })` |
+| Throw/close turnout | `<T idx state>` | `dcc.sendTurnout({ turnoutIdx, state })` |
+| Loco function | `<F addr func state>` | `dcc.sendFunction({ address, func, state })` |
+| Accessory output | `<Z pin state>` | `dcc.sendOutput({ pin, state })` |
+| Hardware reset | `<D RESET>` | `dcc.send('D RESET')` |
+| Status query | `<=>` | `dcc.send('=')` / `dcc.getStatus()` |
+| Save EEPROM | `<E>` | `dcc.send('E')` |
+| List outputs | `<Z>` | `dcc.send('Z')` |
+
+**Parameter notes:**
+- `addr` — DCC decoder address (1–9999)
+- `speed` — 0–126 (DEJA.js uses signed speed: positive = forward, negative = reverse; direction bit is derived server-side)
+- `dir` — `1` = forward, `0` = reverse
+- `idx` — turnout index as configured on the CommandStation
+- `state` (turnout) — `1` = thrown, `0` = closed
+- `func` / `state` (function) — function number 0–28, `1` = on, `0` = off
+- `pin` / `state` (output) — Arduino pin number, `1` = on, `0` = off
+
+### How Commands Flow from Frontend to Serial
+
+```
+Frontend (Vue app)
+  │
+  │  useDcc().setFunction(addr, func, state)     // packages/dccex/useDcc.ts
+  │  useDcc().setPower(payload)
+  │  useDcc().sendOutput(pin, state)
+  │
+  ▼
+  send('function' | 'dcc' | 'output', payload)   // writes to Firebase RTDB
+  │
+  ▼
+Firebase RTDB: dccCommands/{layoutId}             // push + set with serverTimestamp
+  │
+  ▼
+Server: dejaCloud.ts  rtdb.ref.on('child_added')  // apps/server/src/dejaCloud.ts
+  │
+  ▼
+handleDccChange(snapshot) → handleMessage(json)   // apps/server/src/lib/dcc.ts
+  │
+  ├── 'throttle'  → sendSpeed()   → send('t addr speed dir')
+  ├── 'turnout'   → sendTurnout() → send('T idx state')
+  ├── 'function'  → sendFunction()→ send('F addr func state')
+  ├── 'output'    → sendOutput()  → send('Z pin state')
+  ├── 'dcc'       → send()        → raw command passthrough
+  └── 'power'     → power()       → send('1' | '0' | ...)
+  │
+  ▼
+serial.send(port, '<cmd>\n')                      // apps/server/src/lib/serial.ts
+  │
+  ▼
+DCC-EX CommandStation (Arduino, 115200 baud)
+```
+
+DEJA commands (device connect, port listing, status) use a **separate** RTDB queue (`dejaCommands/{layoutId}`) handled by `apps/server/src/lib/deja.ts` — they never go to serial.
+
+Firestore change listeners (`layouts/{layoutId}/throttles`, `/turnouts`, `/signals`, `/effects`) are handled in `apps/server/src/modules/` and also ultimately call `dcc.sendSpeed()` / `dcc.sendTurnout()` etc.
+
+---
+
 ## IO / Device Firmware (`io/`)
 
 Hardware device code — not part of the Node.js/pnpm workspace (no `io/` in `pnpm-workspace.yaml`):
