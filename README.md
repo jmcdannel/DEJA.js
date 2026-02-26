@@ -56,56 +56,181 @@
 
 ---
 
-## 🚀 Quick Start
+## Getting Started
 
-### 📋 Prerequisites
+By the end of this guide your DCC-EX CommandStation will be connected to DEJA.js running on your computer, and you'll be driving trains from any browser on your network.
 
-- 👤 **DEJA.js Account** - [Requst account](https://www.dejajs.com)
-- 📦 **Node.js 22+** - [Install via nvm](https://github.com/nvm-sh/nvm)
-- 📦 **Git** - [Install](https://git-scm.com/install/)
-- <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> **DCC-EX CommandStation** - [Setup guide](https://dcc-ex.com/ex-commandstation/index.html)
-- 🔌 **USB Connection** - Between computer and DCC-EX CommandStation
+### How It Works
 
-### ⚡ Installation
+```
+[DCC-EX CommandStation] --USB--> [DEJA Server] <--WiFi/LAN--> [Throttle App]
+       (your hardware)          (your computer)               (any device)
+                                      |
+                               [DEJA Cloud]
+                          (layout config & roster)
+```
+
+The **DEJA Server** is the only piece you install locally. It bridges your CommandStation over USB to the rest of the system. The Throttle, Cloud, and Monitor apps are hosted web apps you open in a browser.
+
+---
+
+### Prerequisites
+
+| Requirement | Minimum | Get it |
+|---|---|---|
+| DEJA.js account | Free | [Request at dejajs.com](https://www.dejajs.com) |
+| Node.js | v22+ | [Install via nvm](https://github.com/nvm-sh/nvm) |
+| pnpm | v9+ | `npm install -g pnpm` |
+| Git | Any recent | [git-scm.com](https://git-scm.com/install/) |
+| DCC-EX CommandStation | Any supported board | [DCC-EX setup guide](https://dcc-ex.com/ex-commandstation/index.html) |
+| USB cable | — | Connecting CommandStation to this computer |
+
+> Confirm Node.js is ready before continuing: `node --version` should print `v22.x.x` or higher.
+
+---
+
+### Step 1 — Install
+
+Clone the repository and install dependencies.
 
 ```bash
-# Clone the repository
 git clone https://github.com/jmcdannel/deja.git
 cd deja
-
-# Install dependencies (uses turbo for monorepo management)
-npm install -g turbo
-turbo install
-
-# Create local environment file
-cp .env.example to .env.local
-
+pnpm install
 ```
 
-### 🧱 Setup
+**Verify:** Install completes without errors and you can see an `apps/` directory in the project root.
 
-You'll first need to login to your DEJA.js account in the [DEJA Cloud app](http://cloud.dejajs.com) and confiure your <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX CommandStation to communicate with DEJA SERVER.
+---
 
-1. Login to [DEJA Cloud](http://cloud.dejajs.com)
-2. Select your Layout
-3. Click "View Local Environemnt Configuration", copy and paste the configuration into `.env.local` using a text editor or IDE. [Need more help?](#-environment-setup)
-4. From the [Layout](https://cloud.dejajs.com/layout) page, click "add" from the Devices list.
-5. Select <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX Command Station, USB. Click "Submit".
-6. Start DEJA Server
+### Step 2 — Configure
+
+Copy the environment template and fill in your values.
 
 ```bash
-# Start DEJA Server
-turbo deja
+cp .env.example .env.local
 ```
-7. Select the USB Port ofr the <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX CommandStation and click "Connect".
 
-#### 🌍 First Steps
+Open `.env.local` in a text editor and set your `LAYOUT_ID`:
 
-1. Add a Loco to your [Roster](http://cloud.dejajs.com/roster)
-2. Launch the [Throttle App](http://throttle.dejajs.com)
-3. Click the <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX Command Station Power Button (<img style="border: 50%; padding: 2px; color: white; fill: white; path: white; background: #666" src="https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/fence-electric.svg" width="16" height="16" alt="electric fence" />) to turn on your tracks.
-3. Select your loco.
-4. Drive your loco.
+```env
+LAYOUT_ID=my-layout-name
+```
+
+**Layout ID rules:** lowercase letters, numbers, and hyphens only — no spaces, underscores, or special characters.
+
+```
+Good: basement-empire, club-layout-2024, riverside-yard
+Bad:  My Layout, layout_1, riverside yard
+```
+
+**Get your Firebase credentials from DEJA Cloud:**
+
+1. Log in to [DEJA Cloud](https://cloud.dejajs.com)
+2. Select your layout
+3. Click **"View Local Environment Configuration"**
+4. Copy the displayed values into your `.env.local`
+
+Your completed `.env.local` will look like this:
+
+```env
+LAYOUT_ID=my-layout-name
+
+VITE_FIREBASE_API_KEY=AIza...
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=1:123456789:web:abc123
+
+VITE_MQTT_BROKER=mqtt://localhost
+VITE_MQTT_PORT=1883
+ENABLE_MQTT=true
+ENABLE_WS=true
+ENABLE_DEJACLOUD=true
+VITE_WS_PORT=8082
+VITE_WS_ID=DEJA.js
+```
+
+**Verify:** `.env.local` exists at the project root and contains your `LAYOUT_ID` and all `VITE_FIREBASE_*` values.
+
+---
+
+### Step 3 — Register Your CommandStation
+
+Tell DEJA Cloud that a DCC-EX CommandStation will connect via USB from this computer.
+
+1. In [DEJA Cloud](https://cloud.dejajs.com), open your layout
+2. Go to **Devices** and click **Add**
+3. Select **DCC-EX CommandStation** → connection type **USB** → click **Submit**
+
+The device will appear in the list with a "disconnected" status — that is expected until the server is running.
+
+**Verify:** Your DCC-EX CommandStation appears in the Devices list in DEJA Cloud.
+
+---
+
+### Step 4 — Start the Server
+
+```bash
+pnpm deja
+```
+
+This starts the DEJA Server (USB serial communication) and the Monitor app (diagnostics) together via Turborepo.
+
+**Verify:** Terminal output shows the WebSocket server listening on port `8082`. Open [DEJA Monitor](https://monitor.dejajs.com) in a browser — you should see the server connected.
+
+---
+
+### Step 5 — Connect Hardware
+
+Select the USB port for your CommandStation in the Monitor app.
+
+1. Open [DEJA Monitor](https://monitor.dejajs.com) on this computer
+2. Find the **DCC-EX CommandStation** device card
+3. Select the USB port from the dropdown
+4. Click **Connect**
+
+> **Finding your port:**
+> Linux / macOS — `ls /dev/tty*` and look for `/dev/ttyUSB0` or `/dev/ttyACM0`
+> Windows — Device Manager > Ports (COM & LPT) — note the `COMx` number
+
+**Verify:** The device card shows a green "connected" status and displays DCC-EX firmware version information.
+
+---
+
+### Step 6 — Drive Trains
+
+1. In [DEJA Cloud](https://cloud.dejajs.com), navigate to **Roster** and click **Add Loco** — enter the DCC address and a name
+2. Open [DEJA Throttle](https://throttle.dejajs.com) in any browser on your network
+3. Click the track power button to energize the track
+4. Select your locomotive and use the speed slider and direction controls to drive
+
+**Verify:** The locomotive moves on the track and responds to speed, direction, and function controls.
+
+---
+
+### Quick Reference
+
+**Commands**
+
+| Task | Command |
+|---|---|
+| Install dependencies | `pnpm install` |
+| Start server + monitor | `pnpm deja` |
+| Start server only | `pnpm start` |
+| Start all apps (dev mode) | `pnpm dev` |
+| Build all apps | `pnpm build` |
+| Lint all packages | `pnpm lint` |
+| Check dependency versions | `pnpm deps:check` |
+
+**App URLs**
+
+| App | URL |
+|---|---|
+| DEJA Cloud (layout config & roster) | https://cloud.dejajs.com |
+| DEJA Throttle (train control) | https://throttle.dejajs.com |
+| DEJA Monitor (diagnostics) | https://monitor.dejajs.com |
 
 ---
 
