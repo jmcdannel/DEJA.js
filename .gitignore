@@ -53,3 +53,13 @@ temp-sounds-cache/
 **/temp-sounds-cache/
 packages/sounds/assets/
 .idea/
+
+# Capacitor native build artifacts
+apps/throttle/ios/App/Pods/
+apps/throttle/ios/DerivedData/
+apps/throttle/android/.gradle/
+apps/throttle/android/app/build/
+apps/throttle/android/build/
+apps/throttle/android/local.properties
+*.keystore
+*.jks
