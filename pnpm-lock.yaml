@@ -883,6 +883,9 @@ importers:
       typescript:
         specifier: latest
         version: 5.9.3
+      vitest:
+        specifier: ^2.0.5
+        version: 2.1.9(@edge-runtime/vm@3.2.0)(@types/node@20.19.23)(jsdom@22.1.0)(terser@5.44.0)
 
 packages:
 
