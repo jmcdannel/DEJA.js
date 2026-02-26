@@ -28,39 +28,11 @@
 
 ---
 
-## 📁 Repository Structure
-
-### 🎮 Applications (`/apps`)
-
-| App | Description | Technologies |
-|-----|-------------|--------------|
-| **🚂 [Throttle](apps/throttle/)** | Train control interface with speed, direction, and function controls | Vue 3, Vuetify, MQTT |
-| **☁️ [Cloud](apps/cloud/)** | Layout management, device monitoring, and multi-user coordination | Vue 3, Firebase, Vuetify |
-| **🖥️ [Server](apps/server/)** | NodeJS API server that communicates with <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX CommandStation | Node.js, WebSockets, Serial |
-| **📊 [Monitor](apps/monitor/)** | System monitoring, logging, and diagnostics dashboard | Vue 3, MQTT, WebSockets |
-| **🎪 [Tour](apps/tour/)** | Interactive tour experiences and special effects control | Vue 3, Audio/Visual effects |
-
-### 📦 Packages (`/packages`)
-
-| Package | Description |
-|---------|-------------|
-| **🎨 UI** | Shared Vue components and design system | 
-| **🔧 Utils** | Common utilities and helper functions |
-| **🔐 Auth** | Authentication and user management |
-| **📡 Modules** | Core DEJA.js modules and communication logic |
-| **⚙️ Config** | Shared configuration for ESLint, Prettier, TypeScript |
-
-### 🔧 Device Apps (`/io`)
-
-// TODO: complete build scripts, devcie sync and deploy
-
----
-
-## Getting Started
+## 🚀 Getting Started
 
 By the end of this guide your DCC-EX CommandStation will be connected to DEJA.js running on your computer, and you'll be driving trains from any browser on your network.
 
-### Quick Install
+### ⚡ Quick Install
 
 The fastest way to get set up. Open a terminal and run one command — it checks your prerequisites, clones the repo, installs dependencies, and walks you through configuration.
 
@@ -76,13 +48,13 @@ curl -fsSL https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.sh |
 irm https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.ps1 | iex
 ```
 
-After the script finishes, skip ahead to [Step 3 — Register Your CommandStation](#step-3--register-your-commandstation).
+After the script finishes, skip ahead to [Step 3 — Register Your CommandStation](#-step-3--register-your-commandstation).
 
 > Prefer to set things up manually? The full step-by-step guide continues below.
 
 ---
 
-### How It Works
+### 🔧 How It Works
 
 ```
 [DCC-EX CommandStation] --USB--> [DEJA Server] <--WiFi/LAN--> [Throttle App]
@@ -96,22 +68,22 @@ The **DEJA Server** is the only piece you install locally. It bridges your Comma
 
 ---
 
-### Prerequisites
+### 📋 Prerequisites
 
 | Requirement | Minimum | Get it |
 |---|---|---|
-| DEJA.js account | Free | [Request at dejajs.com](https://www.dejajs.com) |
-| Node.js | v22+ | [Install via nvm](https://github.com/nvm-sh/nvm) |
-| pnpm | v9+ | `npm install -g pnpm` |
-| Git | Any recent | [git-scm.com](https://git-scm.com/install/) |
-| DCC-EX CommandStation | Any supported board | [DCC-EX setup guide](https://dcc-ex.com/ex-commandstation/index.html) |
-| USB cable | — | Connecting CommandStation to this computer |
+| 👤 DEJA.js account | Free | [Request at dejajs.com](https://www.dejajs.com) |
+| 📦 Node.js | v22+ | [Install via nvm](https://github.com/nvm-sh/nvm) |
+| 📦 pnpm | v9+ | `npm install -g pnpm` |
+| 📦 Git | Any recent | [git-scm.com](https://git-scm.com/install/) |
+| <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX CommandStation | Any supported board | [DCC-EX setup guide](https://dcc-ex.com/ex-commandstation/index.html) |
+| 🔌 USB cable | — | Connecting CommandStation to this computer |
 
 > Confirm Node.js is ready before continuing: `node --version` should print `v22.x.x` or higher.
 
 ---
 
-### Step 1 — Install
+### 📦 Step 1 — Install
 
 Clone the repository and install dependencies.
 
@@ -125,7 +97,7 @@ pnpm install
 
 ---
 
-### Step 2 — Configure
+### ⚙️ Step 2 — Configure
 
 Copy the environment template and fill in your values.
 
@@ -178,7 +150,7 @@ VITE_WS_ID=DEJA.js
 
 ---
 
-### Step 3 — Register Your CommandStation
+### 🧱 Step 3 — Register Your CommandStation
 
 Tell DEJA Cloud that a DCC-EX CommandStation will connect via USB from this computer.
 
@@ -192,7 +164,7 @@ The device will appear in the list with a "disconnected" status — that is expe
 
 ---
 
-### Step 4 — Start the Server
+### 🖥️ Step 4 — Start the Server
 
 ```bash
 pnpm deja
@@ -204,7 +176,7 @@ This starts the DEJA Server (USB serial communication) and the Monitor app (diag
 
 ---
 
-### Step 5 — Connect Hardware
+### 🔌 Step 5 — Connect Hardware
 
 Select the USB port for your CommandStation in the Monitor app.
 
@@ -221,7 +193,7 @@ Select the USB port for your CommandStation in the Monitor app.
 
 ---
 
-### Step 6 — Drive Trains
+### 🚂 Step 6 — Drive Trains
 
 1. In [DEJA Cloud](https://cloud.dejajs.com), navigate to **Roster** and click **Add Loco** — enter the DCC address and a name
 2. Open [DEJA Throttle](https://throttle.dejajs.com) in any browser on your network
@@ -232,7 +204,7 @@ Select the USB port for your CommandStation in the Monitor app.
 
 ---
 
-### Quick Reference
+### 📖 Quick Reference
 
 **Commands**
 
@@ -250,9 +222,37 @@ Select the USB port for your CommandStation in the Monitor app.
 
 | App | URL |
 |---|---|
-| DEJA Cloud (layout config & roster) | https://cloud.dejajs.com |
-| DEJA Throttle (train control) | https://throttle.dejajs.com |
-| DEJA Monitor (diagnostics) | https://monitor.dejajs.com |
+| ☁️ DEJA Cloud (layout config & roster) | https://cloud.dejajs.com |
+| 🚂 DEJA Throttle (train control) | https://throttle.dejajs.com |
+| 📊 DEJA Monitor (diagnostics) | https://monitor.dejajs.com |
+
+---
+
+## 📁 Repository Structure
+
+### 🎮 Applications (`/apps`)
+
+| App | Description | Technologies |
+|-----|-------------|--------------|
+| **🚂 [Throttle](apps/throttle/)** | Train control interface with speed, direction, and function controls | Vue 3, Vuetify, MQTT |
+| **☁️ [Cloud](apps/cloud/)** | Layout management, device monitoring, and multi-user coordination | Vue 3, Firebase, Vuetify |
+| **🖥️ [Server](apps/server/)** | NodeJS API server that communicates with <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX CommandStation | Node.js, WebSockets, Serial |
+| **📊 [Monitor](apps/monitor/)** | System monitoring, logging, and diagnostics dashboard | Vue 3, MQTT, WebSockets |
+| **🎪 [Tour](apps/tour/)** | Interactive tour experiences and special effects control | Vue 3, Audio/Visual effects |
+
+### 📦 Packages (`/packages`)
+
+| Package | Description |
+|---------|-------------|
+| **🎨 UI** | Shared Vue components and design system |
+| **🔧 Utils** | Common utilities and helper functions |
+| **🔐 Auth** | Authentication and user management |
+| **📡 Modules** | Core DEJA.js modules and communication logic |
+| **⚙️ Config** | Shared configuration for ESLint, Prettier, TypeScript |
+
+### 🔧 Device Apps (`/io`)
+
+// TODO: complete build scripts, devcie sync and deploy
 
 ---
 
