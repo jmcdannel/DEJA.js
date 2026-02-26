@@ -22,10 +22,10 @@ const { colors, DEFAULT_COLOR } = useColors()
 const color = computed(() => colors[props.turnout.color || DEFAULT_COLOR])
 
 const indicatorNColor = computed(() => {
-  return props.state ? 'rgb(200,200,200)' : 'rgb(67,242,13)'
+  return props.state ? 'rgb(200,200,200)' : 'rgb(242,13,13)'
 })
 const indicatorRColor = computed(() => {
-  return props.state ? 'rgb(242,13,13)' : 'rgb(200,200,200)'
+  return props.state ? 'rgb(67,242,13)' : 'rgb(200,200,200)'
 })
 
 const internalState = ref(props.state !== undefined ? props.state : props.turnout?.state)
