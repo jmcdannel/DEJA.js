@@ -16,6 +16,8 @@
     "./types": "./types.ts"
   },
   "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -33,6 +35,7 @@
     "@repo/utils": "workspace:*",
     "@vueuse/core": "^11.0.3",
     "typescript": "latest",
+    "vitest": "^2.0.5",
     "vue": "^3.5.17"
   }
 }

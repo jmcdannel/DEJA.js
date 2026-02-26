@@ -9,6 +9,8 @@
     ".": "./index.ts"
   },
   "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
