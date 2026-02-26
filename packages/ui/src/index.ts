@@ -39,3 +39,4 @@ export { default as DeviceStatusList } from './DeviceStatus/DeviceStatusList.vue
 export { default as ModuleList } from './ModuleList/List.vue'
 export { default as LocoList } from './Locos/LocoList.vue'
 export { default as Menu } from './Menu/Menu.vue'
+export * from './animations'

@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import type { DocumentData } from 'firebase/firestore'
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 
 const props = defineProps<{
   logs: DocumentData[]
@@ -41,7 +42,7 @@ function openFullScreen() {
         />
       </div>
     </template>
-    <v-card-text class="monitor-card__body flex flex-1 flex-col-reverse gap-1">
+    <v-card-text v-auto-animate class="monitor-card__body flex flex-1 flex-col-reverse gap-1">
       <v-alert
         v-for="log in logs"
         :key="log.id"

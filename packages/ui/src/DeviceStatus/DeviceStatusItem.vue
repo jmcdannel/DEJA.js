@@ -5,6 +5,7 @@ import { useColors } from '@repo/ui/src/useColors'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { deviceTypes, useTurnouts, useEfx, type Device } from '@repo/modules'
 import Stat from '@repo/ui/src/Stat.vue'
+import { StatusPulse } from '../animations'
 
 const props = defineProps({
   device: {
@@ -83,10 +84,7 @@ const color = computed(() => colors[deviceType.value?.color || DEFAULT_COLOR])
         prepend-icon="mdi-memory"
       >
         <template #append>
-          <span v-if="device?.isConnected" class="ml-2 relative flex h-3 w-3">
-            <span class="absolute inline-flex h-full w-full rounded-full bg-green-600 animate-ping opacity-75"></span>
-            <span class="relative inline-flex h-full w-full rounded-full bg-green-600"></span>
-          </span>
+          <StatusPulse v-if="device?.isConnected" :status="'connected'" size="md" class="ml-2" />
         </template>
         {{ device?.isConnected ? 'Connected' : 'Disconnected' }}
       </v-chip>
@@ -99,10 +97,7 @@ const color = computed(() => colors[deviceType.value?.color || DEFAULT_COLOR])
         prepend-icon="mdi-wifi"
       >
         <template #append>
-          <span v-if="device?.isConnected" class="ml-2 relative flex h-3 w-3">
-            <span class="absolute inline-flex h-full w-full rounded-full bg-green-600 animate-ping opacity-75"></span>
-            <span class="relative inline-flex h-full w-full rounded-full bg-green-600"></span>
-          </span>
+          <StatusPulse v-if="device?.isConnected" :status="'connected'" size="md" class="ml-2" />
         </template>
         {{ device?.isConnected ? 'Connected' : 'Disconnected' }}
       </v-chip>

@@ -72,7 +72,7 @@ const copyToClipboard = async () => {
     </div>
     
     <!-- LCD Screen -->
-    <div class="lcd-screen bg-black rounded p-3 font-mono leading-tight">
+    <div class="lcd-screen bg-black rounded p-3 font-mono leading-tight animate-deja-lcd-flicker">
       <div 
         v-for="(line, index) in displayContent" 
         :key="index"
@@ -162,13 +162,4 @@ const copyToClipboard = async () => {
   text-shadow: 0 0 5px currentColor;
 }
 
-/* Subtle flicker animation */
-@keyframes lcd-flicker {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.98; }
-}
-
-.lcd-screen {
-  animation: lcd-flicker 0.1s infinite;
-}
 </style> 

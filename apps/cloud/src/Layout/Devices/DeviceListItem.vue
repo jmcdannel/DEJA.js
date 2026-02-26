@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useColors } from '@/Core/UI/useColors'
 import { deviceTypes, useLayout, type Device } from '@repo/modules'
 import { useTurnouts } from '@repo/modules'
+import { StatusPulse } from '@repo/ui'
 
 const { connectDevice, autoConnectDevice } = useLayout()
 const { getTurnouts } = useTurnouts()
@@ -101,9 +102,8 @@ async function handleDisconnect () {
         prepend-icon="mdi-memory"
       >
         <template #append>
-          <span v-if="device?.isConnected" class="ml-2 relative flex h-3 w-3">
-            <span class="absolute inline-flex h-full w-full rounded-full bg-green-600 animate-ping opacity-75"></span>
-            <span class="relative inline-flex h-full w-full rounded-full bg-green-600"></span>
+          <span v-if="device?.isConnected" class="ml-2">
+            <StatusPulse status="connected" size="sm" />
           </span>
         </template>
         {{ device?.isConnected ? 'Connected' : 'Disconnected' }}
@@ -117,9 +117,8 @@ async function handleDisconnect () {
         prepend-icon="mdi-wifi"
       >
         <template #append>
-          <span v-if="device?.isConnected" class="ml-2 relative flex h-3 w-3">
-            <span class="absolute inline-flex h-full w-full rounded-full bg-green-600 animate-ping opacity-75"></span>
-            <span class="relative inline-flex h-full w-full rounded-full bg-green-600"></span>
+          <span v-if="device?.isConnected" class="ml-2">
+            <StatusPulse status="connected" size="sm" />
           </span>
         </template>
         {{ device?.isConnected ? 'Connected' : 'Disconnected' }}

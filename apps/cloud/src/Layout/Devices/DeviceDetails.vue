@@ -4,6 +4,7 @@ import { useCollection } from 'vuefire'
 import { useRouter } from 'vue-router'
 import { useColors } from '@/Core/UI/useColors'
 import { deviceTypes, useTurnouts, useEfx, useLayout, type Device } from '@repo/modules/index.ts'
+import { StatusPulse } from '@repo/ui'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 
 const { connectDevice, autoConnectDevice, getDevice } = useLayout()
@@ -122,9 +123,8 @@ const outPins = computed(() => {
         prepend-icon="mdi-memory"
       >
         <template #append>
-          <span v-if="device?.isConnected" class="ml-2 relative flex h-3 w-3">
-            <span class="absolute inline-flex h-full w-full rounded-full bg-green-600 animate-ping opacity-75"></span>
-            <span class="relative inline-flex h-full w-full rounded-full bg-green-600"></span>
+          <span v-if="device?.isConnected" class="ml-2">
+            <StatusPulse status="connected" size="sm" />
           </span>
         </template>
         {{ device?.isConnected ? 'Connected' : 'Disconnected' }}
@@ -138,9 +138,8 @@ const outPins = computed(() => {
         prepend-icon="mdi-wifi"
       >
         <template #append>
-          <span v-if="device?.isConnected" class="ml-2 relative flex h-3 w-3">
-            <span class="absolute inline-flex h-full w-full rounded-full bg-green-600 animate-ping opacity-75"></span>
-            <span class="relative inline-flex h-full w-full rounded-full bg-green-600"></span>
+          <span v-if="device?.isConnected" class="ml-2">
+            <StatusPulse status="connected" size="sm" />
           </span>
         </template>
         {{ device?.isConnected ? 'Connected' : 'Disconnected' }}

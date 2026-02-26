@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 
 interface Section {
   id: string
@@ -112,7 +113,7 @@ const goToSection = (id: string) => {
     </v-col>
 
     <v-col cols="12">
-      <v-row>
+      <v-row v-auto-animate>
         <v-col
           cols="12"
           sm="6"
@@ -120,7 +121,7 @@ const goToSection = (id: string) => {
           v-for="section in sections"
           :key="section.id"
         >
-          <v-card elevation="3" class="section-card">
+          <v-card elevation="3" class="section-card transition-transform duration-deja-fast ease-deja-standard hover:-translate-y-1">
             <div class="media-wrap" @click="goToSection(section.id)">
               <v-img
                 v-if="section.thumbnail"
@@ -190,10 +191,9 @@ const goToSection = (id: string) => {
 </template>
 
 <style scoped>
-.section-card { cursor: default; transition: transform 0.15s ease; }
-.section-card:hover { transform: translateY(-6px); }
+.section-card { cursor: default; }
 .media-wrap { position: relative; overflow: hidden; }
-.overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.25); opacity: 0; transition: opacity 0.2s ease; }
+.overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.25); opacity: 0; transition: opacity 250ms cubic-bezier(0.4, 0, 0.2, 1); }
 .media-wrap:hover .overlay { opacity: 1; }
 .thumb-placeholder { height: 160px; display:flex; align-items:center; justify-content:center; background: rgb(var(--v-theme-surface-variant)); }
 .thumb-icon { opacity: 0.6; color: rgb(var(--v-theme-on-surface-variant)); }
