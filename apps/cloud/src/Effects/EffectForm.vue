@@ -5,6 +5,7 @@ import { efxTypes } from '@repo/modules/effects/constants'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import MacroForm from '@/Effects/MacroForm.vue'
 import IALEDForm from '@/Effects//IALEDForm.vue'
+import MultimediaForm from '@/Effects/MultimediaForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import SoundFileList from '@/Effects/Sounds/SoundFileList.vue'
@@ -167,6 +168,10 @@ async function submit () {
     newEfx.config = config.value
   }
 
+  if (efxType.value === 'multimedia') {
+    newEfx.config = config.value
+  }
+
   // set sound file for sound effects
   if (efxType.value === 'sound') {
     newEfx.sound = selectedSoundFile.value
@@ -186,10 +191,14 @@ function handleIALED(ialedEffectConfig: {
     pattern: string;
     range: string;
     config: string;
-  }): void {  
+  }): void {
   pattern.value = ialedEffectConfig.pattern
   range.value = ialedEffectConfig.range
   config.value = ialedEffectConfig.config
+}
+
+function handleMultimedia(multimediaConfig: { config: string }): void {
+  config.value = multimediaConfig.config
 }
 
 function handleSoundFileSelect(soundFile: string) {
@@ -322,7 +331,7 @@ function handleSoundFileSelect(soundFile: string) {
 
     <!-- macro -->
     <template v-if="efxType === 'ialed'">
-      <IALEDForm 
+      <IALEDForm
         @change="handleIALED" :efx="efx"
         :color="color"
         :device="device"
@@ -331,10 +340,25 @@ function handleSoundFileSelect(soundFile: string) {
         v-model:config="config"
         v-model:strip="pin"
       ></IALEDForm>
-      <LcdDisplay 
+      <LcdDisplay
         :content="config ? JSON.stringify(config, null, 2).split('\n') : []"
         title="CONFIG"
         color="amber"
+        size="sm"
+        :max-lines="10"
+      />
+    </template>
+    <template v-else-if="efxType === 'multimedia'">
+      <MultimediaForm
+        @change="handleMultimedia"
+        :efx="efx"
+        :color="color"
+        v-model:config="config"
+      ></MultimediaForm>
+      <LcdDisplay
+        :content="config ? JSON.stringify(config, null, 2).split('\n') : []"
+        title="CONFIG"
+        color="deep-purple"
         size="sm"
         :max-lines="10"
       />

@@ -9,6 +9,13 @@ export const efxTypes: EffectType[] = [
     require: ['device', 'strip', 'pattern', 'range', 'config'],
   },
   {
+    value: 'multimedia',
+    label: 'Multimedia',
+    icon: 'mdi-movie-open-star',
+    color: 'deep-purple',
+    require: ['config'],
+  },
+  {
     value: 'light',
     label: 'Light',
     icon: 'mdi-lightbulb',
