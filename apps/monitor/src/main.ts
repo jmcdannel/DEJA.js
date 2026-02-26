@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import * as Sentry from '@sentry/vue'
 
 // Vuetify
 import 'vuetify/styles'
@@ -97,6 +98,19 @@ const vuetify = createVuetify({
   },
 })
 const app = createApp(App)
+
+Sentry.init({
+  app,
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  integrations: [
+    Sentry.browserTracingIntegration({ router }),
+    Sentry.replayIntegration(),
+  ],
+  tracesSampleRate: 1.0,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+})
+
 app.use(VueFire, {
   firebaseApp,
   modules: [VueFireAuth()],

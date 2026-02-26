@@ -16,6 +16,7 @@
     "type-check": "vue-tsc --noEmit --composite false --skipLibCheck "
   },
   "dependencies": {
+    "@sentry/vue": "^8.0.0",
     "@vercel/blob": "^1.1.1",
     "@vercel/node": "^5.3.12",
     "dayjs": "^1.11.13",
