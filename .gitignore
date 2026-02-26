@@ -37,6 +37,9 @@ yarn-error.log*
 .DS_Store
 *.pem
 
+# Personal notes — not part of the repo
+TIPS.md
+
 # Ignore device-specific settings
 
 # Ignore all settings.toml files

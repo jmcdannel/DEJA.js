@@ -1,18 +1,29 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useSignals, type Signal, type SignalAspect } from '@repo/modules/signals'
-
-defineEmits(['edit'])
+import { useLayout, type Tag } from '@repo/modules'
+import List from './ModuleList/List.vue'
+import { type ListFilter } from './ModuleList/types'
 
 const { getSignals, setSignalAspect } = useSignals()
+const { getDevices, getLayout } = useLayout()
 const signals = getSignals()
+const devices = getDevices()
+const layout = getLayout()
 
-const color = ref('cyan')
-const aspectLabels: Record<Exclude<SignalAspect, null>, string> = {
-  red: 'Red',
-  yellow: 'Yellow',
-  green: 'Green',
-}
+const signalsList = computed(() => signals.value ? signals.value.map((signal) => ({ ...signal, icon: 'mdi-traffic-light' })) : [])
+
+const deviceOptions = computed(() => devices?.value ? devices.value.map((device) => ({ label: device.id, value: device.id })) : [])
+const tagOptions = computed(() =>
+  layout?.value?.tags
+    ? layout.value.tags.map((tag: Tag) => ({ label: tag.name, value: tag.id }))
+    : []
+)
+
+const filters = computed<ListFilter[]>(() => [
+  { type: 'device', label: 'Device', options: deviceOptions.value },
+  { type: 'tags', label: 'Tags', options: tagOptions.value },
+])
 
 function canToggle(signal: Signal, aspect: Exclude<SignalAspect, null>): boolean {
   const pinMap: Record<Exclude<SignalAspect, null>, number | undefined> = {
@@ -24,55 +35,60 @@ function canToggle(signal: Signal, aspect: Exclude<SignalAspect, null>): boolean
 }
 
 async function toggleAspect(signal: Signal, aspect: Exclude<SignalAspect, null>) {
-  console.log('Toggling aspect', aspect, 'for signal', signal.id)
   if (!canToggle(signal, aspect)) return
   const nextAspect: SignalAspect = signal.aspect === aspect ? null : aspect
   await setSignalAspect(signal.id, nextAspect)
 }
-
-const wiring = (signal: Signal) => signal.commonAnode ? 'Common Anode' : 'Common Cathode'
-const list = computed(() => signals.value || [])
 </script>
+
 <template>
-  <v-container>
-    <v-row>
-      <v-col v-for="item in list" :key="item.id" 
-        cols="auto">
-        <v-card class="p-2 flex flex-col items-center bg-opacity-50" :color="color" variant="tonal" rounded>
-          <v-card-title :color="color">{{ item.name || item.id }}</v-card-title>
-          <v-card-text>
+  <List
+    module-name="signals"
+    color="cyan-darken-4"
+    title="Signals"
+    icon="mdi-traffic-light"
+    :list="signalsList"
+    :filters="filters"
+    :view-options="[
+      { label: 'Signal', value: 'signal' },
+      { label: 'Card', value: 'card' },
+      { label: 'Table', value: 'table' },
+      { label: 'Raw', value: 'raw' },
+    ]"
+  >
+    <template #item="{ item }">
+      <v-card class="p-2 flex flex-col items-center bg-opacity-50" color="cyan" variant="tonal" rounded>
+        <v-card-title color="cyan">{{ (item as Signal).name || item.id }}</v-card-title>
+        <v-card-text>
           <div class="flex flex-col items-center p-3 rounded-lg bg-neutral-900 border border-neutral-700" style="width: 72px;">
             <v-btn
               icon="mdi-circle"
               size="small"
-              :color="item.aspect === 'red' ? 'red-darken-1' : 'red'"
-              :variant="item.aspect === 'red' ? 'flat' : 'tonal'"
-              :disabled="!canToggle(item, 'red')"
-              @click="toggleAspect(item, 'red')"
+              :color="(item as Signal).aspect === 'red' ? 'red-darken-1' : 'red'"
+              :variant="(item as Signal).aspect === 'red' ? 'flat' : 'tonal'"
+              :disabled="!canToggle(item as Signal, 'red')"
+              @click="toggleAspect(item as Signal, 'red')"
             />
             <v-btn
               icon="mdi-circle"
               class="my-2"
               size="small"
-              :color="item.aspect === 'yellow' ? 'amber-darken-2' : 'amber'"
-              :variant="item.aspect === 'yellow' ? 'flat' : 'tonal'"
-              :disabled="!canToggle(item, 'yellow')"
-              @click="toggleAspect(item, 'yellow')"
+              :color="(item as Signal).aspect === 'yellow' ? 'amber-darken-2' : 'amber'"
+              :variant="(item as Signal).aspect === 'yellow' ? 'flat' : 'tonal'"
+              :disabled="!canToggle(item as Signal, 'yellow')"
+              @click="toggleAspect(item as Signal, 'yellow')"
             />
             <v-btn
               icon="mdi-circle"
               size="small"
-              :color="item.aspect === 'green' ? 'green-darken-2' : 'green'"
-              :variant="item.aspect === 'green' ? 'flat' : 'tonal'"
-              :disabled="!canToggle(item, 'green')"
-              @click="toggleAspect(item, 'green')"
+              :color="(item as Signal).aspect === 'green' ? 'green-darken-2' : 'green'"
+              :variant="(item as Signal).aspect === 'green' ? 'flat' : 'tonal'"
+              :disabled="!canToggle(item as Signal, 'green')"
+              @click="toggleAspect(item as Signal, 'green')"
             />
           </div>
         </v-card-text>
       </v-card>
-    </v-col>
-  </v-row>
-</v-container>
+    </template>
+  </List>
 </template>
-
-
