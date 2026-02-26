@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "start": "vite --host",
     "test:unit": "vitest",
+    "test:e2e": "playwright test",
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false --skipLibCheck "
   },
   "dependencies": {
@@ -59,6 +60,7 @@
     "postcss": "^8.4.41",
     "prettier": "^2.8.8",
     "tailwindcss": "^3.4.10",
+    "@playwright/test": "^1.44.0",
     "typescript": "*",
     "vite": "^4.4.9",
     "vitest": "^2.0.5",
