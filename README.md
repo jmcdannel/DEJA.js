@@ -60,6 +60,28 @@
 
 By the end of this guide your DCC-EX CommandStation will be connected to DEJA.js running on your computer, and you'll be driving trains from any browser on your network.
 
+### Quick Install
+
+The fastest way to get set up. Open a terminal and run one command — it checks your prerequisites, clones the repo, installs dependencies, and walks you through configuration.
+
+**macOS / Linux**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.sh | bash
+```
+
+**Windows (PowerShell)**
+
+```powershell
+irm https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.ps1 | iex
+```
+
+After the script finishes, skip ahead to [Step 3 — Register Your CommandStation](#step-3--register-your-commandstation).
+
+> Prefer to set things up manually? The full step-by-step guide continues below.
+
+---
+
 ### How It Works
 
 ```
