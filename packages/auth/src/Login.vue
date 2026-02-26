@@ -7,9 +7,20 @@ export const googleAuthProvider = new GoogleAuthProvider()
 <script setup>
 
 import { ref, onMounted } from 'vue'
-import { getRedirectResult, signInWithPopup, getAuth, signInWithEmailAndPassword } from 'firebase/auth'
+import { getRedirectResult, signInWithPopup, signInWithCredential, getAuth, signInWithEmailAndPassword, GoogleAuthProvider } from 'firebase/auth'
 import { useFirebaseAuth, useCurrentUser } from 'vuefire'
 import { useRouter } from 'vue-router'
+
+function detectNativePlatform() {
+  try {
+    // Use globalThis to check for Capacitor without a static import
+    // This avoids build failures in packages that don't depend on @capacitor/core
+    const cap = globalThis.Capacitor
+    return cap && typeof cap.isNativePlatform === 'function' ? cap.isNativePlatform() : false
+  } catch {
+    return false
+  }
+}
 
 const emit = defineEmits(['auth'])
 const router = useRouter()
@@ -19,7 +30,7 @@ const user = useCurrentUser()
 const email = ref('')
 const password = ref('')
 const remember = ref(false)
-
+const isNative = detectNativePlatform()
 
 // display errors if any
 const error = ref(null)
@@ -43,8 +54,18 @@ async function handleGoogleSignin() {
     if (!auth) {
       throw new Error('auth is null')
     }
-    const resp = await signInWithPopup(auth, googleAuthProvider)
-    console.log('Google signin success', resp)
+    if (isNative) {
+      // Use Capacitor Firebase Authentication for native WebViews
+      // signInWithPopup does not work in native WebViews
+      const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication')
+      const result = await FirebaseAuthentication.signInWithGoogle()
+      const credential = GoogleAuthProvider.credential(result.credential?.idToken)
+      await signInWithCredential(auth, credential)
+      console.log('Google native signin success')
+    } else {
+      const resp = await signInWithPopup(auth, googleAuthProvider)
+      console.log('Google signin success', resp)
+    }
     authComplete()
   } catch (err) {
     console.error('Failed signinRedirect', err)
@@ -148,7 +169,7 @@ onMounted(() => {
       </v-card>
     </section>
     <article class="flex flex-col space-y-4 my-4 gap-2 w-full max-w-10">
-      <v-btn @click="handleGithubSignin" prepend-icon="mdi-github" full-width>
+      <v-btn v-if="!isNative" @click="handleGithubSignin" prepend-icon="mdi-github" full-width>
         Sign in with GitHub
       </v-btn>
       <v-btn @click="handleGoogleSignin" prepend-icon="mdi-google" full-width>

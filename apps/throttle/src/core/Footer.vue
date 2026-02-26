@@ -7,7 +7,7 @@ const user = useCurrentUser()
 const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
 </script>
 <template>
-  <v-footer app class="bg-transparent">
+  <v-footer app class="bg-transparent" style="padding-bottom: var(--safe-area-bottom)">
     <v-container fluid class="p-0">
       <v-row class="pt-2 pb-3 px-0">
         <v-spacer />
