@@ -24,9 +24,9 @@ defineEmits<{
 </script>
 
 <template>
-  <v-card 
-    elevation="2" 
-    class="media-card"
+  <v-card
+    elevation="2"
+    class="media-card cursor-pointer transition-transform duration-deja-fast ease-deja-standard hover:-translate-y-0.5"
     hover
     @click="$emit('play', media.id)"
   >
@@ -115,15 +115,6 @@ defineEmits<{
 </template>
 
 <style scoped>
-.media-card {
-  transition: transform 0.2s ease-in-out;
-  cursor: pointer;
-}
-
-.media-card:hover {
-  transform: translateY(-4px);
-}
-
 .media-thumbnail {
   position: relative;
   height: 160px;
@@ -155,7 +146,7 @@ defineEmits<{
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .media-card:hover .play-overlay {

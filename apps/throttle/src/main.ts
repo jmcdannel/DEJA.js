@@ -3,6 +3,7 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { VueFire, VueFireAuth } from 'vuefire'
+import { MotionPlugin } from '@vueuse/motion'
 // Vuetify
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
@@ -26,6 +27,10 @@ const vuetify = createVuetify({
       mdi,
     },
   },
+  defaults: {
+    VDialog: { transition: 'dialog-bottom-transition' },
+    VMenu: { transition: 'scale-transition' },
+  },
 })
 const pinia = createPinia()
 const vfireConfig = { firebaseApp, modules: [VueFireAuth()] }
@@ -35,4 +40,5 @@ app.use(pinia)
 app.use(router)
 app.use(vuetify)
 app.use(VueFire, vfireConfig)
+app.use(MotionPlugin)
 app.mount('#app')

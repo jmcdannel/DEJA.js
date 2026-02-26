@@ -10,7 +10,7 @@ import { useMenu } from '@/Core/Menu/useMenu'
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
 import { Login } from '@repo/auth'
-import { AppHeader } from '@repo/ui'
+import { AppHeader, TransitionFade } from '@repo/ui'
 // import { useDcc } from '@repo/dccex'
 // import { useEfx } from '@repo/modules'
 
@@ -92,7 +92,11 @@ function handleLogoClick() {
         <Menu v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
       <v-main>
         <v-container >
-          <RouterView />
+          <RouterView v-slot="{ Component }">
+            <TransitionFade>
+              <component :is="Component" />
+            </TransitionFade>
+          </RouterView>
         </v-container>
       </v-main>
     </v-app>

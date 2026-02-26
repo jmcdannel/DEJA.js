@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useLayout } from '@repo/modules'
+import { StatusPulse } from '@repo/ui'
 
 const { getDevices } = useLayout()
 const devices = getDevices()
@@ -19,13 +20,8 @@ const allConnected = computed(() => devices.value.every(device => device.isConne
             :color="!!allConnected ? 'green' : 'yellow'"
           >
           <template #append>
-            <span v-if="allConnected" class="ml-2 relative flex h-3 w-3">
-              <span class="absolute inline-flex h-full w-full rounded-full bg-green-600 animate-ping opacity-75"></span>
-              <span class="relative inline-flex h-full w-full rounded-full bg-green-600"></span>
-            </span>
-            <span v-else class="ml-2 relative flex h-3 w-3">
-              <span class="absolute inline-flex h-full w-full rounded-full bg-yellow-600 animate-ping opacity-75"></span>
-              <span class="relative inline-flex h-full w-full rounded-full bg-yellow-600"></span>
+            <span class="ml-2">
+              <StatusPulse :status="allConnected ? 'connected' : 'warning'" size="sm" />
             </span>
           </template>
             <span class="hidden lg:flex">Devices</span>

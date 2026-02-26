@@ -14,6 +14,8 @@ import { VCard } from 'vuetify/components/VCard'
 import { VueFire, VueFireAuth } from 'vuefire'
 // Firebase
 import { firebaseApp } from '@repo/firebase-config'
+// Motion
+import { MotionPlugin } from '@vueuse/motion'
 
 // Components
 import App from './App.vue'
@@ -63,6 +65,12 @@ const vuetify = createVuetify({
       size: 'small',
       variant: 'tonal',
     },
+    VDialog: {
+      transition: 'dialog-bottom-transition',
+    },
+    VMenu: {
+      transition: 'scale-transition',
+    },
   },
   directives,
   icons: {
@@ -103,4 +111,5 @@ app.use(VueFire, {
 })
 app.use(router)
 app.use(vuetify)
+app.use(MotionPlugin)
 app.mount('#app')

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useDeviceSerialMonitor, type SerialMessage } from './useDeviceSerialMonitor'
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 
 interface Props {
   deviceId: string
@@ -108,7 +109,7 @@ function getDirectionInfo(direction: 'incoming' | 'outgoing') {
           No serial messages yet
         </div>
 
-        <div v-else class="monitor-card__terminal-lines space-y-2">
+        <div v-else v-auto-animate class="monitor-card__terminal-lines space-y-2">
           <div
             v-for="message in messages"
             :key="message.id"

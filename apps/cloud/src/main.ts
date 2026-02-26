@@ -13,6 +13,9 @@ import { VueFire, VueFireAuth } from 'vuefire'
 // Firebase
 import { firebaseApp } from '@repo/firebase-config'
 
+// Motion
+import { MotionPlugin } from '@vueuse/motion'
+
 // Components
 import App from './App.vue'
 import router from './router'
@@ -105,6 +108,8 @@ const vuetify = createVuetify({
     VStepperVertical,
   },
   defaults: {
+    VDialog: { transition: 'dialog-bottom-transition' },
+    VMenu: { transition: 'scale-transition' },
     VNavigationDrawer: {
       VListItem: {
         density: 'compact',
@@ -136,4 +141,5 @@ app.use(VueFire, {
 })
 app.use(router)
 app.use(vuetify)
+app.use(MotionPlugin)
 app.mount('#app')

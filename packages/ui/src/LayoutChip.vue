@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core'
 import SelectLayout from './SelectLayout.vue'
+import { StatusPulse } from './animations'
 const layoutId = useStorage('@DEJA/layoutId', '')
 
 function handleSelect(_layoutId: string) {
@@ -23,14 +24,7 @@ function handleSelect(_layoutId: string) {
         dark
       >
         <template #append>
-          <span v-if="layoutId" class="ml-2 relative flex h-3 w-3">
-            <span class="absolute inline-flex h-full w-full rounded-full bg-green-400 animate-ping opacity-75"></span>
-            <span class="relative inline-flex h-full w-full rounded-full bg-green-400"></span>
-          </span>
-          <span v-else class="ml-2 relative flex h-3 w-3">
-            <span class="absolute inline-flex h-full w-full rounded-full bg-red-400 animate-bounce opacity-75"></span>
-            <span class="relative inline-flex h-full w-full rounded-full bg-red-400"></span>
-          </span>
+          <StatusPulse :status="layoutId ? 'connected' : 'disconnected'" size="md" class="ml-2" />
         </template>
         <template #default>
           <span class="font-medium text-white">{{ layoutId || 'No Layout' }}</span>

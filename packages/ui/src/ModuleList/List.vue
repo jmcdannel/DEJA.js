@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, watch, ref, shallowRef, reactive, type PropType } from 'vue'
 import { useStorage } from '@vueuse/core'
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import Item from './Item.vue'
 import Table from './Table.vue'
 import { type ListFilter } from './types'
@@ -259,7 +260,7 @@ function handleUpdateState(item: DocumentData, newState: boolean) {
       :sort-by="sortBy?.[0]" 
       @update:state="handleUpdateState"
     />
-    <v-row v-else-if="DEFAULT_VIEW_OPTIONS.some(option => option.value === viewAs?.[0])">
+    <v-row v-else-if="DEFAULT_VIEW_OPTIONS.some(option => option.value === viewAs?.[0])" v-auto-animate>
       <v-col :cols="cols.xs" :sm="cols.sm" :md="cols.md" :lg="cols.lg" :xl="cols.xl" :xxl="cols.xxl"
         v-for="item in filteredList"
         :key="item.id">
