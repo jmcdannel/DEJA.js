@@ -5,6 +5,12 @@
   "scripts": {
     "build": "run-p type-check build-only",
     "build-only": "vite build",
+    "build:mobile": "run-s build-only cap:sync",
+    "cap:sync": "cap sync",
+    "cap:add:ios": "cap add ios",
+    "cap:add:android": "cap add android",
+    "cap:open:ios": "cap open ios",
+    "cap:open:android": "cap open android",
     "dev": "vite --host",
     "format": "prettier --write src/",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
@@ -14,6 +20,8 @@
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false --skipLibCheck "
   },
   "dependencies": {
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
     "@mdi/font": "^7.4.47",
     "@repo/modules": "workspace:*",
     "@repo/ui": "workspace:*",
@@ -31,6 +39,9 @@
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/ios": "^6.0.0",
     "@repo/auth": "workspace:*",
     "@repo/dccex": "workspace:*",
     "@repo/deja": "workspace:*",
