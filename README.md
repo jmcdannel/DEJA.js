@@ -199,52 +199,6 @@ Notes:
 
 ---
 
-## 🤖 Developing with Claude Code
-
-This project is set up to work well with [Claude Code](https://claude.ai/code) following the workflow practices shared by Boris Cherny (creator of Claude Code).
-
-### Always Start in Plan Mode
-
-For any non-trivial task, press **Shift+Tab twice** before Claude writes a single line of code to enter Plan Mode. Go back and forth with Claude refining the plan until it looks right, then switch to auto-accept edits mode. Claude can typically 1-shot the implementation from a solid plan.
-
-> "A good plan is really important!" — Boris Cherny
-
-Skip Plan Mode only for trivial, isolated changes (typo fixes, one-liners, simple renames).
-
-### Run Multiple Claude Instances in Parallel
-
-Boris runs **5 Claudes in parallel** in numbered terminal tabs (1–5) and uses macOS/system notifications to know when one needs input. This lets a single developer produce the output of an entire team.
-
-- Number your terminal tabs 1–5 so you can orient yourself quickly
-- Enable Claude Code notifications (Settings → Notifications) so you can switch tabs reactively rather than polling
-- Assign independent tasks across tabs: e.g. tab 1 works on `apps/throttle`, tab 2 on `apps/cloud`, tab 3 on a package refactor
-- Hand off long-running tasks (full builds, linting the whole monorepo) to a background tab while you work elsewhere
-
-### Use Subagents for Repeated Workflows
-
-Boris uses dedicated subagents that are reused across many PRs — they encode complex, multi-step tasks into a single slash command. Subagent ideas for this project:
-
-- **`/verify-app`** — start the dev server for a specific app, open it in a browser, and confirm expected behavior end-to-end (especially useful after changes to `apps/throttle` or `apps/cloud`)
-- **`/code-simplifier`** — after a feature is done, run a second pass to simplify, remove dead code, and clean up rough edges introduced during implementation
-
-Add your own by creating a `.md` file in `.claude/commands/` and invoking it with `/filename`.
-
-### Keep CLAUDE.md Up to Date — Every Mistake Becomes a Rule
-
-When Claude does something wrong (wrong import style, wrong Vue syntax, incorrect command), **immediately add a rule to the "Rules" section of `CLAUDE.md`**. Over time this file becomes a self-correcting system: the longer you work in this repo with Claude, the fewer mistakes it makes.
-
-During PR review, add a comment tagging `@.claude` to have Claude update `CLAUDE.md` as part of the PR. Install the GitHub Action with the `/install-github-action` slash command to enable this.
-
-### Permissions — Skip `--dangerously-skip-permissions`
-
-Do not use `--dangerously-skip-permissions`. Instead, use `/permissions` (or edit `.claude/settings.json` directly) to pre-allow specific bash commands that are safe in your environment. Common commands for this project are already pre-allowed in `.claude/settings.json`.
-
-### Model Choice
-
-Boris uses **Opus with extended thinking** for all coding work. It is larger and slower than Sonnet, but because it requires less steering and is better at tool use, it ends up being faster end-to-end. If a task is taking many correction rounds with a smaller model, switch to Opus.
-
----
-
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
