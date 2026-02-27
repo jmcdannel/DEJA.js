@@ -31,3 +31,7 @@ export { default as useLayoutRoutes } from './routes/useLayoutRoutes'
 export { default as useRoutes } from './routes/useRoutes'
 export * from './routes/types'
 export * from './routes/constants'
+
+// Users module
+export { default as useUserProfile } from './users/useUserProfile'
+export * from './users/types'
