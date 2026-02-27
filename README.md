@@ -32,28 +32,6 @@
 
 By the end of this guide your DCC-EX CommandStation will be connected to DEJA.js running on your computer, and you'll be driving trains from any browser on your network.
 
-### ⚡ Quick Install
-
-The fastest way to get set up. Open a terminal and run one command — it checks your prerequisites, clones the repo, installs dependencies, and walks you through configuration.
-
-**macOS / Linux**
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.sh | bash
-```
-
-**Windows (PowerShell)**
-
-```powershell
-irm https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.ps1 | iex
-```
-
-After the script finishes, skip ahead to [Step 3 — Register Your CommandStation](#-step-3--register-your-commandstation).
-
-> Prefer to set things up manually? The full step-by-step guide continues below.
-
----
-
 ### 🔧 How It Works
 
 ```
@@ -72,7 +50,6 @@ The **DEJA Server** is the only piece you install locally. It bridges your Comma
 
 | Requirement | Minimum | Get it |
 |---|---|---|
-| 👤 DEJA.js account | Free | [Request at dejajs.com](https://www.dejajs.com) |
 | 📦 Node.js | v22+ | [Install via nvm](https://github.com/nvm-sh/nvm) |
 | 📦 pnpm | v9+ | `npm install -g pnpm` |
 | 📦 Git | Any recent | [git-scm.com](https://git-scm.com/install/) |
@@ -83,7 +60,52 @@ The **DEJA Server** is the only piece you install locally. It bridges your Comma
 
 ---
 
-### 📦 Step 1 — Install
+### 👤 Step 1 — Create Your Account
+
+You need a DEJA.js account before anything else — your account provides the layout configuration and Firebase credentials required to run the system locally.
+
+1. Go to [DEJA Cloud](https://cloud.dejajs.com/signup) and create an account (email/password, Google, or GitHub)
+2. Your account will be **pending approval** — you'll see a "Pending Approval" page after signing up
+3. Once an admin approves your account, you'll be redirected to the **onboarding wizard**
+
+---
+
+### 🧭 Step 2 — Complete Onboarding
+
+After your account is approved, the onboarding wizard walks you through initial setup:
+
+1. **Welcome** — overview of the system
+2. **Create Layout** — give your layout a name and ID (lowercase letters, numbers, and hyphens only)
+3. **Environment Setup** — this page shows your `LAYOUT_ID` and all `VITE_FIREBASE_*` credentials. **Copy these values** — you'll need them in Step 4
+4. **Completion** — you're ready to go
+
+**Verify:** You can log in to [DEJA Cloud](https://cloud.dejajs.com) and see your layout dashboard.
+
+---
+
+### 📦 Step 3 — Install
+
+#### ⚡ Quick Install
+
+The fastest way to get set up. Open a terminal and run one command — it checks your prerequisites, clones the repo, installs dependencies, and walks you through configuration.
+
+**macOS / Linux**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.sh | bash
+```
+
+**Windows (PowerShell)**
+
+```powershell
+irm https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.ps1 | iex
+```
+
+After the script finishes, skip ahead to [Step 5 — Register Your CommandStation](#-step-5--register-your-commandstation).
+
+> Prefer to set things up manually? Continue with the steps below.
+
+#### Manual Install
 
 Clone the repository and install dependencies.
 
@@ -97,28 +119,15 @@ pnpm install
 
 ---
 
-### ⚙️ Step 2 — Configure
+### ⚙️ Step 4 — Configure
 
-Copy the environment template and fill in your values.
+Copy the environment template and fill in the values from your onboarding (Step 2).
 
 ```bash
 cp .env.example .env.local
 ```
 
-Open `.env.local` in a text editor and set your `LAYOUT_ID`:
-
-```env
-LAYOUT_ID=my-layout-name
-```
-
-**Layout ID rules:** lowercase letters, numbers, and hyphens only — no spaces, underscores, or special characters.
-
-```
-Good: basement-empire, club-layout-2024, riverside-yard
-Bad:  My Layout, layout_1, riverside yard
-```
-
-**Get your Firebase credentials from DEJA Cloud:**
+Open `.env.local` in a text editor and paste your credentials. If you need to find them again:
 
 1. Log in to [DEJA Cloud](https://cloud.dejajs.com)
 2. Select your layout
@@ -150,7 +159,7 @@ VITE_WS_ID=DEJA.js
 
 ---
 
-### 🧱 Step 3 — Register Your CommandStation
+### 🧱 Step 5 — Register Your CommandStation
 
 Tell DEJA Cloud that a DCC-EX CommandStation will connect via USB from this computer.
 
@@ -164,7 +173,7 @@ The device will appear in the list with a "disconnected" status — that is expe
 
 ---
 
-### 🖥️ Step 4 — Start the Server
+### 🖥️ Step 6 — Start the Server
 
 ```bash
 pnpm deja
@@ -176,7 +185,7 @@ This starts the DEJA Server (USB serial communication) and the Monitor app (diag
 
 ---
 
-### 🔌 Step 5 — Connect Hardware
+### 🔌 Step 7 — Connect Hardware
 
 Select the USB port for your CommandStation in the Monitor app.
 
@@ -193,7 +202,7 @@ Select the USB port for your CommandStation in the Monitor app.
 
 ---
 
-### 🚂 Step 6 — Drive Trains
+### 🚂 Step 8 — Drive Trains
 
 1. In [DEJA Cloud](https://cloud.dejajs.com), navigate to **Roster** and click **Add Loco** — enter the DCC address and a name
 2. Open [DEJA Throttle](https://throttle.dejajs.com) in any browser on your network

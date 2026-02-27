@@ -25,7 +25,20 @@ Write-Host "    3. Clone the DEJA.js repository"
 Write-Host "    4. Install dependencies"
 Write-Host "    5. Create your .env.local configuration file"
 Write-Host ""
-Read-Host "  Press Enter to continue, or Ctrl+C to cancel"
+
+# ── 0. Account check ─────────────────────────────────────────────────────────
+Write-Host "  Before you begin:" -ForegroundColor Yellow
+Write-Host "  You need a DEJA.js account to get your configuration credentials."
+Write-Host ""
+Write-Host "  If you haven't already:"
+Write-Host "    1. Sign up at https://cloud.dejajs.com/signup"
+Write-Host "    2. Wait for your account to be approved"
+Write-Host "    3. Complete the onboarding wizard to create your layout"
+Write-Host "    4. Copy your LAYOUT_ID and VITE_FIREBASE_* values from the"
+Write-Host '       "Environment Setup" step (you can also find them later under'
+Write-Host '       "View Local Environment Configuration" in your layout)'
+Write-Host ""
+Read-Host "  Press Enter if you have your credentials ready, or Ctrl+C to sign up first"
 
 # ── 1. Check Node.js ─────────────────────────────────────────────────────────
 Write-Step "Checking Node.js..."
@@ -125,11 +138,11 @@ Write-Ok "Layout ID set to: $layoutId"
 Write-Host ""
 Write-Host "  Firebase Credentials" -ForegroundColor White
 Write-Host ""
-Write-Info "DEJA.js uses Firebase for real-time sync. Your credentials come"
-Write-Info "from DEJA Cloud - get them by following these steps:"
+Write-Info "Paste the VITE_FIREBASE_* values from your onboarding setup."
+Write-Info "If you need to find them again:"
 Write-Host ""
-Write-Info "  1. Open https://cloud.dejajs.com in your browser"
-Write-Info "  2. Log in and select your layout"
+Write-Info "  1. Log in to https://cloud.dejajs.com"
+Write-Info "  2. Select your layout"
 Write-Info '  3. Click "View Local Environment Configuration"'
 Write-Info "  4. Copy all the VITE_FIREBASE_* values shown"
 Write-Host ""
