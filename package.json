@@ -15,9 +15,12 @@
     "lint": "turbo run lint",
     "start": "turbo run start --filter=deja-serverts",
     "start:all": "turbo run start",
-    "scan-sounds": "turbo run scan-sounds --filter=@repo/sounds"
+    "scan-sounds": "turbo run scan-sounds --filter=@repo/sounds",
+    "changeset": "changeset",
+    "changeset:status": "changeset status"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.0",
     "npm-run-all": "^4.1.5",
     "pm2": "^5.4.2",
     "syncpack": "^13.0.4",

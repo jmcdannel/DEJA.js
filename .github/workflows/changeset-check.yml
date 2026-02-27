@@ -1,0 +1,40 @@
+name: Changeset Check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-changeset:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for changeset files
+        id: check
+        run: |
+          # Look for new .changeset/*.md files added in this PR
+          changesets=$(git diff --name-only --diff-filter=A origin/main...HEAD -- '.changeset/*.md' | grep -v -i 'readme.md' || true)
+          if [ -z "$changesets" ]; then
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "files<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$changesets" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Warn if no changeset
+        if: steps.check.outputs.found == 'false'
+        run: |
+          echo "::warning::No changeset file found. If this PR includes user-facing changes, consider running /changelog in Claude Code to create one."
+
+      - name: Report changeset found
+        if: steps.check.outputs.found == 'true'
+        run: |
+          echo "Changeset file(s) found:"
+          echo "${{ steps.check.outputs.files }}"
