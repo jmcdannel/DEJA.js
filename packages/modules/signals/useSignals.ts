@@ -22,13 +22,20 @@ function normalizePin(pin?: number | string | null): number | undefined {
   return Number.isFinite(parsed as number) ? Number(parsed) : undefined
 }
 
+const VALID_SIGNAL_SORT_FIELDS = new Set(['name', 'device', 'aspect'])
+const DEFAULT_SIGNAL_SORT = 'name'
+
+function validSignalSortField(field: string | undefined): string {
+  return field && VALID_SIGNAL_SORT_FIELDS.has(field) ? field : DEFAULT_SIGNAL_SORT
+}
+
 export const useSignals = () => {
   const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
   const sortBy = useStorage<string[]>('@DEJA/prefs/signals/Sort', ['name'])
 
   const signalsCol = () => {
     if (!layoutId.value) return null
-    const sortField = sortBy.value?.[0] || 'name'
+    const sortField = validSignalSortField(sortBy.value?.[0])
     return query(collection(db, `layouts/${layoutId.value}/signals`), orderBy(sortField))
   }
 

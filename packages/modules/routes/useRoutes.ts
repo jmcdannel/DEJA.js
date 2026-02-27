@@ -6,6 +6,13 @@ import { db } from '@repo/firebase-config'
 import { useTurnouts, type Turnout } from '@repo/modules'
 import type { Route, RouteInput, RouteTurnoutConfig } from './types'
 
+const VALID_ROUTE_SORT_FIELDS = new Set(['name', 'order', 'color'])
+const DEFAULT_ROUTE_SORT = 'name'
+
+function validRouteSortField(field: string | undefined): string {
+  return field && VALID_ROUTE_SORT_FIELDS.has(field) ? field : DEFAULT_ROUTE_SORT
+}
+
 export const useRoutes = () => {
   const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
   const sortBy = useStorage<string[]>('@DEJA/prefs/routes/Sort', ['name'])
@@ -14,7 +21,7 @@ export const useRoutes = () => {
   const routesCol = () => {
     if (!layoutId.value) return null
 
-    const sortField = sortBy.value?.[0] || 'name'
+    const sortField = validRouteSortField(sortBy.value?.[0])
     return query(collection(db, `layouts/${layoutId.value}/routes`), orderBy(sortField))
   }
 
