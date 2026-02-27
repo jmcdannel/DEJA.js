@@ -17,6 +17,7 @@ async function handleSignup() {
       photoURL: user.value.photoURL,
       layoutIds: [],
       onboardingComplete: false,
+      approved: false,
     })
   }
   router.push({ name: 'onboarding' })
