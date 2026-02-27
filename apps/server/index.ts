@@ -1,4 +1,11 @@
 import 'dotenv/config'
+import * as Sentry from '@sentry/node'
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  tracesSampleRate: 1.0,
+})
+
 import { wsServer } from './src/lib/ws-server.js'
 import { dejaMqtt as mqtt } from './src/lib/mqtt.js'
 import { dejaCloud } from './src/dejaCloud.js'
