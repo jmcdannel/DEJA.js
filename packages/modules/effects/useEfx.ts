@@ -16,6 +16,13 @@ import { slugify } from '@repo/utils'
 import { efxTypes } from './constants'
 import type { Effect, EffectType } from './types'
 
+const VALID_EFFECT_SORT_FIELDS = new Set(['name', 'device', 'type', 'order', 'state', 'pin'])
+const DEFAULT_EFFECT_SORT = 'name'
+
+function validEffectSortField(field: string | undefined): string {
+  return field && VALID_EFFECT_SORT_FIELDS.has(field) ? field : DEFAULT_EFFECT_SORT
+}
+
 export const useEfx = () => {
   const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
   const sortBy = useStorage<string[]>('@DEJA/prefs/effects/Sort', ['name'])
@@ -33,7 +40,7 @@ export const useEfx = () => {
       })
     }
 
-    let queryRef = query(collection(db, `layouts/${layoutId.value}/effects`), orderBy(sortBy.value[0]))
+    let queryRef = query(collection(db, `layouts/${layoutId.value}/effects`), orderBy(validEffectSortField(sortBy.value[0])))
     // let queryRef = fquery(colRef, orderBy(sortBy.value[0])) // TODO: debug this, getting error: [VueFire SSR]: Could not get the path of the data source]
     whereClauses.forEach((clause) => {
       queryRef = query(queryRef, clause)

@@ -9,6 +9,59 @@ export interface SoundCommand {
   loop?: boolean
 }
 
+/**
+ * Validate that a sound URL is safe to fetch.
+ * Blocks private/internal IPs, cloud metadata endpoints, and non-HTTPS schemes.
+ */
+function isAllowedSoundUrl(url: string): boolean {
+  if (typeof url !== 'string' || url.length === 0 || url.length > 2048) return false
+
+  // Only allow http(s) URLs
+  if (!url.startsWith('https://') && !url.startsWith('http://')) {
+    log.warn('[SOUND] Blocked non-HTTP URL scheme:', url)
+    return false
+  }
+
+  try {
+    const parsed = new URL(url)
+    const hostname = parsed.hostname.toLowerCase()
+
+    // Block cloud metadata endpoints
+    if (hostname === '169.254.169.254' || hostname === 'metadata.google.internal') {
+      log.warn('[SOUND] Blocked cloud metadata URL:', url)
+      return false
+    }
+
+    // Block private/internal IP ranges
+    const ipMatch = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/)
+    if (ipMatch) {
+      const [, a, b] = ipMatch.map(Number)
+      if (
+        a === 10 ||                          // 10.0.0.0/8
+        a === 127 ||                         // 127.0.0.0/8 (loopback)
+        (a === 172 && b >= 16 && b <= 31) || // 172.16.0.0/12
+        (a === 192 && b === 168) ||          // 192.168.0.0/16
+        (a === 169 && b === 254) ||          // 169.254.0.0/16 (link-local)
+        a === 0                              // 0.0.0.0/8
+      ) {
+        log.warn('[SOUND] Blocked private IP URL:', url)
+        return false
+      }
+    }
+
+    // Block localhost variants
+    if (hostname === 'localhost' || hostname === '[::1]') {
+      log.warn('[SOUND] Blocked localhost URL:', url)
+      return false
+    }
+
+    return true
+  } catch {
+    log.warn('[SOUND] Failed to parse URL:', url)
+    return false
+  }
+}
+
 // Track running sound processes
 interface RunningSound {
   audio: any
@@ -64,28 +117,34 @@ export async function playSound(url: string, volume: number = 1.0): Promise<void
     })
     
     let localFilePath: string
-    
-    // If it's a remote URL, check cache first, then download if needed
-    if (url.startsWith('http')) {
-      // Check cache first
-      const cachedPath = await audioCacheService.getCachedAudio(url)
-      if (cachedPath) {
-        localFilePath = cachedPath
-        log.info('[SOUND] Using cached audio file', { cachedPath })
-      } else {
-        log.info('[SOUND] Audio not in cache, downloading...')
-        
-        try {
-          // Download and cache the audio file
-          localFilePath = await audioCacheService.downloadAndCacheAudio(url)
-        } catch (downloadError) {
-          log.error('[SOUND] Failed to download audio file:', downloadError)
-          throw downloadError
-        }
-      }
+
+    // Only allow HTTP(S) URLs — block local file paths from user input
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      log.error('[SOUND] Blocked non-HTTP sound URL (local paths not allowed):', url)
+      return
+    }
+
+    // Validate URL against SSRF blocklist
+    if (!isAllowedSoundUrl(url)) {
+      log.error('[SOUND] Blocked disallowed sound URL:', url)
+      return
+    }
+
+    // Check cache first, then download if needed
+    const cachedPath = await audioCacheService.getCachedAudio(url)
+    if (cachedPath) {
+      localFilePath = cachedPath
+      log.info('[SOUND] Using cached audio file', { cachedPath })
     } else {
-      // Local file path
-      localFilePath = url
+      log.info('[SOUND] Audio not in cache, downloading...')
+
+      try {
+        // Download and cache the audio file
+        localFilePath = await audioCacheService.downloadAndCacheAudio(url)
+      } catch (downloadError) {
+        log.error('[SOUND] Failed to download audio file:', downloadError)
+        throw downloadError
+      }
     }
     
     

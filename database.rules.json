@@ -1,0 +1,26 @@
+{
+  "rules": {
+    "dccCommands": {
+      "$layoutId": {
+        ".read": "auth != null && root.child('layouts').child($layoutId).child('owner').val() === auth.token.email",
+        ".write": "auth != null && root.child('layouts').child($layoutId).child('owner').val() === auth.token.email",
+        "$commandId": {
+          ".validate": "newData.hasChildren(['action']) && newData.child('action').isString() && newData.child('action').val().length < 50 && newData.child('payload').isString() && newData.child('payload').val().length < 500"
+        }
+      }
+    },
+    "dejaCommands": {
+      "$layoutId": {
+        ".read": "auth != null && root.child('layouts').child($layoutId).child('owner').val() === auth.token.email",
+        ".write": "auth != null && root.child('layouts').child($layoutId).child('owner').val() === auth.token.email",
+        "$commandId": {
+          ".validate": "newData.hasChildren(['action']) && newData.child('action').isString() && newData.child('action').val().length < 50 && newData.child('payload').isString() && newData.child('payload').val().length < 500"
+        }
+      }
+    },
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}
