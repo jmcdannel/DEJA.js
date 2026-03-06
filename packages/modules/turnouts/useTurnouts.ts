@@ -13,6 +13,13 @@ import { useCollection } from 'vuefire'
 import { db } from '@repo/firebase-config'
 import type { Turnout } from './types'
 
+const VALID_TURNOUT_SORT_FIELDS = new Set(['order', 'name', 'device', 'turnoutIdx', 'state', 'type'])
+const DEFAULT_TURNOUT_SORT = 'order'
+
+function validTurnoutSortField(field: string | undefined): string {
+  return field && VALID_TURNOUT_SORT_FIELDS.has(field) ? field : DEFAULT_TURNOUT_SORT
+}
+
 export function useTurnouts() {
   const layoutId = useStorage('@DEJA/layoutId', '')
   const sortBy = useStorage<string[]>('@DEJA/prefs/turnouts/Sort', ['order'])
@@ -30,7 +37,7 @@ export function useTurnouts() {
       })
     }
     console.log('sortby', sortBy.value)
-    let queryRef = query(collection(db, `layouts/${layoutId.value}/turnouts`), orderBy(sortBy.value[0]))
+    let queryRef = query(collection(db, `layouts/${layoutId.value}/turnouts`), orderBy(validTurnoutSortField(sortBy.value[0])))
     // let queryRef = query(colRef, orderBy(sortBy.value[0])) // TODO: debug this, getting error: [VueFire SSR]: Could not get the path of the data source]
     whereClauses.forEach((clause) => {
       console.log(clause)

@@ -256,7 +256,12 @@ export class AudioCacheService {
    */
   async downloadAndCacheAudio(url: string): Promise<string> {
     log.info('[AUDIO_CACHE] Starting download from URL:', url)
-    
+
+    // Defense-in-depth: reject non-HTTP URLs at the cache layer too
+    if (!url.startsWith('https://') && !url.startsWith('http://')) {
+      throw new Error(`[AUDIO_CACHE] Blocked non-HTTP URL: ${url}`)
+    }
+
     // Download the audio file
     const response = await fetch(url)
     log.info('[AUDIO_CACHE] Fetch response status:', response.status, response.statusText)
