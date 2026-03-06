@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import type { DocumentData } from 'firebase/firestore'
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 
 const props = defineProps<{
   logs: DocumentData[]
@@ -21,8 +22,8 @@ watch(() => props.logs, () => {
 <template>
   <v-card color="cyan-darken-3" class="min-h-[420px]">
     <v-card-title>Sensor Logs</v-card-title>
-    <v-card-text class="flex flex-col-reverse gap-4">
-      <v-alert 
+    <v-card-text v-auto-animate class="flex flex-col-reverse gap-4">
+      <v-alert
         v-for="log in logs" 
         :key="log.id" 
         :color="log?.color || 'info'" 

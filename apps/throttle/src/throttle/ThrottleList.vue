@@ -5,6 +5,7 @@ import ThrottleTile from '@/throttle/ThrottleTile.vue'
 import { useLocos, type Loco } from '@repo/modules/locos'
 import { LocoAvatar, ListMenu } from '@repo/ui'
 import { useStorage } from '@vueuse/core'
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import draggable from 'vuedraggable'
 
 const { getLocos, getThrottles, acquireThrottle } = useLocos()
@@ -88,9 +89,9 @@ watch(
   <v-dialog v-model="isRosterOpen" max-width="800px">
     <template v-slot:default>
       <v-sheet class="p-4">
-        <v-row class="flex justify-center">
+        <v-row v-auto-animate class="flex justify-center">
           <v-col cols="auto"
-            v-for="loco in locos" 
+            v-for="loco in locos"
             :key="loco.address" 
             >
             <LocoAvatar 

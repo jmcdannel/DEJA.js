@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useTourStore } from '../stores/tour'
 import { useCollection } from 'vuefire'
 import { useEfx } from '@repo/modules'
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import GuestEffectCard from '../components/GuestEffectCard.vue'
 
 const tourStore = useTourStore()
@@ -27,12 +28,12 @@ const effects = getGuestEffects()
         </v-card>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col 
-        v-for="effect in effects as any[]" 
-        :key="effect.id" 
-        cols="12" 
-        md="6" 
+    <v-row v-auto-animate>
+      <v-col
+        v-for="effect in effects as any[]"
+        :key="effect.id"
+        cols="12"
+        md="6"
         lg="4"
       >
         <GuestEffectCard :effect="effect" />

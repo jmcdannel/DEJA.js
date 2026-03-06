@@ -27,10 +27,10 @@ watch(state, async (newState) => {
 </script>
 
 <template>
-  <v-card 
-    :elevation="effect.state ? 8 : 2" 
-    :class="{ 'active-effect': effect.state }"
-    class="effect-card"
+  <v-card
+    :elevation="effect.state ? 8 : 2"
+    :class="{ 'animate-deja-pulse-glow': effect.state }"
+    class="transition-transform duration-deja-normal ease-deja-standard hover:-translate-y-0.5"
     variant="tonal"
     :color="effect?.color || 'primary'"
   >
@@ -69,18 +69,3 @@ watch(state, async (newState) => {
     </v-card-actions>
   </v-card>
 </template>
-
-<style scoped>
-.effect-card {
-  transition: all 0.3s ease;
-}
-
-.active-effect {
-  border: 2px solid var(--v-primary-base);
-  transform: scale(1.02);
-}
-
-.effect-card:hover {
-  transform: translateY(-2px);
-}
-</style>

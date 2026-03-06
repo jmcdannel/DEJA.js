@@ -13,6 +13,8 @@ import colors from 'vuetify/util/colors'
 import { VueFire, VueFireAuth } from 'vuefire'
 // Firebase
 import { firebaseApp } from '@repo/firebase-config'
+// Motion
+import { MotionPlugin } from '@vueuse/motion'
 
 import App from './App.vue'
 import router from './router'
@@ -31,6 +33,8 @@ const vuetify = createVuetify({
         class: 'mx-4 py-4',
       }
     },
+    VDialog: { transition: 'dialog-bottom-transition' },
+    VMenu: { transition: 'scale-transition' },
   },
   directives,
   icons: {
@@ -78,6 +82,7 @@ Sentry.init({
 
 app.use(pinia)
 app.use(vuetify)
+app.use(MotionPlugin)
 app.use(VueFire, {
   firebaseApp,
   modules: [VueFireAuth()]

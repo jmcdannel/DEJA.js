@@ -203,7 +203,7 @@ async function handleDeactivate() {
 
 <style scoped>
 .effect-card {
-  transition: all 0.3s ease;
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out;
   cursor: pointer;
 }
 
@@ -212,12 +212,18 @@ async function handleDeactivate() {
 }
 
 .effect-card.active {
-  animation: pulse 2s infinite;
+  --deja-glow-color: rgba(76, 175, 80, 0.4);
+  animation: deja-pulse-glow 2s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+@keyframes deja-pulse-glow {
+  0%, 100% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 0 var(--deja-glow-color, rgba(56,189,248,0.4));
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 12px 4px var(--deja-glow-color, rgba(56,189,248,0.4));
+  }
 }
 </style>

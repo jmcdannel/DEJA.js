@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import { useEfx, type Effect } from '@repo/modules'
 import EffectListItem from '@/Effects/EffectListItem.vue'
 
@@ -16,14 +17,14 @@ function handleEdit(item: Effect) {
 </script>
 <template>
   <v-container>
-    <v-row>
+    <v-row v-auto-animate>
       <v-col
         cols="12"
         xs="12"
         sm="6"
         lg="4"
       >
-      <slot name="prepend"></slot>      
+      <slot name="prepend"></slot>
     </v-col>
       <v-col
         v-for="item in list"
