@@ -89,7 +89,7 @@ if (Test-Path "$installDir\.git") {
     Write-Ok "Updated to latest"
 } else {
     Write-Info "Cloning into $installDir ..."
-    git clone https://github.com/jmcdannel/deja.git $installDir
+    git clone https://github.com/jmcdannel/DEJA.js.git $installDir
     Write-Ok "Cloned to $installDir"
 }
 

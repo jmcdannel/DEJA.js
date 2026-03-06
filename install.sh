@@ -92,7 +92,7 @@ if [ -d "$INSTALL_DIR/.git" ]; then
     ok "Updated to latest"
 else
     info "Cloning into $INSTALL_DIR ..."
-    git clone https://github.com/jmcdannel/deja.git "$INSTALL_DIR"
+    git clone https://github.com/jmcdannel/DEJA.js.git "$INSTALL_DIR"
     ok "Cloned to $INSTALL_DIR"
 fi
 
