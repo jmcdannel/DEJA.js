@@ -28,11 +28,32 @@ async function copyEnvBlock() {
     <v-card-title class="text-h6">Server Environment Setup</v-card-title>
     <v-card-text>
       <p class="text-body-2 mb-4">
-        To run a DEJA.js server locally, copy these environment variables into your <code>.env</code> file.
-        This step is optional if you only plan to use the web interface.
+        To run a DEJA.js server locally, use one of our quick install scripts. 
+        It will download the code, install dependencies, and help you configure your environment.
       </p>
 
-      <v-sheet class="pa-4 rounded-lg bg-[#0f172a] font-mono text-sm mb-4" style="white-space: pre-wrap; word-break: break-all;">{{ envBlock }}</v-sheet>
+      <div class="mb-6">
+        <p class="font-weight-bold mb-1">macOS / Linux</p>
+        <v-sheet class="pa-3 rounded-lg bg-[#0f172a] font-mono text-sm text-white mb-2" style="word-break: break-all;">
+          curl -fsSL https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.sh | bash
+        </v-sheet>
+      </div>
+
+      <div class="mb-6">
+        <p class="font-weight-bold mb-1">Windows (PowerShell)</p>
+        <v-sheet class="pa-3 rounded-lg bg-[#0f172a] font-mono text-sm text-white mb-2" style="word-break: break-all;">
+          irm https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.ps1 | iex
+        </v-sheet>
+      </div>
+
+      <v-divider class="my-6"></v-divider>
+
+      <h3 class="text-h6 mb-2">Your Credentials</h3>
+      <p class="text-body-2 mb-4">
+        During installation, you will be prompted for your <strong>Layout ID</strong> and <strong>Firebase Credentials</strong>. Copy the block below when requested:
+      </p>
+
+      <v-sheet class="pa-4 rounded-lg bg-[#0f172a] font-mono text-sm mb-4 text-white" style="white-space: pre-wrap; word-break: break-all;">{{ envBlock }}</v-sheet>
 
       <v-btn
         @click="copyEnvBlock"
@@ -42,12 +63,6 @@ async function copyEnvBlock() {
       >
         {{ copied ? 'Copied!' : 'Copy to Clipboard' }}
       </v-btn>
-
-      <v-alert type="info" variant="tonal" class="mt-4">
-        <p class="text-body-2">
-          Your layout ID is <strong>{{ layoutId }}</strong>. Use this when configuring additional DEJA.js apps or devices.
-        </p>
-      </v-alert>
     </v-card-text>
   </v-card>
 </template>
