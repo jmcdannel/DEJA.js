@@ -6,6 +6,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   GithubAuthProvider,
+  type User,
 } from 'firebase/auth'
 import { useFirebaseAuth } from 'vuefire'
 
@@ -13,7 +14,7 @@ const googleAuthProvider = new GoogleAuthProvider()
 const githubAuthProvider = new GithubAuthProvider()
 
 const emit = defineEmits<{
-  signup: []
+  signup: [user: User]
   'navigate-login': []
 }>()
 
@@ -49,7 +50,7 @@ async function handleEmailSignup() {
   try {
     const cred = await createUserWithEmailAndPassword(auth, email.value, password.value)
     await updateProfile(cred.user, { displayName: displayName.value })
-    emit('signup')
+    emit('signup', cred.user)
   } catch (err: unknown) {
     const firebaseErr = err as { message?: string }
     error.value = firebaseErr.message || 'Signup failed'
@@ -62,8 +63,8 @@ async function handleGoogleSignup() {
   if (!auth) return
   error.value = null
   try {
-    await signInWithPopup(auth, googleAuthProvider)
-    emit('signup')
+    const cred = await signInWithPopup(auth, googleAuthProvider)
+    emit('signup', cred.user)
   } catch (err: unknown) {
     const firebaseErr = err as { message?: string }
     error.value = firebaseErr.message || 'Google signup failed'
@@ -74,8 +75,8 @@ async function handleGithubSignup() {
   if (!auth) return
   error.value = null
   try {
-    await signInWithPopup(auth, githubAuthProvider)
-    emit('signup')
+    const cred = await signInWithPopup(auth, githubAuthProvider)
+    emit('signup', cred.user)
   } catch (err: unknown) {
     const firebaseErr = err as { message?: string }
     error.value = firebaseErr.message || 'GitHub signup failed'

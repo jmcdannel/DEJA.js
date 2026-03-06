@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { requireApproval, requireAuth, requireDccEx, requireLayout, requireOnboarding } from '@repo/auth'
+import { redirectIfAuthenticated, requireApproval, requireAuth, requireDccEx, requireLayout, requireOnboarding } from '@repo/auth'
 import Dashboard from './Dashboard/Dashboard.vue'
 import Login from './views/Login.vue'
 
@@ -16,11 +16,13 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: Login,
+      beforeEnter: [redirectIfAuthenticated],
     },
     {
       path: '/signup',
       name: 'signup',
       component: () => import('./views/Signup.vue'),
+      beforeEnter: [redirectIfAuthenticated],
     },
     {
       path: '/forgot-password',
@@ -31,13 +33,13 @@ const router = createRouter({
       path: '/pending-approval',
       name: 'pending-approval',
       component: () => import('./views/PendingApproval.vue'),
-      beforeEnter: [requireAuth],
+      beforeEnter: [requireAuth, requireOnboarding],
     },
     {
       path: '/onboarding',
       name: 'onboarding',
       component: () => import('./Onboarding/OnboardingWizard.vue'),
-      beforeEnter: [requireAuth, requireApproval],
+      beforeEnter: [requireAuth],
     },
     {
       path: '/select-layout',

@@ -1,13 +1,20 @@
 import { getCurrentUser } from 'vuefire'
-import { doc, getDoc } from 'firebase/firestore'
+import { collection, query, where, getDocs } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 
 export async function requireOnboarding() {
   const currentUser = await getCurrentUser()
-  if (!currentUser) return
+  if (!currentUser) {
+    return { path: '/login' }
+  }
 
-  const userDoc = await getDoc(doc(db, 'users', currentUser.uid))
-  if (!userDoc.exists() || !userDoc.data()?.onboardingComplete) {
+  const layoutsQuery = query(
+    collection(db, 'layouts'),
+    where('owner', '==', currentUser.email),
+  )
+  const layoutsSnap = await getDocs(layoutsQuery)
+
+  if (layoutsSnap.empty) {
     return {
       path: '/onboarding',
       query: { redirect: window.location.pathname },

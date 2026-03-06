@@ -1,25 +1,30 @@
 import { getCurrentUser } from 'vuefire'
-import { doc, getDoc } from 'firebase/firestore'
+import { collection, query, where, getDocs } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 
 export async function requireApproval() {
   const currentUser = await getCurrentUser()
-  if (!currentUser) return
+  if (!currentUser) {
+    return { path: '/login' }
+  }
 
-  // Check if the user has any layouts
-  const userDoc = await getDoc(doc(db, 'users', currentUser.uid))
-  const userData = userDoc.exists() ? userDoc.data() : null
-  const layoutIds = userData?.layoutIds as string[] | undefined
+  const layoutsQuery = query(
+    collection(db, 'layouts'),
+    where('owner', '==', currentUser.email),
+  )
+  const layoutsSnap = await getDocs(layoutsQuery)
 
-  // A user without a layout hasn't completed onboarding yet — let them through
-  // (requireOnboarding will handle redirecting them)
-  if (!layoutIds || layoutIds.length === 0) {
+  // No layouts means onboarding isn't complete — let requireOnboarding handle it
+  if (layoutsSnap.empty) {
     return
   }
 
-  // Check if the user's primary layout is approved
-  const layoutDoc = await getDoc(doc(db, 'layouts', layoutIds[0]))
-  if (!layoutDoc.exists() || !layoutDoc.data()?.approved) {
+  // Check if any layout is approved
+  const hasApprovedLayout = layoutsSnap.docs.some(
+    (doc) => doc.data().approved === true,
+  )
+
+  if (!hasApprovedLayout) {
     return { path: '/pending-approval' }
   }
 }
