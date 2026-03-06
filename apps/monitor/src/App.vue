@@ -4,7 +4,7 @@ import { useStorage } from '@vueuse/core'
 import { RouterView, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { Login } from '@repo/auth'
-import { AppHeader } from '@repo/ui'
+import { AppHeader, TransitionFade } from '@repo/ui'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import type { MenuItem } from '@repo/ui/src/Menu/types'
 import { useDcc } from '@repo/dccex'
@@ -121,7 +121,11 @@ const menu = [
 
 
       <v-main v-if="layoutId">
-        <RouterView />
+        <RouterView v-slot="{ Component }">
+          <TransitionFade>
+            <component :is="Component" />
+          </TransitionFade>
+        </RouterView>
       </v-main>
       <v-main v-else>
         <v-alert type="error" class="text-center mb-4">

@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import { useDccLog } from './useDccLog'
 import DCCLogItem from './DCCLogItem.vue'
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 
 const { log } = useDccLog(true)
 const router = useRouter()
@@ -34,7 +35,7 @@ function openFullScreen() {
     </template>
     <v-card-text class="monitor-card__body flex flex-1 flex-col overflow-hidden">
       <div class="monitor-card__scroll flex-1 overflow-y-auto">
-        <ul class="monitor-card__log-list flex flex-col-reverse">
+        <ul v-auto-animate class="monitor-card__log-list flex flex-col-reverse">
           <li v-for="entry in log" :key="entry.id">
             <DCCLogItem :entry="entry" />
           </li>
