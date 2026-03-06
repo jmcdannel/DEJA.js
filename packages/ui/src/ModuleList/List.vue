@@ -60,6 +60,7 @@ const props = defineProps({
 const viewAs = useStorage<string[]>(`@DEJA/prefs/${props.moduleName}/View`, [DEFAULT_VIEW_OPTION.value])
 const sortBy = useStorage<string[]>(`@DEJA/prefs/${props.moduleName}/Sort`, [DEFAULT_SORT_OPTION.value])
 const filterBy = useStorage<Record<string, string[]>>(`@DEJA/prefs/${props.moduleName}/Filter`, {})
+const searchQuery = useStorage<string>(`@DEJA/prefs/${props.moduleName}/Search`, '')
 
 const viewOptionModel = shallowRef(viewAs.value || [DEFAULT_VIEW_OPTIONS[0]])
 const viewOption = computed(() => props.viewOptions.find(option => option.value === viewOptionModel.value[0]) || props.viewOptions[0])
@@ -116,26 +117,36 @@ const filteredList = computed(() => {
   }
 
   const activeFilters = Object.entries(filterSelections).filter(([, values]) => Array.isArray(values) && values.length > 0)
+  const query = searchQuery.value?.trim().toLowerCase()
 
-  if (!activeFilters.length) {
-    return props.list
+  let result = props.list
+
+  if (activeFilters.length) {
+    result = result.filter((item) => {
+      return activeFilters.every(([filterKey, selectedValues]) => {
+        const itemValue = (item as Record<string, unknown>)[filterKey]
+
+        if (itemValue == null) {
+          return false
+        }
+
+        if (Array.isArray(itemValue)) {
+          return selectedValues.some((selected) => itemValue.includes(selected))
+        }
+
+        return selectedValues.includes(String(itemValue))
+      })
+    })
   }
 
-  return props.list.filter((item) => {
-    return activeFilters.every(([filterKey, selectedValues]) => {
-      const itemValue = (item as Record<string, unknown>)[filterKey]
-
-      if (itemValue == null) {
-        return false
-      }
-
-      if (Array.isArray(itemValue)) {
-        return selectedValues.some((selected) => itemValue.includes(selected))
-      }
-
-      return selectedValues.includes(String(itemValue))
+  if (query) {
+    result = result.filter((item) => {
+      const name = (item as Record<string, unknown>).name
+      return typeof name === 'string' && name.toLowerCase().includes(query)
     })
-  })
+  }
+
+  return result
 })
 
 function getFilterChipLabel(filter: ListFilter) {
@@ -170,6 +181,17 @@ function handleUpdateState(item: DocumentData, newState: boolean) {
     </template>
     <template #append>
       <div class="flex flex-row gap-2 items-center">
+        <v-text-field
+          v-model="searchQuery"
+          density="compact"
+          variant="outlined"
+          hide-details
+          clearable
+          placeholder="Search..."
+          prepend-inner-icon="mdi-magnify"
+          class="search-field"
+          style="max-width: 180px;"
+        />
         <template v-for="filter in filters" :key="filter.type">
           <v-menu>
             <template v-slot:activator="{ props }">

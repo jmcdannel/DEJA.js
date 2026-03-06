@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import * as Sentry from '@sentry/vue'
 import { createPinia } from 'pinia'
 
 // Vuetify
@@ -62,6 +63,18 @@ const vuetify = createVuetify({
 
 const app = createApp(App)
 const pinia = createPinia()
+
+Sentry.init({
+  app,
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  integrations: [
+    Sentry.browserTracingIntegration({ router }),
+    Sentry.replayIntegration(),
+  ],
+  tracesSampleRate: 1.0,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+})
 
 app.use(pinia)
 app.use(vuetify)

@@ -49,6 +49,29 @@ async function getLocos(): Promise<Loco[]> {
     return []
   }
 }
+function calculateConsistSpeed(baseSpeed: number, trim: number, consistDirection: boolean): number {
+  // baseSpeed: signed speed of the lead loco (positive = forward, negative = backward)
+  // trim: non-negative adjustment to apply when appropriate
+  // consistDirection: true = loco is oriented "forward", false = oriented "backward"
+
+  if (baseSpeed === 0) return 0
+
+  const leaderSign = Math.sign(baseSpeed) || 1
+  const absSpeed = Math.abs(baseSpeed)
+
+  // If leader speed is less than or equal to the trim threshold, don't apply trim.
+  const appliedMagnitude = absSpeed <= trim ? absSpeed : absSpeed + trim
+
+  // Ensure moving speeds are never 0 (use at least 1) when leader is moving.
+  const finalMagnitude = Math.max(1, appliedMagnitude)
+
+  // If the consist's orientation is the same as "forward", it uses leaderSign;
+  // otherwise it must invert the sign so the consist moves in the same rail direction.
+  const finalSign = consistDirection ? leaderSign : -leaderSign
+
+  return finalSign * finalMagnitude
+
+}
 
 export async function handleThrottleChange(snapshot: DocumentData): Promise<void> {
   snapshot.docChanges().forEach(async (change: DocumentData) => {
@@ -68,41 +91,11 @@ export async function handleThrottleChange(snapshot: DocumentData): Promise<void
     //   loco
     // )
     if (loco?.consist && loco?.consist?.length > 0) {
-      loco?.
-      consist.forEach(async (consistLoco) => {
-        let consistSpeed
-        if (throttleCmd.speed > 0) {
-          //moving forward
-          if (consistLoco.direction) {
-            // facing forward
-            consistSpeed = throttleCmd.speed + consistLoco.trim
-            if (consistSpeed < 0) {
-              consistSpeed = 1
-            }
-          } else {
-            // facing backward
-            consistSpeed = -throttleCmd.speed - consistLoco.trim
-            if (consistSpeed > 0) {
-              consistSpeed = -1
-            }
-          }
-        } else if (throttleCmd.speed <= 0 && consistLoco.direction) {
-          // facing forward
-          consistSpeed = throttleCmd.speed - consistLoco.trim
-          if (consistSpeed > 0) {
-            consistSpeed = -1
-          }
-        } else {
-          // facing backward
-          consistSpeed = -throttleCmd.speed + consistLoco.trim
-          if (consistSpeed < 0) {
-            consistSpeed = 1
-          }
-        }
+      loco?.consist.forEach(async (consistLoco) => {
         
         const consistCmd:ThrottlePayload = {
           address: consistLoco.address,
-          speed: consistSpeed,
+          speed: calculateConsistSpeed(throttleCmd.speed, consistLoco.trim, consistLoco.direction),
         }
         // console.log('Consist loco', consistLoco, throttleCmd, consistCmd, loco)
         await dcc.sendSpeed(consistCmd)

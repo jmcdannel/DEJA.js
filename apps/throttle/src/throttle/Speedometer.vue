@@ -23,7 +23,7 @@ const props = defineProps({
 })
 
 const addressRef = toRef(props, 'address')
-const { getRoadname, deleteLoco } = useLocos()
+const { getRoadname } = useLocos()
 const { 
   loco,
 } = useThrottle(addressRef)
@@ -105,7 +105,7 @@ const valueLabels = computed(() => {
 </script>
 
 <template>
-  <v-list-item class="flex flex-col items-center gap-2" :base-color="loco?.meta?.color || getRoadname(loco?.meta?.roadname || '')?.color || 'green'">
+  <v-list-item v-if="loco" class="flex flex-col items-center gap-2" :base-color="loco?.meta?.color || getRoadname(loco?.meta?.roadname || '')?.color || 'green'">
     <!-- SVG Speedometer -->
     <svg 
       :width="size" 
@@ -194,7 +194,7 @@ const valueLabels = computed(() => {
     </svg>
     
     <!-- Address label -->
-    <div class="text-center">
+    <div class="text-center bg-gray-400/20 px-2 py-1 rounded-md">
       <v-label  class="text-lg font-bold">#{{ address }}</v-label>
     </div>
   </v-list-item>

@@ -44,6 +44,9 @@ const turnoutPins = computed(() => {
 const turnoutPulsers = computed(() => {
   return turnouts.value ? turnouts.value.map(turnout => `TurnoutPulser(${turnout.straight}, ${turnout.divergent})`) : []
 })
+const outPins = computed(() => {
+  return effects.value ? effects.value.map(effect => effect.pin) : []
+})
 
 // onMounted(() => {
 //   deviceType.value?.color && (color.value = colors[deviceType.value.color])
@@ -142,6 +145,37 @@ const turnoutPulsers = computed(() => {
         </template>
         {{ device?.isConnected ? 'Connected' : 'Disconnected' }}
       </v-chip>
+      <v-spacer class="mt-4"></v-spacer>
+
+      <div class="mb-4 relative bg-black/20 p-2 ring-1 ring-black/20 rounded-md">
+        <h2><pre>config.h</pre></h2>
+        <pre class="bg-black/20 p-2 ring-1 ring-black/20 rounded-md">
+#include &lt;TurnoutPulser.h&gt;
+
+#define DEVICE_ID "daja-arduino"
+#define ENABLE_PWM false
+#define ENABLE_OUTPUTS false
+#define ENABLE_SIGNALS false
+#define ENABLE_TURNOUTS false
+#define ENABLE_SENSORS false
+
+#define SERVOMIN 150 // This is the 'minimum' pulse length count (out of 4096)
+#define SERVOMAX 600 // This is the 'maximum' pulse length count (out of 4096)
+#define MIN_PULSE_WIDTH 650
+#define MAX_PULSE_WIDTH 2350
+#define USMIN 600     // This is the rounded 'minimum' microsecond length based on the minimum pulse of 150
+#define USMAX 2400    // This is the rounded 'maximum' microsecond length based on the maximum pulse of 600
+#define SERVO_FREQ 50 // Analog servos run at ~50 Hz updates
+#define SERVO_COUNT 16
+
+int OUTPINS[] = { {{ outPins.join(', ') }}; };
+int SIGNALPINS[] = {};
+int SENSORPINS[] = {A4, A8, A9};
+
+TurnoutPulser turnouts[] = {};
+        </pre>
+      </div>
+
       <v-spacer class="mt-4"></v-spacer>
       
       <!-- Turnout Pins LCD Display -->

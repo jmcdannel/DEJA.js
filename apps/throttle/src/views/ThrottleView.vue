@@ -1,5 +1,5 @@
 <script async setup lang="ts">
-import { ref, watch, useTemplateRef } from 'vue'
+import { computed, watch, useTemplateRef } from 'vue'
 import { useStorage, useSwipe, type UseSwipeDirection } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
 import { useLocos } from '@repo/modules/locos'
@@ -11,9 +11,9 @@ const router = useRouter()
 const { getThrottles } = useLocos()
 const throttles = getThrottles()
 const lastThrottleAddress = useStorage<number>('@DEJA/lastThrottleAddress', throttles.value[0]?.address || 3)
-const routeAddr = route.params.address ? parseInt(route.params.address.toString()) : NaN
-if (!Number.isNaN(routeAddr)) {
-  lastThrottleAddress.value = routeAddr
+const routeAddr = computed(() => route.params.address ? parseInt(route.params.address.toString()) : NaN)
+if (!Number.isNaN(routeAddr.value)) {
+  lastThrottleAddress.value = routeAddr.value
 } else if (lastThrottleAddress.value === undefined || Number.isNaN(lastThrottleAddress.value)) {
   lastThrottleAddress.value = 3
 }
@@ -71,7 +71,7 @@ function handleSelect(newAddress: number) {
     <v-slide-group-item 
       v-for="item in throttles"
       :key="item.id">
-      <ThrottleNavItem :address="item.address" @select="handleSelect(item.address)" />
+      <ThrottleNavItem v-if="item.address" :address="item.address" @select="handleSelect(item.address)" />
     </v-slide-group-item>
   </v-slide-group>
   </div>

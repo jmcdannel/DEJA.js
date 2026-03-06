@@ -52,7 +52,7 @@ const getPorts = async () => {
   }
 }
 
-function isPowerCommand(data: string): boolean {
+export function isPowerCommand(data: string): boolean {
   // Matches '1', '0', '1 MAIN', '0 MAIN', '1 PROG', '0 PROG' (ignoring whitespace)
   return /^\s*[01](\s+(MAIN|PROG))?\s*$/.test(data)
 }

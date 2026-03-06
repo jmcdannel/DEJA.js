@@ -1,4 +1,4 @@
-# 🚂 DEJA - DCC-EX JavaScript API Suite
+# 🚂 DEJA.js - DCC-EX JavaScript API
 
 > **🌟 The Modern, Comprehensive Model Railroad Control System**
 
@@ -12,9 +12,9 @@
 
 ---
 
-## 🎯 What is DEJA?
+## 🎯 What is DEJA.js?
 
-**DEJA** (*DCC-EX JavaScript API*) is a modern, comprehensive suite of applications that transforms your model railroad into a connected, intelligent system. Built as a monorepo with multiple specialized applications, DEJA provides everything you need to control, monitor, and interact with your DCC-EX CommandStation.
+**DEJA.js** (*DCC-EX JavaScript API*) is a modern, comprehensive suite of applications that transforms your model railroad into a connected, intelligent system. Built as a monorepo with multiple specialized applications, DEJA.js provides everything you need to control, monitor, and interact with your DCC-EX CommandStation.
 
 ### 🌟 Key Features
 
@@ -28,38 +28,6 @@
 
 ---
 
-## 🏗️ Architecture
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   🎮 Throttle   │    │   ☁️ Cloud      │    │   📊 Monitor    │
-│                 │    │                 │    │                 │
-│ Train Control   │    │ Layout Mgmt     │    │ System Logs     │
-│ Speed & Dir     │    │ Device Status   │    │ Performance     │
-│ Functions       │    │ Multi-User      │    │ Diagnostics     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   🎪 Tour       │    │   🖥️ Server     │    │   📦 Packages   │
-│                 │    │                 │    │                 │
-│ Interactive     │    │ WebSocket API   │    │ Shared UI       │
-│ Experiences     │    │ Serial Comm     │    │ Utilities       │
-│ Effects         │    │ MQTT Bridge     │    │ Auth System     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                 │
-                    ┌─────────────────┐
-                    │  🔌 DCC-EX      │
-                    │ CommandStation  │
-                    │                 │
-                    │ Arduino/ESP32   │
-                    │ USB Connection  │
-                    └─────────────────┘
-```
-
----
-
 ## 📁 Repository Structure
 
 ### 🎮 Applications (`/apps`)
@@ -68,26 +36,23 @@
 |-----|-------------|--------------|
 | **🚂 [Throttle](apps/throttle/)** | Train control interface with speed, direction, and function controls | Vue 3, Vuetify, MQTT |
 | **☁️ [Cloud](apps/cloud/)** | Layout management, device monitoring, and multi-user coordination | Vue 3, Firebase, Vuetify |
-| **🖥️ [Server](apps/server/)** | NodeJS API server that communicates with DCC-EX CommandStation | Node.js, WebSocket, Serial |
-| **📊 [Monitor](apps/monitor/)** | System monitoring, logging, and diagnostics dashboard | Vue 3, Real-time charts |
+| **🖥️ [Server](apps/server/)** | NodeJS API server that communicates with <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX CommandStation | Node.js, WebSockets, Serial |
+| **📊 [Monitor](apps/monitor/)** | System monitoring, logging, and diagnostics dashboard | Vue 3, MQTT, WebSockets |
 | **🎪 [Tour](apps/tour/)** | Interactive tour experiences and special effects control | Vue 3, Audio/Visual effects |
 
 ### 📦 Packages (`/packages`)
 
-| Package | Description | Usage |
-|---------|-------------|-------|
-| **🎨 UI** | Shared Vue components and design system | All Vue apps |
-| **🔧 Utils** | Common utilities and helper functions | All apps |
-| **🔐 Auth** | Authentication and user management | Cloud, Monitor |
-| **📡 Modules** | Core DEJA modules and communication logic | All apps |
-| **⚙️ Config** | Shared configuration for ESLint, Prettier, TypeScript | All packages |
+| Package | Description |
+|---------|-------------|
+| **🎨 UI** | Shared Vue components and design system | 
+| **🔧 Utils** | Common utilities and helper functions |
+| **🔐 Auth** | Authentication and user management |
+| **📡 Modules** | Core DEJA.js modules and communication logic |
+| **⚙️ Config** | Shared configuration for ESLint, Prettier, TypeScript |
 
-### 🔧 Infrastructure (`/io`)
+### 🔧 Device Apps (`/io`)
 
-| Component | Description | Purpose |
-|-----------|-------------|---------|
-| **📄 Layouts** | Layout configuration templates | Design patterns |
-| **📝 Scripts** | Build and deployment scripts | Automation |
+// TODO: complete build scripts, devcie sync and deploy
 
 ---
 
@@ -95,9 +60,11 @@
 
 ### 📋 Prerequisites
 
-- 📦 **Node.js 20+** - [Install via nvm](https://github.com/nvm-sh/nvm)
-- 🧱 **DCC-EX CommandStation** - [Setup guide](https://dcc-ex.com/ex-commandstation/index.html)
-- 🔌 **USB Connection** - Between computer and CommandStation
+- 👤 **DEJA.js Account** - [Requst account](https://www.dejajs.com)
+- 📦 **Node.js 22+** - [Install via nvm](https://github.com/nvm-sh/nvm)
+- 📦 **Git** - [Install](https://git-scm.com/install/)
+- <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> **DCC-EX CommandStation** - [Setup guide](https://dcc-ex.com/ex-commandstation/index.html)
+- 🔌 **USB Connection** - Between computer and DCC-EX CommandStation
 
 ### ⚡ Installation
 
@@ -110,48 +77,41 @@ cd deja
 npm install -g turbo
 turbo install
 
-# Start all applications in development mode
-turbo dev
+# Create local environment file
+cp .env.example to .env.local
+
 ```
 
-### 🌍 Application URLs
+### 🧱 Setup
 
-After running `turbo dev`, access the applications at:
+You'll first need to login to your DEJA.js account in the [DEJA Cloud app](http://cloud.dejajs.com) and confiure your <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX CommandStation to communicate with DEJA SERVER.
 
-- 🚂 **Throttle**: http://localhost:5173
-- ☁️ **Cloud**: http://localhost:5174  
-- 📊 **Monitor**: http://localhost:5175
-- 🎪 **Tour**: http://localhost:5176
-- 🖥️ **Server**: http://localhost:8082 (WebSocket)
+1. Login to [DEJA Cloud](http://cloud.dejajs.com)
+2. Select your Layout
+3. Click "View Local Environemnt Configuration", copy and paste the configuration into `.env.local` using a text editor or IDE. [Need more help?](#-environment-setup)
+4. From the [Layout](https://cloud.dejajs.com/layout) page, click "add" from the Devices list.
+5. Select <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX Command Station, USB. Click "Submit".
+6. Start DEJA Server
+
+```bash
+# Start DEJA Server
+turbo deja
+```
+7. Select the USB Port ofr the <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX CommandStation and click "Connect".
+
+#### 🌍 First Steps
+
+1. Add a Loco to your [Roster](http://cloud.dejajs.com/roster)
+2. Launch the [Throttle App](http://throttle.dejajs.com)
+3. Click the <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX Command Station Power Button (<img style="border: 50%; padding: 2px; color: white; fill: white; path: white; background: #666" src="https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/fence-electric.svg" width="16" height="16" alt="electric fence" />) to turn on your tracks.
+3. Select your loco.
+4. Drive your loco.
 
 ---
 
 ## ⚙️ Configuration
 
 ### 🔧 Environment Setup
-
-Create a `.env` file in the root directory:
-
-```env
-# Layout Configuration
-LAYOUT_ID=your-unique-layout-name
-
-# MQTT Configuration
-ENABLE_MQTT=true
-VITE_MQTT_BROKER=wss://test.mosquitto.org
-VITE_MQTT_PORT=8081
-
-# WebSocket Configuration
-ENABLE_WS=true
-VITE_WS_PORT=8082
-VITE_WS_ID=DEJA.js
-
-# Firebase (for Cloud features)
-ENABLE_DEJACLOUD=true
-VITE_FIREBASE_API_KEY=your-api-key
-VITE_FIREBASE_AUTH_DOMAIN=your-domain
-# ... other Firebase config
-```
 
 ### 🛠️ Development Commands
 
@@ -177,10 +137,14 @@ turbo deps:fix        # 🔧 Fix dependency mismatches
 
 ---
 
+## 🏗️ Architecture
+
+
+
 ## 🎯 Usage Scenarios
 
 ### 🏠 Home Layout Control
-1. 🚀 Start the server: `turbo run start:server`
+1. 🚀 Start the server: `turbo deja`
 2. 🎮 Open throttle app for train control
 3. ☁️ Use cloud app for layout management
 
@@ -197,27 +161,6 @@ turbo deps:fix        # 🔧 Fix dependency mismatches
 ---
 
 ## 🧰 Production Runbook
-
-### Start only Server + Monitor by default
-
-These scripts use Turborepo filters to start only the critical services:
-
-```bash
-# Start just the server and monitor apps
-turbo run start --filter=apps/server --filter=apps/monitor
-
-# Alternatively, from the repo root (already configured in package.json)
-pnpm start
-```
-
-### Start all applications
-
-```bash
-turbo run start
-
-# Alternatively, from the repo root
-pnpm run start:all
-```
 
 ### Keep the server running robustly (pm2 + turbo)
 
@@ -246,7 +189,6 @@ Notes:
 
 ### 🔥 Current Focus
 - ✅ **Multi-throttle support** - Multiple simultaneous operators
-- ✅ **Enhanced cloud features** - Better device management
 - ⏳ **Mobile optimizations** - Improved touch interfaces
 - ⏳ **Audio/visual effects** - Tour app enhancements
 
@@ -254,7 +196,6 @@ Notes:
 - 🎯 **AI-powered automation** - Smart train scheduling
 - 📱 **Native mobile apps** - iOS and Android versions
 - 🎮 **VR/AR integration** - Immersive experiences
-- 🌐 **Multi-layout networking** - Connect multiple layouts
 
 ---
 

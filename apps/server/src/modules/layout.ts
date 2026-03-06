@@ -433,20 +433,20 @@ export async function disconnectDevice(deviceId: string): Promise<void> {
 
       // Remove the connection
       delete _connections[deviceId]
-      
-      // Update the device status in the database
-      db.doc(`layouts/${layoutId}/devices/${deviceId}`)
-        .set(
-          {
-            isConnected: false,
-            lastDisconnected: new Date(),
-            timestamp: FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        )
 
-      log.complete('[LAYOUT] Device disconnected:', deviceId)
     }
+      
+    // Update the device status in the database
+    db.doc(`layouts/${layoutId}/devices/${deviceId}`)
+      .set(
+        {
+          isConnected: false,
+          lastDisconnected: new Date(),
+          timestamp: FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      )
+    log.complete('[LAYOUT] Device disconnected:', deviceId)
   } catch (err) {
     log.fatal('[LAYOUT] Error disconnecting device:', err)
   }

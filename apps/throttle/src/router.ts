@@ -89,12 +89,6 @@ const router = createRouter({
       component: () => import('./views/SettingsView.vue'),
       beforeEnter: [requireAuth],
     },
-    {
-      path: '/roadname-logos',
-      name: 'roadname-logos',
-      component: () => import('./views/RoadnameLogosView.vue'),
-      beforeEnter: [requireAuth, requireLayout],
-    },
     // {
     //   path: '/connect/dejajs',
     //   name: 'dejajs',

@@ -5,18 +5,21 @@ export const githubAuthProvider = new GithubAuthProvider()
 export const googleAuthProvider = new GoogleAuthProvider()
 </script>
 <script setup>
+
 import { ref, onMounted } from 'vue'
-import { getRedirectResult, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth'
+import { getRedirectResult, signInWithPopup, signInWithEmailAndPassword, getAuth } from 'firebase/auth'
 import { useFirebaseAuth, useCurrentUser } from 'vuefire'
 import { useRouter } from 'vue-router'
 
 const emit = defineEmits(['auth', 'navigate-signup', 'navigate-forgot-password'])
 const router = useRouter()
+const fbauth = getAuth()
 const auth = useFirebaseAuth()
 const user = useCurrentUser()
 const email = ref('')
 const password = ref('')
 const remember = ref(false)
+
 
 // display errors if any
 const error = ref(null)
@@ -70,6 +73,7 @@ async function handleEmailSignin() {
     console.error('Failed email signin', err)
     // error.value = err
   }
+
 }
 
 function authComplete() {

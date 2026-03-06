@@ -15,6 +15,7 @@
     "lint": "turbo run lint",
     "start": "turbo run start --filter=deja-serverts",
     "start:all": "turbo run start",
+    "deja": "turbo run deja --filter=deja-serverts --filter=deja-monitor",
     "scan-sounds": "turbo run scan-sounds --filter=@repo/sounds"
   },
   "devDependencies": {
