@@ -2,25 +2,30 @@
 import { Signup } from '@repo/auth'
 import { useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
-import { useUserProfile } from '@repo/modules'
+import { useUserProfile, useLayout } from '@repo/modules'
+import { useStorage } from '@vueuse/core'
 
 const router = useRouter()
 const user = useCurrentUser()
-const { createUserProfile } = useUserProfile()
+const { createUserProfile, addLayoutToProfile } = useUserProfile()
+const { createLayout } = useLayout()
+const storedLayoutId = useStorage('@DEJA/layoutId', '')
 
-async function handleSignup() {
+async function handleSignup(layoutId: string) {
   if (user.value) {
     await createUserProfile(user.value.uid, {
       uid: user.value.uid,
       displayName: user.value.displayName || '',
       email: user.value.email || '',
       photoURL: user.value.photoURL,
-      layoutIds: [],
+      layoutIds: [layoutId],
       onboardingComplete: false,
-      approved: false,
     })
+    await createLayout(layoutId, { id: layoutId, name: layoutId })
+    await addLayoutToProfile(user.value.uid, layoutId)
+    storedLayoutId.value = layoutId
   }
-  router.push({ name: 'onboarding' })
+  router.push({ name: 'pending-approval' })
 }
 
 function handleNavigateLogin() {

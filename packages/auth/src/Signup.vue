@@ -13,7 +13,7 @@ const googleAuthProvider = new GoogleAuthProvider()
 const githubAuthProvider = new GithubAuthProvider()
 
 const emit = defineEmits<{
-  signup: []
+  signup: [layoutId: string]
   'navigate-login': []
 }>()
 
@@ -22,6 +22,7 @@ const displayName = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
+const layoutId = ref('')
 const error = ref<string | null>(null)
 const loading = ref(false)
 
@@ -41,6 +42,11 @@ const confirmPasswordRules = [
   (v: string) => !!v || 'Please confirm your password',
   (v: string) => v === password.value || 'Passwords do not match',
 ]
+const layoutIdRules = [
+  (v: string) => !!v || 'Layout ID is required',
+  (v: string) => /^[a-z0-9-]+$/.test(v) || 'Lowercase letters, numbers, and hyphens only',
+  (v: string) => v.length >= 3 || 'Must be at least 3 characters',
+]
 
 async function handleEmailSignup() {
   if (!auth) return
@@ -49,7 +55,7 @@ async function handleEmailSignup() {
   try {
     const cred = await createUserWithEmailAndPassword(auth, email.value, password.value)
     await updateProfile(cred.user, { displayName: displayName.value })
-    emit('signup')
+    emit('signup', layoutId.value)
   } catch (err: unknown) {
     const firebaseErr = err as { message?: string }
     error.value = firebaseErr.message || 'Signup failed'
@@ -63,7 +69,7 @@ async function handleGoogleSignup() {
   error.value = null
   try {
     await signInWithPopup(auth, googleAuthProvider)
-    emit('signup')
+    emit('signup', layoutId.value)
   } catch (err: unknown) {
     const firebaseErr = err as { message?: string }
     error.value = firebaseErr.message || 'Google signup failed'
@@ -75,7 +81,7 @@ async function handleGithubSignup() {
   error.value = null
   try {
     await signInWithPopup(auth, githubAuthProvider)
-    emit('signup')
+    emit('signup', layoutId.value)
   } catch (err: unknown) {
     const firebaseErr = err as { message?: string }
     error.value = firebaseErr.message || 'GitHub signup failed'
@@ -97,6 +103,15 @@ async function handleGithubSignup() {
           <v-text-field v-model="email" label="Email" type="email" :rules="emailRules" required />
           <v-text-field v-model="password" label="Password" type="password" :rules="passwordRules" required />
           <v-text-field v-model="confirmPassword" label="Confirm Password" type="password" :rules="confirmPasswordRules" required />
+          <v-text-field
+            v-model="layoutId"
+            label="Layout ID"
+            placeholder="my-railroad"
+            hint="A unique name for your layout (lowercase letters, numbers, and hyphens only)"
+            persistent-hint
+            :rules="layoutIdRules"
+            required
+          />
           <v-btn
             type="button"
             @click="handleEmailSignup"
@@ -118,10 +133,20 @@ async function handleGithubSignup() {
   </section>
 
   <article class="flex flex-col space-y-4 my-4 gap-2 w-full max-w-10">
-    <v-btn @click="handleGithubSignup" prepend-icon="mdi-github" full-width>
+    <v-text-field
+      v-model="layoutId"
+      label="Layout ID"
+      placeholder="my-railroad"
+      hint="Required before signing up with a social provider"
+      persistent-hint
+      :rules="layoutIdRules"
+      required
+      class="mb-2"
+    />
+    <v-btn @click="handleGithubSignup" :disabled="!layoutId || !/^[a-z0-9-]+$/.test(layoutId)" prepend-icon="mdi-github" full-width>
       Sign up with GitHub
     </v-btn>
-    <v-btn @click="handleGoogleSignup" prepend-icon="mdi-google" full-width>
+    <v-btn @click="handleGoogleSignup" :disabled="!layoutId || !/^[a-z0-9-]+$/.test(layoutId)" prepend-icon="mdi-google" full-width>
       Sign up with Google
     </v-btn>
   </article>

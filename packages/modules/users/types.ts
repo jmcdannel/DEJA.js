@@ -7,5 +7,4 @@ export interface UserProfile {
   createdAt: Date
   updatedAt: Date
   onboardingComplete: boolean
-  approved: boolean
 }
