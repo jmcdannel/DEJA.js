@@ -45,8 +45,8 @@ function handleEdit(item: Effect) {
     color="indigo"
     title="No Effects Yet"
     description="Create lighting, sound, and animation effects to bring your layout to life with immersive scenery and interactive elements."
-    :useCases="[{ icon: 'mdi-volume-high', text: 'Ambient sounds & audio' }, { icon: 'mdi-led-on', text: 'LED animations & lighting' }, { icon: 'mdi-play-circle', text: 'Triggered sequences' }]"
-    actionLabel="Create Your First Effect"
-    actionTo="/effects/new"
+    :use-cases="[{ icon: 'mdi-volume-high', text: 'Ambient sounds & audio' }, { icon: 'mdi-led-on', text: 'LED animations & lighting' }, { icon: 'mdi-play-circle', text: 'Triggered sequences' }]"
+    action-label="Create Your First Effect"
+    action-to="/effects/new"
   />
 </template>

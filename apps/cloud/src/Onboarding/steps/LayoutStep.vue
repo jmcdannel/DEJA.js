@@ -13,7 +13,6 @@ const { createLayout } = useLayout()
 
 const layoutName = ref('')
 const layoutId = ref('')
-const useExisting = ref(false)
 const error = ref<string | null>(null)
 const loading = ref(false)
 
@@ -46,20 +45,6 @@ async function handleCreate() {
   }
 }
 
-async function handleUseExisting() {
-  if (!user.value) return
-  loading.value = true
-  error.value = null
-  try {
-    storedLayoutId.value = layoutId.value
-    emit('complete')
-  } catch (err: unknown) {
-    const fbErr = err as { message?: string }
-    error.value = fbErr.message || 'Failed to set layout'
-  } finally {
-    loading.value = false
-  }
-}
 </script>
 
 <template>
@@ -69,12 +54,7 @@ async function handleUseExisting() {
       <v-alert v-if="error" type="error" class="mb-4" closable @click:close="error = null">
         {{ error }}
       </v-alert>
-      <v-btn-toggle v-model="useExisting" mandatory class="mb-4">
-        <v-btn :value="false">Create New Layout</v-btn>
-        <v-btn :value="true">Use Existing Layout</v-btn>
-      </v-btn-toggle>
-
-      <v-form v-if="!useExisting" v-slot="{ isValid }">
+      <v-form v-slot="{ isValid }">
         <v-text-field
           v-model="layoutName"
           label="Layout Name"
@@ -98,25 +78,6 @@ async function handleUseExisting() {
           class="mt-4"
         >
           Create Layout
-        </v-btn>
-      </v-form>
-
-      <v-form v-else v-slot="{ isValid }">
-        <v-text-field
-          v-model="layoutId"
-          label="Existing Layout ID"
-          placeholder="my-railroad"
-          :rules="layoutIdRules"
-          required
-        />
-        <v-btn
-          @click="handleUseExisting"
-          :disabled="!isValid"
-          :loading="loading"
-          color="primary"
-          class="mt-4"
-        >
-          Use This Layout
         </v-btn>
       </v-form>
     </v-card-text>

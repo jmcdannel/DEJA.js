@@ -27,8 +27,8 @@ function handleEdit(loco: Loco) {
     color="pink"
     title="No Locomotives Yet"
     description="Build your digital roster by adding locomotives with their DCC addresses, decoder functions, and custom configurations."
-    :useCases="[{ icon: 'mdi-memory', text: 'Program DCC decoders' }, { icon: 'mdi-tune', text: 'Configure functions & lights' }, { icon: 'mdi-train-car', text: 'Build consists' }]"
-    actionLabel="Add Your First Loco"
-    actionTo="/locos/new"
+    :use-cases="[{ icon: 'mdi-memory', text: 'Program DCC decoders' }, { icon: 'mdi-tune', text: 'Configure functions & lights' }, { icon: 'mdi-train-car', text: 'Build consists' }]"
+    action-label="Add Your First Loco"
+    action-to="/locos/new"
   />
 </template>

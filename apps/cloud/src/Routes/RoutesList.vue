@@ -47,8 +47,8 @@ function handleEdit(item: Route) {
     color="purple"
     title="No Routes Yet"
     description="Create automated paths that throw multiple turnouts in sequence, making complex track arrangements a single-click operation."
-    :useCases="[{ icon: 'mdi-arrow-decision', text: 'Yard entry paths' }, { icon: 'mdi-highway', text: 'Mainline bypass' }, { icon: 'mdi-format-list-group', text: 'Multi-turnout sequences' }]"
-    actionLabel="Create Your First Route"
-    actionTo="/routes/new"
+    :use-cases="[{ icon: 'mdi-arrow-decision', text: 'Yard entry paths' }, { icon: 'mdi-highway', text: 'Mainline bypass' }, { icon: 'mdi-format-list-group', text: 'Multi-turnout sequences' }]"
+    action-label="Create Your First Route"
+    action-to="/routes/new"
   />
 </template>

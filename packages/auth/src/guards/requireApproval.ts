@@ -14,12 +14,10 @@ export async function requireApproval() {
   )
   const layoutsSnap = await getDocs(layoutsQuery)
 
-  // No layouts means onboarding isn't complete — let requireOnboarding handle it
   if (layoutsSnap.empty) {
     return
   }
 
-  // Check if any layout is approved
   const hasApprovedLayout = layoutsSnap.docs.some(
     (doc) => doc.data().approved === true,
   )

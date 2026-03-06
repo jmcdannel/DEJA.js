@@ -52,8 +52,8 @@ const list = getTurnouts()
     color="amber"
     title="No Turnouts Yet"
     description="Define your track switches and control them remotely. Map each turnout to its DCC address for seamless operation."
-    :useCases="[{ icon: 'mdi-swap-horizontal', text: 'Yard switching' }, { icon: 'mdi-source-fork', text: 'Mainline junctions' }, { icon: 'mdi-warehouse', text: 'Staging areas' }]"
-    actionLabel="Add Your First Turnout"
-    actionTo="/turnouts/new"
+    :use-cases="[{ icon: 'mdi-swap-horizontal', text: 'Yard switching' }, { icon: 'mdi-source-fork', text: 'Mainline junctions' }, { icon: 'mdi-warehouse', text: 'Staging areas' }]"
+    action-label="Add Your First Turnout"
+    action-to="/turnouts/new"
   />
 </template>

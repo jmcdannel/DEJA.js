@@ -20,7 +20,8 @@ export const useEfx = () => {
   const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
   const sortBy = useStorage<string[]>('@DEJA/prefs/effects/Sort', ['name'])
   const filterBy = useStorage<string[]>('@DEJA/prefs/effects/Filter', [])
-  const colRef = collection(db, `layouts/${layoutId.value}/effects`)
+  const colRef = () =>
+    layoutId.value ? collection(db, `layouts/${layoutId.value}/effects`) : null
 
   const efxCol = () => {
     const whereClauses: any[] = []
@@ -78,8 +79,10 @@ export const useEfx = () => {
   function getEffectsByType(efxType: string) {
     try {
       console.log('getEffectsByType', efxType)
+      const ref = colRef()
+      if (!ref) return null
       return query(
-        colRef,
+        ref,
         where('type', '==', efxType),
       )
     } catch (error) {
@@ -91,8 +94,10 @@ export const useEfx = () => {
   function getEffectsByDevice(deviceId: string) {
     try {
       console.log('getEffectsByDevice', deviceId)
+      const ref = colRef()
+      if (!ref) return null
       return query(
-        colRef,
+        ref,
         where('device', '==', deviceId),
       )
     } catch (error) {
