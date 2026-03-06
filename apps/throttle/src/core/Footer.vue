@@ -4,7 +4,7 @@ import { useStorage } from '@vueuse/core'
 import FooterMenu from '@/core/Menu/FooterMenu.vue'
 
 const user = useCurrentUser()
-const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
 </script>
 <template>
   <v-footer app class="bg-transparent">

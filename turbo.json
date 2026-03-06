@@ -23,7 +23,9 @@
   ],
   "ui": "tui",
   "tasks": {
-    "build": {},
+    "build": {
+      "outputs": ["dist/**", ".next/**"]
+    },
     "test": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]

@@ -10,14 +10,14 @@ import { useMenu } from '@/Core/Menu/useMenu'
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
 import { Login } from '@repo/auth'
-import { AppHeader } from '@repo/ui'
+import { AppHeader, TransitionFade } from '@repo/ui'
 // import { useDcc } from '@repo/dccex'
 // import { useEfx } from '@repo/modules'
 
 // const { sendDccCommand } = useDcc()
 // const { runEffect, getEffectsByType } = useEfx()
 const drawer = ref(true)
-const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
 
 // Event handlers for the unified header
 async function handleTrackPowerToggle(newState: boolean) {
@@ -92,7 +92,11 @@ function handleLogoClick() {
         <Menu v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
       <v-main>
         <v-container >
-          <RouterView />
+          <RouterView v-slot="{ Component }">
+            <TransitionFade>
+              <component :is="Component" />
+            </TransitionFade>
+          </RouterView>
         </v-container>
       </v-main>
     </v-app>

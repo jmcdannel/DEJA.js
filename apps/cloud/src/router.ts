@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { requireAuth, requireDccEx, requireLayout } from '@repo/auth'
+import { redirectIfAuthenticated, requireApproval, requireAuth, requireDccEx, requireLayout, requireOnboarding } from '@repo/auth'
 import Dashboard from './Dashboard/Dashboard.vue'
 import Login from './views/Login.vue'
 
@@ -10,12 +10,36 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: Dashboard,
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/login',
       name: 'login',
       component: Login,
+      beforeEnter: [redirectIfAuthenticated],
+    },
+    {
+      path: '/signup',
+      name: 'signup',
+      component: () => import('./views/Signup.vue'),
+      beforeEnter: [redirectIfAuthenticated],
+    },
+    {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: () => import('./views/ForgotPassword.vue'),
+    },
+    {
+      path: '/pending-approval',
+      name: 'pending-approval',
+      component: () => import('./views/PendingApproval.vue'),
+      beforeEnter: [requireAuth, requireOnboarding],
+    },
+    {
+      path: '/onboarding',
+      name: 'onboarding',
+      component: () => import('./Onboarding/OnboardingWizard.vue'),
+      beforeEnter: [requireAuth],
     },
     {
       path: '/select-layout',
@@ -27,109 +51,109 @@ const router = createRouter({
       path: '/locos',
       name: 'Roster',
       component: () => import('./Roster/Roster.vue'),
-      beforeEnter: [requireAuth, requireDccEx, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireDccEx, requireLayout],
     },
-    { 
+    {
       path: '/locos/new',
       name: 'Add Loco',
       component: () => import('./Roster/AddLoco.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
-    { 
+    {
       path: '/locos/:address',
       name: 'Edit Loco',
       component: () => import('./Roster/EditLoco.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/effects',
       name: 'Effects',
       component: () => import('./Effects/Effects.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/effects/new',
       name: 'Add Effect',
       component: () => import('./Effects/AddEffect.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/effects/:effectId',
       name: 'Edit Effect',
       component: () => import('./Effects/EditEffect.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/routes',
       name: 'Routes',
       component: () => import('./Routes/Routes.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/routes/new',
       name: 'Add Route',
       component: () => import('./Routes/AddRoute.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/routes/:routeId',
       name: 'Edit Route',
       component: () => import('./Routes/EditRoute.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/signals',
       name: 'Signals',
       component: () => import('./Signals/Signals.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/signals/new',
       name: 'Add Signal',
       component: () => import('./Signals/AddSignal.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/signals/:signalId',
       name: 'Edit Signal',
       component: () => import('./Signals/EditSignal.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/turnouts',
       name: 'Turnouts',
       component: () => import('./Turnouts/Turnouts.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/turnouts/new',
       name: 'Add Turnout',
       component: () => import('./Turnouts/AddTurnout.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/turnouts/:turnoutId',
       name: 'Edit Turnout',
       component: () => import('./Turnouts/EditTurnout.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/turnouts/labels',
       name: 'Turnout Labels',
       component: () => import('./Turnouts/TurnoutLabels.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/dccex',
       name: 'DCC-EX',
       component: () => import('./DCCEX/DCCEX.vue'),
-      beforeEnter: [requireAuth, requireDccEx, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireDccEx, requireLayout],
     },
     {
       path: '/layout',
       name: 'Layout',
       component: () => import('./Layout/Layout.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/settings',
@@ -141,7 +165,7 @@ const router = createRouter({
       path: '/layout/device/:deviceId',
       name: 'Device',
       component: () => import('./Layout/Devices/DeviceDetails.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     // 404 - Catch all unmatched routes
     {

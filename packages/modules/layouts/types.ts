@@ -11,6 +11,7 @@ export interface LayoutDefaultSound {
   icon: string
 }
 export interface Layout {
+  approved?: boolean
   author?: string
   createdAt?: Date
   description?: string
@@ -26,6 +27,7 @@ export interface Layout {
   locos?: string[]
   meta?: Record<string, any>
   name: string
+  owner?: string
   routes?: string[]
   scripts?: string[]
   sensors?: string[]

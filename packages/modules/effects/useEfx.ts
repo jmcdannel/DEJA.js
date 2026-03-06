@@ -16,11 +16,19 @@ import { slugify } from '@repo/utils'
 import { efxTypes } from './constants'
 import type { Effect, EffectType } from './types'
 
+const VALID_EFFECT_SORT_FIELDS = new Set(['name', 'device', 'type', 'order', 'state', 'pin'])
+const DEFAULT_EFFECT_SORT = 'name'
+
+function validEffectSortField(field: string | undefined): string {
+  return field && VALID_EFFECT_SORT_FIELDS.has(field) ? field : DEFAULT_EFFECT_SORT
+}
+
 export const useEfx = () => {
-  const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+  const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
   const sortBy = useStorage<string[]>('@DEJA/prefs/effects/Sort', ['name'])
   const filterBy = useStorage<string[]>('@DEJA/prefs/effects/Filter', [])
-  const colRef = collection(db, `layouts/${layoutId.value}/effects`)
+  const colRef = () =>
+    layoutId.value ? collection(db, `layouts/${layoutId.value}/effects`) : null
 
   const efxCol = () => {
     const whereClauses: any[] = []
@@ -33,7 +41,7 @@ export const useEfx = () => {
       })
     }
 
-    let queryRef = query(collection(db, `layouts/${layoutId.value}/effects`), orderBy(sortBy.value[0]))
+    let queryRef = query(collection(db, `layouts/${layoutId.value}/effects`), orderBy(validEffectSortField(sortBy.value[0])))
     // let queryRef = fquery(colRef, orderBy(sortBy.value[0])) // TODO: debug this, getting error: [VueFire SSR]: Could not get the path of the data source]
     whereClauses.forEach((clause) => {
       queryRef = query(queryRef, clause)
@@ -78,8 +86,10 @@ export const useEfx = () => {
   function getEffectsByType(efxType: string) {
     try {
       console.log('getEffectsByType', efxType)
+      const ref = colRef()
+      if (!ref) return null
       return query(
-        colRef,
+        ref,
         where('type', '==', efxType),
       )
     } catch (error) {
@@ -91,8 +101,10 @@ export const useEfx = () => {
   function getEffectsByDevice(deviceId: string) {
     try {
       console.log('getEffectsByDevice', deviceId)
+      const ref = colRef()
+      if (!ref) return null
       return query(
-        colRef,
+        ref,
         where('device', '==', deviceId),
       )
     } catch (error) {
