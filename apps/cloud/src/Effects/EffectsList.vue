@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useEfx, type Effect } from '@repo/modules'
 import EffectListItem from '@/Effects/EffectListItem.vue'
+import EmptyState from '@/Core/UI/EmptyState.vue'
 
 const emit = defineEmits(['edit'])
 
@@ -15,7 +16,7 @@ function handleEdit(item: Effect) {
 
 </script>
 <template>
-  <v-container>
+  <v-container v-if="list?.length">
     <v-row>
       <v-col
         cols="12"
@@ -37,4 +38,14 @@ function handleEdit(item: Effect) {
     </v-col>
     </v-row>
   </v-container>
+  <EmptyState
+    v-if="!list?.length"
+    icon="mdi-rocket-launch"
+    color="indigo"
+    title="No Effects Yet"
+    description="Create lighting, sound, and animation effects to bring your layout to life with immersive scenery and interactive elements."
+    :useCases="[{ icon: 'mdi-volume-high', text: 'Ambient sounds & audio' }, { icon: 'mdi-led-on', text: 'LED animations & lighting' }, { icon: 'mdi-play-circle', text: 'Triggered sequences' }]"
+    actionLabel="Create Your First Effect"
+    actionTo="/effects/new"
+  />
 </template>

@@ -4,6 +4,7 @@ import { useTurnouts, type Turnout } from '@repo/modules'
 import TurnoutListItem from '@/Turnouts/TurnoutListItem.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
+import EmptyState from '@/Core/UI/EmptyState.vue'
 
 defineEmits(['edit'])
 defineProps<{
@@ -14,7 +15,7 @@ const { getTurnouts } = useTurnouts()
 const list = getTurnouts()
 </script>
 <template>
-  <v-container>
+  <v-container v-if="list?.length">
       <template v-if="viewAs === 'card'">
         <v-row>
           <v-col cols="12" xs="12" sm="6" lg="4">
@@ -44,4 +45,14 @@ const list = getTurnouts()
       </template>
   </v-container>
   <ViewJson :json="list" label="Turnouts"></ViewJson>
+  <EmptyState
+    v-if="!list?.length"
+    icon="mdi-call-split"
+    color="amber"
+    title="No Turnouts Yet"
+    description="Define your track switches and control them remotely. Map each turnout to its DCC address for seamless operation."
+    :useCases="[{ icon: 'mdi-swap-horizontal', text: 'Yard switching' }, { icon: 'mdi-source-fork', text: 'Mainline junctions' }, { icon: 'mdi-warehouse', text: 'Staging areas' }]"
+    actionLabel="Add Your First Turnout"
+    actionTo="/turnouts/new"
+  />
 </template>

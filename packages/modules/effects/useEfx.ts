@@ -17,7 +17,7 @@ import { efxTypes } from './constants'
 import type { Effect, EffectType } from './types'
 
 export const useEfx = () => {
-  const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+  const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
   const sortBy = useStorage<string[]>('@DEJA/prefs/effects/Sort', ['name'])
   const filterBy = useStorage<string[]>('@DEJA/prefs/effects/Filter', [])
   const colRef = collection(db, `layouts/${layoutId.value}/effects`)

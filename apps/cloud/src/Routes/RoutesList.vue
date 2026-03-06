@@ -3,6 +3,7 @@ import { useCollection } from 'vuefire'
 import { type Route } from '@repo/modules/index.ts'
 import { useRoutes } from '@repo/modules/routes/useRoutes'
 import RouteListItem from '@/Routes/RouteListItem.vue'
+import EmptyState from '@/Core/UI/EmptyState.vue'
 
 const emit = defineEmits(['edit'])
 
@@ -16,7 +17,7 @@ function handleEdit(item: Route) {
 
 </script>
 <template>
-  <v-container>
+  <v-container v-if="list?.length">
     <v-row >
       <v-col
         cols="12"
@@ -39,4 +40,14 @@ function handleEdit(item: Route) {
     </v-col>
     </v-row>
   </v-container>
+  <EmptyState
+    v-if="!list?.length"
+    icon="mdi-map"
+    color="purple"
+    title="No Routes Yet"
+    description="Create automated paths that throw multiple turnouts in sequence, making complex track arrangements a single-click operation."
+    :useCases="[{ icon: 'mdi-arrow-decision', text: 'Yard entry paths' }, { icon: 'mdi-highway', text: 'Mainline bypass' }, { icon: 'mdi-format-list-group', text: 'Multi-turnout sequences' }]"
+    actionLabel="Create Your First Route"
+    actionTo="/routes/new"
+  />
 </template>

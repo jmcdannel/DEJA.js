@@ -17,7 +17,7 @@ import { AppHeader } from '@repo/ui'
 // const { sendDccCommand } = useDcc()
 // const { runEffect, getEffectsByType } = useEfx()
 const drawer = ref(true)
-const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
 
 // Event handlers for the unified header
 async function handleTrackPowerToggle(newState: boolean) {

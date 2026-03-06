@@ -53,3 +53,11 @@ temp-sounds-cache/
 **/temp-sounds-cache/
 packages/sounds/assets/
 .idea/
+
+# Claude Code
+.claude/worktrees/
+
+# Build caches
+*.tsbuildinfo
+storybook-static/
+reports/

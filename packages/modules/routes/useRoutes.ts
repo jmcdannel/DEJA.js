@@ -7,7 +7,7 @@ import { useTurnouts, type Turnout } from '@repo/modules'
 import type { Route, RouteInput, RouteTurnoutConfig } from './types'
 
 export const useRoutes = () => {
-  const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+  const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
   const sortBy = useStorage<string[]>('@DEJA/prefs/routes/Sort', ['name'])
   const { setTurnout } = useTurnouts()
 
