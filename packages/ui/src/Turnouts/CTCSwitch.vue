@@ -77,6 +77,7 @@ async function handleTurnouts() {
       <g
         id="handle-rot"
         :transform="props.state ? '' : 'rotate(-55 300.634 706.491)'"
+        style="transition: transform 300ms cubic-bezier(0.4, 0, 0.6, 1);"
       >
         <g id="handle" transform="matrix(-1.11144,-0.520968,0.493442,-1.06369,149.413,1432.43)">
           <path d="M135.836,611.847C135.836,611.847 125.096,651.919 125.096,669.093C125.096,675.319 129.908,680.374 135.836,680.374C141.764,680.374 146.576,675.319 146.576,669.093C146.576,651.919 135.836,611.847 135.836,611.847Z" style="fill:rgb(128,128,128);stroke:black;stroke-width:2.5px;"/>

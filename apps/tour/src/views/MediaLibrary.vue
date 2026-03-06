@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import MediaCard from '../components/MediaCard.vue'
 
 interface MediaItem {
@@ -308,12 +309,12 @@ onMounted(() => {
       </v-col>
 
       <v-col cols="12" md="9">
-        <v-row>
-          <v-col 
-            cols="12" 
-            sm="6" 
-            lg="4" 
-            v-for="media in filteredMedia" 
+        <v-row v-auto-animate>
+          <v-col
+            cols="12"
+            sm="6"
+            lg="4"
+            v-for="media in filteredMedia"
             :key="media.id"
           >
             <MediaCard 
