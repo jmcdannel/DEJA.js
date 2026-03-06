@@ -21,7 +21,7 @@ interface ConnectOptions {
   deviceId?: string  // Add device ID for tracking
 }
 
-const isSensorData = (data: string): boolean => {
+export const isSensorData = (data: string): boolean => {
   return data.startsWith('{ "sensor')
 }
 

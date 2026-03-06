@@ -1,4 +1,5 @@
 <script async setup lang="ts">
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import { useCollection } from 'vuefire'
 import { type Route } from '@repo/modules/index.ts'
 import { useRoutes } from '@repo/modules/routes/useRoutes'
@@ -17,14 +18,14 @@ function handleEdit(item: Route) {
 </script>
 <template>
   <v-container>
-    <v-row >
+    <v-row v-auto-animate>
       <v-col
         cols="12"
         xs="12"
         sm="12"
         lg="12"
       >
-      <slot name="prepend"></slot>      
+      <slot name="prepend"></slot>
     </v-col>
       <v-col
         v-for="item in list"

@@ -73,6 +73,28 @@ export function useLocos() {
     return locoThrottle
   }
 
+  async function acquireThrottle(address: number) {
+    try {
+      if (!address) {
+        console.warn('No throttle address provided for acquisition')
+        return
+      }
+      const data = {
+        address,
+        speed: 0,
+        direction: false,
+        timestamp: serverTimestamp(),
+      }
+      const newThrottleDoc = await setDoc(
+        doc(db, `layouts/${layoutId.value}/throttles`, address.toString()),
+        data
+      )
+      return newThrottleDoc
+    } catch (e) {
+      console.error('Error adding throttle: ', e)
+    }
+  }
+
   function getThrottlesWithLocos(): LocoThrottle[] {
     const throttles = getThrottles()
     const locos = getLocos()
@@ -171,6 +193,7 @@ export function useLocos() {
     updateFunctions,
     updateLoco,
     updateConsist,
+    acquireThrottle,
   }
 }
 

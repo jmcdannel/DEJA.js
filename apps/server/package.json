@@ -11,12 +11,16 @@
     "build": "tsc",
     "dev": "tsx watch index.ts",
     "start": "tsx index.ts",
+    "deja": "npm run start",
     "mosquitto": "tsx src/scripts/start-mqtt.ts",
     "check-mqtt": "tsx src/scripts/check-mqtt.ts",
     "migrate-sounds": "tsx src/scripts/migrate-sound-effects.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@sentry/node": "^8.0.0",
     "@repo/modules": "workspace:*",
     "@repo/sounds": "workspace:*",
     "@serialport/parser-readline": "^12.0.0",
@@ -41,7 +45,8 @@
     "globals": "^16.0.0",
     "mqtt": "^5.13.1",
     "tsx": "^4.20.4",
-    "typescript": "*"
+    "typescript": "*",
+    "vitest": "^2.0.5"
   },
   "engines": {
     "node": ">= 20"

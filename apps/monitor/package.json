@@ -9,9 +9,11 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "preview": "vite preview",
     "start": "vite --host",
+    "deja": "npm run start",
     "type-check": "vue-tsc --noEmit --composite false --skipLibCheck "
   },
   "dependencies": {
+    "@sentry/vue": "^8.0.0",
     "dayjs": "^1.11.13",
     "firebase": "^10.14.1",
     "vue": "^3.5.17",
@@ -33,7 +35,9 @@
     "@repo/utils": "workspace:*",
     "@vitejs/plugin-vue": "^4.4.0",
     "@vue/tsconfig": "^0.7.0",
+    "@formkit/auto-animate": "^0.8.2",
     "@vueuse/core": "^11.0.3",
+    "@vueuse/motion": "^2.2.6",
     "@vueuse/sound": "^2.0.1",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.41",

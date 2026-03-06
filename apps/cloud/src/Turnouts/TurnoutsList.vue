@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import { useTurnouts, type Turnout } from '@repo/modules'
 import TurnoutListItem from '@/Turnouts/TurnoutListItem.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
@@ -16,7 +17,7 @@ const list = getTurnouts()
 <template>
   <v-container>
       <template v-if="viewAs === 'card'">
-        <v-row>
+        <v-row v-auto-animate>
           <v-col cols="12" xs="12" sm="6" lg="4">
             <slot name="prepend"></slot>
           </v-col>
