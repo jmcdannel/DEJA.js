@@ -120,12 +120,20 @@ export const useLayout = () => {
     try {
       await setDoc(doc(db, `layouts`, id), {
         ...layout,
+        approved: layout.approved ?? false,
         defaultSounds: layout.defaultSounds ?? defaultLayoutSounds,
-        owner: user.value?.email,
+        owner: layout.owner ?? user.value?.email,
         dcc: {
           client: 'dejaJs',
         },
         created: serverTimestamp(),
+        timestamp: serverTimestamp(),
+      })
+      await setDoc(doc(db, `layouts/${id}/devices`, 'dccex'), {
+        id: 'dccex',
+        name: 'dccex',
+        type: 'dcc-ex',
+        connection: 'usb',
         timestamp: serverTimestamp(),
       })
       return true

@@ -48,7 +48,6 @@ export default defineConfig(({ mode }) => {
         '@repo/deja',
         '@repo/utils',
         '@repo/ui',
-        '@repo/auth'
       ],
       exclude: ['dotenv']
     },

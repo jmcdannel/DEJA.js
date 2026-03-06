@@ -7,11 +7,11 @@ export const googleAuthProvider = new GoogleAuthProvider()
 <script setup>
 
 import { ref, onMounted } from 'vue'
-import { getRedirectResult, signInWithPopup, getAuth, signInWithEmailAndPassword } from 'firebase/auth'
+import { getRedirectResult, signInWithPopup, signInWithEmailAndPassword, getAuth } from 'firebase/auth'
 import { useFirebaseAuth, useCurrentUser } from 'vuefire'
 import { useRouter } from 'vue-router'
 
-const emit = defineEmits(['auth'])
+const emit = defineEmits(['auth', 'navigate-signup', 'navigate-forgot-password'])
 const router = useRouter()
 const fbauth = getAuth()
 const auth = useFirebaseAuth()
@@ -54,29 +54,26 @@ async function handleGoogleSignin() {
 
 async function handleEmailSignin() {
   try {
-  if (!auth) {
-    throw new Error('auth is null')
-  }
-  signInWithEmailAndPassword(auth, email.value, password.value)
-    .then((userCredential) => {
-      // Signed in 
-      const user = userCredential.user;
-      console.log('Email signin success', user)
-      authComplete()
-      // ...
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.error('Failed email signin', errorCode, errorMessage)
-      error.value = errorMessage
-    });
+    if (!auth) {
+      throw new Error('auth is null')
+    }
+    signInWithEmailAndPassword(auth, email.value, password.value)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log('Email signin success', user)
+        authComplete()
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error('Failed email signin', errorCode, errorMessage)
+        error.value = errorMessage
+      });
   } catch (err) {
     console.error('Failed email signin', err)
     // error.value = err
   }
 
-  
 }
 
 function authComplete() {
@@ -129,19 +126,19 @@ onMounted(() => {
             />
             <div class="flex items-center justify-between my-2">
               <v-checkbox v-model="remember" label="Remember me" hide-details dense />
-              <v-btn text small @click="$router.push('/forgot-password')">Forgot?</v-btn>
+              <v-btn variant="text" size="small" @click="$emit('navigate-forgot-password')">Forgot?</v-btn>
             </div>
             <v-row class="mt-4">
               <v-col cols="12" sm="6">
                 <v-btn text small href="https://www.dejajs.com" target="_blank" rel="noopener" color="secondary">
                   Learn more
                 </v-btn>
-              </v-col>  
+              </v-col>
               <v-col cols="12" sm="6">
                 <v-btn type="button" @click="handleEmailSignin" :disabled="!isValid" color="primary" block>
                   Sign in
                 </v-btn>
-              </v-col>            
+              </v-col>
             </v-row>
           </v-form>
         </v-card-text>
@@ -164,5 +161,9 @@ onMounted(() => {
         Sign in with Microsoft
       </v-btn>
     </article>
+    <v-card-text class="text-center">
+      <span>Don't have an account?</span>
+      <v-btn variant="text" color="primary" @click="$emit('navigate-signup')">Sign up</v-btn>
+    </v-card-text>
   </template>
 </template>

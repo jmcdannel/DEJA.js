@@ -23,7 +23,7 @@ function normalizePin(pin?: number | string | null): number | undefined {
 }
 
 export const useSignals = () => {
-  const layoutId = useStorage('@DEJA/layoutId', 'betatrack')
+  const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
   const sortBy = useStorage<string[]>('@DEJA/prefs/signals/Sort', ['name'])
 
   const signalsCol = () => {
