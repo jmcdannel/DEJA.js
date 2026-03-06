@@ -6,15 +6,15 @@ export async function requireApproval() {
   const currentUser = await getCurrentUser()
   if (!currentUser) return
 
+  // Check if the user has any layouts
   const userDoc = await getDoc(doc(db, 'users', currentUser.uid))
-  if (!userDoc.exists()) {
-    return { path: '/pending-approval' }
-  }
-
-  const userData = userDoc.data()
+  const userData = userDoc.exists() ? userDoc.data() : null
   const layoutIds = userData?.layoutIds as string[] | undefined
+
+  // A user without a layout hasn't completed onboarding yet — let them through
+  // (requireOnboarding will handle redirecting them)
   if (!layoutIds || layoutIds.length === 0) {
-    return { path: '/pending-approval' }
+    return
   }
 
   // Check if the user's primary layout is approved
