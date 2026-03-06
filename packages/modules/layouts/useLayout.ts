@@ -129,6 +129,13 @@ export const useLayout = () => {
         created: serverTimestamp(),
         timestamp: serverTimestamp(),
       })
+      await setDoc(doc(db, `layouts/${id}/devices`, 'dccex'), {
+        id: 'dccex',
+        name: 'dccex',
+        type: 'dcc-ex',
+        connection: 'usb',
+        timestamp: serverTimestamp(),
+      })
       return true
     } catch (e) {
       console.error('Error adding throttle: ', e)
