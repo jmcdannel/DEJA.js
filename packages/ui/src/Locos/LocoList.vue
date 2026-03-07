@@ -43,6 +43,9 @@ function getLocoFromItem(item: Record<string, unknown>): Loco {
     icon="mdi-train"
     :list="locosList"
     :filters="filters"
+    empty-icon="mdi-train"
+    empty-title="No locomotives"
+    empty-description="Add locomotives to your roster to get started"
     :view-options="[
       { label: 'Avatar', value: 'avatar' },
       { label: 'Card', value: 'card' },

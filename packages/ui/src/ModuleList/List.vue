@@ -4,6 +4,7 @@ import { useStorage } from '@vueuse/core'
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import Item from './Item.vue'
 import Table from './Table.vue'
+import EmptyState from '../EmptyState/EmptyState.vue'
 import { type ListFilter } from './types'
 import { 
   DEFAULT_VIEW_OPTIONS,
@@ -43,6 +44,22 @@ const props = defineProps({
   list: {
       type: Array as PropType<DocumentData[]>,
       default: () => []
+  },
+  loading: {
+    type: Boolean,
+    default: false
+  },
+  emptyIcon: {
+    type: String,
+    default: undefined
+  },
+  emptyTitle: {
+    type: String,
+    default: undefined
+  },
+  emptyDescription: {
+    type: String,
+    default: undefined
   },
   filters: {
     type: Array as PropType<ListFilter[]>,
@@ -255,9 +272,20 @@ function handleUpdateState(item: DocumentData, newState: boolean) {
   </v-toolbar>
   <v-spacer class="my-4"></v-spacer>
   <div class="w-full p-4">
-    <Table v-if="viewAs?.[0] === 'table'" 
-      :list="filteredList" 
-      :sort-by="sortBy?.[0]" 
+    <v-row v-if="loading">
+      <v-col v-for="n in 6" :key="n" :cols="cols.xs" :sm="cols.sm" :md="cols.md" :lg="cols.lg" :xl="cols.xl" :xxl="cols.xxl">
+        <v-skeleton-loader type="card" />
+      </v-col>
+    </v-row>
+    <EmptyState
+      v-else-if="!filteredList.length"
+      :icon="emptyIcon"
+      :title="emptyTitle"
+      :description="emptyDescription"
+    />
+    <Table v-else-if="viewAs?.[0] === 'table'"
+      :list="filteredList"
+      :sort-by="sortBy?.[0]"
       @update:state="handleUpdateState"
     />
     <v-row v-else-if="DEFAULT_VIEW_OPTIONS.some(option => option.value === viewAs?.[0])" v-auto-animate>
