@@ -36,10 +36,12 @@ const turnoutPins = computed(() => turnouts.value ? turnouts.value.map(turnout =
 const turnoutPulsers = computed(() => turnouts.value ? turnouts.value.map(turnout => `TurnoutPulser(${turnout.straight}, ${turnout.divergent})`) : [])
 const outPins = computed(() => effects.value ? effects.value.map(effect => effect.pin) : [])
 
-function getEffectIcon(type: string | undefined) {
-  if (!type) return 'mdi-lightbulb'
+function getEffectDetails(type: string | undefined) {
   const def = efxTypes.find(t => t.value === type)
-  return def?.icon || 'mdi-lightbulb'
+  return {
+    icon: def?.icon || 'mdi-lightbulb',
+    color: def?.color || 'yellow'
+  }
 }
 
 function handleBack() {
@@ -189,7 +191,9 @@ function handleBack() {
             <tbody>
               <tr v-for="effect in effects" :key="effect?.id" class="cursor-pointer hover:bg-white/5">
                 <td class="font-weight-medium py-1 px-2 truncate max-w-[120px]" :title="effect?.name">
-                  <v-icon size="small" class="mr-2 text-yellow">{{ getEffectIcon(effect?.type) }}</v-icon>
+                  <v-avatar color="grey-darken-4" size="28" class="mr-2 border border-white/10">
+                    <v-icon :color="getEffectDetails(effect?.type).color" size="small">{{ getEffectDetails(effect?.type).icon }}</v-icon>
+                  </v-avatar>
                   {{ effect?.name || 'Unnamed' }}
                 </td>
                 <td class="font-mono text-grey-lighten-1 py-1 px-2">{{ effect?.id }}</td>
