@@ -110,7 +110,11 @@ const watchDialog = computed(() => {
             :src="user.photoURL"
             :alt="user.displayName || 'User'"
           ></v-img>
-          <v-icon v-else icon="mdi-account-circle"></v-icon>
+          <v-img
+            v-else
+            :src="`https://api.dicebear.com/9.x/glass/svg?seed=${user?.email || user?.uid || user?.displayName || 'deja'}`"
+            :alt="user.displayName || 'User'"
+          ></v-img>
         </v-avatar>
       </v-btn>
     </template>
