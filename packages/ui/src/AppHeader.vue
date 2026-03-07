@@ -9,8 +9,8 @@ import UserProfile from './UserProfile.vue'
 import TrackPower from './TrackPower.vue'
 import Power from './Power.vue'
 import EmergencyStop from './EmergencyStop.vue'
-import BackgroundDecor from './BackgroundDecor.vue'
 import SelectLayout from './SelectLayout.vue'
+import ThemeSwitcher from './ThemeSwitcher.vue'
 import { useLayout } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
 // import { useEfx, type Effect } from '@repo/modules'
@@ -170,6 +170,7 @@ const defaultProps = {
         </v-chip>
         <v-spacer class="ma-2"></v-spacer>
       </template>
+      <ThemeSwitcher class="ma-1" />
       <UserProfile v-if="showUserProfile !== false && user" />
       <template v-if="layoutId && user">
         <TrackPower class="ma-1" :power-state="layoutPowerState" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />

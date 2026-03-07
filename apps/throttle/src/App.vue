@@ -6,6 +6,7 @@ import Footer from '@/core/Footer.vue'
 import useMenu from '@/core/Menu/useMenu'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { usePageSwipe } from '@/composables/usePageSwipe'
+import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 
 const drawer = ref(false)
 const { handleMenu, menuConfig } = useMenu()
@@ -13,18 +14,18 @@ const { handleMenu, menuConfig } = useMenu()
 const mainContentRef = useTemplateRef('mainContentRef')
 usePageSwipe(mainContentRef, { disabledRoutes: ['throttle'] })
 
+const { isDark } = useThemeSwitcher()
 </script>
 
 <template>
   <v-responsive>
-    <v-app theme="dark">
+    <v-app :theme="isDark ? 'dark' : 'light'">
       <AppHeader
         app-name="Throttle"
         app-icon="mdi-gamepad-variant"
         variant="throttle"
         color="blue"
         :drawer="drawer"
-        :dark="true"
         :show-layout-power="true"
         :show-emergency-stop="true"
         :show-device-status="true"

@@ -4,6 +4,7 @@ import { useCollection } from 'vuefire'
 import { useRouter } from 'vue-router'
 import { useColors } from '@/Core/UI/useColors'
 import { deviceTypes, useTurnouts, useEfx, useLayout, type Device } from '@repo/modules/index.ts'
+import { efxTypes } from '@repo/modules/effects/constants'
 import { StatusPulse } from '@repo/ui'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 
@@ -35,6 +36,12 @@ const turnoutNames = computed(() => turnouts.value ? turnouts.value.map(turnout 
 const turnoutPins = computed(() => turnouts.value ? turnouts.value.map(turnout => `${turnout.straight}, ${turnout.divergent}`) : [])
 const turnoutPulsers = computed(() => turnouts.value ? turnouts.value.map(turnout => `TurnoutPulser(${turnout.straight}, ${turnout.divergent})`) : [])
 const outPins = computed(() => effects.value ? effects.value.map(effect => effect.pin) : [])
+
+function getEffectIcon(type: string | undefined) {
+  if (!type) return 'mdi-lightbulb'
+  const def = efxTypes.find(t => t.value === type)
+  return def?.icon || 'mdi-lightbulb'
+}
 
 function handleBack() {
   route.push({ name: 'home' }) // or specific layout back route
@@ -134,6 +141,7 @@ function handleBack() {
                 <th class="text-left py-1 px-2 font-weight-bold">Idx</th>
                 <th class="text-left py-1 px-2 font-weight-bold">Name</th>
                 <th class="text-center py-1 px-2 font-weight-bold">Pins</th>
+                <th class="text-center py-1 px-2 font-weight-bold">Type</th>
                 <th class="text-center py-1 px-2 font-weight-bold">State</th>
               </tr>
             </thead>
@@ -143,6 +151,9 @@ function handleBack() {
                 <td class="font-weight-medium py-1 px-2 truncate max-w-[120px]" :title="turnout?.name">{{ turnout?.name || 'Unnamed' }}</td>
                 <td class="text-center py-1 px-2 font-mono text-grey-lighten-1">
                   <span class="text-green-lighten-2">{{ turnout?.straight }}</span>/<span class="text-orange-lighten-2">{{ turnout?.divergent }}</span>
+                </td>
+                <td class="text-center py-1 px-2">
+                  <v-chip size="x-small" variant="tonal" class="text-uppercase">{{ turnout?.type || 'DEFAULT' }}</v-chip>
                 </td>
                 <td class="text-center py-1 px-2">
                   <v-icon :color="turnout?.state === 1 ? 'green' : 'orange'" size="small">
@@ -178,7 +189,10 @@ function handleBack() {
             </thead>
             <tbody>
               <tr v-for="effect in effects" :key="effect?.id" class="cursor-pointer hover:bg-white/5">
-                <td class="font-weight-medium py-1 px-2 truncate max-w-[120px]" :title="effect?.name">{{ effect?.name || 'Unnamed' }}</td>
+                <td class="font-weight-medium py-1 px-2 truncate max-w-[120px]" :title="effect?.name">
+                  <v-icon :icon="getEffectIcon(effect?.type)" size="small" class="mr-2 text-yellow"></v-icon>
+                  {{ effect?.name || 'Unnamed' }}
+                </td>
                 <td class="font-mono text-grey-lighten-1 py-1 px-2">{{ effect?.id }}</td>
                 <td class="text-center text-capitalize py-1 px-2">{{ effect?.type || 'Standard' }}</td>
                 <td class="text-center font-mono py-1 px-2">{{ effect?.pin || '--' }}</td>

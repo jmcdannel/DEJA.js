@@ -42,6 +42,21 @@
     />
     <title>DEJA.js Throttle</title>
     <link rel="manifest" href="/manifest.json" crossorigin="use-credentials" />
+    <script>
+      (function() {
+        try {
+          var stored = localStorage.getItem('@DEJA/theme-preference');
+          // If stored is stringified JSON, parse it (VueUse might stringify standard types)
+          var pref = stored ? (stored.startsWith('"') ? JSON.parse(stored) : stored) : 'system';
+          var isDark = pref === 'dark' || (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>

@@ -4,6 +4,7 @@ import { useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { useTheme } from 'vuetify'
+import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { useMenu } from '@/Core/Menu/useMenu'
 
@@ -50,12 +51,7 @@ const router = useRouter()
 const theme = useTheme()
 const { menu, handleMenu } = useMenu()
 
-const currentTheme = ref(theme.name.value || 'dark')
-
-// Watch for theme changes and update the local state
-watch(() => theme.name.value, (newTheme) => {
-  currentTheme.value = newTheme
-})
+const { isDark } = useThemeSwitcher()
 
 function handleLayoutSelect(newLayout: string) {
   layoutId.value = newLayout
@@ -69,13 +65,12 @@ function handleLogoClick() {
 </script>
 <template>
   <v-responsive class="border rounded">
-      <v-app :theme="theme.name.value">
+      <v-app :theme="isDark ? 'dark' : 'light'">
         <AppHeader 
           app-name="Cloud"
           app-icon="mdi-cloud"
           variant="cloud"
           color="blue"
-          :dark="true"
           :show-layout-power="true"
           :show-emergency-stop="true"
           :show-device-status="true"
