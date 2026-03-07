@@ -31,9 +31,9 @@ const pinCommand = (effect: Effect): EffectCommand => ({
 const ialedCommand = (effect: Effect): string => {
   const pin = effect?.pin
   const pattern = effect?.state ? effect?.pattern : 'off'
-  // const range = effect?.range
+  const range = effect?.range ?? 'all'
   const config = effect?.config
-  const command = `${pin}, ${pattern}, all, ${config}\n`
+  const command = `${pin}, ${pattern}, ${range}, ${config}\n`
   return command
 }
 
