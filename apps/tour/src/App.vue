@@ -5,8 +5,9 @@ import { useTourStore } from './stores/tour'
 import TourLogo from './components/TourLogo.vue'
 import LayoutSelector from './components/LayoutSelector.vue'
 import TourUserProfile from './components/TourUserProfile.vue'
-import { BackgroundDecor, TransitionFade } from '@repo/ui'
+import { BackgroundDecor, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
 
+provideNotifications()
 const drawer = ref(false)
 const theme = useTheme()
 const tourStore = useTourStore()
@@ -114,6 +115,7 @@ onMounted(() => {
     
     <!-- Layout Selector Dialog -->
     <LayoutSelector />
+    <NotificationContainer />
   </v-app>
 </template>
 
