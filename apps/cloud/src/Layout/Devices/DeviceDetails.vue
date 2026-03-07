@@ -3,8 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useCollection } from 'vuefire'
 import { useRouter } from 'vue-router'
 import { useColors } from '@/Core/UI/useColors'
-import { deviceTypes, useTurnouts, useEfx, useLayout, type Device } from '@repo/modules/index.ts'
-import { efxTypes } from '@repo/modules/effects/constants'
+import { deviceTypes, useTurnouts, useEfx, useLayout, type Device, efxTypes } from '@repo/modules'
 import { StatusPulse } from '@repo/ui'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 
@@ -190,7 +189,7 @@ function handleBack() {
             <tbody>
               <tr v-for="effect in effects" :key="effect?.id" class="cursor-pointer hover:bg-white/5">
                 <td class="font-weight-medium py-1 px-2 truncate max-w-[120px]" :title="effect?.name">
-                  <v-icon :icon="getEffectIcon(effect?.type)" size="small" class="mr-2 text-yellow"></v-icon>
+                  <v-icon size="small" class="mr-2 text-yellow">{{ getEffectIcon(effect?.type) }}</v-icon>
                   {{ effect?.name || 'Unnamed' }}
                 </td>
                 <td class="font-mono text-grey-lighten-1 py-1 px-2">{{ effect?.id }}</td>
