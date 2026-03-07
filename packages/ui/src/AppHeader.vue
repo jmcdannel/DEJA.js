@@ -9,8 +9,8 @@ import UserProfile from './UserProfile.vue'
 import TrackPower from './TrackPower.vue'
 import Power from './Power.vue'
 import EmergencyStop from './EmergencyStop.vue'
-import BackgroundDecor from './BackgroundDecor.vue'
 import SelectLayout from './SelectLayout.vue'
+import ThemeSwitcher from './ThemeSwitcher.vue'
 import { useLayout } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
 // import { useEfx, type Effect } from '@repo/modules'
@@ -53,6 +53,11 @@ const isDeviceModalOpen = ref(false)
 
 // Event handlers
 async function handleTrackPowerToggle(newState: boolean) {
+  if ((window as any).__WI_THROTTLE_CONNECTED__) {
+    // WiThrottle power command: PPA1 for on, PPA0 for off
+    window.dispatchEvent(new CustomEvent('withrottle-send', { detail: `PPA${newState ? '1' : '0'}` }))
+    return
+  }
   const DEFAULT_ON = '1 MAIN'
   const DEFAULT_OFF = '0'
   await sendDccCommand({ action: 'dcc', payload: newState ? DEFAULT_ON : DEFAULT_OFF })
@@ -68,6 +73,12 @@ function handleLayoutPowerToggle(newState: boolean) {
 }
 
 async function handleEmergencyStop() {
+  if ((window as any).__WI_THROTTLE_CONNECTED__) {
+    // WiThrottle emergency stop command: usually '*' or a specific stop command
+    // but DCC-EX accepts '*' as e-stop for everything. Wait, standard WiThrottle e-stop is '!' for all locos.
+    window.dispatchEvent(new CustomEvent('withrottle-send', { detail: '!' }))
+    return
+  }
   await sendDccCommand({ action: 'dcc', payload: '!' })
 }
 
@@ -102,6 +113,7 @@ const allConnected = computed(() => devices.value.every(device => device.isConne
 const hasDevices = computed(() => devices.value.length > 0)
 const connectedDevicesCount = computed(() => devices.value.filter(d => d.isConnected).length)
 const dccexConnected = computed(() => {
+  if ((window as any).__WI_THROTTLE_CONNECTED__) return true
   const dccexDevice = devices.value.find(device => device.type === 'dcc-ex')
   return dccexDevice?.isConnected ?? false
 })
@@ -170,6 +182,7 @@ const defaultProps = {
         </v-chip>
         <v-spacer class="ma-2"></v-spacer>
       </template>
+      <ThemeSwitcher class="ma-1" />
       <UserProfile v-if="showUserProfile !== false && user" />
       <template v-if="layoutId && user">
         <TrackPower class="ma-1" :power-state="layoutPowerState" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
