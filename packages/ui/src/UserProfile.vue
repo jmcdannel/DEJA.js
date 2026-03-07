@@ -17,9 +17,11 @@ const user = useCurrentUser()
             :src="user?.photoURL"
             alt="user photo"
           />
-          <span v-else class="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center text-white">
-            {{ user?.displayName?.charAt(0) || '?' }}
-          </span>
+          <v-img
+            v-else
+            :src="`https://api.dicebear.com/9.x/glass/svg?seed=${user?.email || user?.uid || user?.displayName || 'deja'}`"
+            alt="user photo"
+          />
         </v-avatar>
       </template>
       <v-list>
