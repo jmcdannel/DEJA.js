@@ -32,5 +32,10 @@
   "dependencies": {
     "pg-protocol": "^1.13.0",
     "pg-types": "^4.1.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "esbuild": "0.25.11"
+    }
   }
 }
