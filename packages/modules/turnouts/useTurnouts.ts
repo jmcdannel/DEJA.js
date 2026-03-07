@@ -11,7 +11,10 @@ import {
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
 import { db } from '@repo/firebase-config'
+import { createLogger } from '@repo/utils'
 import type { Turnout } from './types'
+
+const log = createLogger('Turnouts')
 
 const VALID_TURNOUT_SORT_FIELDS = new Set(['order', 'name', 'device', 'turnoutIdx', 'state', 'type'])
 const DEFAULT_TURNOUT_SORT = 'order'
@@ -36,11 +39,11 @@ export function useTurnouts() {
         }
       })
     }
-    console.log('sortby', sortBy.value)
+    log.debug('sortby', sortBy.value)
     let queryRef = query(collection(db, `layouts/${layoutId.value}/turnouts`), orderBy(validTurnoutSortField(sortBy.value[0])))
     // let queryRef = query(colRef, orderBy(sortBy.value[0])) // TODO: debug this, getting error: [VueFire SSR]: Could not get the path of the data source]
     whereClauses.forEach((clause) => {
-      console.log(clause)
+      log.debug(clause)
       queryRef = query(queryRef, clause)
     })
     
@@ -49,27 +52,27 @@ export function useTurnouts() {
   
 
   function getTurnouts() {
-    console.log('getTurnouts called')
+    log.debug('getTurnouts called')
     const turnouts = useCollection(turnoutsCol, { ssrKey: 'turnouts' })
     return turnouts
   }
   
   function getTurnoutsByDevice(deviceId: string) {
     try {
-      console.log('getTurnoutsByDevice', deviceId)
+      log.debug('getTurnoutsByDevice', deviceId)
       return query(
         colRef,
         where('device', '==', deviceId),
       )
     } catch (error) {
-      console.error('Error getting turnouts by device:', error)
+      log.error('Error getting turnouts by device:', error)
       return null
     }
   }
 
   function getTurnoutsByIds(turnoutIds: string[] | null ) {
     try {
-      console.log('getTurnoutsByIds', turnoutIds)
+      log.debug('getTurnoutsByIds', turnoutIds)
       if (!turnoutIds) {
         return null
       }
@@ -78,7 +81,7 @@ export function useTurnouts() {
       } else if (turnoutIds.length === 1) {
         return query(colRef, where('__name__', '==', turnoutIds[0]))
       } else if (turnoutIds.length > 10) {
-        console.warn('Too many turnout ids for "in" query; returning all turnouts instead')
+        log.warn('Too many turnout ids for "in" query; returning all turnouts instead')
         return colRef
       }
       return query(
@@ -86,7 +89,7 @@ export function useTurnouts() {
         where('__name__', 'in', turnoutIds),
       )
     } catch (error) {
-      console.error('Error getting turnouts by ids:', error)
+      log.error('Error getting turnouts by ids:', error)
       return null
     }
   }
@@ -98,7 +101,7 @@ export function useTurnouts() {
     if (docSnap.exists()) {
       return { ...docSnap.data(), id: docSnap.id } as Turnout
     } else {
-      console.error('No such document!')
+      log.error('No such document!')
       throw new Error('No such turnout!')
     }
   }
@@ -114,9 +117,9 @@ export function useTurnouts() {
         },
         { merge: true }
       )
-      console.log('Turnout switched:', turnout.id, newState)
+      log.debug('Turnout switched:', turnout.id, newState)
     } catch (e) {
-      console.error('Error adding document: ', e)
+      log.error('Error adding document: ', e)
     }
   }
 
@@ -129,7 +132,7 @@ export function useTurnouts() {
       { merge: true })
       return true
     } catch (e) {
-      console.error('Error adding throttle: ', e)
+      log.error('Error adding throttle: ', e)
     }
   }
 

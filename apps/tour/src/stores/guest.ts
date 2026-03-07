@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('GuestStore')
 
 // Pre-generated train-related usernames for guests
 const GUEST_USERNAMES = [
@@ -157,7 +160,7 @@ export const useGuestStore = defineStore('guest', () => {
             parsed = JSON.parse(parsed)
           } catch (e) {
             // If double-parse fails, fall back to null
-            console.warn('Failed to double-parse legacy guest value', e)
+            log.warn('Failed to double-parse legacy guest value', e)
             return null
           }
         }
@@ -172,7 +175,7 @@ export const useGuestStore = defineStore('guest', () => {
         }
         return guest
       } catch (e) {
-        console.error('Failed to parse guest from storage', e)
+        log.error('Failed to parse guest from storage', e)
         return null
       }
     },
@@ -190,7 +193,7 @@ export const useGuestStore = defineStore('guest', () => {
 
   // Explicitly tell useStorage the stored type is GuestUser | null
   const currentGuest = useStorage<GuestUser | null>('@DEJA/guest-user', null, localStorage, { serializer: guestStorageSerializer as any })
-  console.log('Guest store initialized, current guest:', currentGuest.value)
+  log.debug('Guest store initialized, current guest:', currentGuest.value)
   const availableUsernames = ref<string[]>([...GUEST_USERNAMES])
   const usedUsernames = ref<Set<string>>(new Set())
 
@@ -275,7 +278,7 @@ export const useGuestStore = defineStore('guest', () => {
   // Check if user is guest
   const isGuestUser = computed(() => {
     // currentGuest is stored as an object via useStorage, so we can read properties directly.
-    console.log('Checking if current user is guest:', currentGuest.value, currentGuest.value?.isGuest, typeof currentGuest.value)
+    log.debug('Checking if current user is guest:', currentGuest.value, currentGuest.value?.isGuest, typeof currentGuest.value)
     return currentGuest.value?.isGuest === true
   })
 

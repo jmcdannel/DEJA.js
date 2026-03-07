@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('EffectFormSimple')
 
 interface Effect {
   id: string
@@ -19,8 +22,8 @@ const props = defineProps<{
 const emit = defineEmits(['close'])
 
 onMounted(() => {
-  console.log('EffectFormSimple: Component mounted successfully')
-  console.log('EffectFormSimple: Props received:', props.efx)
+  log.debug('EffectFormSimple: Component mounted successfully')
+  log.debug('EffectFormSimple: Props received:', props.efx)
 })
 </script>
 

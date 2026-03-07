@@ -4,7 +4,10 @@ import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
 import { db } from '@repo/firebase-config'
 import { useTurnouts, type Turnout } from '@repo/modules'
+import { createLogger } from '@repo/utils'
 import type { Route, RouteInput, RouteTurnoutConfig } from './types'
+
+const log = createLogger('Routes')
 
 const VALID_ROUTE_SORT_FIELDS = new Set(['name', 'order', 'color'])
 const DEFAULT_ROUTE_SORT = 'name'
@@ -31,7 +34,7 @@ export const useRoutes = () => {
 
   async function getRoute(id: string): Promise<Route | undefined> {
     if (!layoutId.value) {
-      console.error('Layout ID is not set')
+      log.error('Layout ID is not set')
       return
     }
 
@@ -46,12 +49,12 @@ export const useRoutes = () => {
         }
       }
     } catch (error) {
-      console.error('Error fetching route:', error)
+      log.error('Error fetching route:', error)
     }
   }
   
   async function runRoute(route: Route ) {
-      console.log('runRoute', route)
+      log.debug('runRoute', route)
 
       const turnoutSteps = ref<RouteTurnoutConfig[]>(route.turnouts || [])
 
@@ -70,12 +73,12 @@ export const useRoutes = () => {
 
   async function setRoute(routeId: string, route: RouteInput): Promise<boolean> {
     if (!layoutId.value) {
-      console.error('Layout ID is not set')
+      log.error('Layout ID is not set')
       return false
     }
 
     if (!route) {
-      console.error('Route data is not provided')
+      log.error('Route data is not provided')
       return false
     }
 
@@ -87,21 +90,21 @@ export const useRoutes = () => {
       }, { merge: true })
       return true
     } catch (error) {
-      console.error('Error saving route:', error)
+      log.error('Error saving route:', error)
       return false
     }
   }
 
   async function deleteRoute(routeId: string): Promise<void> {
     if (!layoutId.value) {
-      console.error('Layout ID is not set')
+      log.error('Layout ID is not set')
       return
     }
 
     try {
       await deleteDoc(doc(db, `layouts/${layoutId.value}/routes`, routeId))
     } catch (error) {
-      console.error('Error deleting route:', error)
+      log.error('Error deleting route:', error)
     }
   }
 

@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import { useEfx, type Effect } from '@repo/modules'
+import { createLogger } from '@repo/utils'
 import EffectListItem from '@/Effects/EffectListItem.vue'
 import EmptyState from '@/Core/UI/EmptyState.vue'
 
+const log = createLogger('EffectsList')
+
 const emit = defineEmits(['edit'])
 
-console.log('EffectsList.vue loaded')
+log.debug('EffectsList.vue loaded')
 const { getEffects } = useEfx()
 const list = getEffects()
 
 function handleEdit(item: Effect) {
-  console.log('handleEdit', item)
+  log.debug('handleEdit', item)
   emit('edit', item)
 }
 

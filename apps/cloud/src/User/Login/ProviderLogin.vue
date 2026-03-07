@@ -7,6 +7,9 @@ import { ref, onMounted } from 'vue'
 import { getRedirectResult, signInWithPopup } from 'firebase/auth'
 import { useFirebaseAuth } from 'vuefire'
 import { FaGithubAlt, FaGoogle, FaMicrosoft, FaApple, FaFacebook } from 'vue3-icons/fa6'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('ProviderLogin')
 
 const auth = useFirebaseAuth()
 
@@ -15,22 +18,22 @@ const error = ref(null)
 
 function handleGithubSignin() {
   if (!auth) {
-    console.error('Firebase auth is not initialized')
+    log.error('Firebase auth is not initialized')
     return
   }
   signInWithPopup(auth, githubAuthProvider).catch((reason) => {
-    console.error('Failed signinRedirect', reason)
+    log.error('Failed signinRedirect', reason)
     error.value = reason
   })
 }
 
 onMounted(() => {
   if (!auth) {
-    console.error('Firebase auth is not initialized')
+    log.error('Firebase auth is not initialized')
     return
   }
   getRedirectResult(auth).catch((reason) => {
-    console.error('Failed redirect result', reason)
+    log.error('Failed redirect result', reason)
     error.value = reason
   })
 })

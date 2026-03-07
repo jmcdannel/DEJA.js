@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { createLogger } from '@repo/utils'
 import TourLogo from '../components/TourLogo.vue'
+
+const log = createLogger('Welcome')
 
 const videoLoading = ref(false)
 const guestEffectsCount = ref(12) // This would come from your effects data
@@ -50,7 +53,7 @@ const playIntroVideo = () => {
   setTimeout(() => {
     videoLoading.value = false
     // Here you would integrate with your actual video player
-    console.log('Playing intro video...')
+    log.debug('Playing intro video...')
   }, 1000)
 }
 </script>

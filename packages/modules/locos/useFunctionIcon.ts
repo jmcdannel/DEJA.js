@@ -1,3 +1,7 @@
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('FunctionIcon')
+
 const icons = [
   { name: 'light', icon: 'mdi-lightbulb' },
   { name: 'bell', icon: 'mdi-bell' },
@@ -16,7 +20,7 @@ const icons = [
   { name: 'dim', icon: 'mdi-brightness-4' },
 ]
 export function useFunctionIcon() {
-  console.log('useFunctionIcon')
+  log.debug('useFunctionIcon')
 
   const DEFAULT_ICON = 'mdi-train'
 

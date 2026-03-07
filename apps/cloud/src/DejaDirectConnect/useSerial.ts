@@ -1,4 +1,7 @@
 import { ref } from "vue"
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('Serial')
 
 declare global {
   interface Window {
@@ -40,7 +43,7 @@ export function useSerial(handleMessage: (message: string) => void) {
     try {
       await writeToStream(payload)
     } catch (err) {
-      console.error("Error handling message:", err)
+      log.error("Error handling message:", err)
     }
   }
 
@@ -49,7 +52,7 @@ export function useSerial(handleMessage: (message: string) => void) {
       disconnectServer()
       isConnected.value = false
     } catch (err) {
-      console.error(err)
+      log.error(err)
     }
   }
 
@@ -63,15 +66,15 @@ export function useSerial(handleMessage: (message: string) => void) {
       if (!port) {
         port = await (navigator as any)?.serial?.requestPort() // prompt user to select device connected to a com port
         // - Wait for the port to open.
-        console.log("User selected a port to connect to", port, port?.opened)
+        log.debug("User selected a port to connect to", port, port?.opened)
       }
 
       await port?.open({ baudRate: 115200 }) // open the port at the proper supported baud rate
       connectServer()
       isConnected.value = true
-      console.log("useSerial", isConnected.value)
+      log.debug("useSerial", isConnected.value)
     } catch (err) {
-      console.error(err)
+      log.error(err)
     }
   }
 
@@ -103,7 +106,7 @@ export function useSerial(handleMessage: (message: string) => void) {
       writeToStream("\x03", "echo(false);")
       return true
     } catch (err) {
-      console.log("User didn't select a port to connect to", err)
+      log.debug("User didn't select a port to connect to", err)
       return false
     }
   }
@@ -126,7 +129,7 @@ export function useSerial(handleMessage: (message: string) => void) {
         var moreToProcess = true
         while (moreToProcess) {
           // displayLog('[RECEIVE] '+ value);
-          // console.log('[RECEIVE] '+ value);
+          // log.debug('[RECEIVE] '+ value);
 
           let end = -1,
             i
@@ -147,7 +150,7 @@ export function useSerial(handleMessage: (message: string) => void) {
               moreToProcess = false
             }
             displayLog("[R] " + thisCommandString)
-            // console.log(getTimeStamp() + " [R] " + thisCommandString)
+            // log.debug(getTimeStamp() + " [R] " + thisCommandString)
             parseResponse(thisCommandString)
           } else {
             moreToProcess = false
@@ -155,7 +158,7 @@ export function useSerial(handleMessage: (message: string) => void) {
         }
       }
       if (readerResult?.done) {
-        console.log(
+        log.debug(
           getTimeStamp() + " [readLoop] DONE " + readerResult?.done.toString()
         )
         reader?.releaseLock()
@@ -187,14 +190,14 @@ export function useSerial(handleMessage: (message: string) => void) {
           }
           const packet = `${line}\n`
           stream.write(packet)
-          console.log(packet)
+          log.debug(packet)
         })
         stream.releaseLock()
       } else {
-        console.error("No stream to write to", outputStream, port, stream)
+        log.error("No stream to write to", outputStream, port, stream)
       }
     } catch (err) {
-      console.error("Error writing to stream:", err)
+      log.error("Error writing to stream:", err)
     }
   }
 
@@ -215,7 +218,7 @@ export function useSerial(handleMessage: (message: string) => void) {
         await inputDone?.catch(() => {})
         reader = null
         inputDone = null
-        console.log("close reader")
+        log.debug("close reader")
       }
 
       // Close the output stream.
@@ -224,12 +227,12 @@ export function useSerial(handleMessage: (message: string) => void) {
         await outputDone // have to wait for  the azync calls to finish and outputDone to close
         outputStream = null
         outputDone = null
-        console.log("close outputStream")
+        log.debug("close outputStream")
       }
       // Close the serial port.
       await port.close()
       port = null
-      console.log("close port")
+      log.debug("close port")
       displayLog("[CONNECTION] Serial disconnected")
     } else {
       // Disables emulator
@@ -254,7 +257,7 @@ export function useSerial(handleMessage: (message: string) => void) {
     data = data.replace(/>/g, "&gt;")
     data = data.replace(/\n/g, "<br>")
     if (data.length > 0) data = getTimeStamp() + " <b>" + data + "</b>"
-    // console.log(data.toString())
+    // log.debug(data.toString())
     // $("#log-box").append(data.toString() + "<br>")
     // $("#log-box").scrollTop($("#log-box").prop("scrollHeight"))
 

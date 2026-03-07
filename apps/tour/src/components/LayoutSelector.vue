@@ -5,7 +5,10 @@ import { useCurrentUser } from 'vuefire'
 import { collection, query, where } from 'firebase/firestore'
 import { useCollection } from 'vuefire'
 import { db } from '@repo/firebase-config'
+import { createLogger } from '@repo/utils'
 import TourLogo from './TourLogo.vue'
+
+const log = createLogger('LayoutSelector')
 
 const user = useCurrentUser()
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -36,11 +39,11 @@ const layouts = isDemoMode ? ref([
 
 const selectLayout = (selectedLayoutId: string) => {
   layoutId.value = selectedLayoutId
-  console.log('Selected layout for tour:', selectedLayoutId)
+  log.debug('Selected layout for tour:', selectedLayoutId)
 }
 
 onMounted(() => {
-  console.log('LayoutSelector mounted, current layoutId:', layoutId.value)
+  log.debug('LayoutSelector mounted, current layoutId:', layoutId.value)
 })
 </script>
 

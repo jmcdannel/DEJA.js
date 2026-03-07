@@ -1,6 +1,9 @@
 import { computed, ref, watch } from 'vue'
 import { useTurnouts, useLayoutRoutes, type Route, type RouteTurnoutConfig } from '@repo/modules/index.ts'
 import { useRoutes } from '@repo/modules/routes/useRoutes'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('LayoutRoutesMap')
 
 const DELAY = 2000 // ms delay between turnouts being set in a route
 
@@ -21,7 +24,7 @@ export const useLayoutRoutesMap = () => {
 
   watch([p1, p2], async ([newP1, newP2]) => {
     if (newP1 !== null && newP2 !== null) {
-      console.log('watch p1 and p2', newP1, newP2, routes)
+      log.debug('watch p1 and p2', newP1, newP2, routes)
       const route = routes.value?.find(
         (r) =>
           (r.point1 === newP1 && r.point2 === newP2) ||
@@ -36,14 +39,14 @@ export const useLayoutRoutesMap = () => {
           routeTurnouts.value = []
         }, routeTurnouts.value.length * DELAY + 500)
       } else {
-        console.log('No route found between', newP1, 'and', newP2, routes.value)
+        log.debug('No route found between', newP1, 'and', newP2, routes.value)
       }
     }
   })
 
   function getMapClasses(): string {
     let classes = ['']
-    // console.log('getMapClasses', p1.value, p2.value, routes.value)
+    // log.debug('getMapClasses', p1.value, p2.value, routes.value)
 
     if (p1.value) {
       classes.push('p1-selected')
@@ -77,7 +80,7 @@ export const useLayoutRoutesMap = () => {
     target: EventTarget | null
   ): { target: HTMLElement; type: string } | null {
     if (!target) return null
-    console.log('findClickableParent', target)
+    log.debug('findClickableParent', target)
 
     const currentTarget = target as HTMLElement
     
@@ -125,7 +128,7 @@ export const useLayoutRoutesMap = () => {
   }
 
   async function handleMapClick2(e: MouseEvent) {
-    console.log('handleMapClick', e.target)
+    log.debug('handleMapClick', e.target)
     const clickableParent = findClickableParent(e.target)
     if (!clickableParent) return
 
@@ -153,7 +156,7 @@ export const useLayoutRoutesMap = () => {
   async function handleMapClick(e: MouseEvent) {
     e.preventDefault()
     const svgBtn = findClickableParent(e.target)
-    console.log('handleMapClick', svgBtn, svgBtn?.type, routes)
+    log.debug('handleMapClick', svgBtn, svgBtn?.type, routes)
     if (svgBtn) {
       switch (svgBtn.type) {
         case 'Routes':
@@ -186,7 +189,7 @@ export const useLayoutRoutesMap = () => {
     // percentComplete.value = 0
 
     // const steps = route.turnouts?.length || 0
-    // console.log('Running route:', steps, route)
+    // log.debug('Running route:', steps, route)
 
     // await runEffect({ ...route, state: true, type: route.type })
 

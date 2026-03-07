@@ -9,6 +9,9 @@ import Menu from '@repo/ui/src/Menu/Menu.vue'
 import type { MenuItem } from '@repo/ui/src/Menu/types'
 import { useDcc } from '@repo/dccex'
 import { useEfx, useLayout } from '@repo/modules'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('MonitorApp')
 
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
@@ -41,7 +44,7 @@ async function handleEmergencyStop() {
 }
 
 function handleDeviceSelect(deviceId: string) {
-  console.log('Device selected:', deviceId)
+  log.debug('Device selected:', deviceId)
   // Handle device selection if needed
 }
 

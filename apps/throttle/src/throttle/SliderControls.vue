@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useDebounce } from '@vueuse/core'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('SliderControls')
   
 const ticks: Record<number, string> = {
   0: 'IDLE',
@@ -187,7 +190,7 @@ const brakeRef = ref(10)
 const debouncedSpeed = useDebounce(sliderModel, 2000)
 
 watch(debouncedSpeed, (speed) => {
-  console.log('debounced emit', speed)
+  log.debug('debounced emit', speed)
   const signedSpeed = dirModel.value === 2 ? speed : dirModel.value === 0 ? -speed : 0
   emit('update:currentSpeed', signedSpeed)
 })

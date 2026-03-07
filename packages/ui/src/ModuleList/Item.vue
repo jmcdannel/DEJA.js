@@ -2,11 +2,14 @@
 import { ref, computed, watch } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
 import { useEfx, type Effect } from '@repo/modules/effects'
+import { createLogger } from '@repo/utils'
 import type { ModuleListItem, ModuleListViewOption } from './types'
 import type { DocumentData } from 'firebase/firestore'
 import ItemSwitch from './ItemSwitch.vue'
 import ItemButton from './ItemButton.vue'
 import ItemCard from './ItemCard.vue'
+
+const log = createLogger('ModuleListItem')
 
 interface Props {
   item: DocumentData
@@ -23,7 +26,7 @@ const { start, stop } = useTimeoutFn(() => {
 }, 2000)
 
 watch(state, async (newState) => {
-  console.log('Effect state watched to:', newState)
+  log.debug('Effect state watched to:', newState)
   isRunning.value = true
   stop()
   start()

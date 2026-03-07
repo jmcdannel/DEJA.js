@@ -2,8 +2,11 @@
 import { computed, ref, watch } from 'vue'
 import { useLayout } from '@repo/modules'
 import { useSignals, type Signal, type SignalAspect } from '@repo/modules/signals'
+import { createLogger } from '@repo/utils'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
+
+const log = createLogger('SignalForm')
 
 interface ValidationRules {
   required: ((val: any) => boolean | string)[];
@@ -105,7 +108,7 @@ async function submit() {
     await setSignal(props.signal?.id || '', payload)
     emit('close')
   } catch (err) {
-    console.error('Failed to save signal', err)
+    log.error('Failed to save signal', err)
     error.value = 'Unable to save signal.'
   } finally {
     loading.value = false
