@@ -87,9 +87,9 @@ function handleLogoClick() {
         <Menu v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
       <v-main>
         <v-container >
-          <RouterView v-slot="{ Component }">
+          <RouterView v-slot="{ Component, route }">
             <TransitionFade>
-              <component :is="Component" />
+              <component :is="Component" :key="route.fullPath" />
             </TransitionFade>
           </RouterView>
         </v-container>
