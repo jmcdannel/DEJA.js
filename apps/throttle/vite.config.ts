@@ -34,7 +34,7 @@ export default defineConfig({
       include: [/node_modules/, /packages/]
     },
     rollupOptions: {
-      external: ['dotenv']
+      external: ['dotenv', '@spryrocks/capacitor-socket-connection-plugin']
     }
   },
   server: {

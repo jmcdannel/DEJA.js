@@ -1,12 +1,22 @@
-import { Socket } from '@spryrocks/capacitor-socket-connection-plugin'
 import { ref } from 'vue'
 
 export type WiThrottleConnectionState = 'DISCONNECTED' | 'CONNECTING' | 'CONNECTED' | 'ERROR'
 
+// Capacitor socket type — loaded dynamically since the plugin is only available in native builds
+type CapacitorSocket = {
+  open(host: string, port: number): Promise<void>
+  close(): Promise<void>
+  write(data: Uint8Array): Promise<void>
+  onData: ((data: Uint8Array) => void) | null
+  onClose: (() => void) | null
+  onError: ((err: unknown) => void) | null
+  onStateChanged: ((state: string) => void) | null
+}
+
 export class WiThrottleService {
   private host: string
   private port: number
-  private socket: Socket | null = null
+  private socket: CapacitorSocket | null = null
   private connectionTimer: ReturnType<typeof setInterval> | null = null
 
   public state = ref<WiThrottleConnectionState>('DISCONNECTED')
@@ -37,7 +47,8 @@ export class WiThrottleService {
       this.state.value = 'CONNECTING'
       this.errorMessage.value = ''
       
-      this.socket = new Socket()
+      const { Socket } = await import('@spryrocks/capacitor-socket-connection-plugin')
+      this.socket = new Socket() as CapacitorSocket
 
       // Set up listeners
       this.socket.onData = (data: Uint8Array) => {
@@ -61,8 +72,14 @@ export class WiThrottleService {
       // Handshake: send hardware/app info
       await this.send('NDEJA Throttle')
       await this.send('HU1') // Hardware ID
-    } catch (e: any) {
-      this.handleDisconnect(e.message || 'Failed to connect')
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to connect'
+      // If the Capacitor plugin isn't available (web builds), provide a clear message
+      if (message.includes('Failed to fetch dynamically imported module') || message.includes('Cannot find module')) {
+        this.handleDisconnect('WiThrottle requires a native (Capacitor) build — TCP sockets are not available in web browsers')
+      } else {
+        this.handleDisconnect(message)
+      }
     }
   }
 
