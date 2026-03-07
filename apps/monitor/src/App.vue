@@ -8,7 +8,7 @@ import { AppHeader, TransitionFade, NotificationContainer, provideNotifications 
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import type { MenuItem } from '@repo/ui/src/Menu/types'
 import { useDcc } from '@repo/dccex'
-import { useEfx, useLayout } from '@repo/modules'
+import { useEfx, useLayout, type Effect } from '@repo/modules'
 
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
@@ -31,7 +31,7 @@ async function handleTrackPowerToggle(newState: boolean) {
 async function handleLayoutPowerToggle(newState: boolean) {
   const powerEfx = await getEffectsByType('power')
   if (powerEfx && Array.isArray(powerEfx)) {
-    powerEfx.forEach((efx: any) => {
+    powerEfx.forEach((efx: Effect) => {
       runEffect({...efx, state: newState })
     })
   }

@@ -10,7 +10,7 @@ import { slugify } from '@repo/utils/slugify'
 // TODO: icon picker
 
 interface ValidationRules {
-  required: ((val: any) => boolean | string)[];
+  required: ((val: unknown) => boolean | string)[];
 }
 
 const props = defineProps<{
