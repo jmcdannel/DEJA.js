@@ -11,7 +11,7 @@ import { useMenu } from '@/Core/Menu/useMenu'
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
 import { Login } from '@repo/auth'
-import { AppHeader, TransitionFade } from '@repo/ui'
+import { AppHeader } from '@repo/ui'
 // import { useDcc } from '@repo/dccex'
 // import { useEfx } from '@repo/modules'
 
@@ -88,9 +88,7 @@ function handleLogoClick() {
       <v-main>
         <v-container >
           <RouterView v-slot="{ Component, route }">
-            <TransitionFade>
-              <component :is="Component" :key="route.fullPath" />
-            </TransitionFade>
+            <component :is="Component" :key="route.fullPath" />
           </RouterView>
         </v-container>
       </v-main>
