@@ -4,7 +4,7 @@ import { useStorage } from '@vueuse/core'
 import { RouterView, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { Login } from '@repo/auth'
-import { AppHeader, TransitionFade } from '@repo/ui'
+import { AppHeader, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import type { MenuItem } from '@repo/ui/src/Menu/types'
 import { useDcc } from '@repo/dccex'
@@ -13,6 +13,7 @@ import { useEfx, useLayout } from '@repo/modules'
 const { sendDccCommand } = useDcc()
 const { runEffect, getEffectsByType } = useEfx()
 const { getDevices, getLayouts } = useLayout()
+provideNotifications()
 const layoutId = useStorage('@DEJA/layoutId', '')
 const enabled = useStorage('@DEJA/pref/ws-logging', false)
 const wshost = useStorage('@DEJA/pref/ws-host', 'localhost:8082')
@@ -133,6 +134,7 @@ const menu = [
         </v-alert>
         <!-- <SelectLayout @selected="handleLayoutSelect" /> -->
       </v-main>
+      <NotificationContainer />
     </v-app>
     <v-app v-else :theme="theme">
       <Login />
