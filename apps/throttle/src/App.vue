@@ -6,25 +6,49 @@ import Footer from '@/core/Footer.vue'
 import useMenu from '@/core/Menu/useMenu'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { usePageSwipe } from '@/composables/usePageSwipe'
+import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
+import { wiThrottleService } from '@/services/WiThrottleService'
+import { watch, onMounted, onUnmounted } from 'vue'
 
 const drawer = ref(false)
 const { handleMenu, menuConfig } = useMenu()
 
-const mainContentRef = useTemplateRef('mainContentRef')
-usePageSwipe(mainContentRef, { disabledRoutes: ['throttle'] })
+// Bridge custom events from the monorepo packages to the native Capacitor TCP socket
+function handleWiThrottleSend(event: Event) {
+  const customEvent = event as CustomEvent
+  if (customEvent.detail) {
+    wiThrottleService.send(customEvent.detail)
+  }
+}
 
+watch(() => wiThrottleService.state.value, (newState) => {
+  // Expose connection state to the window object so @repo/modules can read it without circular imports
+  ;(window as any).__WI_THROTTLE_CONNECTED__ = newState === 'CONNECTED'
+})
+
+onMounted(() => {
+  window.addEventListener('withrottle-send', handleWiThrottleSend)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('withrottle-send', handleWiThrottleSend)
+})
+
+const mainContentRef = useTemplateRef('mainContentRef')
+usePageSwipe(mainContentRef as any, { disabledRoutes: ['throttle'] })
+
+const { isDark } = useThemeSwitcher()
 </script>
 
 <template>
   <v-responsive>
-    <v-app theme="dark">
+    <v-app :theme="isDark ? 'dark' : 'light'">
       <AppHeader
         app-name="Throttle"
         app-icon="mdi-gamepad-variant"
         variant="throttle"
         color="blue"
         :drawer="drawer"
-        :dark="true"
         :show-layout-power="true"
         :show-emergency-stop="true"
         :show-device-status="true"
