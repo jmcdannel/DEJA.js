@@ -3,8 +3,11 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { GithubAuthProvider, GoogleAuthProvider, signInWithPopup, getRedirectResult } from 'firebase/auth'
 import { useFirebaseAuth, useCurrentUser } from 'vuefire'
+import { createLogger } from '@repo/utils'
 import { useGuestStore } from '../stores/guest'
 import TourLogo from '../components/TourLogo.vue'
+
+const log = createLogger('TourLogin')
 
 const router = useRouter()
 const auth = useFirebaseAuth()
@@ -64,7 +67,7 @@ const handleGuestAccess = async () => {
     
     // Create guest user
     const guestUser = guestStore.createGuestUser(selectedUsername.value)
-    console.log('Guest user created:', guestUser)
+    log.debug('Guest user created:', guestUser)
     
     // Small delay to show success message
     // setTimeout(() => {
@@ -72,7 +75,7 @@ const handleGuestAccess = async () => {
     // }, 1500)
     
   } catch (err: any) {
-    console.error('Guest access failed:', err)
+    log.error('Guest access failed:', err)
     error.value = err.message || 'Failed to create guest profile'
   } finally {
     loading.value = false
@@ -91,9 +94,9 @@ const handleGithubSignin = async () => {
     error.value = null
     
     await signInWithPopup(auth, githubAuthProvider)
-    console.log('GitHub signin success')
+    log.debug('GitHub signin success')
   } catch (err: any) {
-    console.error('GitHub signin failed:', err)
+    log.error('GitHub signin failed:', err)
     error.value = err.message || 'Failed to sign in with GitHub'
   } finally {
     loading.value = false
@@ -112,9 +115,9 @@ const handleGoogleSignin = async () => {
     error.value = null
     
     await signInWithPopup(auth, googleAuthProvider)
-    console.log('Google signin success')
+    log.debug('Google signin success')
   } catch (err: any) {
-    console.error('Google signin failed:', err)
+    log.error('Google signin failed:', err)
     error.value = err.message || 'Failed to sign in with Google'
   } finally {
     loading.value = false
@@ -124,7 +127,7 @@ const handleGoogleSignin = async () => {
 // Watch for successful authentication (Firebase or guest)
 watch([user, () => guestStore.currentGuest], ([newUser, newGuest]) => {
   if (newUser || newGuest) {
-    console.log('User authenticated, redirecting...', newUser, newGuest)
+    log.debug('User authenticated, redirecting...', newUser, newGuest)
     setTimeout(() => {
       router.push('/')
     }, 1500)
@@ -147,7 +150,7 @@ onMounted(async () => {
     // Handle redirect results
     await getRedirectResult(auth)
   } catch (err: any) {
-    console.error('Redirect result error:', err)
+    log.error('Redirect result error:', err)
     error.value = err.message || 'Authentication error'
   }
 })

@@ -4,8 +4,11 @@ import { useCollection } from 'vuefire'
 import { useColors } from '@repo/ui/src/useColors'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { deviceTypes, useTurnouts, useEfx, type Device } from '@repo/modules'
+import { createLogger } from '@repo/utils'
 import Stat from '@repo/ui/src/Stat.vue'
 import { StatusPulse } from '../animations'
+
+const log = createLogger('DeviceStatusItem')
 
 const props = defineProps({
   device: {
@@ -18,7 +21,7 @@ const { colors, DEFAULT_COLOR } = useColors()
 const { getTurnoutsByDevice } = useTurnouts()
 const { getEffectsByDevice } = useEfx()
 
-console.log('Device in DeviceStatusItem:', props.device.id)
+log.debug('Device in DeviceStatusItem:', props.device.id)
 const turnouts = useCollection(computed(() => props.device ? getTurnoutsByDevice(props.device.id as string) : null))
 const effects = useCollection(computed(() => props.device ? getEffectsByDevice(props.device.id as string) : null))
 

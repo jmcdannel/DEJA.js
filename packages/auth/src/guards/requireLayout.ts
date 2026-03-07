@@ -1,4 +1,7 @@
 import { useStorage } from '@vueuse/core'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('Auth')
 
 // Prefer the Vite environment variable VITE_LAYOUT_ID when available.
 // import.meta.env is provided by Vite in the browser; cast to any to avoid
@@ -9,7 +12,7 @@ const defaultLayoutId = (typeof import.meta !== 'undefined' && (import.meta as a
 
 export async function requireLayout() {
   // initialize storage with the env value (if present) so pages can default to it
-  console.log('defaultLayoutId', defaultLayoutId)
+  log.debug('defaultLayoutId', defaultLayoutId)
   const layoutId = useStorage('@DEJA/layoutId', defaultLayoutId)
 
   if (!layoutId.value || layoutId.value === '') {

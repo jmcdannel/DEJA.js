@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('LcdDisplay')
 
 interface Props {
   content?: string | string[]
@@ -57,9 +60,9 @@ const copyToClipboard = async () => {
     const content = displayContent.value.join('\n')
     await navigator.clipboard.writeText(content)
     // You could add a toast notification here if you have one
-    console.log('Content copied to clipboard')
+    log.debug('Content copied to clipboard')
   } catch (err) {
-    console.error('Failed to copy to clipboard:', err)
+    log.error('Failed to copy to clipboard:', err)
   }
 }
 </script>

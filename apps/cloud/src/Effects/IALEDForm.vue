@@ -4,6 +4,9 @@ import type { Device } from '@repo/modules'
 import type { Effect } from '@repo/modules/effects'
 // import type { Device } from '@/Devices/types'
 import { useLayout } from '@repo/modules'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('IALEDForm')
 
 const pattern = defineModel('pattern')
 const range = defineModel('range')
@@ -30,7 +33,7 @@ const device = computed(async () => {
 })
 
 onMounted(async () => {
-  console.log('IALEDForm', props.efx)
+  log.debug('IALEDForm', props.efx)
   if (props.device) {
     const result = await getDevice(props.device)
     if (result) {

@@ -15,7 +15,8 @@ const firebaseConfig = {
 
 // Check if required config values are present
 if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-  console.warn('Firebase configuration incomplete. Some environment variables may be missing.')
+  // Using console.warn directly here to avoid circular dependency with @repo/utils
+  console.warn('[Firebase] Firebase configuration incomplete. Some environment variables may be missing.')
 }
 
 export const firebaseApp = initializeApp(firebaseConfig)

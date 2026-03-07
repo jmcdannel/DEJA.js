@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ConsistLoco, Loco, useLocos } from '@repo/modules/locos'
+import { createLogger } from '@repo/utils'
 import LeadLoco from './LeadLoco.vue'
 import ConsistLocoCmp from './ConsistLoco.vue'
 import AddConsistLoco from './AddConsistLoco.vue'
+
+const log = createLogger('EditConsist')
 
 defineEmits(['close'])
 const props = defineProps<{
@@ -20,7 +23,7 @@ async function handleRemoveLoco(cloco: ConsistLoco) {
   if (props.loco) {
     const newConsist = (props.loco.consist || [])
       .filter((l:ConsistLoco) => l.address !== cloco.address)
-    console.log('newConsist', newConsist)
+    log.debug('newConsist', newConsist)
     if (props.loco.id) {
       await updateConsist(props.loco.id, newConsist)
     }
@@ -36,7 +39,7 @@ async function handleAdjustTrim(cloco: ConsistLoco, trim: number) {
       }
       return l
     })
-    console.log('newConsist', newConsist)
+    log.debug('newConsist', newConsist)
     if (props.loco.id) {
       await updateConsist(props.loco.id, newConsist)
     }
@@ -51,7 +54,7 @@ async function handleAddLoco(newAddress: string, direction:boolean = true) {
       trim: 0
     }
     const newConsist = [...(props.loco.consist || []), newLoco]
-    console.log('newConsist', newConsist)
+    log.debug('newConsist', newConsist)
     if (props.loco.id) {
       await updateConsist(props.loco.id, newConsist)
     }
@@ -67,7 +70,7 @@ async function toggleLocoDir(cloco: ConsistLoco, direction:boolean) {
       }
       return l
     })
-    console.log('newConsist', newConsist)
+    log.debug('newConsist', newConsist)
     if (props.loco.id) {
       await updateConsist(props.loco.id, newConsist)
     }

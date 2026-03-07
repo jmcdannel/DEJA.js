@@ -1,7 +1,10 @@
 import { computed, ref, watch, onUnmounted } from 'vue'
 import { isObject, useStorage, useWebSocket } from '@vueuse/core'
+import { createLogger } from '@repo/utils'
 import type { LogEntry } from './types'
 import { defuaultEntry, dccMessages} from './constants'
+
+const logger = createLogger('DccLog')
 
 
 function getDefaultWsHost(): string {
@@ -50,11 +53,11 @@ export function useDccLog(isEnabled: boolean) {
   const { data } = useWebSocket(`ws://${wshost.value}/`)
 
   function append(entry: string) {
-    console.log('append', entry, log.value)
+    logger.debug('append', entry, log.value)
     const formattedEntry = parseEntry(entry)
     if (formattedEntry) {
       log.value = [...log.value, formattedEntry]
-      console.log('appended', log.value)
+      logger.debug('appended', log.value)
     }
     }
 

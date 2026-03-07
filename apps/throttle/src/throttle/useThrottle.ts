@@ -6,11 +6,14 @@ import type { Throttle } from '@/throttle/types'
 import { type Loco, useLocos } from '@repo/modules'
 import { db } from '@repo/firebase-config'
 import { getSignedSpeed } from '@/throttle/utils'
+import { createLogger } from '@repo/utils'
 import { throttle } from 'vuetify/lib/util/index.mjs'
+
+const log = createLogger('Throttle')
 
 
 export const useThrottle = (address: Ref<number | null | undefined>) => {
-  console.log('useThrottle', address.value)
+  log.debug('useThrottle', address.value)
   const { getLocos } = useLocos()
   const layoutId = useStorage('@DEJA/layoutId', '')
 
@@ -20,7 +23,7 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
         : null
   )
 
-  console.log('throttle doc ref:', throttle)
+  log.debug('throttle doc ref:', throttle)
 
   // Derive loco from the locos collection so we use the shared `getLocos` hook
   const locos = getLocos()
@@ -58,7 +61,7 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
       const throttleDoc = doc(db, `layouts/${layoutId.value}/throttles`, addr.toString())
       await deleteDoc(throttleDoc)
     } catch (e) {
-      console.error('Error releasing throttle: ', e)
+      log.error('Error releasing throttle: ', e)
     }
   }
 

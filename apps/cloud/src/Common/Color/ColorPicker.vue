@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import {  onMounted, ref, watch } from 'vue'
 import { useLayout, type Tag } from '@repo/modules'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('ColorPicker')
 
 defineEmits(['select', 'cancel'])
 const model = defineModel<string>()
@@ -50,7 +53,7 @@ onMounted(async () => {
 })
 
 watch(current, (value) => {
-  console.log('current', value)
+  log.debug('current', value)
   if (value !== 'custom') {
     model.value = value
   }

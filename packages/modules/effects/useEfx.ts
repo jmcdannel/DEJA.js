@@ -12,9 +12,11 @@ import {
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
 import { db } from '@repo/firebase-config'
-import { slugify } from '@repo/utils'
+import { slugify, createLogger } from '@repo/utils'
 import { efxTypes } from './constants'
 import type { Effect, EffectType } from './types'
+
+const log = createLogger('Effects')
 
 const VALID_EFFECT_SORT_FIELDS = new Set(['name', 'device', 'type', 'order', 'state', 'pin'])
 const DEFAULT_EFFECT_SORT = 'name'
@@ -51,20 +53,20 @@ export const useEfx = () => {
   }
 
   function getEffects() {
-    console.log('Getting effects for layout:', layoutId.value)
+    log.debug('Getting effects for layout:', layoutId.value)
     const effects = useCollection(efxCol, { ssrKey: 'effects' })
     return effects
   }
 
   function getGuestEffects() {
-    console.log('Getting guest effects for layout:', layoutId.value)
+    log.debug('Getting guest effects for layout:', layoutId.value)
     const guestEffects = useCollection(query(collection(db, `layouts/${layoutId.value}/effects`), where('allowGuest', '==', true)), { ssrKey: 'guestEffects' })
     return guestEffects
   }
 
   async function getEffect(id: string): Promise<Effect | undefined> {
     if (!layoutId.value) {
-      console.error('Layout ID is not set')
+      log.error('Layout ID is not set')
       return
     }
     const deviceRef = doc(db, `layouts/${layoutId.value}/effects`, id)
@@ -79,13 +81,13 @@ export const useEfx = () => {
         state: data.state || false
       } as Effect
     } else {
-      console.error('No such document!')
+      log.error('No such document!')
     }
   }
 
   function getEffectsByType(efxType: string) {
     try {
-      console.log('getEffectsByType', efxType)
+      log.debug('getEffectsByType', efxType)
       const ref = colRef()
       if (!ref) return null
       return query(
@@ -93,14 +95,14 @@ export const useEfx = () => {
         where('type', '==', efxType),
       )
     } catch (error) {
-      console.error('Error getting effects by type:', error)
+      log.error('Error getting effects by type:', error)
       return null
     }
   }
 
   function getEffectsByDevice(deviceId: string) {
     try {
-      console.log('getEffectsByDevice', deviceId)
+      log.debug('getEffectsByDevice', deviceId)
       const ref = colRef()
       if (!ref) return null
       return query(
@@ -108,7 +110,7 @@ export const useEfx = () => {
         where('device', '==', deviceId),
       )
     } catch (error) {
-      console.error('Error getting effects by device:', error)
+      log.error('Error getting effects by device:', error)
       return null
     }
   }
@@ -119,10 +121,10 @@ export const useEfx = () => {
 
   async function deleteEfx(efxId: string): Promise<void> {
     try {
-      console.log('deleteEfx', efxId)
+      log.debug('deleteEfx', efxId)
       await deleteDoc(doc(db, `layouts/${layoutId.value}/effects`, efxId))
     } catch (e) {
-      console.error('Error deleting document: ', e)
+      log.error('Error deleting document: ', e)
     }
   }
 
@@ -130,11 +132,11 @@ export const useEfx = () => {
 
   async function setEfx(efxId: string, efx: Effect): Promise<boolean> {
     if (!layoutId.value) {
-      console.error('Layout ID is not set')
+      log.error('Layout ID is not set')
       return false
     }
     if (!efx) {
-      console.error('Effect data is not provided')
+      log.error('Effect data is not provided')
       return false
     }
     try {
@@ -147,18 +149,18 @@ export const useEfx = () => {
       })
       return true
     } catch (e) {
-      console.error('Error setting effect: ', e)
+      log.error('Error setting effect: ', e)
       return false
     }
   }
 
   async function runEffect(efx: Effect): Promise<void> {
     if (!layoutId.value) {
-      console.error('Layout ID is not set')
+      log.error('Layout ID is not set')
       return
     }
     if (!efx || !efx.id) {
-      console.error('Effect data is not provided or invalid')
+      log.error('Effect data is not provided or invalid')
       return
     }
     try {
@@ -172,7 +174,7 @@ export const useEfx = () => {
       )
       return
     } catch (e) {
-      console.error('runEffect: ', e, efx)
+      log.error('runEffect: ', e, efx)
     }
   }
 

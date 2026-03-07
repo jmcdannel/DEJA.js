@@ -2,19 +2,22 @@
 import { ref, watch, onErrorCaptured, computed } from 'vue'
 import { useEfx, useLayout, type Effect } from '@repo/modules'
 import { efxTypes } from '@repo/modules/effects/constants'
+import { createLogger } from '@repo/utils'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import MacroForm from '@/Effects/MacroForm.vue'
 import IALEDForm from '@/Effects//IALEDForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import SoundFileList from '@/Effects/Sounds/SoundFileList.vue'
+
+const log = createLogger('EffectForm')
 // TODO: icon picker
 
 // Error handling
 onErrorCaptured((error, instance, info) => {
-  console.error('EffectForm: Error captured:', error)
-  console.error('EffectForm: Instance:', instance)
-  console.error('EffectForm: Info:', info)
+  log.error('EffectForm: Error captured:', error)
+  log.error('EffectForm: Instance:', instance)
+  log.error('EffectForm: Info:', info)
   return false // Prevent error from propagating
 })
 
@@ -33,9 +36,9 @@ let getDevices: any
 try {
   const layoutHook = useLayout()
   getDevices = layoutHook.getDevices
-  console.log('EffectForm: useLayout hook loaded successfully')
+  log.debug('EffectForm: useLayout hook loaded successfully')
 } catch (error) {
-  console.error('EffectForm: Failed to load useLayout hook:', error)
+  log.error('EffectForm: Failed to load useLayout hook:', error)
   getDevices = () => []
 }
 
@@ -45,22 +48,22 @@ try {
   const efxHook = useEfx()
   setEfx = efxHook.setEfx
   getEfxType = efxHook.getEfxType
-  console.log('EffectForm: useEfx hook loaded successfully')
+  log.debug('EffectForm: useEfx hook loaded successfully')
 } catch (error) {
-  console.error('EffectForm: Failed to load useEfx hook:', error)
-  setEfx = () => console.log('setEfx mock called')
+  log.error('EffectForm: Failed to load useEfx hook:', error)
+  setEfx = () => log.debug('setEfx mock called')
   getEfxType = () => ({})
 }
 
 // Debug imports
-console.log('EffectForm: Imports check:', {
+log.debug('EffectForm: Imports check:', {
   useEfx: !!useEfx,
   efxTypes: !!efxTypes,
   useLayout: !!useLayout
 })
 
-console.log('EffectForm: efxTypes value:', efxTypes)
-console.log('EffectForm: Component mounting with props:', props.efx)
+log.debug('EffectForm: efxTypes value:', efxTypes)
+log.debug('EffectForm: Component mounting with props:', props.efx)
 
 const editColor = ref(false)
 
@@ -100,7 +103,7 @@ const soundFileRules = computed(() => {
   return []
 })
 const devices = getDevices()
-console.log('EffectForm initialized with:', {
+log.debug('EffectForm initialized with:', {
   props: props.efx,
   devices,
   efxType: efxType.value,
@@ -125,14 +128,14 @@ async function submit () {
 
   // Validate device is selected when required
   if (efxTypeObj.value?.require?.includes('device') && !device.value) {
-    console.error('Device is required for this effect type')
+    log.error('Device is required for this effect type')
     loading.value = false
     return
   }
 
   // Validate sound file is selected for sound effects
   if (efxType.value === 'sound' && !selectedSoundFile.value) {
-    console.error('Sound file is required for sound effects')
+    log.error('Sound file is required for sound effects')
     loading.value = false
     return
   }

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('NotFound')
 
 const route = useRoute()
 const showErrorDetails = ref(false)
@@ -14,9 +17,9 @@ onMounted(() => {
   userAgent.value = navigator.userAgent
   
   // Add some fun console messages
-  console.log('🚂 Choo choo! Looks like we hit a 404!')
-  console.log('💡 Pro tip: Check your track switches and ensure proper routing!')
-  console.log('☕ Time for a coffee break while we figure this out!')
+  log.debug('🚂 Choo choo! Looks like we hit a 404!')
+  log.debug('💡 Pro tip: Check your track switches and ensure proper routing!')
+  log.debug('☕ Time for a coffee break while we figure this out!')
 })
 </script>
 

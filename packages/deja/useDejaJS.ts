@@ -1,6 +1,9 @@
 import { useStorage } from '@vueuse/core'
 import { ref, push, set, serverTimestamp } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('DejaJS')
 
 interface DejaCommand {
   action: string
@@ -21,7 +24,7 @@ export const useDejaJS = () => {
         timestamp: serverTimestamp(),
       })
     } catch (e) {
-      console.error('Error adding document: ', e)
+      log.error('Error adding document: ', e)
     }
   }
   return {
