@@ -25,7 +25,7 @@ export interface Layout {
   isFavorite?: boolean
   isPublic?: boolean
   locos?: string[]
-  meta?: Record<string, any>
+  meta?: Record<string, unknown>
   name: string
   owner?: string
   routes?: string[]
@@ -51,7 +51,7 @@ export interface Layout {
 export interface Device {
   autoConnect?: boolean
   client?: string
-  config?: Record<string, any>
+  config?: Record<string, unknown>
   connection?: 'usb' | 'wifi'
   description?: string
   id: string

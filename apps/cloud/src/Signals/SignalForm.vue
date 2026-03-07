@@ -6,7 +6,7 @@ import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 
 interface ValidationRules {
-  required: ((val: any) => boolean | string)[];
+  required: ((val: unknown) => boolean | string)[];
 }
 
 const props = defineProps<{ signal: Signal | null }>()
@@ -33,7 +33,7 @@ const color = ref('cyan')
 
 // Validation for device when required
 const deviceRules = computed(() => {
-  return [(val: any) => !!val || 'Device is required for this effect type.']
+  return [(val: unknown) => !!val || 'Device is required for this effect type.']
 })
 
 watch(() => props.signal, (next) => {
