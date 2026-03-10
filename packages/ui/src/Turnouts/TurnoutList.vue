@@ -39,6 +39,9 @@ const filters = computed<ListFilter[]>(() => [
       icon="mdi-call-split"
       :list="turnoutsList"
       :filters="filters"
+      empty-icon="mdi-swap-horizontal"
+      empty-title="No turnouts"
+      empty-description="Add turnouts to control track switches"
       :view-options="[
         { label: 'CTC Switch', value: 'ctc-switch' },
         { label: 'Switch', value: 'switch' },

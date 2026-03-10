@@ -5,10 +5,12 @@ import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import SignalForm from '@/Signals/SignalForm.vue'
 import type { Signal } from '@repo/modules/signals'
 import { useSignals } from '@repo/modules/signals'
+import { useNotification } from '@repo/ui'
 
 const route = useRoute()
 const router = useRouter()
 const { getSignal } = useSignals()
+const { notify } = useNotification()
 const signal = ref<Signal | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
@@ -25,7 +27,7 @@ async function loadSignal() {
       error.value = 'Signal not found.'
     }
   } catch (err) {
-    console.error(err)
+    notify.error('Unable to load signal.')
     error.value = 'Unable to load signal.'
   } finally {
     loading.value = false

@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useLocos, ROADNAMES } from '@repo/modules/locos'
 
 interface ValidationRules {
-  required: ((val: any) => boolean | string)[];
+  required: ((val: unknown) => boolean | string)[];
 }
 
 const emit = defineEmits(['close'])

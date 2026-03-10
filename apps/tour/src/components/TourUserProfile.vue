@@ -47,8 +47,8 @@ const handleUsernameChange = async () => {
       window.location.reload()
     }, 1000)
     
-  } catch (err: any) {
-    usernameChangeError.value = err.message || 'Failed to change username'
+  } catch (err: unknown) {
+    usernameChangeError.value = err instanceof Error ? err.message : 'Failed to change username'
   } finally {
     changingUsername.value = false
   }

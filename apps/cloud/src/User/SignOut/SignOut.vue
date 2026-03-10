@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { signOut } from 'firebase/auth'
 import { useCurrentUser, useFirebaseAuth } from 'vuefire'
+import { useNotification } from '@repo/ui'
 
 const auth = useFirebaseAuth()
 const user = useCurrentUser()
+const { notify } = useNotification()
 
 function handleSignOut() {
   if (auth) {
     signOut(auth).catch((reason) => {
-      console.error('Failed signOut', reason)
+      notify.error('Failed to sign out. Please try again.')
     })
   }
 }

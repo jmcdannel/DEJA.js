@@ -10,7 +10,7 @@ export interface DccMessage {
 export interface LogEntry extends DccMessage {
   id: number
   action: string
-  payload: any
+  payload: string
 }
 
 export interface DccLogState {
