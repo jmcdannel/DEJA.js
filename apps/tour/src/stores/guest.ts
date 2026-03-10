@@ -147,8 +147,8 @@ export const useGuestStore = defineStore('guest', () => {
   // useStorage serializes to JSON by default which will turn Dates into strings.
   // Provide a custom serializer to revive Date objects when reading and
   // serialize Dates as ISO strings when writing so the in-memory type stays consistent.
-  const guestStorageSerializer: { read: (v: string | null) => GuestUser | null; write: (v: GuestUser | null) => string } = {
-    read: (raw: string | null) => {
+  const guestStorageSerializer = {
+    read: (raw: string) => {
       if (!raw) return null
       try {
         let parsed: unknown = JSON.parse(raw)
@@ -165,15 +165,17 @@ export const useGuestStore = defineStore('guest', () => {
           }
         }
 
-        const guest = parsed as GuestUser
-        if (guest) {
+        const raw_guest = parsed as Record<string, unknown>
+        if (raw_guest) {
           // revive date strings into Date objects
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ;(guest as any).createdAt = guest.createdAt ? new Date(guest.createdAt as unknown as string) : undefined
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ;(guest as any).lastActive = guest.lastActive ? new Date(guest.lastActive as unknown as string) : undefined
+          const guest: GuestUser = {
+            ...raw_guest,
+            createdAt: raw_guest.createdAt ? new Date(raw_guest.createdAt as string) : new Date(),
+            lastActive: raw_guest.lastActive ? new Date(raw_guest.lastActive as string) : new Date(),
+          } as GuestUser
+          return guest
         }
-        return guest
+        return null
       } catch (e) {
         log.error('Failed to parse guest from storage', e)
         return null
@@ -192,7 +194,7 @@ export const useGuestStore = defineStore('guest', () => {
   }
 
   // Explicitly tell useStorage the stored type is GuestUser | null
-  const currentGuest = useStorage<GuestUser | null>('@DEJA/guest-user', null, localStorage, { serializer: guestStorageSerializer as any })
+  const currentGuest = useStorage<GuestUser | null>('@DEJA/guest-user', null, localStorage, { serializer: guestStorageSerializer })
   log.debug('Guest store initialized, current guest:', currentGuest.value)
   const availableUsernames = ref<string[]>([...GUEST_USERNAMES])
   const usedUsernames = ref<Set<string>>(new Set())

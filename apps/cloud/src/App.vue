@@ -13,12 +13,13 @@ const log = createLogger('CloudApp')
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
 import { Login } from '@repo/auth'
-import { AppHeader, TransitionFade } from '@repo/ui'
+import { AppHeader, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
 // import { useDcc } from '@repo/dccex'
 // import { useEfx } from '@repo/modules'
 
 // const { sendDccCommand } = useDcc()
 // const { runEffect, getEffectsByType } = useEfx()
+provideNotifications()
 const drawer = ref(true)
 const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
 
@@ -102,6 +103,7 @@ function handleLogoClick() {
           </RouterView>
         </v-container>
       </v-main>
+      <NotificationContainer />
     </v-app>
   </v-responsive>
 </template>

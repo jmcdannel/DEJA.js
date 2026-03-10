@@ -13,8 +13,8 @@ const list = getEffects()
 const dragging = ref(false)
 
 function handleSave() {
-  log.debug('Saving new order:', list.value.map(async (item: any, order: number) => {
-    const efx = item as Effect
+  log.debug('Saving new order:', list.value.map(async (item: Effect, order: number) => {
+    const efx = item
     log.debug('Setting effect', efx.name, 'to order', order)
     await setEfx(efx.id, { ...efx, order })
   }))

@@ -12,6 +12,7 @@ import { throttle } from 'vuetify/lib/util/index.mjs'
 const log = createLogger('Throttle')
 
 
+
 export const useThrottle = (address: Ref<number | null | undefined>) => {
   log.debug('useThrottle', address.value)
   const { getLocos } = useLocos()
@@ -30,7 +31,7 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
   const loco = computed(() => {
     const addr = address.value
     if (addr === undefined || addr === null) return undefined
-    return (locos.value || []).find((l: any) => l.address === addr) as unknown as Loco | undefined
+    return (locos.value || []).find((l: Loco) => l.address === addr)
   })
   const currentSpeed = computed(() => throttle.value ? getSignedSpeed({
     speed: throttle.value?.speed,

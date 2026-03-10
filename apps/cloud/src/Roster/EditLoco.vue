@@ -11,7 +11,7 @@ import ColorPicker from '@/Common/Color/ColorPicker.vue'
 const log = createLogger('EditLoco')
 
 interface ValidationRules {
-  required: ((val: any) => boolean | string)[];
+  required: ((val: unknown) => boolean | string)[];
 }
 
 const locoTypes = [

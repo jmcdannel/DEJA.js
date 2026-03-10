@@ -4,9 +4,10 @@ import {
   setDoc,
   doc,
   getDoc,
-  query, 
+  query,
   orderBy,
   where,
+  type QueryConstraint,
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
@@ -30,7 +31,7 @@ export function useTurnouts() {
   const colRef = collection(db, `layouts/${layoutId.value}/turnouts`)
 
   const turnoutsCol = () => {
-    const whereClauses: any[] = []
+    const whereClauses: QueryConstraint[] = []
     if (filterBy.value.length > 0) {
       filterBy.value.forEach((filter) => {
         if (filter.startsWith('device:')) {
@@ -46,17 +47,17 @@ export function useTurnouts() {
       log.debug(clause)
       queryRef = query(queryRef, clause)
     })
-    
+
     return layoutId.value ? queryRef : null
   }
-  
+
 
   function getTurnouts() {
     log.debug('getTurnouts called')
     const turnouts = useCollection(turnoutsCol, { ssrKey: 'turnouts' })
     return turnouts
   }
-  
+
   function getTurnoutsByDevice(deviceId: string) {
     try {
       log.debug('getTurnoutsByDevice', deviceId)

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onErrorCaptured, computed } from 'vue'
-import { useEfx, useLayout, type Effect } from '@repo/modules'
+import { useEfx, useLayout, type Effect, type EffectType } from '@repo/modules'
 import { efxTypes } from '@repo/modules/effects/constants'
 import { createLogger } from '@repo/utils'
 import ViewJson from '@/Core/UI/ViewJson.vue'
@@ -23,7 +23,7 @@ onErrorCaptured((error, instance, info) => {
 })
 
 interface ValidationRules {
-  required: ((val: any) => boolean | string)[];
+  required: ((val: unknown) => boolean | string)[];
 }
 
 const props = defineProps<{
@@ -32,7 +32,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['close'])
 const DEFAULT_DEVICE = 'dccex'
-let getDevices: any
+let getDevices: ReturnType<typeof useLayout>['getDevices']
 
 try {
   const layoutHook = useLayout()
@@ -40,10 +40,11 @@ try {
   log.debug('EffectForm: useLayout hook loaded successfully')
 } catch (error) {
   log.error('EffectForm: Failed to load useLayout hook:', error)
-  getDevices = () => []
+  getDevices = () => [] as never[]
 }
 
-let setEfx: any, getEfxType: any
+let setEfx: ReturnType<typeof useEfx>['setEfx']
+let getEfxType: ReturnType<typeof useEfx>['getEfxType']
 
 try {
   const efxHook = useEfx()
@@ -52,8 +53,8 @@ try {
   log.debug('EffectForm: useEfx hook loaded successfully')
 } catch (error) {
   log.error('EffectForm: Failed to load useEfx hook:', error)
-  setEfx = () => log.debug('setEfx mock called')
-  getEfxType = () => ({})
+  setEfx = () => Promise.resolve(false)
+  getEfxType = () => undefined as EffectType | undefined
 }
 
 // Debug imports
@@ -91,7 +92,7 @@ const rules: ValidationRules = {
 // Validation for device when required
 const deviceRules = computed(() => {
   if (efxTypeObj.value?.require?.includes('device')) {
-    return [(val: any) => !!val || 'Device is required for this effect type.']
+    return [(val: unknown) => !!val || 'Device is required for this effect type.']
   }
   return []
 })
@@ -99,7 +100,7 @@ const deviceRules = computed(() => {
 // Validation for sound file when required
 const soundFileRules = computed(() => {
   if (efxType.value === 'sound') {
-    return [(val: any) => !!val || 'Sound file is required for sound effects.']
+    return [(val: unknown) => !!val || 'Sound file is required for sound effects.']
   }
   return []
 })

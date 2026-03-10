@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { createLogger } from '@repo/utils'
+import { useNotification } from '@repo/ui'
 
 const log = createLogger('LcdDisplay')
 
@@ -31,6 +32,8 @@ const displayContent = computed(() => {
   return props.content.split('\n').slice(0, props.maxLines)
 })
 
+const { notify } = useNotification()
+
 const colorClasses = computed(() => {
   const colors = {
     green: 'text-green-400',
@@ -59,10 +62,11 @@ const copyToClipboard = async () => {
   try {
     const content = displayContent.value.join('\n')
     await navigator.clipboard.writeText(content)
-    // You could add a toast notification here if you have one
+    notify.success('Content copied to clipboard.')
     log.debug('Content copied to clipboard')
-  } catch (err) {
-    log.error('Failed to copy to clipboard:', err)
+  } catch {
+    notify.error('Failed to copy to clipboard.')
+    log.error('Failed to copy to clipboard')
   }
 }
 </script>

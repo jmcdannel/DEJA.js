@@ -23,15 +23,15 @@ export function useSerial(handleMessage: (message: string) => void) {
   */
   let commandString = ""
   let port: {
-      opened: any
-      open: (arg0: { baudRate: number }) => any
+      opened: boolean | undefined
+      open: (arg0: { baudRate: number }) => Promise<void>
       writable: WritableStream<Uint8Array>
-      readable: { pipeTo: (arg0: WritableStream<BufferSource>) => any }
-      close: () => any
+      readable: { pipeTo: (arg0: WritableStream<BufferSource>) => Promise<void> }
+      close: () => Promise<void>
     } | null,
     outputDone: Promise<void> | null,
     outputStream: WritableStream<string> | null,
-    inputDone: Promise<any> | null,
+    inputDone: Promise<void> | null,
     inputStream,
     reader: ReadableStreamDefaultReader<string> | null,
     stream: { write: (arg0: string) => void; releaseLock: () => void },
@@ -58,13 +58,15 @@ export function useSerial(handleMessage: (message: string) => void) {
 
   async function connect() {
     try {
-      if (!(navigator as any)?.serial) return
+      // Web Serial API is not in all TypeScript DOM lib definitions
+      const nav = navigator as Navigator & { serial?: { requestPort: () => Promise<typeof port> } }
+      if (!nav.serial) return
       // - Request a port and open an asynchronous connection,
       //   which prevents the UI from blocking when waiting for
       //   input, and allows serial to be received by the web page
       //   whenever it arrives.
       if (!port) {
-        port = await (navigator as any)?.serial?.requestPort() // prompt user to select device connected to a com port
+        port = await nav.serial.requestPort() // prompt user to select device connected to a com port
         // - Wait for the port to open.
         log.debug("User selected a port to connect to", port, port?.opened)
       }

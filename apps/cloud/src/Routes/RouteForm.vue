@@ -13,7 +13,7 @@ const log = createLogger('RouteForm')
 // TODO: icon picker
 
 interface ValidationRules {
-  required: ((val: any) => boolean | string)[];
+  required: ((val: unknown) => boolean | string)[];
 }
 
 const props = defineProps<{

@@ -18,6 +18,7 @@ import { db } from '@repo/firebase-config'
 import { createLogger } from '@repo/utils'
 import type { Device, Layout, Tag } from './types'
 import { useDejaJS } from '@repo/deja'
+import { createLogger } from '@repo/utils'
 import { defaultLayoutSounds } from './constants'
 
 const log = createLogger('Layout')
@@ -74,7 +75,7 @@ export const useLayout = () => {
   }
 
   function getLayouts(email: string | null = null) {
-    return email 
+    return email
       ? useCollection(query(collection(db, 'layouts'), where('owner', '==', email)), { ssrKey: 'layouts' })
       : null
   }
@@ -235,10 +236,10 @@ export const useLayout = () => {
     try {
       const docSnap = await getDoc(doc(db, 'layouts', layoutId.value))
       if (docSnap.exists()) {
-        const layoutData = docSnap.data()
+        const layoutData = docSnap.data() as Partial<Layout>
         await setDoc(
           doc(db, `layouts`, layoutId.value),
-          { tags: [...((layoutData as any)?.tags || []), tag] },
+          { tags: [...(layoutData?.tags || []), tag] },
           { merge: true }
         )
       }
@@ -254,9 +255,9 @@ export const useLayout = () => {
     }
     const docSnap = await getDoc(doc(db, 'layouts', layoutId.value))
     if (docSnap.exists()) {
-      const layout = docSnap.data()
-      if ((layout as any)?.tags) {
-        return (layout as any).tags.filter((tag: Tag) => ids.includes(tag.id))
+      const layout = docSnap.data() as Partial<Layout>
+      if (layout?.tags) {
+        return layout.tags.filter((tag: Tag) => ids.includes(tag.id))
       }
     }
     return []

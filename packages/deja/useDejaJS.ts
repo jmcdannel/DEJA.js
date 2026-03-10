@@ -7,14 +7,13 @@ const log = createLogger('DejaJS')
 
 interface DejaCommand {
   action: string
-  payload: any
+  payload: unknown
 }
 
 export const useDejaJS = () => {
   const layoutId = useStorage('@DEJA/layoutId', '')
 
   async function sendDejaCommand({ action, payload }: DejaCommand) {
-    // console.log('dejaCloud SEND', action, payload)
     try {
       const commandsRef = ref(rtdb, `dejaCommands/${layoutId.value}`)
       const newCommandRef = push(commandsRef)

@@ -7,7 +7,7 @@ const log = createLogger('DCC')
 
 interface DccCommand {
   action: string
-  payload: any
+  payload: unknown
 }
 
 export const useDcc = () => {
@@ -15,22 +15,22 @@ export const useDcc = () => {
   const isEmulated = useStorage('@DEJA/isEmulated', false)
   const isSerial = useStorage('@DEJA/layoutId', false)
 
-  async function setFunction(address: any, func: any, state: any) {
+  async function setFunction(address: number, func: number, state: boolean) {
     try {
       await send('function', { address, func, state })
-    } catch (err: any) {
+    } catch (err: unknown) {
       log.error('[DCC API].setPower', err)
-      throw new Error(err)
+      throw err instanceof Error ? err : new Error(String(err))
     }
   }
 
-  async function sendOutput(pin: any, state: any) {
+  async function sendOutput(pin: number, state: boolean) {
     try {
       log.debug('[DCC API].sendOutput', pin, state)
       await send('output', { pin, state })
-    } catch (err: any) {
+    } catch (err: unknown) {
       log.error('[DCC API].setPower', err)
-      throw new Error(err)
+      throw err instanceof Error ? err : new Error(String(err))
     }
   }
 
@@ -38,9 +38,9 @@ export const useDcc = () => {
     try {
       log.debug('[DCC API].setPower', payload)
       await send('dcc', payload)
-    } catch (err: any) {
+    } catch (err: unknown) {
       log.error('[DCC API].setPower', err)
-      throw new Error(err)
+      throw err instanceof Error ? err : new Error(String(err))
     }
   }
 
@@ -48,7 +48,6 @@ export const useDcc = () => {
     action,
     payload,
   }: DccCommand): Promise<void> {
-    // log.debug('dejaCloud SEND', action, payload)
     try {
       const command = {
         action,
@@ -59,7 +58,6 @@ export const useDcc = () => {
       const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId.value}`)
       const newCommandRef = push(dccCommandsRef)
       set(newCommandRef, command)
-      // log.debug('Document written with ID: ', command)
     } catch (e) {
       log.error('Error adding document: ', e)
     }

@@ -7,7 +7,8 @@ import {
   query,
   serverTimestamp,
   setDoc,
-  where
+  where,
+  type QueryConstraint
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
@@ -33,7 +34,7 @@ export const useEfx = () => {
     layoutId.value ? collection(db, `layouts/${layoutId.value}/effects`) : null
 
   const efxCol = () => {
-    const whereClauses: any[] = []
+    const whereClauses: QueryConstraint[] = []
     if (filterBy.value.length > 0) {
       filterBy.value.forEach((filter) => {
         if (filter.startsWith('device:')) {

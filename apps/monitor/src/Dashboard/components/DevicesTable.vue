@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import type { Device } from '@repo/modules'
+
 defineProps<{
-  devices: any[]
+  devices: Device[]
 }>()
 </script>
 

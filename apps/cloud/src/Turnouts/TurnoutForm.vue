@@ -14,7 +14,7 @@ import ViewJson from '@/Core/UI/ViewJson.vue'
 const log = createLogger('TurnoutForm')
 
 interface ValidationRules {
-  required: ((val: any) => boolean | string)[];
+  required: ((val: unknown) => boolean | string)[];
 }
 
 const props = defineProps<{
@@ -48,7 +48,7 @@ const tags = ref<string[]>(props.turnout?.tags || [])
 const turnoutType = ref(props.turnout?.type || DEFAULT_TYPE)
 const loading = ref(false)
 const rules: ValidationRules = {
-  required: [(val: any) => (val === 0 || !!val) || 'Required.']
+  required: [(val: unknown) => (val === 0 || !!val) || 'Required.']
 }
 
 function autoId() {

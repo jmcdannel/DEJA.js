@@ -6,7 +6,7 @@ import { createLogger } from '@repo/utils'
 const log = createLogger('AddDeviceItem')
 
 interface ValidationRules {
-  required: ((val: any) => boolean | string)[];
+  required: ((val: unknown) => boolean | string)[];
 }
 
 const emit = defineEmits(['close'])
