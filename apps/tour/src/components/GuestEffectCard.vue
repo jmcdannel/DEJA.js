@@ -2,6 +2,9 @@
 import { ref, computed, watch } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
 import { useEfx, efxTypes, type Effect } from '@repo/modules'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('GuestEffectCard')
 
 interface Props {
   effect: Effect
@@ -18,7 +21,7 @@ const { start, stop } = useTimeoutFn(() => {
 }, 2000)
 
 watch(state, async (newState) => {
-  console.log('Effect state watched to:', newState)
+  log.debug('Effect state watched to:', newState)
   isRunning.value = true
   stop()
   start()

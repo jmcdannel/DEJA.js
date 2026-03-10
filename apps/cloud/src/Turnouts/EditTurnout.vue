@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { createLogger } from '@repo/utils'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import TurnoutForm from '@/Turnouts/TurnoutForm.vue'
 import { useTurnouts, type Turnout } from '@repo/modules'
+
+const log = createLogger('EditTurnout')
 
 const route = useRoute()
 const router = useRouter()
@@ -19,7 +22,7 @@ async function loadTurnout() {
   try {
     turnout.value = await getTurnout(turnoutId)
   } catch (err) {
-    console.error(err)
+    log.error(err)
     error.value = 'Unable to load turnout.'
   } finally {
     loading.value = false

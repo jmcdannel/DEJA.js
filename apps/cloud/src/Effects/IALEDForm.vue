@@ -4,6 +4,9 @@ import { useLayout } from '@repo/modules'
 import type { Device } from '@repo/modules'
 import type { Effect } from '@repo/modules/effects'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('IALEDForm')
 
 /* ------------------------------------------------------------------ */
 /*  Models & Props                                                     */

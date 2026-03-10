@@ -11,8 +11,10 @@ import {
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
 import { db } from '@repo/firebase-config'
-import { slugify } from '@repo/utils'
+import { slugify, createLogger } from '@repo/utils'
 import type { Signal, SignalAspect, SignalInput } from './types'
+
+const log = createLogger('Signals')
 
 function normalizePin(pin?: number | string | null): number | undefined {
   if (pin === undefined || pin === null || pin === '') {
@@ -45,7 +47,7 @@ export const useSignals = () => {
 
   async function getSignal(id: string): Promise<Signal | undefined> {
     if (!layoutId.value) {
-      console.error('Layout ID is not set')
+      log.error('Layout ID is not set')
       return undefined
     }
     try {
@@ -59,19 +61,19 @@ export const useSignals = () => {
         }
       }
     } catch (error) {
-      console.error('Error fetching signal:', error)
+      log.error('Error fetching signal:', error)
     }
     return undefined
   }
 
   async function setSignal(signalId: string, signal: SignalInput): Promise<boolean> {
     if (!layoutId.value) {
-      console.error('Layout ID is not set')
+      log.error('Layout ID is not set')
       return false
     }
 
     if (!signal) {
-      console.error('Signal data is not provided')
+      log.error('Signal data is not provided')
       return false
     }
 
@@ -93,31 +95,31 @@ export const useSignals = () => {
       }, { merge: true })
       return true
     } catch (error) {
-      console.error('Error saving signal:', error)
+      log.error('Error saving signal:', error)
       return false
     }
   }
 
   async function deleteSignal(signalId: string): Promise<void> {
     if (!layoutId.value) {
-      console.error('Layout ID is not set')
+      log.error('Layout ID is not set')
       return
     }
 
     try {
       await deleteDoc(doc(db, `layouts/${layoutId.value}/signals`, signalId))
     } catch (error) {
-      console.error('Error deleting signal:', error)
+      log.error('Error deleting signal:', error)
     }
   }
 
   async function setSignalAspect(signalId: string, aspect: SignalAspect): Promise<void> {
     if (!layoutId.value) {
-      console.error('Layout ID is not set')
+      log.error('Layout ID is not set')
       return
     }
     if (!signalId) {
-      console.error('Signal ID is required to set aspect')
+      log.error('Signal ID is required to set aspect')
       return
     }
     try {
@@ -126,7 +128,7 @@ export const useSignals = () => {
         timestamp: serverTimestamp(),
       }, { merge: true })
     } catch (error) {
-      console.error('Error setting signal aspect:', error)
+      log.error('Error setting signal aspect:', error)
     }
   }
 

@@ -3,7 +3,10 @@ import { ref } from 'vue'
 import { type Effect, MacroItem } from '@repo/modules/effects'
 import { type Loco } from '@repo/modules/locos'
 import { type Turnout } from '@repo/modules'
+import { createLogger } from '@repo/utils'
 import MacroAdd from '@/Effects/MacroAdd.vue'
+
+const log = createLogger('MacroForm')
 
 interface MacroLoco extends Loco {
   speed: number
@@ -24,21 +27,21 @@ const onChips = ref(props.on || [])
 const offChips = ref(props.off || [])
 
 function handleOnUpdate(e: Array<string | undefined>) {
-  console.log('handleOnUpdate', e, onChips.value)
+  log.debug('handleOnUpdate', e, onChips.value)
   // remove e from onChips
   onChips.value = onChips.value.filter((c) => c.id !== e?.[0])
   emitChanges()  
 }
 
 function handleOffUpdate(e: Array<string | undefined>) {
-  console.log('handleOffUpdate', e, offChips.value)
+  log.debug('handleOffUpdate', e, offChips.value)
   // remove e from onChips
   offChips.value = offChips.value.filter((c) => c.id !== e?.[0])
   emitChanges()  
 }
 
 function handleAddOn(effects: Effect[], turnouts: Turnout[], throttles: MacroLoco[]) {
-  console.log('handleAddOn', effects, turnouts, throttles)
+  log.debug('handleAddOn', effects, turnouts, throttles)
   onChips.value = onChips.value.concat(effects.map((e) => ({
     id: e.id,
     name: e.name,
@@ -65,7 +68,7 @@ function handleAddOn(effects: Effect[], turnouts: Turnout[], throttles: MacroLoc
 }
 
 function handleAddOff(effects: Effect[], turnouts: Turnout[], throttles: MacroLoco[]) {
-  console.log('handleAddOff', effects, turnouts, throttles)
+  log.debug('handleAddOff', effects, turnouts, throttles)
   offChips.value = offChips.value.concat(effects.map((e) => ({
     id: e.id,
     name: e.name,

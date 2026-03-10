@@ -10,6 +10,9 @@ import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
 import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
 import { Consist, LocoAvatar, MiniConsist, FunctionsSpeedDial } from '@repo/ui'
 import { useThrottle } from '@/throttle/useThrottle'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('Throttle')
 
 const props = defineProps({
   address: {
@@ -17,11 +20,11 @@ const props = defineProps({
     required: true
   }
 })
-console.log('ThrottleView address prop:', props.address)
+log.debug('ThrottleView address prop:', props.address)
 
 const address = toRef(props, 'address')
 
-console.log('Using throttle for address:', address.value)
+log.debug('Using throttle for address:', address.value)
 
 const { 
   adjustSpeed: handleAdjustSpeed,

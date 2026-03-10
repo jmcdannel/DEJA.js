@@ -3,13 +3,15 @@ import { computed, ref, watch } from 'vue'
 import { useTurnouts, type Turnout } from '@repo/modules'
 import { useLayout } from '@repo/modules'
 // import { useEfx } from '@repo/modules/effects'
-import { slugify } from '@repo/utils/slugify'
+import { slugify, createLogger } from '@repo/utils'
 import TurnoutTypePicker from '@/Turnouts/TurnoutTypePicker.vue'
 import DevicePicker from '@/Layout/Devices/DevicePicker.vue'
 import EffectPicker from '@/Effects/EffectPicker.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
+
+const log = createLogger('TurnoutForm')
 
 interface ValidationRules {
   required: ((val: unknown) => boolean | string)[];
@@ -50,7 +52,7 @@ const rules: ValidationRules = {
 }
 
 function autoId() {
-  console.log('autoId', name.value, device.value, index.value)
+  log.debug('autoId', name.value, device.value, index.value)
   return name.value && device.value && index.value 
     ? `${slugify(name.value)}-${slugify(index.value.toString())}-${slugify(device.value)}` 
     : ''
@@ -89,7 +91,7 @@ async function submit (e: Promise<{ valid: boolean }>): Promise<void> {
     emit('close')
   } else {
     // reset()
-    console.log('invalid form', results)
+    log.debug('invalid form', results)
     loading.value = false
   }
 }

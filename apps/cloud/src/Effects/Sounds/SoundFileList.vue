@@ -143,6 +143,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { soundFileService, type SoundFile } from './SoundFileService'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('SoundFileList')
 
 interface Props {
   selectionMode?: boolean
@@ -197,7 +200,7 @@ async function loadSoundFiles() {
     soundFiles.value = sounds
   } catch (err) {
     error.value = 'Failed to load sound files. Please try again.'
-    console.error('Error loading sound files:', err)
+    log.error('Error loading sound files:', err)
   } finally {
     loading.value = false
   }
@@ -229,11 +232,11 @@ function onAudioLoaded(url: string, event: Event) {
 
 function onAudioEnded(url: string) {
   // Audio finished playing naturally
-  console.log(`Audio ended: ${url}`)
+  log.debug(`Audio ended: ${url}`)
 }
 
 function onAudioError(url: string, event: Event) {
-  console.error(`Audio error for ${url}:`, event)
+  log.error(`Audio error for ${url}:`, event)
   error.value = 'Failed to load audio file.'
 }
 
@@ -249,7 +252,7 @@ function onAudioPlay(url: string) {
 
 function onAudioPause(url: string) {
   // Handle pause if needed
-  console.log(`Audio paused: ${url}`)
+  log.debug(`Audio paused: ${url}`)
 }
 
 function formatDuration(ms: number): string {

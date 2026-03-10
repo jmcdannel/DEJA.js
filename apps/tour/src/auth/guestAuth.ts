@@ -1,8 +1,11 @@
 import { getCurrentUser } from 'vuefire'
+import { createLogger } from '@repo/utils'
 import { useGuestStore } from '../stores/guest'
 
+const log = createLogger('GuestAuth')
+
 export async function requireGuestOrAuth() {
-  console.log('Checking authentication for guest or Firebase user...')
+  log.debug('Checking authentication for guest or Firebase user...')
   // Check if user is authenticated with Firebase
   const firebaseUser = await getCurrentUser()
   

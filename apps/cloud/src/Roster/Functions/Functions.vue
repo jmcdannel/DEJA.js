@@ -2,7 +2,10 @@
 import { ref } from 'vue'
 import { defaultFunctions, type LocoFunction } from '@repo/modules/locos'
 import { useLocos } from '@repo/modules/locos/useLocos'
+import { createLogger } from '@repo/utils'
 import EditFunc from '@/Roster/Functions/EditFunction.vue'
+
+const log = createLogger('Functions')
 // import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 
 const props = defineProps({
@@ -14,14 +17,14 @@ const isModified = ref(false)
 const { updateFunctions } = useLocos()
 
 async function handleSave() {
-  console.log('handleSave', address.value, locoFunctions.value)
+  log.debug('handleSave', address.value, locoFunctions.value)
   if (address.value) {
     await updateFunctions(address.value, locoFunctions.value)
   }
 }
 
 async function handleEdit(func: LocoFunction) {
-  console.log('handleSave', func)
+  log.debug('handleSave', func)
   const existing = locoFunctions.value?.find((lf:LocoFunction) => lf.id === func?.id)
   locoFunctions.value = existing 
     ? (locoFunctions.value || []).map((lf:LocoFunction) => {
@@ -36,7 +39,7 @@ async function handleEdit(func: LocoFunction) {
     : [...(locoFunctions.value || []), { ...existing, ...func }]
   isModified.value = true
   
-  console.log('handleEdit', locoFunctions.value, func, existing)
+  log.debug('handleEdit', locoFunctions.value, func, existing)
 }
 
 </script>

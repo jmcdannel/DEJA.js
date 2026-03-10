@@ -1,10 +1,13 @@
 import { ref, watch } from 'vue'
 import { isObject, useStorage, useWebSocket } from '@vueuse/core'
+import { createLogger } from '@repo/utils'
 import type { LogEntry } from './types'
 import { defuaultEntry, dccMessages} from './constants'
 
+const log = createLogger('DccLog')
+
 export function useDccLog(isEnabled: boolean) {
-  console.log('useDccLog', isEnabled)
+  log.debug('useDccLog', isEnabled)
   if (!isEnabled) {
     return {
       append: (_entry: string) => {},
@@ -18,9 +21,9 @@ export function useDccLog(isEnabled: boolean) {
   const { status, data, send, open, close } = useWebSocket(`ws://${wshost.value}/`)
 
   function append(entry: string): void {
-    console.log('append', entry, log.value)
+    log.debug('append', entry, log.value)
     log.value = [...log.value, parseEntry(entry)]
-    console.log('appended', log.value)
+    log.debug('appended', log.value)
   }
 
   function parseEntry(entry: string): LogEntry {

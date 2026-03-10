@@ -2,17 +2,20 @@
 import { watch } from 'vue'
 import { useStorage } from '@vueuse/core';
 import { useWebSocket } from '@vueuse/core'
+import { createLogger } from '@repo/utils'
 import { useDccLog } from '@/DCCEX/Log/useDccLog'
+
+const log = createLogger('DCCLogger')
 
 const wshost = useStorage('@DEJA/pref/ws-host', '192.168.86.22:8082')
 const { append } = useDccLog()
 
-console.log('wshost', wshost)
+log.debug('wshost', wshost)
 //http://192.168.86.249:5173/
 const { status, data, send, open, close } = useWebSocket(`ws://${wshost.value}/`)
 
 watch(data, (newData) => {
-  console.log('data', newData)
+  log.debug('data', newData)
   append(newData)
 })
 

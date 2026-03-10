@@ -2,6 +2,9 @@
 import { ref } from 'vue'
 import draggable from 'vuedraggable'
 import { useEfx, type Effect } from '@repo/modules'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('EffectSorter')
 
 const emit = defineEmits(['close'])
 
@@ -10,9 +13,9 @@ const list = getEffects()
 const dragging = ref(false)
 
 function handleSave() {
-  console.log('Saving new order:', list.value.map(async (item: Effect, order: number) => {
+  log.debug('Saving new order:', list.value.map(async (item: Effect, order: number) => {
     const efx = item
-    console.log('Setting effect', efx.name, 'to order', order)
+    log.debug('Setting effect', efx.name, 'to order', order)
     await setEfx(efx.id, { ...efx, order })
   }))
   emit('close')

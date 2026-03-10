@@ -3,7 +3,10 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { signOut } from 'firebase/auth'
 import { useCurrentUser, useFirebaseAuth } from 'vuefire'
+import { createLogger } from '@repo/utils'
 import { useGuestStore } from '../stores/guest'
+
+const log = createLogger('TourUserProfile')
 
 const router = useRouter()
 const auth = useFirebaseAuth()
@@ -57,16 +60,16 @@ const handleUsernameChange = async () => {
 // Handle Firebase user sign out
 const handleSignOut = async () => {
   if (!auth) {
-    console.error('Firebase auth not available')
+    log.error('Firebase auth not available')
     return
   }
   
   try {
     await signOut(auth)
-    console.log('User signed out')
+    log.debug('User signed out')
     router.push('/login')
   } catch (error) {
-    console.error('Error signing out:', error)
+    log.error('Error signing out:', error)
   }
 }
 

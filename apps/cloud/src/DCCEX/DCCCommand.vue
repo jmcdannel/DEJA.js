@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useDcc } from '@repo/dccex/useDcc'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('DCCCommand')
 
 const props = defineProps({
   cmd: Object,
@@ -17,7 +20,7 @@ async function send () {
       toggle()
       break
     default:
-      console.log('cmd', props.cmd)
+      log.debug('cmd', props.cmd)
       break
   }
   dccCommand.value && sendDccCommand({ action: 'dcc', payload: dccCommand.value})
@@ -27,7 +30,7 @@ async function send () {
 async function toggle() {
   active.value = !active.value
   dccCommand.value = active.value ? props.cmd?.command[1] : props.cmd?.command[0]
-  console.log('toggle', props.cmd, active.value, dccCommand.value)
+  log.debug('toggle', props.cmd, active.value, dccCommand.value)
 }
 </script>
 <template>

@@ -3,6 +3,9 @@ import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import EmptyState from '@/Core/UI/EmptyState.vue'
 import RosterItem from '@/Roster/RosterItem.vue'
 import { useLocos, type Loco } from '@repo/modules/locos'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('RosterList')
 
 const emit = defineEmits(['edit'])
 
@@ -11,7 +14,7 @@ const { getLocos } = useLocos()
 let locos = getLocos()
 
 function handleEdit(loco: Loco) {
-  console.log('handleEdit', loco)
+  log.debug('handleEdit', loco)
   emit('edit', loco)
 }
 
