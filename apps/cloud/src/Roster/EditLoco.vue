@@ -8,7 +8,7 @@ import Functions from '@/Roster/Functions/Functions.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 
 interface ValidationRules {
-  required: ((val: any) => boolean | string)[];
+  required: ((val: unknown) => boolean | string)[];
 }
 
 const locoTypes = [

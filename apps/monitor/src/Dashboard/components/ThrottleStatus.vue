@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import type { Throttle } from '@repo/modules'
+
 defineProps<{
-  throttles: any[]
+  throttles: Throttle[]
 }>()
 </script>
 <template>

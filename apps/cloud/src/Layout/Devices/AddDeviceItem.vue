@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { deviceTypes, useLayout, type Device } from '@repo/modules'
 
 interface ValidationRules {
-  required: ((val: any) => boolean | string)[];
+  required: ((val: unknown) => boolean | string)[];
 }
 
 const emit = defineEmits(['close'])

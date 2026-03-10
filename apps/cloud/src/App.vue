@@ -11,12 +11,13 @@ import { useMenu } from '@/Core/Menu/useMenu'
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
 import { Login } from '@repo/auth'
-import { AppHeader } from '@repo/ui'
+import { AppHeader, NotificationContainer, provideNotifications } from '@repo/ui'
 // import { useDcc } from '@repo/dccex'
 // import { useEfx } from '@repo/modules'
 
 // const { sendDccCommand } = useDcc()
 // const { runEffect, getEffectsByType } = useEfx()
+provideNotifications()
 const drawer = ref(true)
 const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
 
@@ -66,7 +67,7 @@ function handleLogoClick() {
 <template>
   <v-responsive class="border rounded">
       <v-app :theme="isDark ? 'dark' : 'light'">
-        <AppHeader 
+        <AppHeader
           app-name="Cloud"
           app-icon="mdi-cloud"
           variant="cloud"
@@ -92,6 +93,7 @@ function handleLogoClick() {
           </RouterView>
         </v-container>
       </v-main>
+      <NotificationContainer />
     </v-app>
   </v-responsive>
 </template>

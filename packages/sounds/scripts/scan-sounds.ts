@@ -100,7 +100,7 @@ class SoundScanner {
 
       // Check for existing store file
       const storePath = join(__dirname, '..', 'sound-store.json')
-      let existingStore: any = {}
+      let existingStore: Record<string, unknown> = {}
       
       try {
         const storeData = await readFile(storePath, 'utf-8')

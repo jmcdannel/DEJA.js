@@ -1,10 +1,13 @@
 import { useStorage } from '@vueuse/core'
 import { ref, push, set, serverTimestamp } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('DCC')
 
 interface DccCommand {
   action: string
-  payload: any
+  payload: unknown
 }
 
 export const useDcc = () => {
@@ -12,32 +15,32 @@ export const useDcc = () => {
   const isEmulated = useStorage('@DEJA/isEmulated', false)
   const isSerial = useStorage('@DEJA/layoutId', false)
 
-  async function setFunction(address: any, func: any, state: any) {
+  async function setFunction(address: number, func: number, state: boolean) {
     try {
       await send('function', { address, func, state })
-    } catch (err: any) {
-      console.error('[DCC API].setPower', err)
-      throw new Error(err)
+    } catch (err: unknown) {
+      log.error('[DCC API].setPower', err)
+      throw err instanceof Error ? err : new Error(String(err))
     }
   }
 
-  async function sendOutput(pin: any, state: any) {
+  async function sendOutput(pin: number, state: boolean) {
     try {
-      console.log('[DCC API].sendOutput', pin, state)
+      log.debug('[DCC API].sendOutput', pin, state)
       await send('output', { pin, state })
-    } catch (err: any) {
-      console.error('[DCC API].setPower', err)
-      throw new Error(err)
+    } catch (err: unknown) {
+      log.error('[DCC API].setPower', err)
+      throw err instanceof Error ? err : new Error(String(err))
     }
   }
 
   async function setPower(payload: object) {
     try {
-      console.log('[DCC API].setPower', payload)
+      log.debug('[DCC API].setPower', payload)
       await send('dcc', payload)
-    } catch (err: any) {
-      console.error('[DCC API].setPower', err)
-      throw new Error(err)
+    } catch (err: unknown) {
+      log.error('[DCC API].setPower', err)
+      throw err instanceof Error ? err : new Error(String(err))
     }
   }
 
@@ -45,7 +48,6 @@ export const useDcc = () => {
     action,
     payload,
   }: DccCommand): Promise<void> {
-    // console.log('dejaCloud SEND', action, payload)
     try {
       const command = {
         action,
@@ -56,27 +58,26 @@ export const useDcc = () => {
       const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId.value}`)
       const newCommandRef = push(dccCommandsRef)
       set(newCommandRef, command)
-      // console.log('Document written with ID: ', command)
     } catch (e) {
-      console.error('Error adding document: ', e)
+      log.error('Error adding document: ', e)
     }
   }
 
   async function send(action: string, payload?: object): Promise<void> {
     try {
       if (isEmulated.value) {
-        console.log('[DEJA EMULATOR] send', action, payload)
+        log.debug('[DEJA EMULATOR] send', action, payload)
         return
       } else if (isSerial.value) {
-        console.log('[DEJA SERIAL] send', action, payload)
+        log.debug('[DEJA SERIAL] send', action, payload)
         return
       } else {
-        console.log('[DEJA CLOUD] send', action, payload)
+        log.debug('[DEJA CLOUD] send', action, payload)
         sendDccCommand({ action, payload })
         return
       }
     } catch (err) {
-      console.error('[DCC API].send', err)
+      log.error('[DCC API].send', err)
     }
   }
 

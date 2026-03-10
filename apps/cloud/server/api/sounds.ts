@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
       url: blob.url,
       size: blob.size,
       uploadedAt: blob.uploadedAt?.toISOString() || new Date().toISOString(),
-      contentType: (blob as any).contentType || 'audio/mpeg',
+      contentType: 'contentType' in blob ? String(blob.contentType) : 'audio/mpeg',
       pathname: blob.pathname,
     }))
 
@@ -43,7 +43,7 @@ router.get('/:pathname(*)', async (req, res) => {
       url: blob.url,
       size: blob.size,
       uploadedAt: blob.uploadedAt?.toISOString() || new Date().toISOString(),
-      contentType: (blob as any).contentType || 'audio/mpeg',
+      contentType: 'contentType' in blob ? String(blob.contentType) : 'audio/mpeg',
       pathname: blob.pathname,
     }
 

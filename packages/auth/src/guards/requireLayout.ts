@@ -1,15 +1,16 @@
 import { useStorage } from '@vueuse/core'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('Auth')
 
 // Prefer the Vite environment variable VITE_LAYOUT_ID when available.
-// import.meta.env is provided by Vite in the browser; cast to any to avoid
-// TypeScript issues in environments where import.meta may be unavailable.
-const defaultLayoutId = (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.VITE_LAYOUT_ID)
-  ? String((import.meta as any).env.VITE_LAYOUT_ID)
+const defaultLayoutId = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_LAYOUT_ID)
+  ? String(import.meta.env.VITE_LAYOUT_ID)
   : null
 
 export async function requireLayout() {
   // initialize storage with the env value (if present) so pages can default to it
-  console.log('defaultLayoutId', defaultLayoutId)
+  log.debug('defaultLayoutId', defaultLayoutId)
   const layoutId = useStorage('@DEJA/layoutId', defaultLayoutId)
 
   if (!layoutId.value || layoutId.value === '') {

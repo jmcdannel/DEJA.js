@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useNotification } from '@repo/ui'
 
 interface Props {
   content?: string | string[]
@@ -27,6 +28,8 @@ const displayContent = computed(() => {
   }
   return props.content.split('\n').slice(0, props.maxLines)
 })
+
+const { notify } = useNotification()
 
 const colorClasses = computed(() => {
   const colors = {
@@ -56,10 +59,9 @@ const copyToClipboard = async () => {
   try {
     const content = displayContent.value.join('\n')
     await navigator.clipboard.writeText(content)
-    // You could add a toast notification here if you have one
-    console.log('Content copied to clipboard')
-  } catch (err) {
-    console.error('Failed to copy to clipboard:', err)
+    notify.success('Content copied to clipboard.')
+  } catch {
+    notify.error('Failed to copy to clipboard.')
   }
 }
 </script>
