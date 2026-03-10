@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useEfx, efxTypes } from '@repo/modules'
+import { createLogger } from '@repo/utils'
 import { useColors } from '@/Core/UI/useColors'
+
+const log = createLogger('EffectListItem')
 
 const { DEFAULT_COLOR } = useColors()
 const { runEffect, deleteEfx } = useEfx()
@@ -35,7 +38,7 @@ function formatDuration(seconds: number): string {
 }
 
 async function handleEfx (event: Event) {
-  console.log('handleEfx', props.efx, props.efx?.id, event, (event.target as HTMLInputElement)?.checked)
+  log.debug('handleEfx', props.efx, props.efx?.id, event, (event.target as HTMLInputElement)?.checked)
   props?.efx && props?.efxId && await runEffect({
       ...props.efx,
       id: props.efxId,

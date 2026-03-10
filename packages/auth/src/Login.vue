@@ -10,6 +10,9 @@ import { ref, onMounted } from 'vue'
 import { getRedirectResult, signInWithPopup, signInWithEmailAndPassword, getAuth } from 'firebase/auth'
 import { useFirebaseAuth, useCurrentUser } from 'vuefire'
 import { useRouter } from 'vue-router'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('Auth')
 
 const emit = defineEmits(['auth', 'navigate-signup', 'navigate-forgot-password'])
 const router = useRouter()
@@ -30,10 +33,10 @@ async function handleGithubSignin() {
       throw new Error('auth is null')
     }
     const resp = await signInWithPopup(auth, githubAuthProvider)
-    console.log('Github signin success', resp)
+    log.debug('Github signin success', resp)
     authComplete()
   } catch (err) {
-    console.error('Failed signinRedirect', err)
+    log.error('Failed signinRedirect', err)
     // error.value = err
   }
 }
@@ -44,10 +47,10 @@ async function handleGoogleSignin() {
       throw new Error('auth is null')
     }
     const resp = await signInWithPopup(auth, googleAuthProvider)
-    console.log('Google signin success', resp)
+    log.debug('Google signin success', resp)
     authComplete()
   } catch (err) {
-    console.error('Failed signinRedirect', err)
+    log.error('Failed signinRedirect', err)
     // error.value = err
   }
 }
@@ -60,17 +63,17 @@ async function handleEmailSignin() {
     signInWithEmailAndPassword(auth, email.value, password.value)
       .then((userCredential) => {
         const user = userCredential.user;
-        console.log('Email signin success', user)
+        log.debug('Email signin success', user)
         authComplete()
       })
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
-        console.error('Failed email signin', errorCode, errorMessage)
+        log.error('Failed email signin', errorCode, errorMessage)
         error.value = errorMessage
       });
   } catch (err) {
-    console.error('Failed email signin', err)
+    log.error('Failed email signin', err)
     // error.value = err
   }
 
@@ -85,7 +88,7 @@ onMounted(() => {
     throw new Error('auth is null')
   }
   getRedirectResult(auth).catch((reason) => {
-    console.error('Failed redirect result', reason)
+    log.error('Failed redirect result', reason)
     error.value = reason
   })
 })

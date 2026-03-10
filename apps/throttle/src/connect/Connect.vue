@@ -5,10 +5,13 @@ import { useRouter } from 'vue-router'
 import { useCollection, useCurrentUser } from 'vuefire'
 import { useStorage } from '@vueuse/core'
 import { db } from '@repo/firebase-config'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('Connect')
 
 const user = useCurrentUser()
 const router = useRouter()
-console.log('Loading LayoutsList.vue', user.value)
+log.debug('Loading LayoutsList.vue', user.value)
 
 // Create a computed property for the layouts query that only runs when user is available
 const layoutsQuery = computed(() => {
@@ -27,7 +30,7 @@ const layouts = useCollection(layoutsQuery)
 const layoutId = useStorage('@DEJA/layoutId', '')
 
 function handleLayoutSelect(selectedLayoutId: string) {
-  console.log('Selected layout ID:', selectedLayoutId)
+  log.debug('Selected layout ID:', selectedLayoutId)
   if (selectedLayoutId) {
     layoutId.value = selectedLayoutId
     router.push({ name: 'home' })

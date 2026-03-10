@@ -2,7 +2,10 @@
 import { ref } from 'vue'
 import { slugify } from '@repo/utils/slugify'
 import { useLayout } from '@repo/modules'
+import { createLogger } from '@repo/utils'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
+
+const log = createLogger('TagForm')
 
 const emit = defineEmits(['close'])
 const { setTag } = useLayout()
@@ -16,7 +19,7 @@ const rules = {
 }
 
 async function submit() {
-  console.log('submit', name.value)
+  log.debug('submit', name.value)
   if (name.value === '') return
   const id = slugify(name.value)
   const tag = {

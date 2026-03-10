@@ -11,6 +11,8 @@ import { throttle } from 'vuetify/lib/util/index.mjs'
 
 const log = createLogger('Throttle')
 
+
+
 export const useThrottle = (address: Ref<number | null | undefined>) => {
   log.debug('useThrottle', address.value)
   const { getLocos } = useLocos()

@@ -13,8 +13,11 @@ import {
 import { useStorage } from '@vueuse/core'
 import { useCollection, useDocument } from 'vuefire'
 import { db } from '@repo/firebase-config'
+import { createLogger } from '@repo/utils'
 import type { Loco, ConsistLoco, LocoFunction, LocoThrottle, Throttle } from './types'
 import { ROADNAMES } from './constants'
+
+const log = createLogger('Locos')
 
 const VALID_LOCO_SORT_FIELDS = new Set(['address', 'name'])
 const DEFAULT_LOCO_SORT = 'address'
@@ -58,7 +61,7 @@ export function useLocos() {
   }
 
   async function getLocoThrottle(address: number) {
-    console.log('getLocoThrottle', address)
+    log.debug('getLocoThrottle', address)
     const throttleDoc = doc(
       db,
       `layouts/${layoutId.value}/throttles`,
@@ -83,7 +86,7 @@ export function useLocos() {
   async function acquireThrottle(address: number) {
     try {
       if (!address) {
-        console.warn('No throttle address provided for acquisition')
+        log.warn('No throttle address provided for acquisition')
         return
       }
       const data = {
@@ -98,7 +101,7 @@ export function useLocos() {
       )
       return newThrottleDoc
     } catch (e) {
-      console.error('Error adding throttle: ', e)
+      log.error('Error adding throttle: ', e)
     }
   }
 
@@ -123,7 +126,7 @@ export function useLocos() {
   }
 
   async function updateLoco(id: string, loco: Loco) {
-    console.log('updateLoco', loco)
+    log.debug('updateLoco', loco)
     try {
       const locoDoc = doc(db, `layouts/${layoutId.value}/locos`, id)
       await setDoc(
@@ -131,30 +134,30 @@ export function useLocos() {
         { ...loco, timestamp: serverTimestamp() },
         { merge: true }
       )
-      console.log('loco written with ID: ', id)
+      log.debug('loco written with ID: ', id)
       return loco.address
     } catch (e) {
-      console.error('Error adding throttle: ', e)
+      log.error('Error adding throttle: ', e)
     }
   }
 
   async function updateConsist(id: string, consist: ConsistLoco[]) {
-    console.log('updateConsist', id, consist)
+    log.debug('updateConsist', id, consist)
     try {
       const locoDoc = doc(db, `layouts/${layoutId.value}/locos`, id)
       await setDoc(locoDoc, { consist }, { merge: true })
     } catch (e) {
-      console.error('Error updating consist: ', e)
+      log.error('Error updating consist: ', e)
     }
   }
   
   async function updateFunctions(id: string, functions: LocoFunction[]) {
     try {
-      console.log('Updating functions for loco ', id, functions)
+      log.debug('Updating functions for loco ', id, functions)
       const locoDoc = doc(db, `layouts/${layoutId.value}/locos`, id)
       await setDoc(locoDoc, { functions }, { merge: true })
     } catch (e) {
-      console.error('Error updating functions: ', e)
+      log.error('Error updating functions: ', e)
     }
   }
 
@@ -164,7 +167,7 @@ export function useLocos() {
     roadname: string | undefined = undefined,
     hasSound = true,
   ): Promise<number | undefined> {
-    console.log('dejaCloud createLoco', address)
+    log.debug('dejaCloud createLoco', address)
     try {
       const loco = {
         address,
@@ -180,10 +183,10 @@ export function useLocos() {
         doc(db, `layouts/${layoutId.value}/locos`, address.toString()),
         loco
       )
-      console.log('loco written with ID: ', address, newLocoDoc)
+      log.debug('loco written with ID: ', address, newLocoDoc)
       return address
     } catch (e) {
-      console.error('Error adding throttle: ', e)
+      log.error('Error adding throttle: ', e)
     }
   }
 

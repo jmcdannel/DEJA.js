@@ -2,11 +2,14 @@
 import { computed, ref } from 'vue'
 import { routeType, type Route, type RouteTurnoutConfig, type RouteInput } from '@repo/modules/index.ts'
 import { useRoutes } from '@repo/modules/routes/useRoutes'
+import { createLogger } from '@repo/utils'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import RouteTurnoutForm from '@/Routes/RouteTurnoutForm.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import { slugify } from '@repo/utils/slugify'
+
+const log = createLogger('RouteForm')
 // TODO: icon picker
 
 interface ValidationRules {
@@ -75,7 +78,7 @@ async function submit () {
 }
 
 function handleTurnouts(updated: RouteTurnoutConfig[]) {
-  console.log('updated turnouts', updated)
+  log.debug('updated turnouts', updated)
   turnouts.value = updated
 }
 

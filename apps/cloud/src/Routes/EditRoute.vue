@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { createLogger } from '@repo/utils'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import RouteForm from '@/Routes/RouteForm.vue'
 import { type Route } from '@repo/modules/index.ts'
 import { useRoutes } from '@repo/modules/routes/useRoutes'
+
+const log = createLogger('EditRoute')
 
 const route = useRoute()
 const router = useRouter()
@@ -25,7 +28,7 @@ async function loadRoute() {
       error.value = 'Route not found.'
     }
   } catch (err) {
-    console.error(err)
+    log.error(err)
     error.value = 'Unable to load route.'
   } finally {
     loading.value = false

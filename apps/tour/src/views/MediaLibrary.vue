@@ -2,7 +2,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
+import { createLogger } from '@repo/utils'
 import MediaCard from '../components/MediaCard.vue'
+
+const log = createLogger('MediaLibrary')
 
 interface MediaItem {
   id: string
@@ -186,12 +189,12 @@ const playMedia = (mediaId: string) => {
 
 const viewMediaDetails = (mediaId: string) => {
   // Navigate to detailed view or show more info
-  console.log('View details for:', mediaId)
+  log.debug('View details for:', mediaId)
 }
 
 const startPlayback = () => {
   if (selectedMedia.value) {
-    console.log('Starting playback:', selectedMedia.value.url)
+    log.debug('Starting playback:', selectedMedia.value.url)
     // Here you would integrate with your actual media player
   }
 }

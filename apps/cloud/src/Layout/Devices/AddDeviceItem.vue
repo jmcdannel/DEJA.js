@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { deviceTypes, useLayout, type Device } from '@repo/modules'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('AddDeviceItem')
 
 interface ValidationRules {
   required: ((val: unknown) => boolean | string)[];
@@ -48,7 +51,7 @@ function handleClose() {
   emit('close')
 }
 
-console.log('deviceTypes', deviceTypes)
+log.debug('deviceTypes', deviceTypes)
 
 </script>
 <template>

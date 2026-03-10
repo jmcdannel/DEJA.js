@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useEfx, useTurnouts } from '@repo/modules'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('TurnoutAdd')
 
 const emit = defineEmits(['add', 'close'])
 const props = defineProps({
@@ -17,7 +20,7 @@ const effectChips = ref([])
 const turnoutChips = ref([])
 
 function handleOk() {
-  console.log('handleOk', effectChips.value, turnoutChips.value)
+  log.debug('handleOk', effectChips.value, turnoutChips.value)
   emit('add', effectChips.value, turnoutChips.value)
 }
 

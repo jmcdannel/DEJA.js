@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { createLogger } from '@repo/utils'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import SignalForm from '@/Signals/SignalForm.vue'
 import type { Signal } from '@repo/modules/signals'
 import { useSignals } from '@repo/modules/signals'
 import { useNotification } from '@repo/ui'
+
+const log = createLogger('EditSignal')
 
 const route = useRoute()
 const router = useRouter()
@@ -27,6 +30,7 @@ async function loadSignal() {
       error.value = 'Signal not found.'
     }
   } catch (err) {
+    log.error(err)
     notify.error('Unable to load signal.')
     error.value = 'Unable to load signal.'
   } finally {

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { createLogger } from '@repo/utils'
 import GuestEffectCard from '../components/GuestEffectCard.vue'
+
+const log = createLogger('AreaDetail')
 
 interface AreaDetail {
   id: string
@@ -471,19 +474,19 @@ const relatedMedia = computed(() =>
 
 const playFeaturedMedia = () => {
   if (area.value?.featuredMedia) {
-    console.log('Playing featured media:', area.value.featuredMedia.url)
+    log.debug('Playing featured media:', area.value.featuredMedia.url)
   }
 }
 
 const playMedia = (mediaId: string) => {
-  console.log('Playing media:', mediaId)
+  log.debug('Playing media:', mediaId)
 }
 
 const activateEffect = (effectId: string) => {
   const effect = allEffects.value.find(e => e.id === effectId)
   if (effect) {
     effect.isActive = true
-    console.log(`Activating effect: ${effect.name}`)
+    log.debug(`Activating effect: ${effect.name}`)
   }
 }
 
@@ -491,13 +494,13 @@ const deactivateEffect = (effectId: string) => {
   const effect = allEffects.value.find(e => e.id === effectId)
   if (effect) {
     effect.isActive = false
-    console.log(`Deactivating effect: ${effect.name}`)
+    log.debug(`Deactivating effect: ${effect.name}`)
   }
 }
 
 onMounted(() => {
   // Load area-specific data
-  console.log('Loading area:', areaId.value)
+  log.debug('Loading area:', areaId.value)
 })
 </script>
 

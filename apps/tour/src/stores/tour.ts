@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('TourStore')
 // Local Effect interface to avoid @repo/modules dependency
 interface Effect {
   id: string
@@ -149,7 +152,7 @@ export const useTourStore = defineStore('tour', () => {
   const firebaseEffects = mockEffects
   const currentLayout = ref(null)
 
-  console.log('Tour store initialized with layout ID:', layoutId.value)
+  log.debug('Tour store initialized with layout ID:', layoutId.value)
 
   // Media state
   const media = ref<MediaItem[]>([
@@ -179,7 +182,7 @@ export const useTourStore = defineStore('tour', () => {
 
   // Transform Firebase effects to tour effects with UI enhancements
   const tourEffects = computed(() => {
-    console.log('Computing tour effects, firebaseEffects.value:', firebaseEffects.value)
+    log.debug('Computing tour effects, firebaseEffects.value:', firebaseEffects.value)
     if (!firebaseEffects.value) return []
 
     const effects = firebaseEffects.value.map((effect: Effect): TourEffect => {
@@ -196,7 +199,7 @@ export const useTourStore = defineStore('tour', () => {
       }
     })
 
-    console.log('Transformed tour effects:', effects)
+    log.debug('Transformed tour effects:', effects)
     return effects
   })
 
@@ -207,7 +210,7 @@ export const useTourStore = defineStore('tour', () => {
     const filtered = tourEffects.value.filter(effect => 
       effect.allowGuest === true || effect.allowGuest === undefined
     )
-    console.log('Guest effects:', filtered)
+    log.debug('Guest effects:', filtered)
     return filtered
   })
 
@@ -287,14 +290,14 @@ export const useTourStore = defineStore('tour', () => {
             }, effect.timeoutDuration)
           }
 
-          console.log(`Activating effect: ${effect.name}`)
+          log.debug(`Activating effect: ${effect.name}`)
         } else {
           error.value = 'Access denied to this effect'
         }
       }
     } catch (err) {
       error.value = `Failed to activate effect: ${err}`
-      console.error('Error activating effect:', err)
+      log.error('Error activating effect:', err)
     } finally {
       isLoading.value = false
     }
@@ -310,11 +313,11 @@ export const useTourStore = defineStore('tour', () => {
         // Local effect deactivation (mock implementation)
         // In a real app, this would call the actual effect system
         // For now, we just log the action
-        console.log(`Deactivating effect: ${effect.name}`)
+        log.debug(`Deactivating effect: ${effect.name}`)
       }
     } catch (err) {
       error.value = `Failed to deactivate effect: ${err}`
-      console.error('Error deactivating effect:', err)
+      log.error('Error deactivating effect:', err)
     } finally {
       isLoading.value = false
     }
@@ -334,7 +337,7 @@ export const useTourStore = defineStore('tour', () => {
   const playMedia = (mediaId: string) => {
     const mediaItem = media.value.find(m => m.id === mediaId)
     if (mediaItem) {
-      console.log(`Playing media: ${mediaItem.title}`)
+      log.debug(`Playing media: ${mediaItem.title}`)
       // Here you would integrate with your actual media player
 
       // Mark intro as watched if it's an intro video

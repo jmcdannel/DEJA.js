@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useFunctions, defaultFunctions, type LocoFunction } from '@repo/modules/locos'
+import { createLogger } from '@repo/utils'
 import ViewJson from '../ViewJson.vue'
 import EditFunc from './EditFunction.vue'
+
+const log = createLogger('Functions')
 
 const props = defineProps({
   loco: Object,
@@ -13,14 +16,14 @@ const isModified = ref(false)
 const { updateFunctions } = useFunctions()
 
 async function handleSave() {
-  console.log('handleSave', address.value, locoFunctions.value)
+  log.debug('handleSave', address.value, locoFunctions.value)
   if (address.value) {
     await updateFunctions(address.value, locoFunctions.value)
   }
 }
 
 async function handleEdit(func: LocoFunction) {
-  console.log('handleSave', func)
+  log.debug('handleSave', func)
   const existing = locoFunctions.value?.find((lf:LocoFunction) => lf.id === func?.id)
   locoFunctions.value = existing 
     ? (locoFunctions.value || []).map((lf:LocoFunction) => {
@@ -35,7 +38,7 @@ async function handleEdit(func: LocoFunction) {
     : [...(locoFunctions.value || []), { ...existing, ...func }]
   isModified.value = true
   
-  console.log('handleEdit', locoFunctions.value, func, existing)
+  log.debug('handleEdit', locoFunctions.value, func, existing)
 }
 
 </script>

@@ -1,6 +1,9 @@
 import { ref } from 'vue'
 import { useTurnouts, type Turnout } from '@repo/modules'
+import { createLogger } from '@repo/utils'
 import type { Route, RouteTurnoutConfig } from './types'
+
+const log = createLogger('LayoutRoutes')
 
 const DELAY = 2000 // ms delay between turnouts being set in a route
 
@@ -16,9 +19,9 @@ export const useLayoutRoutes = () => {
     const { setTurnout } = useTurnouts()
 
     async function runRoute(route: Route ) {
-        console.log('runRoute', route)
+        log.debug('runRoute', route)
         if (isRunning.value) {
-            console.log('Route already running, ignoring')
+            log.debug('Route already running, ignoring')
             return
         }
         isRunning.value = true
@@ -44,7 +47,7 @@ export const useLayoutRoutes = () => {
         }
         percentComplete.value = 0
         isRunning.value = false
-        console.log('Route complete')
+        log.debug('Route complete')
     }
 
     return {

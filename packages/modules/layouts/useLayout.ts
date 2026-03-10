@@ -15,6 +15,7 @@ import {
   useCurrentUser,
 } from 'vuefire'
 import { db } from '@repo/firebase-config'
+import { createLogger } from '@repo/utils'
 import type { Device, Layout, Tag } from './types'
 import { useDejaJS } from '@repo/deja'
 import { createLogger } from '@repo/utils'
