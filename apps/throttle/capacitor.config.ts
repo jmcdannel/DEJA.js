@@ -25,6 +25,16 @@ const config: CapacitorConfig = {
     // Allow cleartext (HTTP/WS) traffic to the local DEJA server on the same LAN
     allowMixedContent: true,
   },
+  plugins: {
+    SplashScreen: {
+      launchShowDuration: 2000,
+      launchAutoHide: true,
+      backgroundColor: '#000000',
+      showSpinner: false,
+      splashFullScreen: true,
+      splashImmersive: true,
+    },
+  },
 }
 
 export default config

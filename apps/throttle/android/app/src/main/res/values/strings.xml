@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DEJA Throttle</string>
+    <string name="title_activity_main">DEJA Throttle</string>
+    <string name="package_name">com.dejajs.throttle</string>
+    <string name="custom_url_scheme">com.dejajs.throttle</string>
+</resources>

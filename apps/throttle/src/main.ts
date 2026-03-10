@@ -55,3 +55,7 @@ app.use(vuetify)
 app.use(VueFire, vfireConfig)
 app.use(MotionPlugin)
 app.mount('#app')
+
+// Initialize native platform features (Capacitor)
+import { initNative } from './native/init'
+initNative(router)

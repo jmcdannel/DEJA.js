@@ -7,6 +7,14 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "peerDependencies": {
+    "@capacitor-firebase/authentication": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@capacitor-firebase/authentication": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/modules": "workspace:*",
