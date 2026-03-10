@@ -1,12 +1,25 @@
-import { Socket } from '@spryrocks/capacitor-socket-connection-plugin'
 import { ref } from 'vue'
+
+// Dynamically import the Capacitor socket plugin so web builds (Vercel) don't fail.
+// The plugin only exists in native Capacitor environments.
+let SocketClass: (new () => any) | null = null
+async function getSocketClass(): Promise<(new () => any) | null> {
+  if (SocketClass) return SocketClass
+  try {
+    const mod = await import('@spryrocks/capacitor-socket-connection-plugin')
+    SocketClass = mod.Socket
+    return SocketClass
+  } catch {
+    return null
+  }
+}
 
 export type WiThrottleConnectionState = 'DISCONNECTED' | 'CONNECTING' | 'CONNECTED' | 'ERROR'
 
 export class WiThrottleService {
   private host: string
   private port: number
-  private socket: Socket | null = null
+  private socket: any = null
   private connectionTimer: ReturnType<typeof setInterval> | null = null
 
   public state = ref<WiThrottleConnectionState>('DISCONNECTED')
@@ -37,6 +50,11 @@ export class WiThrottleService {
       this.state.value = 'CONNECTING'
       this.errorMessage.value = ''
       
+      const Socket = await getSocketClass()
+      if (!Socket) {
+        this.handleDisconnect('WiThrottle requires a native Capacitor environment')
+        return
+      }
       this.socket = new Socket()
 
       // Set up listeners
