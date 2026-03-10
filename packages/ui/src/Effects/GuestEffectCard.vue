@@ -2,6 +2,9 @@
 import { ref, computed, watch } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
 import { useEfx, type Effect } from '@repo/modules/effects'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('GuestEffectCard')
 
 const { runEffect, getEfxType } = useEfx()
 
@@ -97,7 +100,7 @@ async function handleActivate() {
       }, timeoutDuration.value)
     }
   } catch (error) {
-    console.error('Error activating effect:', error)
+    log.error('Error activating effect:', error)
   }
 }
 
@@ -114,7 +117,7 @@ async function handleDeactivate() {
     await runEffect({...props.effect, id: props.effectId || props.effect.id, state: false})
     emit('deactivate', props.effectId || props.effect.id)
   } catch (error) {
-    console.error('Error deactivating effect:', error)
+    log.error('Error deactivating effect:', error)
   }
 }
 </script>

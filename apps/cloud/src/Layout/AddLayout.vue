@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useLayout } from '@repo/modules'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('AddLayout')
 const { createLayout } = useLayout()
 
 const showForm = ref(false)
@@ -8,7 +11,7 @@ const layoutName = ref('')
 const layoutId = ref('')
 
 async function handleAdd() {
-  console.log('handleAdd', layoutName, layoutId)
+  log.debug('handleAdd', layoutName, layoutId)
   await createLayout(layoutId.value, { name: layoutName.value, id: layoutId.value })
 }
 </script>

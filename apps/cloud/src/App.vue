@@ -5,8 +5,11 @@ import { useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { useTheme } from 'vuetify'
 import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
+import { createLogger } from '@repo/utils'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { useMenu } from '@/Core/Menu/useMenu'
+
+const log = createLogger('CloudApp')
 
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
@@ -42,7 +45,7 @@ async function handleEmergencyStop() {
 }
 
 function handleDeviceSelect(deviceId: string) {
-  console.log('Device selected:', deviceId)
+  log.debug('Device selected:', deviceId)
   // Handle device selection if needed
 }
 

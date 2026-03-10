@@ -1,6 +1,9 @@
 import { computed, ref, watch, onUnmounted } from 'vue'
 import { useWebSocket } from '@vueuse/core'
 import { useStorage } from '@vueuse/core'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('DeviceMonitor')
 
 export interface SerialMessage {
   id: string
@@ -60,7 +63,7 @@ export function useDeviceSerialMonitor(deviceId: string) {
   // WebSocket connection
   const wsUrl = computed(() => resolveWsUrl(wshost.value))
 
-  console.log('[DeviceMonitor] WebSocket URL:', wsUrl.value)
+  log.debug('[DeviceMonitor] WebSocket URL:', wsUrl.value)
   const { data, status, open, close, send } = useWebSocket(wsUrl, {
     autoReconnect: {
       delay: 1000,
@@ -79,7 +82,7 @@ export function useDeviceSerialMonitor(deviceId: string) {
       // Send subscription message
       send(JSON.stringify(subscribeMessage))
 
-      console.log(`[DeviceMonitor] Subscribing to device: ${deviceId}`)
+      log.debug(`[DeviceMonitor] Subscribing to device: ${deviceId}`)
     }
   }
 
@@ -95,7 +98,7 @@ export function useDeviceSerialMonitor(deviceId: string) {
       send(JSON.stringify(unsubscribeMessage))
 
       isSubscribed.value = false
-      console.log(`[DeviceMonitor] Unsubscribed from device: ${deviceId}`)
+      log.debug(`[DeviceMonitor] Unsubscribed from device: ${deviceId}`)
     }
   }
   
@@ -116,7 +119,7 @@ export function useDeviceSerialMonitor(deviceId: string) {
   
   // Watch for WebSocket messages
   watch(data, (newData) => {
-    console.log('[DeviceMonitor] Received WebSocket data:', newData)
+    log.debug('[DeviceMonitor] Received WebSocket data:', newData)
     if (!newData || !enabled.value) return
     
     try {
@@ -125,13 +128,13 @@ export function useDeviceSerialMonitor(deviceId: string) {
       // Handle subscription confirmation
       if (message.action === 'device-subscribed' && message.payload?.deviceId === deviceId) {
         isSubscribed.value = true
-        console.log(`[DeviceMonitor] Successfully subscribed to device: ${deviceId}`)
+        log.debug(`[DeviceMonitor] Successfully subscribed to device: ${deviceId}`)
         return
       }
 
       // Handle unsubscription confirmation
       if (message.action === 'device-unsubscribed' && message.payload?.deviceId === deviceId) {
-        console.log(`[DeviceMonitor] Successfully unsubscribed from device: ${deviceId}`)
+        log.debug(`[DeviceMonitor] Successfully unsubscribed from device: ${deviceId}`)
         isSubscribed.value = false
         return
       }
@@ -165,7 +168,7 @@ export function useDeviceSerialMonitor(deviceId: string) {
       }
       
     } catch (error) {
-      console.error('[DeviceMonitor] Error parsing WebSocket message:', error)
+      log.error('[DeviceMonitor] Error parsing WebSocket message:', error)
     }
   })
   

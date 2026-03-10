@@ -2,10 +2,13 @@
 import { ref, computed, watch } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
 import { useTurnouts, type Turnout } from '@repo/modules'
+import { createLogger } from '@repo/utils'
 import TurnoutSwitch from './TurnoutSwitch.vue'
 import TurnoutCard from './TurnoutCard.vue'
 import TurnoutButton from './TurnoutButton.vue'
 import TurnoutRaw from './TurnoutRaw.vue'
+
+const log = createLogger('TurnoutItem')
 
 interface Props {
   turnout: Turnout
@@ -24,7 +27,7 @@ const { start, stop } = useTimeoutFn(() => {
 }, 2000)
 
 watch(state, async (newState) => {
-  console.log('Turnout state watched to:', newState)
+  log.debug('Turnout state watched to:', newState)
   isRunning.value = true
   stop()
   start()

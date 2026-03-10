@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core'
 import { StatusPulse } from '@repo/ui'
+import { createLogger } from '@repo/utils'
 import AddLayout from '@/Layout/AddLayout.vue'
 import SelectLayout from '@/Layout/SelectLayout.vue'
+
+const log = createLogger('LayoutStatus')
 
 const layoutId = useStorage('@DEJA/layoutId', '')
 
 function handleSelect(_layoutId: string) {
-  console.log('handleSelect', _layoutId)
+  log.debug('handleSelect', _layoutId)
   layoutId.value = _layoutId
   window.location.reload()
 }

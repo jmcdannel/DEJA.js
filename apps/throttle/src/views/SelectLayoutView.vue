@@ -2,6 +2,9 @@
 import { useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { useLayout } from '@repo/modules'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('SelectLayout')
 
 const router = useRouter()
 const { getLayouts } = useLayout()
@@ -21,7 +24,7 @@ if (layoutId.value === '') {
 
 function handleCreateNew() {
   // TODO: Implement create new layout functionality
-  console.log('Create new layout')
+  log.debug('Create new layout')
 }
 </script>
 

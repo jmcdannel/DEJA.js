@@ -4,14 +4,14 @@
 - [x] Account menu
 - [x] DEJA Suite Nav
 - [x] Login Page / w/signup
-- [ ] Error notification system (toast/snackbar across all apps)
+- [x] Error notification system (toast/snackbar across all apps)
 - [ ] Complete auth flow (email/password, password reset, email verification)
 - [ ] Offline/disconnection handling with retry
-- [ ] Server robustness (input validation, reconnection, graceful shutdown)
-- [ ] Loading/empty states across all views
+- [x] Server robustness (input validation, reconnection, graceful shutdown)
+- [x] Loading/empty states across all views
 - [ ] Complete onboarding / create layout flow
-- [ ] Type safety cleanup (eliminate `any` types)
-- [ ] Production logging (remove console.log, configure log levels)
+- [x] Type safety cleanup (eliminate `any` types)
+- [x] Production logging (remove console.log, configure log levels)
 - [ ] Guest Mode / Demo Mode
 
 ## Phase 2: Feature Parity with DCC-EX Ecosystem
