@@ -30,7 +30,7 @@ const effects = getGuestEffects()
     </v-row>
     <v-row v-auto-animate>
       <v-col
-        v-for="effect in effects as any[]"
+        v-for="effect in effects"
         :key="effect.id"
         cols="12"
         md="6"

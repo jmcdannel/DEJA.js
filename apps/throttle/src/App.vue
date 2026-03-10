@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, useTemplateRef } from 'vue'
 import { RouterView } from 'vue-router'
-import { AppHeader, TransitionFade } from '@repo/ui'
+import { AppHeader, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
 import Footer from '@/core/Footer.vue'
 import useMenu from '@/core/Menu/useMenu'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
@@ -10,6 +10,7 @@ import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import { wiThrottleService } from '@/services/WiThrottleService'
 import { watch, onMounted, onUnmounted } from 'vue'
 
+provideNotifications()
 const drawer = ref(false)
 const { handleMenu, menuConfig } = useMenu()
 
@@ -67,6 +68,7 @@ const { isDark } = useThemeSwitcher()
         </v-container>
       </v-main>
       <Footer />
+      <NotificationContainer />
     </v-app>
   </v-responsive>
 </template>
