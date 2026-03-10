@@ -1,12 +1,14 @@
 import { ref } from 'vue'
 
-// Dynamically import the Capacitor socket plugin so web builds (Vercel) don't fail.
+// Dynamically import the Capacitor socket plugin so web/Vercel builds don't fail.
 // The plugin only exists in native Capacitor environments.
+// Use a variable to hide the specifier from Vite's static import analysis.
+const CAPACITOR_SOCKET_PKG = '@spryrocks/capacitor-socket-connection-plugin'
 let SocketClass: (new () => any) | null = null
 async function getSocketClass(): Promise<(new () => any) | null> {
   if (SocketClass) return SocketClass
   try {
-    const mod = await import('@spryrocks/capacitor-socket-connection-plugin')
+    const mod = await import(/* @vite-ignore */ CAPACITOR_SOCKET_PKG)
     SocketClass = mod.Socket
     return SocketClass
   } catch {
