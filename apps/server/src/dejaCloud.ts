@@ -5,7 +5,8 @@ import { handleThrottleChange, listenToLocoChanges } from './modules/throttles'
 import { handleTurnoutChange } from './modules/turnouts'
 import { handleEffectChange } from './modules/effects'
 import { handleSignalChange } from './modules/signals'
-// import { handleSensorChange } from './modules/sensors'
+import { handleSensorChange } from './modules/sensors'
+import { handleBlockChange } from './modules/blocks'
 import { handleDccChange } from './lib/dcc'
 import { handleDejaCommands } from './lib/deja'
 import { log } from './utils/logger'
@@ -22,6 +23,8 @@ let effectUnsubscribe: (() => void) | null = null
 let turnoutUnsubscribe: (() => void) | null = null
 let signalUnsubscribe: (() => void) | null = null
 let testEffectUnsubscribe: (() => void) | null = null
+let sensorUnsubscribe: (() => void) | null = null
+let blockUnsubscribe: (() => void) | null = null
 
 async function listen(): Promise<void> {
   dccCommandsRef = rtdb.ref(`dccCommands/${layoutId}`)
@@ -46,7 +49,8 @@ async function listen(): Promise<void> {
   effectUnsubscribe = db.collection(`layouts/${layoutId}/effects`).onSnapshot(handleEffectChange)
   signalUnsubscribe = db.collection(`layouts/${layoutId}/signals`).onSnapshot(handleSignalChange)
   turnoutUnsubscribe = db.collection(`layouts/${layoutId}/turnouts`).onSnapshot(handleTurnoutChange)
-  // db.collection(`layouts/${layoutId}/sensors`).onSnapshot(handleSensorChange)
+  sensorUnsubscribe = db.collection(`layouts/${layoutId}/sensors`).onSnapshot(handleSensorChange)
+  blockUnsubscribe = db.collection(`layouts/${layoutId}/blocks`).onSnapshot(handleBlockChange)
   
   // Monitor test effects for sound testing
   testEffectUnsubscribe = db.collection('testEffects').onSnapshot(handleTestEffectChange)
@@ -118,6 +122,14 @@ async function cleanup(): Promise<void> {
     if (testEffectUnsubscribe) {
       testEffectUnsubscribe()
       testEffectUnsubscribe = null
+    }
+    if (sensorUnsubscribe) {
+      sensorUnsubscribe()
+      sensorUnsubscribe = null
+    }
+    if (blockUnsubscribe) {
+      blockUnsubscribe()
+      blockUnsubscribe = null
     }
     
     log.info('Firebase listeners cleaned up')

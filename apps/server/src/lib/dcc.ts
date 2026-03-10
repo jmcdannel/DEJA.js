@@ -276,6 +276,33 @@ const sendOutput = async (payload: OutputPayload) => {
   await send(cmd)
 }
 
+interface SensorDefinition {
+  id: number
+  pin: number
+  pullup?: boolean
+}
+
+const defineSensor = async ({ id, pin, pullup }: SensorDefinition): Promise<void> => {
+  if (!isFiniteNumber(id) || !isFiniteNumber(pin)) {
+    log.error('[DCC] Rejected invalid sensor definition:', { id, pin })
+    return
+  }
+  const cmd = `S ${id} ${pin} ${pullup ? 1 : 0}`
+  await send(cmd)
+}
+
+const querySensors = async (): Promise<void> => {
+  await send('Q')
+}
+
+const querySensor = async (id: number): Promise<void> => {
+  if (!isFiniteNumber(id)) {
+    log.error('[DCC] Rejected invalid sensor query id:', id)
+    return
+  }
+  await send(`q ${id}`)
+}
+
 export async function handleDccChange(snapshot: any, key: string): Promise<void> {
   try {
     const { action, payload } = snapshot
@@ -299,8 +326,11 @@ export async function handleDccChange(snapshot: any, key: string): Promise<void>
 
 export const dcc = {
   dccSerial: com,
+  defineSensor,
   handleDccChange,
   handleMessage,
+  querySensor,
+  querySensors,
   sendCommand: send,
   sendOutput,
   sendSpeed,

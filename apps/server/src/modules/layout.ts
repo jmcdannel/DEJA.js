@@ -1,6 +1,6 @@
 import { FieldValue } from 'firebase-admin/firestore'
 import type { SerialPort } from 'serialport'
-import type { Layout, Device, Sensor } from '@repo/modules'
+import type { Layout, Device, LayoutSensor } from '@repo/modules'
 import { db } from '@repo/firebase-config/firebase-admin-node'
 import { serial as serialLib } from '../lib/serial'
 import { log } from '../utils/logger'
@@ -31,7 +31,7 @@ const POOL_INTERVAL = 3000 // 3 seconds
 const layoutId = process.env.LAYOUT_ID || 'betatrack'
 const _connections: { [key: string]: Connection } = {}
 let _devices: Device[] = []
-let sensors: Sensor[] = []
+let sensors: LayoutSensor[] = []
 
 // Flush the command pool for a specific connection
 const flushCommandPool = (connection: Connection): void => {
@@ -234,10 +234,10 @@ async function loadDevices(): Promise<Device[]> {
   }
 }
 
-async function loadSensors(): Promise<Sensor[]> {
+async function loadSensors(): Promise<LayoutSensor[]> {
   try {
     const sensorsSnapshot = await db.collection('layouts').doc(layoutId).collection('sensors').get()
-    const sensors = sensorsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Sensor))
+    const sensors = sensorsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LayoutSensor))
     return sensors
   } catch (error) {
     log.error('Error loading sensors', error)
