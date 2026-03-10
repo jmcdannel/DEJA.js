@@ -1,8 +1,10 @@
 import './assets/main.css'
 
 import { createApp } from 'vue'
+import * as Sentry from '@sentry/vue'
 import { createPinia } from 'pinia'
 import { VueFire, VueFireAuth } from 'vuefire'
+import { MotionPlugin } from '@vueuse/motion'
 // Vuetify
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
@@ -26,15 +28,32 @@ const vuetify = createVuetify({
       mdi,
     },
   },
+  defaults: {
+    VDialog: { transition: 'dialog-bottom-transition' },
+    VMenu: { transition: 'scale-transition' },
+  },
 })
 const pinia = createPinia()
 const vfireConfig = { firebaseApp, modules: [VueFireAuth()] }
 const app = createApp(App)
 
+Sentry.init({
+  app,
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  integrations: [
+    Sentry.browserTracingIntegration({ router }),
+    Sentry.replayIntegration(),
+  ],
+  tracesSampleRate: 1.0,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+})
+
 app.use(pinia)
 app.use(router)
 app.use(vuetify)
 app.use(VueFire, vfireConfig)
+app.use(MotionPlugin)
 app.mount('#app')
 
 // Initialize native platform features (Capacitor)

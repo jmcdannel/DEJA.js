@@ -16,13 +16,20 @@ import { db } from '@repo/firebase-config'
 import type { Loco, ConsistLoco, LocoFunction, LocoThrottle, Throttle } from './types'
 import { ROADNAMES } from './constants'
 
+const VALID_LOCO_SORT_FIELDS = new Set(['address', 'name'])
+const DEFAULT_LOCO_SORT = 'address'
+
+function validLocoSortField(field: string | undefined): string {
+  return field && VALID_LOCO_SORT_FIELDS.has(field) ? field : DEFAULT_LOCO_SORT
+}
+
 export function useLocos() {
   const layoutId = useStorage('@DEJA/layoutId', '')
   const sortBy = useStorage<string[]>('@DEJA/prefs/locos/Sort', ['address'])
   const colRef = collection(db, `layouts/${layoutId.value}/locos`)
 
   const locosCol = () =>
-    layoutId.value ? query(colRef, orderBy(sortBy.value[0])) : null
+    layoutId.value ? query(colRef, orderBy(validLocoSortField(sortBy.value[0]))) : null
 
   const throttlesCol = () =>
     layoutId.value

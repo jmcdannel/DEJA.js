@@ -5,8 +5,9 @@ import { useTourStore } from './stores/tour'
 import TourLogo from './components/TourLogo.vue'
 import LayoutSelector from './components/LayoutSelector.vue'
 import TourUserProfile from './components/TourUserProfile.vue'
-import { BackgroundDecor } from '@repo/ui'
+import { BackgroundDecor, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
 
+provideNotifications()
 const drawer = ref(false)
 const theme = useTheme()
 const tourStore = useTourStore()
@@ -104,12 +105,17 @@ onMounted(() => {
     <v-main class="relative bg-gradient">
       <BackgroundDecor />
       <v-container fluid>
-        <router-view />
+        <router-view v-slot="{ Component }">
+          <TransitionFade>
+            <component :is="Component" />
+          </TransitionFade>
+        </router-view>
       </v-container>
     </v-main>
     
     <!-- Layout Selector Dialog -->
     <LayoutSelector />
+    <NotificationContainer />
   </v-app>
 </template>
 

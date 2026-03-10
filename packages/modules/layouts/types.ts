@@ -11,6 +11,7 @@ export interface LayoutDefaultSound {
   icon: string
 }
 export interface Layout {
+  approved?: boolean
   author?: string
   createdAt?: Date
   description?: string
@@ -24,8 +25,9 @@ export interface Layout {
   isFavorite?: boolean
   isPublic?: boolean
   locos?: string[]
-  meta?: Record<string, any>
+  meta?: Record<string, unknown>
   name: string
+  owner?: string
   routes?: string[]
   scripts?: string[]
   sensors?: string[]
@@ -49,7 +51,7 @@ export interface Layout {
 export interface Device {
   autoConnect?: boolean
   client?: string
-  config?: Record<string, any>
+  config?: Record<string, unknown>
   connection?: 'usb' | 'wifi'
   description?: string
   id: string

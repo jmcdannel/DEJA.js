@@ -2,11 +2,12 @@
 import { computed, ref, watch } from 'vue'
 import { useLayout } from '@repo/modules'
 import { useSignals, type Signal, type SignalAspect } from '@repo/modules/signals'
+import { useNotification } from '@repo/ui'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 
 interface ValidationRules {
-  required: ((val: any) => boolean | string)[];
+  required: ((val: unknown) => boolean | string)[];
 }
 
 const props = defineProps<{ signal: Signal | null }>()
@@ -14,6 +15,7 @@ const emit = defineEmits(['close'])
 
 const { getDevices } = useLayout()
 const { setSignal } = useSignals()
+const { notify } = useNotification()
 
 const devices = getDevices()
 
@@ -33,7 +35,7 @@ const color = ref('cyan')
 
 // Validation for device when required
 const deviceRules = computed(() => {
-  return [(val: any) => !!val || 'Device is required for this effect type.']
+  return [(val: unknown) => !!val || 'Device is required for this effect type.']
 })
 
 watch(() => props.signal, (next) => {
@@ -105,7 +107,7 @@ async function submit() {
     await setSignal(props.signal?.id || '', payload)
     emit('close')
   } catch (err) {
-    console.error('Failed to save signal', err)
+    notify.error('Unable to save signal.')
     error.value = 'Unable to save signal.'
   } finally {
     loading.value = false

@@ -2,8 +2,8 @@ export interface Effect {
   device?: string // Required for sound effects, optional for others
   name?: string
   pin?: number
-  on?: any[]
-  off?: any[]
+  on?: MacroItem[]
+  off?: MacroItem[]
   type: string
   state: boolean
   color?: string

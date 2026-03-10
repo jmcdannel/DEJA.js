@@ -71,9 +71,9 @@ const handleGuestAccess = async () => {
     //   router.push('/')
     // }, 1500)
     
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Guest access failed:', err)
-    error.value = err.message || 'Failed to create guest profile'
+    error.value = err instanceof Error ? err.message : 'Failed to create guest profile'
   } finally {
     loading.value = false
   }
@@ -92,9 +92,9 @@ const handleGithubSignin = async () => {
     
     await signInWithPopup(auth, githubAuthProvider)
     console.log('GitHub signin success')
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('GitHub signin failed:', err)
-    error.value = err.message || 'Failed to sign in with GitHub'
+    error.value = err instanceof Error ? err.message : 'Failed to sign in with GitHub'
   } finally {
     loading.value = false
   }
@@ -113,9 +113,9 @@ const handleGoogleSignin = async () => {
     
     await signInWithPopup(auth, googleAuthProvider)
     console.log('Google signin success')
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Google signin failed:', err)
-    error.value = err.message || 'Failed to sign in with Google'
+    error.value = err instanceof Error ? err.message : 'Failed to sign in with Google'
   } finally {
     loading.value = false
   }
@@ -146,9 +146,9 @@ onMounted(async () => {
   try {
     // Handle redirect results
     await getRedirectResult(auth)
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Redirect result error:', err)
-    error.value = err.message || 'Authentication error'
+    error.value = err instanceof Error ? err.message : 'Authentication error'
   }
 })
 </script>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useNotification } from '@repo/ui'
 
 interface Props {
   content?: string | string[]
@@ -27,6 +28,8 @@ const displayContent = computed(() => {
   }
   return props.content.split('\n').slice(0, props.maxLines)
 })
+
+const { notify } = useNotification()
 
 const colorClasses = computed(() => {
   const colors = {
@@ -56,10 +59,9 @@ const copyToClipboard = async () => {
   try {
     const content = displayContent.value.join('\n')
     await navigator.clipboard.writeText(content)
-    // You could add a toast notification here if you have one
-    console.log('Content copied to clipboard')
-  } catch (err) {
-    console.error('Failed to copy to clipboard:', err)
+    notify.success('Content copied to clipboard.')
+  } catch {
+    notify.error('Failed to copy to clipboard.')
   }
 }
 </script>
@@ -72,7 +74,7 @@ const copyToClipboard = async () => {
     </div>
     
     <!-- LCD Screen -->
-    <div class="lcd-screen bg-black rounded p-3 font-mono leading-tight">
+    <div class="lcd-screen bg-black rounded p-3 font-mono leading-tight animate-deja-lcd-flicker">
       <div 
         v-for="(line, index) in displayContent" 
         :key="index"
@@ -162,13 +164,4 @@ const copyToClipboard = async () => {
   text-shadow: 0 0 5px currentColor;
 }
 
-/* Subtle flicker animation */
-@keyframes lcd-flicker {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.98; }
-}
-
-.lcd-screen {
-  animation: lcd-flicker 0.1s infinite;
-}
 </style> 

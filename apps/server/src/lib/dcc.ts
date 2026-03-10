@@ -35,6 +35,30 @@ export interface OutputPayload {
   state: boolean
 }
 
+// Allowed DCC-EX action types from Firebase
+const VALID_ACTIONS = new Set([
+  'connect', 'dcc', 'listPorts', 'power', 'throttle',
+  'turnout', 'output', 'function', 'getStatus', 'status', 'ping',
+])
+
+/**
+ * Validate and sanitize a raw DCC-EX command string.
+ * Rejects commands containing protocol-breaking characters that could
+ * allow injection of additional DCC-EX commands.
+ */
+function validateDccCommand(data: string): boolean {
+  if (typeof data !== 'string') return false
+  if (data.length > 200) return false
+  // Block angle brackets and newlines — these break the <cmd>\n framing
+  if (/[<>\n\r]/.test(data)) return false
+  return true
+}
+
+/** Runtime check that a value is a finite number */
+function isFiniteNumber(val: unknown): val is number {
+  return typeof val === 'number' && Number.isFinite(val)
+}
+
 let isConnected = false // serial port connection status
 const baudRate = 115200
 let com: SerialCom = {
@@ -121,6 +145,10 @@ const handleConnectionMessage = async (payload: JSON | string): Promise<void> =>
 
 const send = async (data: string): Promise<void> => {
   try {
+    if (!validateDccCommand(data)) {
+      log.error('[DCC] Rejected invalid command:', data)
+      return
+    }
     const cmd = `<${data}>\n`
     // log.await('Writing to port', data)
     if (com.port) {
@@ -186,11 +214,13 @@ const getStatus = async (): Promise<void> => {
 }
 
 const power = async (state: string): Promise<void> => {
+  if (!isPowerCommand(state)) {
+    log.error('[DCC] Rejected invalid power command:', state)
+    return
+  }
   await send(state)
   // Optimistically update Firestore power state as well
-  if (isPowerCommand(state)) {
-    await writePowerToFirestore(state)
-  }
+  await writePowerToFirestore(state)
   log.star('Power', state)
 }
 
@@ -198,6 +228,10 @@ const sendSpeed = async ({
   address,
   speed,
 }: ThrottlePayload): Promise<void> => {
+  if (!isFiniteNumber(address) || !isFiniteNumber(speed)) {
+    log.error('[DCC] Rejected invalid throttle payload:', { address, speed })
+    return
+  }
   const direction = speed > 0 ? 1 : 0
   const absSpeed = Math.abs(speed)
   log.star('Throttle', address, speed, direction)
@@ -209,6 +243,10 @@ const sendTurnout = async ({
   turnoutIdx,
   state,
 }: TurnoutPayload): Promise<void> => {
+  if (!isFiniteNumber(turnoutIdx) || typeof state !== 'boolean') {
+    log.error('[DCC] Rejected invalid turnout payload:', { turnoutIdx, state })
+    return
+  }
   log.star('Turnout', turnoutIdx, state)
   const cmd = `T ${turnoutIdx} ${state ? 1 : 0}`
   await send(cmd)
@@ -219,12 +257,20 @@ const sendFunction = async ({
   func,
   state,
 }: FunctionPayload): Promise<void> => {
+  if (!isFiniteNumber(address) || !isFiniteNumber(func) || typeof state !== 'boolean') {
+    log.error('[DCC] Rejected invalid function payload:', { address, func, state })
+    return
+  }
   log.star('Function', address, func)
   const cmd = `F ${address} ${func} ${state ? 1 : 0}`
   await send(cmd)
 }
 
 const sendOutput = async (payload: OutputPayload) => {
+  if (!isFiniteNumber(payload.pin) || typeof payload.state !== 'boolean') {
+    log.error('[DCC] Rejected invalid output payload:', payload)
+    return
+  }
   log.star('Output', payload)
   const cmd = `Z ${payload.pin} ${payload.state ? 1 : 0}`
   await send(cmd)
@@ -233,6 +279,10 @@ const sendOutput = async (payload: OutputPayload) => {
 export async function handleDccChange(snapshot: any, key: string): Promise<void> {
   try {
     const { action, payload } = snapshot
+    if (typeof action !== 'string' || !VALID_ACTIONS.has(action)) {
+      log.error('[DCC] Rejected unknown action from RTDB:', action)
+      return
+    }
     // log.log('handleDccChange: ', action, payload, snapshot.key)
     await handleMessage(
       JSON.stringify({ action, payload: JSON.parse(payload) })

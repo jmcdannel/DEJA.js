@@ -47,6 +47,9 @@ const cols = {
       icon="mdi-lightning-bolt"
       :list="effectsList"
       :filters="filters"
+      empty-icon="mdi-auto-fix"
+      empty-title="No effects"
+      empty-description="Create effects to control lights and sounds"
       @update:state="handleEffect"
     />
 </template>

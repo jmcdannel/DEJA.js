@@ -1,20 +1,25 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, useTemplateRef } from 'vue'
 import { RouterView } from 'vue-router'
-import { AppHeader } from '@repo/ui'
+import { AppHeader, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
 import Footer from '@/core/Footer.vue'
 import useMenu from '@/core/Menu/useMenu'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
+import { usePageSwipe } from '@/composables/usePageSwipe'
 
+provideNotifications()
 const drawer = ref(false)
 const { handleMenu, menuConfig } = useMenu()
+
+const mainContentRef = useTemplateRef('mainContentRef')
+usePageSwipe(mainContentRef, { disabledRoutes: ['throttle'] })
 
 </script>
 
 <template>
   <v-responsive>
     <v-app theme="dark">
-      <AppHeader 
+      <AppHeader
         app-name="Throttle"
         app-icon="mdi-gamepad-variant"
         variant="throttle"
@@ -30,11 +35,16 @@ const { handleMenu, menuConfig } = useMenu()
       />
       <Menu v-model:drawer="drawer" :menu="menuConfig" @handle-menu="handleMenu" />
       <v-main>
-        <v-container class="p-0 min-h-full flex flex-col" fluid>
-          <RouterView />
+        <v-container ref="mainContentRef" class="p-0 min-h-full flex flex-col" fluid>
+          <RouterView v-slot="{ Component }">
+            <TransitionFade>
+              <component :is="Component" />
+            </TransitionFade>
+          </RouterView>
         </v-container>
       </v-main>
       <Footer />
+      <NotificationContainer />
     </v-app>
   </v-responsive>
 </template>

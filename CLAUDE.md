@@ -125,7 +125,8 @@ pnpm deps:fix         # syncpack: fix mismatches
 1. **Plan before coding** — Use Plan Mode (Shift+Tab twice) for non-trivial changes
 2. **Lint and type-check before committing** — run `pnpm lint && pnpm check-types`
 3. **Use the `/verify-changes` slash command** to confirm nothing is broken
-4. **Use the `/commit-push-pr` slash command** to commit, push, and open a PR
+4. **Add a changelog entry** — run `/changelog` for any user-facing changes
+5. **Use the `/commit-push-pr` slash command** to commit, push, and open a PR
 
 ---
 

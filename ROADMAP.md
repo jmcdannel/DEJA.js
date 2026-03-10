@@ -1,92 +1,75 @@
-MVP
-[ ] Guest Mode / Demo Mode
-[x] account menu
-[x] DEJA Suite Nav
-[x] Login Page / w/signup u/p login
-[-] ttt-io as packages
-[-] ttt-io build scripts - output arduino configs, dcc config commands
-[ ] store roster on dccex
-[-] function map - momentary, latching (see ex-webthrottle)
-[ ] handle unknown power state
-[ ] onboarding / create layout
-[ ] update DCC-EX page on cloud app
-[ ] sensors
-[ ] sign out buttons
-[ ] readme screenshots
-[ ] docs (ai)
-[ ] test connection button on cloud home
-[ ] rename "layout" to "devices" in Cloud
+# DEJA.js Roadmap
 
-[ ] monitor app
-  - enable auto-clear
-  - reafactor to optimize
+## Phase 1: Production Ready (Current Focus)
+- [x] Account menu
+- [x] DEJA Suite Nav
+- [x] Login Page / w/signup
+- [ ] Error notification system (toast/snackbar across all apps)
+- [ ] Complete auth flow (email/password, password reset, email verification)
+- [ ] Offline/disconnection handling with retry
+- [ ] Server robustness (input validation, reconnection, graceful shutdown)
+- [ ] Loading/empty states across all views
+- [ ] Complete onboarding / create layout flow
+- [ ] Type safety cleanup (eliminate `any` types)
+- [ ] Production logging (remove console.log, configure log levels)
+- [ ] Guest Mode / Demo Mode
 
-[ ] tour app
-  - drive locos w/max
-  - effects
-  - scavenger hunt
-  - scan qr for effect
-  - improve sound ui & features (one at a time or allow multiple?)
-  - play intro
-  - guest user management (cloud?)
+## Phase 2: Feature Parity with DCC-EX Ecosystem
+- [ ] CV/Decoder Programming — read/write CVs from the browser (service track + POM)
+- [ ] Sensor & Block Occupancy — digital/analog sensor input, block detection display
+- [ ] Fast Clock — accelerated model time for operations sessions
+- [ ] Enhanced Consisting — advanced consist management (CV19, command station consists)
+- [ ] Store roster on DCC-EX command station (sync with DEJA cloud)
+- [ ] Function map — momentary vs latching toggle behavior (like EX-WebThrottle)
 
-[-] DEJA.js site
+## Phase 3: Automation & Intelligence
+- [ ] Visual Automation Builder — drag-and-drop automation sequences (DEJA's answer to EX-RAIL/Logix)
+      - Set turnout → wait → set signal → drive train → stop at sensor
+      - No code required, runs in the cloud, triggers via Firebase
+- [ ] Route Automation — entry/exit click-to-route on a visual layout
+- [ ] Sensor-Triggered Events — crossing gates, sound effects, signals on block entry
+- [ ] Scheduled Operations — time-based automation via fast clock integration
+- [ ] AI Conductor — LLM-powered train dispatcher that manages traffic, signals, and routing
+      - "Run the evening commuter schedule" → AI sets routes, signals, and drives trains
+      - Collision avoidance via block occupancy + reservation system
 
-  [ ] App Pages
-  [ ] Sign up
+## Phase 4: Layout Visualization
+- [ ] Track Diagram Editor — draw your layout in the browser (tracks, turnouts, signals, blocks)
+      - Real-time state overlay (turnout positions, block occupancy, signal aspects)
+      - Click-to-control (throw turnouts, set routes, dispatch trains)
+- [ ] 3D Layout Viewer — WebGL-based 3D visualization of your layout with live train positions
+- [ ] CTC Dispatcher Panel — prototype-accurate CTC control panel builder
 
-[-] TTT Site
-  [ ] Logo
-  [ ] Conent
-  [ ] Contact
----
+## Phase 5: Operations & Community
+- [ ] Operations Mode — car routing, switch lists, manifests (like JMRI OperationsPro)
+      - Industries, spurs, yards, staging
+      - Car types, loads, scheduling
+      - Crew instructions and timetables
+- [ ] Layout Sharing — publish your layout config for others to use as a template
+- [ ] Public Layout Gallery — browse and clone community layouts
+- [ ] Multi-layout Dashboard — manage multiple layouts from one account
 
-[ ] use UI controls in cloud app, everywhere
-[ ] quick consist?
-[ ] fix @repo/* imports 
-[ ] add documenation, other meta data to loco
-[ ] add more sounds and hook up speakers
-[-] sound mixer / mute
-[-] led designer
-[ ] welding arduino
+## Phase 6: Hardware Expansion
+- [ ] WiThrottle Protocol Server — allow Engine Driver, WiThrottle iOS, and other apps to connect
+- [ ] Multi-command-station support — connect to multiple DCC-EX stations simultaneously
+- [ ] DC (analog) support via DCC-EX TrackManager
+- [ ] RFID tag tracking — identify specific rolling stock by tag reader
+- [ ] Turntable control — integrate with EX-Turntable via I2C
 
+## Dream Features
+- [ ] Voice Control — "Hey DEJA, throw turnout 5 and set signal to clear"
+- [ ] AR Layout Overlay — point your phone at the layout, see train info, turnout states, and signals in AR
+- [ ] Sound Spatialization — position virtual speakers on the layout, sound follows the train
+- [ ] AI Scenery Generator — describe a scene, AI generates Arduino/Pico animation sequences
+- [ ] Replay Mode — record and replay an entire operating session
+- [ ] Live Streaming Integration — stream layout camera feeds with real-time data overlay
+- [ ] Multiplayer Operations — multiple users dispatch trains on the same layout in real-time (already possible with Firebase!)
+- [ ] Mobile Haptic Feedback — phone vibrates based on throttle position and train acceleration
 
-
-
-[x] Refactor signals to own module (+turnout)
-[x] fix route turnouts
-[x] add loco CTA on throttle list
-[x] led
-[x] add sounds
-[x] ctc switch
-[x] fix broken views / buttons
-[x] better header
-[x] mobile menu
-[x] sortable / draggable
-[x] mqtt as a package
-[x] cloud - fix login component error
-[x] cloud - layout device icons broken
-[x] usb extension cord
-[x] REVERSE (72, tam)
-[x] throtte - park
-[x] consist modal
-[x] all modals
-[x] turnout clamp
-[x] conductor sync speeds
-[x] bigger throttle buttons
-[x] ac main
-[x] logos
-[x] compact turnouts
-[x] Cloud device header
-[x] cloud device detail page
-[x] auto-connect pico
-[x] filter / view / sort everything
-[x] throttle slider
-[x] trim for consist
-[x] throttle list grid cols
-[x] switch layout menu
-[x] add loco FAB on throttle-list
-[x] sort throttles
-[x] optimize command pool to flush at an interval instead of waiting DELAYms
-[x] Remove sound libs from effects page on cloud app
-
+## Dropped / Deferred
+- [-] ttt-io as packages
+- [-] ttt-io build scripts
+- [-] DEJA.js marketing site
+- [-] TTT Site
+- [-] Sound mixer / mute
+- [-] LED designer

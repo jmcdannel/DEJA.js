@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useSignals, type Signal, type SignalAspect } from '@repo/modules/signals'
+import EmptyState from '@/Core/UI/EmptyState.vue'
 
 defineEmits(['edit'])
 
@@ -34,7 +35,7 @@ const wiring = (signal: Signal) => signal.commonAnode ? 'Common Anode' : 'Common
 const list = computed(() => signals.value || [])
 </script>
 <template>
-  <v-container>
+  <v-container v-if="list?.length">
     <v-row>
       <v-col 
         cols="12"
@@ -141,6 +142,16 @@ const list = computed(() => signals.value || [])
       </v-col>
     </v-row>
   </v-container>
+  <EmptyState
+    v-if="!list?.length"
+    icon="mdi-traffic-light"
+    color="emerald"
+    title="No Signals Yet"
+    description="Configure signal heads with red, yellow, and green aspects to manage block protection and interlocking on your layout."
+    :use-cases="[{ icon: 'mdi-shield-check', text: 'Block signal protection' }, { icon: 'mdi-lock', text: 'Interlocking control' }, { icon: 'mdi-lightbulb-on', text: 'Approach lighting' }]"
+    action-label="Add Your First Signal"
+    action-to="/signals/new"
+  />
 </template>
 
 
