@@ -40,11 +40,11 @@
     "./tailwind/animation-preset": "./src/tailwind/animation-preset.ts"
   },
   "dependencies": {
+    "@formkit/auto-animate": "^0.8.2",
     "@repo/dccex": "workspace:^0.0.0",
     "@repo/firebase-config": "workspace:*",
     "@repo/modules": "workspace:*",
     "@repo/utils": "workspace:*",
-    "@formkit/auto-animate": "^0.8.2",
     "@vueuse/core": "^11.0.3",
     "@vueuse/motion": "^2.2.6",
     "dayjs": "^1.11.13",
@@ -69,6 +69,7 @@
     "@storybook/vue3": "^8.0.0",
     "@storybook/vue3-vite": "^8.0.0",
     "storybook": "^8.0.0",
+    "tailwindcss": "^3.4.10",
     "typescript": "latest"
   }
 }

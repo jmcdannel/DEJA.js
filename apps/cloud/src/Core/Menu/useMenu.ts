@@ -53,6 +53,12 @@ export function useMenu() {
       name: 'signals',
     },
     {
+      color: 'teal',
+      icon: 'mdi-access-point',
+      label: 'Sensors',
+      name: 'sensors',
+    },
+    {
       color: 'rose',
       icon: 'mdi-console',
       label: 'Emulator',

@@ -1,3 +1,4 @@
+import { nextTick } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { createLogger } from '@repo/utils'
 
@@ -12,6 +13,9 @@ export async function requireLayout() {
   // initialize storage with the env value (if present) so pages can default to it
   log.debug('defaultLayoutId', defaultLayoutId)
   const layoutId = useStorage('@DEJA/layoutId', defaultLayoutId)
+
+  // Allow useStorage to hydrate from localStorage
+  await nextTick()
 
   if (!layoutId.value || layoutId.value === '') {
     return {
