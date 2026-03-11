@@ -57,8 +57,8 @@ const throttleDefaults: AppBackgroundPrefs = {
 </script>
 
 <template>
-  <v-responsive>
-    <v-app :theme="isDark ? 'dark' : 'light'">
+  <v-responsive class="min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
+    <v-app :theme="isDark ? 'dark' : 'light'" class="!bg-transparent">
       <PageBackground app-name="throttle" :defaults="throttleDefaults">
         <AppHeader
           app-name="Throttle"

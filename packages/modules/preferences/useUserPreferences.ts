@@ -37,10 +37,11 @@ export function useUserPreferences() {
     return localCache.value
   })
 
-  // Sync Firestore → localStorage cache
+  // Sync Firestore → localStorage cache (strip non-serializable fields like Timestamp)
   watch(firestorePrefs, (newVal) => {
     if (newVal) {
-      localCache.value = newVal
+      const { updatedAt, ...serializable } = newVal as UserPreferences & Record<string, unknown>
+      localCache.value = serializable as UserPreferences
     }
   })
 
