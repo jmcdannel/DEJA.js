@@ -13,6 +13,9 @@ import type { TrackDiagram, TrackDiagramNode, TrackDiagramEdge } from '@repo/mod
 import { useTrackDiagrams } from '@repo/modules/trackDiagrams/useTrackDiagrams'
 import { createLogger } from '@repo/utils'
 
+import { generateSvg } from './composables/useTrackDiagramSvg'
+import { generateCss } from './composables/useTrackDiagramCss'
+import { useTrackDiagramStorage } from './composables/useTrackDiagramStorage'
 import { useTrackDiagramEditor } from './composables/useTrackDiagramEditor'
 import TrackDiagramToolbar from './TrackDiagramToolbar.vue'
 import TrackDiagramProperties from './TrackDiagramProperties.vue'
@@ -29,7 +32,9 @@ const props = defineProps<{ diagram: TrackDiagram }>()
 const { setTrackDiagram } = useTrackDiagrams()
 const { toolMode, selectedNodeId, selectedEdgeId, selectNode, selectEdge, snapToGrid, isDirty, markDirty, markClean } = useTrackDiagramEditor()
 
+const { uploadSvg, uploadCss } = useTrackDiagramStorage()
 const saving = ref(false)
+const exporting = ref(false)
 const showPreview = ref(false)
 const nodeCounter = ref(props.diagram.nodes.length)
 
@@ -178,6 +183,48 @@ async function handleSave() {
   markClean()
   saving.value = false
 }
+
+async function handleExport() {
+  exporting.value = true
+  const svg = generateSvg(nodes.value, edges.value, props.diagram.viewBox)
+  const css = generateCss(nodes.value.map((n) => ({ type: n.type, data: n.data as { turnoutId?: string; routePointId?: string } })))
+
+  const svgUrl = await uploadSvg(props.diagram.id, svg)
+  const cssUrl = await uploadCss(props.diagram.id, css)
+
+  if (svgUrl && cssUrl) {
+    const diagramNodes: TrackDiagramNode[] = nodes.value.map((n) => ({
+      id: n.id,
+      type: n.type as TrackDiagramNode['type'],
+      label: n.data.label || '',
+      position: n.position,
+      rotation: n.data.rotation || 0,
+      data: {
+        turnoutId: n.data.turnoutId,
+        routePointId: n.data.routePointId,
+        trackLine: n.data.trackLine,
+        color: n.data.color,
+      },
+    }))
+    const diagramEdges: TrackDiagramEdge[] = edges.value.map((e) => ({
+      id: e.id,
+      source: e.source,
+      target: e.target,
+      sourceHandle: e.sourceHandle,
+      targetHandle: e.targetHandle,
+      data: e.data,
+    }))
+    await setTrackDiagram(props.diagram.id, {
+      ...props.diagram,
+      nodes: diagramNodes,
+      edges: diagramEdges,
+      svgUrl,
+      cssUrl,
+    })
+    markClean()
+  }
+  exporting.value = false
+}
 </script>
 <template>
   <div class="flex flex-col h-[calc(100vh-120px)]">
@@ -191,6 +238,7 @@ async function handleSave() {
         <TrackDiagramToolbar />
         <v-btn icon="mdi-eye" :variant="showPreview ? 'flat' : 'text'" color="indigo" size="small" title="Toggle Preview" @click="showPreview = !showPreview" />
         <v-btn text="Save" prepend-icon="mdi-content-save" color="indigo" :loading="saving" :disabled="!isDirty" size="small" @click="handleSave" />
+        <v-btn text="Export SVG" prepend-icon="mdi-export" color="green" :loading="exporting" size="small" @click="handleExport" />
       </div>
     </div>
 
