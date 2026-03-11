@@ -1,0 +1,49 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cloud",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "deja-cloud", "dev"],
+      "port": 5174,
+      "autoPort": true
+    },
+    {
+      "name": "throttle",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "deja-throttle", "dev"],
+      "port": 3041,
+      "autoPort": true
+    },
+    {
+      "name": "monitor",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "deja-monitor", "dev"],
+      "port": 3031
+    },
+    {
+      "name": "tour",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "deja-tour", "dev"],
+      "port": 3021
+    },
+    {
+      "name": "server",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "deja-serverts", "dev"],
+      "port": 8082
+    },
+    {
+      "name": "sound-api",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "deja-sound-api", "dev"],
+      "port": 3001
+    },
+    {
+      "name": "dejajs-www",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "dejajs-www", "dev"],
+      "port": 3051
+    }
+  ]
+}
