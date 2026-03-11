@@ -3,6 +3,7 @@ import { ref, useTemplateRef } from 'vue'
 import { RouterView } from 'vue-router'
 import { AppHeader, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
 import Footer from '@/core/Footer.vue'
+import ConnectionStatusBanner from '@/core/ConnectionStatusBanner.vue'
 import useMenu from '@/core/Menu/useMenu'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { usePageSwipe } from '@/composables/usePageSwipe'
@@ -68,6 +69,7 @@ const { isDark } = useThemeSwitcher()
         </v-container>
       </v-main>
       <Footer />
+      <ConnectionStatusBanner />
       <NotificationContainer />
     </v-app>
   </v-responsive>
