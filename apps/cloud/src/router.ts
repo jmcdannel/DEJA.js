@@ -181,6 +181,24 @@ const router = createRouter({
       beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
+      path: '/track-diagrams',
+      name: 'Track Diagrams',
+      component: () => import('./TrackDiagram/TrackDiagram.vue'),
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
+    },
+    {
+      path: '/track-diagrams/new',
+      name: 'Add Track Diagram',
+      component: () => import('./TrackDiagram/AddTrackDiagram.vue'),
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
+    },
+    {
+      path: '/track-diagrams/:diagramId',
+      name: 'Edit Track Diagram',
+      component: () => import('./TrackDiagram/EditTrackDiagram.vue'),
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
+    },
+    {
       path: '/dccex',
       name: 'DCC-EX',
       component: () => import('./DCCEX/DCCEX.vue'),
