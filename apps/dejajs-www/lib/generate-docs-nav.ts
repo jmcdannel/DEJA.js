@@ -11,13 +11,13 @@ export interface DocNavItem {
 
 const SECTION_ORDER = [
   'Getting Started',
-  'Server',
   'Throttle',
   'Cloud',
-  'IO Devices',
   'Monitor',
   'Tour',
+  'Server',
   'Sound API',
+  'IO Devices',
   'Developer'
 ];
 
@@ -33,12 +33,12 @@ export function generateDocsNav(): DocNavItem[] {
     // Default section mapping based on directory
     let sectionName = frontmatter.section;
     if (!sectionName) {
-      if (file.startsWith('apps/throttle/')) sectionName = 'Throttle';
-      else if (file.startsWith('apps/cloud/')) sectionName = 'Cloud';
-      else if (file.startsWith('apps/monitor/')) sectionName = 'Monitor';
-      else if (file.startsWith('apps/server/')) sectionName = 'Server';
-      else if (file.startsWith('apps/tour/')) sectionName = 'Tour';
-      else if (file.startsWith('apps/sound-api/')) sectionName = 'Sound API';
+      if (file.startsWith('throttle/')) sectionName = 'Throttle';
+      else if (file.startsWith('cloud/')) sectionName = 'Cloud';
+      else if (file.startsWith('monitor/')) sectionName = 'Monitor';
+      else if (file.startsWith('server/')) sectionName = 'Server';
+      else if (file.startsWith('tour/')) sectionName = 'Tour';
+      else if (file.startsWith('sound-api/')) sectionName = 'Sound API';
       else if (file.startsWith('io/')) sectionName = 'IO Devices';
       else if (file.startsWith('dev/')) sectionName = 'Developer';
       else sectionName = 'Getting Started';
@@ -57,7 +57,7 @@ export function generateDocsNav(): DocNavItem[] {
       // Determine base href for section
       let sectionHref = '/docs';
       if (sectionName !== 'Getting Started') {
-        const sectionSlug = file.split('/')[file.startsWith('apps/') ? 1 : 0];
+        const sectionSlug = file.split('/')[0];
         sectionHref = `/docs/${sectionSlug}`;
       }
       

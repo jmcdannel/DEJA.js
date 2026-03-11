@@ -20,9 +20,7 @@ export function getMdxFilePath(slugParams?: string[]): string | null {
   
   const pathsToTry = [
     path.join(CONTENT_DIR, `${slugPath}.mdx`),
-    path.join(CONTENT_DIR, `apps/${slugPath}.mdx`),
     path.join(CONTENT_DIR, slugPath, 'overview.mdx'),
-    path.join(CONTENT_DIR, `apps/${slugPath}/overview.mdx`),
   ];
 
   for (const p of pathsToTry) {
@@ -50,11 +48,6 @@ export function getSlugFromFile(file: string): string[] | null {
   // Rule: {category}/overview -> [{category}]
   if (relativePath.endsWith('/overview')) {
     relativePath = relativePath.replace(/\/overview$/, '');
-  }
-  
-  // Remove 'apps/' prefix if present
-  if (relativePath.startsWith('apps/')) {
-    relativePath = relativePath.substring(5);
   }
   
   return relativePath.split('/');
