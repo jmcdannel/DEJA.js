@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import { db, rtdb } from '@repo/firebase-config/firebase-admin-node'
 import type { ServerStatus } from '@repo/modules'
+import { dejaEmitter, type BroadcastMessage } from './broadcast'
 import { initialize } from './modules/layout'
 import { handleThrottleChange, listenToLocoChanges } from './modules/throttles'
 import { handleTurnoutChange } from './modules/turnouts'
@@ -9,7 +10,7 @@ import { handleSignalChange } from './modules/signals'
 import { handleSensorChange } from './modules/sensors'
 import { handleBlockChange } from './modules/blocks'
 import { handleDccChange } from './lib/dcc'
-import { handleDejaCommands } from './lib/deja'
+import { handleDejaCommands, handleDejaMessages } from './lib/deja'
 import { log } from './utils/logger'
 import { serial } from './lib/serial'
 import { wsServer } from './lib/ws-server'
@@ -172,12 +173,20 @@ async function handleTestEffectChange(snapshot: any): Promise<void> {
   }
 }
 
+/** Handler for broadcast events — forwards messages to Firebase via handleDejaMessages. */
+const handleCloudBroadcast = (data: BroadcastMessage): void => {
+  handleDejaMessages(data)
+}
+
 export async function connect(): Promise<boolean> {
   try {
     log.start('Connecting to DejaCloud', layoutId)
     // await reset()
     await listen()
     await initialize()
+
+    // Subscribe to broadcast events so messages are persisted to Firebase
+    dejaEmitter.onBroadcast(handleCloudBroadcast)
     // Set up presence tracking
     await serverStatusRef.onDisconnect().set({
       online: false,
@@ -206,7 +215,10 @@ export async function connect(): Promise<boolean> {
 export async function disconnect(): Promise<void> {
   try {
     log.start('Disconnecting from DejaCloud', layoutId)
-    
+
+    // Unsubscribe from broadcast events
+    dejaEmitter.offBroadcast(handleCloudBroadcast)
+
     // Clean up Firebase listeners
     await cleanup()
     
