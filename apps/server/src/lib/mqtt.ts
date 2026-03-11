@@ -1,4 +1,5 @@
 import mqtt from 'mqtt'
+import { dejaEmitter, type BroadcastMessage } from '../broadcast'
 import { log } from '../utils/logger.js'
 
 const layoutId = process.env.LAYOUT_ID
@@ -204,12 +205,20 @@ function connectInternal(): void {
   }
 }
 
+/** Handler for broadcast events — forwards messages to the MQTT broadcast topic. */
+const handleBroadcastEvent = (data: BroadcastMessage): void => {
+  send(JSON.stringify(data))
+}
+
 // Function to connect to MQTT broker
 const connect = (): void => {
   if (connectionState === 'connecting' || connectionState === 'connected') {
     log.note('[MQTT] Already connected or connection in progress, skipping...')
     return
   }
+
+  // Subscribe to broadcast events from the event emitter
+  dejaEmitter.onBroadcast(handleBroadcastEvent)
 
   reconnectAttempts = 0
   clearReconnectTimer()
@@ -219,6 +228,9 @@ const connect = (): void => {
 // Function to disconnect from MQTT broker
 const disconnect = (): void => {
   try {
+    // Unsubscribe from broadcast events
+    dejaEmitter.offBroadcast(handleBroadcastEvent)
+
     connectionState = 'disconnecting'
     clearReconnectTimer()
     reconnectAttempts = 0

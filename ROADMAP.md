@@ -12,7 +12,7 @@
 - [ ] Fix guard chain race conditions in cloud app router
 - [ ] Command deduplication / timeout / acknowledgment tracking
 - [ ] Log level configuration
-- [ ] Refactor broadcast.ts to use event emitter
+- [x] Refactor broadcast.ts to use event emitter
 - [ ] Signal initialization
 - [ ] Refactor turnout commands
 
