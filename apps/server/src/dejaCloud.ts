@@ -12,6 +12,7 @@ import { handleDejaCommands } from './lib/deja'
 import { log } from './utils/logger'
 import { serial } from './lib/serial'
 import { wsServer } from './lib/ws-server'
+import { startDeviceConfigSync, stopDeviceConfigSync } from './modules/sync-config'
 
 const layoutId = process.env.LAYOUT_ID || 'betatrack'
 
@@ -54,6 +55,9 @@ async function listen(): Promise<void> {
   
   // Monitor test effects for sound testing
   testEffectUnsubscribe = db.collection('testEffects').onSnapshot(handleTestEffectChange)
+  
+  // Start syncing device configs (Arduino serial, etc)
+  startDeviceConfigSync()
 }
 
 async function resetThrottles(): Promise<void> {
@@ -131,6 +135,9 @@ async function cleanup(): Promise<void> {
       blockUnsubscribe()
       blockUnsubscribe = null
     }
+    
+    // Stop syncing device configs
+    stopDeviceConfigSync()
     
     log.info('Firebase listeners cleaned up')
   } catch (error) {
