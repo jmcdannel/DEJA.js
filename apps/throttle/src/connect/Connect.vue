@@ -39,7 +39,7 @@ function handleLayoutSelect(selectedLayoutId: string) {
 </script>
 
 <template>
-  <main class="flex flex-col flex-grow p-8 w-full viaduct-background bg-opacity-50 bg-fixed overflow-auto">
+  <main class="flex flex-col flex-grow p-8 w-full overflow-auto">
     <v-card
       class="mx-auto my-8"
       max-width="400"

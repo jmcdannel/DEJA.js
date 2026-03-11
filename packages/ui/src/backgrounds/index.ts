@@ -1,0 +1,5 @@
+export { backgrounds, getBackgroundById } from './registry'
+export type { BackgroundDefinition } from './registry'
+export { default as PageBackground } from './PageBackground.vue'
+export { default as BackgroundSettings } from './BackgroundSettings.vue'
+export { default as BackgroundThumbnail } from './BackgroundThumbnail.vue'

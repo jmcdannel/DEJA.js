@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, useTemplateRef } from 'vue'
 import { RouterView } from 'vue-router'
-import { AppHeader, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
+import { AppHeader, TransitionFade, NotificationContainer, provideNotifications, PageBackground } from '@repo/ui'
+import type { AppBackgroundPrefs } from '@repo/modules'
 import Footer from '@/core/Footer.vue'
 import useMenu from '@/core/Menu/useMenu'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
@@ -39,36 +40,52 @@ const mainContentRef = useTemplateRef('mainContentRef')
 usePageSwipe(mainContentRef as any, { disabledRoutes: ['throttle'] })
 
 const { isDark } = useThemeSwitcher()
+
+const throttleDefaults: AppBackgroundPrefs = {
+  default: 'none',
+  pages: {
+    '/': 'viaduct',
+    '/turnouts': 'forest',
+    '/roster': 'forest',
+    '/routes': 'forest',
+    '/signals': 'forest',
+    '/effects': 'viaduct',
+    '/conductor': 'viaduct',
+    '/connect': 'viaduct',
+  },
+}
 </script>
 
 <template>
   <v-responsive>
     <v-app :theme="isDark ? 'dark' : 'light'">
-      <AppHeader
-        app-name="Throttle"
-        app-icon="mdi-gamepad-variant"
-        variant="throttle"
-        color="blue"
-        :drawer="drawer"
-        :show-layout-power="true"
-        :show-emergency-stop="true"
-        :show-device-status="true"
-        :show-device-status-label="true"
-        :show-user-profile="true"
-        @drawer-toggle="drawer = !drawer"
-      />
-      <Menu v-model:drawer="drawer" :menu="menuConfig" @handle-menu="handleMenu" />
-      <v-main>
-        <v-container ref="mainContentRef" class="p-0 min-h-full flex flex-col" fluid>
-          <RouterView v-slot="{ Component }">
-            <TransitionFade>
-              <component :is="Component" />
-            </TransitionFade>
-          </RouterView>
-        </v-container>
-      </v-main>
-      <Footer />
-      <NotificationContainer />
+      <PageBackground app-name="throttle" :defaults="throttleDefaults">
+        <AppHeader
+          app-name="Throttle"
+          app-icon="mdi-gamepad-variant"
+          variant="throttle"
+          color="blue"
+          :drawer="drawer"
+          :show-layout-power="true"
+          :show-emergency-stop="true"
+          :show-device-status="true"
+          :show-device-status-label="true"
+          :show-user-profile="true"
+          @drawer-toggle="drawer = !drawer"
+        />
+        <Menu v-model:drawer="drawer" :menu="menuConfig" @handle-menu="handleMenu" />
+        <v-main>
+          <v-container ref="mainContentRef" class="p-0 min-h-full flex flex-col" fluid>
+            <RouterView v-slot="{ Component }">
+              <TransitionFade>
+                <component :is="Component" />
+              </TransitionFade>
+            </RouterView>
+          </v-container>
+        </v-main>
+        <Footer />
+        <NotificationContainer />
+      </PageBackground>
     </v-app>
   </v-responsive>
 </template>

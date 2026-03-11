@@ -4,7 +4,7 @@ import { useStorage } from '@vueuse/core'
 import { RouterView, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { Login } from '@repo/auth'
-import { AppHeader, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
+import { AppHeader, TransitionFade, NotificationContainer, provideNotifications, PageBackground } from '@repo/ui'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import type { MenuItem } from '@repo/ui/src/Menu/types'
 import { useDcc } from '@repo/dccex'
@@ -96,6 +96,7 @@ const menu = [
 <template>
   <v-responsive>
     <v-app v-if="user" :theme="theme">
+      <PageBackground app-name="monitor">
       <AppHeader
         app-name="Monitor"
         app-icon="mdi-monitor-dashboard"
@@ -138,6 +139,7 @@ const menu = [
         <!-- <SelectLayout @selected="handleLayoutSelect" /> -->
       </v-main>
       <NotificationContainer />
+      </PageBackground>
     </v-app>
     <v-app v-else :theme="theme">
       <Login />

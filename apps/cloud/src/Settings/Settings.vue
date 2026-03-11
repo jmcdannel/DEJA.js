@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { BackgroundSettings } from '@repo/ui'
 import { ref } from 'vue'
 
 const enableAutoDeploy = ref(true)
@@ -22,6 +23,22 @@ const themeOptions = [
   <v-container class="py-8">
     <v-row justify="center">
       <v-col cols="12" md="8" lg="6">
+        <BackgroundSettings
+          app-name="cloud"
+          :pages="[
+            { path: '/', label: 'Home', icon: 'mdi-home' },
+            { path: '/locos', label: 'Roster', icon: 'mdi-train' },
+            { path: '/effects', label: 'Effects', icon: 'mdi-auto-fix' },
+            { path: '/routes', label: 'Routes', icon: 'mdi-map-marker-path' },
+            { path: '/signals', label: 'Signals', icon: 'mdi-traffic-light' },
+            { path: '/sensors', label: 'Sensors', icon: 'mdi-motion-sensor' },
+            { path: '/turnouts', label: 'Turnouts', icon: 'mdi-directions-fork' },
+            { path: '/dccex', label: 'DCC-EX', icon: 'mdi-console' },
+            { path: '/layout', label: 'Layout', icon: 'mdi-floor-plan' },
+          ]"
+          class="mb-4"
+        />
+
         <v-card>
           <v-card-title>Cloud Settings</v-card-title>
           <v-card-subtitle class="pb-0">Placeholder controls for configuration work.</v-card-subtitle>

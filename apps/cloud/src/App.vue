@@ -14,7 +14,7 @@ const log = createLogger('CloudApp')
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
 import { Login } from '@repo/auth'
-import { AppHeader, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
+import { AppHeader, TransitionFade, NotificationContainer, provideNotifications, PageBackground } from '@repo/ui'
 // import { useDcc } from '@repo/dccex'
 // import { useEfx } from '@repo/modules'
 
@@ -70,6 +70,7 @@ function handleLogoClick() {
 <template>
   <v-responsive class="border rounded min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
       <v-app :theme="isDark ? 'dark' : 'light'" class="!bg-transparent">
+        <PageBackground app-name="cloud">
         <AppHeader
           app-name="Cloud"
           app-icon="mdi-cloud"
@@ -97,6 +98,7 @@ function handleLogoClick() {
         </v-container>
       </v-main>
       <NotificationContainer />
+      </PageBackground>
     </v-app>
   </v-responsive>
 </template>
