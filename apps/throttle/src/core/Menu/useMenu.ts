@@ -53,6 +53,12 @@ export const DEFAULT_MENU_CONFIG: MenuItem[] = [
     name: 'signals',
   },
   {
+    label: 'Programming',
+    icon: 'mdi-chip',
+    color: 'orange',
+    name: 'programming',
+  },
+  {
     label: 'Settings',
     icon: 'mdi-cog',
     color: 'gray',

@@ -69,6 +69,12 @@ const handleMessage = async (ws: WebSocket, payload: string, deviceId?: string):
       log.success('[Device subscription]', targetDeviceId, 'connected to serial monitor')
     }
     
+    // Handle CV programming requests
+    if (data.action === 'cv-request' && data.payload) {
+      const { handleCvRequest } = await import('../modules/cv.js')
+      handleCvRequest(ws, data.payload)
+    }
+
     // Handle device unsubscription
     if (data.action === 'unsubscribe-device' && data.deviceId) {
       const targetDeviceId = data.deviceId

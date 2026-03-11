@@ -39,3 +39,7 @@ export { useBlocks } from './sensors/useBlocks'
 export { useAutomations } from './sensors/useAutomations'
 export * from './sensors/types'
 export * from './sensors/constants'
+
+// CV module
+export * from './cv/types'
+export * from './cv/constants'
