@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'DEJA.js Cloud - Manage Your Railway Roster',
@@ -68,7 +69,7 @@ export default function CloudPage() {
               <span className="text-purple-500">🌐</span> Layout Spaces
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
-              Create separate "spaces" or layouts on a single account. Easily switch between controlling your home setup, a club layout, or a test bench.
+              Create separate &ldquo;spaces&rdquo; or layouts on a single account. Easily switch between controlling your home setup, a club layout, or a test bench.
             </p>
           </div>
         </div>
@@ -90,12 +91,12 @@ export default function CloudPage() {
       </section>
 
       <div className="flex justify-center pb-8">
-        <a
+        <Link
           href="/docs/cloud"
           className="px-8 py-4 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition shadow-lg"
         >
           Access DEJA Cloud
-        </a>
+        </Link>
       </div>
     </div>
   );

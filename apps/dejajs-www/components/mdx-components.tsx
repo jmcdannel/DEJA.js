@@ -1,7 +1,6 @@
 import type { MDXComponents } from 'mdx/types';
 
-export function useMDXComponents(components: MDXComponents): MDXComponents {
-  return {
+export const mdxComponents: MDXComponents = {
     h1: ({ children }) => (
       <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-6 mt-2">
         {children}
@@ -86,14 +85,14 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       <hr className="my-8 border-gray-200 dark:border-gray-700" />
     ),
     img: (props) => (
+      // eslint-disable-next-line @next/next/no-img-element -- MDX images have dynamic src from content
       <img
         {...props}
+        alt={props.alt || ''}
         className="rounded-lg shadow-lg my-4 max-w-full border border-gray-200 dark:border-gray-700"
       />
     ),
     strong: ({ children }) => (
       <strong className="font-semibold text-gray-900 dark:text-white">{children}</strong>
     ),
-    ...components,
-  };
-}
+};

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'DEJA.js Tour & IO - Automation & Expansion',
@@ -85,32 +86,32 @@ export default function TourPage() {
           </p>
         </div>
         <div className="bg-slate-900 rounded-xl p-6 border border-slate-800 shadow-lg font-mono text-sm text-indigo-400">
-           // Minimal configuration needed<br/>
-           #define MQTT_SERVER "192.168.1.10"<br/>
-           #define CLIENT_ID "yard_nodes_1"<br/>
+           {`// Minimal configuration needed`}<br/>
+           {`#define MQTT_SERVER "192.168.1.10"`}<br/>
+           {`#define CLIENT_ID "yard_nodes_1"`}<br/>
            <br/>
-           setup_deja_io();<br/>
+           {`setup_deja_io();`}<br/>
            <br/>
            <span className="text-gray-500 dark:text-gray-400 mt-4 block">
-            // The node automatically registers its pins<br/>
-            // with the DEJA.js Server on boot.
+            {`// The node automatically registers its pins`}<br/>
+            {`// with the DEJA.js Server on boot.`}
           </span>
         </div>
       </section>
 
       <div className="flex justify-center pb-8 gap-4">
-        <a
+        <Link
           href="/docs/tour"
           className="px-8 py-4 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition shadow-lg"
         >
           View Tour Docs
-        </a>
-         <a
+        </Link>
+         <Link
           href="/docs/tour"
           className="px-8 py-4 bg-white dark:bg-slate-900 text-slate-900 dark:text-gray-100 rounded-lg font-medium border border-gray-200 dark:border-slate-800 hover:shadow transition"
         >
           Get IO Code
-        </a>
+        </Link>
       </div>
     </div>
   );

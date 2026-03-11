@@ -21,58 +21,67 @@ const SECTION_ORDER = [
   'Developer'
 ];
 
+function getSectionFromPath(file: string): string {
+  if (file.startsWith('throttle/')) return 'Throttle';
+  if (file.startsWith('cloud/')) return 'Cloud';
+  if (file.startsWith('monitor/')) return 'Monitor';
+  if (file.startsWith('server/')) return 'Server';
+  if (file.startsWith('tour/')) return 'Tour';
+  if (file.startsWith('sound-api/')) return 'Sound API';
+  if (file.startsWith('io/')) return 'IO Devices';
+  if (file.startsWith('dev/')) return 'Developer';
+  return 'Getting Started';
+}
+
+function getSectionSlug(sectionName: string): string {
+  const map: Record<string, string> = {
+    'Throttle': 'throttle',
+    'Cloud': 'cloud',
+    'Monitor': 'monitor',
+    'Server': 'server',
+    'Tour': 'tour',
+    'Sound API': 'sound-api',
+    'IO Devices': 'io',
+    'Developer': 'dev',
+  };
+  return map[sectionName] || '';
+}
+
 export function generateDocsNav(): DocNavItem[] {
   const files = getAllMdxFiles();
   const navMap: Record<string, { title: string; href: string; order: number; children: DocNavItem[] }> = {};
 
-  // First pass: group by section
   for (const file of files) {
+    // Skip plans directory
+    if (file.startsWith('plans/')) continue;
+
     const fullPath = path.join(CONTENT_DIR, file);
     const { data: frontmatter } = parseMdx(fullPath);
-    
-    // Default section mapping based on directory
-    let sectionName = frontmatter.section;
-    if (!sectionName) {
-      if (file.startsWith('throttle/')) sectionName = 'Throttle';
-      else if (file.startsWith('cloud/')) sectionName = 'Cloud';
-      else if (file.startsWith('monitor/')) sectionName = 'Monitor';
-      else if (file.startsWith('server/')) sectionName = 'Server';
-      else if (file.startsWith('tour/')) sectionName = 'Tour';
-      else if (file.startsWith('sound-api/')) sectionName = 'Sound API';
-      else if (file.startsWith('io/')) sectionName = 'IO Devices';
-      else if (file.startsWith('dev/')) sectionName = 'Developer';
-      else sectionName = 'Getting Started';
-    }
+
+    // Always derive section from directory path, ignore frontmatter section
+    const sectionName = getSectionFromPath(file);
 
     const slugArray = getSlugFromFile(file) || [];
     const href = `/docs${slugArray.length > 0 ? '/' + slugArray.join('/') : ''}`;
-    
+
     const item: DocNavItem = {
-      title: frontmatter.title || path.basename(file, '.mdx').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      title: frontmatter.title || path.basename(file, '.mdx').replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
       href,
       order: frontmatter.order || 999,
     };
 
     if (!navMap[sectionName]) {
-      // Determine base href for section
-      let sectionHref = '/docs';
-      if (sectionName !== 'Getting Started') {
-        const sectionSlug = file.split('/')[0];
-        sectionHref = `/docs/${sectionSlug}`;
-      }
-      
+      const slug = getSectionSlug(sectionName);
       navMap[sectionName] = {
         title: sectionName,
-        href: sectionHref,
+        href: slug ? `/docs/${slug}` : '/docs',
         order: 999,
         children: []
       };
     }
-    
-    // If this is the "Overview" page for the section, use its href as the section href
-    if (file.endsWith('overview.mdx') || file === 'getting-started.mdx' || item.title.toLowerCase() === 'overview') {
-      // Wait, overview usually acts as the parent section link.
-      // E.g., /docs/throttle is Throttle (overview), /docs/throttle/home is Home.
+
+    // If this is the overview page, set it as the section href
+    if (file.endsWith('overview.mdx') || file === 'getting-started.mdx') {
       if (sectionName !== 'Getting Started') {
         navMap[sectionName].href = href;
       }
@@ -85,23 +94,23 @@ export function generateDocsNav(): DocNavItem[] {
 
   for (const sectionName of Object.keys(navMap)) {
     const section = navMap[sectionName];
-    // Sort children
+    // Sort children: overview first, then by order
     section.children.sort((a, b) => {
-      // Push "overview" to top
-      if (a.title.toLowerCase() === 'overview') return -1;
-      if (b.title.toLowerCase() === 'overview') return 1;
+      const aIsOverview = a.href === section.href || a.title.toLowerCase().includes('overview') || a.title.toLowerCase().includes('getting started');
+      const bIsOverview = b.href === section.href || b.title.toLowerCase().includes('overview') || b.title.toLowerCase().includes('getting started');
+      if (aIsOverview && !bIsOverview) return -1;
+      if (!aIsOverview && bIsOverview) return 1;
       return (a.order || 999) - (b.order || 999);
     });
-    
-    // Add to result
+
     result.push({
       title: section.title,
       href: section.href,
-      children: section.children.length > 1 ? section.children : undefined, // Simplify if only 1 child
+      children: section.children.length > 1 ? section.children : undefined,
     });
   }
 
-  // Sort sections
+  // Sort sections by defined order
   result.sort((a, b) => {
     let indexA = SECTION_ORDER.indexOf(a.title);
     let indexB = SECTION_ORDER.indexOf(b.title);
@@ -110,7 +119,7 @@ export function generateDocsNav(): DocNavItem[] {
     return indexA - indexB;
   });
 
-  // Preserve comingSoon items
+  // Append coming-soon items
   result.push(
     { title: 'Program', href: '#', comingSoon: true },
     { title: 'AI Ops', href: '#', comingSoon: true },

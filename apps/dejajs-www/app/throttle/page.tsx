@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'DEJA.js Throttle - Precision Mobile Control',
@@ -81,7 +82,7 @@ export default function ThrottlePage() {
         <div className="space-y-4">
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Mobile First. Engineered for Operations.</h2>
           <p className="text-gray-500 dark:text-gray-400">
-            Forget squinting at small LCD screens. DEJA.js Throttle brings your mobile device's high-resolution display and touch accuracy to your layout. The UI is designed specifically to prevent accidental touches while keeping critical functions under your thumb.
+            Forget squinting at small LCD screens. DEJA.js Throttle brings your mobile device&apos;s high-resolution display and touch accuracy to your layout. The UI is designed specifically to prevent accidental touches while keeping critical functions under your thumb.
           </p>
           <ul className="space-y-2 mt-4 text-gray-500 dark:text-gray-400 list-disc list-inside">
             <li>High-contrast visual hierarchy</li>
@@ -93,12 +94,12 @@ export default function ThrottlePage() {
       </section>
 
       <div className="flex justify-center pb-8">
-        <a
+        <Link
           href="/docs/throttle"
           className="px-8 py-4 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition shadow-lg"
         >
           Launch Throttle Web App
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
 import type { DocNavItem } from '../lib/generate-docs-nav';
 
@@ -23,7 +24,7 @@ function NavItem({ item, pathname, depth = 0 }: { item: DocNavItem; pathname: st
             <span className="text-[10px] uppercase tracking-wider font-semibold">Soon</span>
           </span>
         ) : (
-          <a
+          <Link
             href={item.href}
             aria-current={isActive ? 'page' : undefined}
             className={`flex-1 block px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
@@ -34,7 +35,7 @@ function NavItem({ item, pathname, depth = 0 }: { item: DocNavItem; pathname: st
             style={{ paddingLeft: `${depth * 12 + 12}px` }}
           >
             {item.title}
-          </a>
+          </Link>
         )}
         {hasChildren && !!item.children && (
           <button
@@ -92,10 +93,10 @@ export default function DocsSidebar({ nav }: { nav: DocNavItem[] }) {
         } lg:block sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto`}
       >
         <div className="mb-4">
-          <a href="/docs" className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
+          <Link href="/docs" className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
             <Image src="/icon-192.png" alt="DEJA.js" width={24} height={24} className="h-6 w-6" />
             <span>Documentation</span>
-          </a>
+          </Link>
         </div>
         <ul className="space-y-1">
           {nav.map((item) => (
@@ -104,12 +105,12 @@ export default function DocsSidebar({ nav }: { nav: DocNavItem[] }) {
         </ul>
         <hr className="my-4 border-gray-200 dark:border-gray-700" />
         <div className="space-y-1">
-          <a
+          <Link
             href="/"
             className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             Back to Home
-          </a>
+          </Link>
           <a
             href="https://github.com/jmcdannel/DEJA.js"
             target="_blank"

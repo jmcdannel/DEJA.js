@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
+import remarkGfm from 'remark-gfm';
 import { getMdxFilePath, parseMdx, getAllMdxFiles, getSlugFromFile } from '../../../lib/docs-utils';
-import { useMDXComponents } from '../../../components/mdx-components';
+import { mdxComponents } from '../../../components/mdx-components';
 import React from 'react';
 
 export async function generateStaticParams() {
@@ -12,8 +13,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug?: string[] }> }) {
-  // Fix Next.js 15: params is a Promise.
-  const resolvedParams = await Promise.resolve(params);
+  const resolvedParams = await params;
   const slug = resolvedParams.slug || [];
   
   const mdxPath = getMdxFilePath(slug);
@@ -30,8 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
 }
 
 export default async function DocsPage({ params }: { params: Promise<{ slug?: string[] }> }) {
-  // Unwrap promise for Next.js 15 app router compatibility
-  const resolvedParams = await Promise.resolve(params);
+  const resolvedParams = await params;
   const slug = resolvedParams.slug || [];
   
   const mdxPath = getMdxFilePath(slug);
@@ -41,11 +40,15 @@ export default async function DocsPage({ params }: { params: Promise<{ slug?: st
   }
 
   const { data: frontmatter, content } = parseMdx(mdxPath);
-  const components = useMDXComponents({});
+  const components = mdxComponents;
 
   return (
     <div className="prose dark:prose-invert max-w-none">
-      <MDXRemote source={content} components={components} />
+      <MDXRemote
+        source={content}
+        components={components}
+        options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+      />
     </div>
   );
 }

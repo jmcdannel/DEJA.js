@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'DEJA.js Monitor - Layout Diagnostics',
@@ -81,7 +82,7 @@ export default function MonitorPage() {
         <div className="space-y-4">
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Clear the fog.</h2>
           <p className="text-gray-500 dark:text-gray-400">
-            When hardware doesn't react as expected, guessing isn't an option. DEJA.js Monitor replaces cryptic serial logs with a designed, structured view of your layout's state. 
+            When hardware doesn&apos;t react as expected, guessing isn&apos;t an option. DEJA.js Monitor replaces cryptic serial logs with a designed, structured view of your layout&apos;s state.
           </p>
           <ul className="space-y-2 mt-4 text-gray-500 dark:text-gray-400 list-disc list-inside">
             <li>Color-coded log severity (Info, Warn, Error)</li>
@@ -92,12 +93,12 @@ export default function MonitorPage() {
       </section>
 
       <div className="flex justify-center pb-8">
-        <a
+        <Link
           href="/docs/monitor"
           className="px-8 py-4 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition shadow-lg"
         >
           Launch Monitor Web App
-        </a>
+        </Link>
       </div>
     </div>
   );

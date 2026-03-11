@@ -7,7 +7,7 @@ export const CONTENT_DIR = path.join(process.cwd(), 'content/docs');
 
 export function getAllMdxFiles(): string[] {
   if (!fs.existsSync(CONTENT_DIR)) return [];
-  return globSync('**/*.mdx', { cwd: CONTENT_DIR });
+  return globSync('**/*.mdx', { cwd: CONTENT_DIR, ignore: ['plans/**'] });
 }
 
 export function getMdxFilePath(slugParams?: string[]): string | null {

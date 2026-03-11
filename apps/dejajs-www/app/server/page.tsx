@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'DEJA.js Server - The DCC-EX Bridge',
@@ -85,12 +86,12 @@ export default function ServerPage() {
       </section>
 
       <div className="flex justify-center pb-8">
-        <a
+        <Link
           href="/docs/server"
           className="px-8 py-4 bg-cyan-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition shadow-lg"
         >
           Install Server
-        </a>
+        </Link>
       </div>
     </div>
   );
