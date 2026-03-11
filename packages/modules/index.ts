@@ -39,3 +39,6 @@ export { useBlocks } from './sensors/useBlocks'
 export { useAutomations } from './sensors/useAutomations'
 export * from './sensors/types'
 export * from './sensors/constants'
+
+// Track Diagrams module
+export * from './trackDiagrams/index.js'
