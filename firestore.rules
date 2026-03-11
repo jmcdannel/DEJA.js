@@ -75,6 +75,11 @@ service cloud.firestore {
       }
     }
 
+    // User preferences (backgrounds, settings) — each user owns their doc
+    match /users/{userId} {
+      allow read, write: if isAuth() && request.auth.uid == userId;
+    }
+
     // Test effects collection (for sound testing)
     match /testEffects/{docId} {
       allow read, write: if isAuth();

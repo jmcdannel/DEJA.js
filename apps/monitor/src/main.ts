@@ -17,6 +17,8 @@ import { VueFire, VueFireAuth } from 'vuefire'
 import { firebaseApp } from '@repo/firebase-config'
 // Motion
 import { MotionPlugin } from '@vueuse/motion'
+// Pinia
+import { createPinia } from 'pinia'
 
 // Components
 import App from './App.vue'
@@ -119,6 +121,7 @@ Sentry.init({
   replaysOnErrorSampleRate: 1.0,
 })
 
+app.use(createPinia())
 app.use(VueFire, {
   firebaseApp,
   modules: [VueFireAuth()],

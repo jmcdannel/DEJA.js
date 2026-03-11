@@ -111,7 +111,7 @@ onMounted(() => {
           <div class="relative z-10 flex flex-col items-center text-center px-8">
             <Logo variant="cloud" app-name="Cloud" class="mb-4 transform scale-150" />
             <h1 class="text-4xl font-bold mt-4 mb-2">DEJA.js</h1>
-            <p class="text-xl opacity-90 mb-10 font-medium">The modren DCC platform</p>
+            <p class="text-xl opacity-90 mb-10 font-medium">The modern DCC platform</p>
             <div class="flex gap-8 mb-8 opacity-60">
               <Logo variant="throttle" app-name="" />
               <Logo variant="monitor" app-name="" />

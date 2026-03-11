@@ -215,15 +215,24 @@ importers:
       '@sentry/vue':
         specifier: ^8.0.0
         version: 8.55.0(pinia@2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3)))(vue@3.5.22(typescript@5.9.3))
+      chart.js:
+        specifier: ^4.5.1
+        version: 4.5.1
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
       firebase:
         specifier: ^10.14.1
         version: 10.14.1
+      pinia:
+        specifier: ^2.1.6
+        version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       vue:
         specifier: ^3.5.17
         version: 3.5.22(typescript@5.9.3)
+      vue-chartjs:
+        specifier: ^5.3.3
+        version: 5.3.3(chart.js@4.5.1)(vue@3.5.22(typescript@5.9.3))
       vue-router:
         specifier: ^4.2.2
         version: 4.6.3(vue@3.5.22(typescript@5.9.3))
@@ -904,6 +913,9 @@ importers:
       '@repo/sounds':
         specifier: workspace:*
         version: link:../sounds
+      '@vueuse/core':
+        specifier: ^11.0.3
+        version: 11.3.0(vue@3.5.22(typescript@5.9.3))
       firebase:
         specifier: ^10.14.1
         version: 10.14.1
@@ -932,9 +944,6 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
-      '@vueuse/core':
-        specifier: ^11.0.3
-        version: 11.3.0(vue@3.5.22(typescript@5.9.3))
       typescript:
         specifier: latest
         version: 5.9.3
@@ -2585,6 +2594,9 @@ packages:
 
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
+
+  '@kurkle/color@0.3.4':
+    resolution: {integrity: sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==}
 
   '@leichtgewicht/ip-codec@2.0.5':
     resolution: {integrity: sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==}
@@ -5804,6 +5816,10 @@ packages:
 
   charm@0.1.2:
     resolution: {integrity: sha512-syedaZ9cPe7r3hoQA9twWYKu5AIyCswN5+szkmPBe9ccdLrj4bYaCnLVPTLd2kgVRc7+zoX4tyPgRnFKCj5YjQ==}
+
+  chart.js@4.5.1:
+    resolution: {integrity: sha512-GIjfiT9dbmHRiYi6Nl2yFCq7kkwdkp1W/lp2J99rX0yo9tgJGn3lKQATztIjb5tVtevcBtIdICNWqlq5+E8/Pw==}
+    engines: {pnpm: '>=8'}
 
   check-error@2.1.1:
     resolution: {integrity: sha512-OAlb+T7V4Op9OwdkjmguYRqncdlx5JiofwOAUkmTF+jNdHwzTaTs4sRAGpzLF3oOz5xAyDGrPgeIDFQmDOTiJw==}
@@ -11263,6 +11279,12 @@ packages:
   vscode-uri@3.1.0:
     resolution: {integrity: sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ==}
 
+  vue-chartjs@5.3.3:
+    resolution: {integrity: sha512-jqxtL8KZ6YJ5NTv6XzrzLS7osyegOi28UGNZW0h9OkDL7Sh1396ht4Dorh04aKrl2LiSalQ84WtqiG0RIJb0tA==}
+    peerDependencies:
+      chart.js: ^4.1.1
+      vue: ^3.0.0-0 || ^2.7.0
+
   vue-component-meta@2.2.12:
     resolution: {integrity: sha512-dQU6/obNSNbennJ1xd+rhDid4g3vQro+9qUBBIg8HMZH2Zs1jTpkFNxuQ3z77bOlU+ew08Qck9sbYkdSePr0Pw==}
     peerDependencies:
@@ -13905,6 +13927,8 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2':
     optional: true
+
+  '@kurkle/color@0.3.4': {}
 
   '@leichtgewicht/ip-codec@2.0.5': {}
 
@@ -18195,6 +18219,10 @@ snapshots:
   chardet@2.1.1: {}
 
   charm@0.1.2: {}
+
+  chart.js@4.5.1:
+    dependencies:
+      '@kurkle/color': 0.3.4
 
   check-error@2.1.1: {}
 
@@ -24642,7 +24670,7 @@ snapshots:
   vite@4.5.14(@types/node@16.18.11)(lightningcss@1.31.1)(terser@5.44.0):
     dependencies:
       esbuild: 0.25.11
-      postcss: 8.5.6
+      postcss: 8.5.8
       rollup: 3.29.5
     optionalDependencies:
       '@types/node': 16.18.11
@@ -24719,6 +24747,11 @@ snapshots:
   void-elements@3.1.0: {}
 
   vscode-uri@3.1.0: {}
+
+  vue-chartjs@5.3.3(chart.js@4.5.1)(vue@3.5.22(typescript@5.9.3)):
+    dependencies:
+      chart.js: 4.5.1
+      vue: 3.5.22(typescript@5.9.3)
 
   vue-component-meta@2.2.12(typescript@5.9.3):
     dependencies:

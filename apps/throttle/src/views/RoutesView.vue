@@ -4,7 +4,7 @@
 </script>
 
 <template>
-  <main class="min-h-screen forest-background bg-opacity-50 bg-fixed overflow-auto">
+  <main class="min-h-screen overflow-auto">
     <Routes />
   </main>
 </template>
