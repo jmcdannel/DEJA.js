@@ -87,15 +87,15 @@ function handleLogoClick() {
         </AppHeader>
         <Menu v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
       <v-main>
+        <v-progress-linear
+          :active="isNavigating"
+          indeterminate
+          color="primary"
+          height="3"
+          class="position-fixed top-0 left-0 right-0"
+          style="z-index: 9999;"
+        />
         <v-container class="pa-6 pa-md-12 max-w-7xl mx-auto transition-all duration-300">
-          <v-overlay
-            :model-value="isNavigating"
-            contained
-            persistent
-            class="d-flex align-center justify-center"
-          >
-            <v-progress-circular indeterminate color="primary" size="48" />
-          </v-overlay>
           <RouterView v-slot="{ Component, route }">
             <component :is="Component" :key="route.fullPath" />
           </RouterView>
