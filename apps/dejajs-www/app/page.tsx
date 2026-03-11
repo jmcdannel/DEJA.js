@@ -1,18 +1,19 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import Carousel, { CarouselItem } from '../components/Carousel';
 
 const desktopScreenshots: CarouselItem[] = [
-  { id: 1, content: <div className="relative w-full h-full"><Image src="/screenshots/throttle_desktop_routes.png" alt="DEJA.js Throttle Desktop Routes" fill className="object-cover" /></div> },
-  { id: 2, content: <div className="relative w-full h-full"><Image src="/screenshots/throttle_desktop_home.png" alt="DEJA.js Throttle Desktop Home" fill className="object-cover" /></div> },
-  { id: 3, content: <div className="relative w-full h-full"><Image src="/screenshots/cloud_desktop_roster.png" alt="DEJA.js Cloud Desktop Roster" fill className="object-cover" /></div> },
-  { id: 4, content: <div className="relative w-full h-full"><Image src="/screenshots/throttle_desktop_throttle.png" alt="DEJA.js Throttle Desktop" fill className="object-cover" /></div> },
-  { id: 5, content: <div className="relative w-full h-full"><Image src="/screenshots/monitor_desktop.png" alt="DEJA.js Monitor Desktop" fill className="object-cover" /></div> },
+  { id: 1, content: <div className="relative w-full aspect-video"><Image src="/screenshots/throttle_desktop_routes.png" alt="DEJA.js Throttle Desktop Routes" fill className="object-cover" /></div> },
+  { id: 2, content: <div className="relative w-full aspect-video"><Image src="/screenshots/throttle_desktop_home.png" alt="DEJA.js Throttle Desktop Home" fill className="object-cover" /></div> },
+  { id: 3, content: <div className="relative w-full aspect-video"><Image src="/screenshots/cloud_desktop_roster.png" alt="DEJA.js Cloud Desktop Roster" fill className="object-cover" /></div> },
+  { id: 4, content: <div className="relative w-full aspect-video"><Image src="/screenshots/throttle_desktop_throttle.png" alt="DEJA.js Throttle Desktop" fill className="object-cover" /></div> },
+  { id: 5, content: <div className="relative w-full aspect-video"><Image src="/screenshots/monitor_desktop.png" alt="DEJA.js Monitor Desktop" fill className="object-cover" /></div> },
 ];
 
 const mobileScreenshots: CarouselItem[] = [
-  { id: 1, content: <div className="relative w-full h-full"><Image src="/screenshots/throttle_mobile_throttle.png" alt="DEJA.js Throttle Mobile Throttle" fill className="object-cover" /></div> },
-  { id: 2, content: <div className="relative w-full h-full"><Image src="/screenshots/throttle_mobile_conductor.png" alt="DEJA.js Throttle Mobile Conductor" fill className="object-cover" /></div> },
-  { id: 3, content: <div className="relative w-full h-full"><Image src="/screenshots/throttle_mobile_home.png" alt="DEJA.js Throttle Mobile Home" fill className="object-cover" /></div> },
+  { id: 1, content: <div className="relative w-full aspect-[9/16]"><Image src="/screenshots/throttle_mobile_throttle.png" alt="DEJA.js Throttle Mobile Throttle" fill className="object-cover" /></div> },
+  { id: 2, content: <div className="relative w-full aspect-[9/16]"><Image src="/screenshots/throttle_mobile_conductor.png" alt="DEJA.js Throttle Mobile Conductor" fill className="object-cover" /></div> },
+  { id: 3, content: <div className="relative w-full aspect-[9/16]"><Image src="/screenshots/throttle_mobile_home.png" alt="DEJA.js Throttle Mobile Home" fill className="object-cover" /></div> },
 ];
 
 interface Product {
@@ -98,18 +99,18 @@ export default function Home() {
           DEJA.js delivers a precise, organized control experience. Replace cluttered legacy interfaces with smooth interactions and an expandable hardware platform.
         </p>
         <div className="flex gap-4 justify-center pt-4">
-          <a
+          <Link
             href="/docs/quick-start"
             className="px-6 py-3 bg-indigo-500 text-white rounded-lg font-semibold hover:bg-indigo-400 transition"
           >
             Get Started
-          </a>
-          <a
+          </Link>
+          <Link
             href="/docs"
             className="px-6 py-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-gray-100 rounded-lg font-medium border border-gray-200 dark:border-slate-800 hover:shadow transition"
           >
             Read Docs
-          </a>
+          </Link>
         </div>
       </section>
 
@@ -167,7 +168,7 @@ export default function Home() {
             </div>
             <span className="text-xs font-bold text-purple-500 uppercase tracking-widest">Step 2</span>
             <h3 className="font-bold text-lg text-slate-900 dark:text-white">Install</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">Download DEJA.js Server. Plug in your DCC-EX CommandStation via USB. You're connected.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">Download DEJA.js Server. Plug in your DCC-EX CommandStation via USB. You&apos;re connected.</p>
             <div className="hidden md:block absolute top-8 left-[65%] w-[70%] h-px bg-gradient-to-r from-purple-300 to-transparent dark:from-purple-700 z-0"></div>
           </div>
           <div className="flex flex-col items-center space-y-4 relative group text-center">
