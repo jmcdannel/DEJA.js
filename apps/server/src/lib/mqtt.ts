@@ -1,5 +1,7 @@
 import mqtt from 'mqtt'
+import type { IClientOptions } from 'mqtt'
 import { log } from '../utils/logger.js'
+import { ReconnectManager } from '../utils/reconnect.js'
 
 const layoutId = process.env.LAYOUT_ID
 const mqttBroker = process.env.VITE_MQTT_BROKER || 'mqtt://localhost'
@@ -9,24 +11,35 @@ const publishTopics: string[] = []
 
 let mqttClient: mqtt.MqttClient | null = null
 let isConnecting = false
-let reconnectAttempts = 0
-const MAX_RECONNECT_ATTEMPTS = 3
-let hasReachedMaxAttempts = false
+
+// Exponential backoff reconnection manager (no hard limit on attempts)
+const reconnectManager = new ReconnectManager({
+  label: '[MQTT]',
+  baseDelay: 1000,
+  maxDelay: 30_000,
+})
+
+function resubscribeTopics(): void {
+  if (!mqttClient) return
+  subscriptionTopics.forEach((topic) => mqttClient?.subscribe(topic))
+  publishTopics.forEach((topic) =>
+    mqttClient?.publish(
+      topic,
+      JSON.stringify({ action: 'ack', payload: { layoutId } })
+    )
+  )
+}
 
 function handleConnect(): void {
   try {
     if (mqttClient) {
       log.start('MQTT client connected', layoutId)
-      reconnectAttempts = 0 // Reset reconnect attempts on successful connection
-      hasReachedMaxAttempts = false // Reset max attempts flag
       isConnecting = false
-      subscriptionTopics.map((topic) => mqttClient?.subscribe(topic))
-      publishTopics.map((topic) =>
-        mqttClient?.publish(
-          topic,
-          JSON.stringify({ action: 'ack', payload: { layoutId } })
-        )
-      )
+
+      // Reset the reconnect manager on successful connection
+      reconnectManager.reset()
+
+      resubscribeTopics()
     } else {
       log.error('MQTT Error in handleConnect:', mqttClient)
     }
@@ -38,16 +51,6 @@ function handleConnect(): void {
 function handleError(error: Error): void {
   log.error('MQTT mqttClient error', error)
   isConnecting = false
-  
-  // Check if this is a connection refused error
-  if (error.message.includes('ECONNREFUSED') || error.message.includes('ENOTFOUND')) {
-    log.error('MQTT broker not available. Please check your MQTT configuration or disable MQTT.')
-    if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-      log.error('Max MQTT reconnection attempts reached. Stopping reconnection attempts.')
-      hasReachedMaxAttempts = true
-      return
-    }
-  }
 }
 
 function handleDisconnect(): void {
@@ -55,25 +58,19 @@ function handleDisconnect(): void {
   isConnecting = false
 }
 
-function handleReconnect(): void {
-  if (hasReachedMaxAttempts) {
-    log.error('MQTT reconnection blocked - max attempts reached. Please restart server to try again.')
-    return
+function handleClose(): void {
+  log.note('MQTT connection closed')
+  isConnecting = false
+
+  // Schedule a reconnection attempt when the connection is lost unexpectedly
+  if (mqttClient && !reconnectManager.isStopped) {
+    scheduleReconnect()
   }
-  
-  reconnectAttempts++
-  log.note('MQTT client reconnecting...', `Attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`)
-  
-  if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-    log.error('Max MQTT reconnection attempts reached. Stopping reconnection attempts.')
-    hasReachedMaxAttempts = true
-    // Disconnect the client to stop further attempts
-    if (mqttClient) {
-      mqttClient.end(true) // Force disconnect
-      mqttClient = null
-    }
-    return
-  }
+}
+
+function handleOffline(): void {
+  log.note('MQTT client went offline')
+  isConnecting = false
 }
 
 function handleMessage(topic: string, message: Buffer): void {
@@ -84,6 +81,95 @@ function handleMessage(topic: string, message: Buffer): void {
   }
 }
 
+/**
+ * Build the broker URL and options based on environment configuration.
+ */
+function buildConnectionParams(): { brokerUrl: string; options: IClientOptions } {
+  let brokerUrl = mqttBroker
+  const options: IClientOptions = {
+    port: parseInt(mqttPort),
+    reconnectPeriod: 0, // Disable mqtt.js built-in reconnection — we handle it ourselves
+    connectTimeout: 10_000,
+  }
+
+  if (brokerUrl.startsWith('wss://')) {
+    brokerUrl = `${brokerUrl}:${mqttPort}`
+    options.protocol = 'wss'
+  } else if (brokerUrl.startsWith('ws://')) {
+    brokerUrl = `${brokerUrl}:${mqttPort}`
+    options.protocol = 'ws'
+  }
+
+  return { brokerUrl, options }
+}
+
+/**
+ * Attempt a single MQTT connection. Returns true on success, false otherwise.
+ */
+function attemptConnect(): Promise<boolean> {
+  return new Promise((resolve) => {
+    try {
+      if (isConnecting) {
+        resolve(false)
+        return
+      }
+
+      if (!mqttBroker || !mqttPort) {
+        log.error('MQTT broker or port not specified')
+        resolve(false)
+        return
+      }
+
+      isConnecting = true
+      const { brokerUrl, options } = buildConnectionParams()
+
+      log.note('Connecting to MQTT broker:', brokerUrl, 'port:', mqttPort)
+
+      mqttClient = mqtt.connect(brokerUrl, options)
+
+      mqttClient.on('connect', () => {
+        handleConnect()
+        resolve(true)
+      })
+
+      mqttClient.on('error', (error) => {
+        handleError(error)
+        // Only resolve false if we haven't resolved yet (initial connect failed)
+        resolve(false)
+      })
+
+      mqttClient.on('disconnect', handleDisconnect)
+      mqttClient.on('close', handleClose)
+      mqttClient.on('offline', handleOffline)
+      mqttClient.on('message', handleMessage)
+    } catch (err) {
+      isConnecting = false
+      log.error('MQTT Error connecting:', err)
+      resolve(false)
+    }
+  })
+}
+
+/**
+ * Schedule a reconnection using exponential backoff.
+ */
+function scheduleReconnect(): void {
+  // Clean up the old client before reconnecting
+  if (mqttClient) {
+    try {
+      mqttClient.removeAllListeners()
+      mqttClient.end(true)
+    } catch {
+      // Ignore cleanup errors
+    }
+    mqttClient = null
+  }
+
+  reconnectManager.schedule(async () => {
+    return attemptConnect()
+  })
+}
+
 // Function to connect to MQTT broker
 const connect = (): void => {
   try {
@@ -91,112 +177,46 @@ const connect = (): void => {
       log.note('MQTT connection already in progress, skipping...')
       return
     }
-    
-    if (hasReachedMaxAttempts) {
-      log.error('MQTT connection blocked - max attempts reached. Please restart server to try again.')
-      return
-    }
-    
+
     if (!mqttBroker || !mqttPort) {
       log.error('MQTT broker or port not specified')
       return
     }
-    
-    log.note('Connecting to MQTT broker:', mqttBroker, 'port:', mqttPort)
-    isConnecting = true
-    
-    // Parse the broker URL to determine protocol and host
-    let brokerUrl = mqttBroker
-    let options: any = { 
-      port: parseInt(mqttPort),
-      reconnectPeriod: 0, // Disable automatic reconnection - we'll handle it manually
-      connectTimeout: 10000,  // 10 seconds
-      maxReconnectAttempts: 3 // Disable automatic reconnection
-    }
-    
-    // If using WebSocket Secure (wss://), we need to handle it differently
-    if (brokerUrl.startsWith('wss://')) {
-      // For WebSocket connections, use the full URL
-      brokerUrl = `${brokerUrl}:${mqttPort}`
-      options = {
-        ...options,
-        protocol: 'wss'
+
+    // Reset the reconnect manager when starting a fresh connection
+    reconnectManager.reset()
+
+    attemptConnect().then((success) => {
+      if (!success) {
+        log.warn('MQTT initial connection failed, scheduling reconnect...')
+        scheduleReconnect()
       }
-    } else if (brokerUrl.startsWith('ws://')) {
-      // For WebSocket connections, use the full URL
-      brokerUrl = `${brokerUrl}:${mqttPort}`
-      options = {
-        ...options,
-        protocol: 'ws'
-      }
-    }
-    
-    mqttClient = mqtt.connect(brokerUrl, options)
-
-    // https://github.com/mqttjs/MQTT.js#event-connect
-    mqttClient.on('connect', () => {
-      isConnecting = false
-      handleConnect()
+    }).catch((err) => {
+      log.error('MQTT unexpected error during connect:', err)
+      scheduleReconnect()
     })
-
-    // https://github.com/mqttjs/MQTT.js#event-error
-    mqttClient.on('error', (error) => {
-      isConnecting = false
-      handleError(error)
-    })
-
-    // https://github.com/mqttjs/MQTT.js#event-disconnect
-    mqttClient.on('disconnect', () => {
-      isConnecting = false
-      handleDisconnect()
-    })
-
-    // https://github.com/mqttjs/MQTT.js#event-reconnect
-    mqttClient.on('reconnect', handleReconnect)
-    
-    // https://github.com/mqttjs/MQTT.js#event-close
-    mqttClient.on('close', () => {
-      log.note('MQTT connection closed')
-      isConnecting = false
-    })
-    
-    // https://github.com/mqttjs/MQTT.js#event-offline
-    mqttClient.on('offline', () => {
-      log.note('MQTT client went offline')
-      isConnecting = false
-    })
-
-    // https://github.com/mqttjs/MQTT.js#event-message
-    mqttClient.on('message', handleMessage)
-    
   } catch (err) {
     isConnecting = false
     log.error('MQTT Error connecting:', err)
   }
 }
 
-// Function to disconnect from MQTT broker
+// Function to disconnect from MQTT broker (intentional — stops reconnection)
 const disconnect = (): void => {
   try {
+    // Stop all reconnection attempts
+    reconnectManager.stop()
+    isConnecting = false
+
     if (mqttClient) {
+      mqttClient.removeAllListeners()
       mqttClient.end()
       mqttClient = null
-      isConnecting = false
-      reconnectAttempts = 0
-      hasReachedMaxAttempts = false
       log.note('MQTT client disconnected')
     }
   } catch (err) {
     log.error('MQTT Error disconnecting:', err)
   }
-}
-
-// Function to reset connection attempts (useful for testing)
-const resetConnectionAttempts = (): void => {
-  reconnectAttempts = 0
-  hasReachedMaxAttempts = false
-  isConnecting = false
-  log.note('MQTT connection attempts reset')
 }
 
 // Function to subscribe to a topic
@@ -207,7 +227,11 @@ const subscribe = (topic: string): void => {
       subscriptionTopics.push(topic)
       log.note('Subscribed to topic:', topic)
     } else {
-      log.error('MQTT client not connected, cannot subscribe to:', topic)
+      // Store the topic so it gets subscribed on (re)connect
+      if (!subscriptionTopics.includes(topic)) {
+        subscriptionTopics.push(topic)
+      }
+      log.error('MQTT client not connected, topic queued for subscription:', topic)
     }
   } catch (err) {
     log.error('MQTT Error subscribing:', err)
@@ -250,7 +274,6 @@ export const dejaMqtt = {
   publish,
   send,
   subscribe,
-  resetConnectionAttempts,
 }
 
 export default dejaMqtt
