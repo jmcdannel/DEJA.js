@@ -59,6 +59,12 @@ export const DEFAULT_MENU_CONFIG: MenuItem[] = [
     name: 'programming',
   },
   {
+    label: 'Connections',
+    icon: 'mdi-server-network',
+    color: 'teal',
+    name: 'connect',
+  },
+  {
     label: 'Settings',
     icon: 'mdi-cog',
     color: 'blue',
