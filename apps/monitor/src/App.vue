@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
-import { RouterView, useRouter } from 'vue-router'
+import { RouterView, useRoute, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { Login } from '@repo/auth'
 import { AppHeader, TransitionFade, NotificationContainer, provideNotifications, PageBackground } from '@repo/ui'
@@ -23,6 +23,11 @@ const wshost = useStorage('@DEJA/pref/ws-host', 'localhost:8082')
 const devices = getDevices()
 const layouts = getLayouts()
 const drawer = ref(false)
+const route = useRoute()
+
+// Dashboard route uses MonitorStatusBar (rendered inside Dashboard.vue)
+// All other routes use AppHeader
+const isDashboardRoute = computed(() => route.name === 'home')
 
 // Event handlers for the unified header
 async function handleTrackPowerToggle(newState: boolean) {
@@ -46,23 +51,19 @@ async function handleEmergencyStop() {
 
 function handleDeviceSelect(deviceId: string) {
   log.debug('Device selected:', deviceId)
-  // Handle device selection if needed
 }
-
-const enableLogging = useStorage('@DEJA/pref/ws-logging', false)
 
 const user = useCurrentUser()
 const router = useRouter()
 
 const theme = ref('monitorDark')
 
-function handleMenu(item:MenuItem) {
+function handleMenu(item: MenuItem) {
   router.push({ name: item.name })
 }
 
 function handleLayoutSelect(newLayout: string) {
   layoutId.value = newLayout
-  
   window.location.reload()
 }
 
@@ -74,13 +75,13 @@ const menu = [
   {
     label: 'Dashboard',
     icon: 'mdi-view-dashboard',
-    name: 'dashboard',
+    name: 'home',
     color: 'blue',
   },
   {
     label: 'Settings',
     icon: 'mdi-cog',
-    name: 'settings',
+    name: 'Settings',
     color: 'green',
   },
   {
@@ -90,14 +91,15 @@ const menu = [
     color: 'red',
   }
 ]
-
-
 </script>
+
 <template>
   <v-responsive>
     <v-app v-if="user" :theme="theme">
       <PageBackground app-name="monitor">
+      <!-- AppHeader only on non-dashboard routes -->
       <AppHeader
+        v-if="!isDashboardRoute"
         app-name="Monitor"
         app-icon="mdi-monitor-dashboard"
         variant="monitor"
@@ -115,19 +117,24 @@ const menu = [
         @emergency-stop="handleEmergencyStop"
         @device-select="handleDeviceSelect"
         @logo-click="handleLogoClick"
-          @drawer-toggle="drawer = !drawer"
+        @drawer-toggle="drawer = !drawer"
       >
-      <template #default>
-        <v-switch v-model="enabled" label="Enabled" />
-        <v-text-field v-model="wshost" label="Host" hide-details density="compact" />
-      </template>
-    </AppHeader>
-    <Menu v-model:drawer="drawer" :menu="menu" @handle-menu="handleMenu" />
+        <template #default>
+          <v-switch v-model="enabled" label="Enabled" />
+          <v-text-field v-model="wshost" label="Host" hide-details density="compact" />
+        </template>
+      </AppHeader>
 
+      <Menu v-model:drawer="drawer" :menu="menu" :temporary="isDashboardRoute" @handle-menu="handleMenu" />
 
-      <v-main v-if="layoutId">
+      <v-main v-if="layoutId" :class="{ 'pa-0': isDashboardRoute }">
         <RouterView v-slot="{ Component }">
-          <TransitionFade>
+          <component
+            v-if="isDashboardRoute"
+            :is="Component"
+            @toggle-drawer="drawer = !drawer"
+          />
+          <TransitionFade v-else>
             <component :is="Component" />
           </TransitionFade>
         </RouterView>
@@ -136,7 +143,6 @@ const menu = [
         <v-alert type="error" class="text-center mb-4">
           No Layout Selected. Please select a layout to continue.
         </v-alert>
-        <!-- <SelectLayout @selected="handleLayoutSelect" /> -->
       </v-main>
       <NotificationContainer />
       </PageBackground>
