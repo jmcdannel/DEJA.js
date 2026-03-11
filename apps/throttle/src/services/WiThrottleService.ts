@@ -4,6 +4,22 @@ import { useStorage } from '@vueuse/core'
 import type { Layout } from '@repo/modules'
 import { db } from '@repo/firebase-config'
 
+// Dynamically import the Capacitor socket plugin so web/Vercel builds don't fail.
+// The plugin only exists in native Capacitor environments.
+// Use a variable to hide the specifier from Vite's static import analysis.
+const CAPACITOR_SOCKET_PKG = '@spryrocks/capacitor-socket-connection-plugin'
+let SocketClass: (new () => any) | null = null
+async function getSocketClass(): Promise<(new () => any) | null> {
+  if (SocketClass) return SocketClass
+  try {
+    const mod = await import(/* @vite-ignore */ CAPACITOR_SOCKET_PKG)
+    SocketClass = mod.Socket
+    return SocketClass
+  } catch {
+    return null
+  }
+}
+
 export type WiThrottleConnectionState = 'DISCONNECTED' | 'CONNECTING' | 'CONNECTED' | 'ERROR'
 
 // Capacitor socket type — loaded dynamically since the plugin is only available in native builds
@@ -69,7 +85,11 @@ export class WiThrottleService {
       this.state.value = 'CONNECTING'
       this.errorMessage.value = ''
       
-      const { Socket } = await import('@spryrocks/capacitor-socket-connection-plugin')
+      const Socket = await getSocketClass()
+      if (!Socket) {
+        this.handleDisconnect('WiThrottle requires a native Capacitor environment')
+        return
+      }
       this.socket = new Socket() as CapacitorSocket
 
       // Set up listeners

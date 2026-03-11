@@ -32,3 +32,10 @@ export { default as useLayoutRoutes } from './routes/useLayoutRoutes'
 export { default as useRoutes } from './routes/useRoutes'
 export * from './routes/types'
 export * from './routes/constants'
+
+// Sensors module
+export { default as useSensors } from './sensors/useSensors'
+export { useBlocks } from './sensors/useBlocks'
+export { useAutomations } from './sensors/useAutomations'
+export * from './sensors/types'
+export * from './sensors/constants'

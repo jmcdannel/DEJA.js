@@ -6,12 +6,14 @@ import { handleThrottleChange, listenToLocoChanges } from './modules/throttles'
 import { handleTurnoutChange } from './modules/turnouts'
 import { handleEffectChange } from './modules/effects'
 import { handleSignalChange } from './modules/signals'
-// import { handleSensorChange } from './modules/sensors'
+import { handleSensorChange } from './modules/sensors'
+import { handleBlockChange } from './modules/blocks'
 import { handleDccChange } from './lib/dcc'
 import { handleDejaCommands } from './lib/deja'
 import { log } from './utils/logger'
 import { serial } from './lib/serial'
 import { wsServer } from './lib/ws-server'
+import { startDeviceConfigSync, stopDeviceConfigSync } from './modules/sync-config'
 
 const layoutId = process.env.LAYOUT_ID || 'betatrack'
 const serverStatusRef = rtdb.ref(`serverStatus/${layoutId}`)
@@ -24,6 +26,8 @@ let effectUnsubscribe: (() => void) | null = null
 let turnoutUnsubscribe: (() => void) | null = null
 let signalUnsubscribe: (() => void) | null = null
 let testEffectUnsubscribe: (() => void) | null = null
+let sensorUnsubscribe: (() => void) | null = null
+let blockUnsubscribe: (() => void) | null = null
 
 async function listen(): Promise<void> {
   dccCommandsRef = rtdb.ref(`dccCommands/${layoutId}`)
@@ -48,10 +52,14 @@ async function listen(): Promise<void> {
   effectUnsubscribe = db.collection(`layouts/${layoutId}/effects`).onSnapshot(handleEffectChange)
   signalUnsubscribe = db.collection(`layouts/${layoutId}/signals`).onSnapshot(handleSignalChange)
   turnoutUnsubscribe = db.collection(`layouts/${layoutId}/turnouts`).onSnapshot(handleTurnoutChange)
-  // db.collection(`layouts/${layoutId}/sensors`).onSnapshot(handleSensorChange)
+  sensorUnsubscribe = db.collection(`layouts/${layoutId}/sensors`).onSnapshot(handleSensorChange)
+  blockUnsubscribe = db.collection(`layouts/${layoutId}/blocks`).onSnapshot(handleBlockChange)
   
   // Monitor test effects for sound testing
   testEffectUnsubscribe = db.collection('testEffects').onSnapshot(handleTestEffectChange)
+  
+  // Start syncing device configs (Arduino serial, etc)
+  startDeviceConfigSync()
 }
 
 async function resetThrottles(): Promise<void> {
@@ -121,6 +129,17 @@ async function cleanup(): Promise<void> {
       testEffectUnsubscribe()
       testEffectUnsubscribe = null
     }
+    if (sensorUnsubscribe) {
+      sensorUnsubscribe()
+      sensorUnsubscribe = null
+    }
+    if (blockUnsubscribe) {
+      blockUnsubscribe()
+      blockUnsubscribe = null
+    }
+    
+    // Stop syncing device configs
+    stopDeviceConfigSync()
     
     log.info('Firebase listeners cleaned up')
   } catch (error) {

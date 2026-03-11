@@ -1,5 +1,8 @@
 import { computed } from 'vue'
 import { useLayout } from '@repo/modules'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('Auth')
 
 export async function requireDccEx() {
   const { getDevices } = useLayout()
@@ -7,7 +10,7 @@ export async function requireDccEx() {
   const dccExDevice = computed(() =>
     devices.value.find((device) => device.type === 'dcc-ex')
   )
-  console.log('dccExDevice', dccExDevice.value)
+  log.debug('dccExDevice', dccExDevice.value)
   // if (!dccExDevice.value?.isConnected) {
   //   return {
   //     path: '/connect',

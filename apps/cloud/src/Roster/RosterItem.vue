@@ -4,7 +4,10 @@ import {
   BsBezier2,
 } from 'vue3-icons/bs'
 import { useLocos, type Loco } from '@repo/modules/locos'
+import { createLogger } from '@repo/utils'
 import { useColors } from '@/Core/UI/useColors'
+
+const log = createLogger('RosterItem')
 
 defineEmits(['edit'])
 const props = defineProps<{
@@ -24,9 +27,9 @@ const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
 //  })
 
  async function handleDelete() {
-  console.log('handleDelete', props.loco.id)
+  log.debug('handleDelete', props.loco.id)
   if (!props.loco.id) {
-    console.error('No loco ID provided for deletion')
+    log.error('No loco ID provided for deletion')
     return
   }
   await deleteLoco(props.loco.id)

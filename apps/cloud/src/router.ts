@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { getCurrentUser } from 'vuefire'
 import { redirectIfAuthenticated, requireApproval, requireAuth, requireDccEx, requireLayout, requireOnboarding } from '@repo/auth'
 import Dashboard from './Dashboard/Dashboard.vue'
 import Login from './views/Login.vue'
@@ -120,6 +121,42 @@ const router = createRouter({
       beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
+      path: '/sensors',
+      name: 'Sensors',
+      component: () => import('./Sensors/Sensors.vue'),
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
+    },
+    {
+      path: '/sensors/new',
+      name: 'Add Sensor',
+      component: () => import('./Sensors/AddSensor.vue'),
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
+    },
+    {
+      path: '/sensors/automations',
+      name: 'Automations',
+      component: () => import('./Sensors/Automations.vue'),
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
+    },
+    {
+      path: '/sensors/automations/new',
+      name: 'Add Automation',
+      component: () => import('./Sensors/AutomationForm.vue'),
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
+    },
+    {
+      path: '/sensors/automations/:automationId',
+      name: 'Edit Automation',
+      component: () => import('./Sensors/AutomationForm.vue'),
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
+    },
+    {
+      path: '/sensors/:sensorId',
+      name: 'Edit Sensor',
+      component: () => import('./Sensors/EditSensor.vue'),
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
+    },
+    {
       path: '/turnouts',
       name: 'Turnouts',
       component: () => import('./Turnouts/Turnouts.vue'),
@@ -175,6 +212,15 @@ const router = createRouter({
       beforeEnter: [requireAuth],
     }
   ],
+})
+
+let authInitialized = false
+
+router.beforeEach(async () => {
+  if (!authInitialized) {
+    await getCurrentUser()
+    authInitialized = true
+  }
 })
 
 export default router

@@ -30,7 +30,7 @@ const throttles = getThrottles()
 const turnouts = getTurnouts()
 const effects = getEffects()
 const signals = getSignals()
-const { turnoutChanges, effectChanges, signalChanges } = useLayoutLogListeners()
+const { turnoutChanges, effectChanges, signalChanges, sensorChanges } = useLayoutLogListeners()
 const turnoutsThrownCount = ref(0)
 const efxThrownCount = ref(0)
 const signalsActiveCount = ref(0)
@@ -62,6 +62,14 @@ watch(signalChanges, () => {
   }
 }, { deep: true })
 
+watch(sensorChanges, () => {
+  if (sensorChanges.value.length > 0) {
+    setTimeout(() => {
+      sensorChanges.value.shift()
+    }, TIMEOUT)
+  }
+}, { deep: true })
+
 </script>
 
 <template>
@@ -87,10 +95,11 @@ watch(signalChanges, () => {
       </div> -->
 
       <!-- Second Row - Uses half of remaining height with scrolling -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 flex-1 min-h-0 bg-gray-950 max-h-[50vh]">
+      <div class="grid grid-cols-1 lg:grid-cols-4 flex-1 min-h-0 bg-gray-950 max-h-[50vh]">
         <DCCLog />
         <TurnoutLogs :logs="turnoutChanges" />
         <EffectLogs :logs="effectChanges" />
+        <SensorLogs :logs="sensorChanges" />
       </div>
 
       <!-- Third Row - Uses half of remaining height with scrolling -->

@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { createLogger } from '@repo/utils'
 import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
 import EffectForm from '@/Effects/EffectForm.vue'
 import type { Effect } from '@repo/modules'
 import { useEfx } from '@repo/modules'
 import { ListMenu } from '@repo/ui'
+
+const log = createLogger('EditEffect')
 
 const route = useRoute()
 const router = useRouter()
@@ -26,7 +29,7 @@ async function loadEffect() {
       error.value = 'Effect not found.'
     }
   } catch (err) {
-    console.error(err)
+    log.error(err)
     error.value = 'Unable to load effect.'
   } finally {
     loading.value = false

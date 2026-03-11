@@ -31,6 +31,7 @@ export interface Layout {
   routes?: string[]
   scripts?: string[]
   sensors?: string[]
+  blocks?: string[]
   tags?: Tag[]
   thumbnail?: string
   turnouts?: string[]
@@ -83,11 +84,22 @@ export interface DeviceType {
   icon: string
 }
 
-export interface Sensor {
+/** @deprecated Use Sensor from sensors/types instead */
+export interface LayoutSensor {
+  automationId?: string
+  blockId?: string
+  cooldownMs?: number
+  debounceMs?: number
   deviceId: string
   effectId?: string
   enabled: boolean
   id: string
   index: number
+  invertState?: boolean
+  maxRetries?: number
+  pin?: number
+  pullup?: boolean
+  retryWindowMs?: number
   state: boolean
+  type?: string
 }

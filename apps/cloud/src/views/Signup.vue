@@ -14,5 +14,7 @@ function handleNavigateLogin() {
 </script>
 
 <template>
-  <Signup @signup="handleSignup" @navigate-login="handleNavigateLogin" />
+  <div class="fill-height">
+    <Signup @signup="handleSignup" @navigate-login="handleNavigateLogin" />
+  </div>
 </template>

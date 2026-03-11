@@ -2,10 +2,13 @@
 import { computed, ref, watch } from 'vue'
 import {  useRoute, useRouter } from 'vue-router'
 import { useLocos, ROADNAMES, type Loco, type RoadName } from '@repo/modules/locos'
+import { createLogger } from '@repo/utils'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import EditConsist from '@repo/ui/src/Consist/EditConsist.vue'
 import Functions from '@/Roster/Functions/Functions.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
+
+const log = createLogger('EditLoco')
 
 interface ValidationRules {
   required: ((val: unknown) => boolean | string)[];
@@ -51,7 +54,7 @@ async function submit () {
   newLoco.meta.color = color.value || 'primary'
   newLoco.hasSound = hasSound.value
   
-  console.log('Submitting loco', {
+  log.debug('Submitting loco', {
     ...loco.value,
   })
 

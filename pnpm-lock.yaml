@@ -636,6 +636,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@vueuse/core':
         specifier: ^11.0.3
         version: 11.3.0(vue@3.5.22(typescript@5.9.3))
@@ -735,6 +738,9 @@ importers:
 
   packages/dccex:
     dependencies:
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@vueuse/core':
         specifier: ^11.0.3
         version: 11.3.0(vue@3.5.22(typescript@5.9.3))
@@ -766,6 +772,9 @@ importers:
 
   packages/deja:
     dependencies:
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@vueuse/core':
         specifier: ^11.0.3
         version: 11.3.0(vue@3.5.22(typescript@5.9.3))
@@ -901,6 +910,9 @@ importers:
       '@repo/modules':
         specifier: workspace:*
         version: link:../modules
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@vueuse/core':
         specifier: ^11.0.3
         version: 11.3.0(vue@3.5.22(typescript@5.9.3))

@@ -259,9 +259,14 @@ Select the USB port for your CommandStation in the Monitor app.
 | **📡 Modules** | Core DEJA.js modules and communication logic |
 | **⚙️ Config** | Shared configuration for ESLint, Prettier, TypeScript |
 
-### 🔧 Device Apps (`/io`)
+### 🔧 Device Firmware (`/firmware`)
 
-// TODO: complete build scripts, devcie sync and deploy
+DEJA.js provides generic firmware templates for your layout nodes that configure themselves dynamically. Rather than recompiling and flashing your devices every time your layout changes, these templates parse configurations sent instantly by the DEJA Server.
+
+| Firmware | Description | Protocol |
+|---------|-------------|----------|
+| **🔌 [deja-arduino](firmware/deja-arduino/)** | Generic sketch for USB-connected Arduino boards | Serial (USB) |
+| **📡 [deja-pico-w](firmware/deja-pico-w/)** | Generic sketch for WiFi-connected Pico W and ESP32 nodes | MQTT (WiFi) |
 
 ---
 

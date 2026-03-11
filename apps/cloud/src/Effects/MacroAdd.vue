@@ -3,6 +3,9 @@ import { computed, ref } from 'vue'
 import { useEfx, type Effect } from '@repo/modules/effects'
 import { useLocos, type Loco } from '@repo/modules/locos'
 import { useTurnouts, type Turnout } from '@repo/modules'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('MacroAdd')
 
 const emit = defineEmits(['add', 'close'])
 
@@ -32,7 +35,7 @@ const throttles = computed(() => locoChips.value.map((loco: Loco) => ({
 } as MacroLoco)) as MacroLoco[])
 
 function handleOk() {
-  console.log('handleOk', effectChips.value, turnoutChips.value, locoChips.value, throttles.value)
+  log.debug('handleOk', effectChips.value, turnoutChips.value, locoChips.value, throttles.value)
   emit('add', effectChips.value, turnoutChips.value, throttles.value)
 }
 

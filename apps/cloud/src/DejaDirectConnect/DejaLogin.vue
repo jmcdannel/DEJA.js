@@ -7,6 +7,9 @@ import { ref, onMounted } from 'vue'
 import { getRedirectResult, signInWithPopup } from 'firebase/auth'
 import { useFirebaseAuth } from 'vuefire'
 import { FaGithubAlt, FaGoogle, FaMicrosoft, FaApple, FaFacebook } from 'vue3-icons/fa6'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('DejaLogin')
 
 const auth = useFirebaseAuth()
 
@@ -15,14 +18,14 @@ const error = ref(null)
 
 function handleGithubSignin() {
   signInWithPopup(auth, githubAuthProvider).catch((reason) => {
-    console.error('Failed signinRedirect', reason)
+    log.error('Failed signinRedirect', reason)
     error.value = reason
   })
 }
 
 onMounted(() => {
   getRedirectResult(auth).catch((reason) => {
-    console.error('Failed redirect result', reason)
+    log.error('Failed redirect result', reason)
     error.value = reason
   })
 })

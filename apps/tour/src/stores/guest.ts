@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { createLogger } from '@repo/utils'
 
-const log = createLogger('Guest')
+const log = createLogger('GuestStore')
 
 // Pre-generated train-related usernames for guests
 const GUEST_USERNAMES = [

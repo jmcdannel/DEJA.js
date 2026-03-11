@@ -13,6 +13,9 @@ import SelectLayout from './SelectLayout.vue'
 import ThemeSwitcher from './ThemeSwitcher.vue'
 import { useLayout, useServerStatus } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
+import { createLogger } from '@repo/utils'
+
+const log = createLogger('AppHeader')
 // import { useEfx, type Effect } from '@repo/modules'
 
 
@@ -85,7 +88,7 @@ async function handleEmergencyStop() {
 }
 
 function handleDeviceSelect(deviceId: string) {
-  console.log('Device selected:', deviceId)
+  log.debug('Device selected:', deviceId)
   // Handle device selection if needed
 }
 
@@ -121,7 +124,7 @@ const dccexConnected = computed(() => {
 })
 
 const currentLayout = computed(() => {
-  console.log('Current layoutId in AppHeader:', layoutId?.value, user?.value, layouts?.value)
+  log.debug('Current layoutId in AppHeader:', layoutId?.value, user?.value, layouts?.value)
   return layouts?.value ? 
     layouts.value?.find(l => l.id === layoutId.value)
     : { id: layoutId.value, name: layoutId.value }

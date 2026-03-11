@@ -2,10 +2,13 @@
 import { ref, computed, watch } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
 import { useEfx, type Effect } from '@repo/modules/effects'
+import { createLogger } from '@repo/utils'
 import EffectSwitch from './EffectSwitch.vue'
 import EffectCard from './EffectCard.vue'
 import EffectButton from './EffectButton.vue'
 import EffectRaw from './EffectRaw.vue'
+
+const log = createLogger('EffectItem')
 
 interface Props {
   effect: Effect
@@ -22,7 +25,7 @@ const { start, stop } = useTimeoutFn(() => {
 }, 2000)
 
 watch(state, async (newState) => {
-  console.log('Effect state watched to:', newState)
+  log.debug('Effect state watched to:', newState)
   isRunning.value = true
   stop()
   start()
