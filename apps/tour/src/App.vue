@@ -5,7 +5,7 @@ import { useTourStore } from './stores/tour'
 import TourLogo from './components/TourLogo.vue'
 import LayoutSelector from './components/LayoutSelector.vue'
 import TourUserProfile from './components/TourUserProfile.vue'
-import { BackgroundDecor, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
+import { PageBackground, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
 
 provideNotifications()
 const drawer = ref(false)
@@ -33,6 +33,7 @@ onMounted(() => {
 
 <template>
   <v-app>
+    <PageBackground app-name="tour">
     <v-app-bar color="black" elevation="2">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <TourLogo />
@@ -103,7 +104,6 @@ onMounted(() => {
     </v-navigation-drawer>
 
     <v-main class="relative bg-gradient">
-      <BackgroundDecor />
       <v-container fluid>
         <router-view v-slot="{ Component }">
           <TransitionFade>
@@ -116,6 +116,7 @@ onMounted(() => {
     <!-- Layout Selector Dialog -->
     <LayoutSelector />
     <NotificationContainer />
+    </PageBackground>
   </v-app>
 </template>
 
