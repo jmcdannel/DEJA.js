@@ -1,32 +1,32 @@
 # DEJA.js Roadmap
 
 ## P0 — Critical / Production Blockers
-- [ ] Offline/disconnection handling with retry
-- [ ] Server reconnection logic — serial, Firebase, MQTT auto-reconnect with backoff
-- [ ] Graceful server shutdown (clean up Firebase listeners, serial ports, WebSocket connections)
-- [ ] MQTT exponential backoff reconnection
+- [x] Offline/disconnection handling with retry
+- [x] Server reconnection logic — serial, Firebase, MQTT auto-reconnect with backoff
+- [x] Graceful server shutdown (clean up Firebase listeners, serial ports, WebSocket connections)
+- [x] MQTT exponential backoff reconnection
 
 ## P1 — Core UX & Stability
-- [ ] Make login / layout select flow better
+- [x] Make login / layout select flow better
 - [ ] Guest Mode / Demo Mode
-- [ ] Fix guard chain race conditions in cloud app router
-- [ ] Command deduplication / timeout / acknowledgment tracking
-- [ ] Log level configuration
+- [x] Fix guard chain race conditions in cloud app router
+- [x] Command deduplication / timeout / acknowledgment tracking
+- [x] Log level configuration
 - [x] Refactor broadcast.ts to use event emitter
 - [ ] Signal initialization
 - [ ] Refactor turnout commands
 
 ### Cloud App
-- [ ] Device detail views (incomplete)
+- [x] Device detail views (incomplete)
 - [ ] Settings page
-- [ ] Rename "layout" to "devices" in Cloud
+- [x] Rename "layout" to "devices" in Cloud
 - [ ] Update DCC-EX page on cloud app
 - [ ] Test connection button on cloud home
 - [ ] Drag-to-reorder persistence for effects/turnouts
 
 ### Monitor App
-- [ ] Enable auto-clear
-- [ ] Refactor to optimize
+- [x] Enable auto-clear
+- [x] Refactor to optimize
 
 ## P2 — Feature Development
 - [x] CV/Decoder Programming — read/write CVs from the browser (service track + POM)
@@ -38,7 +38,7 @@
 - [ ] AI Conductor — LLM-powered train dispatcher that manages traffic, signals, and routing
       - "Run the evening commuter schedule" → AI sets routes, signals, and drives trains
       - Collision avoidance via block occupancy + reservation system
-- [ ] Track Diagram Editor — draw your layout in the browser (tracks, turnouts, signals, blocks)
+- [x] Track Diagram Editor — draw your layout in the browser (tracks, turnouts, signals, blocks)
       - Real-time state overlay (turnout positions, block occupancy, signal aspects)
       - Click-to-control (throw turnouts, set routes, dispatch trains)
 - [ ] Operations Mode — car routing, switch lists, manifests (like JMRI OperationsPro)
