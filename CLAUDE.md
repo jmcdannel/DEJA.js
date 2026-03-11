@@ -125,8 +125,21 @@ pnpm deps:fix         # syncpack: fix mismatches
 1. **Plan before coding** — Use Plan Mode (Shift+Tab twice) for non-trivial changes
 2. **Lint and type-check before committing** — run `pnpm lint && pnpm check-types`
 3. **Use the `/verify-changes` slash command** to confirm nothing is broken
-4. **Add a changelog entry** — run `/changelog` for any user-facing changes
+4. **Create a changeset entry** — run `/changelog` before opening a PR (see below)
 5. **Use the `/commit-push-pr` slash command** to commit, push, and open a PR
+
+### Changeset Requirement (MANDATORY)
+
+**Every PR must include a changeset file.** The CI `changeset-check` workflow will **fail the PR** if no `.changeset/*.md` file is added. This is enforced — PRs cannot merge without it.
+
+To create a changeset:
+- Run `/changelog` in Claude Code — it analyzes the branch diff and creates the file automatically
+- Or run `pnpm changeset` interactively
+- Or create a file manually in `.changeset/` (see `.changeset/README.md` for format)
+
+**When to create the changeset:** After your code changes are done, before committing/pushing the PR. The `/commit-push-pr` command should always be preceded by `/changelog`.
+
+**What if there are no user-facing changes?** Still create a changeset — use `patch` bump and describe the internal change (e.g., `changed: **[docs]** Update README`, `improved: **[ci]** Add caching to build workflow`).
 
 ---
 
@@ -161,6 +174,7 @@ App-specific env files go in `apps/<app>/.env.local`.
 - **Do not run `npm install` or `yarn`** — this is a pnpm workspace; always use `pnpm`
 - **Do not commit `.env` files** — only `.env.example` belongs in git
 - **Do not bypass ESLint with `// eslint-disable`** without a specific reason in the comment
+- **Do not open a PR without a changeset** — run `/changelog` before `/commit-push-pr`; CI will block the PR if no `.changeset/*.md` file is present
 Managed with **pnpm workspaces** + **Turborepo**. Package manager is `pnpm@9.0.0`. Node.js >= 20 required.
 
 ```
