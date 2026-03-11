@@ -30,7 +30,7 @@ export default function TourPage() {
           <Image src="/tour/icon-512.png" alt="DEJA.js Tour Logo" width={128} height={128} className="h-32 w-32 drop-shadow-lg" />
         </div>
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">
-          <span className="text-indigo-500">DEJA.js Tour & IO</span>
+          <span className="text-cyan-400">DEJA.js Tour & IO</span>
         </h1>
         <p className="max-w-2xl text-lg md:text-xl text-gray-500 dark:text-gray-400 mx-auto">
           Automate and expand. Leverage structured presets and plug-and-play code to push your layout beyond basic throttle control.
@@ -42,7 +42,7 @@ export default function TourPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-indigo-500">🗺️</span> Guided Presets
+              <span className="text-cyan-500">🗺️</span> Guided Presets
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
               Create and execute sequential commands (Tours). Showcase routes, execute demonstrations, and automate complex yard movements with a single tap.
@@ -50,7 +50,7 @@ export default function TourPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-indigo-500">🔌</span> Plug-and-Play IO
+              <span className="text-cyan-500">🔌</span> Plug-and-Play IO
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
               Download provided sketch code for Arduino and Pico W. Expand your layout with hundreds of pins for signals, sensors, and servos without writing backend logic.
@@ -58,7 +58,7 @@ export default function TourPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-indigo-500">💡</span> Dynamic Effects
+              <span className="text-cyan-500">💡</span> Dynamic Effects
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
               Control physical lighting arrays, addressable LEDs, and relay modules directly from the Throttle interface. DEJA handles the protocol translation.
@@ -66,7 +66,7 @@ export default function TourPage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-indigo-500">🔄</span> Protocol Agnostic
+              <span className="text-cyan-500">🔄</span> Protocol Agnostic
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
               Communicate over direct serial USB, local WebSocket, or remote MQTT. Connect microcontrollers exactly how your specific layout geometry demands.
@@ -85,7 +85,7 @@ export default function TourPage() {
             DEJA.js IO provides a standardized way to pull those localized microcontrollers into a unified software interface, so your layout acts as one cohesive, engineered system.
           </p>
         </div>
-        <div className="bg-slate-900 rounded-xl p-6 border border-slate-800 shadow-lg font-mono text-sm text-indigo-400">
+        <div className="bg-slate-900 rounded-xl p-6 border border-slate-800 shadow-lg font-mono text-sm text-cyan-400">
            {`// Minimal configuration needed`}<br/>
            {`#define MQTT_SERVER "192.168.1.10"`}<br/>
            {`#define CLIENT_ID "yard_nodes_1"`}<br/>
@@ -102,7 +102,7 @@ export default function TourPage() {
       <div className="flex justify-center pb-8 gap-4">
         <Link
           href="/docs/tour"
-          className="px-8 py-4 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition shadow-lg"
+          className="px-8 py-4 bg-cyan-500 text-gray-950 rounded-lg font-bold hover:bg-cyan-400 transition shadow-lg"
         >
           View Tour Docs
         </Link>
