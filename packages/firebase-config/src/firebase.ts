@@ -22,3 +22,5 @@ if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
 export const firebaseApp = initializeApp(firebaseConfig)
 export const db = getFirestore(firebaseApp)
 export const rtdb = getDatabase(firebaseApp)
+
+export { storage } from './storage'
