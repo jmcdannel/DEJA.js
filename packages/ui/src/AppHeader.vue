@@ -187,7 +187,8 @@ const defaultProps = {
         </v-chip>
         
         <v-chip v-if="user" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-server-network"
-          :color="serverStatus?.online ? 'success' : 'error'" variant="elevated">
+          :color="serverStatus?.online ? 'success' : 'error'" variant="elevated"
+          @click="router.push({ name: 'Devices' })">
           <template #append>
             <span v-if="serverStatus?.online" class="status-dot success-dot"></span>
             <span v-else class="status-dot error-dot"></span>

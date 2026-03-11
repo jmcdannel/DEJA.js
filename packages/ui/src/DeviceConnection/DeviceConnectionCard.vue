@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import type { Device } from '@repo/modules'
 import { useLayout } from '@repo/modules'
 import StatusPulse from '../animations/StatusPulse.vue'
@@ -32,6 +32,27 @@ const { deviceTypes } = useLayout()
 
 const selectedPort = defineModel<string>('selectedPort', { default: '' })
 const selectedTopic = defineModel<string>('selectedTopic', { default: '' })
+
+// Prepopulate port/topic if the device has a saved value that matches available options
+watch(
+  () => props.availablePorts,
+  (ports) => {
+    if (!selectedPort.value && props.device.port && ports.includes(props.device.port)) {
+      selectedPort.value = props.device.port
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.device.topic,
+  (topic) => {
+    if (!selectedTopic.value && topic) {
+      selectedTopic.value = topic
+    }
+  },
+  { immediate: true }
+)
 
 const deviceConfig = computed(() => {
   return deviceTypes.find((dt) => dt.value === props.device.type)
@@ -101,7 +122,7 @@ function handleConnect() {
   >
     <v-card-text class="pa-4">
       <!-- Top row: device info + status -->
-      <div class="d-flex justify-space-between align-center mb-3">
+      <div class="d-flex justify-space-between align-center mb-3 flex-wrap ga-2">
         <div class="d-flex align-center ga-3">
           <v-avatar
             :color="deviceConfig?.color ?? 'grey'"
@@ -201,7 +222,7 @@ function handleConnect() {
       </div>
 
       <!-- Disconnected: port/topic selector + connect -->
-      <div v-else class="d-flex align-center ga-3">
+      <div v-else class="device-connection-actions">
         <v-select
           v-if="isUsbDevice"
           v-model="selectedPort"
@@ -210,7 +231,7 @@ function handleConnect() {
           density="compact"
           variant="outlined"
           hide-details
-          class="flex-grow-1"
+          class="device-connection-port-select"
           no-data-text="No ports found — click Refresh Ports"
         />
         <v-text-field
@@ -221,24 +242,26 @@ function handleConnect() {
           density="compact"
           variant="outlined"
           hide-details
-          class="flex-grow-1"
+          class="device-connection-port-select"
         />
-        <v-btn
-          color="success"
-          variant="flat"
-          @click="handleConnect"
-          :disabled="isUsbDevice ? !selectedPort : false"
-        >
-          Connect
-        </v-btn>
-        <v-btn
-          variant="tonal"
-          color="primary"
-          @click="emit('navigate', device.id)"
-        >
-          Details
-          <v-icon end icon="mdi-arrow-right" />
-        </v-btn>
+        <div class="d-flex ga-2">
+          <v-btn
+            color="success"
+            variant="flat"
+            @click="handleConnect"
+            :disabled="isUsbDevice ? !selectedPort : false"
+          >
+            Connect
+          </v-btn>
+          <v-btn
+            variant="tonal"
+            color="primary"
+            @click="emit('navigate', device.id)"
+          >
+            Details
+            <v-icon end icon="mdi-arrow-right" />
+          </v-btn>
+        </div>
       </div>
     </v-card-text>
   </v-card>
@@ -248,5 +271,26 @@ function handleConnect() {
 .device-connection-card {
   border-left: 4px solid;
   transition: border-color 0.3s ease;
+}
+
+.device-connection-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.device-connection-port-select {
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .device-connection-actions {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .device-connection-port-select {
+    flex: 1;
+  }
 }
 </style>
