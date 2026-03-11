@@ -1,0 +1,88 @@
+---
+title: Throttle App
+description: The primary train control interface for DEJA.js operators — control locomotive speed, throw turnouts, run routes, trigger effects, and manage multiple trains from any device with a browser.
+section: apps
+order: 1
+---
+
+# Throttle App
+
+The Throttle app is the primary user-facing application in the DEJA.js system. It gives model railroad operators real-time control of locomotives, turnouts, signals, routes, and effects from any device with a modern web browser.
+
+Operators can run a single train with detailed throttle controls, manage multiple trains simultaneously in a grid view, or use the Conductor view for full-station operation on large screens. Every control writes to Firebase in real time, and the DEJA.js server translates those changes into DCC-EX serial commands sent to your CommandStation.
+
+![Throttle app main screen](/images/docs/throttle/overview-main.png)
+
+{/* VIDEO: Quick tour of the Throttle app — navigating between views, controlling a locomotive, throwing a turnout */}
+
+## Key Features
+
+- **Speed and direction control** for individual locomotives using button controls (mobile) or slider controls (desktop/tablet).
+- **Function buttons** (F0 through F28) for headlights, horns, bells, sound effects, and decoder-specific features via a speed dial overlay.
+- **Turnout management** with throw/close controls and color-coded state indicators.
+- **Route execution** through interactive track maps or a route list, with a visual timeline showing turnout sequences and a progress bar during execution.
+- **Consist support** for linking multiple locomotives together, visible directly on the throttle screen.
+- **Multi-throttle operation** with a grid view of all active throttles, drag-to-reorder tiles, and a floating action button to add locomotives from the roster.
+- **Conductor view** combining throttle list, active throttle, and turnout controls in a three-pane layout designed for operator stations.
+- **Signal monitoring** with red, yellow, and green aspect indicators.
+- **Effects control** for triggering sound effects, lights, and animations on your layout.
+- **Swipe navigation** between locomotives on the throttle screen.
+- **Emergency stop** accessible from the app header on every page.
+- **Theme switching** between light and dark modes.
+- **Guest access** available without authentication for quick demonstrations.
+
+## Tech Stack
+
+| Technology | Role |
+|------------|------|
+| Vue 3 | Application framework (Composition API with `<script setup lang="ts">`) |
+| Vuetify 3 | UI component library (Material Design) |
+| Tailwind CSS | Utility-first styling |
+| Pinia | State management |
+| Vue Router 4 | Client-side routing with auth guards |
+| VueFire | Reactive Firebase Firestore bindings |
+| VueUse | Composable utilities (`useStorage`, `useSwipe`, `useDebounce`) |
+| Firebase | Real-time database and authentication |
+| MQTT | Optional message transport via `mqtt-vue-hook` |
+| Vite | Development server and production builds |
+
+## Navigation Structure
+
+The Throttle app uses a customizable footer navigation bar and a slide-out side menu. The footer bar shows your favorite views as icon buttons, and you can configure which items appear through the settings.
+
+### Pages
+
+| Page | Route | Description |
+|------|-------|-------------|
+| [Home](/docs/apps/throttle/home) | `/` | Landing page with speedometer widgets for active throttles, login cards, and layout selection |
+| [Throttle Control](/docs/apps/throttle/throttle) | `/throttle/:address` | Full single-locomotive control with speed, functions, consist, and emergency stop |
+| [Throttle List](/docs/apps/throttle/throttle-list) | `/throttles` | Grid view of all active throttles for multi-train operation |
+| [Conductor View](/docs/apps/throttle/conductor) | `/conductor` | Three-pane operator station layout with throttle list, active throttle, and turnouts |
+| [Effects](/docs/apps/throttle/effects) | `/effects` | Sound effects, lights, and animation control |
+| [Routes](/docs/apps/throttle/routes) | `/routes` | Interactive track maps and route execution |
+| [Signals](/docs/apps/throttle/signals) | `/signals` | Signal monitoring and control |
+| [Turnouts](/docs/apps/throttle/turnouts) | `/turnouts` | Track switch throw/close controls |
+| Roster | `/locos` | Locomotive roster browser |
+| Settings | `/settings` | App preferences and footer menu customization |
+| Select Layout | `/select-layout` | Layout picker for multi-layout setups |
+| Login | `/login` | Authentication screen |
+
+### Route Guards
+
+Most routes require authentication. Some also require an active DCC-EX connection and a selected layout before they are accessible.
+
+| Guard | Applied To |
+|-------|------------|
+| `requireAuth` | All pages except Home and Login |
+| `requireLayout` | Effects, Signals, Routes, Turnouts, Conductor, Throttle, Throttle List |
+| `requireDccEx` | Roster, Conductor, Throttle, Throttle List |
+
+## App Shell
+
+The Throttle app shell includes three persistent UI elements visible across all pages:
+
+- **AppHeader** -- displays the app name, layout power toggle, emergency stop button, device connection status, and user profile. The hamburger menu opens the side navigation drawer.
+- **Side Menu** -- a slide-out drawer with the full list of navigation items, each with an icon and color. Items marked as favorites also appear in the footer bar.
+- **Footer Bar** -- a pill-shaped button group at the bottom of the screen showing your favorited navigation items for quick access. The default favorites are Throttles, Conductor, Throttle, Effects, Routes, Turnouts, and Signals.
+
+Page transitions use a fade animation when navigating between views. Swipe gestures on the main content area navigate forward and backward through the menu (disabled on the Throttle Control page, which uses swipe for locomotive switching).
