@@ -134,8 +134,8 @@ export default function Header() {
       <div className="max-w-5xl mx-auto px-6 pt-7 pb-4 flex items-center justify-between gap-6">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/icon-192.png" alt="" width={32} height={32} className="inline-block h-8 w-8" />
-          <span className="font-display text-[2rem] tracking-[0.08em] leading-none text-gray-900 dark:text-white">
-            DEJA<span className="text-cyan-400">.</span>js
+          <span className="font-display text-[2rem] tracking-[0.08em] leading-none">
+            <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">DEJA</span><span className="text-lime-400">.</span><span className="text-fuchsia-500 text-[1.2rem] font-mono">js</span>
           </span>
           <span className="sr-only">DEJA.js Home</span>
         </Link>
@@ -148,7 +148,7 @@ export default function Header() {
               onMouseEnter={productsDropdown.open}
               aria-expanded={productsDropdown.isOpen}
               aria-haspopup="true"
-              className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1 bg-transparent border-none text-[0.875rem] tracking-[0.04em]"
+              className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1 bg-transparent border-none text-[0.8rem] tracking-[0.06em] font-mono"
             >
               Products
               <svg className={`w-4 h-4 opacity-70 transition-transform ${productsDropdown.isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -203,7 +203,7 @@ export default function Header() {
               onMouseEnter={docsDropdown.open}
               aria-expanded={docsDropdown.isOpen}
               aria-haspopup="true"
-              className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1 bg-transparent border-none text-[0.875rem] tracking-[0.04em]"
+              className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1 bg-transparent border-none text-[0.8rem] tracking-[0.06em] font-mono"
             >
               Docs
               <svg className={`w-4 h-4 opacity-70 transition-transform ${docsDropdown.isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -249,15 +249,15 @@ export default function Header() {
           {/* Pricing Link */}
           <Link
             href="/pricing"
-            className={`text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-[0.875rem] tracking-[0.04em] ${pathname === '/pricing' ? 'text-gray-900 dark:text-white' : ''}`}
+            className={`text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-[0.8rem] tracking-[0.06em] font-mono ${pathname === '/pricing' ? 'text-gray-900 dark:text-white' : ''}`}
           >
             Pricing
           </Link>
         </nav>
 
         <div className="flex items-center gap-4 text-[0.875rem]">
-          <a href="https://cloud.dejajs.com/" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors hidden sm:block tracking-[0.04em]">Log in</a>
-          <a href="https://cloud.dejajs.com/signup" className="px-5 py-2 bg-cyan-500 hover:bg-cyan-400 text-gray-950 rounded-lg shadow-sm transition-colors text-center whitespace-nowrap font-bold tracking-[0.04em]">Sign up</a>
+          <a href="https://cloud.dejajs.com/" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors hidden sm:block tracking-[0.06em] font-mono text-[0.8rem]">Log in</a>
+          <a href="https://cloud.dejajs.com/signup" className="px-5 py-2 bg-cyan-500 hover:bg-cyan-400 text-gray-950 rounded-lg shadow-sm transition-colors text-center whitespace-nowrap font-bold tracking-[0.06em] font-mono text-[0.8rem]">Sign up</a>
         </div>
       </div>
     </header>
