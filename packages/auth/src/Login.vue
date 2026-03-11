@@ -9,6 +9,7 @@ import {
 } from 'firebase/auth'
 import { useFirebaseAuth, useCurrentUser } from 'vuefire'
 import { createLogger } from '@repo/utils'
+import { Logo } from '@repo/ui'
 
 const googleAuthProvider = new GoogleAuthProvider()
 const githubAuthProvider = new GithubAuthProvider()
@@ -108,15 +109,13 @@ onMounted(() => {
         >
           <div class="auth-branding-overlay absolute inset-0"></div>
           <div class="relative z-10 flex flex-col items-center text-center px-8">
-            <v-icon size="80" color="white" class="mb-4">mdi-train</v-icon>
-            <h1 class="text-4xl font-bold mb-2">DEJA.js</h1>
-            <p class="text-lg opacity-80 mb-8">Model Railroad Control System</p>
-            <div class="flex gap-4 mb-8 opacity-40">
-              <v-icon size="24" color="white">mdi-signal-variant</v-icon>
-              <v-icon size="24" color="white">mdi-railroad-light</v-icon>
-              <v-icon size="24" color="white">mdi-swap-horizontal</v-icon>
+            <Logo variant="cloud" app-name="Cloud" class="mb-4 transform scale-150" />
+            <h1 class="text-4xl font-bold mt-4 mb-2">DEJA.js</h1>
+            <p class="text-xl opacity-90 mb-10 font-medium">The modren DCC platform</p>
+            <div class="flex gap-8 mb-8 opacity-60">
+              <Logo variant="throttle" app-name="" />
+              <Logo variant="monitor" app-name="" />
             </div>
-            <p class="text-md opacity-60 italic">"All Aboard! Take command of your layout."</p>
           </div>
         </div>
       </v-col>
@@ -125,9 +124,8 @@ onMounted(() => {
       <v-col cols="12" md="7" class="d-flex align-center justify-center">
         <div class="w-full max-w-md px-6 py-8">
           <!-- Mobile branding header -->
-          <div class="d-md-none text-center mb-6">
-            <v-icon size="48" color="primary">mdi-train</v-icon>
-            <h2 class="text-2xl font-bold mt-2">DEJA.js</h2>
+          <div class="d-md-none flex flex-col items-center text-center mb-8">
+            <Logo variant="cloud" app-name="Cloud" class="mb-2" />
           </div>
 
           <template v-if="user">
@@ -219,7 +217,8 @@ onMounted(() => {
                 color="primary"
                 size="large"
                 block
-                class="text-none mb-4"
+                elevation="2"
+                class="text-none mb-4 font-weight-bold text-h6"
               >
                 Sign In
               </v-btn>
@@ -245,7 +244,7 @@ onMounted(() => {
 
 <style scoped>
 .auth-branding-panel {
-  background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #006064 100%);
+  background: linear-gradient(135deg, #09090b 0%, #18181b 50%, #000000 100%);
   background-size: 200% 200%;
   animation: auth-gradient-shift 8s ease infinite;
 }

@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.5);
+}
+
+/* Base Form Elements Transparency */
 [type='text'],
 [type='email'],
 [type='url'],
@@ -18,4 +42,23 @@
 textarea,
 select {
   background-color: transparent;
+}
+
+/* Glassmorphism Utilities */
+@layer utilities {
+  .glass {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-soft-dark;
+  }
+  .glass-dark {
+    @apply bg-black/20 backdrop-blur-xl border border-white/10 shadow-soft-dark;
+  }
+  .glass-cyan {
+    @apply border border-brand-cyan/30 shadow-glow-cyan bg-brand-cyan/5 backdrop-blur-md;
+  }
+  .glass-magenta {
+    @apply border border-brand-magenta/30 shadow-glow-magenta bg-brand-magenta/5 backdrop-blur-md;
+  }
+  .glass-lime {
+    @apply border border-brand-lime/30 shadow-glow-lime bg-brand-lime/5 backdrop-blur-md;
+  }
 }

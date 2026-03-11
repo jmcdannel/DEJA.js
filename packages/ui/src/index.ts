@@ -1,4 +1,5 @@
 export { default as AppHeader } from './AppHeader.vue'
+export { default as Logo } from './Logo.vue'
 export { default as LocoAvatar } from './LocoAvatar.vue'
 export { default as Consist } from './Consist/Consist.vue'
 export { default as EditConsist } from './Consist/EditConsist.vue'

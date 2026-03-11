@@ -636,6 +636,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@repo/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils

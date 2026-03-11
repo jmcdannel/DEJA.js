@@ -28,20 +28,21 @@ import '@mdi/font/css/materialdesignicons.css'
 const light = {
   colors: {
     /* eslint-disable sort-keys -- theme order matters */
-    background: '#f7f7f7',
-    surface: '#f7f7f7',
+    background: '#F0F4F8',
+    surface: '#FFFFFF',
     'surface-bright': '#FFFFFF',
-    'surface-light': '#EEEEEE',
-    'on-surface-variant': '#EEEEEE',
-    'surface-variant': '#424242',
-    primary: '#1867C0',
-    'primary-darken-1': '#1F5592',
-    secondary: '#48A9A6',
-    'secondary-darken-1': '#018786',
-    error: '#B00020',
-    info: '#2196F3',
-    success: '#4CAF50',
-    warning: '#FB8C00',
+    'surface-light': '#F8FAFC',
+    'on-surface-variant': '#334155',
+    'surface-variant': '#E2E8F0',
+    primary: '#00B8D4', // Cyan
+    'primary-darken-1': '#0097A7',
+    secondary: '#D500F9', // Magenta
+    'secondary-darken-1': '#AA00FF',
+    error: '#FF1744',
+    info: '#2979FF',
+    success: '#00E676',
+    warning: '#FF9100',
+    accent: '#C6FF00', // Lime
   },
   dark: false,
   variables: {
@@ -67,19 +68,20 @@ const light = {
 const dark = {
   colors: {
     /* eslint-disable sort-keys -- theme order matters */
-    background: '#121212',
-    surface: '#1D1D1D',
-    'surface-bright': '#2C2C2C',
-    'surface-light': '#424242',
-    'on-surface-variant': '#EEEEEE',
-    'surface-variant': '#424242',
-    primary: colors.blue.base,
-    secondary: colors.purple.base,
-    'secondary-darken-1': '#018786',
-    error: '#CF6679',
-    info: '#2196F3',
-    success: '#4CAF50',
-    warning: '#FB8C00',
+    background: '#0B1120', // Deep slate for popping neo aesthetics
+    surface: '#111827', // A slightly lighter slate
+    'surface-bright': '#1F2937',
+    'surface-light': '#374151',
+    'on-surface-variant': '#E2E8F0',
+    'surface-variant': '#374151',
+    primary: '#00E5FF', // Neon Cyan
+    secondary: '#D500F9', // Bright Magenta
+    'secondary-darken-1': '#AA00FF',
+    error: '#FF1744',
+    info: '#2979FF',
+    success: '#00E676',
+    warning: '#FF9100',
+    accent: '#C6FF00', // Vivid Lime
   },
   dark: true,
   variables: {
