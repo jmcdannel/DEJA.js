@@ -5,7 +5,8 @@ import type { MenuItem } from './types'
 
 const props = defineProps<{
   drawer: boolean,
-  menu?: MenuItem[]
+  menu?: MenuItem[],
+  temporary?: boolean
 }>();
 
 const emit = defineEmits<{
@@ -22,6 +23,10 @@ const { mobile } = useDisplay()
 
 function onHandleMenu(item: MenuItem) {
   emit('handleMenu', item)
+  // Auto-close drawer on mobile or when used as temporary overlay
+  if (mobile.value) {
+    emit('update:drawer', false)
+  }
 }
 
 const DEJA_SUITE_MENU = [
@@ -64,7 +69,7 @@ const DEJA_SUITE_MENU = [
 
 </script>
 <template>
-  <v-navigation-drawer v-model="boundDrawer" :mobile="mobile" mobile-breakpoint="md" class="bg-slate-900/95 backdrop-blur-sm">
+  <v-navigation-drawer v-model="boundDrawer" :mobile="mobile" mobile-breakpoint="md" :temporary="temporary || mobile" class="bg-slate-900/95 backdrop-blur-sm">
     <v-list density="compact" class="py-1">
         <v-list-item v-for="item in menu"
         :key="item.label"

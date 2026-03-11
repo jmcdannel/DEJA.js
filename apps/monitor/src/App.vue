@@ -125,7 +125,7 @@ const menu = [
         </template>
       </AppHeader>
 
-      <Menu v-model:drawer="drawer" :menu="menu" @handle-menu="handleMenu" />
+      <Menu v-model:drawer="drawer" :menu="menu" :temporary="isDashboardRoute" @handle-menu="handleMenu" />
 
       <v-main v-if="layoutId" :class="{ 'pa-0': isDashboardRoute }">
         <RouterView v-slot="{ Component }">
