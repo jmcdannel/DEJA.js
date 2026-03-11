@@ -32,16 +32,20 @@ const color = computed(() => colors[deviceType.value?.color || DEFAULT_COLOR])
 </script>
 <template>
   <v-card 
-    class="rounded-2xl shadow-xl p-2 pb-5 device-gradient"
-    :subtitle="device.type"
+    class="rounded-2xl shadow-xl p-2 pb-5 device-gradient text-white"
     color="primary"
-    :title="device.id"
     variant="flat">
+    <template v-slot:title>
+      <span class="text-white font-bold tracking-wide">{{ device.id }}</span>
+    </template>
+    <template v-slot:subtitle>
+      <span class="text-white/70 font-semibold tracking-wider uppercase text-xs">{{ device.type }}</span>
+    </template>
     <template v-slot:prepend>
-      <v-icon v-if="device.type === 'dcc-ex'" size="48" :color="device.isConnected ? 'success' : 'error'" icon="mdi-memory" />
-      <v-icon v-else-if="device.type === 'deja-arduino'" size="48" :color="device.isConnected ? 'success' : 'error'" icon="mdi-usb" />
-      <v-icon v-else-if="device.type === 'deja-arduino-led'" size="48" :color="device.isConnected ? 'success' : 'error'" icon="mdi-led-strip" />
-      <v-icon v-else-if="device.type === 'deja-mqtt'" size="48" :color="device.isConnected ? 'success' : 'error'" icon="mdi-wifi" />
+      <v-icon v-if="device.type === 'dcc-ex'" class="mr-2" size="48" :color="device.isConnected ? 'success' : 'error'" icon="mdi-memory" />
+      <v-icon v-else-if="device.type === 'deja-arduino'" class="mr-2" size="48" :color="device.isConnected ? 'success' : 'error'" icon="mdi-usb" />
+      <v-icon v-else-if="device.type === 'deja-arduino-led'" class="mr-2" size="48" :color="device.isConnected ? 'success' : 'error'" icon="mdi-led-strip" />
+      <v-icon v-else-if="device.type === 'deja-mqtt'" class="mr-2" size="48" :color="device.isConnected ? 'success' : 'error'" icon="mdi-wifi" />
     </template>
     <v-card-text>
       <!-- <pre>{{ device }}</pre> -->

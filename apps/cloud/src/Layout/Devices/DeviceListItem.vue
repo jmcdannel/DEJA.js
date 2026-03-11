@@ -50,9 +50,8 @@ async function handleDisconnect () {
 </script>
 <template>
   <v-card
-    class="mx-auto w-full h-full justify-between flex flex-col border-t-4 border-b-4"
-    :class="color.border"
-    :subtitle="device?.type || 'ID'"
+    class="mx-auto w-full h-full justify-between flex flex-col border-t-4 border-b-4 glass transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+    :class="[color.border, device?.isConnected ? 'bg-opacity-20' : 'bg-opacity-10']"
     :color="color.value"
     :variant="device?.isConnected ? 'tonal' : 'outlined'"
     density="compact"
@@ -62,7 +61,10 @@ async function handleDisconnect () {
       <v-icon v-else :icon="deviceType?.icon || 'mdi-help'" class="w-16 h-16 mr-2 border rounded-full" />
     </template>
     <template #title>
-      <span class="text-md">{{device?.id}}</span>
+      <div class="flex flex-col">
+        <span class="text-lg font-bold text-white tracking-wide">{{device?.id}}</span>
+        <span class="text-xs text-white/70 uppercase tracking-wider font-semibold">{{device?.type || 'ID'}}</span>
+      </div>
     </template>
     <template #append>
     </template>
