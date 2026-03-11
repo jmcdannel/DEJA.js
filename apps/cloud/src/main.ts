@@ -43,6 +43,9 @@ const light = {
     success: '#00E676',
     warning: '#FF9100',
     accent: '#C6FF00', // Lime
+    'device-connected': '#4CAF50',
+    'device-disconnected': '#F44336',
+    'stat-card': '#F5F7FA',
   },
   dark: false,
   variables: {
@@ -82,6 +85,9 @@ const dark = {
     success: '#00E676',
     warning: '#FF9100',
     accent: '#C6FF00', // Vivid Lime
+    'device-connected': '#4CAF50',
+    'device-disconnected': '#F44336',
+    'stat-card': '#1E1E2E',
   },
   dark: true,
   variables: {
@@ -103,6 +109,40 @@ const dark = {
     'theme-code': '#F5F5F5',
     'theme-on-code': '#000000',
   }
+}
+
+const highContrast = {
+  colors: {
+    /* eslint-disable sort-keys -- theme order matters */
+    background: '#000000',
+    surface: '#1A1A1A',
+    'surface-variant': '#2A2A2A',
+    'surface-bright': '#333333',
+    'surface-light': '#2A2A2A',
+    'on-surface-variant': '#FFFFFF',
+    primary: '#00FFFF',
+    'primary-darken-1': '#00CCCC',
+    secondary: '#FF00FF',
+    'secondary-darken-1': '#CC00CC',
+    accent: '#FFFF00',
+    success: '#00FF00',
+    error: '#FF0000',
+    warning: '#FFA500',
+    info: '#00BFFF',
+    'device-connected': '#00FF00',
+    'device-disconnected': '#FF0000',
+    'stat-card': '#1A1A1A',
+  },
+  dark: true,
+  variables: {
+    /* eslint-disable sort-keys -- theme order matters */
+    'border-color': '#FFFFFF',
+    'border-opacity': 0.3,
+    'high-emphasis-opacity': 1,
+    'medium-emphasis-opacity': 0.8,
+    'disabled-opacity': 0.5,
+    'idle-opacity': 0.2,
+  },
 }
 
 const vuetify = createVuetify({
@@ -133,6 +173,7 @@ const vuetify = createVuetify({
     defaultTheme: 'dark',
     themes: {
       dark,
+      'high-contrast': highContrast,
       light,
     },
   },

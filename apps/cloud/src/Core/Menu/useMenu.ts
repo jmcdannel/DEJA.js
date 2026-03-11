@@ -12,9 +12,9 @@ export function useMenu() {
     // },
     {
       color: 'cyan',
-      icon: 'mdi-fence',
-      label: 'Layout',
-      name: 'layout',
+      icon: 'mdi-developer-board',
+      label: 'Devices',
+      name: 'devices',
     },
     {
       color: 'lime',

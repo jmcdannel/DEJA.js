@@ -1,30 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import DCCLog from '../Dashboard/components/DCCLog/DCCLog.vue'
+import DccLogPane from '../Dashboard/components/DccLogPane.vue'
 import TurnoutLogs from '../Dashboard/components/TurnoutLogs.vue'
 import EffectLogs from '../Dashboard/components/EffectLogs.vue'
-import DeviceSerialMonitors from '../Dashboard/components/DeviceSerialMonitor/DeviceSerialMonitors.vue'
+import DeviceSerialPane from '../Dashboard/components/DeviceSerialPane.vue'
 import { useLayoutLogListeners } from '../composables/useLayoutLogListeners'
-import { useLayout } from '@repo/modules'
 
 const route = useRoute()
 const router = useRouter()
 const { turnoutChanges, effectChanges } = useLayoutLogListeners()
-const { getDevices } = useLayout()
-const devices = getDevices()
-const resolvedDevices = computed(() => {
-  const candidate = devices as unknown as { value?: unknown } | unknown
-  if (Array.isArray(candidate)) {
-    return candidate
-  }
-
-  if (candidate && Array.isArray((candidate as { value?: unknown }).value)) {
-    return (candidate as { value: unknown[] }).value
-  }
-
-  return [] as unknown[]
-})
 
 const logType = computed(() => (route.params.logType as string || '').toLowerCase())
 
@@ -33,7 +18,7 @@ const currentLog = computed(() => {
     case 'dcc':
       return {
         title: 'DCC Logger',
-        component: DCCLog,
+        component: DccLogPane,
         props: {},
       }
     case 'turnouts':
@@ -51,8 +36,8 @@ const currentLog = computed(() => {
     case 'devices':
       return {
         title: 'Device Serial Monitors',
-        component: DeviceSerialMonitors,
-        props: { devices: resolvedDevices.value },
+        component: DeviceSerialPane,
+        props: {},
       }
     default:
       return null

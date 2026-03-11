@@ -157,7 +157,7 @@ async function handleDisconnect () {
     </v-card-text>
     <v-card-actions>
       <v-btn
-        @click="$router.push({ name: 'Device', params: { deviceId: device?.id } })"  
+        @click="$router.push({ name: 'DeviceDetails', params: { deviceId: device?.id } })"  
         :color="color.value"
         text="Details"
         variant="outlined">

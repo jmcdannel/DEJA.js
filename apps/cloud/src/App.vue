@@ -13,7 +13,7 @@ import { isNavigating } from '@/router'
 const log = createLogger('CloudApp')
 
 // Components
-import { AppHeader, NotificationContainer, provideNotifications } from '@repo/ui'
+import { AppHeader, NotificationContainer, provideNotifications, PageBackground } from '@repo/ui'
 // import { useDcc } from '@repo/dccex'
 // import { useEfx } from '@repo/modules'
 
@@ -57,7 +57,7 @@ const { isDark } = useThemeSwitcher()
 
 function handleLayoutSelect(newLayout: string) {
   layoutId.value = newLayout
-  router.push({ name: 'Layout' })
+  router.push({ name: 'Devices' })
 }
 
 function handleLogoClick() {
@@ -70,6 +70,7 @@ const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
 <template>
   <v-responsive class="border rounded min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
       <v-app :theme="isDark ? 'dark' : 'light'" class="!bg-transparent">
+        <PageBackground app-name="cloud">
         <AppHeader
           app-name="Cloud"
           app-icon="mdi-cloud"
@@ -104,21 +105,22 @@ const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
         </v-banner>
         <Menu v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
       <v-main>
+        <v-progress-linear
+          :active="isNavigating"
+          indeterminate
+          color="primary"
+          height="3"
+          class="position-fixed top-0 left-0 right-0"
+          style="z-index: 9999;"
+        />
         <v-container class="pa-6 pa-md-12 max-w-7xl mx-auto transition-all duration-300">
-          <v-overlay
-            :model-value="isNavigating"
-            contained
-            persistent
-            class="d-flex align-center justify-center"
-          >
-            <v-progress-circular indeterminate color="primary" size="48" />
-          </v-overlay>
           <RouterView v-slot="{ Component, route }">
             <component :is="Component" :key="route.fullPath" />
           </RouterView>
         </v-container>
       </v-main>
       <NotificationContainer />
+      </PageBackground>
     </v-app>
   </v-responsive>
 </template>

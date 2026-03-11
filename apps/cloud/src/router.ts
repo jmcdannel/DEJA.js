@@ -227,8 +227,8 @@ const router = createRouter({
       meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireDccEx: true, requireLayout: true },
     },
     {
-      path: '/layout',
-      name: 'Layout',
+      path: '/devices',
+      name: 'Devices',
       component: () => import('./Layout/Layout.vue'),
       meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
     },
@@ -236,11 +236,11 @@ const router = createRouter({
       path: '/settings',
       name: 'Settings',
       component: () => import('./Settings/Settings.vue'),
-      meta: { requireAuth: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
     },
     {
-      path: '/layout/device/:deviceId',
-      name: 'Device',
+      path: '/devices/:deviceId',
+      name: 'DeviceDetails',
       component: () => import('./Layout/Devices/DeviceDetails.vue'),
       meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
     },
@@ -282,16 +282,19 @@ function checkRequireAuth(
   }
 }
 
-async function checkRequireOnboarding(
-  user: User,
-  to: RouteLocationNormalized,
-): Promise<RouteLocationRaw | undefined> {
+/** Fetch the user's layouts once — shared by onboarding & approval guards. */
+async function getUserLayouts(user: User) {
   const layoutsQuery = query(
     collection(db, 'layouts'),
     where('owner', '==', user.email),
   )
-  const layoutsSnap = await getDocs(layoutsQuery)
+  return getDocs(layoutsQuery)
+}
 
+function checkRequireOnboarding(
+  layoutsSnap: Awaited<ReturnType<typeof getDocs>>,
+  to: RouteLocationNormalized,
+): RouteLocationRaw | undefined {
   if (layoutsSnap.empty) {
     return {
       path: '/onboarding',
@@ -300,16 +303,9 @@ async function checkRequireOnboarding(
   }
 }
 
-async function checkRequireApproval(
-  user: User,
-): Promise<RouteLocationRaw | undefined> {
-  const layoutsQuery = query(
-    collection(db, 'layouts'),
-    where('owner', '==', user.email),
-  )
-  const layoutsSnap = await getDocs(layoutsQuery)
-
-  // If the user has no layouts the onboarding guard should have caught it.
+function checkRequireApproval(
+  layoutsSnap: Awaited<ReturnType<typeof getDocs>>,
+): RouteLocationRaw | undefined {
   if (layoutsSnap.empty) {
     return
   }
@@ -381,9 +377,13 @@ router.beforeEach(async (to) => {
     // requireAuth is set (the guard above would have returned).
     const user = currentUser as User
 
+    // Fetch user layouts once for both onboarding and approval guards.
+    const needsLayouts = meta.requireOnboarding || meta.requireApproval
+    const layoutsSnap = needsLayouts ? await getUserLayouts(user) : null
+
     // 3. Require onboarding (user must have at least one layout)
-    if (meta.requireOnboarding) {
-      const redirect = await checkRequireOnboarding(user, to)
+    if (meta.requireOnboarding && layoutsSnap) {
+      const redirect = checkRequireOnboarding(layoutsSnap, to)
       if (redirect) {
         log.debug('requireOnboarding → redirecting to onboarding')
         return redirect
@@ -391,8 +391,8 @@ router.beforeEach(async (to) => {
     }
 
     // 4. Require layout approval
-    if (meta.requireApproval) {
-      const redirect = await checkRequireApproval(user)
+    if (meta.requireApproval && layoutsSnap) {
+      const redirect = checkRequireApproval(layoutsSnap)
       if (redirect) {
         log.debug('requireApproval → redirecting to pending-approval')
         return redirect

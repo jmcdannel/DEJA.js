@@ -187,7 +187,8 @@ const defaultProps = {
         </v-chip>
         
         <v-chip v-if="user" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-server-network"
-          :color="serverStatus?.online ? 'success' : 'error'" variant="elevated">
+          :color="serverStatus?.online ? 'success' : 'error'" variant="elevated"
+          @click="router.push({ name: 'Devices' })">
           <template #append>
             <span v-if="serverStatus?.online" class="status-dot success-dot"></span>
             <span v-else class="status-dot error-dot"></span>
@@ -197,8 +198,8 @@ const defaultProps = {
 
         <v-spacer class="ma-2"></v-spacer>
       </template>
-      <ThemeSwitcher class="ma-1" />
-      <UserProfile v-if="showUserProfile !== false && user" />
+      <ThemeSwitcher class="mx-2" />
+      <UserProfile v-if="showUserProfile !== false && user" class="mx-2" />
       <template v-if="layoutId && user">
         <TrackPower class="ma-1" :power-state="layoutPowerState" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
         <Power class="ma-1" v-if="showLayoutPower" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />
