@@ -284,25 +284,29 @@ const defaultProps = {
 
 <style scoped>
 .header-gradient {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(20px);
+  background: rgba(11, 17, 32, 0.6);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
 .header-gradient2 {
-  background: rgba(15, 23, 42, 0.25);
-  backdrop-filter: blur(20px);
+  background: rgba(11, 17, 32, 0.3);
+  backdrop-filter: blur(24px);
 }
 
-/* Ensure proper contrast for all elements */
+/* Premium translucent elements */
 :deep(.v-btn) {
-  backdrop-filter: blur(12px);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 :deep(.v-chip) {
-  backdrop-filter: blur(12px);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Consistent spacing and sizing */
@@ -315,15 +319,19 @@ const defaultProps = {
   min-height: 32px;
 }
 
-/* Subtle hover effects */
+/* Glowing hover effects */
 :deep(.v-btn:hover) {
-  transform: translateY(-1px);
-  transition: transform 0.2s ease;
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 229, 255, 0.2);
+  border-color: rgba(0, 229, 255, 0.3);
 }
 
 :deep(.v-chip:hover) {
-  transform: translateY(-1px);
-  transition: transform 0.2s ease;
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(213, 0, 249, 0.2);
+  border-color: rgba(213, 0, 249, 0.3);
 }
 
 /* Ensure consistent gap between elements */

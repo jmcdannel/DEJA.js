@@ -18,7 +18,6 @@ import { db } from '@repo/firebase-config'
 import { createLogger } from '@repo/utils'
 import type { Device, Layout, Tag } from './types'
 import { useDejaJS } from '@repo/deja'
-import { createLogger } from '@repo/utils'
 import { defaultLayoutSounds } from './constants'
 
 const log = createLogger('Layout')
@@ -146,6 +145,24 @@ export const useLayout = () => {
     }
   }
 
+  async function updateLayout(id: string, data: Partial<Layout>) {
+    log.debug('updateLayout', id, data)
+    try {
+      await setDoc(
+        doc(db, `layouts`, id),
+        {
+          ...data,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      )
+      return true
+    } catch (e) {
+      log.error('Error updating layout: ', e)
+      return false
+    }
+  }
+
   async function createDevice(id: string, device: Device) {
     if (!layoutId.value) {
       log.error('No layoutId set, cannot create device')
@@ -267,6 +284,7 @@ export const useLayout = () => {
     getLayout,
     getLayouts,
     createLayout,
+    updateLayout,
     getDevice,
     getLayoutDevices,
     getDevices,

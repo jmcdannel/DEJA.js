@@ -9,6 +9,7 @@ import {
   type User,
 } from 'firebase/auth'
 import { useFirebaseAuth } from 'vuefire'
+import { Logo } from '@repo/ui'
 
 const googleAuthProvider = new GoogleAuthProvider()
 const githubAuthProvider = new GithubAuthProvider()
@@ -28,10 +29,6 @@ const emailLoading = ref(false)
 const googleLoading = ref(false)
 const githubLoading = ref(false)
 
-const displayNameRules = [
-  (v: string) => !!v || 'Name is required',
-  (v: string) => v.length >= 2 || 'Name must be at least 2 characters',
-]
 const emailRules = [
   (v: string) => !!v || 'Email is required',
   (v: string) => /.+@.+\..+/.test(v) || 'Must be a valid email',
@@ -79,7 +76,6 @@ async function handleEmailSignup() {
   error.value = null
   try {
     const cred = await createUserWithEmailAndPassword(auth, email.value, password.value)
-    await updateProfile(cred.user, { displayName: displayName.value })
     emit('signup', cred.user)
   } catch (err: unknown) {
     const firebaseErr = err as { message?: string }
@@ -130,15 +126,13 @@ async function handleGithubSignup() {
         >
           <div class="auth-branding-overlay absolute inset-0"></div>
           <div class="relative z-10 flex flex-col items-center text-center px-8">
-            <v-icon size="80" color="white" class="mb-4">mdi-train</v-icon>
-            <h1 class="text-4xl font-bold mb-2">DEJA.js</h1>
-            <p class="text-lg opacity-80 mb-8">Model Railroad Control System</p>
-            <div class="flex gap-4 mb-8 opacity-40">
-              <v-icon size="24" color="white">mdi-signal-variant</v-icon>
-              <v-icon size="24" color="white">mdi-railroad-light</v-icon>
-              <v-icon size="24" color="white">mdi-swap-horizontal</v-icon>
+            <Logo variant="cloud" app-name="Cloud" class="mb-4 transform scale-150" />
+            <h1 class="text-4xl font-bold mt-4 mb-2">DEJA.js</h1>
+            <p class="text-xl opacity-90 mb-10 font-medium">The modren DCC platform</p>
+            <div class="flex gap-8 mb-8 opacity-60">
+              <Logo variant="throttle" app-name="" />
+              <Logo variant="monitor" app-name="" />
             </div>
-            <p class="text-md opacity-60 italic">"Your layout, your command."</p>
           </div>
         </div>
       </v-col>
@@ -147,9 +141,8 @@ async function handleGithubSignup() {
       <v-col cols="12" md="7" class="d-flex align-center justify-center">
         <div class="w-full max-w-md px-6 py-8">
           <!-- Mobile branding header -->
-          <div class="d-md-none text-center mb-6">
-            <v-icon size="48" color="primary">mdi-train</v-icon>
-            <h2 class="text-2xl font-bold mt-2">DEJA.js</h2>
+          <div class="d-md-none flex flex-col items-center text-center mb-8">
+            <Logo variant="cloud" app-name="Cloud" class="mb-2" />
           </div>
 
           <h2 class="text-h4 font-weight-bold mb-2">Create Account</h2>
@@ -199,13 +192,6 @@ async function handleGithubSignup() {
           <!-- Email Form -->
           <v-form @submit.prevent="handleEmailSignup">
             <v-text-field
-              v-model="displayName"
-              label="Display Name"
-              variant="outlined"
-              :rules="displayNameRules"
-              class="mb-2"
-            />
-            <v-text-field
               v-model="email"
               label="Email"
               type="email"
@@ -248,7 +234,8 @@ async function handleGithubSignup() {
               color="primary"
               size="large"
               block
-              class="text-none mb-4"
+              elevation="2"
+              class="text-none mb-4 font-weight-bold text-h6"
             >
               Create Account
             </v-btn>
@@ -273,7 +260,7 @@ async function handleGithubSignup() {
 
 <style scoped>
 .auth-branding-panel {
-  background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #006064 100%);
+  background: linear-gradient(135deg, #09090b 0%, #18181b 50%, #000000 100%);
   background-size: 200% 200%;
   animation: auth-gradient-shift 8s ease infinite;
 }

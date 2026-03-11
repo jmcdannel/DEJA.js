@@ -17,45 +17,49 @@ const devices = getDevices()
 const showAdd = ref(false)
 </script>
 <template>
-  <ModuleTitle menu="Layout" />  
+  <div class="animate-fade-in-up space-y-6">
+    <ModuleTitle menu="Layout" />  
 
-  <h2 class="text-sky-500 bg-gradient-to-r from-sky-400 to-purple-700 p-3 text-zinc-950 text-3xl ">
-    {{ layout?.name }}
-  </h2>
-  <hr class="my-4 border-sky-500" />
-  <h3 class="flex text-sky-500 dark:text-sky-400 mt-4">
-    <v-icon icon="mdi-usb" class="w-8 h-8 mr-2"></v-icon>
-    <span class="text-xl">Devices</span>
-  </h3>
-  <hr class="my-4 border-sky-500" />
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    <DeviceListItem v-for="item in devices" :key="item.id" :device="item as Device" :ports="layout?.ports" />
-    <AddTile v-if="!showAdd" color="cyan" @click="showAdd = !showAdd" />
+    <div class="glass-dark rounded-2xl shadow-soft-dark p-6 bg-gradient-to-r from-brand-cyan/20 to-brand-magenta/20 border border-white/5">
+      <h2 class="text-white text-3xl font-bold tracking-tight">
+        {{ layout?.name }}
+      </h2>
+    </div>
+
+    <h3 class="flex items-center text-brand-cyan mt-8 mb-4">
+      <v-icon icon="mdi-usb" class="w-8 h-8 mr-2"></v-icon>
+      <span class="text-2xl font-semibold">Devices</span>
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <DeviceListItem v-for="item in devices" :key="item.id" :device="item as Device" :ports="layout?.ports" />
+      <AddTile v-if="!showAdd" color="cyan" @click="showAdd = !showAdd" />
+    </div>
+    <AddDeviceItem :show="showAdd" @close="showAdd = false" class="mt-4" />
+    
+    <div class="my-8">
+      <LayoutTags />
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <PortList :ports="layout?.ports || []" />
+      <v-card 
+        class="mx-auto w-full h-full justify-between flex flex-col glass border border-white/10"
+        :prepend-icon="'mdi-usb'"
+        title="Modules"
+        color="transparent"
+        variant="flat"
+        density="compact">
+        <v-card-text>
+          <v-list lines="one" bg-color="transparent">
+            <v-list-item
+              v-for="module in layout?.modules"
+              :key="module"
+              :title="module"
+              class="text-white/80"
+            ></v-list-item>
+          </v-list>
+        </v-card-text>
+      </v-card>
+    </div>
   </div>
-  <AddDeviceItem :show="showAdd" @close="showAdd = false" class="mt-4" />
-  <hr class="my-8 border-sky-500" />
-  <LayoutTags />
-  <hr class="my-8 border-sky-500" />
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-    <PortList :ports="layout?.ports || []" />
-    <v-card 
-      class="mx-auto w-full h-full justify-between flex flex-col border-t-4 border-b-4"
-      :prepend-icon="'mdi-usb'"
-      title="Modules"
-      :color="'cyan'"
-      variant="tonal"
-      density="compact">
-      <v-card-text>
-        <v-list lines="one">
-          <v-list-item
-            v-for="module in layout?.modules"
-            :key="module"
-            :title="module"
-          ></v-list-item>
-        </v-list>
-      </v-card-text>
-    </v-card>
-  </div>
-  <!-- <ViewJson :json="JSON.parse(layout)" label="RAW Layout Data"></ViewJson>
-  <ViewJson :json="JSON.parse(devices)" label="RAW Device Data"></ViewJson> -->
 </template>

@@ -32,18 +32,11 @@ const logoComponent = computed(() => {
 </script>
 
 <template>
-  <div class="flex items-start">
-    <!-- <img 
+  <div class="flex items-center">
+    <img 
       :src="logoComponent" 
       :alt="`${appName} Logo`" 
       class="w-10 h-10 drop-shadow-sm" 
-    /> -->
-    <v-icon
-      v-if="appIcon"
-      :icon="appIcon"
-      size="32"
-      :color="appColor"
-      style="filter: drop-shadow(1px 1px 0 #fff2);"
     />
     <span
       class="ml-2 font-bold drop-shadow-sm hidden sm:inline text-xl lg:text-2xl bg-gradient-to-r from-blue-500 to-cyan-400 text-transparent bg-clip-text"

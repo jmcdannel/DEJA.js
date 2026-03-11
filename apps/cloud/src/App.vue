@@ -68,8 +68,8 @@ function handleLogoClick() {
 
 </script>
 <template>
-  <v-responsive class="border rounded">
-      <v-app :theme="isDark ? 'dark' : 'light'">
+  <v-responsive class="border rounded min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
+      <v-app :theme="isDark ? 'dark' : 'light'" class="!bg-transparent">
         <AppHeader
           app-name="Cloud"
           app-icon="mdi-cloud"
@@ -90,7 +90,7 @@ function handleLogoClick() {
         </AppHeader>
         <Menu v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
       <v-main>
-        <v-container >
+        <v-container class="pa-6 pa-md-12 max-w-7xl mx-auto transition-all duration-300">
           <RouterView v-slot="{ Component, route }">
             <component :is="Component" :key="route.fullPath" />
           </RouterView>

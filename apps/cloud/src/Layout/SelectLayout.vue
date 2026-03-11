@@ -19,20 +19,20 @@ async function handleLayoutSelect(newLayout: string) {
 }
 </script>
 <template>
-  <div class="flex flex-row flex-wrap justify-center items-center h-full w-full flex-grow gap-2">
-    <v-list>
+  <div class="flex flex-col items-center h-full w-full flex-grow gap-4 animate-fade-in-up">
+    <v-list class="bg-transparent w-full max-w-md">
       <v-list-item
         v-for="layout in layouts"
         :key="layout.id"
-        class="cursor-pointer"
+        class="cursor-pointer glass-dark hover:glass-cyan hover:scale-[1.02] transition-all duration-300 rounded-2xl mb-4 p-2"
         @click="handleLayoutSelect(layout.id)"
       >
-        <v-list-item-title>
+        <v-list-item-title class="flex justify-center w-full my-2">
           <v-chip
-            size="small"
+            size="large"
             prepend-icon="mdi-home"
             color="primary"
-            variant="outlined"
+            class="font-semibold tracking-wide"
           >
             {{ layout.name || layout.id }}
           </v-chip>
