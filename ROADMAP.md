@@ -1,70 +1,72 @@
 # DEJA.js Roadmap
 
-## Phase 1: Production Ready (Current Focus)
-- [x] Account menu
-- [x] DEJA Suite Nav
-- [x] Login Page / w/signup
-- [x] Error notification system (toast/snackbar across all apps)
-- [ ] Complete auth flow (email/password, password reset, email verification)
+## P0 — Critical / Production Blockers
 - [ ] Offline/disconnection handling with retry
-- [x] Server robustness (input validation, reconnection, graceful shutdown)
-- [x] Loading/empty states across all views
-- [ ] Complete onboarding / create layout flow
-- [x] Type safety cleanup (eliminate `any` types)
-- [x] Production logging (remove console.log, configure log levels)
+- [ ] Server reconnection logic — serial, Firebase, MQTT auto-reconnect with backoff
+- [ ] Graceful server shutdown (clean up Firebase listeners, serial ports, WebSocket connections)
+- [ ] MQTT exponential backoff reconnection
+
+## P1 — Core UX & Stability
+- [ ] Make login / layout select flow better
 - [ ] Guest Mode / Demo Mode
+- [ ] Fix guard chain race conditions in cloud app router
+- [ ] Command deduplication / timeout / acknowledgment tracking
+- [ ] Log level configuration
+- [ ] Refactor broadcast.ts to use event emitter
+- [ ] Signal initialization
+- [ ] Refactor turnout commands
 
-## Phase 2: Feature Parity with DCC-EX Ecosystem
+### Cloud App
+- [ ] Device detail views (incomplete)
+- [ ] Settings page
+- [ ] Rename "layout" to "devices" in Cloud
+- [ ] Update DCC-EX page on cloud app
+- [ ] Test connection button on cloud home
+- [ ] Drag-to-reorder persistence for effects/turnouts
+
+### Monitor App
+- [ ] Enable auto-clear
+- [ ] Refactor to optimize
+
+## P2 — Feature Development
 - [ ] CV/Decoder Programming — read/write CVs from the browser (service track + POM)
-- [ ] Sensor & Block Occupancy — digital/analog sensor input, block detection display
-- [ ] Fast Clock — accelerated model time for operations sessions
-- [ ] Enhanced Consisting — advanced consist management (CV19, command station consists)
 - [ ] Store roster on DCC-EX command station (sync with DEJA cloud)
-- [ ] Function map — momentary vs latching toggle behavior (like EX-WebThrottle)
-
-## Phase 3: Automation & Intelligence
 - [ ] Visual Automation Builder — drag-and-drop automation sequences (DEJA's answer to EX-RAIL/Logix)
       - Set turnout → wait → set signal → drive train → stop at sensor
       - No code required, runs in the cloud, triggers via Firebase
-- [ ] Route Automation — entry/exit click-to-route on a visual layout
-- [ ] Sensor-Triggered Events — crossing gates, sound effects, signals on block entry
-- [ ] Scheduled Operations — time-based automation via fast clock integration
+- [ ] Scheduled Operations — time-based automation
 - [ ] AI Conductor — LLM-powered train dispatcher that manages traffic, signals, and routing
       - "Run the evening commuter schedule" → AI sets routes, signals, and drives trains
       - Collision avoidance via block occupancy + reservation system
-
-## Phase 4: Layout Visualization
 - [ ] Track Diagram Editor — draw your layout in the browser (tracks, turnouts, signals, blocks)
       - Real-time state overlay (turnout positions, block occupancy, signal aspects)
       - Click-to-control (throw turnouts, set routes, dispatch trains)
-- [ ] 3D Layout Viewer — WebGL-based 3D visualization of your layout with live train positions
-- [ ] CTC Dispatcher Panel — prototype-accurate CTC control panel builder
-
-## Phase 5: Operations & Community
 - [ ] Operations Mode — car routing, switch lists, manifests (like JMRI OperationsPro)
       - Industries, spurs, yards, staging
       - Car types, loads, scheduling
       - Crew instructions and timetables
-- [ ] Layout Sharing — publish your layout config for others to use as a template
-- [ ] Public Layout Gallery — browse and clone community layouts
-- [ ] Multi-layout Dashboard — manage multiple layouts from one account
 
-## Phase 6: Hardware Expansion
-- [ ] WiThrottle Protocol Server — allow Engine Driver, WiThrottle iOS, and other apps to connect
+### Tour App
+- [ ] Auth
+- [ ] Add `allowTour` prop to DEJA modules
+- [ ] Drive locos w/max speed limit
+- [ ] Effects
+- [ ] Scavenger hunt
+- [ ] Scan QR for effect
+- [ ] Improve sound UI & features
+- [ ] Play intro
+- [ ] Guest user management
+
+## P3 — Hardware & Platform Expansion
 - [ ] Multi-command-station support — connect to multiple DCC-EX stations simultaneously
 - [ ] DC (analog) support via DCC-EX TrackManager
 - [ ] RFID tag tracking — identify specific rolling stock by tag reader
-- [ ] Turntable control — integrate with EX-Turntable via I2C
 
-## Dream Features
+## P4 — Dream Features
 - [ ] Voice Control — "Hey DEJA, throw turnout 5 and set signal to clear"
 - [ ] AR Layout Overlay — point your phone at the layout, see train info, turnout states, and signals in AR
 - [ ] Sound Spatialization — position virtual speakers on the layout, sound follows the train
 - [ ] AI Scenery Generator — describe a scene, AI generates Arduino/Pico animation sequences
-- [ ] Replay Mode — record and replay an entire operating session
-- [ ] Live Streaming Integration — stream layout camera feeds with real-time data overlay
-- [ ] Multiplayer Operations — multiple users dispatch trains on the same layout in real-time (already possible with Firebase!)
-- [ ] Mobile Haptic Feedback — phone vibrates based on throttle position and train acceleration
 
 ## Dropped / Deferred
 - [-] ttt-io as packages
@@ -73,3 +75,69 @@
 - [-] TTT Site
 - [-] Sound mixer / mute
 - [-] LED designer
+
+---
+
+## Completed
+- [x] Account menu *(P1 — Core UX)*
+- [x] DEJA Suite Nav *(P1 — Core UX)*
+- [x] Login Page / w/signup *(P1 — Core UX)*
+- [x] Error notification system — toast/snackbar across all apps *(P0 — Production)*
+- [x] Complete auth flow — email/password, password reset, email verification *(P0 — Production)*
+- [x] Loading/empty states across all views *(P1 — Core UX)*
+- [x] Complete onboarding / create layout flow *(P1 — Core UX)*
+- [x] Type safety cleanup — eliminate `any` types *(P1 — Core UX)*
+- [x] Production logging — remove console.log, configure log levels *(P1 — Core UX)*
+- [x] Sign out buttons across apps *(P1 — Core UX)*
+- [x] Add 404 catch-all route in throttle *(P1 — Core UX)*
+- [x] Icon picker for effects/routes forms *(P1 — Cloud App)*
+- [x] Sensor data handling *(P1 — Server)*
+- [x] Server input validation — validate DCC command payloads *(P0 — Production)*
+- [x] Sensor & Block Occupancy — digital/analog sensor input, block detection display *(P2 — Feature Development)*
+- [x] Function map — momentary vs latching toggle behavior *(P2 — Feature Development)*
+- [x] Route Automation — entry/exit click-to-route on a visual layout *(P2 — Feature Development)*
+- [x] Sensor-Triggered Events — crossing gates, sound effects, signals on block entry *(P2 — Feature Development)*
+- [x] CTC Dispatcher Panel — prototype-accurate CTC control panel builder *(P2 — Feature Development)*
+- [x] Multi-layout Dashboard — manage multiple layouts from one account *(P2 — Feature Development)*
+- [x] Mobile Haptic Feedback — phone vibrates based on throttle position and train acceleration *(P4 — Dream Features)*
+- [x] Fix routes *(P0 — Bug Fix)*
+- [x] Fix AI Main button in throttle *(P0 — Bug Fix)*
+- [x] Monitor change layout bug *(P0 — Bug Fix)*
+- [x] Fix unmet peers pnpm errors *(P0 — Bug Fix)*
+- [x] Signals in Cloud *(P1 — Cloud App)*
+- [x] Monitor: UI *(P1 — Monitor App)*
+- [x] Fix serial command pooling *(P0 — Server)*
+- [x] Sync power states across apps *(P0 — Production)*
+- [x] Fix serial auto-connect bug *(P0 — Server)*
+- [x] Refactor signals to own module (+turnout) *(P1 — Server)*
+- [x] Fix route turnouts *(P0 — Bug Fix)*
+- [x] Add loco CTA on throttle list *(P1 — Core UX)*
+- [x] LED *(P2 — Feature Development)*
+- [x] Add sounds *(P2 — Feature Development)*
+- [x] CTC switch *(P2 — Feature Development)*
+- [x] Fix broken views / buttons *(P0 — Bug Fix)*
+- [x] Better header *(P1 — Core UX)*
+- [x] Mobile menu *(P1 — Core UX)*
+- [x] Sortable / draggable *(P1 — Core UX)*
+- [x] MQTT as a package *(P1 — Server)*
+- [x] Cloud - fix login component error *(P0 — Bug Fix)*
+- [x] Cloud - layout device icons broken *(P0 — Bug Fix)*
+- [x] Throttle - park *(P2 — Feature Development)*
+- [x] Consist modal *(P1 — Core UX)*
+- [x] All modals *(P1 — Core UX)*
+- [x] Conductor sync speeds *(P1 — Core UX)*
+- [x] Bigger throttle buttons *(P1 — Core UX)*
+- [x] Logos *(P1 — Core UX)*
+- [x] Compact turnouts *(P1 — Core UX)*
+- [x] Cloud device header *(P1 — Cloud App)*
+- [x] Cloud device detail page *(P1 — Cloud App)*
+- [x] Auto-connect pico *(P1 — Server)*
+- [x] Filter / view / sort everything *(P1 — Core UX)*
+- [x] Throttle slider *(P1 — Core UX)*
+- [x] Trim for consist *(P1 — Core UX)*
+- [x] Throttle list grid cols *(P1 — Core UX)*
+- [x] Switch layout menu *(P1 — Core UX)*
+- [x] Add loco FAB on throttle-list *(P1 — Core UX)*
+- [x] Sort throttles *(P1 — Core UX)*
+- [x] Optimize command pool to flush at an interval *(P0 — Server)*
+- [x] Remove sound libs from effects page on cloud app *(P1 — Cloud App)*
