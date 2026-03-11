@@ -88,7 +88,7 @@ export default function ServerPage() {
       <div className="flex justify-center pb-8">
         <Link
           href="/docs/server"
-          className="px-8 py-4 bg-cyan-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition shadow-lg"
+          className="px-8 py-4 bg-cyan-500 text-gray-950 rounded-lg font-bold hover:bg-cyan-400 transition shadow-lg"
         >
           Install Server
         </Link>
