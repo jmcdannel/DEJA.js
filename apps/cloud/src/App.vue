@@ -56,7 +56,7 @@ const { isDark } = useThemeSwitcher()
 
 function handleLayoutSelect(newLayout: string) {
   layoutId.value = newLayout
-  router.push({ name: 'Layout' })
+  router.push({ name: 'Devices' })
 }
 
 function handleLogoClick() {
