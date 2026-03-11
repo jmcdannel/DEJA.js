@@ -1,0 +1,101 @@
+---
+title: Getting Started with DEJA.js
+description: An introduction to the DEJA.js model railroad control system — what it is, who it's for, and how the pieces fit together.
+section: docs
+order: 1
+---
+
+# Getting Started with DEJA.js
+
+DEJA.js (DCC-EX JavaScript API) is an open-source control system for model railroads. It connects your web browser to a [DCC-EX CommandStation](https://dcc-ex.com/) over USB serial, giving you real-time control of locomotives, turnouts, signals, sound effects, and more — all from a modern web interface.
+
+Whether you run a small switching layout on your desk or a large club layout with multiple operators, DEJA.js provides the tools to control it from any device with a browser.
+
+![DEJA.js system overview](/images/docs/getting-started/system-overview.png)
+
+## Who Is DEJA.js For?
+
+- **Model railroad hobbyists** who want browser-based train control without installing desktop software.
+- **Club operators** who need multi-user access to a shared layout over a local network.
+- **Tinkerers and makers** who want to extend their layout with custom effects, sound, and automation using JavaScript and TypeScript.
+
+No prior programming experience is required to use the apps. If you want to customize or extend the system, familiarity with TypeScript and Vue.js will help.
+
+## What's Included
+
+DEJA.js is a monorepo containing five frontend applications, a backend server, shared packages, and device firmware. Here is a quick overview of each piece.
+
+### Apps
+
+| App | Purpose | Description |
+|-----|---------|-------------|
+| **Throttle** | Train control | The primary operator interface. Control locomotive speed, direction, and functions. Throw turnouts, activate routes, and trigger effects. |
+| **Cloud** | Layout management | Configure your layout: manage your locomotive roster, set up turnouts and routes, wire signals, and define effects. Also includes a DCC-EX command console for direct communication with the CommandStation. |
+| **Monitor** | System dashboard | A diagnostics and logging dashboard that shows real-time system status, connected devices, and communication logs. |
+| **Tour** | Interactive tours | Run scripted tours and special effects sequences — useful for open houses, demonstrations, and automated layout operations. |
+| **Server** | Backend bridge | A Node.js backend that bridges your browser apps to the DCC-EX CommandStation over USB serial. It also coordinates communication through WebSockets, MQTT, and Firebase. |
+
+There is also a **Sound API** (Next.js) that manages sound effect assets stored in Vercel Blob storage.
+
+### Shared Packages
+
+The `packages/` directory contains reusable libraries shared across apps:
+
+- **@repo/modules** -- Core business logic for locomotives, turnouts, effects, signals, and routes.
+- **@repo/ui** -- Shared Vue components (locomotive avatars, turnout switches, track power controls, and more).
+- **@repo/dccex** -- DCC-EX command protocol integration.
+- **@repo/deja** -- Core DEJA composable for writing commands to Firebase.
+- **@repo/firebase-config** -- Firebase client and admin SDK initialization.
+- **@repo/auth** -- Authentication and route guards.
+
+### Device Firmware
+
+The `io/` directory contains Arduino and Raspberry Pi Pico W firmware for hardware I/O boards that communicate with the server over MQTT.
+
+## How It Works
+
+At a high level, DEJA.js follows this flow:
+
+```
+Browser (Throttle, Cloud, etc.)
+       |
+       v
+  Firebase (Firestore + Realtime Database)
+       |
+       v
+  DEJA.js Server (Node.js)
+       |
+       v
+  USB Serial (115200 baud)
+       |
+       v
+  DCC-EX CommandStation (Arduino)
+       |
+       v
+  DCC Track -- Locomotives, Turnouts, Signals
+```
+
+1. You interact with a web app in your browser (for example, moving a throttle slider).
+2. The app writes the command to Firebase.
+3. The DEJA.js Server listens for changes in Firebase, translates them into DCC-EX serial commands, and sends them to the CommandStation over USB.
+4. The CommandStation outputs DCC signals on the track to control your trains.
+
+WebSocket connections provide a fast, bidirectional channel between the browser and server for real-time status updates. MQTT is available as an optional communication layer for IoT device integration.
+
+## System Requirements
+
+Before you begin, make sure you have:
+
+- **Node.js 20** or later
+- **pnpm 9** or later (the package manager used by this project)
+- **Git** for cloning the repository
+- A **Firebase project** (free tier is sufficient) for real-time data synchronization
+- A **DCC-EX CommandStation** connected via USB (optional during development -- the system can run without hardware connected)
+
+## Next Steps
+
+Ready to set up your own DEJA.js instance?
+
+- [Installation](/docs/installation) -- Clone the repo, install dependencies, and configure your environment.
+- [Quick Start](/docs/quick-start) -- Start the development servers and control your first train.
+- [Architecture](/docs/architecture) -- Understand how the system is structured and how data flows between components.

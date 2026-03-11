@@ -27,7 +27,7 @@ const props = defineProps<{
   appName?: string
   appIcon?: string
   drawer?: boolean
-  variant?: 'default' | 'cloud' | 'throttle' | 'monitor'
+  variant?: 'default' | 'cloud' | 'throttle' | 'monitor' | 'tour'
   showLayoutPower?: boolean
   showEmergencyStop?: boolean
   showUserProfile?: boolean

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 2000 1512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="Artboard1" transform="matrix(0.888889,0,0,2.36171,-222.222,-1511.49)">
+        <rect x="250" y="640" width="2250" height="640" style="fill:none;"/>
+        <clipPath id="_clip1">
+            <rect x="250" y="640" width="2250" height="640"/>
+        </clipPath>
+        <g clip-path="url(#_clip1)">
+            <g transform="matrix(1.125,0,0,0.484059,-304.4,742.694)">
+                <rect x="-300" y="-460" width="2930" height="1570"/>
+            </g>
+            <g transform="matrix(1.125,0,0,0.423422,250,640)">
+                <path d="M752.709,78.804C752.709,49.547 728.956,25.794 699.699,25.794L131.052,25.794C101.794,25.794 78.041,49.547 78.041,78.804L78.041,1417.51C78.041,1446.77 101.794,1470.52 131.052,1470.52L699.699,1470.52C728.956,1470.52 752.709,1446.77 752.709,1417.51L752.709,78.804Z" style="fill:rgb(13,202,242);fill-opacity:0.22;stroke:rgb(13,121,242);stroke-width:4.5px;"/>
+            </g>
+            <g transform="matrix(1.125,0,0,0.423422,229.64,676.507)">
+                <text x="452.289px" y="133.827px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;fill:rgb(13,202,242);">DEJA</text>
+                <text x="452.289px" y="183.398px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;fill:rgb(13,242,40);">Throttle</text>
+            </g>
+            <g transform="matrix(1.125,0,0,0.423422,337.58,880.907)">
+                <text x="452.289px" y="133.827px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;fill:rgb(13,202,242);">DEJA</text>
+                <text x="452.289px" y="195.398px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;fill:rgb(242,13,175);">Cloud DB</text>
+            </g>
+            <g transform="matrix(1.125,0,0,0.423422,-12.4797,1186.59)">
+                <text x="456.973px" y="133.827px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;fill:rgb(13,202,242);">DEJA<tspan x="577.02px 590.356px " y="133.827px 133.827px "> S</tspan>erver</text>
+            </g>
+            <g transform="matrix(1.125,0,0,0.423422,1431.67,1192.37)">
+                <text x="535.242px" y="133.827px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;fill:rgb(242,13,13);">T<tspan x="562.781px 578.766px " y="133.827px 133.827px ">ra</tspan>ck</text>
+            </g>
+            <g transform="matrix(1.125,0,0,0.423422,544.691,1196.24)">
+                <text x="534.574px" y="125.232px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:36px;fill:rgb(13,40,242);">DCC-EX Command Station</text>
+            </g>
+            <g transform="matrix(1.43757,0,0,0.423422,16.3613,838.155)">
+                <path d="M571.39,720.375L571.39,738.527L549.537,710.601L571.39,682.675L571.39,700.827L778.146,700.827L778.146,682.675L800,710.601L778.146,738.527L778.146,720.375L571.39,720.375Z" style="fill:rgb(13,121,242);stroke:rgb(13,121,242);stroke-width:3.92px;"/>
+            </g>
+            <g transform="matrix(1.125,0,0,0.423422,233.913,631.663)">
+                <text x="619.522px" y="1260.58px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:48px;fill:rgb(13,121,242);">USB</text>
+            </g>
+            <g transform="matrix(1.125,0,0,0.423422,959.906,665.617)">
+                <text x="636.52px" y="1251.99px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:36px;fill:rgb(242,13,13);">DCC+/-</text>
+            </g>
+            <g transform="matrix(1.01921,0,0,0.423422,1056.33,876.562)">
+                <path d="M580.361,720.375L580.361,738.527L549.537,710.601L580.361,682.675L580.361,700.827L769.176,700.827L769.176,682.675L800,710.601L769.176,738.527L769.176,720.375L580.361,720.375Z" style="fill:rgb(242,13,13);stroke:black;stroke-width:4.72px;"/>
+            </g>
+            <g transform="matrix(4.72371e-17,0.290351,-1.125,2.59271e-17,1413.93,632.087)">
+                <path d="M590.261,720.375L590.261,738.527L549.537,710.601L590.261,682.675L590.261,700.827L759.276,700.827L759.276,682.675L800,710.601L759.276,738.527L759.276,720.375L590.261,720.375Z" style="fill:rgb(13,202,242);stroke:rgb(13,202,242);stroke-width:5.25px;"/>
+            </g>
+            <g transform="matrix(5.35544e-17,0.329181,-1.125,2.59271e-17,1439.6,817.167)">
+                <path d="M585.457,720.375L585.457,738.527L549.537,710.601L585.457,682.675L585.457,700.827L764.079,700.827L764.079,682.675L800,710.601L764.079,738.527L764.079,720.375L585.457,720.375Z" style="fill:rgb(13,202,242);stroke:rgb(13,202,242);stroke-width:5.02px;"/>
+            </g>
+            <g transform="matrix(15.3104,0,0,5.76246,430.784,659.109)">
+                <path d="M17,19L7,19L7,5L17,5M17,1L7,1C5.89,1 5,1.89 5,3L5,21C5,22.097 5.903,23 7,23L17,23C18.097,23 19,22.097 19,21L19,3C19,1.89 18.1,1 17,1Z" style="fill:rgb(13,242,40);fill-rule:nonzero;"/>
+            </g>
+            <g transform="matrix(25,0,0,9.40938,1091.42,1046.29)">
+                <path d="M6,4L18,4L18,5L21,5L21,7L18,7L18,9L21,9L21,11L18,11L18,13L21,13L21,15L18,15L18,17L21,17L21,19L18,19L18,20L6,20L6,19L3,19L3,17L6,17L6,15L3,15L3,13L6,13L6,11L3,11L3,9L6,9L6,7L3,7L3,5L6,5L6,4M11,15L11,18L12,18L12,15L11,15M13,15L13,18L14,18L14,15L13,15M15,15L15,18L16,18L16,15L15,15Z" style="fill:rgb(13,40,242);fill-rule:nonzero;"/>
+            </g>
+            <g transform="matrix(19.4826,0,0,7.33276,377.154,842.369)">
+                <path d="M19,12L19,13.5C21.194,13.5 23,15.306 23,17.5C23,18.32 22.75,19.08 22.33,19.71L21.24,18.62C21.41,18.28 21.5,17.9 21.5,17.5C21.5,16.129 20.371,15 19,15L19,16.5L16.75,14.25L19,12M19,23L19,21.5C16.806,21.5 15,19.694 15,17.5C15,16.68 15.25,15.92 15.67,15.29L16.76,16.38C16.59,16.72 16.5,17.1 16.5,17.5C16.5,18.871 17.629,20 19,20L19,18.5L21.25,20.75L19,23M12,3C16.42,3 20,4.79 20,7C20,9.21 16.42,11 12,11C7.58,11 4,9.21 4,7C4,4.79 7.58,3 12,3M4,9C4,11.21 7.58,13 12,13C13.11,13 14.17,12.89 15.14,12.68C14.19,13.54 13.5,14.67 13.18,15.96L12,16C7.58,16 4,14.21 4,12L4,9M20,9L20,11L19.5,11L18.9,11.03C19.6,10.43 20,9.74 20,9M4,14C4,16.21 7.58,18 12,18L13,17.97C13.09,19.03 13.42,20 13.95,20.88L12,21C7.58,21 4,19.21 4,17L4,14Z" style="fill:rgb(242,13,175);fill-rule:nonzero;"/>
+            </g>
+            <g transform="matrix(16.6883,0,0,6.28108,455.906,1074.23)">
+                <path d="M4,1L20,1C20.549,1 21,1.451 21,2L21,6C21,6.549 20.549,7 20,7L4,7C3.451,7 3,6.549 3,6L3,2C3,1.451 3.451,1 4,1M4,9L20,9C20.549,9 21,9.451 21,10L21,14C21,14.549 20.549,15 20,15L4,15C3.451,15 3,14.549 3,14L3,10C3,9.451 3.451,9 4,9M4,17L20,17C20.549,17 21,17.451 21,18L21,22C21,22.549 20.549,23 20,23L4,23C3.451,23 3,22.549 3,22L3,18C3,17.451 3.451,17 4,17M9,5L10,5L10,3L9,3L9,5M9,13L10,13L10,11L9,11L9,13M9,21L10,21L10,19L9,19L9,21M5,3L5,5L7,5L7,3L5,3M5,11L5,13L7,13L7,11L5,11M5,19L5,21L7,21L7,19L5,19Z" style="fill:rgb(13,202,242);fill-rule:nonzero;"/>
+            </g>
+            <g transform="matrix(20.4545,0,0,7.69859,1851.24,1061.07)">
+                <path d="M9,9L9,11L7,11L7,9L5,9L5,11L3,11L3,9L1,9L1,21L3,21L3,19L5,19L5,21L7,21L7,19L9,19L9,21L11,21L11,19L13,19L13,21L15,21L15,19L17,19L17,21L19,21L19,19L21,19L21,21L23,21L23,9L21,9L21,11L19,11L19,9L17,9L17,11L15,11L15,9L13,9L13,11L11,11L11,9L9,9M3,13L5,13L5,17L3,17L3,13M7,13L9,13L9,17L7,17L7,13M11,13L13,13L13,17L11,17L11,13M15,13L17,13L17,17L15,17L15,13M19,13L21,13L21,17L19,17L19,13M7,4L11,4L11,2L17,5L13,5L13,7L7,4Z" style="fill:rgb(242,13,13);fill-rule:nonzero;"/>
+            </g>
+        </g>
+    </g>
+</svg>

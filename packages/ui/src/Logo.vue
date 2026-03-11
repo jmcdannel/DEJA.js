@@ -5,7 +5,7 @@ interface Props {
   appName?: string
   appIcon?: string
   appColor?: string
-  variant?: 'default' | 'cloud' | 'throttle' | 'monitor'
+  variant?: 'default' | 'cloud' | 'throttle' | 'monitor' | 'tour'
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -23,8 +23,25 @@ const logoComponent = computed(() => {
       return new URL('./assets/logo-monitor.svg', import.meta.url).href
     case 'cloud':
       return new URL('./assets/logo-cloud.svg', import.meta.url).href
+    case 'tour':
+      return new URL('./assets/logo-default.svg', import.meta.url).href
     default:
       return new URL('./assets/logo-default.svg', import.meta.url).href
+  }
+})
+
+const appIconSrc = computed(() => {
+  switch (props.variant) {
+    case 'throttle':
+      return new URL('./assets/icons/throttle.png', import.meta.url).href
+    case 'monitor':
+      return new URL('./assets/icons/monitor.png', import.meta.url).href
+    case 'cloud':
+      return new URL('./assets/icons/cloud.png', import.meta.url).href
+    case 'tour':
+      return new URL('./assets/icons/tour.png', import.meta.url).href
+    default:
+      return new URL('./assets/icons/deja.png', import.meta.url).href
   }
 })
 
@@ -33,10 +50,10 @@ const logoComponent = computed(() => {
 
 <template>
   <div class="flex items-center">
-    <img 
-      :src="logoComponent" 
-      :alt="`${appName} Logo`" 
-      class="w-10 h-10 drop-shadow-sm" 
+    <img
+      :src="appIconSrc"
+      :alt="`${appName} Logo`"
+      class="w-10 h-10 drop-shadow-sm rounded-lg"
     />
     <span
       class="ml-2 font-bold drop-shadow-sm hidden sm:inline text-xl lg:text-2xl bg-gradient-to-r from-blue-500 to-cyan-400 text-transparent bg-clip-text"
