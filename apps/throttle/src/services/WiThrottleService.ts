@@ -1,4 +1,8 @@
 import { ref } from 'vue'
+import { getFirestore, doc, getDoc } from 'firebase/firestore'
+import { useStorage } from '@vueuse/core'
+import type { Layout } from '@repo/modules'
+import { db } from '@repo/firebase-config'
 
 // Dynamically import the Capacitor socket plugin so web/Vercel builds don't fail.
 // The plugin only exists in native Capacitor environments.
@@ -18,10 +22,19 @@ async function getSocketClass(): Promise<(new () => any) | null> {
 
 export type WiThrottleConnectionState = 'DISCONNECTED' | 'CONNECTING' | 'CONNECTED' | 'ERROR'
 
+// Capacitor socket type — loaded dynamically since the plugin is only available in native builds
+type CapacitorSocket = {
+  open(host: string, port: number): Promise<void>
+  close(): Promise<void>
+  write(data: Uint8Array): Promise<void>
+  onData: ((data: Uint8Array) => void) | null
+  onClose: (() => void) | null
+  onError: ((err: unknown) => void) | null
+  onStateChanged: ((state: string) => void) | null
+}
+
 export class WiThrottleService {
-  private host: string
-  private port: number
-  private socket: any = null
+  private socket: CapacitorSocket | null = null
   private connectionTimer: ReturnType<typeof setInterval> | null = null
 
   public state = ref<WiThrottleConnectionState>('DISCONNECTED')
@@ -32,23 +45,43 @@ export class WiThrottleService {
   public turnouts = ref<{ id: string; name: string; state: number }[]>([])
 
   constructor() {
-    this.host = ''
-    this.port = 44444
-  }
-
-  public setHost(host: string, port: number = 44444) {
-    this.host = host
-    this.port = port
   }
 
   public async connect(): Promise<void> {
-    if (!this.host) {
-      this.errorMessage.value = 'Host IP address is required'
+    const layoutId = useStorage<string>('@DEJA/layoutId', '').value
+    if (!layoutId) {
+      this.errorMessage.value = 'No layout selected'
       this.state.value = 'ERROR'
       return
     }
 
     try {
+      const layoutSnap = await getDoc(doc(db, 'layouts', layoutId))
+      if (!layoutSnap.exists()) throw new Error('Layout not found')
+      const layoutData = layoutSnap.data() as Layout
+
+      const connConfig = layoutData.throttleConnection
+      if (connConfig?.type !== 'withrottle') {
+        // If not explicitly set to WiThrottle, we default to the DEJA server.
+        // For DEJA server via WiThrottle protocol (if eventually supported natively) or 
+        // to just skip this TCP connection entirely.
+        // For now, DEJA.js App uses Firebase / WebSockets for DEJA Server connection natively,
+        // so we just mark it as "DISCONNECTED" from a TCP WiThrottle perspective,
+        // since the UI doesn't need this socket to function when using DEJA Server mode.
+        this.state.value = 'DISCONNECTED'
+        this.errorMessage.value = ''
+        return
+      }
+
+      const host = connConfig.host
+      const port = connConfig.port || 44444
+
+      if (!host) {
+        this.errorMessage.value = 'Host IP address is required for WiThrottle connection'
+        this.state.value = 'ERROR'
+        return
+      }
+      
       this.state.value = 'CONNECTING'
       this.errorMessage.value = ''
       
@@ -57,7 +90,7 @@ export class WiThrottleService {
         this.handleDisconnect('WiThrottle requires a native Capacitor environment')
         return
       }
-      this.socket = new Socket()
+      this.socket = new Socket() as CapacitorSocket
 
       // Set up listeners
       this.socket.onData = (data: Uint8Array) => {
@@ -73,16 +106,26 @@ export class WiThrottleService {
         console.log('Socket state changed:', state)
       }
 
-      await this.socket.open(this.host, this.port)
+      await this.socket.open(host, port)
       
       this.state.value = 'CONNECTED'
+      
+      // Set a global flag so UI components (like AppHeader) know they can use sendDccCommand native override
+      ;(window as any).__WI_THROTTLE_CONNECTED__ = true
+      
       this.startHeartbeat()
       
       // Handshake: send hardware/app info
       await this.send('NDEJA Throttle')
       await this.send('HU1') // Hardware ID
-    } catch (e: any) {
-      this.handleDisconnect(e.message || 'Failed to connect')
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to connect'
+      // If the Capacitor plugin isn't available (web builds), provide a clear message
+      if (message.includes('Failed to fetch dynamically imported module') || message.includes('Cannot find module')) {
+        this.handleDisconnect('WiThrottle requires a native (Capacitor) build — TCP sockets are not available in web browsers')
+      } else {
+        this.handleDisconnect(message)
+      }
     }
   }
 
@@ -95,6 +138,7 @@ export class WiThrottleService {
       }
       this.socket = null
     }
+    ;(window as any).__WI_THROTTLE_CONNECTED__ = false
     this.stopHeartbeat()
     this.state.value = 'DISCONNECTED'
   }
@@ -177,6 +221,7 @@ export class WiThrottleService {
   private handleDisconnect(reason: string) {
     this.stopHeartbeat()
     this.socket = null
+    ;(window as any).__WI_THROTTLE_CONNECTED__ = false
     
     // If we get an error while connecting, transition to ERROR instead of just DISCONNECTED
     if (this.state.value === 'CONNECTING') {

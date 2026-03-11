@@ -23,10 +23,11 @@
   "dependencies": {
     "@capacitor/app": "^6.0.0",
     "@capacitor/core": "^6.0.0",
-    "@sentry/vue": "^8.0.0",
     "@mdi/font": "^7.4.47",
     "@repo/modules": "workspace:*",
     "@repo/ui": "workspace:*",
+    "@sentry/vue": "^8.0.0",
+    "@spryrocks/capacitor-socket-connection-plugin": "^6.3.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "dayjs": "^1.11.13",
     "firebase": "^10.14.1",
@@ -37,10 +38,12 @@
     "vue-debounce": "^5.0.0",
     "vue-router": "^4.2.2",
     "vue3-icons": "^0.1.13",
-    "vuetify": "^3.7.3",
-    "vuedraggable": "^4.1.0"
+    "vuedraggable": "^4.1.0",
+    "vuetify": "^3.7.3"
   },
   "devDependencies": {
+    "@formkit/auto-animate": "^0.8.2",
+    "@playwright/test": "^1.44.0",
     "@repo/auth": "workspace:*",
     "@repo/dccex": "workspace:*",
     "@repo/deja": "workspace:*",
@@ -60,7 +63,6 @@
     "@vue/eslint-config-typescript": "^11.0.3",
     "@vue/test-utils": "^2.3.2",
     "@vue/tsconfig": "^0.7.0",
-    "@formkit/auto-animate": "^0.8.2",
     "@vueuse/core": "^11.0.3",
     "@vueuse/motion": "^2.2.6",
     "autoprefixer": "^10.4.20",
@@ -71,7 +73,6 @@
     "postcss": "^8.4.41",
     "prettier": "^2.8.8",
     "tailwindcss": "^3.4.10",
-    "@playwright/test": "^1.44.0",
     "typescript": "*",
     "vite": "^4.4.9",
     "vitest": "^2.0.5",

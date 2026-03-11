@@ -14,7 +14,7 @@ const log = createLogger('CloudApp')
 // Components
 import SelectLayout from './Layout/SelectLayout.vue'
 import { Login } from '@repo/auth'
-import { AppHeader, NotificationContainer, provideNotifications } from '@repo/ui'
+import { AppHeader, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
 // import { useDcc } from '@repo/dccex'
 // import { useEfx } from '@repo/modules'
 
