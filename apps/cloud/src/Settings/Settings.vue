@@ -1,90 +1,74 @@
 <script setup lang="ts">
 import { BackgroundSettings } from '@repo/ui'
-import { ref } from 'vue'
+import { useLayout } from '@repo/modules'
+import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import LayoutTags from '@/Layout/LayoutTags.vue'
+import PortList from '@/Layout/PortList.vue'
 
-const enableAutoDeploy = ref(true)
-const allowedNotifications = ref(['email'])
-const defaultTheme = ref('system')
-const logRetention = ref(30)
-const betaFeatures = ref(false)
-const notificationOptions = [
-  { title: 'Email updates', value: 'email' },
-  { title: 'SMS alerts', value: 'sms' },
-  { title: 'Push notifications', value: 'push' },
-]
-const themeOptions = [
-  { title: 'System default', value: 'system' },
-  { title: 'Light', value: 'light' },
-  { title: 'Dark', value: 'dark' },
-]
+const { getLayout } = useLayout()
+
+const layout = getLayout()
 </script>
 
 <template>
-  <v-container class="py-8">
-    <v-row justify="center">
-      <v-col cols="12" md="8" lg="6">
-        <BackgroundSettings
-          app-name="cloud"
-          :pages="[
-            { path: '/', label: 'Home', icon: 'mdi-home' },
-            { path: '/locos', label: 'Roster', icon: 'mdi-train' },
-            { path: '/effects', label: 'Effects', icon: 'mdi-auto-fix' },
-            { path: '/routes', label: 'Routes', icon: 'mdi-map-marker-path' },
-            { path: '/signals', label: 'Signals', icon: 'mdi-traffic-light' },
-            { path: '/sensors', label: 'Sensors', icon: 'mdi-motion-sensor' },
-            { path: '/turnouts', label: 'Turnouts', icon: 'mdi-directions-fork' },
-            { path: '/dccex', label: 'DCC-EX', icon: 'mdi-console' },
-            { path: '/layout', label: 'Layout', icon: 'mdi-floor-plan' },
-          ]"
-          class="mb-4"
-        />
+  <div class="animate-fade-in-up space-y-6">
+    <ModuleTitle menu="Settings" />
 
-        <v-card>
-          <v-card-title>Cloud Settings</v-card-title>
-          <v-card-subtitle class="pb-0">Placeholder controls for configuration work.</v-card-subtitle>
-          <v-divider class="my-2" />
-          <v-card-text class="space-y-6">
-            <v-switch
-              v-model="enableAutoDeploy"
-              label="Enable auto-deploy for layout changes"
-              color="primary"
-              hide-details
-            />
-            <v-select
-              v-model="allowedNotifications"
-              :items="notificationOptions"
-              label="Notification channels"
-              multiple
-              chips
-              closable-chips
-            />
-            <v-select
-              v-model="defaultTheme"
-              :items="themeOptions"
-              label="Dashboard theme"
-            />
-            <div>
-              <div class="text-subtitle-2 mb-2">Log retention (days)</div>
-              <v-slider
-                v-model="logRetention"
-                :min="7"
-                :max="90"
-                :step="1"
-                thumb-label="always"
-              />
-            </div>
-            <v-switch
-              v-model="betaFeatures"
-              label="Join cloud feature preview program"
-              color="primary"
-              hide-details
-            />
-          </v-card-text>
-          <v-card-actions class="justify-end">
-            <v-btn color="primary" variant="tonal" disabled>Save (coming soon)</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+    <BackgroundSettings
+      app-name="cloud"
+      :pages="[
+        { path: '/', label: 'Home', icon: 'mdi-home' },
+        { path: '/locos', label: 'Roster', icon: 'mdi-train' },
+        { path: '/effects', label: 'Effects', icon: 'mdi-auto-fix' },
+        { path: '/routes', label: 'Routes', icon: 'mdi-map-marker-path' },
+        { path: '/signals', label: 'Signals', icon: 'mdi-traffic-light' },
+        { path: '/sensors', label: 'Sensors', icon: 'mdi-motion-sensor' },
+        { path: '/turnouts', label: 'Turnouts', icon: 'mdi-directions-fork' },
+        { path: '/dccex', label: 'DCC-EX', icon: 'mdi-console' },
+        { path: '/layout', label: 'Layout', icon: 'mdi-floor-plan' },
+      ]"
+      class="mb-4"
+    />
+
+    <div class="glass-dark rounded-2xl shadow-soft-dark p-6 bg-gradient-to-r from-brand-blue/20 to-brand-cyan/20 border border-white/5">
+      <h2 class="text-white text-3xl font-bold tracking-tight">
+        {{ layout?.name }}
+      </h2>
+      <p class="text-white/60 mt-1 text-sm">Layout configuration and system settings</p>
+    </div>
+
+    <h3 class="flex items-center text-brand-cyan mt-8 mb-4">
+      <v-icon icon="mdi-tag-multiple" class="w-8 h-8 mr-2"></v-icon>
+      <span class="text-2xl font-semibold">Tags</span>
+    </h3>
+    <LayoutTags />
+
+    <h3 class="flex items-center text-brand-cyan mt-8 mb-4">
+      <v-icon icon="mdi-usb" class="w-8 h-8 mr-2"></v-icon>
+      <span class="text-2xl font-semibold">USB Ports</span>
+    </h3>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <PortList :ports="layout?.ports || []" />
+
+      <v-card
+        class="mx-auto w-full h-full justify-between flex flex-col glass border border-white/10"
+        prepend-icon="mdi-view-module"
+        title="Modules"
+        color="transparent"
+        variant="flat"
+        density="compact"
+      >
+        <v-card-text>
+          <v-list lines="one" bg-color="transparent">
+            <v-list-item
+              v-for="module in layout?.modules"
+              :key="module"
+              :title="module"
+              class="text-white/80"
+            ></v-list-item>
+          </v-list>
+        </v-card-text>
+      </v-card>
+    </div>
+  </div>
 </template>

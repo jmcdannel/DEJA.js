@@ -18,12 +18,12 @@ export default function GlobalError({
     <html lang="en" className="dark">
       <body className="bg-gray-50 text-gray-800 transition-colors duration-200 dark:bg-gray-950 dark:text-gray-50 relative">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="fixed w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[100px] -top-[100px] left-[50%] translate-x-[-50%]"></div>
-          <div className="fixed w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[80px] -bottom-[-10%] -right-[200px]"></div>
-          <div className="fixed w-[400px] h-[400px] rounded-full bg-violet-500/10 blur-[90px] top-[50%] left-[20%]"></div>
+          <div className="fixed w-[600px] h-[600px] rounded-full bg-cyan-600/10 blur-[100px] -top-[100px] left-[50%] translate-x-[-50%]"></div>
+          <div className="fixed w-[500px] h-[500px] rounded-full bg-fuchsia-500/10 blur-[80px] -bottom-[-10%] -right-[200px]"></div>
+          <div className="fixed w-[400px] h-[400px] rounded-full bg-lime-500/10 blur-[90px] top-[50%] left-[20%]"></div>
         </div>
         <main className="max-w-5xl mx-auto px-6 py-10 flex flex-col items-center justify-center min-h-screen text-center space-y-6">
-          <h1 className="text-8xl font-extrabold bg-gradient-to-r from-purple-500 to-violet-400 bg-clip-text text-transparent">
+          <h1 className="text-8xl font-extrabold bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
             Error
           </h1>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">

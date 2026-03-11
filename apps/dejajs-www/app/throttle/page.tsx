@@ -30,7 +30,7 @@ export default function ThrottlePage() {
           <Image src="/throttle/icon-512.png" alt="DEJA.js Throttle Logo" width={128} height={128} className="h-32 w-32 drop-shadow-lg" />
         </div>
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">
-          <span className="text-green-500">DEJA.js Throttle</span>
+          <span className="text-lime-500">DEJA.js Throttle</span>
         </h1>
         <p className="max-w-2xl text-lg md:text-xl text-gray-500 dark:text-gray-400 mx-auto">
           Tactile, responsive, clear. The modern driver experience designed primarily for touch interfaces and mobile devices.
@@ -42,7 +42,7 @@ export default function ThrottlePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-green-500">🚂</span> Precision Speed Control
+              <span className="text-lime-500">🚂</span> Precision Speed Control
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
               Smooth slider interfaces combined with exact step modifiers (+1 / -1). Visual feedback confirms speed step changes instantly.
@@ -50,7 +50,7 @@ export default function ThrottlePage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-green-500">🔗</span> EZ Consist
+              <span className="text-lime-500">🔗</span> EZ Consist
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
               Build functional consists in seconds visually. Select lead, adjust orientations, and drive multiple locomotives as a single unit without complex programming.
@@ -58,7 +58,7 @@ export default function ThrottlePage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-green-500">🎛️</span> Function Mapping
+              <span className="text-lime-500">🎛️</span> Function Mapping
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
               Customizable function buttons mapped dynamically from your roster. Color-code lights, horns, and bells for quick visual identification.
@@ -66,7 +66,7 @@ export default function ThrottlePage() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-green-500">🔀</span> Turnout & Route Access
+              <span className="text-lime-500">🔀</span> Turnout & Route Access
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
               Access your designated turnouts directly from the throttle context. Throw switches without switching apps or physical controllers.
@@ -96,7 +96,7 @@ export default function ThrottlePage() {
       <div className="flex justify-center pb-8">
         <Link
           href="/docs/throttle"
-          className="px-8 py-4 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition shadow-lg"
+          className="px-8 py-4 bg-lime-500 text-gray-950 rounded-lg font-bold hover:bg-lime-400 transition shadow-lg"
         >
           Launch Throttle Web App
         </Link>

@@ -7,14 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [1.1.0] - 2026-03-10
+
 ### Added
+
+#### DEJA.js Marketing & Documentation Site
+- **[dejajs-www]** Add DEJA.js marketing and documentation site to monorepo as Next.js 15 app with MDX-powered docs, product pages, screenshot carousels, and Sentry integration
+- **[dejajs-www]** Dynamic MDX documentation rendering with frontmatter-driven sidebar navigation, remark-gfm support, and auto-generated doc navigation
+
+#### Sensor & Block Occupancy System
+- **[modules]** New `packages/modules/sensors/` module with composables for sensors, blocks, and automations CRUD
+- **[cloud]** Sensors management UI: list, add, edit, delete sensors with advanced config
+- **[cloud]** Automation builder: trigger actions on sensor state changes
+- **[server]** Server-side sensor handling: debounce, cooldown, retry limits, effect/automation triggering
+- **[server]** Block occupancy computation from sensor states
+- **[server]** DCC-EX sensor commands: define, query sensors on command station
+- **[server]** Process incoming sensor data from serial and update Firestore
+- **[monitor]** SensorLogs panel with type icons and block info
+- **[ui]** Shared sensor components: SensorList, SensorItem, SensorCard, SensorSwitch, SensorTable
+
+#### Cloud Registration & Onboarding
+- **[cloud]** User registration, onboarding wizard, and layout approval flow with signup, layout creation, and pending-approval gate
+- **[cloud]** Empty state components with guided prompts for effects, roster, routes, signals, and turnouts collections
+
+#### UI Component Systems
+- **[ui]** Animation system with transition components (Fade, Slide, Expand, List), StatusPulse, Tailwind preset, and reduced-motion support
+- **[ui]** Toast/snackbar notification system with `useNotification` composable for user-facing success, error, info, and warning messages
+- **[ui]** Loading skeletons and empty states for list views with shared EmptyState component and contextual messages for locos, effects, and turnouts
+- **[ui]** Share app icons (deja, cloud, throttle, monitor, tour) across all apps via @repo/ui package with Logo.vue and exported icon URLs
+
+#### Infrastructure
+- **[utils]** Structured production logging with level-gated `createLogger` utility, replacing 300+ console calls across all packages and apps
 
 #### Sound Effects System
 - **Complete sound effects management** - New comprehensive system for managing audio effects in railroad layouts:
   - **SoundPicker component** - Advanced sound browser with category tabs, search, and external library integration
   - **BBC Sound Effects Library integration** - High-quality sounds from BBC's royalty-free collection via Vercel blob store
   - **Sound effects service** - Centralized service for managing sound metadata, categories, and search functionality
-  - **BBC Sound Effects Library integration** - Ready for integration with BBC's high-quality, royalty-free sound collection
   - **BBC Sound Importer** - Component for importing sounds from BBC Sound Effects Library URLs
   - **DEJA Server Device Type** - New device type representing the server machine for playing sound effects
   - **Vercel API Route Architecture** - Framework for implementing BBC sound import API in Vercel (replaces separate HTTP server)
@@ -28,7 +59,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Audio playback controls** - Play/pause/stop functionality with HTML5 Audio API integration
 - **Sound metadata management** - Duration, tags, licensing, and attribution tracking
 
+### Changed
+
+- **[auth]** Replace users collection with layout-based onboarding and approval guards querying by owner email
+- **[dejajs-www]** Restructure documentation to match app routing with per-app sections for Throttle, Cloud, Monitor, Tour, Server, Sound API, and IO Devices
+- **Sound effects architecture** - Moved from monorepo package dependencies to local implementations:
+  - Created local `soundService.ts` in cloud app for better reliability
+  - Updated SoundPicker and SoundTest components to use local imports
+  - Improved build stability by avoiding problematic monorepo exports
+- **Login and signup redesign** - Full-height split layout with animated gradient, social auth buttons (Google, GitHub), password strength indicator, mobile-responsive stacked layout
+
 ### Fixed
+
+- **[dejajs-www]** Screenshot images now display correctly in homepage carousel by using aspect-ratio sizing instead of h-full
+- **[modules]** Remove hardcoded 'betatrack' layout default across all apps and composables
+- **[cloud]** Fix blank page on initial load by awaiting Firebase Auth initialization before route guards execute
 - **Tour app loading issues** - Resolved TypeScript compilation errors and dependency problems:
   - Fixed `currentGuest.value` references in tour store and TourLogin.vue
   - Replaced problematic `@repo/modules` imports with local implementations
@@ -36,20 +81,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated Vite configuration to match working app patterns with proper `optimizeDeps.include`
   - Added `commonjsOptions` and proper package resolution for better compatibility
   - Tour app now builds successfully and runs on port 3003
-
 - **Sound effects system** - Resolved import and export issues:
   - Fixed `soundEffectsService` export errors by creating local sound service
   - Resolved monorepo package resolution issues with local component copies
   - Fixed SoundPicker component import dependencies
-  - Sound effects system now builds and runs successfully
 
-### Changed
-- **Sound effects architecture** - Moved from monorepo package dependencies to local implementations:
-  - Created local `soundService.ts` in cloud app for better reliability
-  - Updated SoundPicker and SoundTest components to use local imports
-  - Improved build stability by avoiding problematic monorepo exports
+### Improved
 
-### Technical Improvements
+- **[server]** Enhanced sound playback with audio caching and improved DCC command handling
+- Eliminate `any` types across 32 files with proper TypeScript typing, including typed Firebase snapshots, event handlers, and catch block narrowing
 - **Sound effects infrastructure** - Comprehensive foundation for audio management:
   - **File organization** - Structured sound directories (`/sounds/train/`, `/sounds/station/`, etc.)
   - **Metadata system** - Rich sound information including duration, tags, source, and licensing
@@ -173,8 +213,8 @@ The effect components follow the same pattern as turnout components:
 <EffectButton :effect="myEffect" @update:state="handleStateChange" />
 
 <!-- Guest-friendly card for tour app -->
-<GuestEffectCard 
-  :effect="myEffect" 
+<GuestEffectCard
+  :effect="myEffect"
   @activate="onActivate"
   @deactivate="onDeactivate"
 />

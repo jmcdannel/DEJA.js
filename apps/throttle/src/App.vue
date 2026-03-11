@@ -4,6 +4,7 @@ import { RouterView } from 'vue-router'
 import { AppHeader, TransitionFade, NotificationContainer, provideNotifications, PageBackground } from '@repo/ui'
 import type { AppBackgroundPrefs } from '@repo/modules'
 import Footer from '@/core/Footer.vue'
+import ConnectionStatusBanner from '@/core/ConnectionStatusBanner.vue'
 import useMenu from '@/core/Menu/useMenu'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { usePageSwipe } from '@/composables/usePageSwipe'
@@ -84,6 +85,7 @@ const throttleDefaults: AppBackgroundPrefs = {
           </v-container>
         </v-main>
         <Footer />
+        <ConnectionStatusBanner />
         <NotificationContainer />
       </PageBackground>
     </v-app>

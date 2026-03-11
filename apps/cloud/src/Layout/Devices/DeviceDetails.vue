@@ -45,7 +45,7 @@ function getEffectDetails(type: string | undefined) {
 }
 
 function handleBack() {
-  route.push({ name: 'home' }) // or specific layout back route
+  route.push({ name: 'Devices' })
 }
 </script>
 
@@ -299,7 +299,7 @@ TurnoutPulser turnouts[] = {};
         valigned="center"
         prepend-icon="mdi-arrow-left"
       >
-        Back to Setup
+        Back to Devices
       </v-btn>
       <v-spacer></v-spacer>
       <v-btn

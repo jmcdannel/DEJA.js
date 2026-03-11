@@ -10,16 +10,23 @@ interface DccCommand {
   payload: unknown
 }
 
-export const useDcc = () => {
+interface DccWriteOptions {
+  /** Optional callback that wraps a write with retry/queuing logic */
+  enqueue?: (execute: () => Promise<void>, description: string) => Promise<void>
+}
+
+export const useDcc = (options?: DccWriteOptions) => {
   const layoutId = useStorage('@DEJA/layoutId', '')
   const isEmulated = useStorage('@DEJA/isEmulated', false)
   const isSerial = useStorage('@DEJA/layoutId', false)
+
+  const wrappedWrite = options?.enqueue ?? ((execute: () => Promise<void>) => execute())
 
   async function setFunction(address: number, func: number, state: boolean) {
     try {
       await send('function', { address, func, state })
     } catch (err: unknown) {
-      log.error('[DCC API].setPower', err)
+      log.error('[DCC API].setFunction', err)
       throw err instanceof Error ? err : new Error(String(err))
     }
   }
@@ -29,7 +36,7 @@ export const useDcc = () => {
       log.debug('[DCC API].sendOutput', pin, state)
       await send('output', { pin, state })
     } catch (err: unknown) {
-      log.error('[DCC API].setPower', err)
+      log.error('[DCC API].sendOutput', err)
       throw err instanceof Error ? err : new Error(String(err))
     }
   }
@@ -48,36 +55,32 @@ export const useDcc = () => {
     action,
     payload,
   }: DccCommand): Promise<void> {
-    try {
-      const command = {
-        action,
-        payload: JSON.stringify(payload),
-        timestamp: serverTimestamp(),
-      }
+    await wrappedWrite(
+      async () => {
+        const command = {
+          action,
+          payload: JSON.stringify(payload),
+          timestamp: serverTimestamp(),
+        }
 
-      const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId.value}`)
-      const newCommandRef = push(dccCommandsRef)
-      set(newCommandRef, command)
-    } catch (e) {
-      log.error('Error adding document: ', e)
-    }
+        const dccCommandsRef = ref(rtdb, `dccCommands/${layoutId.value}`)
+        const newCommandRef = push(dccCommandsRef)
+        await set(newCommandRef, command)
+      },
+      `dcc ${action}`,
+    )
   }
 
   async function send(action: string, payload?: object): Promise<void> {
-    try {
-      if (isEmulated.value) {
-        log.debug('[DEJA EMULATOR] send', action, payload)
-        return
-      } else if (isSerial.value) {
-        log.debug('[DEJA SERIAL] send', action, payload)
-        return
-      } else {
-        log.debug('[DEJA CLOUD] send', action, payload)
-        sendDccCommand({ action, payload })
-        return
-      }
-    } catch (err) {
-      log.error('[DCC API].send', err)
+    if (isEmulated.value) {
+      log.debug('[DEJA EMULATOR] send', action, payload)
+      return
+    } else if (isSerial.value) {
+      log.debug('[DEJA SERIAL] send', action, payload)
+      return
+    } else {
+      log.debug('[DEJA CLOUD] send', action, payload)
+      await sendDccCommand({ action, payload })
     }
   }
 
