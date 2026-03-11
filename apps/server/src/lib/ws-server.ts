@@ -1,6 +1,7 @@
 import os from 'node:os'
 import type { IncomingMessage } from 'node:http'
 import WebSocket, { WebSocketServer } from 'ws';
+import { dejaEmitter, type BroadcastMessage } from '../broadcast'
 import { log } from '../utils/logger.js'
 
 const layoutId = process.env.LAYOUT_ID
@@ -160,11 +161,20 @@ export const getActiveDevices = (): string[] => {
   return Array.from(deviceConnections.keys())
 }
 
+/** Handler for broadcast events — forwards messages to all connected WebSocket clients. */
+const handleBroadcastEvent = (data: BroadcastMessage): void => {
+  send(data as unknown as JSON)
+}
+
 export const connect = async (): Promise<WebSocketServer | null> => {
   return new Promise((resolve, reject) => {
     try {
       weServer = new WebSocketServer({ port: parseInt(port) })
       weServer.on('connection', (ws, req) => handleConnection(ws, req) && resolve(weServer))
+
+      // Subscribe to broadcast events from the event emitter
+      dejaEmitter.onBroadcast(handleBroadcastEvent)
+
       const serverIp =
         os?.networkInterfaces()
         ?.['en0']
@@ -183,6 +193,9 @@ export const connect = async (): Promise<WebSocketServer | null> => {
 
 export const disconnect = async (): Promise<void> => {
   try {
+    // Unsubscribe from broadcast events
+    dejaEmitter.offBroadcast(handleBroadcastEvent)
+
     if (weServer) {
       // Close all client connections
       connections.forEach((ws) => {
@@ -191,7 +204,7 @@ export const disconnect = async (): Promise<void> => {
         }
       })
       connections.length = 0
-      
+
       // Close all device connections
       deviceConnections.forEach((deviceConns) => {
         deviceConns.forEach((ws) => {
@@ -201,13 +214,13 @@ export const disconnect = async (): Promise<void> => {
         })
       })
       deviceConnections.clear()
-      
+
       // Close the WebSocket server
       weServer.close(() => {
         log.success('WebSocket server closed successfully')
         weServer = null
       })
-      
+
       log.info('WebSocket server shutdown initiated')
     }
   } catch (err) {

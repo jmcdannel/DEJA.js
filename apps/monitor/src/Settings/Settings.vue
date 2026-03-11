@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { BackgroundSettings } from '@repo/ui'
 import { ref } from 'vue'
 
 const autoRefresh = ref(true)
@@ -22,6 +23,16 @@ const themeOptions = [
   <v-container class="py-8">
     <v-row justify="center">
       <v-col cols="12" md="8" lg="6">
+        <BackgroundSettings
+          app-name="monitor"
+          :pages="[
+            { path: '/', label: 'Dashboard', icon: 'mdi-view-dashboard' },
+            { path: '/settings', label: 'Settings', icon: 'mdi-cog' },
+            { path: '/logs', label: 'Logs', icon: 'mdi-file-document' },
+          ]"
+          class="mb-4"
+        />
+
         <v-card>
           <v-card-title>Monitor Settings</v-card-title>
           <v-card-subtitle class="pb-0">Mock controls for device monitoring tweaks.</v-card-subtitle>

@@ -197,8 +197,8 @@ const defaultProps = {
 
         <v-spacer class="ma-2"></v-spacer>
       </template>
-      <ThemeSwitcher class="ma-1" />
-      <UserProfile v-if="showUserProfile !== false && user" />
+      <ThemeSwitcher class="mx-2" />
+      <UserProfile v-if="showUserProfile !== false && user" class="mx-2" />
       <template v-if="layoutId && user">
         <TrackPower class="ma-1" :power-state="layoutPowerState" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
         <Power class="ma-1" v-if="showLayoutPower" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />

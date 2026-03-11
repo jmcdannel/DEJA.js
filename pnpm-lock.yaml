@@ -904,6 +904,9 @@ importers:
       '@repo/sounds':
         specifier: workspace:*
         version: link:../sounds
+      '@vueuse/core':
+        specifier: ^11.0.3
+        version: 11.3.0(vue@3.5.22(typescript@5.9.3))
       firebase:
         specifier: ^10.14.1
         version: 10.14.1
@@ -932,9 +935,6 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
-      '@vueuse/core':
-        specifier: ^11.0.3
-        version: 11.3.0(vue@3.5.22(typescript@5.9.3))
       typescript:
         specifier: latest
         version: 5.9.3

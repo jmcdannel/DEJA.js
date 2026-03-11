@@ -4,7 +4,7 @@
 </script>
 
 <template>
-  <main class="@container flex flex-col flex-grow p-2 md:p-4 w-full viaduct-background bg-opacity-50 bg-fixed overflow-auto">
+  <main class="@container flex flex-col flex-grow p-2 md:p-4 w-full overflow-auto">
    <EffectList />
   </main>
 </template>

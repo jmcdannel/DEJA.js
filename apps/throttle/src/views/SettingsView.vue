@@ -5,6 +5,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import type { Layout } from '@repo/modules'
 import SelectFavorites from '@/core/Menu/SelectFavorites.vue'
+import { BackgroundSettings } from '@repo/ui'
 
 const enableExperimentalSync = ref(true)
 const notificationChannels = ref(['email'])
@@ -89,6 +90,21 @@ async function saveLayoutConnectionSettings() {
     <v-row justify="center">
       <v-col cols="12" md="8" lg="6">
         <SelectFavorites />
+
+        <BackgroundSettings
+          app-name="throttle"
+          :pages="[
+            { path: '/', label: 'Home', icon: 'mdi-home' },
+            { path: '/turnouts', label: 'Turnouts', icon: 'mdi-directions-fork' },
+            { path: '/roster', label: 'Roster', icon: 'mdi-train' },
+            { path: '/routes', label: 'Routes', icon: 'mdi-map-marker-path' },
+            { path: '/signals', label: 'Signals', icon: 'mdi-traffic-light' },
+            { path: '/effects', label: 'Effects', icon: 'mdi-auto-fix' },
+            { path: '/conductor', label: 'Conductor', icon: 'mdi-account-hard-hat' },
+            { path: '/connect', label: 'Connect', icon: 'mdi-connection' },
+          ]"
+          class="mb-4"
+        />
 
         <!-- DEJA Server configuration (used at runtime, especially on mobile) -->
         <v-card class="mb-4">

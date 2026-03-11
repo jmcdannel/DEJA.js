@@ -29,7 +29,7 @@ function NavItem({ item, pathname, depth = 0 }: { item: DocNavItem; pathname: st
             aria-current={isActive ? 'page' : undefined}
             className={`flex-1 block px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
               isActive
-                ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300'
+                ? 'bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-300'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
             }`}
             style={{ paddingLeft: `${depth * 12 + 12}px` }}
