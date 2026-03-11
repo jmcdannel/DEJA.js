@@ -42,6 +42,12 @@ export { default as Stat } from './Stat.vue'
 export { default as useColors } from './useColors'
 export { default as DeviceStatusItem } from './DeviceStatus/DeviceStatusItem.vue'
 export { default as DeviceStatusList } from './DeviceStatus/DeviceStatusList.vue'
+
+// Device Connection
+export { DeviceConnectionCard, DeviceConnectionList } from './DeviceConnection'
+
+// Dashboard widgets
+export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart } from './Dashboard'
 export { default as EmptyState } from './EmptyState/EmptyState.vue'
 export { default as ModuleList } from './ModuleList/List.vue'
 export { default as LocoList } from './Locos/LocoList.vue'

@@ -197,6 +197,16 @@ export const useLayout = () => {
     }
   }
 
+  async function disconnectDevice(deviceId: string) {
+    try {
+      sendDejaCommand({ action: 'disconnect', payload: { deviceId } })
+
+      log.debug('disconnectDevice: ', deviceId)
+    } catch (e) {
+      log.error('Error disconnectDevice: ', e)
+    }
+  }
+
   async function autoConnectDevice(id: string, autoConnect: boolean) {
     if (!layoutId.value) {
       log.error('No layoutId set, cannot auto-connect device')
@@ -292,6 +302,7 @@ export const useLayout = () => {
     autoConnectDevice,
     deviceTypes,
     connectDevice,
+    disconnectDevice,
     getTags,
     setTags,
     setTag,

@@ -1,43 +1,42 @@
 import { ref, watch, onMounted } from 'vue'
-import { useStorage, usePreferredDark } from '@vueuse/core'
+import { useStorage } from '@vueuse/core'
 import { useTheme as useVuetifyTheme } from 'vuetify'
 
-export type ThemeMode = 'light' | 'dark' | 'system'
+export type ThemeMode = 'light' | 'dark' | 'high-contrast'
 
 export function useThemeSwitcher() {
   const vuetifyTheme = useVuetifyTheme()
-  const preferredDark = usePreferredDark()
-  
-  // Store the user's explicit preference ('light', 'dark', or 'system')
-  const themePreference = useStorage<ThemeMode>('@DEJA/theme-preference', 'system')
+
+  // Store the user's explicit preference
+  const themePreference = useStorage<ThemeMode>('@DEJA/theme-preference', 'dark')
   
   // Computed actual state (light or dark)
   const isDark = ref(false)
 
   const applyTheme = (mode: ThemeMode) => {
-    let resolvedIsDark = false
-    
-    if (mode === 'system') {
-      resolvedIsDark = preferredDark.value
+    isDark.value = mode === 'dark' || mode === 'high-contrast'
+
+    // Sync Tailwind dark mode class
+    const html = document.documentElement
+    if (mode === 'dark' || mode === 'high-contrast') {
+      html.classList.add('dark')
     } else {
-      resolvedIsDark = mode === 'dark'
+      html.classList.remove('dark')
     }
 
-    isDark.value = resolvedIsDark
-
-    // Update HTML class
-    if (resolvedIsDark) {
-      document.documentElement.classList.add('dark')
+    // High-contrast class for targeted overrides
+    if (mode === 'high-contrast') {
+      html.classList.add('high-contrast')
     } else {
-      document.documentElement.classList.remove('dark')
+      html.classList.remove('high-contrast')
     }
 
-    // Update Vuetify
-    vuetifyTheme.global.name.value = resolvedIsDark ? 'dark' : 'light'
+    // Update Vuetify theme name directly
+    vuetifyTheme.global.name.value = mode
   }
 
-  // Watch for changes in preference or system preference
-  watch([themePreference, preferredDark], ([newPref]) => {
+  // Watch for changes in preference
+  watch(themePreference, (newPref) => {
     applyTheme(newPref)
   })
 
@@ -51,9 +50,10 @@ export function useThemeSwitcher() {
   }
   
   const cycleTheme = () => {
-    if (themePreference.value === 'system') setTheme('light')
-    else if (themePreference.value === 'light') setTheme('dark')
-    else setTheme('system')
+    const order: ThemeMode[] = ['light', 'dark', 'high-contrast']
+    const currentIndex = order.indexOf(themePreference.value)
+    const nextIndex = (currentIndex + 1) % order.length
+    setTheme(order[nextIndex])
   }
 
   return {

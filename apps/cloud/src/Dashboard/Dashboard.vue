@@ -1,68 +1,145 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useCurrentUser } from 'vuefire';
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
-import EmptyState from '@/Core/UI/EmptyState.vue'
-import DeviceStatusList from '@repo/ui/src/DeviceStatus/DeviceStatusList.vue'
-import { useLayout } from '@repo/modules'
+import { useLayout, useServerStatus } from '@repo/modules'
+import { useDejaJS } from '@repo/deja'
+import {
+  DeviceConnectionList,
+  SystemOverviewStats,
+  CommandActivityChart,
+  DeviceConnectionChart,
+} from '@repo/ui'
+import { ref as rtdbRef, onValue, off } from 'firebase/database'
+import { rtdb } from '@repo/firebase-config'
+import { useStorage } from '@vueuse/core'
+import { useCommandActivity } from '@/composables/useCommandActivity'
 
-const user = useCurrentUser()
 const router = useRouter()
-const { getDevices } = useLayout()
-const devices = getDevices()
+const { getDevices, getLayout, connectDevice, disconnectDevice } = useLayout()
+const { sendDejaCommand } = useDejaJS()
+const { serverStatus } = useServerStatus()
 
-const hasDccExDevice = computed(() =>
-  devices.value?.some((device) => device.type === 'dcc-ex')
+// Device data
+const devices = getDevices()
+const layout = getLayout()
+
+// Port list from RTDB
+const ports = ref<string[]>([])
+const layoutId = useStorage('@DEJA/layoutId', '')
+
+let unsubPorts: (() => void) | null = null
+
+onMounted(() => {
+  // Request port list
+  sendDejaCommand({ action: 'listPorts', payload: {} })
+
+  // Listen to RTDB portList
+  if (layoutId.value) {
+    const portRef = rtdbRef(rtdb, `portList/${layoutId.value}`)
+    onValue(portRef, (snapshot) => {
+      const val = snapshot.val()
+      if (Array.isArray(val)) {
+        ports.value = val
+      }
+    })
+    unsubPorts = () => off(portRef)
+  }
+})
+
+onUnmounted(() => {
+  unsubPorts?.()
+})
+
+// Command activity (placeholder -- wired to empty ref until WebSocket integration)
+const wsMessages = ref<{ action: string; payload?: unknown }[]>([])
+const { activity: commandActivity } = useCommandActivity(wsMessages)
+
+// Computed stats
+const trackPower = computed(() => layout?.value?.dccEx?.power ?? null)
+const connectedCount = computed(() => devices.value?.filter((d) => d.isConnected).length ?? 0)
+const disconnectedCount = computed(() => (devices.value?.length ?? 0) - connectedCount.value)
+const deviceCount = computed(() => ({
+  connected: connectedCount.value,
+  total: devices.value?.length ?? 0,
+}))
+const totalCommandCount = computed(() =>
+  commandActivity.value.reduce((sum, b) => sum + b.count, 0),
 )
 
-function handleDisconnect() {
-  router.push('/')
+// Event handlers
+async function handleConnect(deviceId: string, serial?: string, topic?: string) {
+  const device = devices.value?.find((d) => d.id === deviceId)
+  if (!device) return
+  await connectDevice(device, serial, topic)
 }
 
-function handleGoToDevices() {
+async function handleDisconnect(deviceId: string) {
+  await disconnectDevice(deviceId)
+}
+
+async function handleReconnect(deviceId: string) {
+  const device = devices.value?.find((d) => d.id === deviceId)
+  if (!device) return
+  await disconnectDevice(deviceId)
+  // Wait briefly for Firestore to propagate
+  setTimeout(async () => {
+    await connectDevice(device, device.port, device.topic)
+  }, 1000)
+}
+
+function navigateToDevice(deviceId: string) {
+  router.push({ name: 'DeviceDetails', params: { deviceId } })
+}
+
+function refreshPorts() {
+  sendDejaCommand({ action: 'listPorts', payload: {} })
+}
+
+function navigateToAddDevice() {
   router.push({ name: 'Devices' })
 }
-
 </script>
+
 <template>
-  <div class="animate-fade-in-up">
-    <ModuleTitle menu="Dashboard" />
-    <template v-if="user">
-      <template v-if="hasDccExDevice">
-        <DeviceStatusList @disconnect="handleDisconnect" class="glass-dark rounded-2xl shadow-soft-dark p-6 mt-4" />
-      </template>
-      <template v-else>
-        <div class="glass-dark rounded-3xl shadow-soft-dark p-8 mt-6 transition-all duration-300 hover:shadow-glow-cyan border border-brand-cyan/20">
-          <EmptyState
-            icon="mdi-memory"
-            color="cyan"
-            title="Set Up Your Command Station"
-            description="Connect a DCC-EX CommandStation device to your layout to start controlling trains, turnouts, signals, and effects from the cloud."
-            :use-cases="[{ icon: 'mdi-speedometer', text: 'Monitor layout status' }, { icon: 'mdi-devices', text: 'Track connected devices' }, { icon: 'mdi-chart-line', text: 'System health overview' }]"
-            action-label="Go to Layout Setup"
-            action-to="/devices"
-            @action="handleGoToDevices"
-          />
-        </div>
-      </template>
-    </template>
-  </div>
+  <v-container fluid class="pa-4 pa-md-6">
+    <!-- Device Connection List (Hero) -->
+    <DeviceConnectionList
+      :devices="devices ?? []"
+      :available-ports="ports"
+      link-mode="page"
+      @connect="handleConnect"
+      @disconnect="handleDisconnect"
+      @reconnect="handleReconnect"
+      @navigate="navigateToDevice"
+      @refresh-ports="refreshPorts"
+      @add-device="navigateToAddDevice"
+    />
+
+    <!-- Divider -->
+    <v-divider class="my-6" />
+
+    <!-- System Overview -->
+    <h2 class="text-h5 font-weight-bold mb-4">System Overview</h2>
+
+    <SystemOverviewStats
+      :server-status="serverStatus"
+      :device-count="deviceCount"
+      :track-power="trackPower"
+      :command-count="totalCommandCount"
+      class="mb-4"
+    />
+
+    <!-- Graphs Row -->
+    <v-row dense>
+      <v-col cols="12" md="6">
+        <CommandActivityChart :data="commandActivity" />
+      </v-col>
+      <v-col cols="12" md="6">
+        <DeviceConnectionChart
+          :connected="connectedCount"
+          :disconnected="disconnectedCount"
+        />
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
-
-<style scoped>
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-</style>

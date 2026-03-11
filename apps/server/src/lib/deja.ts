@@ -50,6 +50,7 @@ export async function handleDejaMessages(
       case 'portList':
         db.collection('layouts').doc(layoutId)
           .set({ ports: payload }, { merge: true })
+        rtdb.ref(`portList/${layoutId}`).set(payload)
         break
       case 'status':
       case 'getStatus':
@@ -106,6 +107,18 @@ export async function handleDejaCommands(
       case 'connect':
         await layout.connectDevice(JSON.parse(payload))
         break
+      case 'disconnect': {
+        const parsed = JSON.parse(payload)
+        const deviceId = parsed.deviceId ?? parsed.device
+        if (!deviceId) {
+          log.warn('disconnect: missing deviceId')
+          break
+        }
+        log.start(`Disconnecting device: ${deviceId}`)
+        await layout.disconnectDevice(deviceId)
+        log.success(`Device disconnected: ${deviceId}`)
+        break
+      }
       case 'listPorts':
         await listPorts()
         break

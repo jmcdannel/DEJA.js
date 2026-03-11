@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { collection, query, where } from 'firebase/firestore'
 import { useRouter } from 'vue-router'
 import { useCollection, useCurrentUser } from 'vuefire'
 import { useStorage } from '@vueuse/core'
-import { db } from '@repo/firebase-config'
+import { db, rtdb } from '@repo/firebase-config'
+import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { createLogger } from '@repo/utils'
+import { useLayout, type Device } from '@repo/modules'
+import { DeviceConnectionList, DeviceStatusItem } from '@repo/ui'
 
 const log = createLogger('Connect')
 
@@ -19,7 +22,7 @@ const layoutsQuery = computed(() => {
     // Return null if no user email, which will prevent the query from running
     return null
   }
-  
+
   const layoutsRef = collection(db, 'layouts')
   return query(layoutsRef, where('owner', '==', user.value.email))
 })
@@ -36,6 +39,56 @@ function handleLayoutSelect(selectedLayoutId: string) {
     router.push({ name: 'home' })
   }
 }
+
+// Device connection management
+const { getDevices, connectDevice, disconnectDevice } = useLayout()
+const devices = getDevices()
+
+const ports = ref<string[]>([])
+let unsubPorts: (() => void) | null = null
+
+// Listen to RTDB portList when layout is selected
+watch(layoutId, (id) => {
+  // Clean up previous listener
+  unsubPorts?.()
+  unsubPorts = null
+
+  if (id) {
+    const portRef = rtdbRef(rtdb, `portList/${id}`)
+    onValue(portRef, (snapshot) => {
+      const val = snapshot.val()
+      if (Array.isArray(val)) {
+        ports.value = val
+      }
+    })
+    unsubPorts = () => off(portRef)
+  }
+}, { immediate: true })
+
+// Device event handlers
+async function handleConnect(deviceId: string, serial?: string, topic?: string) {
+  const device = devices.value?.find((d: Device) => d.id === deviceId)
+  if (!device) return
+  await connectDevice(device, serial, topic)
+}
+
+async function handleDisconnect(deviceId: string) {
+  await disconnectDevice(deviceId)
+}
+
+// Device detail modal
+const selectedDeviceId = ref<string | null>(null)
+const showDeviceModal = ref(false)
+
+function openDeviceModal(deviceId: string) {
+  selectedDeviceId.value = deviceId
+  showDeviceModal.value = true
+}
+
+const selectedDevice = computed(() => {
+  if (!selectedDeviceId.value || !devices.value) return null
+  return devices.value.find((d: Device) => d.id === selectedDeviceId.value) ?? null
+})
 </script>
 
 <template>
@@ -46,7 +99,7 @@ function handleLayoutSelect(selectedLayoutId: string) {
     >
       <v-card-text>
         <h2 class="text-h6 mb-2">Your Layouts</h2>
-        <div v-for="layout in layouts" :key="layout.id" 
+        <div v-for="layout in layouts" :key="layout.id"
           class="p-4 rounded-lg border cursor-pointer transition-all hover:bg-gray-800 my-2"
           :class="{ 'border-green-500 bg-green-800': layout.id === layoutId, 'border-gray-200 bg-gray-900': layout.id !== layoutId }"
           @click="handleLayoutSelect(layout.id)">
@@ -63,5 +116,32 @@ function handleLayoutSelect(selectedLayoutId: string) {
         </div>
       </v-card-text>
     </v-card>
+
+    <!-- Device Connection List (shown after layout is selected) -->
+    <div v-if="layoutId" class="mt-6 mx-auto w-full" style="max-width: 600px">
+      <DeviceConnectionList
+        :devices="devices ?? []"
+        :available-ports="ports"
+        link-mode="modal"
+        :show-header="false"
+        @connect="handleConnect"
+        @disconnect="handleDisconnect"
+        @navigate="openDeviceModal"
+      />
+    </div>
+
+    <!-- Device Detail Modal -->
+    <v-dialog v-model="showDeviceModal" max-width="600">
+      <v-card v-if="selectedDevice">
+        <v-card-title>Device Details</v-card-title>
+        <v-card-text>
+          <DeviceStatusItem :device="selectedDevice" />
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn @click="showDeviceModal = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </main>
 </template>
