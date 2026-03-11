@@ -221,6 +221,9 @@ importers:
       firebase:
         specifier: ^10.14.1
         version: 10.14.1
+      pinia:
+        specifier: ^2.1.6
+        version: 2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       vue:
         specifier: ^3.5.17
         version: 3.5.22(typescript@5.9.3)
@@ -24642,7 +24645,7 @@ snapshots:
   vite@4.5.14(@types/node@16.18.11)(lightningcss@1.31.1)(terser@5.44.0):
     dependencies:
       esbuild: 0.25.11
-      postcss: 8.5.6
+      postcss: 8.5.8
       rollup: 3.29.5
     optionalDependencies:
       '@types/node': 16.18.11
