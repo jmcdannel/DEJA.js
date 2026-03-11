@@ -1,4 +1,6 @@
 import { getStorage } from 'firebase/storage'
 import { firebaseApp } from './firebase'
 
-export const storage = getStorage(firebaseApp)
+export function getFirebaseStorage() {
+  return getStorage(firebaseApp)
+}

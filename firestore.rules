@@ -73,6 +73,12 @@ service cloud.firestore {
         allow read: if isAuth();
         allow write: if isLayoutOwner(layoutId);
       }
+
+      // Track diagrams - layout owner only
+      match /trackDiagrams/{diagramId} {
+        allow read: if isAuth();
+        allow write: if isLayoutOwner(layoutId);
+      }
     }
 
     // Test effects collection (for sound testing)

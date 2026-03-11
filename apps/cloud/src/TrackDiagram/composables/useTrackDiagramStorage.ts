@@ -1,5 +1,5 @@
 import { ref as storageRef, uploadString, getDownloadURL } from 'firebase/storage'
-import { storage } from '@repo/firebase-config'
+import { getFirebaseStorage } from '@repo/firebase-config'
 import { useStorage } from '@vueuse/core'
 import { createLogger } from '@repo/utils'
 
@@ -12,7 +12,7 @@ export const useTrackDiagramStorage = () => {
     if (!layoutId.value) return null
     try {
       const path = `layouts/${layoutId.value}/maps/${diagramId}.svg`
-      const fileRef = storageRef(storage, path)
+      const fileRef = storageRef(getFirebaseStorage(), path)
       await uploadString(fileRef, svgContent, 'raw', { contentType: 'image/svg+xml' })
       return await getDownloadURL(fileRef)
     } catch (error) {
@@ -25,7 +25,7 @@ export const useTrackDiagramStorage = () => {
     if (!layoutId.value) return null
     try {
       const path = `layouts/${layoutId.value}/maps/${diagramId}.css`
-      const fileRef = storageRef(storage, path)
+      const fileRef = storageRef(getFirebaseStorage(), path)
       await uploadString(fileRef, cssContent, 'raw', { contentType: 'text/css' })
       return await getDownloadURL(fileRef)
     } catch (error) {
