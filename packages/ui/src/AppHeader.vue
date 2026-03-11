@@ -252,8 +252,8 @@ const defaultProps = {
                     {{ device.type === 'dcc-ex' || device.connection === 'usb' ? 'mdi-memory' : device.connection === 'wifi' ? 'mdi-wifi' : 'mdi-bluetooth' }}
                   </v-icon>
                   <div>
-                    <h4 class="font-medium">{{ device.id }}</h4>
-                    <div class="flex gap-2 text-sm text-gray-600">
+                    <h4 class="font-medium text-white">{{ device.id }}</h4>
+                    <div class="flex gap-2 text-sm text-gray-400">
                       <span>{{ device.connection }}</span>
                       <span v-if="device.port">{{ device.port }}</span>
                       <span v-if="device.topic">{{ device.topic }}</span>
@@ -271,8 +271,8 @@ const defaultProps = {
           </div>
           <div v-else class="text-center py-8">
             <v-icon size="48" color="grey">mdi-devices-outline</v-icon>
-            <h3 class="text-lg font-medium text-gray-900 mt-2">No Devices Available</h3>
-            <p class="text-gray-600">There are currently no devices configured.</p>
+            <h3 class="text-lg font-medium text-white mt-2">No Devices Available</h3>
+            <p class="text-gray-400">There are currently no devices configured.</p>
           </div>
         </v-card-text>
         <v-card-actions class="justify-end">
