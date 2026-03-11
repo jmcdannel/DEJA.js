@@ -1,4 +1,4 @@
-import { ref, readonly, watch } from 'vue'
+import { ref, readonly, computed, watch } from 'vue'
 import { useConnectionStatus } from '@/composables/useConnectionStatus'
 import { createLogger } from '@repo/utils'
 
@@ -149,7 +149,7 @@ export function useCommandQueue() {
     /** Execute a write with retry, queuing if offline */
     enqueue,
     /** Number of commands waiting in the queue */
-    queueSize: readonly(ref(queue.value.length)),
+    queueSize: computed(() => queue.value.length),
     /** The reactive queue (read-only) */
     queue: readonly(queue),
     /** Whether the queue is currently being flushed */
