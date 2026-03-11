@@ -85,12 +85,12 @@ onMounted(() => {
           </v-btn>
           
           <v-btn
-            to="/layout"
+            to="/devices"
             color="info"
             size="large"
-            prepend-icon="mdi-map"
+            prepend-icon="mdi-developer-board"
           >
-            Layout Yard
+            Devices
           </v-btn>
           
           <v-btn
