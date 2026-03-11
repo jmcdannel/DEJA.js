@@ -123,18 +123,19 @@ function handleConnect() {
     <v-card-text class="pa-4">
       <!-- Top row: device info + status -->
       <div class="d-flex justify-space-between align-center mb-3 flex-wrap ga-2">
-        <div class="d-flex align-center ga-3">
+        <div class="d-flex align-center ga-3 device-info-link" @click="emit('navigate', device.id)">
           <v-avatar
             :color="deviceConfig?.color ?? 'grey'"
             variant="tonal"
             size="40"
             rounded="lg"
+            class="cursor-pointer"
           >
             <v-icon :icon="deviceConfig?.icon ?? 'mdi-devices'" />
           </v-avatar>
           <div>
             <div
-              class="text-subtitle-1 font-weight-bold"
+              class="text-subtitle-1 font-weight-bold cursor-pointer"
               :class="`text-${deviceConfig?.color ?? 'grey'}`"
             >
               {{ device.name || deviceConfig?.label || device.type }}
@@ -281,6 +282,15 @@ function handleConnect() {
 
 .device-connection-port-select {
   width: 100%;
+}
+
+.device-info-link {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.device-info-link:hover {
+  opacity: 0.8;
 }
 
 @media (min-width: 600px) {
