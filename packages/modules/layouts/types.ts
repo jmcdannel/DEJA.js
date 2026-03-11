@@ -46,6 +46,17 @@ export interface Layout {
     isConnected?: boolean
     lastConnected?: Date
   }
+  throttleConnection?: {
+    type: 'deja-server' | 'withrottle'
+    host?: string
+    port?: number
+  }
+}
+
+export interface ServerStatus {
+  online: boolean
+  lastSeen: Date | number
+  version?: string
 }
 
 export interface Device {

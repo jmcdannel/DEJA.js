@@ -11,7 +11,7 @@ import Power from './Power.vue'
 import EmergencyStop from './EmergencyStop.vue'
 import SelectLayout from './SelectLayout.vue'
 import ThemeSwitcher from './ThemeSwitcher.vue'
-import { useLayout } from '@repo/modules'
+import { useLayout, useServerStatus } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
 // import { useEfx, type Effect } from '@repo/modules'
 
@@ -43,6 +43,8 @@ const layoutId = useStorage('@DEJA/layoutId', '')
 const user = useCurrentUser()
 const router = useRouter()
 const { mdAndUp } = useDisplay()
+
+const { serverStatus } = useServerStatus()
 
 const layouts = getLayouts(user.value?.email)
 const devices = getDevices()
@@ -180,6 +182,16 @@ const defaultProps = {
             {{ connectedDevicesCount }}/{{ devices.length }}
           </span>
         </v-chip>
+        
+        <v-chip v-if="user" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-server-network"
+          :color="serverStatus?.online ? 'success' : 'error'" variant="elevated">
+          <template #append>
+            <span v-if="serverStatus?.online" class="status-dot success-dot"></span>
+            <span v-else class="status-dot error-dot"></span>
+          </template>
+          <span class="font-medium hidden sm:inline-block">Server</span>
+        </v-chip>
+
         <v-spacer class="ma-2"></v-spacer>
       </template>
       <ThemeSwitcher class="ma-1" />

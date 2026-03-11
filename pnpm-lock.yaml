@@ -373,6 +373,9 @@ importers:
       '@sentry/vue':
         specifier: ^8.0.0
         version: 8.55.0(pinia@2.3.1(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3)))(vue@3.5.22(typescript@5.9.3))
+      '@spryrocks/capacitor-socket-connection-plugin':
+        specifier: ^6.3.0
+        version: 6.3.0(@capacitor/core@6.2.1)
       '@tailwindcss/container-queries':
         specifier: ^0.1.1
         version: 0.1.1(tailwindcss@3.4.18(tsx@4.20.6)(yaml@1.10.2))
@@ -2447,6 +2450,29 @@ packages:
 
   '@soda/get-current-script@1.0.2':
     resolution: {integrity: sha512-T7VNNlYVM1SgQ+VsMYhnDkcGmWhQdL0bDyGm5TlQ3GBXnJscEClUUOKduWTmm2zCnvNLC1hc3JpuXjs/nFOc5w==}
+
+  '@spryrocks/capacitor-socket-connection-plugin@6.3.0':
+    resolution: {integrity: sha512-/lOSnWFXfFezyhdKmppDQQnFH/3EDBbRKXQXzHLrrTJsLa/Jmxtkqd1mdgWUdGAPiwEpvEkQGMHGGZMrmw24gw==}
+    peerDependencies:
+      '@capacitor/core': ^6.1.2
+
+  '@spryrocks/logger-core@0.1.17-alpha.0':
+    resolution: {integrity: sha512-m2vY5EhOv8rz8vyIh0agioKm5W/ETMvq0gmAEM+Jg2V8ciK+UTyT7dAkXnZelscuaB+tLDWqS/J2cnaNhQc2lA==}
+
+  '@spryrocks/logger-observer@0.1.17-alpha.2':
+    resolution: {integrity: sha512-NlrVcCTOhTXaheye3U6dyhlqoN3SkZVQycBZJ5r4oqiL3ziiTAjTJ/DRS4PiwixE1yugaUfKZW02o5cQ41RqNQ==}
+
+  '@spryrocks/logger-plugin-core@0.1.17-alpha.0':
+    resolution: {integrity: sha512-bgQcfWn+eYpff1Gsof/Pm8aQchZhBhm4ctKh9c4otkwpOVvW6ob3guyUBkV/xAeEzdPdeYTtqSBiOB2xzvVRsw==}
+
+  '@spryrocks/logger-plugin-observer@0.1.17-alpha.2':
+    resolution: {integrity: sha512-veZXAEQy0txmMCMOAr0nB4E3fN1Qa9waGcM5VUW9Rzq2/3NLQXPGCu1DTjVRSktbCbf7BgQOlqHWXlBRrd9qCw==}
+
+  '@spryrocks/logger-plugin@0.1.17-alpha.2':
+    resolution: {integrity: sha512-meq63XwkpMv9LdIsoOxIby1bi8BciSd3dAo60sD0dLB9FeB7GDP38FAYsSi09sN7+FxZq5uqn8Ug7TYk+Fdxdg==}
+
+  '@spryrocks/logger@0.1.17-alpha.2':
+    resolution: {integrity: sha512-HRVz+JDqAQ0N8D9rp93tV3gGyhwN6ZdI2vBWKftgXPCd0cle/GkSL3Wjj8P3F6kNcky2/xv0dyROGWIcLQoxSQ==}
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
@@ -10914,6 +10940,35 @@ snapshots:
       webpack: 5.102.1
 
   '@soda/get-current-script@1.0.2': {}
+
+  '@spryrocks/capacitor-socket-connection-plugin@6.3.0(@capacitor/core@6.2.1)':
+    dependencies:
+      '@capacitor/core': 6.2.1
+      '@spryrocks/logger-plugin': 0.1.17-alpha.2
+
+  '@spryrocks/logger-core@0.1.17-alpha.0': {}
+
+  '@spryrocks/logger-observer@0.1.17-alpha.2':
+    dependencies:
+      '@spryrocks/logger-core': 0.1.17-alpha.0
+
+  '@spryrocks/logger-plugin-core@0.1.17-alpha.0':
+    dependencies:
+      '@spryrocks/logger-core': 0.1.17-alpha.0
+
+  '@spryrocks/logger-plugin-observer@0.1.17-alpha.2':
+    dependencies:
+      '@spryrocks/logger-observer': 0.1.17-alpha.2
+      '@spryrocks/logger-plugin-core': 0.1.17-alpha.0
+
+  '@spryrocks/logger-plugin@0.1.17-alpha.2':
+    dependencies:
+      '@spryrocks/logger': 0.1.17-alpha.2
+      '@spryrocks/logger-plugin-observer': 0.1.17-alpha.2
+
+  '@spryrocks/logger@0.1.17-alpha.2':
+    dependencies:
+      '@spryrocks/logger-observer': 0.1.17-alpha.2
 
   '@standard-schema/spec@1.0.0': {}
 

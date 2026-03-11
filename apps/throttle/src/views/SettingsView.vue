@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useStorage } from '@vueuse/core'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { db } from '@repo/firebase-config'
+import type { Layout } from '@repo/modules'
 import SelectFavorites from '@/core/Menu/SelectFavorites.vue'
 
 const enableExperimentalSync = ref(true)
@@ -35,6 +38,50 @@ function saveServerSettings() {
   serverSaved.value = true
   setTimeout(() => { serverSaved.value = false }, 2000)
 }
+
+// Layout Throttle Connection config
+const layoutId = useStorage<string>('@DEJA/layoutId', '').value
+const connectionType = ref<'deja-server' | 'withrottle'>('deja-server')
+const connectionHost = ref('')
+const connectionPort = ref(44444)
+const isLayoutLoading = ref(true)
+const isLayoutSaving = ref(false)
+
+if (layoutId) {
+  getDoc(doc(db, 'layouts', layoutId)).then((snap) => {
+    if (snap.exists()) {
+      const data = snap.data() as Layout
+      if (data.throttleConnection) {
+        connectionType.value = data.throttleConnection.type || 'deja-server'
+        connectionHost.value = data.throttleConnection.host || ''
+        connectionPort.value = data.throttleConnection.port || 44444
+      }
+    }
+    isLayoutLoading.value = false
+  })
+}
+
+async function saveLayoutConnectionSettings() {
+  if (!layoutId) return
+  isLayoutSaving.value = true
+  try {
+    await setDoc(
+      doc(db, 'layouts', layoutId), 
+      {
+        throttleConnection: {
+          type: connectionType.value,
+          host: connectionHost.value,
+          port: connectionPort.value
+        }
+      },
+      { merge: true }
+    )
+  } catch(e) {
+    console.error('Error saving throttle connection:', e)
+  }
+  isLayoutSaving.value = false
+}
+
 </script>
 
 <template>
@@ -78,6 +125,51 @@ function saveServerSettings() {
               @click="saveServerSettings"
             >
               {{ serverSaved ? 'Saved!' : 'Save Server Settings' }}
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+
+        <v-card class="mb-4" :loading="isLayoutLoading">
+          <v-card-title>Throttle Connection</v-card-title>
+          <v-card-subtitle class="pb-0">Configure how this Throttle connects to your Layout.</v-card-subtitle>
+          <v-divider class="my-2" />
+          <v-card-text class="space-y-4">
+            <v-radio-group v-model="connectionType" label="Connection Protocol" inline hide-details>
+              <v-radio label="DEJA.js Server" value="deja-server" />
+              <v-radio label="Native WiThrottle" value="withrottle" />
+            </v-radio-group>
+            
+            <div v-if="connectionType === 'withrottle'" class="mt-4 space-y-4">
+               <v-text-field
+                v-model="connectionHost"
+                label="WiThrottle Host IP"
+                placeholder="192.168.1.50"
+                hint="IP address of the device running the WiThrottle server (e.g., DCC-EX WiFi, JMRI server)"
+                persistent-hint
+                prepend-inner-icon="mdi-ip-network"
+              />
+              <v-text-field
+                v-model.number="connectionPort"
+                label="WiThrottle Port"
+                type="number"
+                placeholder="44444"
+                hint="Typically 44444 or 12090"
+                persistent-hint
+                prepend-inner-icon="mdi-serial-port"
+              />
+            </div>
+            
+            <v-alert v-if="connectionType === 'deja-server'" type="info" variant="tonal" class="mt-4 text-sm">
+              The DEJA.js Server provides a native web socket connection which handles routing commands automatically. This option does not require the Capacitor native networking plugins and works reliably in the web browser.
+            </v-alert>
+          </v-card-text>
+          <v-card-actions class="justify-end">
+            <v-btn 
+              color="primary" 
+              variant="tonal" 
+              :loading="isLayoutSaving"
+              @click="saveLayoutConnectionSettings">
+              Save Connection Info
             </v-btn>
           </v-card-actions>
         </v-card>

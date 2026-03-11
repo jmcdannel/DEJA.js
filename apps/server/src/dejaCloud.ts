@@ -1,5 +1,6 @@
 import 'dotenv/config'
 import { db, rtdb } from '@repo/firebase-config/firebase-admin-node'
+import type { ServerStatus } from '@repo/modules'
 import { initialize } from './modules/layout'
 import { handleThrottleChange, listenToLocoChanges } from './modules/throttles'
 import { handleTurnoutChange } from './modules/turnouts'
@@ -13,6 +14,7 @@ import { serial } from './lib/serial'
 import { wsServer } from './lib/ws-server'
 
 const layoutId = process.env.LAYOUT_ID || 'betatrack'
+const serverStatusRef = rtdb.ref(`serverStatus/${layoutId}`)
 
 // Store listeners for cleanup
 let dccCommandsRef: any = null
@@ -157,6 +159,23 @@ export async function connect(): Promise<boolean> {
     // await reset()
     await listen()
     await initialize()
+    // Set up presence tracking
+    await serverStatusRef.onDisconnect().set({
+      online: false,
+      lastSeen: {
+        '.sv': 'timestamp' // Firebase server timestamp
+      }
+    })
+    
+    // Set online
+    await serverStatusRef.set({
+      online: true,
+      lastSeen: {
+        '.sv': 'timestamp'
+      },
+      version: process.env.npm_package_version || 'unknown'
+    })
+    
     log.success('Connected to DejaCloud', layoutId)
     return true
   } catch (error) {
@@ -183,6 +202,15 @@ export async function disconnect(): Promise<void> {
     // Disconnect all serial ports
     log.info('Disconnecting all serial ports...')
     serial.disconnectAll()
+    
+    // Cancel the onDisconnect and mark offline immediately
+    await serverStatusRef.onDisconnect().cancel()
+    await serverStatusRef.set({
+      online: false,
+      lastSeen: {
+        '.sv': 'timestamp'
+      }
+    })
     
     log.success('Disconnected from DejaCloud', layoutId)
   } catch (error) {
