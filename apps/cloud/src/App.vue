@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
@@ -7,6 +7,7 @@ import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import { createLogger } from '@repo/utils'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { useMenu } from '@/Core/Menu/useMenu'
+import { useSubscription, PLAN_DISPLAY } from '@repo/modules'
 import { isNavigating } from '@/router'
 
 const log = createLogger('CloudApp')
@@ -63,6 +64,8 @@ function handleLogoClick() {
   router.push({ path: '/' })
 }
 
+const { isTrialing, trialDaysLeft, plan } = useSubscription()
+const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
 </script>
 <template>
   <v-responsive class="border rounded min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
@@ -85,6 +88,20 @@ function handleLogoClick() {
           @drawer-toggle="drawer = !drawer"
         >
         </AppHeader>
+        <v-banner
+          v-if="isTrialing"
+          lines="one"
+          color="info"
+          density="compact"
+          class="text-body-2"
+        >
+          <template #text>
+            🎉 <strong>{{ trialPlanName }} trial</strong> — {{ trialDaysLeft }} days remaining. You won't be charged until the trial ends.
+          </template>
+          <template #actions>
+            <v-btn variant="text" size="small" :to="{ name: 'settings' }">Manage subscription</v-btn>
+          </template>
+        </v-banner>
         <Menu v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
       <v-main>
         <v-container class="pa-6 pa-md-12 max-w-7xl mx-auto transition-all duration-300">
