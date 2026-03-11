@@ -410,12 +410,6 @@ body {
   display: flex;
   align-items: center;
   gap: 0.125rem;
-  opacity: 0;
-  transition: opacity 150ms ease;
-}
-
-.monitor-pane:hover .monitor-pane__actions {
-  opacity: 1;
 }
 
 .monitor-pane__action-btn {
@@ -704,20 +698,13 @@ body {
 }
 
 /* ==========================================================================
-   Responsive (mobile single-column)
+   Responsive — JS-driven column count via usePaneManager.
+   Mobile fallback for grid-area override when single-column.
    ========================================================================== */
 
 @media (max-width: 768px) {
-  .monitor-grid {
-    grid-template-columns: 1fr !important;
-    grid-template-areas: none !important;
-    grid-template-rows: none !important;
-    overflow-y: auto;
-  }
-
   .monitor-grid > * {
-    grid-area: auto !important;
-    min-height: 300px;
+    min-height: 250px;
   }
 }
 

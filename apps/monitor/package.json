@@ -14,10 +14,12 @@
   },
   "dependencies": {
     "@sentry/vue": "^8.0.0",
+    "chart.js": "^4.5.1",
     "dayjs": "^1.11.13",
     "firebase": "^10.14.1",
     "pinia": "^2.1.6",
     "vue": "^3.5.17",
+    "vue-chartjs": "^5.3.3",
     "vue-router": "^4.2.2",
     "vuefire": "^3.2.1",
     "vuetify": "^3.7.3"

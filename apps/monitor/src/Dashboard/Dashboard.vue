@@ -6,7 +6,7 @@ import { usePaneManager, PANE_COLORS, type PaneColorKey } from '../composables/u
 import MonitorPane from './components/MonitorPane.vue'
 import MonitorStatusBar from './components/MonitorStatusBar.vue'
 import DccLogPane from './components/DccLogPane.vue'
-import DeviceSerialPane from './components/DeviceSerialPane.vue'
+import DeviceSerialPaneContent from './components/DeviceSerialPaneContent.vue'
 import TurnoutLogPane from './components/TurnoutLogPane.vue'
 import EffectLogPane from './components/EffectLogPane.vue'
 import SensorLogPane from './components/SensorLogPane.vue'
@@ -16,6 +16,30 @@ import { useDcc } from '@repo/dccex'
 const paneManager = usePaneManager()
 const { turnoutChanges, effectChanges, sensorChanges } = useLayoutLogListeners()
 const { sendDccCommand } = useDcc()
+const { getDevices } = useLayout()
+
+const devices = getDevices()
+
+// Sync devices into pane manager
+watch(
+  () => {
+    const raw = devices as unknown as { value?: unknown } | unknown
+    if (Array.isArray(raw)) return raw
+    if (raw && Array.isArray((raw as { value?: unknown[] }).value)) return (raw as { value: unknown[] }).value
+    return []
+  },
+  (deviceList) => {
+    paneManager.setDevices(
+      deviceList.map((d: Record<string, unknown>) => ({
+        id: d.id as string,
+        name: (d.name as string) || (d.id as string),
+        type: (d.type as string) || 'unknown',
+        connection: (d.connection as string) || 'usb',
+      }))
+    )
+  },
+  { immediate: true }
+)
 
 // Template refs for pane content components
 const dccLogRef = ref<InstanceType<typeof DccLogPane> | null>(null)
@@ -61,12 +85,19 @@ function getPaneConfig(id: string) {
 }
 
 // Clear handlers
+const deviceSerialRefs = ref<Record<string, { clear: () => void }>>({})
+
 function handleClear(id: string) {
   switch (id) {
     case 'dcc': dccLogRef.value?.clear(); break
     case 'turnouts': turnoutLogRef.value?.clear(); break
     case 'effects': effectLogRef.value?.clear(); break
     case 'sensors': sensorLogRef.value?.clear(); break
+    default:
+      if (id.startsWith('device-')) {
+        deviceSerialRefs.value[id]?.clear()
+      }
+      break
   }
 }
 
@@ -81,6 +112,11 @@ async function handleTrackPowerToggle(newState: boolean) {
 
 async function handleEmergencyStop() {
   await sendDccCommand({ action: 'dcc', payload: '!' })
+}
+
+// Extract device ID from pane ID
+function deviceIdFromPaneId(paneId: string): string {
+  return paneId.replace('device-', '')
 }
 </script>
 
@@ -101,22 +137,11 @@ async function handleEmergencyStop() {
           v-bind="getPaneConfig('dcc')!"
           pane-id="dcc"
           @minimize="paneManager.toggleMinimize('dcc')"
+          @restore="paneManager.restorePane('dcc')"
           @maximize="paneManager.toggleMaximize('dcc')"
           @clear="handleClear('dcc')"
         >
           <DccLogPane ref="dccLogRef" />
-        </MonitorPane>
-
-        <!-- Serial I/O Pane -->
-        <MonitorPane
-          v-if="isPaneVisible('serial')"
-          v-bind="getPaneConfig('serial')!"
-          pane-id="serial"
-          @minimize="paneManager.toggleMinimize('serial')"
-          @maximize="paneManager.toggleMaximize('serial')"
-          @clear="handleClear('serial')"
-        >
-          <DeviceSerialPane />
         </MonitorPane>
 
         <!-- Turnout Log Pane -->
@@ -125,6 +150,7 @@ async function handleEmergencyStop() {
           v-bind="getPaneConfig('turnouts')!"
           pane-id="turnouts"
           @minimize="paneManager.toggleMinimize('turnouts')"
+          @restore="paneManager.restorePane('turnouts')"
           @maximize="paneManager.toggleMaximize('turnouts')"
           @clear="handleClear('turnouts')"
         >
@@ -137,6 +163,7 @@ async function handleEmergencyStop() {
           v-bind="getPaneConfig('effects')!"
           pane-id="effects"
           @minimize="paneManager.toggleMinimize('effects')"
+          @restore="paneManager.restorePane('effects')"
           @maximize="paneManager.toggleMaximize('effects')"
           @clear="handleClear('effects')"
         >
@@ -149,6 +176,7 @@ async function handleEmergencyStop() {
           v-bind="getPaneConfig('sensors')!"
           pane-id="sensors"
           @minimize="paneManager.toggleMinimize('sensors')"
+          @restore="paneManager.restorePane('sensors')"
           @maximize="paneManager.toggleMaximize('sensors')"
           @clear="handleClear('sensors')"
         >
@@ -160,11 +188,32 @@ async function handleEmergencyStop() {
           v-if="isPaneVisible('stats')"
           v-bind="getPaneConfig('stats')!"
           pane-id="stats"
+          :hide-clear="true"
           @minimize="paneManager.toggleMinimize('stats')"
+          @restore="paneManager.restorePane('stats')"
           @maximize="paneManager.toggleMaximize('stats')"
           @clear="() => {}"
         >
           <StatsPane />
+        </MonitorPane>
+
+        <!-- Dynamic Device Panes -->
+        <MonitorPane
+          v-for="devicePane in paneManager.devicePanes"
+          :key="devicePane.id"
+          v-show="isPaneVisible(devicePane.id)"
+          v-bind="getPaneConfig(devicePane.id)!"
+          :pane-id="devicePane.id"
+          @minimize="paneManager.toggleMinimize(devicePane.id)"
+          @restore="paneManager.restorePane(devicePane.id)"
+          @maximize="paneManager.toggleMaximize(devicePane.id)"
+          @clear="handleClear(devicePane.id)"
+        >
+          <DeviceSerialPaneContent
+            :ref="(el: any) => { if (el) deviceSerialRefs[devicePane.id] = el }"
+            :device-id="deviceIdFromPaneId(devicePane.id)"
+            :device-name="devicePane.name"
+          />
         </MonitorPane>
       </div>
 
@@ -179,6 +228,7 @@ async function handleEmergencyStop() {
             v-bind="pane"
             :pane-id="pane.id"
             @minimize="paneManager.toggleMinimize(pane.id)"
+            @restore="paneManager.restorePane(pane.id)"
             @maximize="paneManager.toggleMaximize(pane.id)"
             @clear="handleClear(pane.id)"
           />

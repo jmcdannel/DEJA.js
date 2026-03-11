@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { PANE_COLORS, type PaneColorKey } from '../../composables/usePaneManager'
+import { PANE_COLORS, type PaneColorKey, type PaneState } from '../../composables/usePaneManager'
 
 interface Props {
   paneId: string
@@ -8,19 +8,24 @@ interface Props {
   index: number
   icon: string
   color: PaneColorKey
+  state?: PaneState
   messageCount?: number
   isLive?: boolean
   fullScreenRoute?: string
+  hideClear?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  state: 'normal',
   messageCount: 0,
   isLive: false,
   fullScreenRoute: '',
+  hideClear: false,
 })
 
 const emit = defineEmits<{
   minimize: []
+  restore: []
   maximize: []
   clear: []
 }>()
@@ -49,6 +54,7 @@ const colors = computed(() => PANE_COLORS[props.color])
       </div>
       <div class="monitor-pane__actions">
         <button
+          v-if="!hideClear"
           class="monitor-pane__action-btn"
           aria-label="Clear"
           title="Clear"
@@ -57,6 +63,7 @@ const colors = computed(() => PANE_COLORS[props.color])
           <v-icon icon="mdi-delete-outline" size="14" />
         </button>
         <button
+          v-if="state !== 'minimized'"
           class="monitor-pane__action-btn"
           aria-label="Minimize"
           title="Minimize"
@@ -65,9 +72,19 @@ const colors = computed(() => PANE_COLORS[props.color])
           <v-icon icon="mdi-window-minimize" size="14" />
         </button>
         <button
+          v-if="state === 'minimized' || state === 'maximized'"
           class="monitor-pane__action-btn"
-          aria-label="Maximize"
-          title="Maximize"
+          aria-label="Restore"
+          title="Restore"
+          @click="emit('restore')"
+        >
+          <v-icon icon="mdi-window-restore" size="14" />
+        </button>
+        <button
+          v-if="state !== 'maximized'"
+          class="monitor-pane__action-btn"
+          aria-label="Fullscreen"
+          title="Fullscreen"
           @click="emit('maximize')"
         >
           <v-icon icon="mdi-window-maximize" size="14" />
