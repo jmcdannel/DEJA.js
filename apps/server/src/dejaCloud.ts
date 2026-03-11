@@ -12,7 +12,6 @@ import { handleDccChange } from './lib/dcc'
 import { handleDejaCommands } from './lib/deja'
 import { log } from './utils/logger'
 import { serial } from './lib/serial'
-import { wsServer } from './lib/ws-server'
 import { startDeviceConfigSync, stopDeviceConfigSync } from './modules/sync-config'
 
 const layoutId = process.env.LAYOUT_ID || 'betatrack'
@@ -206,22 +205,12 @@ export async function connect(): Promise<boolean> {
 export async function disconnect(): Promise<void> {
   try {
     log.start('Disconnecting from DejaCloud', layoutId)
-    
+
     // Clean up Firebase listeners
     await cleanup()
-    
-    // Close WebSocket server if enabled
-    if (process.env.ENABLE_WS === 'true' || process.env.ENABLE_WS === undefined) {
-      log.info('Closing WebSocket server...')
-      await wsServer.disconnect()
-    }
-    
+
     await reset()
-    
-    // Disconnect all serial ports
-    log.info('Disconnecting all serial ports...')
-    serial.disconnectAll()
-    
+
     // Cancel the onDisconnect and mark offline immediately
     await serverStatusRef.onDisconnect().cancel()
     await serverStatusRef.set({
@@ -230,7 +219,7 @@ export async function disconnect(): Promise<void> {
         '.sv': 'timestamp'
       }
     })
-    
+
     log.success('Disconnected from DejaCloud', layoutId)
   } catch (error) {
     log.error('Error in disconnect:', error)
