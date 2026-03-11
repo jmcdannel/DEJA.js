@@ -84,6 +84,12 @@ const router = createRouter({
       beforeEnter: [requireAuth],
     },
     {
+      path: '/programming',
+      name: 'programming',
+      component: () => import('./views/ProgrammingView.vue'),
+      beforeEnter: [requireAuth, requireDccEx, requireLayout],
+    },
+    {
       path: '/settings',
       name: 'settings',
       component: () => import('./views/SettingsView.vue'),

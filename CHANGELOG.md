@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### CV/Decoder Programming
+- **[modules]** New `packages/modules/cv/` module with shared types, constants, and NMRA CV definitions for decoder programming
+- **[server]** CV programming module with DCC-EX response parsing, request-response correlation via WebSocket, and timeout handling
+- **[server]** Serial data listener registry in `serial.ts` for modules to subscribe to incoming serial data without modifying existing flow
+- **[server]** WebSocket `cv-request`/`cv-response` protocol for bidirectional CV read/write operations (bypasses Firebase for low-latency request-response)
+- **[throttle]** CV Programmer view with tabbed interface: Read/Write, CV29 Config, Address Calculator, Common CVs batch reader, and operation log
+- **[throttle]** `useCvProgrammer` composable for WebSocket-based CV communication with promise correlation and auto-reconnect
+- **[throttle]** CV29 bit-by-bit editor with toggle switches for direction, speed steps, analog conversion, RailCom, speed table, and long address
+- **[throttle]** Address calculator with short/long address conversion (CV17/CV18) and auto-write via DCC-EX `<W address>` command
+- **[throttle]** Common CVs reference table with batch read, inline editing, and factory reset (write 8 to CV8)
+- **[throttle]** Support for both Service Track (read+write with ACK) and Programming on Main (write-only to addressed loco)
+
 ---
 
 ## [1.1.0] - 2026-03-10

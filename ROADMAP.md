@@ -29,7 +29,7 @@
 - [ ] Refactor to optimize
 
 ## P2 — Feature Development
-- [ ] CV/Decoder Programming — read/write CVs from the browser (service track + POM)
+- [x] CV/Decoder Programming — read/write CVs from the browser (service track + POM)
 - [ ] Store roster on DCC-EX command station (sync with DEJA cloud)
 - [ ] Visual Automation Builder — drag-and-drop automation sequences (DEJA's answer to EX-RAIL/Logix)
       - Set turnout → wait → set signal → drive train → stop at sensor

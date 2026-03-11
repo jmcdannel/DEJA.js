@@ -7,6 +7,21 @@ import { wsServer } from './ws-server'
 // Track which device each port belongs to
 const portToDevice: Map<SerialPort, string> = new Map()
 
+// Data listener registry for modules that need to intercept serial responses
+type SerialDataListener = (data: string) => void
+const dataListeners: SerialDataListener[] = []
+
+export const addDataListener = (listener: SerialDataListener): void => {
+  dataListeners.push(listener)
+}
+
+export const removeDataListener = (listener: SerialDataListener): void => {
+  const index = dataListeners.indexOf(listener)
+  if (index > -1) {
+    dataListeners.splice(index, 1)
+  }
+}
+
 // Track reconnect managers per device for auto-reconnect on disconnect
 const reconnectManagers: Map<string, ReconnectManager> = new Map()
 
@@ -130,6 +145,15 @@ async function connectPort(options: ConnectOptions): Promise<SerialPort | undefi
 
       const parser = port.pipe(new ReadlineParser())
       parser.on('data', (data) => {
+        // Notify registered data listeners (e.g., CV response parser)
+        for (const listener of dataListeners) {
+          try {
+            listener(data)
+          } catch {
+            // Listeners must not break the serial data flow
+          }
+        }
+
         // Send device-specific serial data if we know the device (but filter out sensor data)
         const device = portToDevice.get(port)
         if (device && !isSensorData(data)) {
@@ -308,9 +332,11 @@ const stopReconnect = (deviceId: string): void => {
 }
 
 export const serial = {
+  addDataListener,
   connect,
   disconnect,
   disconnectAll,
+  removeDataListener,
   send,
   stopReconnect,
 }
