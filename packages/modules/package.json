@@ -12,6 +12,7 @@
     "./locos": "./locos/index.ts",
     "./signals": "./signals/index.ts",
     "./turnouts": "./turnouts/index.ts",
+    "./preferences": "./preferences/index.ts",
     "./routes": "./routes/index.ts",
     "./types": "./types.ts"
   },
@@ -22,6 +23,7 @@
   },
   "dependencies": {
     "@repo/sounds": "workspace:*",
+    "@vueuse/core": "^11.0.3",
     "firebase": "^10.14.1",
     "vuefire": "^3.2.1"
   },
@@ -33,7 +35,6 @@
     "@repo/prettier-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@repo/utils": "workspace:*",
-    "@vueuse/core": "^11.0.3",
     "typescript": "latest",
     "vitest": "^2.0.5",
     "vue": "^3.5.17"
