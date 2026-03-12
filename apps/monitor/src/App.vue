@@ -5,6 +5,7 @@ import { RouterView, useRoute, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { Login } from '@repo/auth'
 import { AppHeader, TransitionFade, NotificationContainer, provideNotifications, PageBackground } from '@repo/ui'
+import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import type { MenuItem } from '@repo/ui/src/Menu/types'
 import { useDcc } from '@repo/dccex'
@@ -56,7 +57,7 @@ function handleDeviceSelect(deviceId: string) {
 const user = useCurrentUser()
 const router = useRouter()
 
-const theme = ref('monitorDark')
+const { themePreference } = useThemeSwitcher()
 
 function handleMenu(item: MenuItem) {
   router.push({ name: item.name })
@@ -95,7 +96,7 @@ const menu = [
 
 <template>
   <v-responsive>
-    <v-app v-if="user" :theme="theme">
+    <v-app v-if="user" :theme="themePreference">
       <PageBackground app-name="monitor">
       <!-- AppHeader only on non-dashboard routes -->
       <AppHeader
@@ -147,7 +148,7 @@ const menu = [
       <NotificationContainer />
       </PageBackground>
     </v-app>
-    <v-app v-else :theme="theme">
+    <v-app v-else :theme="themePreference">
       <Login />
     </v-app>
   </v-responsive>
