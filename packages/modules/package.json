@@ -14,7 +14,8 @@
     "./turnouts": "./turnouts/index.ts",
     "./preferences": "./preferences/index.ts",
     "./routes": "./routes/index.ts",
-    "./types": "./types.ts"
+    "./types": "./types.ts",
+    "./plans/types": "./plans/types.ts"
   },
   "scripts": {
     "test": "vitest run",
