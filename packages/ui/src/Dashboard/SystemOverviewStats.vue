@@ -14,9 +14,16 @@ const props = defineProps<Props>()
 const serverUptime = computed(() => {
   if (!props.serverStatus?.online || !props.serverStatus?.lastSeen) return ''
   const now = Date.now()
-  const last = typeof props.serverStatus.lastSeen === 'number'
-    ? props.serverStatus.lastSeen
-    : new Date(props.serverStatus.lastSeen).getTime()
+  const raw = props.serverStatus.lastSeen
+  let last: number
+  if (typeof raw === 'number') {
+    last = raw
+  } else if (raw instanceof Date) {
+    last = raw.getTime()
+  } else {
+    last = new Date(raw as string).getTime()
+  }
+  if (Number.isNaN(last)) return ''
   const diff = now - last
   const hours = Math.floor(diff / 3_600_000)
   const minutes = Math.floor((diff % 3_600_000) / 60_000)

@@ -85,10 +85,22 @@ const connectionPath = computed(() => {
 const uptime = computed(() => {
   if (!props.device.lastConnected || !isConnected.value) return ''
   const now = Date.now()
-  const last =
-    props.device.lastConnected instanceof Date
-      ? props.device.lastConnected.getTime()
-      : new Date(props.device.lastConnected).getTime()
+  const raw = props.device.lastConnected
+  let last: number
+  if (raw instanceof Date) {
+    last = raw.getTime()
+  } else if (typeof raw === 'number') {
+    last = raw
+  } else if (typeof (raw as Record<string, unknown>)?.toDate === 'function') {
+    // Firestore Timestamp object
+    last = (raw as { toDate: () => Date }).toDate().getTime()
+  } else if (typeof (raw as Record<string, unknown>)?.seconds === 'number') {
+    // Raw Firestore Timestamp shape
+    last = (raw as { seconds: number }).seconds * 1000
+  } else {
+    last = new Date(raw as string).getTime()
+  }
+  if (Number.isNaN(last)) return ''
   const diff = now - last
   const hours = Math.floor(diff / 3_600_000)
   const minutes = Math.floor((diff % 3_600_000) / 60_000)
