@@ -12,7 +12,7 @@ import colors from 'vuetify/util/colors'
 // VueFire
 import { VueFire, VueFireAuth } from 'vuefire'
 // Firebase
-import { firebaseApp } from '@repo/firebase-config'
+import { firebaseApp, initAppCheck } from '@repo/firebase-config'
 // Motion
 import { MotionPlugin } from '@vueuse/motion'
 
@@ -79,6 +79,8 @@ Sentry.init({
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 })
+
+initAppCheck(firebaseApp)
 
 app.use(pinia)
 app.use(vuetify)

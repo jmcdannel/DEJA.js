@@ -13,7 +13,7 @@ import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import App from './App.vue'
 import router from './router'
-import { firebaseApp } from '@repo/firebase-config'
+import { firebaseApp, initAppCheck } from '@repo/firebase-config'
 // Style
 import './style.css'
 import '@mdi/font/css/materialdesignicons.css'
@@ -177,6 +177,8 @@ Sentry.init({
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 })
+
+initAppCheck(firebaseApp)
 
 app.use(pinia)
 app.use(router)

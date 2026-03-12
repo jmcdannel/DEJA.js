@@ -14,7 +14,7 @@ import { VCard } from 'vuetify/components/VCard'
 // VueFire
 import { VueFire, VueFireAuth } from 'vuefire'
 // Firebase
-import { firebaseApp } from '@repo/firebase-config'
+import { firebaseApp, initAppCheck } from '@repo/firebase-config'
 // Motion
 import { MotionPlugin } from '@vueuse/motion'
 // Pinia
@@ -120,6 +120,8 @@ Sentry.init({
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 })
+
+initAppCheck(firebaseApp)
 
 app.use(createPinia())
 app.use(VueFire, {

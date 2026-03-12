@@ -8,6 +8,7 @@
   "browser": "./src/firebase.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./app-check": "./src/app-check.ts",
     "./firebase": "./src/firebase.ts",
     "./firebase-node": "./src/firebase-node.ts",
     "./firebase-admin-node": "./src/firebase-admin-node.ts"
