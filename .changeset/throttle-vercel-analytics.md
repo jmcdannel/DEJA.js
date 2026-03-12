@@ -2,4 +2,4 @@
 "deja": patch
 ---
 
-added: **[throttle]** Vercel Analytics and Speed Insights for real-user performance monitoring of train control interface
+added: **[throttle]** Vercel Analytics for real-user page view and visitor tracking of train control interface
