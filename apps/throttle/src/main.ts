@@ -2,6 +2,8 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import * as Sentry from '@sentry/vue'
+import { inject as injectAnalytics } from '@vercel/analytics'
+import { injectSpeedInsights } from '@vercel/speed-insights'
 import { createPinia } from 'pinia'
 import { VueFire, VueFireAuth } from 'vuefire'
 import { MotionPlugin } from '@vueuse/motion'
@@ -177,6 +179,11 @@ Sentry.init({
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 })
+
+if (import.meta.env.PROD) {
+  injectAnalytics()
+  injectSpeedInsights()
+}
 
 app.use(pinia)
 app.use(router)
