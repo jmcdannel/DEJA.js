@@ -46,6 +46,14 @@ packages/ui/src/themes/
 └── ADDING_THEMES.md            # Guide for adding new themes
 ```
 
+### Package Exports
+
+`packages/ui/src/index.ts` must re-export from `./themes` so apps can import directly:
+```ts
+export { createVuetifyThemes } from './themes'
+export type { AppThemeConfig, ThemeMode } from './themes'
+```
+
 ### Theme Factory API
 
 ```ts
@@ -78,12 +86,34 @@ interface ThemeOverrides {
   'on-surface-variant': string
   primary: string
   secondary: string
-  accent: string
+  accent: string          // Note: custom color (not a Vuetify built-in), but Vuetify
+                          // generates on-accent automatically for all custom colors
   error: string
   info: string
   success: string
   warning: string
   [key: string]: string
+}
+
+/** Vuetify theme variables (opacity, border, hover, etc.) */
+interface ThemeVariables {
+  'border-color': string
+  'border-opacity': number
+  'high-emphasis-opacity': number
+  'medium-emphasis-opacity': number
+  'disabled-opacity': number
+  'idle-opacity': number
+  'hover-opacity': number
+  'focus-opacity': number
+  'selected-opacity': number
+  'activated-opacity': number
+  'pressed-opacity': number
+  'dragged-opacity': number
+  'theme-kbd': string
+  'theme-on-kbd': string
+  'theme-code': string
+  'theme-on-code': string
+  [key: string]: string | number
 }
 ```
 
@@ -104,12 +134,13 @@ export function createVuetifyThemes(
 
 The factory:
 1. Iterates registered theme modes
-2. For each mode, generates a base palette (backgrounds, surfaces, opacity scales)
-3. Applies the app's identity colors (primary, secondary, accent)
-4. Applies shared semantic colors (success, error, warning, info) — adjusted per mode
-5. Merges per-mode overrides from the app config
-6. Merges custom colors for that mode
-7. Returns a complete `ThemeDefinition` per mode
+2. For each mode, generates a base palette (backgrounds, surfaces)
+3. Generates Vuetify `variables` from the mode definition (opacity scales, border, hover, kbd/code styling)
+4. Applies the app's identity colors (primary, secondary, accent)
+5. Applies shared semantic colors (success, error, warning, info) — adjusted per mode
+6. Merges per-mode overrides from the app config
+7. Merges custom colors for that mode
+8. Returns a complete `ThemeDefinition` (with both `colors` and `variables`) per mode
 
 ### Theme Mode Registry
 
@@ -129,12 +160,8 @@ interface ThemeModeDefinition {
     'surface-light': string
     'surface-variant': string
   }
-  /** Text/icon opacity scales */
-  opacity: {
-    highEmphasis: number
-    mediumEmphasis: number
-    disabled: number
-  }
+  /** Vuetify variables for this mode (opacity, border, hover, kbd/code styling) */
+  variables: ThemeVariables
   /** How to transform identity colors for this mode (e.g. high-contrast saturates) */
   colorTransform?: (color: string) => string
 }
@@ -150,9 +177,9 @@ export const THEME_MODE_DEFINITIONS: Record<ThemeMode, ThemeModeDefinition>
 
 | Mode | dark | htmlClasses | Character |
 |------|------|-------------|-----------|
-| `light` | `false` | `[]` | Light gray backgrounds, white surfaces, standard opacity |
-| `dark` | `true` | `['dark']` | Deep slate backgrounds, elevated surfaces, slightly boosted colors |
-| `high-contrast` | `true` | `['dark', 'high-contrast']` | Pure black background, near-black surfaces, fully saturated colors, max opacity |
+| `light` | `false` | `[]` | Light gray backgrounds, white surfaces, standard opacity (0.87/0.6/0.38) |
+| `dark` | `true` | `['dark']` | Deep slate backgrounds, elevated surfaces, boosted opacity (0.87/0.6/0.38) |
+| `high-contrast` | `true` | `['dark', 'high-contrast']` | Pure black background, near-black surfaces, saturated colors, max opacity (1.0/0.8/0.5) |
 
 ### ThemeMode Type
 
@@ -175,25 +202,41 @@ Changes:
 - `cycleTheme()` — iterate `THEME_MODES` array instead of hardcoded switch
 - `isDark` — check `THEME_MODE_DEFINITIONS[mode].dark` instead of string comparison
 - `applyTheme()` — derive HTML classes from `THEME_MODE_DEFINITIONS[mode].htmlClasses` instead of manual if/else
-- `ThemeMode` type imported from `../themes/types` (single source of truth)
+- `ThemeMode` type imported from `../themes/types` (single source of truth) — remove the existing local `ThemeMode` definition in `useThemeSwitcher.ts`
 
 ---
 
 ## Per-App Changes
 
-### All 3 Apps: App.vue Fix
+### Throttle & Cloud: App.vue Fix
 
-**Current (broken for high-contrast):**
+Two changes per app:
+
+**Script:** Update destructuring to include `themePreference`:
 ```vue
-<v-app :theme="isDark ? 'dark' : 'light'">
+// Before:
+const { isDark } = useThemeSwitcher()
+// After:
+const { isDark, themePreference } = useThemeSwitcher()
 ```
 
-**Fixed:**
+**Template:** Bind to `themePreference` instead of the boolean:
 ```vue
+<!-- Before (broken — drops high-contrast): -->
+<v-app :theme="isDark ? 'dark' : 'light'">
+<!-- After: -->
 <v-app :theme="themePreference">
 ```
 
-One-line change. `themePreference` already holds the exact Vuetify theme name.
+`isDark` is still used elsewhere (e.g., gradient classes), so keep it in the destructuring.
+
+### Monitor: App.vue Fix
+
+Monitor requires more work since it doesn't use `useThemeSwitcher` at all:
+
+1. **Remove** the hardcoded `const theme = ref('monitorDark')`
+2. **Add** `const { themePreference } = useThemeSwitcher()` (with import from `@repo/ui`)
+3. **Update both `<v-app>` elements** (authenticated and unauthenticated states both have `<v-app :theme="theme">`) to use `:theme="themePreference"`
 
 ### Throttle (`apps/throttle/src/main.ts`)
 
@@ -219,7 +262,25 @@ const themes = createVuetifyThemes({
 
 ### Cloud (`apps/cloud/src/main.ts`)
 
-Same pattern — replace inline themes with `createVuetifyThemes()` call using cloud's identity colors. Cloud shares the same primary/secondary/accent as throttle currently, so the config will be similar but can diverge later.
+Same pattern as throttle. Cloud currently shares the same identity colors but can diverge later:
+
+```ts
+import { createVuetifyThemes } from '@repo/ui'
+
+const themes = createVuetifyThemes({
+  primary: '#00E5FF',
+  secondary: '#D500F9',
+  accent: '#C6FF00',
+  light: {
+    primary: '#00B8D4',
+  },
+  custom: {
+    light: { 'device-connected': '#4CAF50', 'device-disconnected': '#F44336', 'stat-card': '#F5F7FA' },
+    dark: { 'device-connected': '#66BB6A', 'device-disconnected': '#EF5350', 'stat-card': '#1A2332' },
+    'high-contrast': { 'device-connected': '#00FF00', 'device-disconnected': '#FF0000', 'stat-card': '#1A1A1A' },
+  },
+})
+```
 
 ### Monitor (`apps/monitor/src/main.ts`)
 
@@ -258,7 +319,12 @@ const { themePreference } = useThemeSwitcher()
 
 **File:** `apps/monitor/src/style.css`
 
-Convert hardcoded colors to Vuetify CSS variables. Key conversions:
+**Body/root-level fixes:**
+- Remove `body { background-color: #020617; color: #e2e8f0; }` — let Vuetify handle these via the theme
+- Remove `:root { color-scheme: dark; }` — or make it conditional on the `.dark` class
+- Remove/update `.v-theme--monitorDark` CSS selectors (3 occurrences) — these will break when the theme is renamed from `monitorDark` to `dark`. Convert to theme-variable-based styles or remove if the variable approach makes them unnecessary.
+
+**Convert hardcoded colors to Vuetify CSS variables.** Key conversions:
 
 | Current | Becomes |
 |---------|---------|
@@ -283,6 +349,7 @@ Convert hardcoded colors to Vuetify CSS variables. Key conversions:
 - **Animation preset** — theme-independent
 - **Background/PageBackground system** — already theme-aware via overlay opacity
 - **`useColors` composable** — already has dark mode variants
+- **Vuetify component defaults** — remain per-app in each `main.ts`
 - **Tour app** — not in scope
 
 ---
