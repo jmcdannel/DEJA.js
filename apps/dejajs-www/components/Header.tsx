@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import Logo from './Logo';
 
 const products = [
   {
@@ -133,10 +134,7 @@ export default function Header() {
     <header className="w-full border-b bg-white dark:border-gray-800 dark:bg-gray-950 sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-6 pt-7 pb-4 flex items-center justify-between gap-6">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/icon-192.png" alt="" width={32} height={32} className="inline-block h-8 w-8" />
-          <span className="font-display text-[2rem] tracking-[0.08em] leading-none">
-            <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">DEJA</span><span className="text-lime-400">.</span><span className="text-fuchsia-500 text-[1.2rem] font-mono">js</span>
-          </span>
+          <Logo size="lg" />
           <span className="sr-only">DEJA.js Home</span>
         </Link>
         <nav className="hidden md:flex flex-1 items-center gap-8 ml-6" aria-label="Main navigation">

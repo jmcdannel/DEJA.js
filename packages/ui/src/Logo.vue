@@ -1,34 +1,35 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useSlots } from 'vue'
+
+export type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'
+export type LogoVariant = 'default' | 'cloud' | 'throttle' | 'monitor' | 'tour'
 
 interface Props {
-  appName?: string
-  appIcon?: string
-  appColor?: string
-  variant?: 'default' | 'cloud' | 'throttle' | 'monitor' | 'tour'
+  size?: LogoSize
+  showIcon?: boolean
+  appTitle?: string
+  variant?: LogoVariant
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  appName: 'DEJA',
-  appIcon: 'mdi-train',
-  appColor: 'primary',
-  variant: 'default'
+  size: 'md',
+  showIcon: true,
+  variant: 'default',
 })
 
-const logoComponent = computed(() => {
-  switch (props.variant) {
-    case 'throttle':
-      return new URL('./assets/logo-throttle.svg', import.meta.url).href
-    case 'monitor':
-      return new URL('./assets/logo-monitor.svg', import.meta.url).href
-    case 'cloud':
-      return new URL('./assets/logo-cloud.svg', import.meta.url).href
-    case 'tour':
-      return new URL('./assets/logo-default.svg', import.meta.url).href
-    default:
-      return new URL('./assets/logo-default.svg', import.meta.url).href
-  }
-})
+const slots = useSlots()
+
+const sizeMap = {
+  xs:  { brand: 'text-sm',  js: 'text-[0.55rem]', icon: 'w-4 h-4',   gap: 'gap-1',   title: 'text-xs' },
+  sm:  { brand: 'text-lg',  js: 'text-[0.7rem]',  icon: 'w-6 h-6',   gap: 'gap-1.5', title: 'text-sm' },
+  md:  { brand: 'text-2xl', js: 'text-[1rem]',    icon: 'w-8 h-8',   gap: 'gap-2',   title: 'text-lg' },
+  lg:  { brand: 'text-3xl', js: 'text-[1.2rem]',  icon: 'w-10 h-10', gap: 'gap-2',   title: 'text-xl' },
+  xl:  { brand: 'text-4xl', js: 'text-[1.5rem]',  icon: 'w-12 h-12', gap: 'gap-3',   title: 'text-2xl' },
+  '2xl': { brand: 'text-5xl', js: 'text-[1.8rem]', icon: 'w-14 h-14', gap: 'gap-3', title: 'text-3xl' },
+  '3xl': { brand: 'text-6xl', js: 'text-[2.2rem]', icon: 'w-16 h-16', gap: 'gap-4', title: 'text-4xl' },
+} as const
+
+const s = computed(() => sizeMap[props.size])
 
 const appIconSrc = computed(() => {
   switch (props.variant) {
@@ -45,25 +46,34 @@ const appIconSrc = computed(() => {
   }
 })
 
-
+const hasIconSlot = computed(() => !!slots.icon)
 </script>
 
 <template>
-  <div class="flex items-center">
-    <img
-      :src="appIconSrc"
-      :alt="`${appName} Logo`"
-      class="w-10 h-10 drop-shadow-sm rounded-lg"
-    />
-    <span
-      class="ml-2 font-bold drop-shadow-sm hidden sm:inline text-xl lg:text-2xl bg-gradient-to-r from-blue-500 to-cyan-400 text-transparent bg-clip-text"
-    >
-      DEJA
+  <div class="deja-logo flex items-center" :class="s.gap">
+    <!-- Icon: slot override or default img -->
+    <template v-if="showIcon">
+      <slot name="icon">
+        <img
+          :src="appIconSrc"
+          :alt="`DEJA.js${appTitle ? ' ' + appTitle : ''}`"
+          :class="[s.icon, 'drop-shadow-sm rounded-lg flex-shrink-0']"
+        />
+      </slot>
+    </template>
+
+    <!-- Brand text -->
+    <span class="font-bold tracking-[0.08em] leading-none whitespace-nowrap" :class="s.brand">
+      <span class="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">DEJA</span><span class="text-lime-400">.</span><span class="text-fuchsia-500 font-mono" :class="s.js">js</span>
     </span>
+
+    <!-- Optional app title suffix -->
     <span
-      class="ml-2 font-bold drop-shadow-sm text-xl lg:text-2xl"
+      v-if="appTitle"
+      class="text-white font-semibold leading-none whitespace-nowrap"
+      :class="s.title"
     >
-      {{ appName }}
+      {{ appTitle }}
     </span>
   </div>
 </template>
