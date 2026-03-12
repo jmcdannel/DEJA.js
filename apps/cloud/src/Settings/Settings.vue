@@ -69,7 +69,7 @@ async function openBillingPortal() {
 
 <template>
   <div class="animate-fade-in-up space-y-6">
-    <PageHeader menu="Settings" />
+    <PageHeader menu="Settings" :subtitle="layout?.name" />
 
     <!-- Billing & Subscription -->
     <v-card class="mb-6">
@@ -131,46 +131,48 @@ async function openBillingPortal() {
       class="mb-4"
     />
 
-    <!-- Layout Info -->
-    <div class="glass-dark rounded-2xl shadow-soft-dark p-6 bg-gradient-to-r from-brand-blue/20 to-brand-cyan/20 border border-white/5">
-      <h2 class="text-white text-3xl font-bold tracking-tight">
-        {{ layout?.name }}
-      </h2>
-      <p class="text-white/60 mt-1 text-sm">Layout configuration and system settings</p>
-    </div>
+    <!-- Tags -->
+    <v-card variant="tonal">
+      <v-card-title class="text-brand-cyan">
+        <v-icon icon="mdi-tag-multiple" class="mr-2"></v-icon>
+        Tags
+      </v-card-title>
+      <v-card-text>
+        <LayoutTags />
+      </v-card-text>
+    </v-card>
 
-    <h3 class="flex items-center text-brand-cyan mt-8 mb-4">
-      <v-icon icon="mdi-tag-multiple" class="w-8 h-8 mr-2"></v-icon>
-      <span class="text-2xl font-semibold">Tags</span>
-    </h3>
-    <LayoutTags />
+    <!-- USB Ports -->
+    <v-card variant="tonal">
+      <v-card-title class="text-brand-cyan">
+        <v-icon icon="mdi-usb" class="mr-2"></v-icon>
+        USB Ports
+      </v-card-title>
+      <v-card-text>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <PortList :ports="layout?.ports || []" />
 
-    <h3 class="flex items-center text-brand-cyan mt-8 mb-4">
-      <v-icon icon="mdi-usb" class="w-8 h-8 mr-2"></v-icon>
-      <span class="text-2xl font-semibold">USB Ports</span>
-    </h3>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <PortList :ports="layout?.ports || []" />
-
-      <v-card
-        class="mx-auto w-full h-full justify-between flex flex-col glass border border-white/10"
-        prepend-icon="mdi-view-module"
-        title="Modules"
-        color="transparent"
-        variant="flat"
-        density="compact"
-      >
-        <v-card-text>
-          <v-list lines="one" bg-color="transparent">
-            <v-list-item
-              v-for="module in layout?.modules"
-              :key="module"
-              :title="module"
-              class="text-white/80"
-            ></v-list-item>
-          </v-list>
-        </v-card-text>
-      </v-card>
-    </div>
+          <v-card
+            class="mx-auto w-full h-full justify-between flex flex-col glass border border-white/10"
+            prepend-icon="mdi-view-module"
+            title="Modules"
+            color="transparent"
+            variant="flat"
+            density="compact"
+          >
+            <v-card-text>
+              <v-list lines="one" bg-color="transparent">
+                <v-list-item
+                  v-for="module in layout?.modules"
+                  :key="module"
+                  :title="module"
+                  class="text-white/80"
+                ></v-list-item>
+              </v-list>
+            </v-card-text>
+          </v-card>
+        </div>
+      </v-card-text>
+    </v-card>
   </div>
 </template>
