@@ -17,18 +17,24 @@
     "migrate-sounds": "tsx src/scripts/migrate-sound-effects.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "build:docker": "tsup"
   },
   "dependencies": {
     "@repo/modules": "workspace:*",
     "@repo/sounds": "workspace:*",
     "@sentry/node": "^8.0.0",
     "@serialport/parser-readline": "^12.0.0",
+    "@vueuse/core": "^11.0.3",
     "dotenv": "^16.3.1",
     "firebase": "^10.14.1",
+    "firebase-admin": "^13.4.0",
+    "mqtt": "^5.15.0",
     "play-sound": "^1.1.6",
     "serialport": "^12.0.0",
     "signale": "^1.4.0",
+    "vue": "^3.5.17",
+    "vuefire": "^3.2.1",
     "wait-on": "^7.0.1",
     "ws": "^8.13.0"
   },
@@ -41,10 +47,9 @@
     "@types/play-sound": "^1.1.2",
     "@types/signale": "^1.4.7",
     "@types/ws": "^8.18.1",
-    "firebase-admin": "^13.4.0",
     "globals": "^16.0.0",
     "memfs": "^4.56.11",
-    "mqtt": "^5.13.1",
+    "tsup": "^8.5.1",
     "tsx": "^4.20.4",
     "typescript": "*",
     "vitest": "^2.0.5"
