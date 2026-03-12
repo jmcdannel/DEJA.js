@@ -4,7 +4,7 @@ import { useCurrentUser } from 'vuefire'
 import { getIdToken } from 'firebase/auth'
 import { useSubscription, PLAN_DISPLAY, useLayout } from '@repo/modules'
 import { BackgroundSettings } from '@repo/ui'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import LayoutTags from '@/Layout/LayoutTags.vue'
 import PortList from '@/Layout/PortList.vue'
 
@@ -69,7 +69,7 @@ async function openBillingPortal() {
 
 <template>
   <div class="animate-fade-in-up space-y-6">
-    <ModuleTitle menu="Settings" />
+    <PageHeader menu="Settings" />
 
     <!-- Billing & Subscription -->
     <v-card class="mb-6">
