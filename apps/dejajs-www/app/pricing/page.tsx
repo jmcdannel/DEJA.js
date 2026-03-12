@@ -103,9 +103,12 @@ export default function PricingPage() {
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed text-gray-500"><Check type="no" /> Tour App</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed text-gray-500"><Check type="no" /> Direct support</li>
           </ul>
-          <button className="w-full py-3.5 rounded-[10px] border border-white/15 bg-transparent text-white font-bold text-[0.9rem] tracking-[0.04em] cursor-pointer transition-all hover:bg-gray-800">
-            Get Started Free
-          </button>
+          <a
+            href="https://cloud.dejajs.com/onboarding?plan=hobbyist"
+            className="block w-full py-3.5 rounded-[10px] border border-white/15 bg-transparent text-white font-bold text-[0.9rem] tracking-[0.04em] cursor-pointer transition-all hover:bg-gray-800 text-center no-underline"
+          >
+            Get Started Free →
+          </a>
         </div>
 
         {/* ENGINEER - Featured */}
@@ -145,9 +148,12 @@ export default function PricingPage() {
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed text-gray-500"><Check type="no" /> Tour App</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed text-gray-500"><Check type="no" /> Early feature access</li>
           </ul>
-          <button className="w-full py-3.5 rounded-[10px] border-none bg-cyan-500 text-gray-950 font-bold text-[0.9rem] tracking-[0.04em] cursor-pointer transition-all hover:bg-cyan-400 hover:shadow-[0_4px_24px_rgba(6,182,212,0.25)]">
+          <a
+            href={`https://cloud.dejajs.com/onboarding?plan=engineer&billing=${billing}`}
+            className="block w-full py-3.5 rounded-[10px] border-none bg-cyan-500 text-gray-950 font-bold text-[0.9rem] tracking-[0.04em] cursor-pointer transition-all hover:bg-cyan-400 hover:shadow-[0_4px_24px_rgba(6,182,212,0.25)] text-center no-underline"
+          >
             Start Free Trial →
-          </button>
+          </a>
         </div>
 
         {/* CONDUCTOR */}
@@ -186,9 +192,12 @@ export default function PricingPage() {
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Early access to new features</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Beta testing & feedback program</li>
           </ul>
-          <button className="w-full py-3.5 rounded-[10px] border border-white/15 bg-transparent text-white font-bold text-[0.9rem] tracking-[0.04em] cursor-pointer transition-all hover:border-cyan-500 hover:text-cyan-400">
-            Become a Conductor
-          </button>
+          <a
+            href={`https://cloud.dejajs.com/onboarding?plan=conductor&billing=${billing}`}
+            className="block w-full py-3.5 rounded-[10px] border border-white/15 bg-transparent text-white font-bold text-[0.9rem] tracking-[0.04em] cursor-pointer transition-all hover:border-cyan-500 hover:text-cyan-400 text-center no-underline"
+          >
+            Become a Conductor →
+          </a>
         </div>
       </div>
 

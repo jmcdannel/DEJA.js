@@ -87,35 +87,23 @@ After your account is approved, the onboarding wizard walks you through initial 
 
 #### ⚡ Quick Install
 
-The fastest way to get set up. Open a terminal and run one command — it checks your prerequisites, clones the repo, installs dependencies, and walks you through configuration.
+The fastest way to get set up. Open a terminal on the machine connected to your DCC-EX Command Station and run one command — it downloads the DEJA.js server, installs dependencies, and walks you through configuration.
 
 **macOS / Linux**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.sh | bash
+curl -fsSL https://install.dejajs.com | bash
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
-irm https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.ps1 | iex
+irm https://install.dejajs.com/win | iex
 ```
 
 After the script finishes, skip ahead to [Step 5 — Register Your CommandStation](#-step-5--register-your-commandstation).
 
-> Prefer to set things up manually? Continue with the steps below.
-
-#### Manual Install
-
-Clone the repository and install dependencies.
-
-```bash
-git clone https://github.com/jmcdannel/deja.git
-cd deja
-pnpm install
-```
-
-**Verify:** Install completes without errors and you can see an `apps/` directory in the project root.
+> Need help? See the [Install Guide](https://dejajs.com/docs/install) for detailed instructions and troubleshooting.
 
 ---
 

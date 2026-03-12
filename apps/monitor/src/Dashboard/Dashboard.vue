@@ -4,18 +4,14 @@ import { useLayout, useLocos, useTurnouts, useEfx, useSignals } from '@repo/modu
 import { useLayoutLogListeners } from '../composables/useLayoutLogListeners'
 import { usePaneManager, PANE_COLORS, type PaneColorKey } from '../composables/usePaneManager'
 import MonitorPane from './components/MonitorPane.vue'
-import MonitorStatusBar from './components/MonitorStatusBar.vue'
 import DccLogPane from './components/DccLogPane.vue'
 import DeviceSerialPaneContent from './components/DeviceSerialPaneContent.vue'
 import TurnoutLogPane from './components/TurnoutLogPane.vue'
 import EffectLogPane from './components/EffectLogPane.vue'
 import SensorLogPane from './components/SensorLogPane.vue'
 import StatsPane from './components/StatsPane.vue'
-import { useDcc } from '@repo/dccex'
-
 const paneManager = usePaneManager()
 const { turnoutChanges, effectChanges, sensorChanges } = useLayoutLogListeners()
-const { sendDccCommand } = useDcc()
 const { getDevices } = useLayout()
 
 const devices = getDevices()
@@ -101,19 +97,6 @@ function handleClear(id: string) {
   }
 }
 
-// Status bar event handlers
-const emit = defineEmits<{
-  'toggle-drawer': []
-}>()
-
-async function handleTrackPowerToggle(newState: boolean) {
-  await sendDccCommand({ action: 'dcc', payload: newState ? '1 MAIN' : '0' })
-}
-
-async function handleEmergencyStop() {
-  await sendDccCommand({ action: 'dcc', payload: '!' })
-}
-
 // Extract device ID from pane ID
 function deviceIdFromPaneId(paneId: string): string {
   return paneId.replace('device-', '')
@@ -122,12 +105,6 @@ function deviceIdFromPaneId(paneId: string): string {
 
 <template>
   <div class="flex flex-col h-screen">
-    <MonitorStatusBar
-      @toggle-drawer="emit('toggle-drawer')"
-      @track-power-toggle="handleTrackPowerToggle"
-      @emergency-stop="handleEmergencyStop"
-    />
-
     <div class="monitor-layout">
       <!-- Main grid -->
       <div class="monitor-grid" :style="gridStyle">

@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { useCurrentUser } from 'vuefire'
 import SignOut from './Signout.vue'
+
+const props = withDefaults(defineProps<{ size?: string | number }>(), {
+  size: undefined,
+})
+
 const user = useCurrentUser()
 
 </script>
 <template>
   <v-menu location="bottom">
-      <template v-slot:activator="{ props }">
+      <template v-slot:activator="{ props: activatorProps }">
         <v-avatar
           type="button"
-          v-bind="props"
+          v-bind="activatorProps"
+          :size="size"
           class="shadow-md border-2 border-white/20 mx-3"
         >
           <v-img
