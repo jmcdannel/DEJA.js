@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 
 </script>
 <template>
-  <ModuleTitle menu="Signals" />
+  <PageHeader menu="Signals" />
   <div
   class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 mb-4"
   ></div>

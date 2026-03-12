@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import type { Turnout } from '@repo/modules'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import TurnoutsList from '@/Turnouts/TurnoutsList.vue'
 import TurnoutSorter from '@/Turnouts/TurnoutSorter.vue'
 import Addtile from '@/Core/UI/AddTile.vue'
@@ -14,7 +14,6 @@ const VIEW_OPTIONS = [
 ]
 const showSorter = ref(false)
 const showViewMenu = ref(false)
-const showFilters = ref(false)
 const viewAs = useStorage('@DEJA/prefs/turnoutsView', 'card')
 const router = useRouter()
 
@@ -25,35 +24,23 @@ function handleEdit(turnout: Turnout) {
 function handleAdd() {
   router.push({ name: 'Add Turnout' })
 }
-
 </script>
 <template>
-  <ModuleTitle menu="Turnouts" />
+  <PageHeader menu="Turnouts">
+    <v-btn @click="showViewMenu = !showViewMenu" icon="mdi-eye" size="small" variant="text" />
+    <v-btn @click="showSorter = !showSorter" icon="mdi-sort-variant" size="small" variant="text" />
+  </PageHeader>
 
-  <v-toolbar
-    class="bg-clip-text bg-gradient-to-r from-purple-300 to-pink-600"
-    color="purple"
-    variant="tonal"
-  >
-    <v-toolbar-title class="text-3xl text-yellow-400">Turnouts</v-toolbar-title>
-    <v-spacer></v-spacer>
-    <v-toolbar-items color="yellow">
-      <v-btn @click="showViewMenu = !showViewMenu" icon="mdi-eye"></v-btn>
-      <v-btn @click="showFilters = !showFilters" icon="mdi-filter"></v-btn>
-      <v-btn @click="showSorter = !showSorter" icon="mdi-sort-variant" ></v-btn>
-    </v-toolbar-items>
-  </v-toolbar>
   <v-dialog v-model="showViewMenu" max-width="290">
     <v-card title="View As" color="purple-darken-4" variant="elevated">
-      <v-list :items="VIEW_OPTIONS" v-model:selected="viewAs" select-strategy="single-independent">
-      </v-list>
+      <v-list :items="VIEW_OPTIONS" v-model:selected="viewAs" select-strategy="single-independent" />
     </v-card>
   </v-dialog>
 
   <v-dialog v-model="showSorter" max-width="80vw">
     <TurnoutSorter @close="showSorter = false" />
   </v-dialog>
-  <v-divider class="my-2" />
+
   <TurnoutsList @edit="handleEdit" :viewAs="viewAs">
     <template #prepend>
       <Addtile @click="handleAdd" color="yellow" />

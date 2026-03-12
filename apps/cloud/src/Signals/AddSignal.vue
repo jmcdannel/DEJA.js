@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import SignalForm from '@/Signals/SignalForm.vue'
 import type { Signal } from '@repo/modules/signals'
 
@@ -22,6 +22,6 @@ function handleClose() {
 }
 </script>
 <template>
-  <ModuleTitle menu="Signals" />
+  <PageHeader menu="Signals" />
   <SignalForm :signal="defaultSignal" @close="handleClose" />
 </template>

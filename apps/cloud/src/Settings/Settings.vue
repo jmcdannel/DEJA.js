@@ -5,9 +5,7 @@ import { useStorage } from '@vueuse/core'
 import { getIdToken } from 'firebase/auth'
 import { useSubscription, PLAN_DISPLAY, useLayout } from '@repo/modules'
 import { BackgroundSettings } from '@repo/ui'
-import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
-import { useDisplay } from 'vuetify'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import LayoutTags from '@/Layout/LayoutTags.vue'
 import PortList from '@/Layout/PortList.vue'
 
@@ -131,8 +129,8 @@ function scrollTo(id: string) {
 </script>
 
 <template>
-  <div>
-    <ModuleTitle menu="Settings" />
+  <div class="animate-fade-in-up space-y-6">
+    <PageHeader menu="Settings" :subtitle="layout?.name" />
 
     <div class="settings-layout">
       <!-- Content -->

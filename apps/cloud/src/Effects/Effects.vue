@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import type { Effect } from '@repo/modules'
 import { useRouter } from 'vue-router'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import EffectsList from '@/Effects/EffectsList.vue'
 import EffectSorter from '@/Effects/EffectSorter.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
@@ -21,10 +21,10 @@ function handleAdd() {
 
 </script>
 <template>
-  <ModuleTitle menu="Effects">
+  <PageHeader menu="Effects">
     <ListMenu :disabledMenus="['view']" :module-name="'effects'" />
     <v-btn @click="showSorter = !showSorter" icon="mdi-sort-variant"></v-btn>
-  </ModuleTitle>
+  </PageHeader>
 
   <v-dialog v-model="showSorter" max-width="80vw">
     <EffectSorter @close="showSorter = false" />

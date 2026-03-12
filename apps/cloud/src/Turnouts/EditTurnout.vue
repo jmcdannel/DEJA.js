@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createLogger } from '@repo/utils'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import TurnoutForm from '@/Turnouts/TurnoutForm.vue'
 import { useTurnouts, type Turnout } from '@repo/modules'
 
@@ -36,7 +36,7 @@ function handleClose() {
 onMounted(loadTurnout)
 </script>
 <template>
-  <ModuleTitle menu="Turnouts" />
+  <PageHeader menu="Turnouts" />
   <div v-if="loading" class="p-6 flex justify-center">
     <v-progress-circular indeterminate color="yellow" />
   </div>
