@@ -7,8 +7,8 @@ import { useStorage } from '@vueuse/core'
 import { db, rtdb } from '@repo/firebase-config'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { createLogger } from '@repo/utils'
-import { useLayout, type Device } from '@repo/modules'
-import { DeviceConnectionList, DeviceStatusItem } from '@repo/ui'
+import { useLayout, useServerStatus, type Device } from '@repo/modules'
+import { DeviceConnectionList, DeviceStatusItem, StatusPulse } from '@repo/ui'
 
 const log = createLogger('Connect')
 
@@ -39,6 +39,29 @@ function handleLayoutSelect(selectedLayoutId: string) {
     router.push({ name: 'home' })
   }
 }
+
+// Server status (auto-detect, same as header chip)
+const { serverStatus } = useServerStatus()
+
+const serverUptime = computed(() => {
+  if (!serverStatus.value?.online || !serverStatus.value?.lastSeen) return ''
+  const now = Date.now()
+  const raw = serverStatus.value.lastSeen
+  let last: number
+  if (typeof raw === 'number') {
+    last = raw
+  } else if (raw instanceof Date) {
+    last = raw.getTime()
+  } else {
+    last = new Date(raw as string).getTime()
+  }
+  if (Number.isNaN(last)) return ''
+  const diff = now - last
+  const hours = Math.floor(diff / 3_600_000)
+  const minutes = Math.floor((diff % 3_600_000) / 60_000)
+  if (hours > 0) return `${hours}h ${minutes}m`
+  return `${minutes}m`
+})
 
 // Device connection management
 const { getDevices, connectDevice, disconnectDevice } = useLayout()
@@ -112,6 +135,58 @@ const selectedDevice = computed(() => {
               </div>
             </div>
             <v-icon v-if="layout.id === layoutId" color="green">mdi-check-circle</v-icon>
+          </div>
+        </div>
+      </v-card-text>
+    </v-card>
+
+    <!-- DEJA Server Status (auto-detect) -->
+    <v-card
+      v-if="layoutId"
+      class="mx-auto mt-6"
+      max-width="600"
+      :style="{
+        borderLeftColor: serverStatus?.online
+          ? 'rgb(var(--v-theme-success))'
+          : 'rgb(var(--v-theme-error))',
+        borderLeftWidth: '4px',
+        borderLeftStyle: 'solid',
+      }"
+      variant="tonal"
+    >
+      <v-card-text class="pa-4">
+        <div class="d-flex justify-space-between align-center">
+          <div class="d-flex align-center ga-3">
+            <v-avatar
+              :color="serverStatus?.online ? 'success' : 'error'"
+              variant="tonal"
+              size="40"
+              rounded="lg"
+            >
+              <v-icon icon="mdi-server-network" />
+            </v-avatar>
+            <div>
+              <div
+                class="text-subtitle-1 font-weight-bold"
+                :class="serverStatus?.online ? 'text-success' : 'text-error'"
+              >
+                DEJA Server
+              </div>
+              <div v-if="serverStatus?.version" class="text-caption text-medium-emphasis">
+                v{{ serverStatus.version }}
+              </div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="d-flex align-center ga-1">
+              <StatusPulse :status="serverStatus?.online ? 'connected' : 'disconnected'" size="sm" />
+              <span class="text-caption" :class="serverStatus?.online ? 'text-success' : 'text-error'">
+                {{ serverStatus?.online ? 'Online' : 'Offline' }}
+              </span>
+            </div>
+            <div v-if="serverUptime" class="text-caption text-medium-emphasis">
+              uptime {{ serverUptime }}
+            </div>
           </div>
         </div>
       </v-card-text>
