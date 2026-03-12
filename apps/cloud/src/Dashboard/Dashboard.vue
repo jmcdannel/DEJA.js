@@ -13,6 +13,7 @@ import {
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
 import { useStorage } from '@vueuse/core'
+import { formatUptime } from '@repo/utils'
 import { useCommandActivity } from '@/composables/useCommandActivity'
 
 const router = useRouter()
@@ -58,22 +59,7 @@ const { activity: commandActivity } = useCommandActivity(wsMessages)
 // Server uptime
 const serverUptime = computed(() => {
   if (!serverStatus.value?.online || !serverStatus.value?.lastSeen) return ''
-  const now = Date.now()
-  const raw = serverStatus.value.lastSeen
-  let last: number
-  if (typeof raw === 'number') {
-    last = raw
-  } else if (raw instanceof Date) {
-    last = raw.getTime()
-  } else {
-    last = new Date(raw as string).getTime()
-  }
-  if (Number.isNaN(last)) return ''
-  const diff = now - last
-  const hours = Math.floor(diff / 3_600_000)
-  const minutes = Math.floor((diff % 3_600_000) / 60_000)
-  if (hours > 0) return `${hours}h ${minutes}m`
-  return `${minutes}m`
+  return formatUptime(serverStatus.value.lastSeen)
 })
 
 // Computed stats

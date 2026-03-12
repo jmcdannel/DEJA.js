@@ -6,7 +6,7 @@ import { useCollection, useCurrentUser } from 'vuefire'
 import { useStorage } from '@vueuse/core'
 import { db, rtdb } from '@repo/firebase-config'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
-import { createLogger } from '@repo/utils'
+import { createLogger, formatUptime } from '@repo/utils'
 import { useLayout, useServerStatus, type Device } from '@repo/modules'
 import { DeviceConnectionList, DeviceStatusItem, StatusPulse } from '@repo/ui'
 
@@ -45,22 +45,7 @@ const { serverStatus } = useServerStatus()
 
 const serverUptime = computed(() => {
   if (!serverStatus.value?.online || !serverStatus.value?.lastSeen) return ''
-  const now = Date.now()
-  const raw = serverStatus.value.lastSeen
-  let last: number
-  if (typeof raw === 'number') {
-    last = raw
-  } else if (raw instanceof Date) {
-    last = raw.getTime()
-  } else {
-    last = new Date(raw as string).getTime()
-  }
-  if (Number.isNaN(last)) return ''
-  const diff = now - last
-  const hours = Math.floor(diff / 3_600_000)
-  const minutes = Math.floor((diff % 3_600_000) / 60_000)
-  if (hours > 0) return `${hours}h ${minutes}m`
-  return `${minutes}m`
+  return formatUptime(serverStatus.value.lastSeen)
 })
 
 // Device connection management

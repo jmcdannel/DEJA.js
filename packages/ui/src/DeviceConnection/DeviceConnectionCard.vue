@@ -2,6 +2,7 @@
 import { computed, watch } from 'vue'
 import type { Device } from '@repo/modules'
 import { useLayout } from '@repo/modules'
+import { formatUptime } from '@repo/utils'
 import StatusPulse from '../animations/StatusPulse.vue'
 
 interface Props {
@@ -84,28 +85,7 @@ const connectionPath = computed(() => {
 
 const uptime = computed(() => {
   if (!props.device.lastConnected || !isConnected.value) return ''
-  const now = Date.now()
-  const raw = props.device.lastConnected
-  let last: number
-  if (raw instanceof Date) {
-    last = raw.getTime()
-  } else if (typeof raw === 'number') {
-    last = raw
-  } else if (typeof (raw as Record<string, unknown>)?.toDate === 'function') {
-    // Firestore Timestamp object
-    last = (raw as { toDate: () => Date }).toDate().getTime()
-  } else if (typeof (raw as Record<string, unknown>)?.seconds === 'number') {
-    // Raw Firestore Timestamp shape
-    last = (raw as { seconds: number }).seconds * 1000
-  } else {
-    last = new Date(raw as string).getTime()
-  }
-  if (Number.isNaN(last)) return ''
-  const diff = now - last
-  const hours = Math.floor(diff / 3_600_000)
-  const minutes = Math.floor((diff % 3_600_000) / 60_000)
-  if (hours > 0) return `${hours}h ${minutes}m`
-  return `${minutes}m`
+  return formatUptime(props.device.lastConnected)
 })
 
 function handleConnect() {
