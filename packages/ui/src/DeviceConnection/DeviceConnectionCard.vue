@@ -2,6 +2,7 @@
 import { computed, watch } from 'vue'
 import type { Device } from '@repo/modules'
 import { useLayout } from '@repo/modules'
+import { formatUptime } from '@repo/utils'
 import StatusPulse from '../animations/StatusPulse.vue'
 
 interface Props {
@@ -84,16 +85,7 @@ const connectionPath = computed(() => {
 
 const uptime = computed(() => {
   if (!props.device.lastConnected || !isConnected.value) return ''
-  const now = Date.now()
-  const last =
-    props.device.lastConnected instanceof Date
-      ? props.device.lastConnected.getTime()
-      : new Date(props.device.lastConnected).getTime()
-  const diff = now - last
-  const hours = Math.floor(diff / 3_600_000)
-  const minutes = Math.floor((diff % 3_600_000) / 60_000)
-  if (hours > 0) return `${hours}h ${minutes}m`
-  return `${minutes}m`
+  return formatUptime(props.device.lastConnected)
 })
 
 function handleConnect() {
