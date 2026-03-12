@@ -53,7 +53,7 @@ const user = useCurrentUser()
 const router = useRouter()
 const { menu, handleMenu } = useMenu()
 
-const { isDark } = useThemeSwitcher()
+const { isDark, themePreference } = useThemeSwitcher()
 
 function handleLayoutSelect(newLayout: string) {
   layoutId.value = newLayout
@@ -69,7 +69,7 @@ const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
 </script>
 <template>
   <v-responsive class="border rounded min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
-      <v-app :theme="isDark ? 'dark' : 'light'" class="!bg-transparent">
+      <v-app :theme="themePreference" class="!bg-transparent">
         <PageBackground app-name="cloud">
         <AppHeader
           app-name="Cloud"
