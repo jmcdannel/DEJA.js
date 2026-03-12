@@ -2,10 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Override Vuetify's v-responsive overflow to allow position: sticky inside */
+.v-responsive {
+  overflow: visible !important;
+}
+
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
     scroll-behavior: smooth;
+  }
+  .font-display {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.04em;
   }
 }
 

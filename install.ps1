@@ -1,8 +1,8 @@
 # DEJA.js one-command installer for Windows
 # Usage (PowerShell):
-#   irm https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.ps1 | iex
+#   irm https://install.dejajs.com/win | iex
 # Or with a custom install directory:
-#   & ([scriptblock]::Create((irm https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.ps1))) "C:\deja"
+#   & ([scriptblock]::Create((irm https://install.dejajs.com/win))) "C:\deja"
 
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
@@ -21,7 +21,7 @@ Write-Host ""
 Write-Host "  This script will:"
 Write-Host "    1. Check prerequisites (Node.js v22+, Git)"
 Write-Host "    2. Install pnpm if needed"
-Write-Host "    3. Clone the DEJA.js repository"
+Write-Host "    3. Download DEJA.js"
 Write-Host "    4. Install dependencies"
 Write-Host "    5. Create your .env.local configuration file"
 Write-Host ""
