@@ -83,79 +83,37 @@ After your account is approved, the onboarding wizard walks you through initial 
 
 ---
 
-### 📦 Step 3 — Install
+### 📦 Step 3 — Install the DEJA Server
 
-#### ⚡ Quick Install
+The DEJA Server runs as a Docker container on your computer (or Raspberry Pi). One command handles everything.
 
-The fastest way to get set up. Open a terminal and run one command — it checks your prerequisites, clones the repo, installs dependencies, and walks you through configuration.
+#### Prerequisites
 
-**macOS / Linux**
+| Requirement | Get it |
+|---|---|
+| Docker | [Install Docker](https://docs.docker.com/get-docker/) (Docker Desktop on Mac/Windows, or `apt install docker.io` on Linux/Pi) |
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.sh | bash
-```
+#### Install
 
-**Windows (PowerShell)**
+From your [DEJA Cloud](https://cloud.dejajs.com) dashboard, go to **Settings > Install** to find your install command and credentials. Then run:
 
-```powershell
-irm https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.ps1 | iex
-```
-
-After the script finishes, skip ahead to [Step 5 — Register Your CommandStation](#-step-5--register-your-commandstation).
-
-> Prefer to set things up manually? Continue with the steps below.
-
-#### Manual Install
-
-Clone the repository and install dependencies.
+**macOS / Linux / Raspberry Pi**
 
 ```bash
-git clone https://github.com/jmcdannel/deja.git
-cd deja
-pnpm install
+curl -fsSL https://install.dejajs.com | bash
 ```
 
-**Verify:** Install completes without errors and you can see an `apps/` directory in the project root.
+The install script will:
+1. Check for Docker (installs on Linux if missing)
+2. Prompt for your GHCR token and account credentials (from the Install page)
+3. Detect your serial ports and configure the connection to your CommandStation
+4. Pull the DEJA Server Docker image and start it
 
----
+**Windows**
 
-### ⚙️ Step 4 — Configure
+Windows users should install [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) with WSL 2 backend, then run the install command from a WSL terminal.
 
-Copy the environment template and fill in the values from your onboarding (Step 2).
-
-```bash
-cp .env.example .env.local
-```
-
-Open `.env.local` in a text editor and paste your credentials. If you need to find them again:
-
-1. Log in to [DEJA Cloud](https://cloud.dejajs.com)
-2. Select your layout
-3. Click **"View Local Environment Configuration"**
-4. Copy the displayed values into your `.env.local`
-
-Your completed `.env.local` will look like this:
-
-```env
-LAYOUT_ID=my-layout-name
-
-VITE_FIREBASE_API_KEY=AIza...
-VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your-project
-VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
-VITE_FIREBASE_APP_ID=1:123456789:web:abc123
-
-VITE_MQTT_BROKER=mqtt://localhost
-VITE_MQTT_PORT=1883
-ENABLE_MQTT=true
-ENABLE_WS=true
-ENABLE_DEJACLOUD=true
-VITE_WS_PORT=8082
-VITE_WS_ID=DEJA.js
-```
-
-**Verify:** `.env.local` exists at the project root and contains your `LAYOUT_ID` and all `VITE_FIREBASE_*` values.
+**Verify:** The install script prints a success message with your local server URL. Open [DEJA Monitor](https://monitor.dejajs.com) — you should see the server connected.
 
 ---
 
@@ -173,15 +131,19 @@ The device will appear in the list with a "disconnected" status — that is expe
 
 ---
 
-### 🖥️ Step 6 — Start the Server
+### 🖥️ Step 6 — Manage the Server
+
+The DEJA Server runs as a Docker container. Use the `deja` CLI to manage it:
 
 ```bash
-pnpm deja
+deja status    # Check server status, subscription, and serial connection
+deja logs      # View server logs
+deja update    # Pull the latest server version
+deja restart   # Restart the server
+deja stop      # Stop the server
 ```
 
-This starts the DEJA Server (USB serial communication) and the Monitor app (diagnostics) together via Turborepo.
-
-**Verify:** Terminal output shows the WebSocket server listening on port `8082`. Open [DEJA Monitor](https://monitor.dejajs.com) in a browser — you should see the server connected.
+**Verify:** `deja status` shows the server running and connected. Open [DEJA Monitor](https://monitor.dejajs.com) in a browser — you should see the server connected.
 
 ---
 
@@ -215,17 +177,15 @@ Select the USB port for your CommandStation in the Monitor app.
 
 ### 📖 Quick Reference
 
-**Commands**
+**Server Commands**
 
 | Task | Command |
 |---|---|
-| Install dependencies | `pnpm install` |
-| Start server + monitor | `pnpm deja` |
-| Start server only | `pnpm start` |
-| Start all apps (dev mode) | `pnpm dev` |
-| Build all apps | `pnpm build` |
-| Lint all packages | `pnpm lint` |
-| Check dependency versions | `pnpm deps:check` |
+| Check server status | `deja status` |
+| View server logs | `deja logs` |
+| Update to latest version | `deja update` |
+| Restart the server | `deja restart` |
+| Stop the server | `deja stop` |
 
 **App URLs**
 
@@ -323,26 +283,20 @@ turbo deps:fix        # 🔧 Fix dependency mismatches
 
 ## 🧰 Production Runbook
 
-### Keep the server running robustly (pm2 + turbo)
-
-Use pm2 to manage the turbo start process so it restarts on crashes and can boot on startup:
+The DEJA Server runs as a Docker container with `restart: unless-stopped`, so it automatically restarts on crashes and reboots. No additional process manager (pm2) is needed.
 
 ```bash
-# Start server + monitor via turbo under pm2
-pm2 start --name deja-start --interpreter bash -- turbo run start --filter=apps/server --filter=apps/monitor
-pm2 start bash --name deja-start -- -lc "pnpm turbo run start --filter=apps/server --filter=apps/monitor"
+# Check everything is running
+deja status
 
-# For all apps
-pm2 start --name deja-start-all --interpreter bash -- turbo run start
+# Update to the latest release
+deja update
 
-# Persist the pm2 process list and enable on boot
-pm2 save
-pm2 startup
+# View logs for troubleshooting
+deja logs
 ```
 
-Notes:
-- The root `package.json` is configured so `pnpm start` maps to the filtered turbo start.
-- `turbo.json` marks `start` and `start:all` as persistent to work well under pm2.
+Configuration files are stored in `~/.deja/` — see `~/.deja/docker-compose.yml` for the container configuration.
 
 ---
 
@@ -360,22 +314,15 @@ Notes:
 
 ---
 
-## 🤝 Contributing
+## 🤝 Feedback & Support
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### 🛠️ Development Setup
-1. 🍴 Fork the repository
-2. 🌿 Create a feature branch
-3. 🧪 Write tests for new features
-4. 📝 Update documentation
-5. 🚀 Submit a pull request
+Have a feature request or found a bug? Contact us through the [DEJA Cloud](https://cloud.dejajs.com) support channel or email support@dejajs.com.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+DEJA.js is proprietary software distributed under a subscription license. See your subscription terms at [dejajs.com](https://dejajs.com).
 
 ---
 

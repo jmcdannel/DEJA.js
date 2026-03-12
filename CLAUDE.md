@@ -144,6 +144,39 @@ To create a changeset:
 ---
 
 
+## Distribution & Build (Private)
+
+DEJA.js is a **private, subscription-gated product**. The repo is private on GitHub. See `docs/superpowers/specs/2026-03-12-private-distribution-design.md` for the full design spec.
+
+### Server Distribution
+- Server is distributed as a **Docker image** on GitHub Container Registry (GHCR): `ghcr.io/jmcdannel/deja-server`
+- Multi-arch: `linux/amd64` + `linux/arm64` (Raspberry Pi)
+- Users install via `curl -fsSL https://install.dejajs.com | bash`
+- Docker image is built using **tsup** (not bare `tsc`) to produce a self-contained ESM bundle with all `@repo/*` workspace deps resolved at build time
+- Native modules (`serialport`, `firebase-admin`) are externals kept in `node_modules`
+
+### Subscription Validation
+- Server validates subscription on startup via Firebase Admin SDK → Firestore `users/{uid}.subscription`
+- Allowed statuses: `active`, `trialing`, `past_due`
+- Denied statuses: `incomplete`, `incomplete_expired`, `unpaid`, `canceled`, missing
+- 48-hour grace period for offline/network failure
+- Mid-session cancellation logs a warning but does NOT shut down — enforced on next cold start
+- Config stored at `~/.deja/config.json` (uid, layoutId, cached subscription)
+
+### Release Process
+1. Merge to main, create changeset
+2. Tag release: `git tag v1.x.x && git push --tags`
+3. CI builds multi-arch Docker image and pushes to GHCR
+4. Users run `deja update` to pull new version
+
+### Rules for Distribution Code
+- **Do not expose source code** in Docker images — only compiled JavaScript
+- **Do not hardcode secrets** in Dockerfiles or compose files — use env vars and mounted config
+- **Do not auto-update** running servers — updates are user-initiated only
+- **Do not shut down mid-session** on subscription changes — warn and enforce on next start
+
+---
+
 ## Environment Variables
 
 Copy `.env.example` to `.env` at the root. Key variables:
