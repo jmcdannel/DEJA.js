@@ -1,5 +1,5 @@
 ---
-"deja-serverts": patch
+"deja": minor
 ---
 
-added: **[server]** Add Cloudflare Tunnel support for secure remote access to the DEJA.js WebSocket server without port forwarding
+added: **[server]** Cloudflare Tunnel support for secure remote access to local DEJA server without port forwarding
