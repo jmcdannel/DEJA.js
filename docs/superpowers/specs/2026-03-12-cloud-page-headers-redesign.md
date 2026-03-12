@@ -8,7 +8,7 @@
 
 ## Problem
 
-The cloud app's page headers have two issues:
+The cloud app's page headers have three issues:
 
 1. **ModuleTitle is visually flat** — a plain `v-sheet` with an icon, label, and a hard `<hr class="border-sky-500">` divider. No background treatment, no visual weight.
 2. **Inconsistent headers** — some pages (e.g., Layout) have double headers: a ModuleTitle plus additional styled `<h2>` / `<h3>` elements with their own gradient backgrounds.
@@ -38,28 +38,80 @@ Replaces `ModuleTitle.vue` in `apps/cloud/src/Core/UI/`.
 
 ### Styling
 
-- Background: `bg-gradient-to-r from-{color}-500/20 to-transparent`
-  - Uses the module's accent color (e.g., `from-cyan-500/20` for Devices, `from-amber-500/20` for Turnouts)
+- Background: applied via a static class map (see "Tailwind Safelist" below) — NOT dynamic template interpolation
+  - Uses the module's accent color at 20% opacity (e.g., `from-cyan-500/20` for Devices, `from-amber-500/20` for Turnouts)
 - Border-radius: `rounded-xl`
 - Padding: `px-4 py-3`
 - Bottom margin: `mb-6`
 - No `<hr>` divider — the gradient fade provides visual separation
 - Icon + title left-aligned in a flex row
 - Actions slot right-aligned via `v-spacer`
-- Title: `text-2xl` with `text-{color}-500 dark:text-{color}-400`
+- Title: `<h2>` element, `text-2xl` with color classes applied via the same static class map
 - Icon: `size="32"` with matching color classes
+
+### Tailwind Safelist / Static Class Map
+
+**Critical:** Tailwind purges dynamically constructed class names like `` `from-${color}-500/20` ``. The component MUST use a static lookup map:
+
+```ts
+const GRADIENT_CLASSES: Record<string, string> = {
+  cyan:    'bg-gradient-to-r from-cyan-500/20 to-transparent',
+  lime:    'bg-gradient-to-r from-lime-500/20 to-transparent',
+  pink:    'bg-gradient-to-r from-pink-500/20 to-transparent',
+  indigo:  'bg-gradient-to-r from-indigo-500/20 to-transparent',
+  amber:   'bg-gradient-to-r from-amber-500/20 to-transparent',
+  purple:  'bg-gradient-to-r from-purple-500/20 to-transparent',
+  emerald: 'bg-gradient-to-r from-emerald-500/20 to-transparent',
+  teal:    'bg-gradient-to-r from-teal-500/20 to-transparent',
+  rose:    'bg-gradient-to-r from-rose-500/20 to-transparent',
+  blue:    'bg-gradient-to-r from-blue-500/20 to-transparent',
+  sky:     'bg-gradient-to-r from-sky-500/20 to-transparent',    // default fallback
+  red:     'bg-gradient-to-r from-red-500/20 to-transparent',
+}
+
+const TEXT_CLASSES: Record<string, string> = {
+  cyan:    'text-cyan-500 dark:text-cyan-400',
+  lime:    'text-lime-500 dark:text-lime-400',
+  pink:    'text-pink-500 dark:text-pink-400',
+  indigo:  'text-indigo-500 dark:text-indigo-400',
+  amber:   'text-amber-500 dark:text-amber-400',
+  purple:  'text-purple-500 dark:text-purple-400',
+  emerald: 'text-emerald-500 dark:text-emerald-400',
+  teal:    'text-teal-500 dark:text-teal-400',
+  rose:    'text-rose-500 dark:text-rose-400',
+  blue:    'text-blue-500 dark:text-blue-400',
+  sky:     'text-sky-500 dark:text-sky-400',
+  red:     'text-red-500 dark:text-red-400',
+}
+```
+
+This map covers all colors used in `useMenu()`. The component resolves `GRADIENT_CLASSES[color] ?? GRADIENT_CLASSES.sky`.
 
 ### Props
 
 ```ts
 interface PageHeaderProps {
   menu?: string        // Menu key from useMenu() — auto-resolves icon, color, label
-  label?: string       // Manual label (fallback when menu not provided)
-  icon?: string        // Manual icon (fallback when menu not provided)
+  label?: string       // Manual label (fallback when menu not provided or not found)
+  icon?: string        // Manual icon (fallback when menu not provided or not found)
   color?: string       // Manual color (default: "sky")
   subtitle?: string    // Optional secondary text line (e.g., layout name)
 }
 ```
+
+### Prop Resolution / Fallback Chain
+
+The component resolves display values in this order:
+1. If `menu` is provided, call `getMenuItem(menu)` from `useMenu()`
+2. If the lookup returns a match, use its `label`, `icon`, `color`
+3. If the lookup returns `undefined` (no match), fall back to the explicit `label`, `icon`, `color` props
+4. If neither `menu` nor explicit props are provided, use defaults: label = `""`, icon = `""`, color = `"sky"`
+
+This matches the existing ModuleTitle fallback pattern (`menuItem ?? { label: props.label, ... }`).
+
+**Special cases:**
+- `Roster.vue` uses `menu="Loco Roster"` but useMenu has `label: "Roster"`. The menu lookup key must be updated to `menu="Roster"` in the page component.
+- `UserProfile.vue` uses manual props (`label="User Profile"`, `color="red"`, `icon="mdi-lightning-bolt"`) — no `menu` prop. This continues to work via the fallback chain.
 
 ### Slots
 
@@ -117,7 +169,14 @@ Each enabled menu option (View, Sort, Filter) renders as a **chip-triggered `v-m
 - **Dropdown:** A `v-menu` anchored to the chip containing a `v-list` of selectable options
   - Single-select for View and Sort
   - Multi-select for Filter
-- Active filters render as additional removable `v-chip` elements inline
+- Active filters render as additional removable `v-chip` elements inline, placed after the trigger chips in the same flex row
+- Clicking the "X" on a filter chip removes **that individual filter** only (fix the existing bug where `filterBy = []` clears all filters)
+
+### Default/Empty State (Inline Chips)
+
+- View chip: always visible, shows current value or `"View"` as fallback text
+- Sort chip: always visible, shows current value or `"Sort"` as fallback text
+- Filter chip: **hidden** when no filters are active. When active, shows `mdi-filter` with count badge (e.g., "2")
 
 ### Mobile Mode (inline = false)
 
@@ -201,8 +260,16 @@ Per the project's Tailwind conventions:
 | **Create** | `apps/cloud/src/Core/UI/PageHeader.vue` |
 | **Modify** | `packages/ui/src/ListMenu/ListMenu.vue` (add inline mode) |
 | **Modify** | ~20 page components (swap ModuleTitle → PageHeader) |
-| **Modify** | `apps/cloud/src/Core/UI/index.ts` (export PageHeader) |
-| **Keep** | `ModuleTitle.vue` (unused but not deleted, avoids breaking anything) |
+| **Modify** | `apps/cloud/src/Core/UI/index.ts` (add PageHeader export, keep ModuleTitle export for backward compat) |
+| **Keep** | `ModuleTitle.vue` (unused but not deleted — keep both file and export for backward compat) |
+
+---
+
+## Notes
+
+- **ListMenu is self-contained** — it manages its own state via `useStorage()` and does not emit events or expose v-model bindings. PageHeader and ListMenu have no data contract between them; ListMenu just renders in PageHeader's default slot.
+- **No animation on mode switch** — when the browser resizes across the md breakpoint, ListMenu simply re-renders in the new mode (no transition animation needed).
+- **Semantic HTML** — PageHeader should use a `<div>` wrapper (not `<header>`, since the AppBar is the semantic page header). The title should remain `<h2>` to match the current heading level hierarchy.
 
 ---
 
