@@ -156,8 +156,8 @@ export default function Home() {
               </svg>
             </div>
             <span className="text-xs font-bold text-cyan-500 uppercase tracking-widest">Step 1</span>
-            <h3 className="font-bold text-lg text-slate-900 dark:text-white">Sign Up</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">Create your free DEJA Cloud account. Set up your layout and start building your roster.</p>
+            <h3 className="font-bold text-lg text-slate-900 dark:text-white">Sign Up & Pick a Plan</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">Create your free DEJA Cloud account in one click. Choose a plan — start free or try a paid tier for 14 days.</p>
             <div className="hidden md:block absolute top-8 left-[65%] w-[70%] h-px bg-gradient-to-r from-cyan-300 to-transparent dark:from-cyan-700 z-0"></div>
           </div>
           <div className="flex flex-col items-center space-y-4 relative group text-center">
@@ -168,7 +168,7 @@ export default function Home() {
             </div>
             <span className="text-xs font-bold text-fuchsia-500 uppercase tracking-widest">Step 2</span>
             <h3 className="font-bold text-lg text-slate-900 dark:text-white">Install</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">Download DEJA.js Server. Plug in your DCC-EX CommandStation via USB. You&apos;re connected.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">Run one command to install DEJA Server. Plug in your DCC-EX CommandStation via USB. You&apos;re connected.</p>
             <div className="hidden md:block absolute top-8 left-[65%] w-[70%] h-px bg-gradient-to-r from-fuchsia-300 to-transparent dark:from-fuchsia-700 z-0"></div>
           </div>
           <div className="flex flex-col items-center space-y-4 relative group text-center">

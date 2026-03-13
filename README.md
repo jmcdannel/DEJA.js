@@ -23,7 +23,7 @@
 - 📱 **Cross-Platform** - Works on desktop, tablet, and mobile devices
 - 🛰️ **Real-Time Sync** - MQTT and WebSocket communication
 - 🎨 **Beautiful UI** - Dark/light themes with responsive design
-- 🚀 **Easy Deployment** - Containerized and cloud-ready
+- 🚀 **Easy Deployment** - One-command install and cloud-ready
 - 🔧 **Developer Friendly** - TypeScript throughout with comprehensive tooling
 
 ---
@@ -60,38 +60,52 @@ The **DEJA Server** is the only piece you install locally. It bridges your Comma
 
 ---
 
-### 👤 Step 1 — Create Your Account
+### 👤 Step 1 — Sign Up & Choose a Plan
 
-You need a DEJA.js account before anything else — your account provides the layout configuration and Firebase credentials required to run the system locally.
+Create your free DEJA Cloud account and pick a tier. It takes one click.
 
-1. Go to [DEJA Cloud](https://cloud.dejajs.com/signup) and create an account (email/password, Google, or GitHub)
-2. Your account will be **pending approval** — you'll see a "Pending Approval" page after signing up
-3. Once an admin approves your account, you'll be redirected to the **onboarding wizard**
+1. Go to [DEJA Cloud](https://cloud.dejajs.com) and click **Sign Up** (Google, GitHub, or email)
+2. The onboarding wizard starts automatically — **Choose a Plan**:
+
+| | Hobbyist | Engineer | Conductor |
+|---|---|---|---|
+| **Price** | Free | $7/mo or $67/yr | $18/mo or $173/yr |
+| **Locomotives** | 5 | 25 | Unlimited |
+| **Layouts** | 1 | 2 | Unlimited |
+| **Turnouts / Signals / Effects** | — | 15 each | Unlimited |
+
+- **Hobbyist** is completely free — no credit card required.
+- Paid plans include a **14-day free trial** — no charge until the trial ends.
+
+3. If you chose Engineer or Conductor, enter your card details to start the free trial
+
+**Verify:** You're signed in to DEJA Cloud.
 
 ---
 
-### 🧭 Step 2 — Complete Onboarding
+### 🧭 Step 2 — Register Your Layout
 
-After your account is approved, the onboarding wizard walks you through initial setup:
+Give your layout a name and a unique ID (lowercase letters, numbers, and hyphens only). This scopes all your data — locomotives, turnouts, effects, and commands.
 
-1. **Welcome** — overview of the system
-2. **Create Layout** — give your layout a name and ID (lowercase letters, numbers, and hyphens only)
-3. **Environment Setup** — this page shows your `LAYOUT_ID` and all `VITE_FIREBASE_*` credentials. **Copy these values** — you'll need them in Step 4
-4. **Completion** — you're ready to go
+After this step the wizard shows your `LAYOUT_ID` and all `VITE_FIREBASE_*` credentials. **Copy these values** — you'll need them in Step 4.
 
-**Verify:** You can log in to [DEJA Cloud](https://cloud.dejajs.com) and see your layout dashboard.
+> You can find these credentials later in [DEJA Cloud](https://cloud.dejajs.com) under **Settings > View Local Environment Configuration**.
+
+**Verify:** You can see your layout dashboard in [DEJA Cloud](https://cloud.dejajs.com).
 
 ---
 
 ### 📦 Step 3 — Install the DEJA Server
 
-The DEJA Server runs as a Docker container on your computer (or Raspberry Pi). One command handles everything.
+The DEJA Server runs on your computer (or Raspberry Pi) as a native Node.js process. One command handles everything.
+
+The fastest way to get set up. Open a terminal on the machine connected to your DCC-EX Command Station and run one command — it downloads the DEJA.js server, installs dependencies, and walks you through configuration.
 
 #### Prerequisites
 
 | Requirement | Get it |
 |---|---|
-| Docker | [Install Docker](https://docs.docker.com/get-docker/) (Docker Desktop on Mac/Windows, or `apt install docker.io` on Linux/Pi) |
+| Node.js 20+ | [Install Node.js](https://nodejs.org/) (or use [nvm](https://github.com/nvm-sh/nvm)) |
 
 #### Install
 
@@ -104,20 +118,23 @@ curl -fsSL https://install.dejajs.com | bash
 ```
 
 The install script will:
-1. Check for Docker (installs on Linux if missing)
-2. Prompt for your GHCR token and account credentials (from the Install page)
-3. Detect your serial ports and configure the connection to your CommandStation
-4. Pull the DEJA Server Docker image and start it
+1. Check for Node.js 20+ (provides install instructions if missing)
+2. Prompt for your account credentials (from the Install page)
+3. Detect your serial ports for the DCC-EX CommandStation
+4. Download the DEJA Server and install dependencies
+5. Start the server
 
 **Windows**
 
-Windows users should install [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) with WSL 2 backend, then run the install command from a WSL terminal.
+Windows users should install via [WSL](https://learn.microsoft.com/en-us/windows/wsl/install), then run the install command from a WSL terminal.
+
+> Need help? See the [Install Guide](https://dejajs.com/docs/install) for detailed instructions and troubleshooting.
 
 **Verify:** The install script prints a success message with your local server URL. Open [DEJA Monitor](https://monitor.dejajs.com) — you should see the server connected.
 
 ---
 
-### 🧱 Step 5 — Register Your CommandStation
+### 🧱 Step 4 — Register Your CommandStation
 
 Tell DEJA Cloud that a DCC-EX CommandStation will connect via USB from this computer.
 
@@ -131,9 +148,9 @@ The device will appear in the list with a "disconnected" status — that is expe
 
 ---
 
-### 🖥️ Step 6 — Manage the Server
+### 🖥️ Step 5 — Manage the Server
 
-The DEJA Server runs as a Docker container. Use the `deja` CLI to manage it:
+The DEJA Server runs as a native Node.js process. Use the `deja` CLI to manage it:
 
 ```bash
 deja status    # Check server status, subscription, and serial connection
@@ -147,7 +164,7 @@ deja stop      # Stop the server
 
 ---
 
-### 🔌 Step 7 — Connect Hardware
+### 🔌 Step 6 — Connect Hardware
 
 Select the USB port for your CommandStation in the Monitor app.
 
@@ -164,7 +181,7 @@ Select the USB port for your CommandStation in the Monitor app.
 
 ---
 
-### 🚂 Step 8 — Drive Trains
+### 🚂 Step 7 — Drive Trains
 
 1. In [DEJA Cloud](https://cloud.dejajs.com), navigate to **Roster** and click **Add Loco** — enter the DCC address and a name
 2. Open [DEJA Throttle](https://throttle.dejajs.com) in any browser on your network
@@ -283,7 +300,7 @@ turbo deps:fix        # 🔧 Fix dependency mismatches
 
 ## 🧰 Production Runbook
 
-The DEJA Server runs as a Docker container with `restart: unless-stopped`, so it automatically restarts on crashes and reboots. No additional process manager (pm2) is needed.
+The DEJA Server runs as a native Node.js process managed by the `deja` CLI. Use `deja start` to launch and `deja stop` to shut down. No additional process manager (pm2) is needed.
 
 ```bash
 # Check everything is running
@@ -296,7 +313,7 @@ deja update
 deja logs
 ```
 
-Configuration files are stored in `~/.deja/` — see `~/.deja/docker-compose.yml` for the container configuration.
+Configuration files are stored in `~/.deja/` — see `~/.deja/.env` for environment configuration and `~/.deja/config.json` for account settings.
 
 ---
 

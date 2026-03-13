@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createLogger } from '@repo/utils'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import EffectForm from '@/Effects/EffectForm.vue'
 import type { Effect } from '@repo/modules'
 import { useEfx } from '@repo/modules'
@@ -43,9 +43,9 @@ function handleClose() {
 onMounted(loadEffect)
 </script>
 <template>
-  <ModuleTitle menu="Effects">
+  <PageHeader menu="Effects">
     <ListMenu :disabledMenus="['view']" :module-name="'effects'" />
-  </ModuleTitle>
+  </PageHeader>
   <div v-if="loading" class="p-6 flex justify-center">
     <v-progress-circular indeterminate color="purple" />
   </div>

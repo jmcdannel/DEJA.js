@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import type { Device } from '@repo/modules'
-import { useLayout } from '@repo/modules'
+import { useLayout, useServerStatus } from '@repo/modules'
+import { formatUptime } from '@repo/utils'
 import StatusPulse from '../animations/StatusPulse.vue'
 
 interface Props {
@@ -29,6 +30,7 @@ const emit = defineEmits<{
 }>()
 
 const { deviceTypes } = useLayout()
+const { serverStatus } = useServerStatus()
 
 const selectedPort = defineModel<string>('selectedPort', { default: '' })
 const selectedTopic = defineModel<string>('selectedTopic', { default: '' })
@@ -58,25 +60,33 @@ const deviceConfig = computed(() => {
   return deviceTypes.find((dt) => dt.value === props.device.type)
 })
 
-const isConnected = computed(() => props.device.isConnected ?? false)
+const isDejaServer = computed(() => props.device.type === 'deja-server')
+const isConnected = computed(() => {
+  if (isDejaServer.value) return serverStatus.value?.online ?? false
+  return props.device.isConnected ?? false
+})
 const isUsbDevice = computed(
   () =>
-    props.device.connection === 'usb' ||
-    props.device.type === 'dcc-ex' ||
-    props.device.type === 'deja-arduino' ||
-    props.device.type === 'deja-arduino-led'
+    !isDejaServer.value && (
+      props.device.connection === 'usb' ||
+      props.device.type === 'dcc-ex' ||
+      props.device.type === 'deja-arduino' ||
+      props.device.type === 'deja-arduino-led'
+    )
 )
 const isMqttDevice = computed(
-  () => props.device.connection === 'wifi' || props.device.type === 'deja-mqtt'
+  () => !isDejaServer.value && (props.device.connection === 'wifi' || props.device.type === 'deja-mqtt')
 )
 
 const connectionLabel = computed(() => {
+  if (isDejaServer.value) return 'Server'
   if (isUsbDevice.value) return 'USB'
   if (isMqttDevice.value) return 'WiFi'
   return 'Unknown'
 })
 
 const connectionPath = computed(() => {
+  if (isDejaServer.value) return serverStatus.value?.ip ?? ''
   if (props.device.port) return props.device.port
   if (props.device.topic) return props.device.topic
   return ''
@@ -84,16 +94,7 @@ const connectionPath = computed(() => {
 
 const uptime = computed(() => {
   if (!props.device.lastConnected || !isConnected.value) return ''
-  const now = Date.now()
-  const last =
-    props.device.lastConnected instanceof Date
-      ? props.device.lastConnected.getTime()
-      : new Date(props.device.lastConnected).getTime()
-  const diff = now - last
-  const hours = Math.floor(diff / 3_600_000)
-  const minutes = Math.floor((diff % 3_600_000) / 60_000)
-  if (hours > 0) return `${hours}h ${minutes}m`
-  return `${minutes}m`
+  return formatUptime(props.device.lastConnected)
 })
 
 function handleConnect() {
@@ -118,7 +119,7 @@ function handleConnect() {
         ? 'rgb(var(--v-theme-device-connected))'
         : 'rgb(var(--v-theme-device-disconnected))',
     }"
-    variant="tonal"
+    variant="flat"
   >
     <v-card-text class="pa-4">
       <!-- Top row: device info + status -->
@@ -193,23 +194,30 @@ function handleConnect() {
           </v-chip>
         </div>
         <div class="d-flex ga-2">
-          <v-btn
-            size="small"
-            variant="tonal"
-            color="warning"
-            @click="emit('reconnect', device.id)"
-          >
-            <v-icon start icon="mdi-refresh" />
-            Reconnect
-          </v-btn>
-          <v-btn
-            size="small"
-            variant="tonal"
-            color="error"
-            @click="emit('disconnect', device.id)"
-          >
-            Disconnect
-          </v-btn>
+          <template v-if="isDejaServer">
+            <v-chip size="small" color="success" variant="tonal" prepend-icon="mdi-ip-network">
+              {{ serverStatus?.ip }}
+            </v-chip>
+          </template>
+          <template v-else>
+            <v-btn
+              size="small"
+              variant="tonal"
+              color="warning"
+              @click="emit('reconnect', device.id)"
+            >
+              <v-icon start icon="mdi-refresh" />
+              Reconnect
+            </v-btn>
+            <v-btn
+              size="small"
+              variant="tonal"
+              color="error"
+              @click="emit('disconnect', device.id)"
+            >
+              Disconnect
+            </v-btn>
+          </template>
           <v-btn
             size="small"
             variant="tonal"
@@ -220,6 +228,22 @@ function handleConnect() {
             <v-icon end icon="mdi-arrow-right" />
           </v-btn>
         </div>
+      </div>
+
+      <!-- Disconnected: deja-server shows status only -->
+      <div v-else-if="isDejaServer" class="d-flex align-center ga-2">
+        <v-chip size="small" color="error" variant="tonal" prepend-icon="mdi-server-off">
+          Server Offline
+        </v-chip>
+        <v-btn
+          variant="tonal"
+          color="primary"
+          size="small"
+          @click="emit('navigate', device.id)"
+        >
+          Details
+          <v-icon end icon="mdi-arrow-right" />
+        </v-btn>
       </div>
 
       <!-- Disconnected: port/topic selector + connect -->
@@ -272,6 +296,13 @@ function handleConnect() {
 .device-connection-card {
   border-left: 4px solid;
   transition: border-color 0.3s ease;
+  background: rgba(15, 23, 42, 0.65) !important;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-left: 4px solid;
+}
+
+.device-connection-card .text-subtitle-1 {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .device-connection-actions {

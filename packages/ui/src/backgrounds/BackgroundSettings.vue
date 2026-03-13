@@ -40,13 +40,8 @@ function getPageSelection(path: string): string {
 </script>
 
 <template>
-  <v-card variant="outlined" class="bg-slate-900/50">
-    <v-card-title class="text-sm font-semibold flex items-center gap-2">
-      <v-icon size="20">mdi-wallpaper</v-icon>
-      Page Backgrounds
-    </v-card-title>
-
-    <v-card-text>
+  <div class="bg-settings">
+    <div>
       <!-- App-wide default -->
       <div class="mb-4">
         <div class="text-xs text-slate-400 uppercase tracking-wider mb-2 font-medium">
@@ -106,6 +101,6 @@ function getPageSelection(path: string): string {
           </v-expansion-panel-text>
         </v-expansion-panel>
       </v-expansion-panels>
-    </v-card-text>
-  </v-card>
+    </div>
+  </div>
 </template>
