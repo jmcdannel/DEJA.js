@@ -1,3 +1,4 @@
 export { default as slugify } from './slugify'
 export { createLogger, log } from './logger'
 export type { LogLevel } from './logger'
+export { default as formatUptime, toMillis } from './formatUptime'

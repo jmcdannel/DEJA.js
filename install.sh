@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # DEJA.js one-command installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.sh | bash
+# Usage: curl -fsSL https://install.dejajs.com | bash
 # Or with a custom install directory:
-#   curl -fsSL https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.sh | bash -s -- ~/my-deja
+#   curl -fsSL https://install.dejajs.com | bash -s -- ~/my-deja
 
 set -e
 
@@ -28,7 +28,7 @@ echo ""
 echo "  This script will:"
 echo "    1. Check prerequisites (Node.js v22+, Git)"
 echo "    2. Install pnpm if needed"
-echo "    3. Clone the DEJA.js repository"
+echo "    3. Download DEJA.js"
 echo "    4. Install dependencies"
 echo "    5. Create your .env.local configuration file"
 echo ""

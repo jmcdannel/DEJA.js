@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import RouteForm from '@/Routes/RouteForm.vue'
 import { routeType, type Route } from '@repo/modules'
 
@@ -21,6 +21,6 @@ function handleClose() {
 }
 </script>
 <template>
-  <ModuleTitle menu="Routes" />
+  <PageHeader menu="Routes" />
   <RouteForm :route="defaultRoute" @close="handleClose" />
 </template>
