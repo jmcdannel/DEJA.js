@@ -22,6 +22,7 @@
 - [ ] Redesign settings pages across all apps — unified settings UI for theme, connection config, user preferences, layout options
 - [ ] Update README & quickstart guide — simple 3-step getting started + advanced repo clone mode
 - [ ] Stripe subscriptions & pricing — add pricing page, update onboarding for subscriptions, support sales/discount codes
+- [ ] Dev/testing layout access — allow dev builds to connect to betatrack and/or demo layouts so apps can be tested with real data instead of empty or mock state
 
 ### Cloud App
 - [x] Device detail views (incomplete)
