@@ -136,17 +136,38 @@ setup_environment() {
   local layout_id
   layout_id=$(grep -o '"layoutId"[[:space:]]*:[[:space:]]*"[^"]*"' "${CONFIG_FILE}" | sed 's/.*"layoutId"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' 2>/dev/null)
 
-  echo ""
-  info "Enter your Firebase configuration (from https://cloud.dejajs.com → Settings → Install)"
-  echo ""
+  # Firebase client config — these are public client-side keys, safe to embed.
+  # Injected by CI at release time; placeholders here for development.
+  local fb_api_key="__FIREBASE_API_KEY__"
+  local fb_auth_domain="__FIREBASE_AUTH_DOMAIN__"
+  local fb_project_id="__FIREBASE_PROJECT_ID__"
+  local fb_database_url="__FIREBASE_DATABASE_URL__"
+  local fb_storage_bucket="__FIREBASE_STORAGE_BUCKET__"
+  local fb_messaging_id="__FIREBASE_MESSAGING_SENDER_ID__"
+  local fb_app_id="__FIREBASE_APP_ID__"
 
-  read -rp "VITE_FIREBASE_API_KEY: " fb_api_key
-  read -rp "VITE_FIREBASE_AUTH_DOMAIN: " fb_auth_domain
-  read -rp "VITE_FIREBASE_PROJECT_ID: " fb_project_id
-  read -rp "VITE_FIREBASE_DATABASE_URL: " fb_database_url
-  read -rp "VITE_FIREBASE_STORAGE_BUCKET: " fb_storage_bucket
-  read -rp "VITE_FIREBASE_MESSAGING_SENDER_ID: " fb_messaging_id
-  read -rp "VITE_FIREBASE_APP_ID: " fb_app_id
+  # If placeholders are still present (dev/unreleased build), prompt for them
+  if [ "${fb_api_key}" = "__FIREBASE_API_KEY__" ]; then
+    warn "Firebase config not embedded (development build). Prompting..."
+    echo ""
+    info "Enter your Firebase configuration (from https://cloud.dejajs.com → Settings → Install)"
+    echo ""
+    read -rp "VITE_FIREBASE_API_KEY: " fb_api_key
+    read -rp "VITE_FIREBASE_AUTH_DOMAIN: " fb_auth_domain
+    read -rp "VITE_FIREBASE_PROJECT_ID: " fb_project_id
+    read -rp "VITE_FIREBASE_DATABASE_URL: " fb_database_url
+    read -rp "VITE_FIREBASE_STORAGE_BUCKET: " fb_storage_bucket
+    read -rp "VITE_FIREBASE_MESSAGING_SENDER_ID: " fb_messaging_id
+    read -rp "VITE_FIREBASE_APP_ID: " fb_app_id
+  else
+    ok "Firebase client config embedded"
+  fi
+
+  # Service account credentials — these ARE secret and user-specific
+  echo ""
+  info "Enter your Firebase service account credentials."
+  info "Find these at: https://cloud.dejajs.com → Settings → Install"
+  echo ""
   read -rp "FIREBASE_CLIENT_EMAIL (service account): " fb_client_email
   read -rp "FIREBASE_PRIVATE_KEY (service account, paste full key): " fb_private_key
 

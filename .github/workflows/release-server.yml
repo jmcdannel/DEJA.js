@@ -74,6 +74,27 @@ jobs:
           cd apps/server/dist
           tar -czf "${GITHUB_WORKSPACE}/deja-server.tar.gz" index.js package.json version.txt
 
+      - name: Inject Firebase config into install script
+        env:
+          FB_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FB_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FB_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FB_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL }}
+          FB_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FB_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FB_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+        run: |
+          cp scripts/install.sh "${GITHUB_WORKSPACE}/install.sh"
+          sed -i \
+            -e "s|__FIREBASE_API_KEY__|${FB_API_KEY}|g" \
+            -e "s|__FIREBASE_AUTH_DOMAIN__|${FB_AUTH_DOMAIN}|g" \
+            -e "s|__FIREBASE_PROJECT_ID__|${FB_PROJECT_ID}|g" \
+            -e "s|__FIREBASE_DATABASE_URL__|${FB_DATABASE_URL}|g" \
+            -e "s|__FIREBASE_STORAGE_BUCKET__|${FB_STORAGE_BUCKET}|g" \
+            -e "s|__FIREBASE_MESSAGING_SENDER_ID__|${FB_MESSAGING_SENDER_ID}|g" \
+            -e "s|__FIREBASE_APP_ID__|${FB_APP_ID}|g" \
+            "${GITHUB_WORKSPACE}/install.sh"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -81,4 +102,4 @@ jobs:
           files: |
             deja-server.tar.gz
             scripts/deja
-            scripts/install.sh
+            install.sh
