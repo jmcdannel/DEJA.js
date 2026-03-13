@@ -1,6 +1,7 @@
 # DEJA.js Roadmap
 
 ## P0 — Critical / Production Blockers
+- [ ] Set up install.dejajs.com — configure DNS for the installer script endpoint
 - [x] Offline/disconnection handling with retry
 - [x] Server reconnection logic — serial, Firebase, MQTT auto-reconnect with backoff
 - [x] Graceful server shutdown (clean up Firebase listeners, serial ports, WebSocket connections)
