@@ -13,7 +13,7 @@ LOG_FILE="${LOG_DIR}/server.log"
 VERSION_FILE="${SERVER_DIR}/version.txt"
 CONFIG_FILE="${DEJA_DIR}/config.json"
 ENV_FILE="${DEJA_DIR}/.env"
-ENTRY="${SERVER_DIR}/dist/index.js"
+ENTRY="${SERVER_DIR}/index.js"
 GITHUB_REPO="jmcdannel/DEJA.js"
 
 # Max log file size before rotation (10MB)
