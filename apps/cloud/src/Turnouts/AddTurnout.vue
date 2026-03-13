@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import TurnoutForm from '@/Turnouts/TurnoutForm.vue'
 
 const router = useRouter()
@@ -10,6 +10,6 @@ function handleClose() {
 }
 </script>
 <template>
-  <ModuleTitle menu="Turnouts" />
+  <PageHeader menu="Turnouts" />
   <TurnoutForm :turnout="null" @close="handleClose" />
 </template>

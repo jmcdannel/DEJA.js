@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createLogger } from '@repo/utils'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import SensorForm from '@/Sensors/SensorForm.vue'
 import type { Sensor } from '@repo/modules/sensors'
 import { useSensors } from '@repo/modules/sensors'
@@ -45,7 +45,7 @@ function handleClose() {
 onMounted(loadSensor)
 </script>
 <template>
-  <ModuleTitle menu="Sensors" color="teal" />
+  <PageHeader menu="Sensors" />
   <div v-if="loading" class="p-6 flex justify-center">
     <v-progress-circular indeterminate color="teal" />
   </div>

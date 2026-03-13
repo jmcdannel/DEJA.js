@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import os from 'node:os'
 import { db, rtdb } from '@repo/firebase-config/firebase-admin-node'
 import type { Effect } from '@repo/modules'
 import { dejaEmitter, type BroadcastMessage } from './broadcast'
@@ -18,6 +19,12 @@ import { wsServer } from './lib/ws-server'
 import { startDeviceConfigSync, stopDeviceConfigSync } from './modules/sync-config'
 
 const layoutId = process.env.LAYOUT_ID || 'betatrack'
+
+function getLocalIp(): string | undefined {
+  const interfaces = os.networkInterfaces()
+  return interfaces?.['en0']?.find(d => d.family === 'IPv4')?.address
+    || interfaces?.['en1']?.find(d => d.family === 'IPv4')?.address
+}
 const serverStatusRef = rtdb.ref(`serverStatus/${layoutId}`)
 
 // Reconnect manager for Firebase listener recovery
@@ -97,6 +104,7 @@ function monitorConnectivity(): void {
         online: true,
         lastSeen: { '.sv': 'timestamp' },
         version: process.env.npm_package_version || 'unknown',
+        ip: getLocalIp() || null,
       }).catch((err: Error) => {
         log.error('[FIREBASE] Failed to update server status:', err.message)
       })
@@ -306,7 +314,8 @@ export async function connect(): Promise<boolean> {
       lastSeen: {
         '.sv': 'timestamp'
       },
-      version: process.env.npm_package_version || 'unknown'
+      version: process.env.npm_package_version || 'unknown',
+      ip: getLocalIp() || null,
     })
 
     log.success('Connected to DejaCloud', layoutId)

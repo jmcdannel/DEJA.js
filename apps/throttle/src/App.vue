@@ -40,7 +40,7 @@ onUnmounted(() => {
 const mainContentRef = useTemplateRef('mainContentRef')
 usePageSwipe(mainContentRef as any, { disabledRoutes: ['throttle'] })
 
-const { isDark } = useThemeSwitcher()
+const { isDark, themePreference } = useThemeSwitcher()
 
 const throttleDefaults: AppBackgroundPrefs = {
   default: 'none',
@@ -59,7 +59,7 @@ const throttleDefaults: AppBackgroundPrefs = {
 
 <template>
   <v-responsive class="min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
-    <v-app :theme="isDark ? 'dark' : 'light'" class="!bg-transparent">
+    <v-app :theme="themePreference" class="!bg-transparent">
       <PageBackground app-name="throttle" :defaults="throttleDefaults">
         <AppHeader
           app-name="Throttle"

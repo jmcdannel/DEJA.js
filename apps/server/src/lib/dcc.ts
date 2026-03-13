@@ -1,5 +1,6 @@
 import { SerialPort } from 'serialport'
 import { FieldValue } from 'firebase-admin/firestore'
+import { ServerValue } from 'firebase-admin/database'
 import { rtdb, db } from '@repo/firebase-config/firebase-admin-node'
 import { serial } from './serial'
 import { broadcast } from '../broadcast'
@@ -97,6 +98,28 @@ async function writePowerToFirestore(data: string): Promise<void> {
   }
 }
 
+/**
+ * Write a log entry to the dccLog RTDB path for cloud app consumption.
+ * Uses ServerValue.TIMESTAMP so entries are ordered by server time.
+ */
+async function writeDccLog(
+  type: 'cmd-out' | 'cmd-in' | 'info' | 'error' | 'system',
+  message: string
+): Promise<void> {
+  try {
+    if (!layoutId) return
+    const logRef = rtdb.ref(`dccLog/${layoutId}`)
+    await logRef.push({
+      type,
+      message,
+      timestamp: ServerValue.TIMESTAMP,
+    })
+  } catch (err) {
+    // Log locally but don't throw — logging failures must not break command flow
+    log.error('[DCC] Failed to write dccLog entry:', err)
+  }
+}
+
 const handleMessage = async (msg: string): Promise<void> => {
   try {
     const { action, payload } = JSON.parse(msg)
@@ -154,6 +177,7 @@ const send = async (data: string): Promise<void> => {
     if (com.port) {
       serial.send(com.port, cmd)
       broadcast({ action: 'dcc', payload: data })
+      await writeDccLog('cmd-out', data)
       if (isPowerCommand(data)) {
         // Optimistically reflect requested power state in Firestore
         await writePowerToFirestore(data)
@@ -181,6 +205,7 @@ const connect = async (payload: ConnectCommand): Promise<boolean> => {
       action: 'connected',
       payload: { baudRate, device, path },
     })
+    await writeDccLog('system', `Connected to ${path} (baud: ${baudRate})`)
     isConnected = true
     if (port) {
       com = { isConnected, port }
@@ -188,6 +213,7 @@ const connect = async (payload: ConnectCommand): Promise<boolean> => {
     return isConnected
   } catch (err) {
     log.fatal('Error opening port: ', err)
+    await writeDccLog('error', `Connection failed: ${(err as Error).message}`)
     return false
   }
 }
@@ -323,6 +349,13 @@ export async function handleDccChange(snapshot: any, key: string): Promise<void>
     }
   }
 }
+
+// Register serial data listener to log incoming responses to RTDB
+serial.addDataListener((data: string) => {
+  // Don't log sensor JSON data — it's high-frequency noise
+  if (data.startsWith('{ "sensor')) return
+  writeDccLog('cmd-in', data)
+})
 
 export const dcc = {
   dccSerial: com,

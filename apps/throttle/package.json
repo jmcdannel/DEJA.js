@@ -29,6 +29,7 @@
     "@sentry/vue": "^8.0.0",
     "@spryrocks/capacitor-socket-connection-plugin": "^6.3.0",
     "@tailwindcss/container-queries": "^0.1.1",
+    "@vercel/analytics": "^1.6.1",
     "dayjs": "^1.11.13",
     "firebase": "^10.14.1",
     "mqtt-vue-hook": "^1.2.20",
