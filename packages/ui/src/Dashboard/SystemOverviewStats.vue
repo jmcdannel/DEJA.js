@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { ServerStatus } from '@repo/modules'
+import { formatUptime } from '@repo/utils'
 
 interface Props {
   serverStatus: ServerStatus | null
@@ -13,15 +14,7 @@ const props = defineProps<Props>()
 
 const serverUptime = computed(() => {
   if (!props.serverStatus?.online || !props.serverStatus?.lastSeen) return ''
-  const now = Date.now()
-  const last = typeof props.serverStatus.lastSeen === 'number'
-    ? props.serverStatus.lastSeen
-    : new Date(props.serverStatus.lastSeen).getTime()
-  const diff = now - last
-  const hours = Math.floor(diff / 3_600_000)
-  const minutes = Math.floor((diff % 3_600_000) / 60_000)
-  if (hours > 0) return `${hours}h ${minutes}m`
-  return `${minutes}m`
+  return formatUptime(props.serverStatus.lastSeen)
 })
 </script>
 

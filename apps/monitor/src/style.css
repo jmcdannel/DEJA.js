@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Override Vuetify's v-responsive overflow to allow position: sticky inside */
+.v-responsive {
+  overflow: visible !important;
+}
+
 [data-app] {
   font-family: 'Roboto Mono', 'Roboto', 'Segoe UI', sans-serif;
 }
@@ -586,6 +591,12 @@ body {
 .monitor-status-bar__clock {
   font-weight: 600;
   color: rgba(var(--v-theme-on-surface), 0.6);
+}
+
+.monitor-status-bar__divider {
+  width: 1px;
+  height: 14px;
+  background: rgba(148, 163, 184, 0.2);
 }
 
 /* ==========================================================================

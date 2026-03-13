@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSensors, sensorActionTypes, type Automation, type AutomationAction } from '@repo/modules/sensors'
 import { createLogger } from '@repo/utils'
 import { useNotification } from '@repo/ui'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 
 const log = createLogger('AutomationForm')
 
@@ -136,7 +136,7 @@ onMounted(loadAutomation)
 </script>
 
 <template>
-  <ModuleTitle menu="Sensors" color="teal" />
+  <PageHeader menu="Sensors" />
   <div v-if="loadingData" class="p-6 flex justify-center">
     <v-progress-circular indeterminate color="teal" />
   </div>

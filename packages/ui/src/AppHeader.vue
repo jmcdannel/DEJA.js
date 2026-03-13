@@ -10,7 +10,6 @@ import TrackPower from './TrackPower.vue'
 import Power from './Power.vue'
 import EmergencyStop from './EmergencyStop.vue'
 import SelectLayout from './SelectLayout.vue'
-import ThemeSwitcher from './ThemeSwitcher.vue'
 import { useLayout, useServerStatus } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
 import { createLogger } from '@repo/utils'
@@ -155,12 +154,12 @@ const defaultProps = {
       <v-app-bar-nav-icon variant="text" @click.stop="handleDrawerToggle" class="!h-10 !w-10 ml-4"></v-app-bar-nav-icon>
     </template>
     <template v-slot:title>
-      <Logo 
-        :app-name="appName || defaultProps.appName"
-        :app-icon="appIcon || defaultProps.appIcon"
-        :app-color="color || defaultProps.color"
+      <Logo
+        :size="mdAndUp ? 'md' : 'sm'"
+        :app-title="appName || defaultProps.appName"
         :variant="variant || defaultProps.variant"
         @click="handleLogoClick"
+        class="cursor-pointer"
       />
     </template>
     <slot></slot>
@@ -198,7 +197,6 @@ const defaultProps = {
 
         <v-spacer class="ma-2"></v-spacer>
       </template>
-      <ThemeSwitcher class="mx-2" />
       <UserProfile v-if="showUserProfile !== false && user" class="mx-2" />
       <template v-if="layoutId && user">
         <TrackPower class="ma-1" :power-state="layoutPowerState" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
