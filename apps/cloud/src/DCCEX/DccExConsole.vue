@@ -62,7 +62,7 @@ const version = computed(() => layoutDoc.value?.dccEx?.version ?? '')
 }
 
 .dccex-console-cheatsheet {
-  grid-column: 1 / -1;
+  grid-column: 1 / 2;
 }
 
 /* Responsive: stack on narrow viewports */

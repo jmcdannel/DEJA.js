@@ -65,7 +65,10 @@ const sections: CheatEntry[][] = [
 
     <!-- Parameter legend -->
     <div class="cheatsheet-legend">
-      a=addr s=speed/state d=dir f=func i=idx p=pin cv=CV#
+      <div>a=addr s=speed/state d=dir f=func i=idx p=pin cv=CV#</div>
+      <a href="https://dcc-ex.com/reference/software/command-reference.html" target="_blank" rel="noopener noreferrer" class="cheatsheet-link">
+        DCC-EX Command Reference <v-icon size="10">mdi-open-in-new</v-icon>
+      </a>
     </div>
   </div>
 </template>
@@ -133,5 +136,22 @@ const sections: CheatEntry[][] = [
   font-size: 9px;
   color: #475569;
   font-style: italic;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.cheatsheet-link {
+  color: #38bdf8;
+  text-decoration: none;
+  font-style: normal;
+  font-size: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.cheatsheet-link:hover {
+  text-decoration: underline;
 }
 </style>
