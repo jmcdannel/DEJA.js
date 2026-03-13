@@ -147,7 +147,7 @@ setup_environment() {
   local fb_app_id="__FIREBASE_APP_ID__"
 
   # If placeholders are still present (dev/unreleased build), prompt for them
-  if [ "${fb_api_key}" = "__FIREBASE_API_KEY__" ]; then
+  if [[ "${fb_api_key}" == __* ]]; then
     warn "Firebase config not embedded (development build). Prompting..."
     echo ""
     info "Enter your Firebase configuration (from https://cloud.dejajs.com → Settings → Install)"
