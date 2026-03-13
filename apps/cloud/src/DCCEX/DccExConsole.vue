@@ -36,8 +36,10 @@ const version = computed(() => layoutDoc.value?.dccEx?.version ?? '')
     <!-- Right: Sidebar -->
     <div class="dccex-console-sidebar">
       <CommandGrid />
-      <CommandCheatSheet />
     </div>
+
+    <!-- Full-width: Cheat Sheet -->
+    <CommandCheatSheet class="dccex-console-cheatsheet" />
   </div>
 </template>
 
@@ -57,6 +59,10 @@ const version = computed(() => layoutDoc.value?.dccEx?.version ?? '')
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.dccex-console-cheatsheet {
+  grid-column: 1 / -1;
 }
 
 /* Responsive: stack on narrow viewports */
