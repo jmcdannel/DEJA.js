@@ -1,0 +1,19 @@
+# .dockerignore (repo root)
+# Ignore everything not needed for the server Docker build
+.git
+.github
+docs
+io
+apps/cloud
+apps/monitor
+apps/throttle
+apps/tour
+apps/sound-api
+**/node_modules
+**/dist
+**/.env
+**/.env.local
+**/*.test.ts
+**/vitest.config.ts
+.changeset
+.claude
