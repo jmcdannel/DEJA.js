@@ -34,6 +34,7 @@
 ### Monitor App
 - [x] Enable auto-clear
 - [x] Refactor to optimize
+- [ ] Cloud-hosted monitor — deploy monitor app to Vercel, switch serial/system logging to Firebase RTDB so real-time data is accessible remotely without running locally. Use WebSocket as fallback only. Use Cloudflare Tunnel if needed to expose local server to the hosted app.
 
 ## P2 — Feature Development
 - [ ] Refine themes — polish Vuetify/Tailwind theming across all apps (dark/light mode, color palettes, consistent branding, typography)
