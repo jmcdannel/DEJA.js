@@ -6,6 +6,7 @@ import { subscribeRoute } from './routes/subscribe'
 import { webhookRoute } from './routes/webhook'
 import { billingPortalRoute } from './routes/billing-portal'
 import { changePlanRoute } from './routes/change-plan'
+import { cleanupLogsRoute } from './routes/cleanup-logs'
 
 const app = new Hono()
 
@@ -23,6 +24,7 @@ app.route('/api', subscribeRoute)
 app.route('/api', webhookRoute)
 app.route('/api', billingPortalRoute)
 app.route('/api', changePlanRoute)
+app.route('/api', cleanupLogsRoute)
 
 app.get('/api/health', (c) => c.json({ status: 'ok' }))
 
