@@ -125,8 +125,9 @@ pnpm deps:fix         # syncpack: fix mismatches
 1. **Plan before coding** — Use Plan Mode (Shift+Tab twice) for non-trivial changes
 2. **Lint and type-check before committing** — run `pnpm lint && pnpm check-types`
 3. **Use the `/verify-changes` slash command** to confirm nothing is broken
-4. **Create a changeset entry** — run `/changelog` before opening a PR (see below)
-5. **Use the `/commit-push-pr` slash command** to commit, push, and open a PR
+4. **Update docs if UI changed** — run `/update-docs` to capture screenshots and update MDX docs
+5. **Create a changeset entry** — run `/changelog` before opening a PR (see below)
+6. **Use the `/commit-push-pr` slash command** to commit, push, and open a PR
 
 ### Changeset Requirement (MANDATORY)
 
@@ -140,6 +141,24 @@ To create a changeset:
 **When to create the changeset:** After your code changes are done, before committing/pushing the PR. The `/commit-push-pr` command should always be preceded by `/changelog`.
 
 **What if there are no user-facing changes?** Still create a changeset — use `patch` bump and describe the internal change (e.g., `changed: **[docs]** Update README`, `improved: **[ci]** Add caching to build workflow`).
+
+### Screenshot & Documentation Updates
+
+When UI changes are made, update screenshots and MDX docs:
+
+- Run `/capture-screenshots [app]` to capture fresh screenshots of app views
+- Run `/update-docs` to auto-detect changed apps, capture screenshots, and update MDX docs
+- The CI `docs-check` workflow will post a reminder on PRs that change UI files without updating docs
+
+**Screenshots** are saved to `apps/dejajs-www/public/screenshots/` using the naming convention `{app}_{desktop|mobile}_{view-name}.png`.
+
+**MDX docs** live in `docs/apps/{app}/overview.mdx` and are synced to the `dejajs-www` docs site at build time.
+
+**Dev auto-login:** Set `VITE_DEV_AUTO_LOGIN=true` in `.env` to bypass auth guards during screenshot capture. Only works in dev mode.
+
+**Test user login:** Alternatively, set `CLAUDE_TEST_EMAIL` and `CLAUDE_TEST_PASSWORD` in `.env` for realistic email/password login during automated testing.
+
+**Worktree env setup:** Git worktrees don't inherit `.env`. Symlink it: `ln -sf /path/to/DEJA.js/.env .env`
 
 ---
 
@@ -191,6 +210,9 @@ Copy `.env.example` to `.env` at the root. Key variables:
 | `ENABLE_MQTT` | Toggle MQTT communication |
 | `ENABLE_WS` | Toggle WebSocket communication |
 | `VITE_WS_PORT` | WebSocket server port (default: `8082`) |
+| `VITE_DEV_AUTO_LOGIN` | Bypass auth guards in dev mode (for screenshots) |
+| `CLAUDE_TEST_EMAIL` | Test user email for automated login |
+| `CLAUDE_TEST_PASSWORD` | Test user password for automated login |
 
 App-specific env files go in `apps/<app>/.env.local`.
 

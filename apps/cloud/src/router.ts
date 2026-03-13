@@ -353,6 +353,11 @@ router.beforeEach(async (to) => {
   try {
     const { meta } = to
 
+    // Dev auto-login bypass for automated screenshot capture
+    if (import.meta.env.DEV && import.meta.env.VITE_DEV_AUTO_LOGIN === 'true') {
+      return
+    }
+
     // Resolve Firebase auth state once for the entire guard chain.
     const currentUser = await getCurrentUser()
 
