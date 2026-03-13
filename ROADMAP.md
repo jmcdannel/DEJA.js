@@ -7,20 +7,27 @@
 - [ ] MQTT exponential backoff reconnection
 
 ## P1 — Core UX & Stability
+- [ ] Add missing Firebase auth providers — Google, GitHub, Apple sign-in
+- [ ] Redesign login / signup pages — modern split-layout, better visual hierarchy, social auth prominent
 - [ ] Make login / layout select flow better
 - [ ] Guest Mode / Demo Mode
 - [ ] Fix guard chain race conditions in cloud app router
+- [ ] Sync device statuses across all apps — ensure connect/disconnect events write to Firebase so status updates propagate to cloud, monitor, throttle in real-time
 - [ ] Command deduplication / timeout / acknowledgment tracking
 - [ ] Log level configuration
 - [ ] Refactor broadcast.ts to use event emitter
 - [ ] Signal initialization
 - [ ] Refactor turnout commands
+- [ ] WiThrottle protocol support — implement WiThrottle server so JMRI-compatible throttle apps can connect to DEJA.js
+- [ ] Redesign settings pages across all apps — unified settings UI for theme, connection config, user preferences, layout options
+- [ ] Update README & quickstart guide — simple 3-step getting started + advanced repo clone mode
+- [ ] Stripe subscriptions & pricing — add pricing page, update onboarding for subscriptions, support sales/discount codes
 
 ### Cloud App
 - [ ] Device detail views (incomplete)
-- [ ] Settings page
 - [ ] Rename "layout" to "devices" in Cloud
 - [ ] Update DCC-EX page on cloud app
+- [ ] Redesign cloud 404 page — current one is ugly
 - [ ] Test connection button on cloud home
 - [ ] Drag-to-reorder persistence for effects/turnouts
 
@@ -29,6 +36,7 @@
 - [ ] Refactor to optimize
 
 ## P2 — Feature Development
+- [ ] Refine themes — polish Vuetify/Tailwind theming across all apps (dark/light mode, color palettes, consistent branding, typography)
 - [ ] CV/Decoder Programming — read/write CVs from the browser (service track + POM)
 - [ ] Store roster on DCC-EX command station (sync with DEJA cloud)
 - [ ] Visual Automation Builder — drag-and-drop automation sequences (DEJA's answer to EX-RAIL/Logix)
@@ -56,6 +64,17 @@
 - [ ] Improve sound UI & features
 - [ ] Play intro
 - [ ] Guest user management
+
+### dejajs.com Website
+- [ ] Architecture diagrams — SVG-based graphics showing common scenarios (use MDI icons from https://pictogrammers.com/library/mdi/)
+      - DEJA Cloud → DCC-EX CommandStation → Track
+      - Throttle App → Firebase → Server → Serial → DCC-EX
+      - Multi-device setup (Arduino LED + Pico W MQTT + DCC-EX)
+      - Tour App guest flow
+- [ ] Pricing page with Stripe integration
+
+### IO / Firmware
+- [x] Finalize io package builds — generate device config files into `dist/{layoutId}/` per device
 
 ## P3 — Hardware & Platform Expansion
 - [ ] Multi-command-station support — connect to multiple DCC-EX stations simultaneously
