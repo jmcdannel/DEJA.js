@@ -39,6 +39,15 @@ apps/cloud/api/
 - No extra framework needed (no Hono, no Express)
 - The server app (PM2) can't host serverless functions; it runs on local hardware with serial connections
 
+**Note:** These are raw `@vercel/node` serverless functions, NOT Hono routes. The billing-api uses Hono (`c.req.header()`, `c.json()`), but these endpoints use the standard Vercel handler signature:
+
+```typescript
+import type { VercelRequest, VercelResponse } from '@vercel/node'
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // ...
+}
+```
+
 ### Why Not a Status/Connection Endpoint
 
 Firebase is the source of truth for device connection status (`serverStatus/{layoutId}`, `layouts/{layoutId}/devices`). The Vue apps use VueFire for reactive bindings, so the UI already updates automatically when status changes. A REST endpoint would be redundant.
@@ -75,6 +84,7 @@ Authorization: Bearer <CRON_SECRET>
 
 **Error responses:**
 - `401` — Missing or invalid bearer token
+- `405` — Method not allowed (only POST accepted)
 - `500` — `CRON_SECRET` not configured, or cleanup failed
 
 **Cron schedule:** Daily at 3:00 AM UTC (configured in `vercel.json`).
@@ -109,6 +119,7 @@ Authorization: Bearer <CRON_SECRET>
 
 **Error responses:**
 - `401` — Missing or invalid bearer token
+- `405` — Method not allowed (only GET accepted)
 - `500` — Diagnostics fetch failed
 
 ---
@@ -117,20 +128,52 @@ Authorization: Bearer <CRON_SECRET>
 
 ### `api/lib/verifyAuth.ts`
 
-Extracts and validates the `CRON_SECRET` bearer token from the `Authorization` header. Returns an error response if invalid, or `null` if valid (allowing the handler to proceed).
+Validates the `CRON_SECRET` bearer token. Returns `{ valid: true }` or `{ valid: false, status, message }`. Each handler checks the result and sends the appropriate error response if invalid.
 
 ```typescript
-// Usage in endpoint:
-const authError = verifyAuth(req)
-if (authError) return authError
+import type { VercelRequest } from '@vercel/node'
+
+interface AuthResult {
+  valid: boolean
+  status?: number
+  message?: string
+}
+
+export function verifyAuth(req: VercelRequest): AuthResult {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) return { valid: false, status: 500, message: 'CRON_SECRET not configured' }
+
+  const header = req.headers.authorization
+  if (!header?.startsWith('Bearer ') || header.slice(7) !== cronSecret) {
+    return { valid: false, status: 401, message: 'Unauthorized' }
+  }
+  return { valid: true }
+}
 ```
 
 ### `api/lib/firebase.ts`
 
-Initializes Firebase Admin SDK with RTDB support. Same pattern as `apps/billing-api/src/lib/firebase.ts`:
-- Uses `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `VITE_FIREBASE_PROJECT_ID` env vars
-- Exports `db` (Firestore), `rtdb` (Realtime Database)
-- Guards against double-initialization with `getApps()` check
+Initializes Firebase Admin SDK with RTDB support. Exports `rtdb` for Realtime Database access.
+
+```typescript
+import { initializeApp, cert, getApps } from 'firebase-admin/app'
+import { getDatabase } from 'firebase-admin/database'
+
+const serviceAccount = {
+  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+  privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+}
+
+const databaseURL = process.env.VITE_FIREBASE_DATABASE_URL
+  || `https://${process.env.VITE_FIREBASE_PROJECT_ID || 'demo'}-default-rtdb.firebaseio.com`
+
+if (!getApps().length) {
+  initializeApp({ credential: cert(serviceAccount), databaseURL })
+}
+
+export const rtdb = getDatabase()
+```
 
 ---
 
@@ -151,10 +194,10 @@ Initializes Firebase Admin SDK with RTDB support. Same pattern as `apps/billing-
 
 ### Add to `apps/cloud`
 
-- `firebase-admin` as a dependency in `package.json`
+- `firebase-admin` in `dependencies` (not `devDependencies` — serverless functions need it at runtime)
 - `CRON_SECRET` in `.env.example`
 - `api/` directory with endpoints and shared libs
-- Cron config in `vercel.json`
+- Cron config in `vercel.json` (merged with existing config, preserving the `env` block)
 
 ### Changeset
 
@@ -176,12 +219,17 @@ Update the existing `.changeset/rtdb-log-cleanup.md` to reflect the move from bi
 
 ### Vercel Config (`apps/cloud/vercel.json`)
 
+The existing `env` and `rewrites` blocks are preserved. Only the `crons` key is added:
+
 ```json
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/" }
   ],
+  "env": {
+    "BLOB_READ_WRITE_TOKEN": "vercel_blob_rw_xNDOZJM68szqABqe_KEdeLVsr36pBcvelnNxQX8gjJzBEFV"
+  },
   "crons": [
     { "path": "/api/cleanup-logs", "schedule": "0 3 * * *" }
   ]
