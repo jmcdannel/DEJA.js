@@ -28,9 +28,8 @@ export default defineConfig({
       '@repo/deja',
       '@repo/utils',
       '@repo/ui',
-      '@repo/auth'
     ],
-    exclude: ['dotenv']
+    exclude: ['dotenv', '@repo/auth']
   },
   build: {
     commonjsOptions: {
