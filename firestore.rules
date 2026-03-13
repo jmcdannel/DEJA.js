@@ -75,9 +75,15 @@ service cloud.firestore {
       }
     }
 
-    // User preferences (backgrounds, settings) — each user owns their doc
+    // User preferences (backgrounds, settings, subscription) — each user owns their doc
     match /users/{userId} {
       allow read, write: if isAuth() && request.auth.uid == userId;
+    }
+
+    // Approval requests — authenticated users can create/read their own
+    match /approvalRequests/{layoutId} {
+      allow read: if isAuth();
+      allow create, update: if isAuth();
     }
 
     // Test effects collection (for sound testing)

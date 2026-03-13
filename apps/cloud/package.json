@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@sentry/vue": "^8.0.0",
+    "@stripe/stripe-js": "^8.9.0",
     "@vercel/blob": "^1.1.1",
     "@vercel/node": "^5.3.12",
     "dayjs": "^1.11.13",
@@ -27,6 +28,7 @@
     "vuetify": "^3.7.3"
   },
   "devDependencies": {
+    "@formkit/auto-animate": "^0.8.2",
     "@mdi/font": "^7.4.47",
     "@repo/auth": "workspace:^0.0.0",
     "@repo/dccex": "workspace:*",
@@ -41,7 +43,6 @@
     "@repo/utils": "workspace:*",
     "@vitejs/plugin-vue": "^4.4.0",
     "@vue/tsconfig": "^0.7.0",
-    "@formkit/auto-animate": "^0.8.2",
     "@vueuse/core": "^11.0.3",
     "@vueuse/motion": "^2.2.6",
     "@vueuse/sound": "^2.0.1",
