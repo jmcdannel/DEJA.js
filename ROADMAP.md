@@ -1,21 +1,21 @@
 # DEJA.js Roadmap
 
 ## P0 — Critical / Production Blockers
-- [ ] Offline/disconnection handling with retry
-- [ ] Server reconnection logic — serial, Firebase, MQTT auto-reconnect with backoff
-- [ ] Graceful server shutdown (clean up Firebase listeners, serial ports, WebSocket connections)
-- [ ] MQTT exponential backoff reconnection
+- [x] Offline/disconnection handling with retry
+- [x] Server reconnection logic — serial, Firebase, MQTT auto-reconnect with backoff
+- [x] Graceful server shutdown (clean up Firebase listeners, serial ports, WebSocket connections)
+- [x] MQTT exponential backoff reconnection
 
 ## P1 — Core UX & Stability
 - [ ] Add missing Firebase auth providers — Google, GitHub, Apple sign-in
 - [ ] Redesign login / signup pages — modern split-layout, better visual hierarchy, social auth prominent
-- [ ] Make login / layout select flow better
+- [x] Make login / layout select flow better
 - [ ] Guest Mode / Demo Mode
-- [ ] Fix guard chain race conditions in cloud app router
+- [x] Fix guard chain race conditions in cloud app router
 - [ ] Sync device statuses across all apps — ensure connect/disconnect events write to Firebase so status updates propagate to cloud, monitor, throttle in real-time
-- [ ] Command deduplication / timeout / acknowledgment tracking
-- [ ] Log level configuration
-- [ ] Refactor broadcast.ts to use event emitter
+- [x] Command deduplication / timeout / acknowledgment tracking
+- [x] Log level configuration
+- [x] Refactor broadcast.ts to use event emitter
 - [ ] Signal initialization
 - [ ] Refactor turnout commands
 - [ ] WiThrottle protocol support — implement WiThrottle server so JMRI-compatible throttle apps can connect to DEJA.js
@@ -24,20 +24,20 @@
 - [ ] Stripe subscriptions & pricing — add pricing page, update onboarding for subscriptions, support sales/discount codes
 
 ### Cloud App
-- [ ] Device detail views (incomplete)
-- [ ] Rename "layout" to "devices" in Cloud
+- [x] Device detail views (incomplete)
+- [x] Rename "layout" to "devices" in Cloud
 - [ ] Update DCC-EX page on cloud app
 - [ ] Redesign cloud 404 page — current one is ugly
 - [ ] Test connection button on cloud home
 - [ ] Drag-to-reorder persistence for effects/turnouts
 
 ### Monitor App
-- [ ] Enable auto-clear
-- [ ] Refactor to optimize
+- [x] Enable auto-clear
+- [x] Refactor to optimize
 
 ## P2 — Feature Development
 - [ ] Refine themes — polish Vuetify/Tailwind theming across all apps (dark/light mode, color palettes, consistent branding, typography)
-- [ ] CV/Decoder Programming — read/write CVs from the browser (service track + POM)
+- [x] CV/Decoder Programming — read/write CVs from the browser (service track + POM)
 - [ ] Store roster on DCC-EX command station (sync with DEJA cloud)
 - [ ] EXRAIL Automation Studio — visual EXRAIL script editor in the cloud app for building and uploading automation sequences to DCC-EX
 - [ ] Visual Automation Builder — drag-and-drop automation sequences (DEJA's answer to EX-RAIL/Logix)
@@ -47,7 +47,7 @@
 - [ ] AI Conductor — LLM-powered train dispatcher that manages traffic, signals, and routing
       - "Run the evening commuter schedule" → AI sets routes, signals, and drives trains
       - Collision avoidance via block occupancy + reservation system
-- [ ] Track Diagram Editor — draw your layout in the browser (tracks, turnouts, signals, blocks)
+- [x] Track Diagram Editor — draw your layout in the browser (tracks, turnouts, signals, blocks)
       - Real-time state overlay (turnout positions, block occupancy, signal aspects)
       - Click-to-control (throw turnouts, set routes, dispatch trains)
 - [ ] Operations Mode — car routing, switch lists, manifests (like JMRI OperationsPro)

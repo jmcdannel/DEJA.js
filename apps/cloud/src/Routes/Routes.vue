@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Route } from '@repo/modules'
 import { useRouter } from 'vue-router'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import RoutesList from '@/Routes/RoutesList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 
@@ -17,7 +17,7 @@ function handleAdd() {
 
 </script>
 <template>
-  <ModuleTitle menu="Routes" />
+  <PageHeader menu="Routes" />
   <RoutesList @edit="handleEdit">
     <template #prepend>
       <AddTile @click="handleAdd" color="purple" />

@@ -60,26 +60,38 @@ The **DEJA Server** is the only piece you install locally. It bridges your Comma
 
 ---
 
-### 👤 Step 1 — Create Your Account
+### 👤 Step 1 — Sign Up & Choose a Plan
 
-You need a DEJA.js account before anything else — your account provides the layout configuration and Firebase credentials required to run the system locally.
+Create your free DEJA Cloud account and pick a tier. It takes one click.
 
-1. Go to [DEJA Cloud](https://cloud.dejajs.com/signup) and create an account (email/password, Google, or GitHub)
-2. Your account will be **pending approval** — you'll see a "Pending Approval" page after signing up
-3. Once an admin approves your account, you'll be redirected to the **onboarding wizard**
+1. Go to [DEJA Cloud](https://cloud.dejajs.com) and click **Sign Up** (Google, GitHub, or email)
+2. The onboarding wizard starts automatically — **Choose a Plan**:
+
+| | Hobbyist | Engineer | Conductor |
+|---|---|---|---|
+| **Price** | Free | $7/mo or $67/yr | $18/mo or $173/yr |
+| **Locomotives** | 5 | 25 | Unlimited |
+| **Layouts** | 1 | 2 | Unlimited |
+| **Turnouts / Signals / Effects** | — | 15 each | Unlimited |
+
+- **Hobbyist** is completely free — no credit card required.
+- Paid plans include a **14-day free trial** — no charge until the trial ends.
+
+3. If you chose Engineer or Conductor, enter your card details to start the free trial
+
+**Verify:** You're signed in to DEJA Cloud.
 
 ---
 
-### 🧭 Step 2 — Complete Onboarding
+### 🧭 Step 2 — Register Your Layout
 
-After your account is approved, the onboarding wizard walks you through initial setup:
+Give your layout a name and a unique ID (lowercase letters, numbers, and hyphens only). This scopes all your data — locomotives, turnouts, effects, and commands.
 
-1. **Welcome** — overview of the system
-2. **Create Layout** — give your layout a name and ID (lowercase letters, numbers, and hyphens only)
-3. **Environment Setup** — this page shows your `LAYOUT_ID` and all `VITE_FIREBASE_*` credentials. **Copy these values** — you'll need them in Step 4
-4. **Completion** — you're ready to go
+After this step the wizard shows your `LAYOUT_ID` and all `VITE_FIREBASE_*` credentials. **Copy these values** — you'll need them in Step 4.
 
-**Verify:** You can log in to [DEJA Cloud](https://cloud.dejajs.com) and see your layout dashboard.
+> You can find these credentials later in [DEJA Cloud](https://cloud.dejajs.com) under **Settings > View Local Environment Configuration**.
+
+**Verify:** You can see your layout dashboard in [DEJA Cloud](https://cloud.dejajs.com).
 
 ---
 
@@ -87,35 +99,23 @@ After your account is approved, the onboarding wizard walks you through initial 
 
 #### ⚡ Quick Install
 
-The fastest way to get set up. Open a terminal and run one command — it checks your prerequisites, clones the repo, installs dependencies, and walks you through configuration.
+The fastest way to get set up. Open a terminal on the machine connected to your DCC-EX Command Station and run one command — it downloads the DEJA.js server, installs dependencies, and walks you through configuration.
 
 **macOS / Linux**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.sh | bash
+curl -fsSL https://install.dejajs.com | bash
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
-irm https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/install.ps1 | iex
+irm https://install.dejajs.com/win | iex
 ```
 
 After the script finishes, skip ahead to [Step 5 — Register Your CommandStation](#-step-5--register-your-commandstation).
 
-> Prefer to set things up manually? Continue with the steps below.
-
-#### Manual Install
-
-Clone the repository and install dependencies.
-
-```bash
-git clone https://github.com/jmcdannel/deja.git
-cd deja
-pnpm install
-```
-
-**Verify:** Install completes without errors and you can see an `apps/` directory in the project root.
+> Need help? See the [Install Guide](https://dejajs.com/docs/install) for detailed instructions and troubleshooting.
 
 ---
 

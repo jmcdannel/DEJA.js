@@ -10,7 +10,6 @@ import TrackPower from './TrackPower.vue'
 import Power from './Power.vue'
 import EmergencyStop from './EmergencyStop.vue'
 import SelectLayout from './SelectLayout.vue'
-import ThemeSwitcher from './ThemeSwitcher.vue'
 import { useLayout, useServerStatus } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
 import { createLogger } from '@repo/utils'
@@ -155,12 +154,12 @@ const defaultProps = {
       <v-app-bar-nav-icon variant="text" @click.stop="handleDrawerToggle" class="!h-10 !w-10 ml-4"></v-app-bar-nav-icon>
     </template>
     <template v-slot:title>
-      <Logo 
-        :app-name="appName || defaultProps.appName"
-        :app-icon="appIcon || defaultProps.appIcon"
-        :app-color="color || defaultProps.color"
+      <Logo
+        :size="mdAndUp ? 'md' : 'sm'"
+        :app-title="appName || defaultProps.appName"
         :variant="variant || defaultProps.variant"
         @click="handleLogoClick"
+        class="cursor-pointer"
       />
     </template>
     <slot></slot>
@@ -187,7 +186,8 @@ const defaultProps = {
         </v-chip>
         
         <v-chip v-if="user" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-server-network"
-          :color="serverStatus?.online ? 'success' : 'error'" variant="elevated">
+          :color="serverStatus?.online ? 'success' : 'error'" variant="elevated"
+          @click="router.push({ name: 'Devices' })">
           <template #append>
             <span v-if="serverStatus?.online" class="status-dot success-dot"></span>
             <span v-else class="status-dot error-dot"></span>
@@ -197,8 +197,7 @@ const defaultProps = {
 
         <v-spacer class="ma-2"></v-spacer>
       </template>
-      <ThemeSwitcher class="ma-1" />
-      <UserProfile v-if="showUserProfile !== false && user" />
+      <UserProfile v-if="showUserProfile !== false && user" class="mx-2" />
       <template v-if="layoutId && user">
         <TrackPower class="ma-1" :power-state="layoutPowerState" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
         <Power class="ma-1" v-if="showLayoutPower" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />

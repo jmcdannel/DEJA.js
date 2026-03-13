@@ -13,49 +13,61 @@ export const DEFAULT_MENU_CONFIG: MenuItem[] = [
   {
     label: 'Throttles',
     icon: 'mdi-gamepad-variant',
-    color: 'green',
+    color: 'lime',
     name: 'throttle-list',
   },
   {
     label: 'Effects',
-    icon: 'mdi-rocket',
-    color: 'purple',
+    icon: 'mdi-rocket-launch',
+    color: 'indigo',
     name: 'effects',
   },
   {
     label: "Conductor",
     icon: 'mdi-account-tie-hat',
-    color: 'red',
+    color: 'rose',
     name: 'conductor',
   },
   {
     label: "Throttle",
     icon: 'mdi-speedometer',
-    color: 'lime',
+    color: 'cyan',
     name: 'throttle',
   },
   {
     label: "Routes",
     icon: 'mdi-map',
-    color: 'teal',
+    color: 'purple',
     name: 'routes',
   },
   {
     label: "Turnouts",
     icon: 'mdi-call-split',
-    color: 'blue',
+    color: 'amber',
     name: 'turnouts',
   },
   {
     label: "Signals",
     icon: 'mdi-traffic-light',
-    color: 'blue',
+    color: 'emerald',
     name: 'signals',
+  },
+  {
+    label: 'Programming',
+    icon: 'mdi-chip',
+    color: 'orange',
+    name: 'programming',
+  },
+  {
+    label: 'Connections',
+    icon: 'mdi-server-network',
+    color: 'teal',
+    name: 'connect',
   },
   {
     label: 'Settings',
     icon: 'mdi-cog',
-    color: 'gray',
+    color: 'blue',
     name: 'settings'
   }
 ]

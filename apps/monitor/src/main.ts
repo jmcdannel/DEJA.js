@@ -15,8 +15,11 @@ import { VCard } from 'vuetify/components/VCard'
 import { VueFire, VueFireAuth } from 'vuefire'
 // Firebase
 import { firebaseApp } from '@repo/firebase-config'
+import { createVuetifyThemes } from '@repo/ui'
 // Motion
 import { MotionPlugin } from '@vueuse/motion'
+// Pinia
+import { createPinia } from 'pinia'
 
 // Components
 import App from './App.vue'
@@ -25,7 +28,7 @@ import router from './router'
 // Styles
 import './style.css'
 import '@mdi/font/css/materialdesignicons.css'
-import { pad } from 'vuetify/lib/components/VTimePicker/util.mjs'
+
 
 const vuetify = createVuetify({
   components,
@@ -82,27 +85,21 @@ const vuetify = createVuetify({
     },
   },
   theme: {
-    defaultTheme: 'monitorDark',
-    themes: {
-      monitorDark: {
-        dark: true,
-        colors: {
-          background: '#020617',
-          surface: '#0f172a',
-          primary: '#38bdf8',
-          secondary: '#22d3ee',
-          info: '#0ea5e9',
-          success: '#10b981',
-          warning: '#f97316',
-          error: '#ef4444',
-        },
-        variables: {
-          'border-color': '#1e293b',
-          'overlay-scrim-background': '#020617cc',
-          'selection-control-size': 18,
-        },
+    defaultTheme: 'dark',
+    themes: createVuetifyThemes({
+      primary: '#38bdf8',
+      secondary: '#22d3ee',
+      accent: '#a78bfa',
+      light: {
+        background: '#f1f5f9',
+        surface: '#ffffff',
       },
-    },
+      custom: {
+        dark: { 'monitor-glow': '#38bdf8' },
+        light: { 'monitor-glow': '#0284c7' },
+        'high-contrast': { 'monitor-glow': '#00FFFF' },
+      },
+    }),
   },
 })
 const app = createApp(App)
@@ -119,6 +116,7 @@ Sentry.init({
   replaysOnErrorSampleRate: 1.0,
 })
 
+app.use(createPinia())
 app.use(VueFire, {
   firebaseApp,
   modules: [VueFireAuth()],

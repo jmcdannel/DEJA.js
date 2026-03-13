@@ -9,6 +9,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-03-11
+
+### Added
+
+#### CV/Decoder Programming
+- **[modules]** New `packages/modules/cv/` module with shared types, constants, and NMRA CV definitions for decoder programming
+- **[server]** CV programming module with DCC-EX response parsing, request-response correlation via WebSocket, and timeout handling
+- **[server]** Serial data listener registry in `serial.ts` for modules to subscribe to incoming serial data without modifying existing flow
+- **[server]** WebSocket `cv-request`/`cv-response` protocol for bidirectional CV read/write operations (bypasses Firebase for low-latency request-response)
+- **[throttle]** CV Programmer view with tabbed interface: Read/Write, CV29 Config, Address Calculator, Common CVs batch reader, and operation log
+- **[throttle]** `useCvProgrammer` composable for WebSocket-based CV communication with promise correlation and auto-reconnect
+- **[throttle]** CV29 bit-by-bit editor with toggle switches for direction, speed steps, analog conversion, RailCom, speed table, and long address
+- **[throttle]** Address calculator with short/long address conversion (CV17/CV18) and auto-write via DCC-EX `<W address>` command
+- **[throttle]** Common CVs reference table with batch read, inline editing, and factory reset (write 8 to CV8)
+- **[throttle]** Support for both Service Track (read+write with ACK) and Programming on Main (write-only to addressed loco)
+
+#### Device Connection & Dashboard Redesign
+- **[cloud]** Rewrite dashboard with device connections overview and system status
+- **[cloud]** `useCommandActivity` composable for tracking command throughput
+- **[monitor]** Redesign dashboard as tmux-style pane grid with responsive layout, colorful stats KPIs, and per-device serial panes
+- **[ui]** `DeviceConnectionCard` and `DeviceConnectionList` shared components
+- **[ui]** Make device name and icon clickable to navigate to device details
+- **[ui]** Link server chip to devices page with prepopulated ports and mobile layout
+- **[throttle]** Device connection list on connect page with Connections menu item
+
+#### Theme & UI Enhancements
+- **[ui]** High-contrast theme support in ThemeSwitcher with device-specific colors
+- **[cloud, throttle]** Configurable page backgrounds with user preferences system
+- **[dejajs-www]** Updated fonts, color scheme, and new pricing page
+
+#### Reliability & Resilience
+- **[server]** Graceful shutdown with cleanup of all subsystems (serial, MQTT, Firebase, WebSocket)
+- **[server]** Exponential backoff reconnection for serial, MQTT, and Firebase connections
+- **[throttle]** Offline detection, command queuing, and retry logic for unreliable connections
+
+### Changed
+
+- **[cloud]** Rename Layout page to Devices; move Tags/Ports/Modules to Settings
+- **[server]** Decouple `broadcast.ts` from transports using EventEmitter pattern
+- **[server]** MQTT reconnection refactored with exponential backoff and dejaCloud cleanup
+
+### Fixed
+
+- **[monitor]** Auto-hide sidebar nav on dashboard and mobile views
+- **[server]** Restore WebSocket and serial disconnect in dejaCloud shutdown
+- **[cloud]** Resolve guard chain race conditions in router
+- **[cloud]** Share layouts query between onboarding and approval guards
+- **[cloud]** Fix DeviceDetails back link to navigate to Devices page
+- **[throttle]** Make `queueSize` reactive with computed instead of static ref
+- **[cloud, throttle]** Fix localStorage serialization, Firestore rules, and menu styling
+- **[cloud]** Correct "modren" typo to "modern" on login/signup pages
+- **[cloud, throttle]** Restore header gradient, update fonts and glow colors
+
+---
+
 ## [1.1.0] - 2026-03-10
 
 ### Added

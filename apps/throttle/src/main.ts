@@ -2,6 +2,7 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import * as Sentry from '@sentry/vue'
+import { inject as injectAnalytics } from '@vercel/analytics'
 import { createPinia } from 'pinia'
 import { VueFire, VueFireAuth } from 'vuefire'
 import { MotionPlugin } from '@vueuse/motion'
@@ -14,9 +15,24 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import App from './App.vue'
 import router from './router'
 import { firebaseApp } from '@repo/firebase-config'
+import { createVuetifyThemes } from '@repo/ui'
 // Style
 import './style.css'
 import '@mdi/font/css/materialdesignicons.css'
+
+const themes = createVuetifyThemes({
+  primary: '#00E5FF',
+  secondary: '#D500F9',
+  accent: '#C6FF00',
+  light: {
+    primary: '#00B8D4',
+  },
+  custom: {
+    light: { 'device-connected': '#4CAF50', 'device-disconnected': '#F44336', 'stat-card': '#F5F7FA' },
+    dark: { 'device-connected': '#66BB6A', 'device-disconnected': '#EF5350', 'stat-card': '#1A2332' },
+    'high-contrast': { 'device-connected': '#00FF00', 'device-disconnected': '#FF0000', 'stat-card': '#1A1A1A' },
+  },
+})
 
 const vuetify = createVuetify({
   components,
@@ -31,6 +47,10 @@ const vuetify = createVuetify({
   defaults: {
     VDialog: { transition: 'dialog-bottom-transition' },
     VMenu: { transition: 'scale-transition' },
+  },
+  theme: {
+    defaultTheme: 'dark',
+    themes,
   },
 })
 const pinia = createPinia()
@@ -48,6 +68,10 @@ Sentry.init({
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 })
+
+if (import.meta.env.PROD) {
+  injectAnalytics()
+}
 
 app.use(pinia)
 app.use(router)

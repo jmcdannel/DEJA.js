@@ -58,6 +58,7 @@ export interface ServerStatus {
   online: boolean
   lastSeen: Date | number
   version?: string
+  ip?: string | null
 }
 
 export interface Device {
@@ -75,7 +76,7 @@ export interface Device {
   tags?: Tag[]
   timestamp?: Date
   topic?: string
-  type: 'dcc-ex' | 'deja-arduino' | 'deja-arduino-led' | 'deja-mqtt'
+  type: 'dcc-ex' | 'deja-arduino' | 'deja-arduino-led' | 'deja-mqtt' | 'deja-server'
 }
 
 export interface DeviceType {

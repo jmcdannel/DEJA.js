@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {  useRouter } from 'vue-router'
 import type { Loco } from '@repo/modules/locos'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import RosterList from '@/Roster/RosterList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 
@@ -16,7 +16,7 @@ function handleAddLoco() {
 
 </script>
 <template>
-  <ModuleTitle menu="Loco Roster" />
+  <PageHeader menu="Roster" />
   <RosterList @edit="handleEditLoco">
     <template #prepend>
       <AddTile @click="handleAddLoco" />

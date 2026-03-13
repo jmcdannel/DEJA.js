@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import Logo from './Logo';
 
 const products = [
   {
@@ -131,14 +132,12 @@ export default function Header() {
 
   return (
     <header className="w-full border-b bg-white dark:border-gray-800 dark:bg-gray-950 sticky top-0 z-50">
-      <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
-        <Link href="/" className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center">
-          <Image src="/icon-192.png" alt="" width={32} height={32} className="inline-block h-8 w-8 mr-2" />
-          <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">DEJA</span>
-          <span className="text-purple-500 text-sm">.js</span>
+      <div className="max-w-5xl mx-auto px-6 pt-7 pb-4 flex items-center justify-between gap-6">
+        <Link href="/" className="flex items-center gap-2">
+          <Logo size="lg" />
           <span className="sr-only">DEJA.js Home</span>
         </Link>
-        <nav className="hidden md:flex flex-1 items-center gap-6 ml-6 text-sm font-medium text-gray-700 dark:text-gray-200" aria-label="Main navigation">
+        <nav className="hidden md:flex flex-1 items-center gap-8 ml-6" aria-label="Main navigation">
           {/* Products Mega Menu */}
           <div className="relative group py-2" ref={productsDropdown.ref}>
             <button
@@ -147,7 +146,7 @@ export default function Header() {
               onMouseEnter={productsDropdown.open}
               aria-expanded={productsDropdown.isOpen}
               aria-haspopup="true"
-              className="cursor-pointer hover:text-indigo-500 transition-colors flex items-center gap-1 bg-transparent border-none text-sm font-medium text-gray-700 dark:text-gray-200"
+              className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1 bg-transparent border-none text-[0.8rem] tracking-[0.06em] font-mono"
             >
               Products
               <svg className={`w-4 h-4 opacity-70 transition-transform ${productsDropdown.isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -182,7 +181,7 @@ export default function Header() {
                       >
                         <Image src={product.logo} alt="" width={40} height={40} className="h-10 w-10 flex-shrink-0 mt-0.5" />
                         <div className="min-w-0">
-                          <div className="font-semibold text-slate-900 dark:text-white group-hover/item:text-indigo-500 transition-colors">
+                          <div className="font-medium text-slate-900 dark:text-white group-hover/item:text-cyan-400 transition-colors">
                             {product.name}
                           </div>
                         </div>
@@ -202,7 +201,7 @@ export default function Header() {
               onMouseEnter={docsDropdown.open}
               aria-expanded={docsDropdown.isOpen}
               aria-haspopup="true"
-              className="cursor-pointer hover:text-indigo-500 transition-colors flex items-center gap-1 bg-transparent border-none text-sm font-medium text-gray-700 dark:text-gray-200"
+              className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1 bg-transparent border-none text-[0.8rem] tracking-[0.06em] font-mono"
             >
               Docs
               <svg className={`w-4 h-4 opacity-70 transition-transform ${docsDropdown.isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -244,11 +243,19 @@ export default function Header() {
               </div>
             )}
           </div>
+
+          {/* Pricing Link */}
+          <Link
+            href="/pricing"
+            className={`text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-[0.8rem] tracking-[0.06em] font-mono ${pathname === '/pricing' ? 'text-gray-900 dark:text-white' : ''}`}
+          >
+            Pricing
+          </Link>
         </nav>
 
-        <div className="flex items-center gap-4 text-sm font-medium">
-          <a href="https://cloud.dejajs.com/" className="text-gray-700 dark:text-gray-200 hover:text-indigo-500 transition-colors hidden sm:block">Log in</a>
-          <a href="https://cloud.dejajs.com/signup" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition-colors text-center whitespace-nowrap">Sign up</a>
+        <div className="flex items-center gap-4 text-[0.875rem]">
+          <a href="https://cloud.dejajs.com/" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors hidden sm:block tracking-[0.06em] font-mono text-[0.8rem]">Log in</a>
+          <a href="https://cloud.dejajs.com/signup" className="px-5 py-2 bg-cyan-500 hover:bg-cyan-400 text-gray-950 rounded-lg shadow-sm transition-colors text-center whitespace-nowrap font-bold tracking-[0.06em] font-mono text-[0.8rem]">Sign up</a>
         </div>
       </div>
     </header>

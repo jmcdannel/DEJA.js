@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import EffectForm from '@/Effects/EffectForm.vue'
 import type { Effect } from '@repo/modules'
 import { ListMenu } from '@repo/ui'
@@ -22,8 +22,8 @@ function handleClose() {
 }
 </script>
 <template>
-  <ModuleTitle menu="Effects">
+  <PageHeader menu="Effects">
     <ListMenu :disabledMenus="['view']" :module-name="'effects'" />
-  </ModuleTitle>
+  </PageHeader>
   <EffectForm :efx="defaultEffect" @close="handleClose" />
 </template>
