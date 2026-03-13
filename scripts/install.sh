@@ -7,10 +7,11 @@ set -euo pipefail
 
 DEJA_DIR="${HOME}/.deja"
 DEJA_BIN="${DEJA_DIR}/bin"
-COMPOSE_FILE="${DEJA_DIR}/docker-compose.yml"
+SERVER_DIR="${DEJA_DIR}/server"
 CONFIG_FILE="${DEJA_DIR}/config.json"
 ENV_FILE="${DEJA_DIR}/.env"
-IMAGE="ghcr.io/jmcdannel/deja-server:latest"
+GITHUB_REPO="jmcdannel/DEJA.js"
+MIN_NODE_VERSION=20
 
 # --- Colors ---
 RED='\033[0;31m'
@@ -39,69 +40,45 @@ detect_platform() {
   esac
 
   case "${ARCH}" in
-    x86_64|amd64) DOCKER_ARCH="amd64" ;;
-    aarch64|arm64) DOCKER_ARCH="arm64" ;;
+    x86_64|amd64) ;; # supported
+    aarch64|arm64) ;; # supported (Raspberry Pi, Apple Silicon)
     *)             err "Unsupported architecture: ${ARCH}"; exit 1 ;;
   esac
 
-  ok "Platform: ${PLATFORM} (${DOCKER_ARCH})"
+  ok "Platform: ${PLATFORM} (${ARCH})"
 }
 
 # ======================================================================
-# Step 2: Check/install Docker
+# Step 2: Check Node.js
 # ======================================================================
-check_docker() {
-  if command -v docker &>/dev/null; then
-    ok "Docker found: $(docker --version)"
-    return
-  fi
-
-  if [ "${PLATFORM}" = "linux" ]; then
-    info "Docker not found. Installing..."
-    curl -fsSL https://get.docker.com | sh
-    sudo usermod -aG docker "${USER}"
-    ok "Docker installed. You may need to log out and back in for group changes."
-  else
-    err "Docker not found. Install Docker Desktop: https://docs.docker.com/get-docker/"
-    exit 1
-  fi
-}
-
-check_docker_compose() {
-  if docker compose version &>/dev/null; then
-    ok "Docker Compose found"
-    return
-  fi
-  err "Docker Compose not found. Install Docker Desktop or docker-compose-plugin."
-  exit 1
-}
-
-# ======================================================================
-# Step 3: Docker login to GHCR
-# ======================================================================
-docker_login() {
-  # Accept token as argument or prompt
-  local token="${GHCR_TOKEN:-}"
-
-  if [ -z "${token}" ]; then
+check_node() {
+  if ! command -v node &>/dev/null; then
+    err "Node.js is not installed."
     echo ""
-    info "You need a GitHub Container Registry token to pull the DEJA Server image."
-    info "Find your token at: https://cloud.dejajs.com → Settings → Install"
-    echo ""
-    read -rp "GHCR Token: " token
-  fi
-
-  if [ -z "${token}" ]; then
-    err "No token provided."
+    info "Install Node.js ${MIN_NODE_VERSION}+ from: https://nodejs.org/"
+    if [ "${PLATFORM}" = "linux" ]; then
+      info "Or use nvm: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash"
+      info "Then: nvm install ${MIN_NODE_VERSION}"
+    elif [ "${PLATFORM}" = "macos" ]; then
+      info "Or with Homebrew: brew install node@${MIN_NODE_VERSION}"
+    fi
     exit 1
   fi
 
-  echo "${token}" | docker login ghcr.io -u deja-user --password-stdin
-  ok "Logged in to GHCR"
+  local node_version
+  node_version=$(node --version | sed 's/v//' | cut -d. -f1)
+
+  if [ "${node_version}" -lt "${MIN_NODE_VERSION}" ]; then
+    err "Node.js ${MIN_NODE_VERSION}+ required. Found: $(node --version)"
+    info "Update Node.js: https://nodejs.org/"
+    exit 1
+  fi
+
+  ok "Node.js found: $(node --version)"
 }
 
 # ======================================================================
-# Step 4: Account linking
+# Step 3: Account linking
 # ======================================================================
 link_account() {
   mkdir -p "${DEJA_DIR}"
@@ -148,7 +125,7 @@ JSONEOF
 }
 
 # ======================================================================
-# Step 5: Environment setup
+# Step 4: Environment setup
 # ======================================================================
 setup_environment() {
   if [ -f "${ENV_FILE}" ]; then
@@ -198,20 +175,16 @@ ENVEOF
 }
 
 # ======================================================================
-# Step 6: Serial port detection & Docker Compose generation
+# Step 5: Serial port detection
 # ======================================================================
-detect_serial_and_generate_compose() {
-  local device_line=""
-
+detect_serial() {
   if [ "${PLATFORM}" = "linux" ]; then
-    # Check dialout group
     if ! groups "${USER}" | grep -q dialout; then
       warn "User '${USER}' is not in the 'dialout' group. Serial access may fail."
       warn "Fix: sudo usermod -aG dialout ${USER} && logout"
     fi
   fi
 
-  # Detect serial ports
   local ports=()
   for p in /dev/ttyUSB* /dev/ttyACM* /dev/ttyAMA* /dev/tty.usbmodem* /dev/tty.usbserial*; do
     [ -e "${p}" ] && ports+=("${p}")
@@ -223,49 +196,65 @@ detect_serial_and_generate_compose() {
     for i in "${!ports[@]}"; do
       echo "  $((i + 1)). ${ports[$i]}"
     done
-    echo "  0. Skip (configure later)"
     echo ""
-    read -rp "Select port for DCC-EX CommandStation [1]: " choice
-    choice="${choice:-1}"
-
-    if [ "${choice}" != "0" ] && [ "${choice}" -le "${#ports[@]}" ] 2>/dev/null; then
-      local selected="${ports[$((choice - 1))]}"
-      device_line="    devices:
-      - ${selected}:${selected}"
-      ok "Using serial port: ${selected}"
-    else
-      warn "No serial port selected. Edit ${COMPOSE_FILE} later to add one."
-    fi
+    ok "Serial ports will be auto-detected by the server at runtime."
   else
-    warn "No serial ports detected. Edit ${COMPOSE_FILE} later to add your device."
+    warn "No serial ports detected. Connect your DCC-EX CommandStation and restart the server."
   fi
-
-  # Generate docker-compose.yml
-  cat > "${COMPOSE_FILE}" <<COMPOSEEOF
-services:
-  deja-server:
-    image: ${IMAGE}
-${device_line}
-    volumes:
-      - ${DEJA_DIR}:/home/node/.deja
-    ports:
-      - "8082:8082"
-    env_file: .env
-    restart: unless-stopped
-COMPOSEEOF
-
-  ok "Docker Compose file generated"
 }
 
 # ======================================================================
-# Step 7: Install CLI & pull image
+# Step 6: Download and install server
+# ======================================================================
+install_server() {
+  info "Fetching latest release..."
+
+  local release_info
+  release_info=$(curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" 2>/dev/null) || {
+    err "Failed to fetch release info. Check your internet connection."
+    exit 1
+  }
+
+  local version
+  version=$(echo "${release_info}" | grep '"tag_name"' | sed 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
+
+  if [ -z "${version}" ]; then
+    err "Could not determine latest version."
+    exit 1
+  fi
+
+  info "Installing DEJA.js server ${version}..."
+
+  local tarball_url="https://github.com/${GITHUB_REPO}/releases/download/${version}/deja-server.tar.gz"
+  local tmp_dir
+  tmp_dir=$(mktemp -d)
+
+  curl -fsSL "${tarball_url}" -o "${tmp_dir}/deja-server.tar.gz" || {
+    err "Failed to download server. Check your internet connection."
+    rm -rf "${tmp_dir}"
+    exit 1
+  }
+
+  mkdir -p "${SERVER_DIR}"
+  tar -xzf "${tmp_dir}/deja-server.tar.gz" -C "${SERVER_DIR}"
+  rm -rf "${tmp_dir}"
+
+  ok "Server files extracted"
+
+  info "Installing dependencies (this may take a minute)..."
+  cd "${SERVER_DIR}" && npm install --production 2>&1 | tail -1
+
+  ok "Server ${version} installed"
+}
+
+# ======================================================================
+# Step 7: Install CLI
 # ======================================================================
 install_cli() {
   mkdir -p "${DEJA_BIN}"
 
   # Download the CLI script from the release assets
-  # The CI workflow uploads deja-cli.sh alongside the Docker image
-  curl -fsSL "https://raw.githubusercontent.com/jmcdannel/DEJA.js/main/scripts/deja-cli.sh" \
+  curl -fsSL "https://raw.githubusercontent.com/${GITHUB_REPO}/main/scripts/deja" \
     -o "${DEJA_BIN}/deja" 2>/dev/null || {
     err "Failed to download DEJA CLI. Check your internet connection."
     exit 1
@@ -294,38 +283,14 @@ install_cli() {
   ok "DEJA CLI installed at ${DEJA_BIN}/deja"
 }
 
-pull_and_start() {
-  info "Pulling DEJA Server image..."
-  docker compose -f "${COMPOSE_FILE}" pull
-  ok "Image pulled"
-
-  info "Starting DEJA Server..."
-  docker compose -f "${COMPOSE_FILE}" up -d
-  ok "Server started"
-}
-
 # ======================================================================
-# Step 8: Verification
+# Step 8: Start and verify
 # ======================================================================
-verify() {
-  echo ""
-  info "Waiting for server to start..."
-  local attempts=0
-  while [ ${attempts} -lt 15 ]; do
-    # Check container health via docker compose (server is WebSocket-only, not HTTP)
-    local state
-    state=$(docker compose -f "${COMPOSE_FILE}" ps --format '{{.State}}' 2>/dev/null || echo "")
-    if [ "${state}" = "running" ]; then
-      ok "Server container is running"
-      break
-    fi
-    sleep 2
-    attempts=$((attempts + 1))
-  done
+start_and_verify() {
+  export PATH="${DEJA_BIN}:${PATH}"
 
-  if [ ${attempts} -ge 15 ]; then
-    warn "Server did not start in time. Check logs: deja logs -f"
-  fi
+  info "Starting DEJA.js server..."
+  "${DEJA_BIN}/deja" start
 
   echo ""
   echo "========================================"
@@ -354,22 +319,19 @@ main() {
   echo ""
 
   detect_platform
-  check_docker
-  check_docker_compose
-  docker_login
+  check_node
   link_account
   setup_environment
-  detect_serial_and_generate_compose
+  detect_serial
+  install_server
   install_cli
-  pull_and_start
-  verify
+  start_and_verify
 }
 
 # Parse arguments
 while [ $# -gt 0 ]; do
   case "$1" in
-    --token=*) GHCR_TOKEN="${1#*=}" ;;
-    --uid=*)   DEJA_UID="${1#*=}" ;;
+    --uid=*)    DEJA_UID="${1#*=}" ;;
     --layout=*) DEJA_LAYOUT_ID="${1#*=}" ;;
     *) ;;
   esac
