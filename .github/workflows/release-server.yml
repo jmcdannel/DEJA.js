@@ -81,8 +81,11 @@ jobs:
           FB_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
           FB_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
           FB_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FB_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FB_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
         run: |
           cp scripts/install.sh "${GITHUB_WORKSPACE}/install.sh"
+          # Use sed for simple values (no special chars)
           sed -i \
             -e "s|__FIREBASE_API_KEY__|${FB_API_KEY}|g" \
             -e "s|__FIREBASE_AUTH_DOMAIN__|${FB_AUTH_DOMAIN}|g" \
@@ -91,7 +94,17 @@ jobs:
             -e "s|__FIREBASE_STORAGE_BUCKET__|${FB_STORAGE_BUCKET}|g" \
             -e "s|__FIREBASE_MESSAGING_SENDER_ID__|${FB_MESSAGING_SENDER_ID}|g" \
             -e "s|__FIREBASE_APP_ID__|${FB_APP_ID}|g" \
+            -e "s|__FIREBASE_CLIENT_EMAIL__|${FB_CLIENT_EMAIL}|g" \
             "${GITHUB_WORKSPACE}/install.sh"
+          # Use python for private key (contains newlines and special chars)
+          python3 -c "
+          import os
+          path = os.environ['GITHUB_WORKSPACE'] + '/install.sh'
+          key = os.environ['FB_PRIVATE_KEY']
+          with open(path) as f: content = f.read()
+          content = content.replace('__FIREBASE_PRIVATE_KEY__', key)
+          with open(path, 'w') as f: f.write(content)
+          "
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

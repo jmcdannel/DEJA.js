@@ -12,6 +12,7 @@ CONFIG_FILE="${DEJA_DIR}/config.json"
 ENV_FILE="${DEJA_DIR}/.env"
 GITHUB_REPO="jmcdannel/DEJA.js"
 MIN_NODE_VERSION=20
+GITHUB_TOKEN="${DEJA_GITHUB_TOKEN:-}"
 
 # --- Colors ---
 RED='\033[0;31m'
@@ -75,6 +76,44 @@ check_node() {
   fi
 
   ok "Node.js found: $(node --version)"
+}
+
+# ======================================================================
+# Step 2b: GitHub token (private repo access)
+# ======================================================================
+gh_curl() {
+  if [ -n "${GITHUB_TOKEN}" ]; then
+    curl -fsSL -H "Authorization: token ${GITHUB_TOKEN}" "$@"
+  else
+    curl -fsSL "$@"
+  fi
+}
+
+check_github_token() {
+  if [ -n "${GITHUB_TOKEN}" ]; then
+    ok "GitHub token provided"
+    return
+  fi
+
+  echo ""
+  info "A GitHub personal access token is required to download from the private repo."
+  info "Create one at: https://github.com/settings/tokens/new?scopes=repo"
+  info "Or set DEJA_GITHUB_TOKEN in your environment."
+  echo ""
+  read -rp "GitHub token: " GITHUB_TOKEN
+
+  if [ -z "${GITHUB_TOKEN}" ]; then
+    err "GitHub token is required for private repo access."
+    exit 1
+  fi
+
+  # Verify token works
+  if ! gh_curl "https://api.github.com/repos/${GITHUB_REPO}" -o /dev/null 2>/dev/null; then
+    err "GitHub token is invalid or does not have access to ${GITHUB_REPO}."
+    exit 1
+  fi
+
+  ok "GitHub token verified"
 }
 
 # ======================================================================
@@ -163,26 +202,32 @@ setup_environment() {
     ok "Firebase client config embedded"
   fi
 
-  # Service account credentials — these ARE secret and user-specific
-  echo ""
-  info "Enter your Firebase service account credentials."
-  info "Download your service account JSON from: https://cloud.dejajs.com → Settings → Install"
-  echo ""
-  read -rp "Path to service account JSON file (or press Enter to skip): " sa_json_path
+  # Service account credentials — injected by CI at release time
+  local fb_client_email="__FIREBASE_CLIENT_EMAIL__"
+  local fb_private_key="__FIREBASE_PRIVATE_KEY__"
 
-  local fb_client_email=""
-  local fb_private_key=""
+  if [[ "${fb_client_email}" == __* ]]; then
+    warn "Service account not embedded (development build)."
+    info "Download your service account JSON from: https://cloud.dejajs.com → Settings → Install"
+    echo ""
+    read -rp "Path to service account JSON file (or press Enter to skip): " sa_json_path
 
-  if [ -n "${sa_json_path}" ] && [ -f "${sa_json_path}" ]; then
-    fb_client_email=$(grep -o '"client_email"[[:space:]]*:[[:space:]]*"[^"]*"' "${sa_json_path}" | sed 's/.*"client_email"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
-    fb_private_key=$(grep -o '"private_key"[[:space:]]*:[[:space:]]*"[^"]*"' "${sa_json_path}" | sed 's/.*"private_key"[[:space:]]*:[[:space:]]*"\(.*\)".*/\1/')
-    ok "Service account loaded from ${sa_json_path}"
-  elif [ -n "${sa_json_path}" ]; then
-    err "File not found: ${sa_json_path}"
-    exit 1
+    fb_client_email=""
+    fb_private_key=""
+
+    if [ -n "${sa_json_path}" ] && [ -f "${sa_json_path}" ]; then
+      fb_client_email=$(grep -o '"client_email"[[:space:]]*:[[:space:]]*"[^"]*"' "${sa_json_path}" | sed 's/.*"client_email"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
+      fb_private_key=$(grep -o '"private_key"[[:space:]]*:[[:space:]]*"[^"]*"' "${sa_json_path}" | sed 's/.*"private_key"[[:space:]]*:[[:space:]]*"\(.*\)".*/\1/')
+      ok "Service account loaded from ${sa_json_path}"
+    elif [ -n "${sa_json_path}" ]; then
+      err "File not found: ${sa_json_path}"
+      exit 1
+    else
+      warn "Skipping service account setup. Server features requiring admin access will not work."
+      warn "You can add these later to ${ENV_FILE}"
+    fi
   else
-    warn "Skipping service account setup. Server features requiring admin access will not work."
-    warn "You can add these later to ${ENV_FILE}"
+    ok "Service account config embedded"
   fi
 
   cat > "${ENV_FILE}" <<ENVEOF
@@ -245,7 +290,7 @@ install_server() {
   info "Fetching latest release..."
 
   local release_info
-  release_info=$(curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" 2>/dev/null) || {
+  release_info=$(gh_curl "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" 2>/dev/null) || {
     err "Failed to fetch release info. Check your internet connection."
     exit 1
   }
@@ -264,7 +309,7 @@ install_server() {
   local tmp_dir
   tmp_dir=$(mktemp -d)
 
-  curl -fsSL "${tarball_url}" -o "${tmp_dir}/deja-server.tar.gz" || {
+  gh_curl "${tarball_url}" -H "Accept: application/octet-stream" -o "${tmp_dir}/deja-server.tar.gz" || {
     err "Failed to download server. Check your internet connection."
     rm -rf "${tmp_dir}"
     exit 1
@@ -279,6 +324,7 @@ install_server() {
   info "Installing dependencies (this may take a minute)..."
   cd "${SERVER_DIR}" && npm install --production 2>&1 | tail -1
 
+  INSTALLED_VERSION="${version}"
   ok "Server ${version} installed"
 }
 
@@ -288,9 +334,9 @@ install_server() {
 install_cli() {
   mkdir -p "${DEJA_BIN}"
 
-  # Download the CLI script from the release assets
-  curl -fsSL "https://raw.githubusercontent.com/${GITHUB_REPO}/main/scripts/deja" \
-    -o "${DEJA_BIN}/deja" 2>/dev/null || {
+  # Download the CLI from the same release
+  local cli_url="https://github.com/${GITHUB_REPO}/releases/download/${INSTALLED_VERSION}/deja"
+  gh_curl "${cli_url}" -H "Accept: application/octet-stream" -o "${DEJA_BIN}/deja" || {
     err "Failed to download DEJA CLI. Check your internet connection."
     exit 1
   }
@@ -355,6 +401,7 @@ main() {
 
   detect_platform
   check_node
+  check_github_token
   link_account
   setup_environment
   detect_serial
