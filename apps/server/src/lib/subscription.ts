@@ -45,11 +45,14 @@ function getConfigPath(): string {
 // --- Custom Error Classes ---
 
 export class SubscriptionError extends Error {
+  code: 'ConfigMissing' | 'ConfigCorrupt' | 'ConfigMissingUid' | 'SubscriptionDenied' | 'GracePeriodExpired'
+
   constructor(
-    public code: 'ConfigMissing' | 'ConfigCorrupt' | 'ConfigMissingUid' | 'SubscriptionDenied' | 'GracePeriodExpired',
+    code: 'ConfigMissing' | 'ConfigCorrupt' | 'ConfigMissingUid' | 'SubscriptionDenied' | 'GracePeriodExpired',
     message: string,
   ) {
     super(message)
+    this.code = code
     this.name = code
   }
 }
