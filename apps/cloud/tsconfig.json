@@ -1,6 +1,6 @@
 {
   "extends": "@repo/typescript-config/vue-library",
-  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "../../packages/**/*"],
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "api/**/*", "../../packages/**/*"],
   "exclude": ["dist", "build", "node_modules", "../../packages/**/*.stories.*"],
   "compilerOptions": {
     "composite": true,
