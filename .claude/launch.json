@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "throttle",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter=deja-throttle", "dev"],
+      "port": 3041
+    },
+    {
+      "name": "cloud",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter=deja-cloud", "dev"],
+      "port": 3011
+    },
+    {
+      "name": "monitor",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter=deja-monitor", "dev"],
+      "port": 3021
+    }
+  ]
+}
