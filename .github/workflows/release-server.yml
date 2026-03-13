@@ -72,45 +72,38 @@ jobs:
           cd apps/server/dist
           tar -czf "${GITHUB_WORKSPACE}/deja-server.tar.gz" index.js package.json version.txt
 
-      - name: Inject Firebase config into install script
-        env:
-          FB_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-          FB_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
-          FB_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-          FB_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL }}
-          FB_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
-          FB_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
-          FB_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
-          FB_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
-          FB_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+      - name: Embed install script in install-api
         run: |
-          cp scripts/install.sh "${GITHUB_WORKSPACE}/install.sh"
-          # Use sed for simple values (no special chars)
-          sed -i \
-            -e "s|__FIREBASE_API_KEY__|${FB_API_KEY}|g" \
-            -e "s|__FIREBASE_AUTH_DOMAIN__|${FB_AUTH_DOMAIN}|g" \
-            -e "s|__FIREBASE_PROJECT_ID__|${FB_PROJECT_ID}|g" \
-            -e "s|__FIREBASE_DATABASE_URL__|${FB_DATABASE_URL}|g" \
-            -e "s|__FIREBASE_STORAGE_BUCKET__|${FB_STORAGE_BUCKET}|g" \
-            -e "s|__FIREBASE_MESSAGING_SENDER_ID__|${FB_MESSAGING_SENDER_ID}|g" \
-            -e "s|__FIREBASE_APP_ID__|${FB_APP_ID}|g" \
-            -e "s|__FIREBASE_CLIENT_EMAIL__|${FB_CLIENT_EMAIL}|g" \
-            "${GITHUB_WORKSPACE}/install.sh"
-          # Use python for private key (contains newlines and special chars)
-          python3 -c "
-          import os
-          path = os.environ['GITHUB_WORKSPACE'] + '/install.sh'
-          key = os.environ['FB_PRIVATE_KEY']
-          with open(path) as f: content = f.read()
-          content = content.replace('__FIREBASE_PRIVATE_KEY__', key)
-          with open(path, 'w') as f: f.write(content)
+          # Escape the script for embedding as a JS template literal
+          node -e "
+            const fs = require('fs');
+            const script = fs.readFileSync('scripts/install.sh', 'utf8');
+            const escaped = script.replace(/\`/g, '\\\`').replace(/\\\$/g, '\\\\\$');
+            const apiIndex = fs.readFileSync('apps/install-api/src/index.ts', 'utf8');
+            const result = apiIndex.replace('__INSTALL_SCRIPT_TEMPLATE__', escaped);
+            fs.writeFileSync('apps/install-api/src/index.ts', result);
           "
 
-      - name: Create GitHub Release
+      - name: Upload release assets to Vercel Blob
+        env:
+          UPLOAD_SECRET: ${{ secrets.INSTALL_API_UPLOAD_SECRET }}
+          INSTALL_API_URL: https://install.dejajs.com
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Upload tarball
+          curl -fsSL -X POST \
+            -H "Authorization: Bearer ${UPLOAD_SECRET}" \
+            -F "file=@deja-server.tar.gz;type=application/gzip" \
+            "${INSTALL_API_URL}/releases/${VERSION}/upload"
+
+          # Upload CLI
+          curl -fsSL -X POST \
+            -H "Authorization: Bearer ${UPLOAD_SECRET}" \
+            -F "file=@scripts/deja;type=application/octet-stream" \
+            "${INSTALL_API_URL}/releases/${VERSION}/upload"
+
+      - name: Create GitHub Release (changelog only)
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          files: |
-            deja-server.tar.gz
-            scripts/deja
-            install.sh

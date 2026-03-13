@@ -14,7 +14,7 @@ VERSION_FILE="${SERVER_DIR}/version.txt"
 CONFIG_FILE="${DEJA_DIR}/config.json"
 ENV_FILE="${DEJA_DIR}/.env"
 ENTRY="${SERVER_DIR}/index.js"
-GITHUB_REPO="jmcdannel/DEJA.js"
+INSTALL_BASE_URL="https://install.dejajs.com"
 
 # Max log file size before rotation (10MB)
 MAX_LOG_SIZE=10485760
@@ -335,29 +335,6 @@ cmd_update() {
   local current_version
   current_version=$(get_version)
 
-  # Fetch latest release info from GitHub
-  local release_info
-  release_info=$(curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" 2>/dev/null) || {
-    err "Failed to check for updates. Check your internet connection."
-    exit 1
-  }
-
-  local latest_version
-  latest_version=$(echo "${release_info}" | grep '"tag_name"' | sed 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
-
-  if [ -z "${latest_version}" ]; then
-    err "Could not determine latest version."
-    exit 1
-  fi
-
-  if [ "${current_version}" = "${latest_version}" ]; then
-    ok "Already up to date ${DIM}(${current_version})${NC}"
-    echo ""
-    return 0
-  fi
-
-  info "Updating: ${current_version} ${ICON_ARROW} ${latest_version}"
-
   # Check if server is running (will restart after update)
   local was_running=false
   if is_running; then
@@ -365,14 +342,14 @@ cmd_update() {
     cmd_stop
   fi
 
-  # Download tarball
-  local tarball_url="https://github.com/${GITHUB_REPO}/releases/download/${latest_version}/deja-server.tar.gz"
+  # Download latest tarball from install API
+  local tarball_url="${INSTALL_BASE_URL}/releases/latest/deja-server.tar.gz"
   local tmp_dir
   tmp_dir=$(mktemp -d)
 
-  info "Downloading ${latest_version}..."
+  info "Downloading latest release..."
   curl -fsSL "${tarball_url}" -o "${tmp_dir}/deja-server.tar.gz" || {
-    err "Failed to download update."
+    err "Failed to download update. Check your internet connection."
     rm -rf "${tmp_dir}"
     exit 1
   }
@@ -383,11 +360,27 @@ cmd_update() {
   tar -xzf "${tmp_dir}/deja-server.tar.gz" -C "${SERVER_DIR}"
   rm -rf "${tmp_dir}"
 
-  # Install/update native dependencies
-  info "Installing dependencies..."
-  cd "${SERVER_DIR}" && npm install --production --silent 2>/dev/null
+  # Read updated version
+  local latest_version
+  latest_version=$(get_version)
 
-  ok "Updated to ${latest_version}"
+  if [ "${current_version}" = "${latest_version}" ]; then
+    ok "Already up to date ${DIM}(${current_version})${NC}"
+  else
+    # Install/update native dependencies
+    info "Installing dependencies..."
+    cd "${SERVER_DIR}" && npm install --production --silent 2>/dev/null
+
+    ok "Updated: ${current_version} ${ICON_ARROW} ${latest_version}"
+  fi
+
+  # Update CLI itself
+  local cli_url="${INSTALL_BASE_URL}/releases/latest/deja"
+  info "Updating CLI..."
+  curl -fsSL "${cli_url}" -o "${DEJA_BIN}/deja" || {
+    warn "Failed to update CLI. Continuing with current version."
+  }
+  chmod +x "${DEJA_BIN}/deja"
 
   # Restart if was running
   if [ "${was_running}" = true ]; then

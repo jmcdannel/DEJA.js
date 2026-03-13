@@ -10,9 +10,8 @@ DEJA_BIN="${DEJA_DIR}/bin"
 SERVER_DIR="${DEJA_DIR}/server"
 CONFIG_FILE="${DEJA_DIR}/config.json"
 ENV_FILE="${DEJA_DIR}/.env"
-GITHUB_REPO="jmcdannel/DEJA.js"
 MIN_NODE_VERSION=20
-GITHUB_TOKEN="${DEJA_GITHUB_TOKEN:-}"
+INSTALL_BASE_URL="https://install.dejajs.com"
 
 # --- Colors ---
 RED='\033[0;31m'
@@ -76,44 +75,6 @@ check_node() {
   fi
 
   ok "Node.js found: $(node --version)"
-}
-
-# ======================================================================
-# Step 2b: GitHub token (private repo access)
-# ======================================================================
-gh_curl() {
-  if [ -n "${GITHUB_TOKEN}" ]; then
-    curl -fsSL -H "Authorization: token ${GITHUB_TOKEN}" "$@"
-  else
-    curl -fsSL "$@"
-  fi
-}
-
-check_github_token() {
-  if [ -n "${GITHUB_TOKEN}" ]; then
-    ok "GitHub token provided"
-    return
-  fi
-
-  echo ""
-  info "A GitHub personal access token is required to download from the private repo."
-  info "Create one at: https://github.com/settings/tokens/new?scopes=repo"
-  info "Or set DEJA_GITHUB_TOKEN in your environment."
-  echo ""
-  read -rp "GitHub token: " GITHUB_TOKEN
-
-  if [ -z "${GITHUB_TOKEN}" ]; then
-    err "GitHub token is required for private repo access."
-    exit 1
-  fi
-
-  # Verify token works
-  if ! gh_curl "https://api.github.com/repos/${GITHUB_REPO}" -o /dev/null 2>/dev/null; then
-    err "GitHub token is invalid or does not have access to ${GITHUB_REPO}."
-    exit 1
-  fi
-
-  ok "GitHub token verified"
 }
 
 # ======================================================================
@@ -289,27 +250,11 @@ detect_serial() {
 install_server() {
   info "Fetching latest release..."
 
-  local release_info
-  release_info=$(gh_curl "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" 2>/dev/null) || {
-    err "Failed to fetch release info. Check your internet connection."
-    exit 1
-  }
-
-  local version
-  version=$(echo "${release_info}" | grep '"tag_name"' | sed 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
-
-  if [ -z "${version}" ]; then
-    err "Could not determine latest version."
-    exit 1
-  fi
-
-  info "Installing DEJA.js server ${version}..."
-
-  local tarball_url="https://github.com/${GITHUB_REPO}/releases/download/${version}/deja-server.tar.gz"
+  local tarball_url="${INSTALL_BASE_URL}/releases/latest/deja-server.tar.gz"
   local tmp_dir
   tmp_dir=$(mktemp -d)
 
-  gh_curl "${tarball_url}" -H "Accept: application/octet-stream" -o "${tmp_dir}/deja-server.tar.gz" || {
+  curl -fsSL "${tarball_url}" -o "${tmp_dir}/deja-server.tar.gz" || {
     err "Failed to download server. Check your internet connection."
     rm -rf "${tmp_dir}"
     exit 1
@@ -320,6 +265,12 @@ install_server() {
   rm -rf "${tmp_dir}"
 
   ok "Server files extracted"
+
+  # Read version from extracted version.txt
+  local version="unknown"
+  if [ -f "${SERVER_DIR}/version.txt" ]; then
+    version=$(cat "${SERVER_DIR}/version.txt")
+  fi
 
   info "Installing dependencies (this may take a minute)..."
   cd "${SERVER_DIR}" && npm install --production 2>&1 | tail -1
@@ -334,10 +285,10 @@ install_server() {
 install_cli() {
   mkdir -p "${DEJA_BIN}"
 
-  # Download the CLI from the same release
-  local cli_url="https://github.com/${GITHUB_REPO}/releases/download/${INSTALLED_VERSION}/deja"
-  gh_curl "${cli_url}" -H "Accept: application/octet-stream" -o "${DEJA_BIN}/deja" || {
-    err "Failed to download DEJA CLI. Check your internet connection."
+  # Download the CLI from the install API
+  curl -fsSL "${INSTALL_BASE_URL}/releases/latest/deja" \
+    -o "${DEJA_BIN}/deja" || {
+    err "Failed to download DEJA CLI."
     exit 1
   }
 
@@ -401,7 +352,6 @@ main() {
 
   detect_platform
   check_node
-  check_github_token
   link_account
   setup_environment
   detect_serial
