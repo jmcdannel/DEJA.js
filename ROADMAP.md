@@ -39,6 +39,7 @@
 - [ ] Refine themes — polish Vuetify/Tailwind theming across all apps (dark/light mode, color palettes, consistent branding, typography)
 - [ ] CV/Decoder Programming — read/write CVs from the browser (service track + POM)
 - [ ] Store roster on DCC-EX command station (sync with DEJA cloud)
+- [ ] EXRAIL Automation Studio — visual EXRAIL script editor in the cloud app for building and uploading automation sequences to DCC-EX
 - [ ] Visual Automation Builder — drag-and-drop automation sequences (DEJA's answer to EX-RAIL/Logix)
       - Set turnout → wait → set signal → drive train → stop at sensor
       - No code required, runs in the cloud, triggers via Firebase
