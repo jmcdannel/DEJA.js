@@ -18,7 +18,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit",
-    "build:docker": "tsup"
+    "build:docker": "tsup",
+    "tunnel": "bash scripts/tunnel.sh quick",
+    "tunnel:named": "bash scripts/tunnel.sh named"
   },
   "dependencies": {
     "@repo/modules": "workspace:*",
