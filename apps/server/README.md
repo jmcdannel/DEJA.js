@@ -264,6 +264,80 @@ tail -f logs/deja.log
 
 ---
 
+## Remote Access with Cloudflare Tunnels
+
+Cloudflare Tunnels let you securely access your DEJA.js server from anywhere -- no port forwarding, static IP, or firewall changes required. The tunnel creates an outbound-only connection from your machine to Cloudflare's network, and clients connect through a public URL.
+
+This is useful for controlling your model railroad layout from a different room, building, or location entirely.
+
+### Quick Start (No Account Required)
+
+The fastest way to get a tunnel running -- generates a temporary public URL:
+
+```bash
+# From the apps/server directory
+pnpm tunnel
+```
+
+This runs `cloudflared tunnel --url http://localhost:8082` and prints a public `https://*.trycloudflare.com` URL. Share that URL with your throttle/cloud/monitor apps. The URL changes each time you restart.
+
+**Prerequisites:** Install `cloudflared` first:
+
+| Platform | Command |
+|----------|---------|
+| macOS | `brew install cloudflare/cloudflare/cloudflared` |
+| Debian/Ubuntu | Download `.deb` from the [cloudflared releases page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) |
+| Windows | `winget install --id Cloudflare.cloudflared` or download from the [releases page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) |
+
+### Full Setup (Persistent Named Tunnel)
+
+For a stable hostname that persists across restarts:
+
+1. **Create a free Cloudflare account** at [dash.cloudflare.com](https://dash.cloudflare.com)
+2. **Add a domain** (or use Cloudflare's free subdomain)
+3. **Authenticate cloudflared:**
+   ```bash
+   cloudflared tunnel login
+   ```
+4. **Create a named tunnel:**
+   ```bash
+   cloudflared tunnel create deja-js
+   ```
+5. **Configure DNS:**
+   ```bash
+   cloudflared tunnel route dns deja-js deja.yourdomain.com
+   ```
+6. **Edit `apps/server/cloudflared.yml`:**
+   - Replace `YOUR_TUNNEL_UUID_HERE` with the tunnel UUID from step 4
+   - Update the `credentials-file` path
+7. **Run the tunnel:**
+   ```bash
+   pnpm tunnel:named
+   ```
+
+Alternatively, set `CLOUDFLARE_TUNNEL_TOKEN` in your `.env` file (get it from the Cloudflare Zero Trust dashboard) and `pnpm tunnel:named` will use it automatically.
+
+### Connecting Vue Apps to the Tunnel
+
+Once the tunnel is running, update your throttle/cloud/monitor app configuration to use the tunnel URL instead of `localhost`:
+
+- For the quick tunnel, use the `*.trycloudflare.com` URL printed in the terminal
+- For named tunnels, use your configured domain (e.g., `wss://deja.yourdomain.com`)
+
+In the Vue apps, the WebSocket connection URL is typically configured via environment variables or the connection settings UI. Replace `ws://localhost:8082` with your tunnel URL (using `wss://` since Cloudflare provides TLS).
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| `cloudflared: command not found` | Install cloudflared (see table above) |
+| Tunnel starts but WebSocket fails | Ensure the DEJA.js server is running on port 8082 before starting the tunnel |
+| Connection drops frequently | Check your internet connection; cloudflared reconnects automatically |
+| Named tunnel shows placeholder error | Edit `cloudflared.yml` and replace `YOUR_TUNNEL_UUID_HERE` with your actual tunnel UUID |
+| Vue app cannot connect via tunnel | Use `wss://` (not `ws://`) since Cloudflare terminates TLS |
+
+---
+
 ## 🤝 Contributing
 
 We welcome contributions from the railroad community! 🚂

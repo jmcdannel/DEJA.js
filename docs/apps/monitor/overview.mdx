@@ -6,31 +6,41 @@ order: 3
 
 # Monitor App
 
-The Monitor app provides real-time system diagnostics, server status, and device monitoring for your DCC-EX layout. Track connected devices, view serial communication logs, and monitor server health.
+The Monitor app is a tmux-style system monitoring dashboard for your DCC-EX layout. It provides real-time log streams, device status, and system metrics in a tiled pane layout.
 
 ## Key Features
 
-- **Dashboard** — Real-time overview of server status, connected devices, and system metrics
-- **Device Cards** — Individual status cards for each connected hardware device with connection state and uptime
-- **Serial Monitor** — Live serial communication log for debugging DCC-EX command station interactions
-- **Server Status** — WebSocket connection health, Firebase sync status, and MQTT broker connectivity
-- **Log Viewer** — Filterable log output for system events, errors, and warnings
-- **Settings** — Monitor configuration and preferences
+- **Tmux-Style Dashboard** — Tiled panes for DCC Log, Turnouts, Effects, Sensors, and Stats with minimize/maximize/clear controls
+- **MonitorStatusBar** — Compact IDE-like header with track power, e-stop, layout selector, WS/server status indicators, and user profile
+- **Real-Time Logs** — Live streaming of DCC commands, turnout changes, effect triggers, and sensor events
+- **System Stats** — Active locos, device count, turnout/effect/signal totals, and server uptime
+- **Device Serial Monitor** — Subscribe to individual device serial output for debugging
+- **Settings** — Account, billing, theme (dark/light/high-contrast), background customization, and WS connection config
 
 ## Screenshots
 
-### Dashboard
+### Dashboard (Desktop)
 
-![Monitor Dashboard](/screenshots/monitor_desktop_dashboard.png)
+![Monitor Dashboard — Desktop](/screenshots/monitor_desktop_dashboard.png)
 
-### Settings
+### Dashboard (Mobile)
 
-![Monitor Settings](/screenshots/monitor_desktop_settings.png)
+![Monitor Dashboard — Mobile](/screenshots/monitor_mobile_dashboard.png)
+
+### Settings (Desktop)
+
+![Monitor Settings — Desktop](/screenshots/monitor_desktop_settings.png)
+
+### Settings (Mobile)
+
+![Monitor Settings — Mobile](/screenshots/monitor_mobile_settings.png)
 
 ## Technical Details
 
 - **Framework:** Vue 3 with Composition API
-- **State:** Firebase Firestore via VueFire
-- **Real-time:** WebSocket subscriptions for device serial data
-- **Routing:** Vue Router 4 with auth guards
-- **Port:** 3021 (development)
+- **UI:** Vuetify 3 + Tailwind CSS
+- **State:** Firebase Firestore via VueFire, localStorage via VueUse
+- **Real-time:** WebSocket subscriptions for device serial data, Firebase RTDB for DCC logs
+- **Routing:** Vue Router 4 with auth guards (`requireAuth`, `requireLayout`)
+- **Theme:** Dark/Light/High-Contrast via `useThemeSwitcher`
+- **Port:** 3031 (development)

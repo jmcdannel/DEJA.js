@@ -82,6 +82,9 @@ importers:
       firebase:
         specifier: ^10.14.1
         version: 10.14.1
+      firebase-admin:
+        specifier: ^13.4.0
+        version: 13.5.0
       vue:
         specifier: ^3.5.17
         version: 3.5.22(typescript@5.9.3)
