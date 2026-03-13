@@ -1,0 +1,165 @@
+---
+title: Installation
+description: How to install and configure DEJA.js — quick install for end users or full manual setup for developers.
+section: docs
+order: 2
+---
+
+# Installation
+
+There are two ways to install DEJA.js:
+
+- **Quick Install** — A single command that downloads the server, installs dependencies, and configures your environment. Best for most users.
+- **Manual Install** — Clone the full monorepo and configure everything yourself. Best for developers who want to contribute or customize.
+
+Both paths assume you have already [signed up for DEJA Cloud](https://cloud.dejajs.com) and completed the onboarding wizard (see [Quick Start](/docs/quick-start), Steps 1–3).
+
+## Prerequisites
+
+| Requirement | Minimum Version | How to Check |
+|-------------|-----------------|--------------|
+| **Node.js** | 22.0 or later | `node --version` |
+| **pnpm** | 9.0 or later | `pnpm --version` |
+| **Git** | Any recent version | `git --version` |
+
+If you do not have pnpm installed, you can enable it through Node.js corepack:
+
+```bash
+corepack enable
+corepack prepare pnpm@9.0.0 --activate
+```
+
+A **DCC-EX CommandStation** connected via USB is optional during development. The server and frontend apps will run without hardware attached — you just will not be able to send commands to the track.
+
+## Quick Install
+
+Open a terminal on the machine connected to your DCC-EX CommandStation and run one command:
+
+**macOS / Linux**
+
+```bash
+curl -fsSL https://install.dejajs.com | bash
+```
+
+**Windows (PowerShell)**
+
+```powershell
+irm https://install.dejajs.com/win | iex
+```
+
+The script will:
+
+1. Clone the DEJA.js repository
+2. Install all dependencies via pnpm
+3. Prompt you to paste your environment credentials (from the onboarding wizard)
+4. Create your `.env.local` file
+
+After the script finishes, you're ready to [register your CommandStation](/docs/quick-start#step-5--register-your-commandstation) and [start the server](/docs/quick-start#step-6--start-the-server).
+
+## Manual Install
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/jmcdannel/DEJA.js.git
+cd DEJA.js
+```
+
+### Install Dependencies
+
+DEJA.js uses pnpm workspaces with Turborepo. A single install command fetches dependencies for every app and package in the monorepo:
+
+```bash
+pnpm install
+```
+
+This may take a minute on the first run. Do not use `npm install` or `yarn` — the project is configured exclusively for pnpm.
+
+### Configure Environment Variables
+
+Copy the example environment file to create your local configuration:
+
+```bash
+cp .env.example .env.local
+```
+
+Open `.env.local` in your editor and paste the credentials from the onboarding wizard. If you need to find them again, log in to [DEJA Cloud](https://cloud.dejajs.com), select your layout, and click **Settings > View Local Environment Configuration**.
+
+### Required Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `LAYOUT_ID` | Your layout's unique identifier. Scopes all data to your layout. | `my-home-layout` |
+| `VITE_FIREBASE_API_KEY` | Firebase Web API key | `AIzaSy...` |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase auth domain | `my-project.firebaseapp.com` |
+| `VITE_FIREBASE_PROJECT_ID` | Firebase project ID | `my-project` |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase storage bucket | `my-project.appspot.com` |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID | `123456789` |
+| `VITE_FIREBASE_APP_ID` | Firebase app ID | `1:123456789:web:abc123` |
+
+### Communication Settings
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ENABLE_WS` | Enable the WebSocket server | `true` |
+| `ENABLE_MQTT` | Enable MQTT broker communication | `true` |
+| `ENABLE_DEJACLOUD` | Enable Firebase cloud integration on the server | `true` |
+| `VITE_WS_PORT` | WebSocket server port | `8082` |
+| `VITE_WS_ID` | Server identifier string | `DEJA.js` |
+| `VITE_MQTT_BROKER` | MQTT broker URL | `mqtt://localhost` |
+| `VITE_MQTT_PORT` | MQTT broker port | `1883` |
+
+### Optional Variables
+
+| Variable | Description |
+|----------|-------------|
+| `VITE_SENTRY_DSN` | Sentry DSN for frontend error tracking |
+| `SENTRY_DSN` | Sentry DSN for server-side error tracking |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob token for sound file storage (Sound API only) |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key (Cloud app billing features) |
+| `VITE_BILLING_API_URL` | Billing API endpoint URL |
+
+Individual apps can also have their own `.env.local` files in `apps/<app-name>/` for app-specific overrides.
+
+## Verify the Installation
+
+Build all packages to confirm everything is wired up correctly:
+
+```bash
+pnpm build
+```
+
+If the build succeeds with no errors, your installation is complete. You can also run the type checker and linter to catch any configuration issues:
+
+```bash
+pnpm check-types
+pnpm lint
+```
+
+## Troubleshooting
+
+### `pnpm: command not found`
+
+Make sure corepack is enabled (`corepack enable`) or install pnpm globally (`npm install -g pnpm@9`).
+
+### Firebase errors on build
+
+Double-check that all `VITE_FIREBASE_*` variables are set in `.env.local`. Missing values will cause build-time or runtime errors in apps that depend on Firebase.
+
+### Serial port access denied
+
+On Linux, your user may need to be in the `dialout` group to access USB serial ports:
+
+```bash
+sudo usermod -a -G dialout $USER
+```
+
+Log out and back in for the change to take effect.
+
+### Port conflicts
+
+If a dev server fails to start because a port is already in use, you can change the port in the app's `vite.config.ts` or stop the conflicting process.
+
+## Next Steps
+
+Your environment is ready. Head to the [Quick Start](/docs/quick-start) guide to register your CommandStation and start controlling trains.
