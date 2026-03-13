@@ -166,10 +166,24 @@ setup_environment() {
   # Service account credentials — these ARE secret and user-specific
   echo ""
   info "Enter your Firebase service account credentials."
-  info "Find these at: https://cloud.dejajs.com → Settings → Install"
+  info "Download your service account JSON from: https://cloud.dejajs.com → Settings → Install"
   echo ""
-  read -rp "FIREBASE_CLIENT_EMAIL (service account): " fb_client_email
-  read -rp "FIREBASE_PRIVATE_KEY (service account, paste full key): " fb_private_key
+  read -rp "Path to service account JSON file (or press Enter to skip): " sa_json_path
+
+  local fb_client_email=""
+  local fb_private_key=""
+
+  if [ -n "${sa_json_path}" ] && [ -f "${sa_json_path}" ]; then
+    fb_client_email=$(grep -o '"client_email"[[:space:]]*:[[:space:]]*"[^"]*"' "${sa_json_path}" | sed 's/.*"client_email"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
+    fb_private_key=$(grep -o '"private_key"[[:space:]]*:[[:space:]]*"[^"]*"' "${sa_json_path}" | sed 's/.*"private_key"[[:space:]]*:[[:space:]]*"\(.*\)".*/\1/')
+    ok "Service account loaded from ${sa_json_path}"
+  elif [ -n "${sa_json_path}" ]; then
+    err "File not found: ${sa_json_path}"
+    exit 1
+  else
+    warn "Skipping service account setup. Server features requiring admin access will not work."
+    warn "You can add these later to ${ENV_FILE}"
+  fi
 
   cat > "${ENV_FILE}" <<ENVEOF
 LAYOUT_ID=${layout_id}
