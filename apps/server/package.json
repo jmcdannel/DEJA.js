@@ -17,7 +17,9 @@
     "migrate-sounds": "tsx src/scripts/migrate-sound-effects.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "tunnel": "bash scripts/tunnel.sh quick",
+    "tunnel:named": "bash scripts/tunnel.sh named"
   },
   "dependencies": {
     "@sentry/node": "^8.0.0",

@@ -1,0 +1,67 @@
+---
+title: Onboarding
+description: The onboarding wizard walks new users through account setup — choose a plan, enter payment for paid tiers, and register your first layout.
+order: 10
+---
+
+# Onboarding
+
+The onboarding wizard (`/onboarding`) guides new users through initial setup after signing up. The wizard has four steps and takes just a few minutes to complete.
+
+## Onboarding Steps
+
+### Step 1 — Create Account
+
+Sign up at [DEJA Cloud](https://cloud.dejajs.com) using Google, GitHub, or email and password. After signing in, the onboarding wizard starts automatically.
+
+### Step 2 — Choose Plan
+
+Select the pricing tier that fits your layout:
+
+| | Hobbyist | Engineer | Conductor |
+|---|---|---|---|
+| **Price** | Free | $7/mo or $67/yr | $18/mo or $173/yr |
+| **Locomotives** | 5 | 25 | Unlimited |
+| **Layouts** | 1 | 2 | Unlimited |
+| **Turnouts, Signals, Effects** | — | 15 each | Unlimited |
+| **Tour App** | — | — | Included |
+
+Use the **monthly / annual** toggle to compare pricing. Annual billing saves roughly 20%.
+
+You can change your plan at any time from the Cloud app Settings page.
+
+### Step 3 — Payment
+
+This step depends on which plan you selected:
+
+- **Hobbyist** — This step is skipped automatically. No credit card required.
+- **Engineer / Conductor** — Enter your card details using the secure payment form. Click **Start 14-Day Free Trial** to begin. You will not be charged until the trial ends.
+
+If your card requires 3D Secure verification, a confirmation dialog will appear automatically. Complete the verification to proceed.
+
+### Step 4 — Register Layout
+
+Give your layout a name and a unique ID. The ID must use lowercase letters, numbers, and hyphens only (for example, `my-home-layout`).
+
+Your layout ID scopes all data in DEJA.js — locomotives, turnouts, effects, routes, signals, and commands are all tied to this ID.
+
+## After Onboarding
+
+Once you complete the wizard, you are ready to install the DEJA Server and start controlling trains. See the [Quick Start](/docs/quick-start) guide for the full walkthrough.
+
+Your environment credentials (LAYOUT_ID and Firebase configuration) are available at any time under **Settings > View Local Environment Configuration** in the Cloud app.
+
+## Changing Your Plan
+
+You can upgrade, downgrade, or manage your subscription from the **Settings** page in the Cloud app:
+
+- **Upgrade** — Click the upgrade prompt to move to a higher tier. Changes take effect immediately.
+- **Manage Subscription** — Click **Manage in Stripe** to open the Stripe Billing Portal where you can update payment methods, view invoices, or cancel.
+
+## Deep Links
+
+The onboarding wizard supports deep links for pre-selecting a plan. These are useful when linking from a pricing page or marketing material:
+
+- `/onboarding?plan=hobbyist` — Skip plan selection, go straight to layout registration.
+- `/onboarding?plan=engineer&billing=monthly` — Pre-select Engineer with monthly billing.
+- `/onboarding?plan=conductor&billing=annual` — Pre-select Conductor with annual billing.
