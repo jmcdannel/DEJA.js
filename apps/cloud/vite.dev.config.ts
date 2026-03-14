@@ -1,6 +1,9 @@
 import { fileURLToPath, URL } from 'node:url'
+import { readFileSync } from 'node:fs'
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
+
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'))
 
 // Custom plugin to handle workspace package resolution
 const workspacePackagePlugin = () => {
@@ -36,6 +39,7 @@ export default defineConfig(({ mode }) => {
       // Provide fallback for process global to prevent "process is not defined" errors
       'process.env': {},
       global: 'globalThis',
+      __APP_VERSION__: JSON.stringify(pkg.version),
     },
     optimizeDeps: {
       include: [

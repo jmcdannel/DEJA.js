@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# DEJA.js CLI
+# Usage: deja <command>
+#
+# Commands:
+#   version   Show installed DEJA.js server version
+
+set -e
+
+# ── Colors ─────────────────────────────────────────────────────────────────
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+DEJA_DIR="${DEJA_HOME:-$HOME/.deja}"
+VERSION_FILE="$DEJA_DIR/server/version.txt"
+
+cmd_version() {
+  if [ -f "$VERSION_FILE" ]; then
+    local version
+    version=$(cat "$VERSION_FILE")
+    echo -e "${BOLD}${BLUE}DEJA.js${NC} server ${GREEN}v${version}${NC}"
+  else
+    echo -e "${BOLD}${BLUE}DEJA.js${NC} server version ${YELLOW}unknown${NC}"
+    echo -e "  No version file found at ${VERSION_FILE}"
+    echo -e "  Run the installer or update to create one."
+  fi
+}
+
+cmd_help() {
+  echo ""
+  echo -e "  ${BOLD}${BLUE}DEJA.js${NC} CLI"
+  echo ""
+  echo "  Usage: deja <command>"
+  echo ""
+  echo "  Commands:"
+  echo "    version   Show installed DEJA.js server version"
+  echo "    help      Show this help message"
+  echo ""
+}
+
+# ── Main ───────────────────────────────────────────────────────────────────
+case "${1:-help}" in
+  version | --version | -v)
+    cmd_version
+    ;;
+  help | --help | -h)
+    cmd_help
+    ;;
+  *)
+    echo -e "${RED}Unknown command: $1${NC}"
+    cmd_help
+    exit 1
+    ;;
+esac

@@ -94,6 +94,8 @@ function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
+const appVersion = __APP_VERSION__
+
 const backgroundPages = [
   { path: '/', label: 'Dashboard', icon: 'mdi-view-dashboard' },
   { path: '/settings', label: 'Settings', icon: 'mdi-cog' },
@@ -246,6 +248,9 @@ const backgroundPages = [
             </div>
           </div>
         </div>
+
+        <!-- Version -->
+        <p class="settings-version">DEJA.js Monitor v{{ appVersion }}</p>
       </div>
 
       <!-- Jump-to nav (desktop only, right side) -->
@@ -357,4 +362,11 @@ const backgroundPages = [
 .settings-row__name { font-size: 0.875rem; font-weight: 500; color: #cbd5e1; }
 .settings-row__desc { font-size: 0.75rem; color: rgba(148, 163, 184, 0.6); }
 .settings-row__value { flex-shrink: 0; }
+
+.settings-version {
+  text-align: center;
+  font-size: 0.7rem;
+  color: rgba(148, 163, 184, 0.4);
+  padding: 16px 0 8px;
+}
 </style>

@@ -105,6 +105,8 @@ const themeOptions: { value: ThemeMode; label: string; icon: string }[] = [
   { value: 'high-contrast', label: 'High Contrast', icon: 'mdi-contrast-box' },
 ]
 
+const appVersion = __APP_VERSION__
+
 const backgroundPages = [
   { path: '/', label: 'Home', icon: 'mdi-home' },
   { path: '/locos', label: 'Roster', icon: 'mdi-train' },
@@ -271,6 +273,9 @@ function scrollTo(id: string) {
             <PortList :ports="layout?.ports || []" />
           </div>
         </div>
+
+        <!-- Version -->
+        <p class="settings-version">DEJA.js Cloud v{{ appVersion }}</p>
       </div>
 
       <!-- Jump-to nav (desktop only, right side) -->
@@ -399,5 +404,12 @@ function scrollTo(id: string) {
   border-color: rgba(56, 189, 248, 0.5);
   background: rgba(56, 189, 248, 0.08);
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.1);
+}
+
+.settings-version {
+  text-align: center;
+  font-size: 0.7rem;
+  color: rgba(148, 163, 184, 0.4);
+  padding: 16px 0 8px;
 }
 </style>
