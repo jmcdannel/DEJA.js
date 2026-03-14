@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useWebSocket } from '@vueuse/core'
 import { useLayout, useLocos, useTurnouts, useEfx, useSignals } from '@repo/modules'
 import { useLayoutLogListeners } from '../composables/useLayoutLogListeners'
 import { usePaneManager, PANE_COLORS, type PaneColorKey } from '../composables/usePaneManager'
+import { useWsConnection } from '../composables/useWsConnection'
 import MonitorPane from './components/MonitorPane.vue'
 import DccLogPane from './components/DccLogPane.vue'
 import DeviceSerialPaneContent from './components/DeviceSerialPaneContent.vue'
@@ -11,6 +13,12 @@ import EffectLogPane from './components/EffectLogPane.vue'
 import SensorLogPane from './components/SensorLogPane.vue'
 import StatsPane from './components/StatsPane.vue'
 const paneManager = usePaneManager()
+const { wshost, wsUrl } = useWsConnection()
+const { status: wsStatus } = useWebSocket(wsUrl, {
+  autoReconnect: { delay: 2000, retries: 10 },
+})
+const wsDisconnected = computed(() => !wshost.value || wsStatus.value !== 'OPEN')
+const showWsBanner = ref(true)
 const { turnoutChanges, effectChanges, sensorChanges } = useLayoutLogListeners()
 const { getDevices } = useLayout()
 
@@ -106,6 +114,24 @@ function deviceIdFromPaneId(paneId: string): string {
 <template>
   <div class="flex flex-col h-screen">
     <div class="monitor-layout">
+      <!-- WebSocket connection banner -->
+      <v-alert
+        v-if="wsDisconnected && showWsBanner"
+        type="info"
+        variant="tonal"
+        closable
+        density="compact"
+        class="mx-2 mt-2"
+        @click:close="showWsBanner = false"
+      >
+        <template #title>WebSocket Not Connected</template>
+        <span class="text-sm">
+          DCC Log and Device Serial Monitor require a connection to your DEJA.js server.
+          Start a tunnel with <code class="bg-slate-700 px-1 rounded">pnpm tunnel</code> in your server directory,
+          then paste the URL in <router-link to="/settings" class="text-sky-300 underline">Settings</router-link>.
+        </span>
+      </v-alert>
+
       <!-- Main grid -->
       <div class="monitor-grid" :style="gridStyle">
         <!-- DCC Log Pane -->

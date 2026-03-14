@@ -64,3 +64,10 @@ export { default as SensorTable } from './Sensors/SensorTable.vue'
 export * from './animations'
 export { appIcons } from './assets/icons'
 export type { AppIconName } from './assets/icons'
+
+// Themes
+export { createVuetifyThemes, THEME_MODES, THEME_MODE_DEFINITIONS } from './themes'
+export type { AppThemeConfig, ThemeMode, ThemeOverrides, ThemeVariables, ThemeModeDefinition } from './themes'
+
+// Composables
+export { useThemeSwitcher } from './composables/useThemeSwitcher'

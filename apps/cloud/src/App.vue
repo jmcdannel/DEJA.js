@@ -42,7 +42,7 @@ const router = useRouter()
 const route = useRoute()
 const { menu, handleMenu } = useMenu()
 
-const { isDark } = useThemeSwitcher()
+const { isDark, themePreference } = useThemeSwitcher()
 
 // Track whether the initial route has resolved. Until it has, treat as
 // fullscreen so the header/nav never flash before a redirect completes.
@@ -77,46 +77,45 @@ const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
 </script>
 <template>
   <v-responsive class="border rounded min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
-      <v-app :theme="isDark ? 'dark' : 'light'" class="!bg-transparent">
+      <v-app :theme="themePreference" class="!bg-transparent">
         <PageBackground
           app-name="cloud"
           :background-id="isFullscreen ? 'stars' : undefined"
           :defaults="{ default: 'none', pages: {} }"
         >
-        <template v-if="!isFullscreen">
-          <AppHeader
-            app-name="Cloud"
-            app-icon="mdi-cloud"
-            variant="cloud"
-            color="blue"
-            :show-layout-power="true"
-            :show-emergency-stop="true"
-            :show-device-status="true"
-            :show-device-status-label="true"
-            :show-user-profile="true"
-            @track-power-toggle="handleTrackPowerToggle"
-            @layout-power-toggle="handleLayoutPowerToggle"
-            @emergency-stop="handleEmergencyStop"
-            @device-select="handleDeviceSelect"
-            @logo-click="handleLogoClick"
-            @drawer-toggle="drawer = !drawer"
-          />
-          <v-banner
-            v-if="isTrialing"
-            lines="one"
-            color="info"
-            density="compact"
-            class="text-body-2"
-          >
-            <template #text>
-              🎉 <strong>{{ trialPlanName }} trial</strong> — {{ trialDaysLeft }} days remaining. You won't be charged until the trial ends.
-            </template>
-            <template #actions>
-              <v-btn variant="text" size="small" :to="{ name: 'settings' }">Manage subscription</v-btn>
-            </template>
-          </v-banner>
-          <Menu v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
-        </template>
+        <AppHeader
+          v-if="!isFullscreen"
+          app-name="Cloud"
+          app-icon="mdi-cloud"
+          variant="cloud"
+          color="blue"
+          :show-layout-power="true"
+          :show-emergency-stop="true"
+          :show-device-status="true"
+          :show-device-status-label="true"
+          :show-user-profile="true"
+          @track-power-toggle="handleTrackPowerToggle"
+          @layout-power-toggle="handleLayoutPowerToggle"
+          @emergency-stop="handleEmergencyStop"
+          @device-select="handleDeviceSelect"
+          @logo-click="handleLogoClick"
+          @drawer-toggle="drawer = !drawer"
+        />
+        <v-banner
+          v-if="!isFullscreen && isTrialing"
+          lines="one"
+          color="info"
+          density="compact"
+          class="text-body-2"
+        >
+          <template #text>
+            🎉 <strong>{{ trialPlanName }} trial</strong> — {{ trialDaysLeft }} days remaining. You won't be charged until the trial ends.
+          </template>
+          <template #actions>
+            <v-btn variant="text" size="small" :to="{ name: 'Settings' }">Manage subscription</v-btn>
+          </template>
+        </v-banner>
+        <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
       <v-main>
         <v-progress-linear
           :active="isNavigating"

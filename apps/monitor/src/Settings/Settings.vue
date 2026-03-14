@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useCurrentUser } from 'vuefire'
-import { useStorage } from '@vueuse/core'
+import { useStorage, useWebSocket } from '@vueuse/core'
 import { getIdToken } from 'firebase/auth'
 import { useSubscription, PLAN_DISPLAY } from '@repo/modules'
 import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
+import { useWsConnection } from '../composables/useWsConnection'
 
 const user = useCurrentUser()
 const { plan, status, isTrialing, trialDaysLeft, subscription } = useSubscription()
@@ -16,18 +17,13 @@ const { mdAndUp } = useDisplay()
 const layoutId = useStorage('@DEJA/layoutId', '')
 
 // WebSocket connection
-const wshost = useStorage('@DEJA/pref/ws-host', 'localhost:8082')
+const { wshost, wsUrl } = useWsConnection()
 const wsEnabled = useStorage('@DEJA/pref/ws-logging', false)
-
-onMounted(() => {
-  // Auto-populate with local machine IP if still default
-  if (wshost.value === 'localhost:8082') {
-    const hostname = window.location.hostname
-    if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
-      wshost.value = `${hostname}:8082`
-    }
-  }
+const { status: wsStatus } = useWebSocket(wsUrl, {
+  autoReconnect: { delay: 2000, retries: 10 },
 })
+const wsConnected = computed(() => wsStatus.value === 'OPEN')
+const showTunnelHelp = ref(false)
 
 const planName = computed(() => PLAN_DISPLAY[plan.value].name)
 const planPrice = computed(() => {
@@ -198,10 +194,36 @@ const backgroundPages = [
           <div class="settings-row">
             <div class="settings-row__label">
               <span class="settings-row__name">WebSocket Host</span>
-              <span class="settings-row__desc">Address of the DEJA.js server (auto-detected from your network)</span>
+              <span class="settings-row__desc">Address of the DEJA.js server or Cloudflare tunnel URL</span>
             </div>
-            <div class="settings-row__value">
-              <v-text-field v-model="wshost" density="compact" variant="outlined" hide-details style="min-width: 280px;" placeholder="localhost:8082" />
+            <div class="settings-row__value flex items-center gap-2">
+              <v-text-field v-model="wshost" density="compact" variant="outlined" hide-details style="min-width: 280px;" placeholder="your-tunnel.trycloudflare.com" />
+              <v-chip
+                :color="wsConnected ? 'success' : 'error'"
+                size="x-small"
+                variant="tonal"
+                :prepend-icon="wsConnected ? 'mdi-check-circle' : 'mdi-alert-circle'"
+              >
+                {{ wsConnected ? 'Connected' : 'Disconnected' }}
+              </v-chip>
+            </div>
+          </div>
+          <div class="settings-row settings-row--block">
+            <button
+              class="flex items-center gap-1 text-xs text-sky-400 hover:text-sky-300 cursor-pointer bg-transparent border-none"
+              @click="showTunnelHelp = !showTunnelHelp"
+            >
+              <v-icon size="14">{{ showTunnelHelp ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
+              Remote access via Cloudflare Tunnel
+            </button>
+            <div v-if="showTunnelHelp" class="mt-2 text-xs text-slate-400 leading-relaxed">
+              <p class="mb-2">To access your DEJA.js server remotely:</p>
+              <ol class="list-decimal list-inside space-y-1 mb-2">
+                <li>In your server directory, run <code class="bg-slate-700 px-1 rounded text-slate-200">pnpm tunnel</code></li>
+                <li>Copy the generated <code class="bg-slate-700 px-1 rounded text-slate-200">*.trycloudflare.com</code> URL</li>
+                <li>Paste it in the WebSocket Host field above (no port or protocol needed)</li>
+              </ol>
+              <p class="text-slate-500">For a persistent URL, use <code class="bg-slate-700 px-1 rounded">pnpm tunnel:named</code> with a Cloudflare account.</p>
             </div>
           </div>
           <div class="settings-row">

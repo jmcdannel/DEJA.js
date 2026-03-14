@@ -5,6 +5,7 @@ import { RouterView, useRoute, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { Login } from '@repo/auth'
 import { TransitionFade, NotificationContainer, provideNotifications, PageBackground } from '@repo/ui'
+import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import type { MenuItem } from '@repo/ui/src/Menu/types'
 import { useDcc } from '@repo/dccex'
@@ -29,9 +30,10 @@ async function handleEmergencyStop() {
 }
 
 const user = useCurrentUser()
+const isDevAutoLogin = import.meta.env.DEV && import.meta.env.VITE_DEV_AUTO_LOGIN === 'true'
 const router = useRouter()
 
-const theme = ref('monitorDark')
+const { themePreference } = useThemeSwitcher()
 
 function handleMenu(item: MenuItem) {
   router.push({ name: item.name })
@@ -42,7 +44,7 @@ const menu: MenuItem[] = []
 
 <template>
   <v-responsive>
-    <v-app v-if="user" :theme="theme">
+    <v-app v-if="user || isDevAutoLogin" :theme="themePreference">
       <PageBackground app-name="monitor">
       <MonitorStatusBar
         @toggle-drawer="drawer = !drawer"
@@ -71,7 +73,7 @@ const menu: MenuItem[] = []
       <NotificationContainer />
       </PageBackground>
     </v-app>
-    <v-app v-else :theme="theme">
+    <v-app v-else :theme="themePreference">
       <Login />
     </v-app>
   </v-responsive>
