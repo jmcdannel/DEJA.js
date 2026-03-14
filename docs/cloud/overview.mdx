@@ -1,0 +1,96 @@
+---
+title: Cloud App
+description: The DEJA.js layout management hub for configuring locomotives, turnouts, routes, effects, signals, and devices from a single web interface.
+section: apps
+order: 1
+---
+
+# Cloud App
+
+The Cloud app is the central configuration hub for your DEJA.js model railroad layout. It provides a web-based interface for managing every aspect of your layout -- from building your locomotive roster to wiring signals and configuring hardware devices. All configuration data is stored in Firebase and synchronized in real time across all connected apps.
+
+![Cloud app dashboard](/images/docs/cloud/dashboard.png)
+
+{/* VIDEO: Cloud app overview walkthrough showing navigation between major sections */}
+
+## What You Can Do
+
+The Cloud app covers the full lifecycle of layout configuration:
+
+- **Locomotive Roster** -- Add, edit, and remove locomotives. Configure DCC addresses, decoder functions (F0 through F28), and build multi-unit consists.
+- **Turnouts** -- Define turnout names, DCC indices, pin assignments, and device bindings. Organize them with tags, reorder with drag-and-drop sorting.
+- **Routes** -- Create automated turnout sequences that throw multiple turnouts in a defined order with a single action.
+- **Effects** -- Set up lights, LEDs, street lights, relays, sound effects, macros, addressable LED strips (IALED), and more.
+- **Signals** -- Wire three-aspect signal heads (red, yellow, green) with per-pin configuration and common anode/cathode wiring selection.
+- **DCC-EX Console** -- Send raw DCC commands to the CommandStation, use preset command buttons, and monitor command history in real time over WebSocket.
+- **Layout Configuration** -- Manage devices, view serial ports, review loaded firmware modules, and organize layout metadata with tags.
+- **Sensors** -- Monitor real-time sensor state from connected hardware.
+
+## Authentication and Access
+
+The Cloud app requires authentication. Users can sign up with email and password, or sign in with GitHub OAuth. After signing up, new users go through a two-step onboarding wizard:
+
+1. **Welcome** -- An introduction to the system.
+2. **Create Your Layout** -- Set up your first layout with a name and initial configuration.
+
+After onboarding, accounts require approval before full access is granted. Until approved, users see a pending approval screen. This ensures only authorized operators can modify layout configuration.
+
+Once approved, users select a layout to work with. The selected layout ID is persisted in local storage (`@DEJA/layoutId`) so it carries across sessions.
+
+## Navigation
+
+The Cloud app uses a sidebar navigation drawer to move between sections. The menu items, from top to bottom, are:
+
+| Section | Icon | Description |
+|---------|------|-------------|
+| **Layout** | Fence | Hardware devices, serial ports, firmware modules, and tags |
+| **DCC-EX** | CPU | Raw command console and real-time command log |
+| **Roster** | Train | Locomotive management with functions and consists |
+| **Effects** | Rocket | Lights, sounds, LEDs, macros, and IALED strips |
+| **Turnouts** | Call Split | Turnout configuration with sorting and filtering |
+| **Routes** | Map | Automated turnout sequences |
+| **Signals** | Traffic Light | Three-aspect signal head wiring |
+| **Settings** | Cog | User preferences |
+
+The header bar displays the app name ("Cloud"), a cloud icon, and provides controls for track power, emergency stop, device status indicators, and user profile access.
+
+![Cloud app navigation sidebar](/images/docs/cloud/navigation.png)
+
+## Dashboard
+
+The home screen serves as a system overview. If a DCC-EX CommandStation device is configured in your layout, the dashboard displays a live device status list showing connection state, port assignments, and health indicators for each connected device.
+
+If no DCC-EX device has been configured yet, the dashboard shows an onboarding prompt titled "Set Up Your Command Station" with quick-links to layout setup. This empty state highlights three key capabilities: monitoring layout status, tracking connected devices, and viewing a system health overview.
+
+## Tech Stack
+
+The Cloud app is built with:
+
+- **Vue 3** with Composition API (`<script setup lang="ts">`)
+- **Vuetify 3** for Material Design UI components
+- **Tailwind CSS** for utility classes
+- **VueFire** for reactive Firebase bindings
+- **Vue Router 4** with authentication guards (`requireAuth`, `requireOnboarding`, `requireApproval`, `requireLayout`)
+- **VueUse** for composable utilities (persistent storage, etc.)
+
+All data flows through Firebase Firestore collections scoped to the selected layout ID. Changes made in the Cloud app are immediately visible in the Throttle, Monitor, and Tour apps.
+
+## Running the Cloud App
+
+Start the Cloud app in development mode:
+
+```bash
+pnpm --filter=deja-cloud dev
+```
+
+The app launches on a Vite development server. For development without a live Firebase connection, a mock mode is available:
+
+```bash
+pnpm --filter=deja-cloud dev:mock
+```
+
+## Next Steps
+
+- [Locomotive Roster](/docs/cloud/roster) -- Add and configure your locomotives.
+- [Layout Configuration](/docs/cloud/layout) -- Set up devices and serial connections.
+- [DCC-EX Console](/docs/cloud/dcc-ex) -- Send commands directly to your CommandStation.

@@ -1,0 +1,183 @@
+---
+title: DCC-EX Command Reference
+description: Reference for DCC-EX serial commands used by DEJA.js -- command format, parameter ranges, and the full command flow from browser to track.
+section: dev
+order: 12
+---
+
+# DCC-EX Command Reference
+
+DCC-EX uses a text-based protocol over USB serial. Every command is wrapped in angle brackets and terminated with a newline: `<command>\n`. The DEJA.js server's `send()` function in `apps/server/src/lib/dcc.ts` handles this wrapping automatically -- callers pass only the inner command string (e.g., `t 3 50 1` rather than `<t 3 50 1>\n`).
+
+Serial communication runs at **115200 baud**.
+
+## Command Table
+
+| Operation | DCC-EX Command | DEJA.js Function | Description |
+|-----------|---------------|-----------------|-------------|
+| Track power ON | `<1>` | `dcc.power('1')` | Turn on power to all tracks |
+| Track power OFF | `<0>` | `dcc.power('0')` | Turn off power to all tracks |
+| Main track ON | `<1 MAIN>` | `dcc.send('1 MAIN')` | Turn on power to main track only |
+| Main track OFF | `<0 MAIN>` | `dcc.send('0 MAIN')` | Turn off power to main track only |
+| Prog track ON | `<1 PROG>` | `dcc.send('1 PROG')` | Turn on power to programming track only |
+| Prog track OFF | `<0 PROG>` | `dcc.send('0 PROG')` | Turn off power to programming track only |
+| Throttle | `<t addr speed dir>` | `dcc.sendSpeed({ address, speed })` | Set locomotive speed and direction |
+| Turnout | `<T idx state>` | `dcc.sendTurnout({ turnoutIdx, state })` | Throw or close a turnout |
+| Function | `<F addr func state>` | `dcc.sendFunction({ address, func, state })` | Toggle a locomotive function |
+| Output | `<Z pin state>` | `dcc.sendOutput({ pin, state })` | Control an accessory output pin |
+| Hardware reset | `<D RESET>` | `dcc.send('D RESET')` | Reset the CommandStation hardware |
+| Status query | `<=>` | `dcc.getStatus()` | Request current CommandStation status |
+| Save EEPROM | `<E>` | `dcc.send('E')` | Save current configuration to EEPROM |
+| List outputs | `<Z>` | `dcc.send('Z')` | List all defined output pins |
+
+## Parameter Reference
+
+### Throttle: `<t addr speed dir>`
+
+| Parameter | Range | Description |
+|-----------|-------|-------------|
+| `addr` | 1--9999 | DCC decoder address |
+| `speed` | 0--126 | Absolute speed (0 = stop, 126 = maximum) |
+| `dir` | 0 or 1 | Direction: `1` = forward, `0` = reverse |
+
+DEJA.js uses signed speed internally: positive values mean forward, negative values mean reverse. The server derives the direction bit and absolute speed automatically:
+
+```typescript
+const direction = speed > 0 ? 1 : 0
+const absSpeed = Math.abs(speed)
+const cmd = `t ${address} ${absSpeed} ${direction}`
+```
+
+### Turnout: `<T idx state>`
+
+| Parameter | Range | Description |
+|-----------|-------|-------------|
+| `idx` | Integer | Turnout index as configured on the CommandStation |
+| `state` | 0 or 1 | `1` = thrown (diverging), `0` = closed (straight) |
+
+The server converts the boolean state to an integer:
+
+```typescript
+const cmd = `T ${turnoutIdx} ${state ? 1 : 0}`
+```
+
+### Function: `<F addr func state>`
+
+| Parameter | Range | Description |
+|-----------|-------|-------------|
+| `addr` | 1--9999 | DCC decoder address |
+| `func` | 0--28 | Function number (F0 = headlight, F1 = bell, F2 = horn, etc.) |
+| `state` | 0 or 1 | `1` = on, `0` = off |
+
+### Output: `<Z pin state>`
+
+| Parameter | Range | Description |
+|-----------|-------|-------------|
+| `pin` | Integer | Arduino pin number on the CommandStation |
+| `state` | 0 or 1 | `1` = on (HIGH), `0` = off (LOW) |
+
+### Power: `<1>` / `<0>`
+
+| Command | Description |
+|---------|-------------|
+| `<1>` | Power on (all tracks) |
+| `<0>` | Power off (all tracks) |
+| `<1 MAIN>` | Power on main track only |
+| `<0 MAIN>` | Power off main track only |
+| `<1 PROG>` | Power on programming track only |
+| `<0 PROG>` | Power off programming track only |
+
+Power commands are detected by the server and optimistically written to Firestore so that frontend apps can reflect the power state immediately.
+
+## Command Validation
+
+Before any command is sent to the serial port, the server validates it with the `validateDccCommand` function:
+
+1. The command must be a string.
+2. The command must not exceed 200 characters.
+3. The command must not contain angle brackets (`<`, `>`) or newline characters (`\n`, `\r`) -- these would break the DCC-EX framing protocol.
+
+Numeric parameters (address, speed, pin, function number) are validated with `isFiniteNumber` to reject `NaN`, `Infinity`, and non-numeric values.
+
+The action type is also validated against a whitelist of known actions: `connect`, `dcc`, `listPorts`, `power`, `throttle`, `turnout`, `output`, `function`, `getStatus`, `status`, and `ping`.
+
+## Full Command Flow
+
+The following diagram shows the complete path a command takes from a user action in the browser to a DCC signal on the track:
+
+```
+Frontend (Vue app)
+  |
+  |  useDcc().setFunction(addr, func, state)
+  |  useDcc().setPower(payload)
+  |  useDcc().sendOutput(pin, state)
+  |
+  v
+send(action, payload) -- writes to Firebase RTDB
+  |
+  v
+Firebase RTDB: dccCommands/{layoutId}
+  |  (push + set with serverTimestamp)
+  |
+  v
+Server: dejaCloud.ts
+  |  rtdb.ref('dccCommands/{layoutId}').on('child_added')
+  |
+  v
+dcc.ts: handleDccChange(snapshot, key)
+  |  Validates action against whitelist
+  |  Parses payload JSON
+  |
+  v
+dcc.ts: handleMessage(json)
+  |
+  |-- action: 'throttle'  -> sendSpeed()    -> send('t addr speed dir')
+  |-- action: 'turnout'   -> sendTurnout()  -> send('T idx state')
+  |-- action: 'function'  -> sendFunction() -> send('F addr func state')
+  |-- action: 'output'    -> sendOutput()   -> send('Z pin state')
+  |-- action: 'dcc'       -> send()         -> raw command passthrough
+  |-- action: 'power'     -> power()        -> send('1' or '0')
+  |
+  v
+dcc.ts: send(data)
+  |  validateDccCommand(data)
+  |  Wraps as '<data>\n'
+  |  Broadcasts to WebSocket clients
+  |
+  v
+serial.send(port, '<cmd>\n')
+  |
+  v
+DCC-EX CommandStation (Arduino, 115200 baud)
+  |
+  v
+DCC track signals -> locomotives, turnouts, signals
+```
+
+After the command is processed, the server removes it from the RTDB queue:
+
+```typescript
+const cmd = rtdb.ref(`dccCommands/${layoutId}/${key}`)
+cmd.remove()
+```
+
+## DEJA Commands (Non-Serial)
+
+DEJA system commands use a separate RTDB queue (`dejaCommands/{layoutId}`) and are handled by `apps/server/src/lib/deja.ts`. These commands never reach the serial port. They handle operations like:
+
+- Device connection and disconnection.
+- Serial port discovery and listing.
+- Server status queries.
+
+## Firestore-Driven Commands
+
+In addition to the RTDB command queue, the server also listens to Firestore collections for state changes:
+
+| Collection | Handler | What It Does |
+|------------|---------|---------------|
+| `layouts/{layoutId}/throttles` | `handleThrottleChange` | Detects speed/direction changes and calls `dcc.sendSpeed()` |
+| `layouts/{layoutId}/turnouts` | `handleTurnoutChange` | Detects turnout state changes and calls `dcc.sendTurnout()` |
+| `layouts/{layoutId}/effects` | `handleEffectChange` | Processes effect activations (sound playback, output pins) |
+| `layouts/{layoutId}/signals` | `handleSignalChange` | Processes signal state changes |
+
+These listeners provide an alternative path for commands to reach the CommandStation -- instead of going through the RTDB queue, they react directly to Firestore document changes.
