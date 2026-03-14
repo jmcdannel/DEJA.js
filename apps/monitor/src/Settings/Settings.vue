@@ -4,7 +4,7 @@ import { useCurrentUser } from 'vuefire'
 import { useStorage, useWebSocket } from '@vueuse/core'
 import { getIdToken } from 'firebase/auth'
 import { useSubscription, PLAN_DISPLAY } from '@repo/modules'
-import { BackgroundSettings } from '@repo/ui'
+import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
 import { useWsConnection } from '../composables/useWsConnection'
@@ -13,6 +13,8 @@ const user = useCurrentUser()
 const { plan, status, isTrialing, trialDaysLeft, subscription } = useSubscription()
 const { themePreference, setTheme } = useThemeSwitcher()
 const { mdAndUp } = useDisplay()
+
+const layoutId = useStorage('@DEJA/layoutId', '')
 
 // WebSocket connection
 const { wshost, wsUrl } = useWsConnection()
@@ -83,6 +85,7 @@ const sections = [
   { id: 'billing', label: 'Billing', icon: 'mdi-credit-card-outline' },
   { id: 'appearance', label: 'Appearance', icon: 'mdi-palette-outline' },
   { id: 'connection', label: 'Connection', icon: 'mdi-server-network' },
+  { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'monitor', label: 'Monitor', icon: 'mdi-monitor-dashboard' },
 ]
 
@@ -234,6 +237,15 @@ const backgroundPages = [
           </div>
         </div>
 
+        <!-- Server Setup -->
+        <div id="server-setup" class="settings-section">
+          <div class="settings-section__header">
+            <v-icon size="20" class="settings-section__icon">mdi-download-outline</v-icon>
+            <h2 class="settings-section__title">Server Setup</h2>
+          </div>
+          <ServerSetupInfo :uid="user?.uid" :layout-id="layoutId" />
+        </div>
+
         <!-- Monitor Settings -->
         <div id="monitor" class="settings-section">
           <div class="settings-section__header">
@@ -379,4 +391,5 @@ const backgroundPages = [
 .settings-row__name { font-size: 0.875rem; font-weight: 500; color: #cbd5e1; }
 .settings-row__desc { font-size: 0.75rem; color: rgba(148, 163, 184, 0.6); }
 .settings-row__value { flex-shrink: 0; }
+
 </style>

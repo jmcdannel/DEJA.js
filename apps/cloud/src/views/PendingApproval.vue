@@ -6,6 +6,7 @@ import { doc, setDoc, serverTimestamp, collection, query, where } from 'firebase
 import { db } from '@repo/firebase-config'
 import { useLayout } from '@repo/modules'
 import { Signout } from '@repo/auth'
+import { ServerSetupInfo } from '@repo/ui'
 
 const user = useCurrentUser()
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -42,24 +43,6 @@ async function saveServerType() {
     // Silent fail — non-critical setting
   } finally {
     serverSaving.value = false
-  }
-}
-
-// Install script copy
-const copiedMac = ref(false)
-const copiedWin = ref(false)
-
-const macScript = 'curl -fsSL https://install.dejajs.com | bash'
-const winScript = 'irm https://install.dejajs.com/win | iex'
-
-async function copyScript(script: string, platform: 'mac' | 'win') {
-  await navigator.clipboard.writeText(script)
-  if (platform === 'mac') {
-    copiedMac.value = true
-    setTimeout(() => { copiedMac.value = false }, 2000)
-  } else {
-    copiedWin.value = true
-    setTimeout(() => { copiedWin.value = false }, 2000)
   }
 }
 
@@ -126,6 +109,19 @@ async function sendApprovalNotification() {
         </v-btn>
       </div>
 
+      <!-- Your Install Credentials -->
+      <div class="glass-card mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <v-icon color="primary" size="28">mdi-key-variant</v-icon>
+          <h2 class="text-lg font-semibold text-sky-100">Your Install Credentials</h2>
+        </div>
+        <p class="text-slate-400 text-sm mb-5">
+          You will need these values when running the install script. Copy them now — the installer will prompt for both.
+        </p>
+
+        <ServerSetupInfo :uid="user?.uid" :layout-id="primaryLayoutId" />
+      </div>
+
       <!-- Server Type Selection -->
       <div class="glass-card mb-6">
         <div class="flex items-center gap-3 mb-4">
@@ -173,8 +169,11 @@ async function sendApprovalNotification() {
           <v-icon color="primary" size="28">mdi-download-outline</v-icon>
           <h2 class="text-lg font-semibold text-sky-100">Quick Install</h2>
         </div>
-        <p class="text-slate-400 text-sm mb-5">
+        <p class="text-slate-400 text-sm mb-2">
           Run one of these scripts on the machine connected to your DCC-EX Command Station.
+        </p>
+        <p class="text-slate-400 text-sm mb-5">
+          The installer will prompt you for your <strong class="text-sky-300">User UID</strong> and <strong class="text-sky-300">Layout ID</strong> shown above.
         </p>
 
         <!-- macOS / Linux -->
@@ -365,4 +364,5 @@ async function sendApprovalNotification() {
 .advanced-link:hover {
   color: #38bdf8;
 }
+
 </style>
