@@ -18,8 +18,8 @@ function getDefaultWsHost(): string {
     return `${hostname}:8082`
   }
 
-  // On remote host (Vercel, etc.), return empty to prompt user configuration
-  return ''
+  // On remote host (Vercel, etc.), default to permanent tunnel domain
+  return 'ws.dejajs.com'
 }
 
 export function resolveWsUrl(host: string | undefined): string | undefined {
