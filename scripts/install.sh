@@ -18,6 +18,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 info()  { echo -e "${BLUE}[INFO]${NC}  $*"; }
@@ -101,11 +102,11 @@ link_account() {
     info "Link your DEJA.js account."
     info "Find your UID and Layout ID at: https://cloud.dejajs.com → Settings → Install"
     echo ""
-    read -rp "Your UID: " uid
+    read -rp "Your UID: " uid < /dev/tty
   fi
 
   if [ -z "${layout_id}" ]; then
-    read -rp "Your Layout ID: " layout_id
+    read -rp "Your Layout ID: " layout_id < /dev/tty
   fi
 
   if [ -z "${uid}" ] || [ -z "${layout_id}" ]; then
@@ -152,13 +153,13 @@ setup_environment() {
     echo ""
     info "Enter your Firebase configuration (from https://cloud.dejajs.com → Settings → Install)"
     echo ""
-    read -rp "VITE_FIREBASE_API_KEY: " fb_api_key
-    read -rp "VITE_FIREBASE_AUTH_DOMAIN: " fb_auth_domain
-    read -rp "VITE_FIREBASE_PROJECT_ID: " fb_project_id
-    read -rp "VITE_FIREBASE_DATABASE_URL: " fb_database_url
-    read -rp "VITE_FIREBASE_STORAGE_BUCKET: " fb_storage_bucket
-    read -rp "VITE_FIREBASE_MESSAGING_SENDER_ID: " fb_messaging_id
-    read -rp "VITE_FIREBASE_APP_ID: " fb_app_id
+    read -rp "VITE_FIREBASE_API_KEY: " fb_api_key < /dev/tty
+    read -rp "VITE_FIREBASE_AUTH_DOMAIN: " fb_auth_domain < /dev/tty
+    read -rp "VITE_FIREBASE_PROJECT_ID: " fb_project_id < /dev/tty
+    read -rp "VITE_FIREBASE_DATABASE_URL: " fb_database_url < /dev/tty
+    read -rp "VITE_FIREBASE_STORAGE_BUCKET: " fb_storage_bucket < /dev/tty
+    read -rp "VITE_FIREBASE_MESSAGING_SENDER_ID: " fb_messaging_id < /dev/tty
+    read -rp "VITE_FIREBASE_APP_ID: " fb_app_id < /dev/tty
   else
     ok "Firebase client config embedded"
   fi
@@ -171,7 +172,7 @@ setup_environment() {
     warn "Service account not embedded (development build)."
     info "Download your service account JSON from: https://cloud.dejajs.com → Settings → Install"
     echo ""
-    read -rp "Path to service account JSON file (or press Enter to skip): " sa_json_path
+    read -rp "Path to service account JSON file (or press Enter to skip): " sa_json_path < /dev/tty
 
     fb_client_email=""
     fb_private_key=""
@@ -345,10 +346,19 @@ start_and_verify() {
 # ======================================================================
 main() {
   echo ""
-  echo "========================================"
-  echo "  DEJA.js Server Installer"
-  echo "========================================"
-  echo ""
+  echo -e "${CYAN}"
+  cat << 'LOGO'
+      ____  ______     _____     _
+     / __ \| ____/    / /   |   (_)____
+    / / / /|  _|  _  / / /| |  / / ___/
+   / /_/ / | |___| |/ / ___ | / (__  )
+  /_____/  |_____|___/_/  |_|/_/____/
+          ___===~~~---...___
+      .--~                  ~--.
+     /       SERVER INSTALLER    \
+    |_____________________________|
+LOGO
+  echo -e "${NC}"
 
   detect_platform
   check_node
