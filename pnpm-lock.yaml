@@ -105,7 +105,7 @@ importers:
         specifier: ^7.4.47
         version: 7.4.47
       '@repo/auth':
-        specifier: workspace:^0.0.0
+        specifier: workspace:^0.0.1
         version: link:../../packages/auth
       '@repo/dccex':
         specifier: workspace:*
@@ -300,7 +300,7 @@ importers:
         specifier: ^7.4.47
         version: 7.4.47
       '@repo/auth':
-        specifier: workspace:^0.0.0
+        specifier: workspace:^0.0.1
         version: link:../../packages/auth
       '@repo/dccex':
         specifier: workspace:*
@@ -709,7 +709,7 @@ importers:
         specifier: ^7.4.47
         version: 7.4.47
       '@repo/auth':
-        specifier: workspace:^0.0.0
+        specifier: workspace:^0.0.1
         version: link:../../packages/auth
       '@repo/dccex':
         specifier: workspace:*
