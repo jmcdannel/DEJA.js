@@ -246,22 +246,16 @@ importers:
 
   apps/install-api:
     dependencies:
-      '@hono/node-server':
-        specifier: ^1.13.0
-        version: 1.19.11(hono@4.12.7)
       '@vercel/blob':
         specifier: ^0.27.1
         version: 0.27.3
-      hono:
-        specifier: ^4.7.0
-        version: 4.12.7
+      '@vercel/node':
+        specifier: ^5.0.0
+        version: 5.4.1(rollup@4.52.5)
     devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
-      tsx:
-        specifier: ^4.19.0
-        version: 4.20.6
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.23
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
