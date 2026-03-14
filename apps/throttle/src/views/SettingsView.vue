@@ -135,6 +135,8 @@ function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
+const appVersion = __APP_VERSION__
+
 const backgroundPages = [
   { path: '/', label: 'Home', icon: 'mdi-home' },
   { path: '/turnouts', label: 'Turnouts', icon: 'mdi-directions-fork' },
@@ -324,6 +326,9 @@ const backgroundPages = [
             <SelectFavorites />
           </div>
         </div>
+
+        <!-- Version -->
+        <p class="settings-version">DEJA.js Throttle v{{ appVersion }}</p>
       </div>
 
       <!-- Jump-to nav (desktop only, right side) -->
@@ -452,4 +457,10 @@ const backgroundPages = [
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.1);
 }
 
+.settings-version {
+  text-align: center;
+  font-size: 0.7rem;
+  color: rgba(148, 163, 184, 0.4);
+  padding: 16px 0 8px;
+}
 </style>

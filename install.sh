@@ -30,7 +30,8 @@ echo "    1. Check prerequisites (Node.js v22+, Git)"
 echo "    2. Install pnpm if needed"
 echo "    3. Download DEJA.js"
 echo "    4. Install dependencies"
-echo "    5. Create your .env.local configuration file"
+echo "    5. Install the deja CLI"
+echo "    6. Create your .env.local configuration file"
 echo ""
 
 # ── 0. Account check ──────────────────────────────────────────────────────
@@ -103,7 +104,38 @@ step "Installing dependencies..."
 pnpm install
 ok "Dependencies installed"
 
-# ── 6. Create .env.local ─────────────────────────────────────────────────────
+# ── 6. Write version & install CLI ────────────────────────────────────────────
+step "Installing DEJA CLI..."
+DEJA_HOME="${DEJA_HOME:-$HOME/.deja}"
+mkdir -p "$DEJA_HOME/server"
+SERVER_VERSION=$(node -e "console.log(require('./apps/server/package.json').version)")
+echo "$SERVER_VERSION" > "$DEJA_HOME/server/version.txt"
+ok "Server version $SERVER_VERSION recorded"
+
+# Install CLI script
+cp scripts/deja "$DEJA_HOME/deja"
+chmod +x "$DEJA_HOME/deja"
+
+# Add to PATH if not already there
+SHELL_RC=""
+if [ -f "$HOME/.zshrc" ]; then
+  SHELL_RC="$HOME/.zshrc"
+elif [ -f "$HOME/.bashrc" ]; then
+  SHELL_RC="$HOME/.bashrc"
+fi
+
+if [ -n "$SHELL_RC" ] && ! grep -q "DEJA_HOME" "$SHELL_RC"; then
+  echo "" >> "$SHELL_RC"
+  echo "# DEJA.js CLI" >> "$SHELL_RC"
+  echo "export DEJA_HOME=\"$DEJA_HOME\"" >> "$SHELL_RC"
+  echo 'export PATH="$DEJA_HOME:$PATH"' >> "$SHELL_RC"
+  ok "Added deja CLI to PATH in $(basename "$SHELL_RC")"
+  warn "Run 'source $SHELL_RC' or open a new terminal to use 'deja' command"
+else
+  ok "deja CLI available at $DEJA_HOME/deja"
+fi
+
+# ── 7. Create .env.local ─────────────────────────────────────────────────────
 step "Configuring environment..."
 if [ ! -f .env.local ]; then
     cp .env.example .env.local
@@ -112,7 +144,7 @@ else
     warn ".env.local already exists — skipping copy"
 fi
 
-# ── 7. Set LAYOUT_ID ─────────────────────────────────────────────────────────
+# ── 8. Set LAYOUT_ID ─────────────────────────────────────────────────────────
 echo ""
 echo -e "  ${BOLD}Layout ID${NC}"
 info "A unique name for your layout. Used to identify your data in DEJA Cloud."
@@ -137,7 +169,7 @@ else
 fi
 ok "Layout ID set to: $LAYOUT_ID"
 
-# ── 8. Firebase credentials ──────────────────────────────────────────────────
+# ── 9. Firebase credentials ──────────────────────────────────────────────────
 echo ""
 echo -e "  ${BOLD}Firebase Credentials${NC}"
 echo ""
@@ -170,7 +202,7 @@ else
     info "  $INSTALL_DIR/.env.local"
 fi
 
-# ── 9. Done ──────────────────────────────────────────────────────────────────
+# ── 10. Done ─────────────────────────────────────────────────────────────────
 echo ""
 echo -e "  ${GREEN}${BOLD}Setup complete!${NC}"
 echo ""
