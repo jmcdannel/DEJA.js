@@ -53,11 +53,10 @@ app.post('/releases/:version/upload', async (c) => {
   const file = formData.get('file') as File
   if (!file) return c.json({ error: 'No file provided' }, 400)
 
-  const arrayBuffer = await file.arrayBuffer()
   const url = await uploadRelease(
     version,
     file.name,
-    new Uint8Array(arrayBuffer),
+    file,
     file.type || 'application/octet-stream'
   )
 
