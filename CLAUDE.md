@@ -593,6 +593,7 @@ Copy `.env.example` to `.env` (or `.env.local`) at the repo root. Turborepo read
 | `VITE_WS_PORT` | WebSocket server port (default: `8082`) |
 | `VITE_WS_ID` | Server identifier string (default: `DEJA.js`) |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob token for sound file storage |
+| `CLOUDFLARE_TUNNEL_TOKEN` | Cloudflare tunnel token for `pnpm tunnel:named` |
 
 ---
 
