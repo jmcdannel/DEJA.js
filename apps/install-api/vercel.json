@@ -1,5 +1,7 @@
 {
+  "framework": null,
   "installCommand": "npm install",
-  "buildCommand": "echo 'skipping build — Vercel compiles api/ functions natively'",
+  "buildCommand": "",
+  "outputDirectory": ".",
   "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
 }
