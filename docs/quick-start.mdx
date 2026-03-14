@@ -1,0 +1,192 @@
+---
+title: Quick Start
+description: Go from zero to driving trains in minutes — sign up, choose a plan, register your layout, install the server, and take control.
+section: docs
+order: 3
+---
+
+# Quick Start
+
+By the end of this guide your DCC-EX CommandStation will be connected to DEJA.js and you'll be driving trains from any browser on your network.
+
+## What You Need
+
+| Requirement | Details |
+|---|---|
+| **Node.js** v22+ | [Install via nvm](https://github.com/nvm-sh/nvm) |
+| **pnpm** v9+ | `npm install -g pnpm` |
+| **Git** | [git-scm.com](https://git-scm.com/install/) |
+| **DCC-EX CommandStation** | [DCC-EX setup guide](https://dcc-ex.com/ex-commandstation/index.html) |
+| **USB cable** | Connecting the CommandStation to your computer |
+
+> Confirm Node.js before continuing: `node --version` should print `v22.x.x` or higher.
+
+---
+
+## Step 1 — Sign Up
+
+Create your free DEJA Cloud account. It takes one click.
+
+1. Go to [DEJA Cloud](https://cloud.dejajs.com) and click **Sign Up**.
+2. Sign in with **Google**, **GitHub**, or **email and password**.
+3. The onboarding wizard starts automatically.
+
+---
+
+## Step 2 — Choose a Plan
+
+Pick the tier that fits your layout. You can always upgrade later.
+
+| | Hobbyist | Engineer | Conductor |
+|---|---|---|---|
+| **Price** | Free | $7/mo or $67/yr | $18/mo or $173/yr |
+| **Locomotives** | 5 | 25 | Unlimited |
+| **Layouts** | 1 | 2 | Unlimited |
+| **Turnouts, Signals, Effects** | — | 15 each | Unlimited |
+| **Tour App** | — | — | Included |
+
+- **Hobbyist** is completely free — no credit card required.
+- **Engineer** and **Conductor** include a **14-day free trial**. You won't be charged until the trial ends.
+
+Select your plan and continue. If you chose a paid tier, enter your card details on the next screen to start your trial.
+
+---
+
+## Step 3 — Register Your Layout
+
+Give your layout a name and a unique ID (lowercase letters, numbers, and hyphens only). This is how DEJA.js organizes your locomotives, turnouts, effects, and all other configuration.
+
+After this step the wizard shows your `LAYOUT_ID` and Firebase credentials. **Copy these values** — you'll need them in Step 4.
+
+> You can find your credentials later in [DEJA Cloud](https://cloud.dejajs.com) under **Settings > View Local Environment Configuration**.
+
+---
+
+## Step 4 — Install
+
+### Quick Install (recommended)
+
+Open a terminal on the machine connected to your DCC-EX CommandStation and run one command. It downloads the DEJA.js server, installs dependencies, and walks you through configuration.
+
+**macOS / Linux**
+
+```bash
+curl -fsSL https://install.dejajs.com | bash
+```
+
+**Windows (PowerShell)**
+
+```powershell
+irm https://install.dejajs.com/win | iex
+```
+
+After the script finishes, skip ahead to [Step 5 — Register Your CommandStation](#step-5--register-your-commandstation).
+
+### Manual Install
+
+If you prefer to set things up yourself:
+
+```bash
+git clone https://github.com/jmcdannel/DEJA.js.git
+cd DEJA.js
+pnpm install
+cp .env.example .env.local
+```
+
+Open `.env.local` in a text editor and paste the credentials from Step 3:
+
+```env
+LAYOUT_ID=my-layout-name
+
+VITE_FIREBASE_API_KEY=AIza...
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=1:123456789:web:abc123
+
+ENABLE_WS=true
+ENABLE_DEJACLOUD=true
+VITE_WS_PORT=8082
+```
+
+For the full list of environment variables and advanced configuration, see the [Installation guide](/docs/installation).
+
+---
+
+## Step 5 — Register Your CommandStation
+
+Tell DEJA Cloud that a DCC-EX CommandStation will connect via USB from this computer.
+
+1. In [DEJA Cloud](https://cloud.dejajs.com), open your layout.
+2. Go to **Devices** and click **Add**.
+3. Select **DCC-EX CommandStation** → connection type **USB** → click **Submit**.
+
+---
+
+## Step 6 — Start the Server
+
+```bash
+pnpm deja
+```
+
+This starts the DEJA Server (USB serial communication) and the Monitor app (diagnostics) together.
+
+**Verify:** Terminal output shows the WebSocket server listening on port `8082`. Open [DEJA Monitor](https://monitor.dejajs.com) in a browser — you should see the server connected.
+
+---
+
+## Step 7 — Connect Hardware
+
+1. Open [DEJA Monitor](https://monitor.dejajs.com) on this computer.
+2. Find the **DCC-EX CommandStation** device card.
+3. Select the USB port from the dropdown and click **Connect**.
+
+> **Finding your port:**
+> - Linux / macOS — `ls /dev/tty*` and look for `/dev/ttyUSB0` or `/dev/ttyACM0`
+> - Windows — Device Manager > Ports (COM & LPT) — note the `COMx` number
+
+**Verify:** The device card shows a green "connected" status and displays DCC-EX firmware version information.
+
+---
+
+## Step 8 — Drive Trains
+
+1. In [DEJA Cloud](https://cloud.dejajs.com), navigate to **Roster** and click **Add Loco** — enter the DCC address and a name.
+2. Open [DEJA Throttle](https://throttle.dejajs.com) in any browser on your network.
+3. Click the track power button to energize the track.
+4. Select your locomotive and use the speed slider and direction controls to drive.
+
+**Verify:** The locomotive moves on the track and responds to speed, direction, and function controls.
+
+---
+
+## App URLs
+
+| App | URL |
+|---|---|
+| DEJA Cloud (layout config & roster) | [cloud.dejajs.com](https://cloud.dejajs.com) |
+| DEJA Throttle (train control) | [throttle.dejajs.com](https://throttle.dejajs.com) |
+| DEJA Monitor (diagnostics) | [monitor.dejajs.com](https://monitor.dejajs.com) |
+
+## Useful Commands
+
+| Task | Command |
+|---|---|
+| Install dependencies | `pnpm install` |
+| Start server + monitor | `pnpm deja` |
+| Start all apps (dev mode) | `pnpm dev` |
+| Build all apps | `pnpm build` |
+| Lint all packages | `pnpm lint` |
+| Check dependency versions | `pnpm deps:check` |
+
+## What's Next
+
+Now that you're up and running, explore the individual app guides:
+
+- [Throttle App](/docs/throttle) -- Full guide to the train control interface.
+- [Cloud App](/docs/cloud) -- Layout configuration, roster management, and the DCC-EX console.
+- [Monitor App](/docs/monitor) -- Diagnostics and real-time logging.
+- [Server](/docs/server) -- Backend configuration, serial port management, and subsystem toggles.
+- [Tour App](/docs/tour) -- Scripted tours and effects sequences.
+- [Architecture](/docs/architecture) -- Understand the data flow and system design.
