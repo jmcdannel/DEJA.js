@@ -10,11 +10,10 @@
   },
   "dependencies": {
     "@vercel/blob": "^0.27.1",
-    "hono": "^4.7.0"
+    "@vercel/node": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "tsx": "^4.19.0",
     "typescript": "^5.7.2"
   }
 }
