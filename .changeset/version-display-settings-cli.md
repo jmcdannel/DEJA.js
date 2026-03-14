@@ -1,5 +1,5 @@
 ---
-"deja": patch
+"deja-serverts": patch
 ---
 
 added: **[throttle]** Display app version on Settings page footer

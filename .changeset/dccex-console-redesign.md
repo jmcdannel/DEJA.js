@@ -1,5 +1,5 @@
 ---
-"deja": minor
+"deja-cloud": minor
 ---
 
 added: **[cloud]** Redesigned DCC-EX console with retro LCD terminal, predefined command grid, and command cheat sheet — replaces old log viewer with real-time Firebase RTDB-backed interface

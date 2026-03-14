@@ -1,5 +1,5 @@
 ---
-"deja": minor
+"deja-serverts": minor
 ---
 
 added: **[server]** Subscription validation with Firebase Admin SDK, 48-hour offline grace period, and periodic re-check

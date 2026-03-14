@@ -1,5 +1,5 @@
 ---
-"deja": minor
+"@repo/ui": minor
 ---
 
 added: **[ui]** Shared theme factory (`createVuetifyThemes`) generating light, dark, and high-contrast Vuetify themes from per-app identity colors

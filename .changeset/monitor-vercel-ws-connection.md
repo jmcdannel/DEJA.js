@@ -1,5 +1,5 @@
 ---
-"deja": patch
+"deja-monitor": patch
 ---
 
 fixed: **[monitor]** Fix hardcoded `ws://` protocol that blocked WebSocket connections from HTTPS hosts (Vercel)

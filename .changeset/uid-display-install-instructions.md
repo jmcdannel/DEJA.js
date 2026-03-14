@@ -1,5 +1,5 @@
 ---
-"deja": minor
+"deja-cloud": minor
 ---
 
 added: **[cloud, throttle, monitor]** Display Firebase UID and Layout ID in Settings pages with copy-to-clipboard buttons and install command for server setup
