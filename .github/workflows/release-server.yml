@@ -41,31 +41,10 @@ jobs:
 
       - name: Generate distribution package.json
         run: |
-          cat > apps/server/dist/package.json <<'PKGJSON'
-          {
-            "name": "deja-server",
-            "version": "${{ steps.version.outputs.version }}",
-            "private": true,
-            "type": "module",
-            "engines": { "node": ">= 20" },
-            "dependencies": {
-              "serialport": "^12.0.0",
-              "@serialport/parser-readline": "^12.0.0",
-              "firebase-admin": "^13.4.0",
-              "firebase": "^10.14.1",
-              "ws": "^8.13.0",
-              "mqtt": "^5.15.0",
-              "signale": "^1.4.0",
-              "dotenv": "^16.3.1",
-              "play-sound": "^1.1.6",
-              "wait-on": "^7.0.1",
-              "@sentry/node": "^8.0.0",
-              "vue": "^3.5.17",
-              "vuefire": "^3.2.1",
-              "@vueuse/core": "^11.0.3"
-            }
-          }
-          PKGJSON
+          node -e "
+            const pkg = {name:'deja-server',version:'${{ steps.version.outputs.version }}',private:true,type:'module',engines:{node:'>= 20'},dependencies:{'serialport':'^12.0.0','@serialport/parser-readline':'^12.0.0','firebase-admin':'^13.4.0','firebase':'^10.14.1','ws':'^8.13.0','mqtt':'^5.15.0','signale':'^1.4.0','dotenv':'^16.3.1','play-sound':'^1.1.6','wait-on':'^7.0.1','@sentry/node':'^8.0.0','vue':'^3.5.17','vuefire':'^3.2.1','@vueuse/core':'^11.0.3'}};
+            require('fs').writeFileSync('apps/server/dist/package.json', JSON.stringify(pkg, null, 2));
+          "
 
       - name: Create tarball
         run: |
