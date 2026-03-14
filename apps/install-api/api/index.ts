@@ -10,7 +10,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // GET / — serve install script
     if (method === 'GET' && (path === '/' || path === '/api')) {
-      const script = generateInstallScript()
+      const script = await generateInstallScript()
       res.setHeader('Content-Type', 'text/plain')
       res.setHeader('Cache-Control', 'no-cache')
       return res.status(200).send(script)
@@ -75,7 +75,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
-function generateInstallScript(): string {
+async function generateInstallScript(): Promise<string> {
+  // Fetch install.sh from blob storage (uploaded alongside release assets)
+  const blobUrl = await getReleaseUrl(await getLatestVersion() || '', 'install.sh')
+
+  let script: string
+  if (blobUrl) {
+    const resp = await fetch(blobUrl)
+    script = await resp.text()
+  } else {
+    return '#!/bin/bash\necho "Error: No install script found. No releases have been published yet."\nexit 1'
+  }
+
   const replacements: Record<string, string> = {
     '__FIREBASE_API_KEY__': process.env.FIREBASE_API_KEY ?? '',
     '__FIREBASE_AUTH_DOMAIN__': process.env.FIREBASE_AUTH_DOMAIN ?? '',
@@ -88,14 +99,11 @@ function generateInstallScript(): string {
     '__FIREBASE_PRIVATE_KEY__': process.env.FIREBASE_PRIVATE_KEY ?? '',
   }
 
-  let script = INSTALL_SCRIPT_TEMPLATE
   for (const [placeholder, value] of Object.entries(replacements)) {
     script = script.replaceAll(placeholder, value)
   }
   return script
 }
-
-const INSTALL_SCRIPT_TEMPLATE = `__INSTALL_SCRIPT_TEMPLATE__`
 
 async function getLatestVersion(): Promise<string | null> {
   const { blobs } = await list({ prefix: `${RELEASES_PREFIX}/`, limit: 1000 })
