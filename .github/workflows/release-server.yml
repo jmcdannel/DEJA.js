@@ -51,18 +51,6 @@ jobs:
           cd apps/server/dist
           tar -czf "${GITHUB_WORKSPACE}/deja-server.tar.gz" index.js package.json version.txt
 
-      - name: Embed install script in install-api
-        run: |
-          # Escape the script for embedding as a JS template literal
-          node -e "
-            const fs = require('fs');
-            const script = fs.readFileSync('scripts/install.sh', 'utf8');
-            const escaped = script.replace(/\`/g, '\\\`').replace(/\\\$/g, '\\\\\$');
-            const apiIndex = fs.readFileSync('apps/install-api/src/index.ts', 'utf8');
-            const result = apiIndex.replace('__INSTALL_SCRIPT_TEMPLATE__', escaped);
-            fs.writeFileSync('apps/install-api/src/index.ts', result);
-          "
-
       - name: Upload release assets to Vercel Blob
         env:
           UPLOAD_SECRET: ${{ secrets.INSTALL_API_UPLOAD_SECRET }}
@@ -73,13 +61,25 @@ jobs:
           # Upload tarball
           curl -fsSL -X POST \
             -H "Authorization: Bearer ${UPLOAD_SECRET}" \
-            -F "file=@deja-server.tar.gz;type=application/gzip" \
+            -H "x-filename: deja-server.tar.gz" \
+            -H "Content-Type: application/gzip" \
+            --data-binary "@deja-server.tar.gz" \
             "${INSTALL_API_URL}/releases/${VERSION}/upload"
 
           # Upload CLI
           curl -fsSL -X POST \
             -H "Authorization: Bearer ${UPLOAD_SECRET}" \
-            -F "file=@scripts/deja;type=application/octet-stream" \
+            -H "x-filename: deja" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary "@scripts/deja" \
+            "${INSTALL_API_URL}/releases/${VERSION}/upload"
+
+          # Upload install script
+          curl -fsSL -X POST \
+            -H "Authorization: Bearer ${UPLOAD_SECRET}" \
+            -H "x-filename: install.sh" \
+            -H "Content-Type: text/plain" \
+            --data-binary "@scripts/install.sh" \
             "${INSTALL_API_URL}/releases/${VERSION}/upload"
 
       - name: Create GitHub Release (changelog only)
