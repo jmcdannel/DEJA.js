@@ -10,9 +10,6 @@
     }
   ],
 
-  "env": {
-    "BLOB_READ_WRITE_TOKEN": "vercel_blob_rw_xNDOZJM68szqABqe_KEdeLVsr36pBcvelnNxQX8gjJzBEFV"
-  },
   "crons": [
     { "path": "/api/cleanup-logs", "schedule": "0 3 * * *" }
   ]
