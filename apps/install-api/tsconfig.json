@@ -13,8 +13,8 @@
     "strictNullChecks": true,
     "target": "ESNext",
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./api"
   },
-  "include": ["src/**/*.ts"],
+  "include": ["api/**/*.ts"],
   "exclude": ["node_modules"]
 }

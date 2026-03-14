@@ -1,4 +1,4 @@
-import { serve } from '@hono/node-server'
+import { handle } from 'hono/vercel'
 import { Hono } from 'hono'
 import { getLatestVersion, getReleaseUrl, uploadRelease } from './lib/blob'
 
@@ -87,10 +87,8 @@ function generateInstallScript(): string {
 // For local dev, it returns the placeholder version.
 const INSTALL_SCRIPT_TEMPLATE = `__INSTALL_SCRIPT_TEMPLATE__`
 
-const port = parseInt(process.env.PORT ?? '3000', 10)
+export default handle(app)
 
-serve({ fetch: app.fetch, port }, (info) => {
-  console.log(`Install API running on http://localhost:${info.port}`)
-})
-
-export default app
+// Named exports for each HTTP method (required by Vercel serverless)
+export const GET = handle(app)
+export const POST = handle(app)
