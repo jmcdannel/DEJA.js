@@ -2,10 +2,6 @@ import { handle } from 'hono/vercel'
 import { Hono } from 'hono'
 import { getLatestVersion, getReleaseUrl, uploadRelease } from './lib/blob'
 
-export const config = {
-  runtime: 'edge',
-}
-
 const app = new Hono().basePath('/api')
 
 // Serve the install script with Firebase config baked in from env vars
