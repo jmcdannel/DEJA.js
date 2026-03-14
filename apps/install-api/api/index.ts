@@ -2,7 +2,11 @@ import { handle } from 'hono/vercel'
 import { Hono } from 'hono'
 import { getLatestVersion, getReleaseUrl, uploadRelease } from './lib/blob'
 
-const app = new Hono()
+export const config = {
+  runtime: 'edge',
+}
+
+const app = new Hono().basePath('/api')
 
 // Serve the install script with Firebase config baked in from env vars
 app.get('/', async (c) => {
@@ -49,11 +53,11 @@ app.post('/releases/:version/upload', async (c) => {
   const file = formData.get('file') as File
   if (!file) return c.json({ error: 'No file provided' }, 400)
 
-  const buffer = Buffer.from(await file.arrayBuffer())
+  const arrayBuffer = await file.arrayBuffer()
   const url = await uploadRelease(
     version,
     file.name,
-    buffer,
+    new Uint8Array(arrayBuffer),
     file.type || 'application/octet-stream'
   )
 

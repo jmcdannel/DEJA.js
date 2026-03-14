@@ -5,7 +5,7 @@ const RELEASES_PREFIX = 'releases'
 export async function uploadRelease(
   version: string,
   filename: string,
-  data: Buffer | ReadableStream,
+  data: Uint8Array | ReadableStream,
   contentType: string
 ): Promise<string> {
   const path = `${RELEASES_PREFIX}/${version}/${filename}`
