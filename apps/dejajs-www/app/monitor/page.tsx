@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { client } from '../../sanity/lib/client';
+import { PRODUCT_PAGE_QUERY } from '../../sanity/lib/queries';
 
 export const metadata: Metadata = {
   title: 'DEJA.js Monitor - Layout Diagnostics',
@@ -22,7 +24,28 @@ export const metadata: Metadata = {
   },
 };
 
-export default function MonitorPage() {
+// Hardcoded fallback features
+const defaultFeatures = [
+  { icon: '📜', title: 'Command Traces', description: 'View raw and parsed DCC-EX API commands in real-time. Understand exactly what bytes are being transmitted between the server and the CommandStation.' },
+  { icon: '📊', title: 'Live Telemetry', description: 'Monitor track power draw, main/prog track statuses, and server uptime metrics from a unified dashboard.' },
+  { icon: '📡', title: 'Sensor Activity', description: 'Watch layout events flow in as trains pass sensors. Ideal for verifying automation hardware installations and routing logic.' },
+  { icon: '🔍', title: 'Event Filtering', description: 'Cut through the noise. Filter the event stream strictly by turnouts, locos, errors, or custom IO devices to debug specific layout zones.' },
+];
+
+export default async function MonitorPage() {
+  let product: any = null;
+  try {
+    product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'monitor' });
+  } catch {
+    // Fall back to hardcoded content
+  }
+
+  const title = product?.title || 'DEJA.js Monitor';
+  const tagline = product?.tagline || 'Deep diagnostic visibility. Built for technical operators and layout builders who need to see the data flowing across their network.';
+  const features = product?.features?.length ? product.features : defaultFeatures;
+  const ctaLabel = product?.cta?.label || 'Launch Monitor Web App';
+  const ctaHref = product?.cta?.href || '/docs/monitor';
+
   return (
     <div className="space-y-16">
       <section className="text-center space-y-6 flex flex-col items-center">
@@ -30,48 +53,26 @@ export default function MonitorPage() {
           <Image src="/monitor/icon-512.png" alt="DEJA.js Monitor Logo" width={128} height={128} className="h-32 w-32 drop-shadow-lg" />
         </div>
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">
-          <span className="text-red-500">DEJA.js Monitor</span>
+          <span className="text-red-500">{title}</span>
         </h1>
         <p className="max-w-2xl text-lg md:text-xl text-gray-500 dark:text-gray-400 mx-auto">
-          Deep diagnostic visibility. Built for technical operators and layout builders who need to see the data flowing across their network.
+          {tagline}
         </p>
       </section>
 
       <section className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-slate-800">
         <h2 className="text-2xl font-bold mb-6 text-slate-900 dark:text-white border-b border-gray-200 dark:border-slate-800 pb-4">Core Capabilities</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-red-500">📜</span> Command Traces
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400">
-              View raw and parsed DCC-EX API commands in real-time. Understand exactly what bytes are being transmitted between the server and the CommandStation.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-red-500">📊</span> Live Telemetry
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400">
-              Monitor track power draw, main/prog track statuses, and server uptime metrics from a unified dashboard.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-red-500">📡</span> Sensor Activity
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400">
-              Watch layout events flow in as trains pass sensors. Ideal for verifying automation hardware installations and routing logic.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-red-500">🔍</span> Event Filtering
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400">
-              Cut through the noise. Filter the event stream strictly by turnouts, locos, errors, or custom IO devices to debug specific layout zones.
-            </p>
-          </div>
+          {features.map((feature: any, idx: number) => (
+            <div key={feature._key || idx}>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                <span className="text-red-500">{feature.icon}</span> {feature.title}
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400">
+                {feature.description}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -94,10 +95,10 @@ export default function MonitorPage() {
 
       <div className="flex justify-center pb-8">
         <Link
-          href="/docs/monitor"
+          href={ctaHref}
           className="px-8 py-4 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition shadow-lg"
         >
-          Launch Monitor Web App
+          {ctaLabel}
         </Link>
       </div>
     </div>

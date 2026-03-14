@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { client } from '../../sanity/lib/client';
+import { PRODUCT_PAGE_QUERY } from '../../sanity/lib/queries';
 
 export const metadata: Metadata = {
   title: 'DEJA.js Cloud - Manage Your Railway Roster',
@@ -22,7 +24,28 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CloudPage() {
+// Hardcoded fallback features
+const defaultFeatures = [
+  { icon: '📋', title: 'Roster Management', description: 'Store your locomotive addresses, descriptions, and custom function definitions in the cloud. Changes sync instantly across all devices accessing the layout.' },
+  { icon: '🎨', title: 'Global Color Coding', description: 'Assign distinct colors to specific locomotives, turnouts, or sensors within the Cloud App. Those colors follow the element into the Throttle and Monitor tools for instant visual recognition.' },
+  { icon: '🔐', title: 'Secure Device Identity', description: 'Manage your connected hardware securely. Issue session tokens to throttle clients to prevent unauthorized access to your DCC-EX CommandStation.' },
+  { icon: '🌐', title: 'Layout Spaces', description: 'Create separate \u201Cspaces\u201D or layouts on a single account. Easily switch between controlling your home setup, a club layout, or a test bench.' },
+];
+
+export default async function CloudPage() {
+  let product: any = null;
+  try {
+    product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'cloud' });
+  } catch {
+    // Fall back to hardcoded content
+  }
+
+  const title = product?.title || 'DEJA.js Cloud';
+  const tagline = product?.tagline || 'The centralized catalog and configuration hub for your model railroad. Manage devices, locos, turnouts, and effects securely from anywhere.';
+  const features = product?.features?.length ? product.features : defaultFeatures;
+  const ctaLabel = product?.cta?.label || 'Access DEJA Cloud';
+  const ctaHref = product?.cta?.href || '/docs/cloud';
+
   return (
     <div className="space-y-16">
       <section className="text-center space-y-6 flex flex-col items-center">
@@ -30,48 +53,26 @@ export default function CloudPage() {
           <Image src="/cloud/icon-512.png" alt="DEJA.js Cloud Logo" width={128} height={128} className="h-32 w-32 drop-shadow-lg" />
         </div>
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">
-          <span className="text-fuchsia-500">DEJA.js Cloud</span>
+          <span className="text-fuchsia-500">{title}</span>
         </h1>
         <p className="max-w-2xl text-lg md:text-xl text-gray-500 dark:text-gray-400 mx-auto">
-          The centralized catalog and configuration hub for your model railroad. Manage devices, locos, turnouts, and effects securely from anywhere.
+          {tagline}
         </p>
       </section>
 
       <section className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-slate-800">
         <h2 className="text-2xl font-bold mb-6 text-slate-900 dark:text-white border-b border-gray-200 dark:border-slate-800 pb-4">Core Capabilities</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-fuchsia-500">📋</span> Roster Management
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400">
-              Store your locomotive addresses, descriptions, and custom function definitions in the cloud. Changes sync instantly across all devices accessing the layout.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-fuchsia-500">🎨</span> Global Color Coding
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400">
-              Assign distinct colors to specific locomotives, turnouts, or sensors within the Cloud App. Those colors follow the element into the Throttle and Monitor tools for instant visual recognition.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-fuchsia-500">🔐</span> Secure Device Identity
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400">
-              Manage your connected hardware securely. Issue session tokens to throttle clients to prevent unauthorized access to your DCC-EX CommandStation.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="text-fuchsia-500">🌐</span> Layout Spaces
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400">
-              Create separate &ldquo;spaces&rdquo; or layouts on a single account. Easily switch between controlling your home setup, a club layout, or a test bench.
-            </p>
-          </div>
+          {features.map((feature: any, idx: number) => (
+            <div key={feature._key || idx}>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                <span className="text-fuchsia-500">{feature.icon}</span> {feature.title}
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400">
+                {feature.description}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -92,10 +93,10 @@ export default function CloudPage() {
 
       <div className="flex justify-center pb-8">
         <Link
-          href="/docs/cloud"
+          href={ctaHref}
           className="px-8 py-4 bg-fuchsia-500 text-gray-950 rounded-lg font-bold hover:bg-fuchsia-400 transition shadow-lg"
         >
-          Access DEJA Cloud
+          {ctaLabel}
         </Link>
       </div>
     </div>
