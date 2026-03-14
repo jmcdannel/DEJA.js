@@ -48,6 +48,8 @@ async function saveServerType() {
 // Install script copy
 const copiedMac = ref(false)
 const copiedWin = ref(false)
+const copiedUid = ref(false)
+const copiedLayoutIdValue = ref(false)
 
 const macScript = 'curl -fsSL https://install.dejajs.com | bash'
 const winScript = 'irm https://install.dejajs.com/win | iex'
@@ -60,6 +62,17 @@ async function copyScript(script: string, platform: 'mac' | 'win') {
   } else {
     copiedWin.value = true
     setTimeout(() => { copiedWin.value = false }, 2000)
+  }
+}
+
+async function copyValue(text: string, flag: 'uid' | 'layoutId') {
+  await navigator.clipboard.writeText(text)
+  if (flag === 'uid') {
+    copiedUid.value = true
+    setTimeout(() => { copiedUid.value = false }, 2000)
+  } else {
+    copiedLayoutIdValue.value = true
+    setTimeout(() => { copiedLayoutIdValue.value = false }, 2000)
   }
 }
 
@@ -126,6 +139,51 @@ async function sendApprovalNotification() {
         </v-btn>
       </div>
 
+      <!-- Your Install Credentials -->
+      <div class="glass-card mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <v-icon color="primary" size="28">mdi-key-variant</v-icon>
+          <h2 class="text-lg font-semibold text-sky-100">Your Install Credentials</h2>
+        </div>
+        <p class="text-slate-400 text-sm mb-5">
+          You will need these values when running the install script. Copy them now — the installer will prompt for both.
+        </p>
+
+        <div class="credential-row mb-3">
+          <div class="credential-label">
+            <span class="text-xs text-slate-500 uppercase tracking-widest font-medium">User UID</span>
+          </div>
+          <div class="credential-value">
+            <code class="credential-mono">{{ user?.uid || '—' }}</code>
+            <v-btn
+              v-if="user?.uid"
+              variant="text"
+              size="x-small"
+              :icon="copiedUid ? 'mdi-check' : 'mdi-content-copy'"
+              :color="copiedUid ? 'success' : undefined"
+              @click="copyValue(user.uid, 'uid')"
+            />
+          </div>
+        </div>
+
+        <div class="credential-row">
+          <div class="credential-label">
+            <span class="text-xs text-slate-500 uppercase tracking-widest font-medium">Layout ID</span>
+          </div>
+          <div class="credential-value">
+            <code class="credential-mono">{{ primaryLayoutId || '—' }}</code>
+            <v-btn
+              v-if="primaryLayoutId"
+              variant="text"
+              size="x-small"
+              :icon="copiedLayoutIdValue ? 'mdi-check' : 'mdi-content-copy'"
+              :color="copiedLayoutIdValue ? 'success' : undefined"
+              @click="copyValue(primaryLayoutId, 'layoutId')"
+            />
+          </div>
+        </div>
+      </div>
+
       <!-- Server Type Selection -->
       <div class="glass-card mb-6">
         <div class="flex items-center gap-3 mb-4">
@@ -173,8 +231,11 @@ async function sendApprovalNotification() {
           <v-icon color="primary" size="28">mdi-download-outline</v-icon>
           <h2 class="text-lg font-semibold text-sky-100">Quick Install</h2>
         </div>
-        <p class="text-slate-400 text-sm mb-5">
+        <p class="text-slate-400 text-sm mb-2">
           Run one of these scripts on the machine connected to your DCC-EX Command Station.
+        </p>
+        <p class="text-slate-400 text-sm mb-5">
+          The installer will prompt you for your <strong class="text-sky-300">User UID</strong> and <strong class="text-sky-300">Layout ID</strong> shown above.
         </p>
 
         <!-- macOS / Linux -->
@@ -364,5 +425,30 @@ async function sendApprovalNotification() {
 }
 .advanced-link:hover {
   color: #38bdf8;
+}
+
+.credential-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.credential-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.credential-mono {
+  flex: 1;
+  font-family: 'Roboto Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  color: #e0f2fe;
+  background: rgba(2, 6, 23, 0.6);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  user-select: all;
+  word-break: break-all;
 }
 </style>

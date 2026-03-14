@@ -5,6 +5,8 @@ import { useStorage } from '@vueuse/core'
 import { getIdToken } from 'firebase/auth'
 import { useSubscription, PLAN_DISPLAY, useLayout } from '@repo/modules'
 import { BackgroundSettings } from '@repo/ui'
+import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
+import { useDisplay } from 'vuetify'
 import PageHeader from '@/Core/UI/PageHeader.vue'
 import LayoutTags from '@/Layout/LayoutTags.vue'
 import PortList from '@/Layout/PortList.vue'
@@ -115,11 +117,32 @@ const backgroundPages = [
   { path: '/layout', label: 'Layout', icon: 'mdi-floor-plan' },
 ]
 
+// Copy helpers
+const copiedUid = ref(false)
+const copiedLayoutId = ref(false)
+const copiedInstall = ref(false)
+const installCommand = 'curl -fsSL https://install.dejajs.com | bash'
+
+async function copyToClipboard(text: string, flag: 'uid' | 'layoutId' | 'install') {
+  await navigator.clipboard.writeText(text)
+  if (flag === 'uid') {
+    copiedUid.value = true
+    setTimeout(() => { copiedUid.value = false }, 2000)
+  } else if (flag === 'layoutId') {
+    copiedLayoutId.value = true
+    setTimeout(() => { copiedLayoutId.value = false }, 2000)
+  } else {
+    copiedInstall.value = true
+    setTimeout(() => { copiedInstall.value = false }, 2000)
+  }
+}
+
 const sections = [
   { id: 'account', label: 'Account', icon: 'mdi-account-circle-outline' },
   { id: 'billing', label: 'Billing', icon: 'mdi-credit-card-outline' },
   { id: 'appearance', label: 'Appearance', icon: 'mdi-palette-outline' },
   { id: 'connection', label: 'Connection', icon: 'mdi-server-network' },
+  { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'layout', label: 'Layout', icon: 'mdi-floor-plan' },
 ]
 
@@ -245,6 +268,44 @@ function scrollTo(id: string) {
             <v-btn color="primary" variant="tonal" size="small" :loading="serverSaving" :prepend-icon="serverSaved ? 'mdi-check' : 'mdi-content-save'" class="text-none" @click="saveServerType">
               {{ serverSaved ? 'Saved!' : 'Save' }}
             </v-btn>
+          </div>
+        </div>
+
+        <!-- Server Setup -->
+        <div id="server-setup" class="settings-section">
+          <div class="settings-section__header">
+            <v-icon size="20" class="settings-section__icon">mdi-download-outline</v-icon>
+            <h2 class="settings-section__title">Server Setup</h2>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row__label">
+              <span class="settings-row__name">User UID</span>
+              <span class="settings-row__desc">Your Firebase user identifier — needed for the install script</span>
+            </div>
+            <div class="settings-row__value flex items-center gap-2">
+              <code class="info-mono">{{ user?.uid || '—' }}</code>
+              <v-btn v-if="user?.uid" variant="text" size="x-small" :icon="copiedUid ? 'mdi-check' : 'mdi-content-copy'" :color="copiedUid ? 'success' : undefined" @click="copyToClipboard(user.uid, 'uid')" />
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row__label">
+              <span class="settings-row__name">Layout ID</span>
+              <span class="settings-row__desc">Your layout identifier — needed for the install script</span>
+            </div>
+            <div class="settings-row__value flex items-center gap-2">
+              <code class="info-mono">{{ storedLayoutId || '—' }}</code>
+              <v-btn v-if="storedLayoutId" variant="text" size="x-small" :icon="copiedLayoutId ? 'mdi-check' : 'mdi-content-copy'" :color="copiedLayoutId ? 'success' : undefined" @click="copyToClipboard(storedLayoutId, 'layoutId')" />
+            </div>
+          </div>
+          <div class="settings-row settings-row--block">
+            <div class="settings-row__label mb-3">
+              <span class="settings-row__name">Install Command</span>
+              <span class="settings-row__desc">Run this on the machine connected to your DCC-EX Command Station. The installer will prompt for your UID and Layout ID.</span>
+            </div>
+            <div class="install-command">
+              <code class="install-command__text">{{ installCommand }}</code>
+              <v-btn variant="text" size="x-small" :icon="copiedInstall ? 'mdi-check' : 'mdi-content-copy'" :color="copiedInstall ? 'success' : undefined" @click="copyToClipboard(installCommand, 'install')" />
+            </div>
           </div>
         </div>
 
@@ -397,5 +458,35 @@ function scrollTo(id: string) {
   border-color: rgba(56, 189, 248, 0.5);
   background: rgba(56, 189, 248, 0.08);
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.1);
+}
+
+.info-mono {
+  font-family: 'Roboto Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  color: #e0f2fe;
+  background: rgba(2, 6, 23, 0.5);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  user-select: all;
+}
+
+.install-command {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(2, 6, 23, 0.6);
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.install-command__text {
+  flex: 1;
+  font-family: 'Roboto Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  color: #22d3ee;
+  word-break: break-all;
+  user-select: all;
 }
 </style>
