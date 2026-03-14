@@ -1,0 +1,88 @@
+# .github/workflows/release-server.yml
+name: Release Server
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build server bundle
+        run: cd apps/server && pnpm build:docker
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Write version file
+        run: echo "${{ steps.version.outputs.version }}" > apps/server/dist/version.txt
+
+      - name: Generate distribution package.json
+        run: |
+          node -e "
+            const pkg = {name:'deja-server',version:'${{ steps.version.outputs.version }}',private:true,type:'module',engines:{node:'>= 20'},dependencies:{'serialport':'^12.0.0','@serialport/parser-readline':'^12.0.0','firebase-admin':'^13.4.0','firebase':'^10.14.1','ws':'^8.13.0','mqtt':'^5.15.0','signale':'^1.4.0','dotenv':'^16.3.1','play-sound':'^1.1.6','wait-on':'^7.0.1','@sentry/node':'^8.0.0','vue':'^3.5.17','vuefire':'^3.2.1','@vueuse/core':'^11.0.3'}};
+            require('fs').writeFileSync('apps/server/dist/package.json', JSON.stringify(pkg, null, 2));
+          "
+
+      - name: Create tarball
+        run: |
+          cd apps/server/dist
+          tar -czf "${GITHUB_WORKSPACE}/deja-server.tar.gz" index.js package.json version.txt
+
+      - name: Embed install script in install-api
+        run: |
+          # Escape the script for embedding as a JS template literal
+          node -e "
+            const fs = require('fs');
+            const script = fs.readFileSync('scripts/install.sh', 'utf8');
+            const escaped = script.replace(/\`/g, '\\\`').replace(/\\\$/g, '\\\\\$');
+            const apiIndex = fs.readFileSync('apps/install-api/src/index.ts', 'utf8');
+            const result = apiIndex.replace('__INSTALL_SCRIPT_TEMPLATE__', escaped);
+            fs.writeFileSync('apps/install-api/src/index.ts', result);
+          "
+
+      - name: Upload release assets to Vercel Blob
+        env:
+          UPLOAD_SECRET: ${{ secrets.INSTALL_API_UPLOAD_SECRET }}
+          INSTALL_API_URL: https://install.dejajs.com
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Upload tarball
+          curl -fsSL -X POST \
+            -H "Authorization: Bearer ${UPLOAD_SECRET}" \
+            -F "file=@deja-server.tar.gz;type=application/gzip" \
+            "${INSTALL_API_URL}/releases/${VERSION}/upload"
+
+          # Upload CLI
+          curl -fsSL -X POST \
+            -H "Authorization: Bearer ${UPLOAD_SECRET}" \
+            -F "file=@scripts/deja;type=application/octet-stream" \
+            "${INSTALL_API_URL}/releases/${VERSION}/upload"
+
+      - name: Create GitHub Release (changelog only)
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
