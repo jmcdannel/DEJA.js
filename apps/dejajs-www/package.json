@@ -15,6 +15,9 @@
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "latest",
     "@next/mdx": "latest",
+    "@sanity/client": "^7.17.0",
+    "@sanity/icons": "^3.7.4",
+    "@sanity/image-url": "^2.0.3",
     "@sentry/nextjs": "^10.42.0",
     "@vercel/analytics": "^1.6.1",
     "autoprefixer": "latest",
@@ -23,10 +26,12 @@
     "gray-matter": "^4.0.3",
     "next": "15.5.8",
     "next-mdx-remote": "^6.0.0",
+    "next-sanity": "^12.1.1",
     "postcss": "latest",
     "react": "latest",
     "react-dom": "latest",
     "remark-gfm": "^4.0.0",
+    "sanity": "^5.15.0",
     "tailwindcss": "latest"
   },
   "devDependencies": {
