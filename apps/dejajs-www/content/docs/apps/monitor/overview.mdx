@@ -1,0 +1,36 @@
+---
+title: Monitor App
+description: System monitoring dashboard for DCC-EX server diagnostics and device status
+order: 3
+---
+
+# Monitor App
+
+The Monitor app provides real-time system diagnostics, server status, and device monitoring for your DCC-EX layout. Track connected devices, view serial communication logs, and monitor server health.
+
+## Key Features
+
+- **Dashboard** — Real-time overview of server status, connected devices, and system metrics
+- **Device Cards** — Individual status cards for each connected hardware device with connection state and uptime
+- **Serial Monitor** — Live serial communication log for debugging DCC-EX command station interactions
+- **Server Status** — WebSocket connection health, Firebase sync status, and MQTT broker connectivity
+- **Log Viewer** — Filterable log output for system events, errors, and warnings
+- **Settings** — Monitor configuration and preferences
+
+## Screenshots
+
+### Dashboard
+
+![Monitor Dashboard](/screenshots/monitor_desktop_dashboard.png)
+
+### Settings
+
+![Monitor Settings](/screenshots/monitor_desktop_settings.png)
+
+## Technical Details
+
+- **Framework:** Vue 3 with Composition API
+- **State:** Firebase Firestore via VueFire
+- **Real-time:** WebSocket subscriptions for device serial data
+- **Routing:** Vue Router 4 with auth guards
+- **Port:** 3021 (development)
