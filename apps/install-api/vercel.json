@@ -1,4 +1,4 @@
 {
-  "installCommand": "pnpm install",
+  "installCommand": "npm install",
   "rewrites": [{ "source": "/(.*)", "destination": "/api/$1" }]
 }
