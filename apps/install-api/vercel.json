@@ -1,4 +1,5 @@
 {
   "installCommand": "npm install",
+  "buildCommand": "echo 'skipping build — Vercel compiles api/ functions natively'",
   "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
 }
