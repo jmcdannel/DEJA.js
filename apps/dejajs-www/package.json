@@ -8,7 +8,8 @@
     "prebuild": "pnpm run sync-docs",
     "dev": "pnpm run sync-docs && next dev -p 3051",
     "build": "next build",
-    "start": "next start -p 3051"
+    "start": "next start -p 3051",
+    "seed": "npx tsx scripts/seed-sanity.ts"
   },
   "dependencies": {
     "@heroui/react": "^2.8.5",
