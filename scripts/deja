@@ -112,10 +112,159 @@ check_env() {
 }
 
 # ======================================================================
+# Interactive REPL
+# ======================================================================
+
+INTERACTIVE_PID=""
+
+handle_repl_command() {
+  local cmd="$1"
+  case "${cmd}" in
+    exit|quit)
+      return 1  # signal to exit the REPL loop
+      ;;
+    help)
+      echo ""
+      echo -e "  ${BOLD}Interactive Commands${NC}"
+      echo -e "    ${CYAN}exit${NC}    Stop the server and exit"
+      echo -e "    ${CYAN}help${NC}    Show this help"
+      echo ""
+      return 0
+      ;;
+    "")
+      # Empty input, ignore
+      return 0
+      ;;
+    *)
+      warn "Unknown command: ${cmd}"
+      echo -e "  ${DIM}Type ${CYAN}help${NC}${DIM} for available commands${NC}"
+      return 0
+      ;;
+  esac
+}
+
+shutdown_server() {
+  if [ -n "${INTERACTIVE_PID}" ] && kill -0 "${INTERACTIVE_PID}" 2>/dev/null; then
+    echo ""
+    info "Stopping server ${DIM}(PID ${INTERACTIVE_PID})${NC}..."
+    kill "${INTERACTIVE_PID}" 2>/dev/null || true
+
+    # Wait up to 12 seconds for graceful shutdown
+    local waited=0
+    while [ ${waited} -lt 12 ]; do
+      if ! kill -0 "${INTERACTIVE_PID}" 2>/dev/null; then
+        break
+      fi
+      sleep 1
+      waited=$((waited + 1))
+    done
+
+    # Force kill if still running
+    if kill -0 "${INTERACTIVE_PID}" 2>/dev/null; then
+      warn "Forcing shutdown..."
+      kill -9 "${INTERACTIVE_PID}" 2>/dev/null || true
+      sleep 1
+    fi
+
+    ok "Server stopped."
+  fi
+  rm -f "${PID_FILE}"
+  INTERACTIVE_PID=""
+}
+
+cmd_start_interactive() {
+  check_installed
+
+  if is_running; then
+    local pid
+    pid=$(get_pid)
+    warn "Server is already running in the background ${DIM}(PID ${pid})${NC}"
+    info "Stop it first with: ${CYAN}deja stop${NC}"
+    return 1
+  fi
+
+  check_env
+
+  echo ""
+  echo -e "  ${GREEN}${ICON_SERVER} DEJA.js Server${NC} ${DIM}v$(get_version)${NC}"
+  echo -e "  ${DIM}──────────────────────────────${NC}"
+  echo -e "  ${DIM}Type ${CYAN}exit${NC}${DIM} to stop · ${CYAN}help${NC}${DIM} for commands${NC}"
+  echo -e "  ${DIM}──────────────────────────────${NC}"
+  echo ""
+
+  # CWD must be ~/.deja so dotenv/config finds .env
+  cd "${DEJA_DIR}"
+
+  # Start server as a child process with output going to terminal
+  node "${ENTRY}" &
+  INTERACTIVE_PID=$!
+  echo "${INTERACTIVE_PID}" > "${PID_FILE}"
+
+  # Trap Ctrl+C and terminal signals for clean shutdown
+  trap 'shutdown_server; exit 0' INT TERM
+
+  # Brief pause to let the server initialize and print startup messages
+  sleep 1
+
+  # Verify the server actually started
+  if ! kill -0 "${INTERACTIVE_PID}" 2>/dev/null; then
+    err "Server failed to start."
+    rm -f "${PID_FILE}"
+    INTERACTIVE_PID=""
+    exit 1
+  fi
+
+  # REPL loop: read commands while server is running
+  while kill -0 "${INTERACTIVE_PID}" 2>/dev/null; do
+    # read with 1-second timeout so we can check if server is still alive
+    if read -r -t 1 input 2>/dev/null; then
+      if ! handle_repl_command "${input}"; then
+        # Command handler returned non-zero — exit requested
+        shutdown_server
+        echo ""
+        exit 0
+      fi
+    fi
+  done
+
+  # If we get here, the server exited on its own
+  echo ""
+  if [ ! -f "${PID_FILE}" ]; then
+    # PID file was cleaned up — likely stopped via `deja stop` from another terminal
+    ok "Server stopped."
+  else
+    warn "Server process exited unexpectedly."
+    rm -f "${PID_FILE}"
+  fi
+  INTERACTIVE_PID=""
+  exit 0
+}
+
+# ======================================================================
 # Commands
 # ======================================================================
 
 cmd_start() {
+  local background=false
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --background|-b|--bg)
+        background=true
+        ;;
+      *) ;;
+    esac
+    shift
+  done
+
+  if [ "${background}" = true ]; then
+    cmd_start_background
+  else
+    cmd_start_interactive
+  fi
+}
+
+cmd_start_background() {
   check_installed
 
   if is_running; then
@@ -191,7 +340,7 @@ cmd_stop() {
 
 cmd_restart() {
   cmd_stop
-  cmd_start
+  cmd_start "$@"
 }
 
 cmd_status() {
@@ -396,7 +545,8 @@ cmd_help() {
   echo -e "  ${DIM}Usage:${NC} deja ${CYAN}<command>${NC} [options]"
   echo ""
   echo -e "  ${BOLD}Commands${NC}"
-  echo -e "    ${CYAN}start${NC}          Start the server"
+  echo -e "    ${CYAN}start${NC}          Start the server (interactive mode)"
+  echo -e "    ${CYAN}start -b${NC}       Start the server in the background"
   echo -e "    ${CYAN}stop${NC}           Stop the server"
   echo -e "    ${CYAN}restart${NC}        Restart the server"
   echo -e "    ${CYAN}status${NC}         Show server status and connections"
@@ -406,6 +556,10 @@ cmd_help() {
   echo -e "  ${BOLD}Options${NC}"
   echo -e "    ${DIM}--version${NC}      Show installed version"
   echo -e "    ${DIM}--help, -h${NC}     Show this help"
+  echo ""
+  echo -e "  ${BOLD}Interactive Mode${NC}"
+  echo -e "    When started without ${DIM}-b${NC}, the server runs in the foreground."
+  echo -e "    Type ${CYAN}exit${NC} to stop the server, or press ${CYAN}Ctrl+C${NC}."
   echo ""
   echo -e "  ${ICON_CONFIG} Config  ${DIM}${DEJA_DIR}/${NC}"
   echo -e "  ${ICON_LOG} Logs    ${DIM}${LOG_FILE}${NC}"
