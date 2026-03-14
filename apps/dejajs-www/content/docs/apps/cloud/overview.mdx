@@ -1,0 +1,71 @@
+---
+title: Cloud App
+description: Layout management, device configuration, and locomotive roster management
+order: 2
+---
+
+# Cloud App
+
+The Cloud app is the administration hub for managing your DCC-EX layout. Configure locomotives, turnouts, routes, effects, signals, and connected devices from a centralized dashboard.
+
+## Key Features
+
+- **Dashboard** — Overview of layout status, connected devices, and real-time system health with device status synced across all apps
+- **Roster Management** — Add, edit, and organize locomotives with custom names, addresses, and function mappings
+- **Turnout Configuration** — Define turnouts with DCC addresses and friendly labels
+- **Route Builder** — Create routes that set multiple turnouts in sequence
+- **Effects Management** — Configure sound effects, lights, and animations
+- **Signal Wiring** — Set up signal aspects and output pin mappings
+- **Sensor Management** — Configure sensors and automation rules
+- **Device Management** — Monitor and configure connected hardware devices with real-time status propagation via Firebase
+- **DCC-EX Console** — LCD-style terminal with live command log, quick-send command grid, and a DCC-EX command cheat sheet
+- **Settings** — Unified settings page with sections for Account, Billing & Subscription (Stripe integration), Appearance (theme and per-page backgrounds), Server Connection type (DEJA Server or WiThrottle), and Layout configuration
+- **Authentication** — Modern login and signup pages with social auth (Google, GitHub, Facebook, Apple, Microsoft) and email/password
+- **Onboarding** — Guided wizard with plan selection (Hobbyist, Engineer, Conductor tiers), Stripe checkout, and layout setup
+
+## Screenshots
+
+### Dashboard
+
+![Cloud Dashboard](/screenshots/cloud_desktop_dashboard.png)
+
+### Roster
+
+![Roster Management](/screenshots/cloud_desktop_roster.png)
+
+### Turnouts
+
+![Turnout Configuration](/screenshots/cloud_desktop_turnouts.png)
+
+### Routes
+
+![Route Configuration](/screenshots/cloud_desktop_routes.png)
+
+### Effects
+
+![Effects Management](/screenshots/cloud_desktop_effects.png)
+
+### Signals
+
+![Signal Configuration](/screenshots/cloud_desktop_signals.png)
+
+### Devices
+
+![Device Management](/screenshots/cloud_desktop_devices.png)
+
+### DCC-EX Console
+
+![DCC-EX Console](/screenshots/cloud_desktop_dccex.png)
+
+### Settings
+
+![Settings](/screenshots/cloud_desktop_settings.png)
+
+## Technical Details
+
+- **Framework:** Vue 3 with Composition API
+- **State:** Firebase Firestore via VueFire
+- **Auth:** Firebase Auth with social providers (Google, GitHub, Facebook, Apple, Microsoft) and email/password, plus onboarding wizard with Stripe-integrated plan selection
+- **Billing:** Stripe subscriptions with three tiers (Hobbyist free, Engineer $7/mo, Conductor $18/mo), billing portal, and annual discount
+- **Routing:** Vue Router 4 with meta-based guard chain
+- **Port:** 3011 (development)

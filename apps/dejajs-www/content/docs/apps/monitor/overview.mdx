@@ -1,0 +1,48 @@
+---
+title: Monitor App
+description: System monitoring dashboard for DCC-EX server diagnostics and device status
+order: 3
+---
+
+# Monitor App
+
+The Monitor app is a tmux-style system monitoring dashboard for your DCC-EX layout. It provides real-time log streams, device status, and system metrics in a tiled pane layout.
+
+## Key Features
+
+- **Tmux-Style Dashboard** — Tiled panes for DCC Log, Turnouts, Effects, Sensors, and Stats with minimize/maximize/clear controls
+- **MonitorStatusBar** — Compact IDE-like header with track power, e-stop, layout selector, WS/server status indicators, and user profile
+- **Real-Time Logs** — Live streaming of DCC commands, turnout changes, effect triggers, and sensor events
+- **System Stats** — Active locos, device count, turnout/effect/signal totals, and server uptime
+- **Device Serial Monitor** — Subscribe to individual device serial output for debugging
+- **Device Status Sync** — Device connect/disconnect events propagate in real-time across all DEJA apps via Firebase
+- **Settings** — Unified settings with Account, Billing & Subscription (Stripe), Appearance (dark/light/high-contrast themes and per-page backgrounds), and WebSocket connection config
+
+## Screenshots
+
+### Dashboard (Desktop)
+
+![Monitor Dashboard — Desktop](/screenshots/monitor_desktop_dashboard.png)
+
+### Dashboard (Mobile)
+
+![Monitor Dashboard — Mobile](/screenshots/monitor_mobile_dashboard.png)
+
+### Settings (Desktop)
+
+![Monitor Settings — Desktop](/screenshots/monitor_desktop_settings.png)
+
+### Settings (Mobile)
+
+![Monitor Settings — Mobile](/screenshots/monitor_mobile_settings.png)
+
+## Technical Details
+
+- **Framework:** Vue 3 with Composition API
+- **UI:** Vuetify 3 + Tailwind CSS
+- **State:** Firebase Firestore via VueFire, localStorage via VueUse
+- **Auth:** Firebase Auth with social providers and email/password
+- **Real-time:** WebSocket subscriptions for device serial data, Firebase RTDB for DCC logs, device status sync across apps
+- **Routing:** Vue Router 4 with auth guards (`requireAuth`, `requireLayout`)
+- **Theme:** Dark/Light/High-Contrast via `useThemeSwitcher`
+- **Port:** 3031 (development)
