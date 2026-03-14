@@ -22,10 +22,10 @@
     // Replace the current loco with the selected loco to show its functions
     selectedConsistAddress.value = selected.address ?? null
     // try to find a full loco entry from the locos collection
-    const full = locos.value?.find((l: Loco) => l.address === selected.address)
+    const full = locos.value?.find((l) => (l as Loco).address === selected.address) as Loco | undefined
     if (full) {
       currentLoco.value = full
-      _functions.value = defaultFunctions.map(f => ({...f, ...full.functions?.find((lf) => lf.id === f.id)}))
+      _functions.value = defaultFunctions.map(f => ({...f, ...full.functions?.find((lf: { id: number }) => lf.id === f.id)}))
       return
     }
   }
