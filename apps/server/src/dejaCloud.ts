@@ -120,6 +120,27 @@ function monitorConnectivity(): void {
   }
 }
 
+/**
+ * Remove stale entries from RTDB command/log queues for the current layout.
+ * Called on server startup to prevent replaying old commands.
+ */
+async function clearStaleLogs(): Promise<void> {
+  const paths = [
+    `dccLog/${layoutId}`,
+    `dccCommands/${layoutId}`,
+    `dejaCommands/${layoutId}`,
+  ]
+
+  for (const path of paths) {
+    try {
+      await rtdb.ref(path).remove()
+      log.success(`[CLEANUP] Cleared stale entries from ${path}`)
+    } catch (error) {
+      log.error(`[CLEANUP] Failed to clear ${path}:`, error)
+    }
+  }
+}
+
 async function listen(): Promise<void> {
   dccCommandsRef = rtdb.ref(`dccCommands/${layoutId}`)
   dccCommandsRef.on('child_added', (data) => {
@@ -291,6 +312,7 @@ const handleCloudBroadcast = (data: BroadcastMessage): void => {
 export async function connect(): Promise<boolean> {
   try {
     log.start('Connecting to DejaCloud', layoutId)
+    await clearStaleLogs()
     await listen()
     await initialize()
 
