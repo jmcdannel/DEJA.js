@@ -6,6 +6,7 @@ import { doc, setDoc, serverTimestamp, collection, query, where } from 'firebase
 import { db } from '@repo/firebase-config'
 import { useLayout } from '@repo/modules'
 import { Signout } from '@repo/auth'
+import { ServerSetupInfo } from '@repo/ui'
 
 const user = useCurrentUser()
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -42,37 +43,6 @@ async function saveServerType() {
     // Silent fail — non-critical setting
   } finally {
     serverSaving.value = false
-  }
-}
-
-// Install script copy
-const copiedMac = ref(false)
-const copiedWin = ref(false)
-const copiedUid = ref(false)
-const copiedLayoutIdValue = ref(false)
-
-const macScript = 'curl -fsSL https://install.dejajs.com | bash'
-const winScript = 'irm https://install.dejajs.com/win | iex'
-
-async function copyScript(script: string, platform: 'mac' | 'win') {
-  await navigator.clipboard.writeText(script)
-  if (platform === 'mac') {
-    copiedMac.value = true
-    setTimeout(() => { copiedMac.value = false }, 2000)
-  } else {
-    copiedWin.value = true
-    setTimeout(() => { copiedWin.value = false }, 2000)
-  }
-}
-
-async function copyValue(text: string, flag: 'uid' | 'layoutId') {
-  await navigator.clipboard.writeText(text)
-  if (flag === 'uid') {
-    copiedUid.value = true
-    setTimeout(() => { copiedUid.value = false }, 2000)
-  } else {
-    copiedLayoutIdValue.value = true
-    setTimeout(() => { copiedLayoutIdValue.value = false }, 2000)
   }
 }
 
@@ -149,39 +119,7 @@ async function sendApprovalNotification() {
           You will need these values when running the install script. Copy them now — the installer will prompt for both.
         </p>
 
-        <div class="credential-row mb-3">
-          <div class="credential-label">
-            <span class="text-xs text-slate-500 uppercase tracking-widest font-medium">User UID</span>
-          </div>
-          <div class="credential-value">
-            <code class="credential-mono">{{ user?.uid || '—' }}</code>
-            <v-btn
-              v-if="user?.uid"
-              variant="text"
-              size="x-small"
-              :icon="copiedUid ? 'mdi-check' : 'mdi-content-copy'"
-              :color="copiedUid ? 'success' : undefined"
-              @click="copyValue(user.uid, 'uid')"
-            />
-          </div>
-        </div>
-
-        <div class="credential-row">
-          <div class="credential-label">
-            <span class="text-xs text-slate-500 uppercase tracking-widest font-medium">Layout ID</span>
-          </div>
-          <div class="credential-value">
-            <code class="credential-mono">{{ primaryLayoutId || '—' }}</code>
-            <v-btn
-              v-if="primaryLayoutId"
-              variant="text"
-              size="x-small"
-              :icon="copiedLayoutIdValue ? 'mdi-check' : 'mdi-content-copy'"
-              :color="copiedLayoutIdValue ? 'success' : undefined"
-              @click="copyValue(primaryLayoutId, 'layoutId')"
-            />
-          </div>
-        </div>
+        <ServerSetupInfo :uid="user?.uid" :layout-id="primaryLayoutId" />
       </div>
 
       <!-- Server Type Selection -->
@@ -427,28 +365,4 @@ async function sendApprovalNotification() {
   color: #38bdf8;
 }
 
-.credential-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.credential-value {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.credential-mono {
-  flex: 1;
-  font-family: 'Roboto Mono', 'Fira Code', monospace;
-  font-size: 0.85rem;
-  color: #e0f2fe;
-  background: rgba(2, 6, 23, 0.6);
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  user-select: all;
-  word-break: break-all;
-}
 </style>
