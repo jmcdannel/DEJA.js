@@ -240,6 +240,12 @@ const router = createRouter({
       meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
     },
     {
+      path: '/upgrade',
+      name: 'Upgrade',
+      component: () => import('./Upgrade/Upgrade.vue'),
+      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+    },
+    {
       path: '/devices/:deviceId',
       name: 'DeviceDetails',
       component: () => import('./Layout/Devices/DeviceDetails.vue'),
