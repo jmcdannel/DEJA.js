@@ -100,6 +100,7 @@ export default function PricingPage() {
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Docs & AI support chatbot</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed text-gray-500"><Check type="no" /> Turnouts & signals</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed text-gray-500"><Check type="no" /> Effects & sounds</li>
+            <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed text-gray-500"><Check type="no" /> Remote monitoring</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed text-gray-500"><Check type="no" /> Tour App</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed text-gray-500"><Check type="no" /> Direct support</li>
           </ul>
@@ -142,6 +143,7 @@ export default function PricingPage() {
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Turnouts & Signals <LimitTag featured>15 each</LimitTag></li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Effects & Sounds <LimitTag featured>15 each</LimitTag></li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> 2 layout configurations</li>
+            <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Remote monitoring via secure tunnel</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="partial" /> Basic macros & scheduling</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Community forum access</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Support tickets <LimitTag featured>72hr SLA</LimitTag></li>
@@ -185,6 +187,7 @@ export default function PricingPage() {
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> <strong>Unlimited</strong> locos, turnouts, signals</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> <strong>Unlimited</strong> effects & sounds</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Unlimited layouts</li>
+            <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Remote monitoring via secure tunnel</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Tour App included</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Advanced macros & automations</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Priority support <LimitTag>24hr SLA</LimitTag></li>
@@ -287,6 +290,15 @@ export default function PricingPage() {
 
               {/* Apps & Features */}
               <tr><td colSpan={4} className="font-mono text-[0.65rem] tracking-[0.12em] uppercase text-cyan-400 pt-6 border-b-0">{'// Apps & Features'}</td></tr>
+              <tr className="hover:bg-white/[0.02]">
+                <td className="py-3.5 border-b border-white/7">
+                  Remote Monitoring
+                  <div className="text-[0.75rem] text-gray-500 mt-0.5">Access your layout monitor from anywhere via secure Cloudflare tunnel</div>
+                </td>
+                <td className="py-3.5 border-b border-white/7 text-center"><TableCheck type="n" /></td>
+                <td className="py-3.5 border-b border-white/7 text-center"><TableCheck type="y" /></td>
+                <td className="py-3.5 border-b border-white/7 text-center"><TableCheck type="y" /></td>
+              </tr>
               <tr className="hover:bg-white/[0.02]">
                 <td className="py-3.5 border-b border-white/7">Tour App</td>
                 <td className="py-3.5 border-b border-white/7 text-center"><TableCheck type="n" /></td>
