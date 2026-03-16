@@ -1,6 +1,6 @@
 {
   "name": "@repo/ui",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -67,13 +67,16 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/prettier-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@storybook/addon-a11y": "^8.0.0",
     "@storybook/addon-essentials": "^8.0.0",
     "@storybook/addon-interactions": "^8.0.0",
     "@storybook/test": "^8.0.0",
     "@storybook/vue3": "^8.0.0",
     "@storybook/vue3-vite": "^8.0.0",
+    "@vitejs/plugin-vue": "^4.4.0",
+    "autoprefixer": "^10.4.27",
     "storybook": "^8.0.0",
-    "tailwindcss": "^3.4.10",
+    "tailwindcss": "^3.4.18",
     "typescript": "latest"
   }
 }

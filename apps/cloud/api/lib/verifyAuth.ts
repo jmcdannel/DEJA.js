@@ -1,4 +1,5 @@
 import type { VercelRequest } from '@vercel/node'
+import { timingSafeEqual } from 'node:crypto'
 
 interface AuthResult {
   valid: boolean
@@ -13,7 +14,14 @@ export function verifyAuth(req: VercelRequest): AuthResult {
   }
 
   const header = req.headers.authorization
-  if (!header?.startsWith('Bearer ') || header.slice(7) !== cronSecret) {
+  if (!header?.startsWith('Bearer ')) {
+    return { valid: false, status: 401, message: 'Unauthorized' }
+  }
+
+  const token = header.slice(7)
+  const tokenBuf = Buffer.from(token)
+  const secretBuf = Buffer.from(cronSecret)
+  if (tokenBuf.length !== secretBuf.length || !timingSafeEqual(tokenBuf, secretBuf)) {
     return { valid: false, status: 401, message: 'Unauthorized' }
   }
 

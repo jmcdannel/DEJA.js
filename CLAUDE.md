@@ -163,6 +163,40 @@ When UI changes are made, update screenshots and MDX docs:
 ---
 
 
+## Distribution & Build (Private)
+
+DEJA.js is a **private, subscription-gated product**. The repo is private on GitHub. See `docs/superpowers/specs/2026-03-12-private-distribution-design.md` for the full design spec.
+
+### Server Distribution
+- Server is distributed as a **tarball** via GitHub Releases, managed by the `deja` CLI
+- Supports `linux/amd64`, `linux/arm64` (Raspberry Pi), and `darwin` (macOS)
+- Users install via `curl -fsSL https://install.dejajs.com | bash`
+- Server is built using **tsup** (not bare `tsc`) to produce a self-contained ESM bundle with all `@repo/*` workspace deps resolved at build time
+- Native modules (`serialport`, `firebase-admin`) are externals installed via `npm install --production` on the user's machine
+- CLI manages the server as a native Node.js process via PID file (`~/.deja/server.pid`)
+
+### Subscription Validation
+- Server validates subscription on startup via Firebase Admin SDK → Firestore `users/{uid}.subscription`
+- Allowed statuses: `active`, `trialing`, `past_due`
+- Denied statuses: `incomplete`, `incomplete_expired`, `unpaid`, `canceled`, missing
+- 48-hour grace period for offline/network failure
+- Mid-session cancellation logs a warning but does NOT shut down — enforced on next cold start
+- Config stored at `~/.deja/config.json` (uid, layoutId, cached subscription)
+
+### Release Process
+1. Merge to main, create changeset
+2. Tag release: `git tag v1.x.x && git push --tags`
+3. CI builds tarball and creates GitHub Release with `deja-server.tar.gz`, `deja` CLI, and `install.sh`
+4. Users run `deja update` to download and install the new version
+
+### Rules for Distribution Code
+- **Do not expose source code** in releases — only compiled JavaScript (tsup output)
+- **Do not hardcode secrets** in scripts — use env vars and `~/.deja/.env`
+- **Do not auto-update** running servers — updates are user-initiated only
+- **Do not shut down mid-session** on subscription changes — warn and enforce on next start
+
+---
+
 ## Environment Variables
 
 Copy `.env.example` to `.env` at the root. Key variables:
@@ -559,6 +593,7 @@ Copy `.env.example` to `.env` (or `.env.local`) at the repo root. Turborepo read
 | `VITE_WS_PORT` | WebSocket server port (default: `8082`) |
 | `VITE_WS_ID` | Server identifier string (default: `DEJA.js`) |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob token for sound file storage |
+| `CLOUDFLARE_TUNNEL_TOKEN` | Cloudflare tunnel token for `pnpm tunnel:named` |
 
 ---
 
