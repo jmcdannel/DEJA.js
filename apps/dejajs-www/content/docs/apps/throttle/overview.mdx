@@ -57,17 +57,3 @@ The throttle app is optimized for mobile devices with touch-friendly controls.
 ![Mobile Home](/screenshots/throttle_mobile_home.png)
 
 ![Mobile Throttle](/screenshots/throttle_mobile_throttle.png)
-
-## Settings
-
-Unified settings page with sections for Account, Billing & Subscription (Stripe plan management and billing portal), Appearance (dark/light/high-contrast themes and per-page background customization), Throttle configuration (speed steps), Connection settings (DEJA Server or WiThrottle protocol with host/port config), and Footer Menu Favorites.
-
-## Technical Details
-
-- **Framework:** Vue 3 with Composition API
-- **UI:** Vuetify 3 + Tailwind CSS
-- **State:** Pinia stores, Firebase Firestore via VueFire, localStorage via VueUse
-- **Auth:** Firebase Auth with social providers (Google, GitHub, Facebook, Apple, Microsoft) and email/password
-- **Billing:** Stripe subscription management with plan display and billing portal access
-- **Real-time:** Device status synced across all apps via Firebase
-- **Routing:** Vue Router 4 with auth guards

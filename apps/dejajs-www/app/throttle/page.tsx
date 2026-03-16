@@ -35,7 +35,7 @@ const defaultFeatures = [
 export default async function ThrottlePage() {
   let product: any = null;
   try {
-    product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'throttle' });
+    if (client) product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'throttle' });
   } catch {
     // Fall back to hardcoded content
   }

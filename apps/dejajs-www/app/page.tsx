@@ -88,7 +88,7 @@ export const metadata: Metadata = {
 export default async function Home() {
   let homepage: any = null;
   try {
-    homepage = await client.fetch(HOMEPAGE_QUERY);
+    if (client) homepage = await client.fetch(HOMEPAGE_QUERY);
   } catch {
     // Fall back to hardcoded content
   }

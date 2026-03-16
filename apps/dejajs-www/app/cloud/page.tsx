@@ -35,7 +35,7 @@ const defaultFeatures = [
 export default async function CloudPage() {
   let product: any = null;
   try {
-    product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'cloud' });
+    if (client) product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'cloud' });
   } catch {
     // Fall back to hardcoded content
   }

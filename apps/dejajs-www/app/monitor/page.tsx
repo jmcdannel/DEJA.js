@@ -35,7 +35,7 @@ const defaultFeatures = [
 export default async function MonitorPage() {
   let product: any = null;
   try {
-    product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'monitor' });
+    if (client) product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'monitor' });
   } catch {
     // Fall back to hardcoded content
   }

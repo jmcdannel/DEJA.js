@@ -27,7 +27,7 @@ const defaultFeatures = [
 export default async function ServerPage() {
   let product: any = null;
   try {
-    product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'server' });
+    if (client) product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'server' });
   } catch {
     // Fall back to hardcoded content
   }

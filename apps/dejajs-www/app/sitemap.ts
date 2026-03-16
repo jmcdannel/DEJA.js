@@ -10,9 +10,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let productSlugs = defaultProductSlugs;
   try {
-    const sanityProducts = await client.fetch(PRODUCT_SLUGS_QUERY);
-    if (sanityProducts?.length) {
-      productSlugs = sanityProducts.map((p: { slug: string }) => p.slug);
+    if (client) {
+      const sanityProducts = await client.fetch(PRODUCT_SLUGS_QUERY);
+      if (sanityProducts?.length) {
+        productSlugs = sanityProducts.map((p: { slug: string }) => p.slug);
+      }
     }
   } catch {
     // Fall back to hardcoded slugs

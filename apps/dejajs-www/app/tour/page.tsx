@@ -35,7 +35,7 @@ const defaultFeatures = [
 export default async function TourPage() {
   let product: any = null;
   try {
-    product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'tour' });
+    if (client) product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'tour' });
   } catch {
     // Fall back to hardcoded content
   }

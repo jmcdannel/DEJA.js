@@ -67,7 +67,7 @@ const defaultSections = [
 export default async function FAQPage() {
   let faq: any = null;
   try {
-    faq = await client.fetch(FAQ_PAGE_QUERY);
+    if (client) faq = await client.fetch(FAQ_PAGE_QUERY);
   } catch {
     // Fall back to hardcoded content
   }

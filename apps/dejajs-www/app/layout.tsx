@@ -95,7 +95,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   let settings = null;
   try {
-    settings = await client.fetch(SITE_SETTINGS_QUERY);
+    if (client) settings = await client.fetch(SITE_SETTINGS_QUERY);
   } catch {
     // Fall back to hardcoded defaults in Header/Footer
   }

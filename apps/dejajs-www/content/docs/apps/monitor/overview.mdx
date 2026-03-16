@@ -15,8 +15,7 @@ The Monitor app is a tmux-style system monitoring dashboard for your DCC-EX layo
 - **Real-Time Logs** — Live streaming of DCC commands, turnout changes, effect triggers, and sensor events
 - **System Stats** — Active locos, device count, turnout/effect/signal totals, and server uptime
 - **Device Serial Monitor** — Subscribe to individual device serial output for debugging
-- **Device Status Sync** — Device connect/disconnect events propagate in real-time across all DEJA apps via Firebase
-- **Settings** — Unified settings with Account, Billing & Subscription (Stripe), Appearance (dark/light/high-contrast themes and per-page backgrounds), and WebSocket connection config
+- **Settings** — Account, billing, theme (dark/light/high-contrast), background customization, and WS connection config
 
 ## Screenshots
 
@@ -41,8 +40,7 @@ The Monitor app is a tmux-style system monitoring dashboard for your DCC-EX layo
 - **Framework:** Vue 3 with Composition API
 - **UI:** Vuetify 3 + Tailwind CSS
 - **State:** Firebase Firestore via VueFire, localStorage via VueUse
-- **Auth:** Firebase Auth with social providers and email/password
-- **Real-time:** WebSocket subscriptions for device serial data, Firebase RTDB for DCC logs, device status sync across apps
+- **Real-time:** WebSocket subscriptions for device serial data, Firebase RTDB for DCC logs
 - **Routing:** Vue Router 4 with auth guards (`requireAuth`, `requireLayout`)
 - **Theme:** Dark/Light/High-Contrast via `useThemeSwitcher`
 - **Port:** 3031 (development)
