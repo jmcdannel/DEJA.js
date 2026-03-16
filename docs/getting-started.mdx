@@ -7,7 +7,7 @@ order: 1
 
 # Getting Started with DEJA.js
 
-DEJA.js (DCC-EX JavaScript API) is an open-source control system for model railroads. It connects your web browser to a [DCC-EX CommandStation](https://dcc-ex.com/) over USB serial, giving you real-time control of locomotives, turnouts, signals, sound effects, and more — all from a modern web interface.
+DEJA.js (DCC-EX JavaScript API) is a modern control system for model railroads. It connects your web browser to a [DCC-EX CommandStation](https://dcc-ex.com/) over USB serial, giving you real-time control of locomotives, turnouts, signals, sound effects, and more — all from a modern web interface.
 
 Whether you run a small switching layout on your desk or a large club layout with multiple operators, DEJA.js provides the tools to control it from any device with a browser.
 
@@ -91,15 +91,22 @@ The `io/` directory contains Arduino and Raspberry Pi Pico W firmware for hardwa
 
 ## System Requirements
 
-Before you begin, make sure you have:
+### End Users
 
-- **Node.js 22** or later
-- **pnpm 9** or later
-- **Git** for cloning the repository
+To install and run the DEJA Server, you need:
+
+- **Node.js 20** or later
 - A **DCC-EX CommandStation** connected via USB
 - A **USB cable** connecting the CommandStation to your computer
 
-> Confirm Node.js is ready: `node --version` should print `v22.x.x` or higher.
+> Confirm Node.js is ready: `node --version` should print `v20.x.x` or higher.
+
+### Developers
+
+If you want to work with the full monorepo source code, you also need:
+
+- **pnpm 9** or later
+- **Git** for cloning the repository
 
 ## Next Steps
 

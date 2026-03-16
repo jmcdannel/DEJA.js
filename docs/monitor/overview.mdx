@@ -94,16 +94,14 @@ These settings are currently mock controls with a placeholder save button. Full 
 
 ## Running the Monitor
 
-Start the Monitor app in development mode from the monorepo root:
+The Monitor app is hosted at [monitor.dejajs.com](https://monitor.dejajs.com). Open it in any browser, log in with your DEJA Cloud account, and select your layout to begin monitoring.
+
+### Developer Mode
+
+If you're working with the full monorepo, you can also run the Monitor locally in development mode:
 
 ```bash
 pnpm --filter=deja-monitor dev
 ```
 
-Or start it alongside the server using the combined command:
-
-```bash
-pnpm deja
-```
-
-The Monitor app requires authentication (`requireAuth`) and a selected layout (`requireLayout`) before the dashboard loads. Log in and select your layout to begin monitoring.
+The Monitor app requires authentication (`requireAuth`) and a selected layout (`requireLayout`) before the dashboard loads.

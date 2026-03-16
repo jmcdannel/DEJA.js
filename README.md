@@ -46,20 +46,6 @@ The **DEJA Server** is the only piece you install locally. It bridges your Comma
 
 ---
 
-### 📋 Prerequisites
-
-| Requirement | Minimum | Get it |
-|---|---|---|
-| 📦 Node.js | v22+ | [Install via nvm](https://github.com/nvm-sh/nvm) |
-| 📦 pnpm | v9+ | `npm install -g pnpm` |
-| 📦 Git | Any recent | [git-scm.com](https://git-scm.com/install/) |
-| <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX CommandStation | Any supported board | [DCC-EX setup guide](https://dcc-ex.com/ex-commandstation/index.html) |
-| 🔌 USB cable | — | Connecting CommandStation to this computer |
-
-> Confirm Node.js is ready before continuing: `node --version` should print `v22.x.x` or higher.
-
----
-
 ### 👤 Step 1 — Sign Up & Choose a Plan
 
 Create your free DEJA Cloud account and pick a tier. It takes one click.
