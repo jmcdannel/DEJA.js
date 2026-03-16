@@ -123,7 +123,7 @@ export const useLayout = () => {
     try {
       await setDoc(doc(db, `layouts`, id), {
         ...layout,
-        approved: layout.approved ?? false,
+        approved: layout.approved ?? true,
         defaultSounds: layout.defaultSounds ?? defaultLayoutSounds,
         owner: layout.owner ?? user.value?.email,
         dcc: {
