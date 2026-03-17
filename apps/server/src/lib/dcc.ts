@@ -2,9 +2,10 @@ import { SerialPort } from 'serialport'
 import { FieldValue } from 'firebase-admin/firestore'
 import { ServerValue } from 'firebase-admin/database'
 import { rtdb, db } from '@repo/firebase-config/firebase-admin-node'
-import { serial } from './serial'
 import { broadcast } from '../broadcast'
+import { createRosterModule } from '../modules/roster.js'
 import { log } from '../utils/logger'
+import { serial } from './serial'
 
 export interface ConnectCommand {
   device: string
@@ -40,6 +41,7 @@ export interface OutputPayload {
 const VALID_ACTIONS = new Set([
   'connect', 'dcc', 'listPorts', 'power', 'throttle',
   'turnout', 'output', 'function', 'getStatus', 'status', 'ping',
+  'syncRoster', 'importRoster',
 ])
 
 /**
@@ -154,6 +156,12 @@ const handleMessage = async (msg: string): Promise<void> => {
       case 'ping':
         await getStatus()
         break
+      case 'syncRoster':
+        await rosterModule.sendRosterSync(payload?.locos ?? [])
+        break
+      case 'importRoster':
+        await rosterModule.startRosterImport()
+        break
       default:
         //noop
         log.warn('Unknown action in `dcc handleMessage`', action, payload)
@@ -224,6 +232,9 @@ const setConnection = async (port: SerialPort): Promise<SerialCom> => {
   isConnected = true
   return com
 }
+
+// Roster sync module — initialized with the internal send function and connection state
+const rosterModule = createRosterModule(send, () => isConnected, serial.addDataListener)
 
 const listPorts = async (): Promise<void> => {
   const payload = await getPorts()
