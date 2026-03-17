@@ -42,6 +42,7 @@ export interface PlanLimits {
   routes: number
   layouts: number
   tourApp: boolean
+  remoteMonitoring: boolean
 }
 
 export interface PlanDisplayInfo {
