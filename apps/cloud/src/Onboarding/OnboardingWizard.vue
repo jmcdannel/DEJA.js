@@ -72,7 +72,7 @@ function handlePaymentComplete() {
 }
 
 function handleLayoutComplete() {
-  router.push({ name: 'pending-approval' })
+  router.push({ name: 'setup-complete' })
 }
 
 const steps = computed(() => [

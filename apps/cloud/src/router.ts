@@ -26,8 +26,6 @@ declare module 'vue-router' {
     requireAuth?: boolean
     /** Require that the user has completed onboarding (has at least one layout) */
     requireOnboarding?: boolean
-    /** Require that at least one of the user's layouts is approved */
-    requireApproval?: boolean
     /** Require that a layout is selected in localStorage */
     requireLayout?: boolean
     /** Require a DCC-EX device on the selected layout */
@@ -51,7 +49,7 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: Dashboard,
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/login',
@@ -72,9 +70,9 @@ const router = createRouter({
       meta: { fullscreen: true },
     },
     {
-      path: '/pending-approval',
-      name: 'pending-approval',
-      component: () => import('./views/PendingApproval.vue'),
+      path: '/setup-complete',
+      name: 'setup-complete',
+      component: () => import('./views/SetupComplete.vue'),
       meta: { requireAuth: true, requireOnboarding: true, fullscreen: true },
     },
     {
@@ -93,157 +91,157 @@ const router = createRouter({
       path: '/locos',
       name: 'Roster',
       component: () => import('./Roster/Roster.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireDccEx: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireDccEx: true, requireLayout: true },
     },
     {
       path: '/locos/new',
       name: 'Add Loco',
       component: () => import('./Roster/AddLoco.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/locos/:address',
       name: 'Edit Loco',
       component: () => import('./Roster/EditLoco.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/effects',
       name: 'Effects',
       component: () => import('./Effects/Effects.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/effects/new',
       name: 'Add Effect',
       component: () => import('./Effects/AddEffect.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/effects/:effectId',
       name: 'Edit Effect',
       component: () => import('./Effects/EditEffect.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/routes',
       name: 'Routes',
       component: () => import('./Routes/Routes.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/routes/new',
       name: 'Add Route',
       component: () => import('./Routes/AddRoute.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/routes/:routeId',
       name: 'Edit Route',
       component: () => import('./Routes/EditRoute.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/signals',
       name: 'Signals',
       component: () => import('./Signals/Signals.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/signals/new',
       name: 'Add Signal',
       component: () => import('./Signals/AddSignal.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/signals/:signalId',
       name: 'Edit Signal',
       component: () => import('./Signals/EditSignal.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/sensors',
       name: 'Sensors',
       component: () => import('./Sensors/Sensors.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/sensors/new',
       name: 'Add Sensor',
       component: () => import('./Sensors/AddSensor.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/sensors/automations',
       name: 'Automations',
       component: () => import('./Sensors/Automations.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/sensors/automations/new',
       name: 'Add Automation',
       component: () => import('./Sensors/AutomationForm.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/sensors/automations/:automationId',
       name: 'Edit Automation',
       component: () => import('./Sensors/AutomationForm.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/sensors/:sensorId',
       name: 'Edit Sensor',
       component: () => import('./Sensors/EditSensor.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/turnouts',
       name: 'Turnouts',
       component: () => import('./Turnouts/Turnouts.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/turnouts/new',
       name: 'Add Turnout',
       component: () => import('./Turnouts/AddTurnout.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/turnouts/:turnoutId',
       name: 'Edit Turnout',
       component: () => import('./Turnouts/EditTurnout.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/turnouts/labels',
       name: 'Turnout Labels',
       component: () => import('./Turnouts/TurnoutLabels.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/dccex',
       name: 'DCC-EX',
       component: () => import('./DCCEX/DCCEX.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireDccEx: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireDccEx: true, requireLayout: true },
     },
     {
       path: '/devices',
       name: 'Devices',
       component: () => import('./Layout/Layout.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/settings',
       name: 'Settings',
       component: () => import('./Settings/Settings.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/devices/:deviceId',
       name: 'DeviceDetails',
       component: () => import('./Layout/Devices/DeviceDetails.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     // 404 - Catch all unmatched routes
     {
@@ -301,22 +299,6 @@ function checkRequireOnboarding(
       path: '/onboarding',
       query: { redirect: to.fullPath },
     }
-  }
-}
-
-function checkRequireApproval(
-  layoutsSnap: Awaited<ReturnType<typeof getDocs>>,
-): RouteLocationRaw | undefined {
-  if (layoutsSnap.empty) {
-    return
-  }
-
-  const hasApprovedLayout = layoutsSnap.docs.some(
-    (doc) => doc.data().approved === true,
-  )
-
-  if (!hasApprovedLayout) {
-    return { path: '/pending-approval' }
   }
 }
 
@@ -383,9 +365,8 @@ router.beforeEach(async (to) => {
     // requireAuth is set (the guard above would have returned).
     const user = currentUser as User
 
-    // Fetch user layouts once for both onboarding and approval guards.
-    const needsLayouts = meta.requireOnboarding || meta.requireApproval
-    const layoutsSnap = needsLayouts ? await getUserLayouts(user) : null
+    // Fetch user layouts for the onboarding guard.
+    const layoutsSnap = meta.requireOnboarding ? await getUserLayouts(user) : null
 
     // 3. Require onboarding (user must have at least one layout)
     if (meta.requireOnboarding && layoutsSnap) {
@@ -396,16 +377,7 @@ router.beforeEach(async (to) => {
       }
     }
 
-    // 4. Require layout approval
-    if (meta.requireApproval && layoutsSnap) {
-      const redirect = checkRequireApproval(layoutsSnap)
-      if (redirect) {
-        log.debug('requireApproval → redirecting to pending-approval')
-        return redirect
-      }
-    }
-
-    // 5. Require a selected layout in localStorage
+    // 4. Require a selected layout in localStorage
     if (meta.requireLayout) {
       const redirect = checkRequireLayout(to)
       if (redirect) {
@@ -414,7 +386,7 @@ router.beforeEach(async (to) => {
       }
     }
 
-    // 6. Require DCC-EX device
+    // 5. Require DCC-EX device
     if (meta.requireDccEx) {
       const redirect = checkRequireDccEx()
       if (redirect) {

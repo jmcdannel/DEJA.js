@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # scripts/install.sh
 # DEJA.js Install Script
-# Usage: curl -fsSL https://install.dejajs.com | bash
+# Usage: curl -fsSL "https://install.dejajs.com?uid=YOUR_UID&layout=YOUR_LAYOUT" | bash
+# The personalized URL (from Cloud → Settings → Install) embeds your UID and Layout ID
+# so you don't need to enter them manually.
 
 set -euo pipefail
 
