@@ -7,6 +7,8 @@ on:
 
 jobs:
   stage:
+    permissions: {}   # No GITHUB_TOKEN permissions needed — uses VERCEL_TOKEN only
+    timeout-minutes: 25
     runs-on: ubuntu-latest
     steps:
       - name: Setup Node.js
@@ -25,6 +27,7 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
+          echo "::add-mask::$VERCEL_TOKEN"
           TEAM="jmcdannels-projects"
           BRANCH="preview"
           MAX_WAIT=300   # 5 minutes per project
@@ -45,8 +48,8 @@ jobs:
             DEPLOYMENT_URL=""
 
             echo "Waiting for $PROJECT to be ready..."
-            while [ $ELAPSED -lt $MAX_WAIT ]; do
-              DEPLOYMENT_URL=$(curl -s \
+            while [ "$ELAPSED" -lt "$MAX_WAIT" ]; do
+              DEPLOYMENT_URL=$(curl -s --fail \
                 "https://api.vercel.com/v6/deployments?projectId=${PROJECT}&meta-gitBranch=${BRANCH}&limit=1&target=preview&teamId=${TEAM}" \
                 -H "Authorization: Bearer $VERCEL_TOKEN" \
                 | jq -r '.deployments[0] | select(.readyState == "READY") | .url // empty')
@@ -56,7 +59,7 @@ jobs:
                 break
               fi
 
-              sleep $INTERVAL
+              sleep "$INTERVAL"
               ELAPSED=$((ELAPSED + INTERVAL))
             done
 
