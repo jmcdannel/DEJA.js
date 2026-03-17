@@ -1,5 +1,6 @@
 ---
-"deja": minor
+"deja-cloud": minor
+"@repo/ui": minor
 ---
 
 changed: **[cloud]** Redesign left nav with grouped sections and pinned app switcher

@@ -9,6 +9,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2026-03-16
+
+### Added
+
+#### Track Diagram Editor
+- **[cloud]** VueFlow-based track diagram editor with custom track nodes and edges, live SVG preview, CSS export, and Firebase Storage upload — create and save visual layout diagrams from the Cloud app
+- **[modules]** `useTrackDiagrams` composable with CRUD operations and type definitions for track diagram management
+- **[firebase-config]** Firebase Storage export for file upload support
+
+#### Navigation & UI Components
+- **[cloud, ui]** Redesign left nav with grouped sections (Modules, Hardware, System) and pinned app switcher — compact icon row for Cloud, Throttle, Monitor, Tour pinned to drawer footer
+- **[ui]** `QuickStart` component for guided onboarding with step-by-step server setup instructions and Storybook stories
+- **[ui]** `SplashPage` component for full-screen branded landing experiences
+- **[ui]** Shared `NotFoundPage` component deployed across cloud, throttle, monitor, and tour apps
+- **[ui]** Configurable background system with aurora, starfield, and photo backgrounds (dark-tracks, milkyway, nebula, railroad-night, steam-locomotive, train-station-night)
+
+#### Sanity CMS Integration
+- **[www]** Integrate Sanity CMS for dynamic marketing content with embedded Studio at `/studio`, GROQ queries for site settings, homepage, FAQ, and product pages, graceful fallback to hardcoded content when env vars are missing, and dynamic sitemap generation
+
+#### DCC-EX Roster Sync
+- **[cloud, server]** Bidirectional DCC-EX CommandStation roster sync — push locos to the CommandStation from the Roster page, import locos from the CommandStation into DEJA Cloud, and auto-sync on loco save
+
+#### Cloud App Enhancements
+- **[cloud]** Sound API consolidated into cloud app — removed separate `sound-api` dependency
+- **[cloud]** Upgrade page for subscription plan management
+- **[server, cloud]** Cloudflare tunnel gated on paid plans with `deja tunnel` CLI commands
+
+#### Distribution
+- **[scripts]** Personalized install URL with embedded UID and layout ID
+- **[cloud]** Setup Complete page replacing the pending approval gate
+
+### Fixed
+
+- **[ui]** Compact nav spacing, reduce icon-label gap, brand colors on app switcher
+- **[ui]** Add `noreferrer` to external link `rel` attributes
+- **[www]** Downgrade Sanity to v3 for React 18 compatibility and fix Studio route
+- **[firebase-config]** Lazy Firebase Storage initialization and add `trackDiagrams` Firestore rules
+- **[cloud]** Add Vite plugin for local Vercel API development
+
+---
+
 ## [1.3.0] - 2026-03-14
 
 ### Added
