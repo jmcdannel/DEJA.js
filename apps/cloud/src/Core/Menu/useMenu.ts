@@ -53,6 +53,12 @@ export function useMenu() {
       name: 'routes',
     },
     {
+      color: 'indigo',
+      icon: 'mdi-map-marker-path',
+      label: 'Track Diagrams',
+      name: 'track-diagrams',
+    },
+    {
       color: 'emerald',
       icon: 'mdi-traffic-light',
       label: 'Signals',

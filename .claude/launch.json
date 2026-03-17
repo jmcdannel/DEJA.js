@@ -20,6 +20,18 @@
       "port": 3021
     },
     {
+      "name": "tour",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter=deja-tour", "dev"],
+      "port": 3031
+    },
+    {
+      "name": "server",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter=deja-serverts", "dev"],
+      "port": 8082
+    },
+    {
       "name": "www",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter=dejajs-www", "dev"],
