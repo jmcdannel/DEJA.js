@@ -16,11 +16,11 @@ export class SoundFileService {
   private apiBaseUrl: string
 
   constructor() {
-    // Use the Next.js API URL - change this to your deployed URL when ready
-    // Prefer VITE_SOUND_API_URL (Vite: import.meta.env), fall back to process.env, then default
+    // Use the cloud app's own sound API at /api/sounds (Vercel Function)
+    // Falls back to VITE_API_BASE_URL env var for custom deployments
     const viteUrl = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_API_BASE_URL : undefined
     const nodeUrl = typeof process !== 'undefined' ? process.env.VITE_API_BASE_URL : undefined
-    this.apiBaseUrl = viteUrl || nodeUrl || 'http://localhost:3001/api'
+    this.apiBaseUrl = viteUrl || nodeUrl || '/api'
     log.debug('SoundFileService initialized with API URL:', this.apiBaseUrl)
   }
 
