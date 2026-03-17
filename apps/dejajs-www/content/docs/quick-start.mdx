@@ -13,13 +13,11 @@ By the end of this guide your DCC-EX CommandStation will be connected to DEJA.js
 
 | Requirement | Details |
 |---|---|
-| **Node.js** v22+ | [Install via nvm](https://github.com/nvm-sh/nvm) |
-| **pnpm** v9+ | `npm install -g pnpm` |
-| **Git** | [git-scm.com](https://git-scm.com/install/) |
+| **Node.js** v20+ | [Install via nvm](https://github.com/nvm-sh/nvm) or [nodejs.org](https://nodejs.org/) |
 | **DCC-EX CommandStation** | [DCC-EX setup guide](https://dcc-ex.com/ex-commandstation/index.html) |
 | **USB cable** | Connecting the CommandStation to your computer |
 
-> Confirm Node.js before continuing: `node --version` should print `v22.x.x` or higher.
+> Confirm Node.js before continuing: `node --version` should print `v20.x.x` or higher.
 
 ---
 
@@ -64,53 +62,26 @@ After this step the wizard shows your `LAYOUT_ID` and Firebase credentials. **Co
 
 ## Step 4 — Install
 
-### Quick Install (recommended)
+Open a terminal on the machine connected to your DCC-EX CommandStation and run one command. It downloads the DEJA Server, installs dependencies, and walks you through configuration.
 
-Open a terminal on the machine connected to your DCC-EX CommandStation and run one command. It downloads the DEJA.js server, installs dependencies, and walks you through configuration.
-
-**macOS / Linux**
+**macOS / Linux / Raspberry Pi**
 
 ```bash
 curl -fsSL https://install.dejajs.com | bash
 ```
 
-**Windows (PowerShell)**
+**Windows**
 
-```powershell
-irm https://install.dejajs.com/win | iex
-```
+Windows users should install via [WSL](https://learn.microsoft.com/en-us/windows/wsl/install), then run the curl command above from a WSL terminal.
 
-After the script finishes, skip ahead to [Step 5 — Register Your CommandStation](#step-5--register-your-commandstation).
+The install script will:
+1. Check for Node.js 20+ (provides install instructions if missing)
+2. Prompt for your account credentials (from Step 3)
+3. Detect your serial ports for the DCC-EX CommandStation
+4. Download the DEJA Server and install dependencies
+5. Start the server
 
-### Manual Install
-
-If you prefer to set things up yourself:
-
-```bash
-git clone https://github.com/jmcdannel/DEJA.js.git
-cd DEJA.js
-pnpm install
-cp .env.example .env.local
-```
-
-Open `.env.local` in a text editor and paste the credentials from Step 3:
-
-```env
-LAYOUT_ID=my-layout-name
-
-VITE_FIREBASE_API_KEY=AIza...
-VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your-project
-VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
-VITE_FIREBASE_APP_ID=1:123456789:web:abc123
-
-ENABLE_WS=true
-ENABLE_DEJACLOUD=true
-VITE_WS_PORT=8082
-```
-
-For the full list of environment variables and advanced configuration, see the [Installation guide](/docs/installation).
+> Looking for the full monorepo developer setup? See the [Installation guide](/docs/installation).
 
 ---
 
@@ -124,15 +95,19 @@ Tell DEJA Cloud that a DCC-EX CommandStation will connect via USB from this comp
 
 ---
 
-## Step 6 — Start the Server
+## Step 6 — Manage the Server
+
+The install script starts the server automatically. Use the `deja` CLI to manage it:
 
 ```bash
-pnpm deja
+deja status     # Check server status and connection
+deja logs       # View server logs
+deja restart    # Restart the server
+deja stop       # Stop the server
+deja update     # Pull the latest server version
 ```
 
-This starts the DEJA Server (USB serial communication) and the Monitor app (diagnostics) together.
-
-**Verify:** Terminal output shows the WebSocket server listening on port `8082`. Open [DEJA Monitor](https://monitor.dejajs.com) in a browser — you should see the server connected.
+**Verify:** Run `deja status` to confirm the server is running. Open [DEJA Monitor](https://monitor.dejajs.com) in a browser — you should see the server connected.
 
 ---
 
@@ -173,12 +148,11 @@ This starts the DEJA Server (USB serial communication) and the Monitor app (diag
 
 | Task | Command |
 |---|---|
-| Install dependencies | `pnpm install` |
-| Start server + monitor | `pnpm deja` |
-| Start all apps (dev mode) | `pnpm dev` |
-| Build all apps | `pnpm build` |
-| Lint all packages | `pnpm lint` |
-| Check dependency versions | `pnpm deps:check` |
+| Check server status | `deja status` |
+| View server logs | `deja logs` |
+| Update to latest version | `deja update` |
+| Restart the server | `deja restart` |
+| Stop the server | `deja stop` |
 
 ## What's Next
 

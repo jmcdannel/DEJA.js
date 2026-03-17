@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: How to install and configure DEJA.js — quick install for end users or full manual setup for developers.
+description: How to install and configure DEJA.js — quick install for end users or full developer setup for contributors.
 section: docs
 order: 2
 ---
@@ -10,15 +10,25 @@ order: 2
 There are two ways to install DEJA.js:
 
 - **Quick Install** — A single command that downloads the server, installs dependencies, and configures your environment. Best for most users.
-- **Manual Install** — Clone the full monorepo and configure everything yourself. Best for developers who want to contribute or customize.
+- **Developer Setup** — Clone the full monorepo and configure everything yourself. Best for developers who want to contribute or customize.
 
 Both paths assume you have already [signed up for DEJA Cloud](https://cloud.dejajs.com) and completed the onboarding wizard (see [Quick Start](/docs/quick-start), Steps 1–3).
 
 ## Prerequisites
 
+### Quick Install
+
 | Requirement | Minimum Version | How to Check |
 |-------------|-----------------|--------------|
-| **Node.js** | 22.0 or later | `node --version` |
+| **Node.js** | 20.0 or later | `node --version` |
+
+That's it — the install script handles everything else.
+
+### Developer Setup
+
+| Requirement | Minimum Version | How to Check |
+|-------------|-----------------|--------------|
+| **Node.js** | 20.0 or later | `node --version` |
 | **pnpm** | 9.0 or later | `pnpm --version` |
 | **Git** | Any recent version | `git --version` |
 
@@ -35,28 +45,56 @@ A **DCC-EX CommandStation** connected via USB is optional during development. Th
 
 Open a terminal on the machine connected to your DCC-EX CommandStation and run one command:
 
-**macOS / Linux**
+**macOS / Linux / Raspberry Pi**
 
 ```bash
 curl -fsSL https://install.dejajs.com | bash
 ```
 
-**Windows (PowerShell)**
+**Windows**
 
-```powershell
-irm https://install.dejajs.com/win | iex
-```
+Windows users should install via [WSL](https://learn.microsoft.com/en-us/windows/wsl/install), then run the curl command above from a WSL terminal.
 
 The script will:
 
-1. Clone the DEJA.js repository
-2. Install all dependencies via pnpm
-3. Prompt you to paste your environment credentials (from the onboarding wizard)
-4. Create your `.env.local` file
+1. Check for Node.js 20+ (provides install instructions if missing)
+2. Prompt for your account credentials (UID and Layout ID from the onboarding wizard)
+3. Create your environment configuration at `~/.deja/.env`
+4. Detect serial ports for your DCC-EX CommandStation
+5. Download the DEJA Server tarball and install dependencies
+6. Install the `deja` CLI
+7. Start the server
 
-After the script finishes, you're ready to [register your CommandStation](/docs/quick-start#step-5--register-your-commandstation) and [start the server](/docs/quick-start#step-6--start-the-server).
+### `deja` CLI Commands
 
-## Manual Install
+After installation, manage the server with the `deja` CLI:
+
+| Command | Description |
+|---------|-------------|
+| `deja status` | Check server status, subscription, and serial connection |
+| `deja logs` | View server logs |
+| `deja logs -f` | Follow server logs in real time |
+| `deja start` | Start the server |
+| `deja stop` | Stop the server |
+| `deja restart` | Restart the server |
+| `deja update` | Download and install the latest server version |
+
+### `~/.deja/` Directory Structure
+
+The Quick Install places all files under `~/.deja/`:
+
+```
+~/.deja/
+├── bin/
+│   └── deja          # CLI executable (added to PATH)
+├── server/           # Server files (downloaded tarball)
+├── config.json       # Account config (uid, layoutId)
+└── .env              # Environment variables (Firebase, ports, etc.)
+```
+
+After the script finishes, you're ready to [register your CommandStation](/docs/quick-start#step-5--register-your-commandstation).
+
+## Developer Setup
 
 ### Clone the Repository
 
@@ -123,6 +161,16 @@ Individual apps can also have their own `.env.local` files in `apps/<app-name>/`
 
 ## Verify the Installation
 
+### Quick Install
+
+```bash
+deja status
+```
+
+If the server is running and connected, you're good to go.
+
+### Developer Setup
+
 Build all packages to confirm everything is wired up correctly:
 
 ```bash
@@ -138,13 +186,23 @@ pnpm lint
 
 ## Troubleshooting
 
+### `deja: command not found`
+
+The install script adds `~/.deja/bin` to your PATH. If the command is not found after installation, either open a new terminal or run:
+
+```bash
+source ~/.zshrc   # or source ~/.bashrc
+```
+
 ### `pnpm: command not found`
 
-Make sure corepack is enabled (`corepack enable`) or install pnpm globally (`npm install -g pnpm@9`).
+Only needed for the Developer Setup. Make sure corepack is enabled (`corepack enable`) or install pnpm globally (`npm install -g pnpm@9`).
 
-### Firebase errors on build
+### Firebase errors on startup
 
-Double-check that all `VITE_FIREBASE_*` variables are set in `.env.local`. Missing values will cause build-time or runtime errors in apps that depend on Firebase.
+**Quick Install:** Double-check that all Firebase variables are set in `~/.deja/.env`. You can re-run the install script or edit the file manually.
+
+**Developer Setup:** Double-check that all `VITE_FIREBASE_*` variables are set in `.env.local`. Missing values will cause build-time or runtime errors in apps that depend on Firebase.
 
 ### Serial port access denied
 
