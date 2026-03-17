@@ -35,6 +35,12 @@ export function useMenu() {
       name: 'effects',
     },
     {
+      color: 'sky',
+      icon: 'mdi-volume-high',
+      label: 'Sounds',
+      name: 'sounds',
+    },
+    {
       color: 'amber',
       icon: 'mdi-call-split',
       label: 'Turnouts',

@@ -1,5 +1,6 @@
 export { default as AppHeader } from './AppHeader.vue'
 export { default as Logo } from './Logo.vue'
+export { default as SplashPage } from './SplashPage.vue'
 export { default as LocoAvatar } from './LocoAvatar.vue'
 export { default as Consist } from './Consist/Consist.vue'
 export { default as EditConsist } from './Consist/EditConsist.vue'
@@ -33,10 +34,22 @@ export { default as EffectTable } from './Effects/EffectTable.vue'
 export { default as GuestEffectCard } from './Effects/GuestEffectCard.vue'
 export { default as BackgroundDecor } from './BackgroundDecor.vue'
 export { default as BackgroundFallingStars } from './BackgroundFallingStars.vue'
+export { default as PageBackground } from './backgrounds/PageBackground.vue'
+export { default as BackgroundSettings } from './backgrounds/BackgroundSettings.vue'
+export { default as BackgroundThumbnail } from './backgrounds/BackgroundThumbnail.vue'
+export { backgrounds, getBackgroundById } from './backgrounds/registry'
+export type { BackgroundDefinition } from './backgrounds/registry'
+export { default as ServerSetupInfo } from './ServerSetupInfo.vue'
 export { default as Stat } from './Stat.vue'
 export { default as useColors } from './useColors'
 export { default as DeviceStatusItem } from './DeviceStatus/DeviceStatusItem.vue'
 export { default as DeviceStatusList } from './DeviceStatus/DeviceStatusList.vue'
+
+// Device Connection
+export { DeviceConnectionCard, DeviceConnectionList } from './DeviceConnection'
+
+// Dashboard widgets
+export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart } from './Dashboard'
 export { default as EmptyState } from './EmptyState/EmptyState.vue'
 export { default as ModuleList } from './ModuleList/List.vue'
 export { default as LocoList } from './Locos/LocoList.vue'
@@ -52,3 +65,10 @@ export { default as SensorTable } from './Sensors/SensorTable.vue'
 export * from './animations'
 export { appIcons } from './assets/icons'
 export type { AppIconName } from './assets/icons'
+
+// Themes
+export { createVuetifyThemes, THEME_MODES, THEME_MODE_DEFINITIONS } from './themes'
+export type { AppThemeConfig, ThemeMode, ThemeOverrides, ThemeVariables, ThemeModeDefinition } from './themes'
+
+// Composables
+export { useThemeSwitcher } from './composables/useThemeSwitcher'

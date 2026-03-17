@@ -10,21 +10,29 @@ interface DejaCommand {
   payload: unknown
 }
 
-export const useDejaJS = () => {
+interface DejaWriteOptions {
+  /** Optional callback that wraps a write with retry/queuing logic */
+  enqueue?: (execute: () => Promise<void>, description: string) => Promise<void>
+}
+
+export const useDejaJS = (options?: DejaWriteOptions) => {
   const layoutId = useStorage('@DEJA/layoutId', '')
 
+  const wrappedWrite = options?.enqueue ?? ((execute: () => Promise<void>) => execute())
+
   async function sendDejaCommand({ action, payload }: DejaCommand) {
-    try {
-      const commandsRef = ref(rtdb, `dejaCommands/${layoutId.value}`)
-      const newCommandRef = push(commandsRef)
-      set(newCommandRef, {
-        action,
-        payload: JSON.stringify(payload),
-        timestamp: serverTimestamp(),
-      })
-    } catch (e) {
-      log.error('Error adding document: ', e)
-    }
+    await wrappedWrite(
+      async () => {
+        const commandsRef = ref(rtdb, `dejaCommands/${layoutId.value}`)
+        const newCommandRef = push(commandsRef)
+        await set(newCommandRef, {
+          action,
+          payload: JSON.stringify(payload),
+          timestamp: serverTimestamp(),
+        })
+      },
+      `deja ${action}`,
+    )
   }
   return {
     sendDejaCommand,

@@ -5,15 +5,21 @@ import { useThemeSwitcher } from './composables/useThemeSwitcher'
 const { themePreference, cycleTheme } = useThemeSwitcher()
 
 const icon = computed(() => {
-  if (themePreference.value === 'system') return 'mdi-monitor'
-  if (themePreference.value === 'light') return 'mdi-weather-sunny'
-  return 'mdi-weather-night'
+  switch (themePreference.value) {
+    case 'light': return 'mdi-white-balance-sunny'
+    case 'dark': return 'mdi-moon-waning-crescent'
+    case 'high-contrast': return 'mdi-contrast-box'
+    default: return 'mdi-theme-light-dark'
+  }
 })
 
 const tooltipText = computed(() => {
-  if (themePreference.value === 'system') return 'System Theme'
-  if (themePreference.value === 'light') return 'Light Theme'
-  return 'Dark Theme'
+  switch (themePreference.value) {
+    case 'light': return 'Light mode'
+    case 'dark': return 'Dark mode'
+    case 'high-contrast': return 'High contrast'
+    default: return 'Theme'
+  }
 })
 </script>
 

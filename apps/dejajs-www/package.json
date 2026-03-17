@@ -1,6 +1,6 @@
 {
   "name": "dejajs-www",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "private": true,
   "scripts": {
@@ -8,13 +8,18 @@
     "prebuild": "pnpm run sync-docs",
     "dev": "pnpm run sync-docs && next dev -p 3051",
     "build": "next build",
-    "start": "next start -p 3051"
+    "start": "next start -p 3051",
+    "seed": "npx tsx scripts/seed-sanity.ts"
   },
   "dependencies": {
     "@heroui/react": "^2.8.5",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "latest",
     "@next/mdx": "latest",
+    "@sanity/client": "6",
+    "@sanity/icons": "3",
+    "@sanity/image-url": "1",
+    "@sanity/vision": "3",
     "@sentry/nextjs": "^10.42.0",
     "@vercel/analytics": "^1.6.1",
     "autoprefixer": "latest",
@@ -23,10 +28,12 @@
     "gray-matter": "^4.0.3",
     "next": "15.5.8",
     "next-mdx-remote": "^6.0.0",
+    "next-sanity": "9",
     "postcss": "latest",
     "react": "latest",
     "react-dom": "latest",
     "remark-gfm": "^4.0.0",
+    "sanity": "3",
     "tailwindcss": "latest"
   },
   "devDependencies": {

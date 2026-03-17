@@ -28,10 +28,19 @@ jobs:
             echo "EOF" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Warn if no changeset
+      - name: Fail if no changeset
         if: steps.check.outputs.found == 'false'
         run: |
-          echo "::warning::No changeset file found. If this PR includes user-facing changes, consider running /changelog in Claude Code to create one."
+          echo "::error::No changeset file found. Every PR must include a changeset entry."
+          echo ""
+          echo "To create one, run /changelog in Claude Code or manually create a .changeset/<name>.md file."
+          echo ""
+          echo "If this PR has NO user-facing changes (e.g., CI-only, docs-only), add a changeset with:"
+          echo "  ---"
+          echo "  \"deja\": patch"
+          echo "  ---"
+          echo "  changed: **[docs]** Description of what changed"
+          exit 1
 
       - name: Report changeset found
         if: steps.check.outputs.found == 'true'

@@ -1,43 +1,41 @@
-import { ref, watch, onMounted } from 'vue'
-import { useStorage, usePreferredDark } from '@vueuse/core'
-import { useTheme as useVuetifyTheme } from 'vuetify'
+// packages/ui/src/composables/useThemeSwitcher.ts
 
-export type ThemeMode = 'light' | 'dark' | 'system'
+import { ref, watch, onMounted } from 'vue'
+import { useStorage } from '@vueuse/core'
+import { useTheme as useVuetifyTheme } from 'vuetify'
+import type { ThemeMode } from '../themes/types'
+import { THEME_MODES, THEME_MODE_DEFINITIONS } from '../themes/modes'
+
+export type { ThemeMode }
 
 export function useThemeSwitcher() {
   const vuetifyTheme = useVuetifyTheme()
-  const preferredDark = usePreferredDark()
-  
-  // Store the user's explicit preference ('light', 'dark', or 'system')
-  const themePreference = useStorage<ThemeMode>('@DEJA/theme-preference', 'system')
-  
+
+  // Store the user's explicit preference
+  const themePreference = useStorage<ThemeMode>('@DEJA/theme-preference', 'dark')
+
   // Computed actual state (light or dark)
   const isDark = ref(false)
 
   const applyTheme = (mode: ThemeMode) => {
-    let resolvedIsDark = false
-    
-    if (mode === 'system') {
-      resolvedIsDark = preferredDark.value
-    } else {
-      resolvedIsDark = mode === 'dark'
-    }
+    const modeDef = THEME_MODE_DEFINITIONS[mode]
+    isDark.value = modeDef.dark
 
-    isDark.value = resolvedIsDark
+    // Sync HTML classes from mode definition
+    const html = document.documentElement
+    // Remove all possible theme classes first
+    const allClasses = THEME_MODES.flatMap(m => THEME_MODE_DEFINITIONS[m].htmlClasses)
+    const uniqueClasses = [...new Set(allClasses)]
+    uniqueClasses.forEach(cls => html.classList.remove(cls))
+    // Add classes for the current mode
+    modeDef.htmlClasses.forEach(cls => html.classList.add(cls))
 
-    // Update HTML class
-    if (resolvedIsDark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-
-    // Update Vuetify
-    vuetifyTheme.global.name.value = resolvedIsDark ? 'dark' : 'light'
+    // Update Vuetify theme name directly
+    vuetifyTheme.global.name.value = mode
   }
 
-  // Watch for changes in preference or system preference
-  watch([themePreference, preferredDark], ([newPref]) => {
+  // Watch for changes in preference
+  watch(themePreference, (newPref) => {
     applyTheme(newPref)
   })
 
@@ -49,11 +47,11 @@ export function useThemeSwitcher() {
   const setTheme = (mode: ThemeMode) => {
     themePreference.value = mode
   }
-  
+
   const cycleTheme = () => {
-    if (themePreference.value === 'system') setTheme('light')
-    else if (themePreference.value === 'light') setTheme('dark')
-    else setTheme('system')
+    const currentIndex = THEME_MODES.indexOf(themePreference.value)
+    const nextIndex = (currentIndex + 1) % THEME_MODES.length
+    setTheme(THEME_MODES[nextIndex])
   }
 
   return {

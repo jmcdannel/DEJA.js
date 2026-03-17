@@ -123,7 +123,7 @@ export const useLayout = () => {
     try {
       await setDoc(doc(db, `layouts`, id), {
         ...layout,
-        approved: layout.approved ?? false,
+        approved: layout.approved ?? true,
         defaultSounds: layout.defaultSounds ?? defaultLayoutSounds,
         owner: layout.owner ?? user.value?.email,
         dcc: {
@@ -194,6 +194,16 @@ export const useLayout = () => {
       log.debug('connectDevice: ', serial, device)
     } catch (e) {
       log.error('Error connectDevice: ', e)
+    }
+  }
+
+  async function disconnectDevice(deviceId: string) {
+    try {
+      sendDejaCommand({ action: 'disconnect', payload: { deviceId } })
+
+      log.debug('disconnectDevice: ', deviceId)
+    } catch (e) {
+      log.error('Error disconnectDevice: ', e)
     }
   }
 
@@ -292,6 +302,7 @@ export const useLayout = () => {
     autoConnectDevice,
     deviceTypes,
     connectDevice,
+    disconnectDevice,
     getTags,
     setTags,
     setTag,

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Automation } from '@repo/modules/sensors'
 import { useRouter } from 'vue-router'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import AutomationList from '@/Sensors/AutomationList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 
@@ -17,7 +17,7 @@ function handleAdd() {
 
 </script>
 <template>
-  <ModuleTitle menu="Sensors" />
+  <PageHeader menu="Sensors" />
   <AutomationList @edit="handleEdit">
     <template #prepend>
       <AddTile @click="handleAdd" color="teal" />

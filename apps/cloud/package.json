@@ -1,6 +1,6 @@
 {
   "name": "deja-cloud",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@sentry/vue": "^8.0.0",
+    "@stripe/stripe-js": "^8.9.0",
     "@vercel/blob": "^1.1.1",
     "@vercel/node": "^5.3.12",
     "@vue-flow/background": "^1.3.2",
@@ -25,6 +26,7 @@
     "@vue-flow/minimap": "^1.5.4",
     "dayjs": "^1.11.13",
     "firebase": "^10.14.1",
+    "firebase-admin": "^13.4.0",
     "vue": "^3.5.17",
     "vue-router": "^4.2.2",
     "vuefire": "^3.2.1",
@@ -33,7 +35,7 @@
   "devDependencies": {
     "@formkit/auto-animate": "^0.8.2",
     "@mdi/font": "^7.4.47",
-    "@repo/auth": "workspace:^0.0.0",
+    "@repo/auth": "workspace:^0.0.1",
     "@repo/dccex": "workspace:*",
     "@repo/deja": "workspace:*",
     "@repo/eslint-config": "workspace:*",

@@ -1,22 +1,21 @@
-import { computed, ref, watch, isRef, type Ref } from 'vue'
+import { computed, watch, type Ref } from 'vue'
 import { useStorage } from '@vueuse/core'
-import { deleteDoc, doc, serverTimestamp, setDoc } from 'firebase/firestore'
+import { deleteDoc, doc, setDoc } from 'firebase/firestore'
 import { useDocument } from 'vuefire'
 import type { Throttle } from '@/throttle/types'
 import { type Loco, useLocos } from '@repo/modules'
 import { db } from '@repo/firebase-config'
 import { getSignedSpeed } from '@/throttle/utils'
 import { createLogger } from '@repo/utils'
-import { throttle } from 'vuetify/lib/util/index.mjs'
+import { useCommandQueue } from '@/composables/useCommandQueue'
 
 const log = createLogger('Throttle')
-
-
 
 export const useThrottle = (address: Ref<number | null | undefined>) => {
   log.debug('useThrottle', address.value)
   const { getLocos } = useLocos()
   const layoutId = useStorage('@DEJA/layoutId', '')
+  const { enqueue } = useCommandQueue()
 
   const throttle = useDocument<Throttle>(
     address.value
@@ -56,27 +55,32 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
   }
 
   async function releaseThrottle() {
-    try {
-      const addr = address.value
-      if (addr === undefined || addr === null) return
-      const throttleDoc = doc(db, `layouts/${layoutId.value}/throttles`, addr.toString())
-      await deleteDoc(throttleDoc)
-    } catch (e) {
-      log.error('Error releasing throttle: ', e)
-    }
+    const addr = address.value
+    if (addr === undefined || addr === null) return
+    await enqueue(
+      async () => {
+        const throttleDoc = doc(db, `layouts/${layoutId.value}/throttles`, addr.toString())
+        await deleteDoc(throttleDoc)
+      },
+      `release throttle ${addr}`,
+    )
   }
 
   async function updateSpeed(speed: number) {
     const addr = address.value
     if (addr === undefined || addr === null) return
-    await setDoc(
-      doc(db, `layouts/${layoutId.value}/throttles`, addr.toString()),
-      {
-        direction: speed > 0,
-        speed: Math.abs(speed),
-        // timestamp: serverTimestamp(),
+    await enqueue(
+      async () => {
+        await setDoc(
+          doc(db, `layouts/${layoutId.value}/throttles`, addr.toString()),
+          {
+            direction: speed > 0,
+            speed: Math.abs(speed),
+          },
+          { merge: true },
+        )
       },
-      { merge: true }
+      `throttle ${addr} speed ${speed}`,
     )
   }
 

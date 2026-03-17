@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import ModuleTitle from '@/Core/UI/ModuleTitle.vue'
+import PageHeader from '@/Core/UI/PageHeader.vue'
 import SensorForm from '@/Sensors/SensorForm.vue'
 import type { Sensor } from '@repo/modules/sensors'
 
@@ -34,6 +34,6 @@ function handleClose() {
 }
 </script>
 <template>
-  <ModuleTitle menu="Sensors" />
+  <PageHeader menu="Sensors" />
   <SensorForm :sensor="defaultSensor" @close="handleClose" />
 </template>

@@ -1,132 +1,66 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
-import { RouterView, useRouter } from 'vue-router'
+import { RouterView, useRoute, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { Login } from '@repo/auth'
-import { AppHeader, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
+import { TransitionFade, NotificationContainer, provideNotifications, PageBackground } from '@repo/ui'
+import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import type { MenuItem } from '@repo/ui/src/Menu/types'
 import { useDcc } from '@repo/dccex'
-import { useEfx, useLayout, type Effect } from '@repo/modules'
-import { createLogger } from '@repo/utils'
-
-const log = createLogger('MonitorApp')
+import MonitorStatusBar from '@/Dashboard/components/MonitorStatusBar.vue'
 
 const { sendDccCommand } = useDcc()
-const { runEffect, getEffectsByType } = useEfx()
-const { getDevices, getLayouts } = useLayout()
 provideNotifications()
 const layoutId = useStorage('@DEJA/layoutId', '')
-const enabled = useStorage('@DEJA/pref/ws-logging', false)
-const wshost = useStorage('@DEJA/pref/ws-host', 'localhost:8082')
-const devices = getDevices()
-const layouts = getLayouts()
 const drawer = ref(false)
+const route = useRoute()
 
-// Event handlers for the unified header
+const isDashboardRoute = computed(() => route.name === 'home')
+
 async function handleTrackPowerToggle(newState: boolean) {
   const DEFAULT_ON = '1 MAIN'
   const DEFAULT_OFF = '0'
   await sendDccCommand({ action: 'dcc', payload: newState ? DEFAULT_ON : DEFAULT_OFF })
 }
 
-async function handleLayoutPowerToggle(newState: boolean) {
-  const powerEfx = await getEffectsByType('power')
-  if (powerEfx && Array.isArray(powerEfx)) {
-    powerEfx.forEach((efx: Effect) => {
-      runEffect({...efx, state: newState })
-    })
-  }
-}
-
 async function handleEmergencyStop() {
   await sendDccCommand({ action: 'dcc', payload: '!' })
 }
 
-function handleDeviceSelect(deviceId: string) {
-  log.debug('Device selected:', deviceId)
-  // Handle device selection if needed
-}
-
-const enableLogging = useStorage('@DEJA/pref/ws-logging', false)
-
 const user = useCurrentUser()
+const isDevAutoLogin = import.meta.env.DEV && import.meta.env.VITE_DEV_AUTO_LOGIN === 'true'
 const router = useRouter()
 
-const theme = ref('monitorDark')
+const { themePreference } = useThemeSwitcher()
 
-function handleMenu(item:MenuItem) {
+function handleMenu(item: MenuItem) {
   router.push({ name: item.name })
 }
 
-function handleLayoutSelect(newLayout: string) {
-  layoutId.value = newLayout
-  
-  window.location.reload()
-}
-
-function handleLogoClick() {
-  router.push({ path: '/' })
-}
-
-const menu = [
-  {
-    label: 'Dashboard',
-    icon: 'mdi-view-dashboard',
-    name: 'dashboard',
-    color: 'blue',
-  },
-  {
-    label: 'Settings',
-    icon: 'mdi-cog',
-    name: 'settings',
-    color: 'green',
-  },
-  {
-    label: 'Logs',
-    icon: 'mdi-file-document',
-    name: 'logs',
-    color: 'red',
-  }
-]
-
-
+const menu: MenuItem[] = []
 </script>
+
 <template>
   <v-responsive>
-    <v-app v-if="user" :theme="theme">
-      <AppHeader
-        app-name="Monitor"
-        app-icon="mdi-monitor-dashboard"
-        variant="monitor"
-        color="primary"
-        :dark="true"
-        :devices="devices"
-        :layouts="layouts"
-        :show-layout-power="true"
-        :show-emergency-stop="true"
-        :show-device-status="true"
-        :show-device-status-label="true"
-        :show-user-profile="true"
+    <v-app v-if="user || isDevAutoLogin" :theme="themePreference">
+      <PageBackground app-name="monitor">
+      <MonitorStatusBar
+        @toggle-drawer="drawer = !drawer"
         @track-power-toggle="handleTrackPowerToggle"
-        @layout-power-toggle="handleLayoutPowerToggle"
         @emergency-stop="handleEmergencyStop"
-        @device-select="handleDeviceSelect"
-        @logo-click="handleLogoClick"
-          @drawer-toggle="drawer = !drawer"
-      >
-      <template #default>
-        <v-switch v-model="enabled" label="Enabled" />
-        <v-text-field v-model="wshost" label="Host" hide-details density="compact" />
-      </template>
-    </AppHeader>
-    <Menu v-model:drawer="drawer" :menu="menu" @handle-menu="handleMenu" />
+      />
 
+      <Menu v-model:drawer="drawer" :menu="menu" :temporary="true" @handle-menu="handleMenu" />
 
-      <v-main v-if="layoutId">
+      <v-main v-if="layoutId" class="pa-0">
         <RouterView v-slot="{ Component }">
-          <TransitionFade>
+          <component
+            v-if="isDashboardRoute"
+            :is="Component"
+          />
+          <TransitionFade v-else>
             <component :is="Component" />
           </TransitionFade>
         </RouterView>
@@ -135,11 +69,11 @@ const menu = [
         <v-alert type="error" class="text-center mb-4">
           No Layout Selected. Please select a layout to continue.
         </v-alert>
-        <!-- <SelectLayout @selected="handleLayoutSelect" /> -->
       </v-main>
       <NotificationContainer />
+      </PageBackground>
     </v-app>
-    <v-app v-else :theme="theme">
+    <v-app v-else :theme="themePreference">
       <Login />
     </v-app>
   </v-responsive>

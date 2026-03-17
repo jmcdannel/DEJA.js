@@ -1,0 +1,128 @@
+---
+title: Sound API
+description: Next.js 14 API for managing sound effect assets stored in Vercel Blob storage, used by the DEJA.js server for sound playback.
+section: apps
+order: 7
+---
+
+# Sound API
+
+The Sound API is a lightweight Next.js 14 application that provides HTTP endpoints for listing and retrieving sound effect metadata. Audio files are stored in Vercel Blob and accessed through the Vercel Blob SDK. The DEJA.js server uses this API to discover available sounds and download audio files for playback during layout operations.
+
+## Endpoints
+
+### List All Sounds
+
+```
+GET /api/sounds
+```
+
+Returns metadata for all sound files stored in Vercel Blob. The response includes up to 100 files.
+
+**Response:**
+
+```json
+{
+  "sounds": [
+    {
+      "name": "Train Horn Long",
+      "url": "https://blob.vercel-storage.com/.../train-horn-long.mp3",
+      "size": 245760,
+      "uploadedAt": "2024-06-15T10:30:00.000Z",
+      "contentType": "audio/mpeg",
+      "pathname": "train-horn-long.mp3"
+    }
+  ]
+}
+```
+
+The `name` field is derived from the filename by removing the file extension, replacing hyphens and underscores with spaces, and capitalizing each word.
+
+**Error Response (500):**
+
+```json
+{
+  "error": "Failed to load sound files"
+}
+```
+
+### Get Single Sound
+
+```
+GET /api/sounds/[pathname]
+```
+
+Returns metadata for a specific sound file identified by its blob pathname. The pathname parameter is URL-decoded before lookup.
+
+**Response:**
+
+```json
+{
+  "sound": {
+    "name": "Crossing Bell",
+    "url": "https://blob.vercel-storage.com/.../crossing-bell.mp3",
+    "size": 102400,
+    "uploadedAt": "2024-06-15T10:30:00.000Z",
+    "contentType": "audio/mpeg",
+    "pathname": "crossing-bell.mp3"
+  }
+}
+```
+
+**Error Response (404):**
+
+```json
+{
+  "error": "Sound file not found"
+}
+```
+
+**Error Response (500):**
+
+```json
+{
+  "error": "Failed to get sound file info"
+}
+```
+
+## Supported Audio Formats
+
+The filename-to-display-name conversion strips the following extensions:
+
+- `.mp3`
+- `.wav`
+- `.ogg`
+- `.m4a`
+- `.flac`
+- `.aac`
+
+## How It Integrates
+
+The Sound API fits into the DEJA.js system as follows:
+
+1. Sound files are uploaded to Vercel Blob storage (manually or through a management interface).
+2. The Sound API provides endpoints for the server and frontend apps to discover available sounds.
+3. When an effect with a sound type is triggered, the DEJA.js server's `AudioCacheService` fetches and caches the audio file, then plays it using the `play-sound` library.
+4. The `@repo/sounds` package contains sound metadata utilities and scan scripts (`pnpm scan-sounds`) for cataloging available audio assets.
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `BLOB_READ_WRITE_TOKEN` | Yes | Vercel Blob storage access token |
+
+This token must be set for the Vercel Blob SDK to authenticate with the storage service. Without it, all API calls will fail.
+
+## Running Locally
+
+Start the Sound API in development mode:
+
+```bash
+pnpm --filter=sound-api dev
+```
+
+The app runs on port 3001 by default. You will need a valid `BLOB_READ_WRITE_TOKEN` in your environment for the API to return data.
+
+## Deployment
+
+The Sound API deploys to Vercel alongside the other frontend apps. See the `vercel.json` configuration in `apps/sound-api/` for deployment settings. The Vercel Blob token is configured as an environment variable in the Vercel project settings.

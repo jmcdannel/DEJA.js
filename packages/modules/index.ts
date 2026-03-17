@@ -33,6 +33,10 @@ export { default as useRoutes } from './routes/useRoutes'
 export * from './routes/types'
 export * from './routes/constants'
 
+// Preferences module
+export { default as useUserPreferences } from './preferences/useUserPreferences'
+export * from './preferences/types'
+
 // Sensors module
 export { default as useSensors } from './sensors/useSensors'
 export { useBlocks } from './sensors/useBlocks'
@@ -42,3 +46,10 @@ export * from './sensors/constants'
 
 // Track Diagrams module
 export * from './trackDiagrams/index.js'
+
+// Plans
+export * from './plans'
+
+// CV module
+export * from './cv/types'
+export * from './cv/constants'

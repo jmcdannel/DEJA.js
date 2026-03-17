@@ -1,7 +1,7 @@
-import { computed, ref, watch, onUnmounted } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
 import { useWebSocket } from '@vueuse/core'
-import { useStorage } from '@vueuse/core'
 import { createLogger } from '@repo/utils'
+import { useWsConnection } from '../../../composables/useWsConnection'
 
 const log = createLogger('DeviceMonitor')
 
@@ -15,36 +15,6 @@ export interface SerialMessage {
 
 const SERIAL_MESSAGE_ACTIONS = ['serial-data']
 
-function getDefaultWsHost(): string {
-  if (typeof window === 'undefined') {
-    return 'localhost:8082'
-  }
-
-  return window.location.host || 'localhost:8082'
-}
-
-function resolveWsUrl(host: string | undefined): string | undefined {
-  if (!host) {
-    return undefined
-  }
-
-  const trimmed = host.trim()
-  if (!trimmed) {
-    return undefined
-  }
-
-  if (trimmed.startsWith('ws://') || trimmed.startsWith('wss://')) {
-    return trimmed
-  }
-
-  if (typeof window !== 'undefined') {
-    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://'
-    return `${protocol}${trimmed}`
-  }
-
-  return `ws://${trimmed}`
-}
-
 function createMessageId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID()
@@ -54,14 +24,11 @@ function createMessageId(): string {
 }
 
 export function useDeviceSerialMonitor(deviceId: string) {
-  const wshost = useStorage('@DEJA/pref/ws-host', getDefaultWsHost())
+  const { wsUrl } = useWsConnection()
   const enabled = ref(true)
   const messages = ref<SerialMessage[]>([])
   const maxMessages = ref(100) // Limit messages to prevent memory issues
   const isSubscribed = ref(false)
-
-  // WebSocket connection
-  const wsUrl = computed(() => resolveWsUrl(wshost.value))
 
   log.debug('[DeviceMonitor] WebSocket URL:', wsUrl.value)
   const { data, status, open, close, send } = useWebSocket(wsUrl, {

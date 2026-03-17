@@ -1,6 +1,6 @@
 {
   "name": "@repo/ui",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -32,12 +32,17 @@
     "./EffectTable": "./src/Effects/EffectTable.vue",
     "./BackgroundFallingStars": "./src/BackgroundFallingStars.vue",
     "./BackgroundDecor": "./src/BackgroundDecor.vue",
+    "./backgrounds": "./src/backgrounds/index.ts",
+    "./PageBackground": "./src/backgrounds/PageBackground.vue",
+    "./BackgroundSettings": "./src/backgrounds/BackgroundSettings.vue",
+    "./BackgroundThumbnail": "./src/backgrounds/BackgroundThumbnail.vue",
     "./Stat": "./src/Stat.vue",
     "./useColors": "./src/useColors.ts",
     "./DeviceStatusItem": "./src/DeviceStatus/DeviceStatusItem.vue",
     "./DeviceStatusList": "./src/DeviceStatus/DeviceStatusList.vue",
     "./animations": "./src/animations/index.ts",
-    "./tailwind/animation-preset": "./src/tailwind/animation-preset.ts"
+    "./tailwind/animation-preset": "./src/tailwind/animation-preset.ts",
+    "./SplashPage": "./src/SplashPage.vue"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.8.2",
@@ -63,13 +68,16 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/prettier-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@storybook/addon-a11y": "^8.0.0",
     "@storybook/addon-essentials": "^8.0.0",
     "@storybook/addon-interactions": "^8.0.0",
     "@storybook/test": "^8.0.0",
     "@storybook/vue3": "^8.0.0",
     "@storybook/vue3-vite": "^8.0.0",
+    "@vitejs/plugin-vue": "^4.4.0",
+    "autoprefixer": "^10.4.27",
     "storybook": "^8.0.0",
-    "tailwindcss": "^3.4.10",
+    "tailwindcss": "^3.4.18",
     "typescript": "latest"
   }
 }

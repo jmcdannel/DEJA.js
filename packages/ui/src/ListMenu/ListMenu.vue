@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useLayout } from '@repo/modules'
+import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   disabledMenus?: string[]
   filterOptions?: { title: string; value: string }[]
+  inline?: boolean
   menuOptions?: { color: string; title: string; icon: string; value: string }[]
   moduleName: string,
   sortOptions?: { title: string; value: string }[]
   viewOptions?: { title: string; value: string }[]
 }>()
+
+const { mdAndUp } = useDisplay()
+const isInline = computed(() => props.inline ?? mdAndUp.value)
 
 const viewAsPref = useStorage<string[]>(`@DEJA/prefs/${props.moduleName}/View`, ['switch'])
 const sortByPref = useStorage<string[]>(`@DEJA/prefs/${props.moduleName}/Sort`, ['device'])
@@ -84,6 +89,25 @@ function getRef(option: string) {
   }
 }
 
+function getDisplayTitle(option: string, currentValue: string): string {
+  const options = getOptions(option)
+  const found = options.find(o => o.value === currentValue)
+  return found?.title ?? (option === 'view' ? 'View' : 'Sort')
+}
+
+function removeFilter(filter: string) {
+  filterBy.value = filterBy.value.filter(f => f !== filter)
+}
+
+function handleFilterSelect({ id }: { id: unknown }) {
+  const value = id as string
+  if (filterBy.value.includes(value)) {
+    filterBy.value = filterBy.value.filter(f => f !== value)
+  } else {
+    filterBy.value = [...filterBy.value, value]
+  }
+}
+
 // Create a map for refs to use valid member expressions in v-model
 const refsMap: Record<string, any> = {
   view: viewAs,
@@ -93,6 +117,103 @@ const refsMap: Record<string, any> = {
 
 </script>
 <template>
+  <!-- Inline mode (desktop) -->
+  <template v-if="isInline">
+    <div class="flex items-center gap-2">
+      <!-- View dropdown -->
+      <v-menu v-if="!disabledMenus?.includes('view')">
+        <template #activator="{ props: menuProps }">
+          <v-chip
+            v-bind="menuProps"
+            size="small"
+            color="purple"
+            variant="elevated"
+            prepend-icon="mdi-eye"
+          >
+            {{ getDisplayTitle('view', viewAs) }}
+          </v-chip>
+        </template>
+        <v-list density="compact" :selected="[viewAs]" @click:select="({ id }) => viewAs = id as string">
+          <v-list-item
+            v-for="item in getOptions('view')"
+            :key="item.value"
+            :value="item.value"
+            :title="item.title"
+          />
+        </v-list>
+      </v-menu>
+
+      <!-- Sort dropdown -->
+      <v-menu v-if="!disabledMenus?.includes('sort')">
+        <template #activator="{ props: menuProps }">
+          <v-chip
+            v-bind="menuProps"
+            size="small"
+            color="teal"
+            variant="elevated"
+            prepend-icon="mdi-sort"
+          >
+            {{ getDisplayTitle('sort', sortBy) }}
+          </v-chip>
+        </template>
+        <v-list density="compact" :selected="[sortBy]" @click:select="({ id }) => sortBy = id as string">
+          <v-list-item
+            v-for="item in getOptions('sort')"
+            :key="item.value"
+            :value="item.value"
+            :title="item.title"
+          />
+        </v-list>
+      </v-menu>
+
+      <!-- Filter dropdown -->
+      <v-menu v-if="!disabledMenus?.includes('filter')">
+        <template #activator="{ props: menuProps }">
+          <v-chip
+            v-if="filterBy.length > 0"
+            v-bind="menuProps"
+            size="small"
+            color="red"
+            variant="elevated"
+            prepend-icon="mdi-filter"
+          >
+            {{ filterBy.length }}
+          </v-chip>
+          <v-btn
+            v-else
+            v-bind="menuProps"
+            icon="mdi-filter-outline"
+            size="x-small"
+            variant="text"
+          />
+        </template>
+        <v-list density="compact" :selected="filterBy" select-strategy="classic" @click:select="handleFilterSelect">
+          <v-list-item
+            v-for="item in getOptions('filter')"
+            :key="item.value"
+            :value="item.value"
+            :title="item.title"
+          />
+        </v-list>
+      </v-menu>
+
+      <!-- Active filter chips (removable) -->
+      <v-chip
+        v-for="filter in filterBy"
+        :key="filter"
+        size="small"
+        color="red"
+        variant="elevated"
+        closable
+        @click:close="removeFilter(filter)"
+      >
+        {{ filter }}
+      </v-chip>
+    </div>
+  </template>
+
+  <!-- Bottom sheet mode (mobile) -->
+  <template v-else>
     <v-bottom-sheet>
     <template v-slot:activator="{ props: activatorProps }">
       <v-btn  v-bind="activatorProps" icon="mdi-cogs" variant="flat" color="purple-darken-2"></v-btn>
@@ -115,16 +236,16 @@ const refsMap: Record<string, any> = {
       </template>
     </v-list>
   <v-sheet class="p-2 gap-2 flex flex-row flex-wrap">
-    <v-chip v-for="filter in filterBy" 
-      :key="filter" 
-      :text="filter" 
-      color="red" 
-      prepend-icon="mdi-memory" 
+    <v-chip v-for="filter in filterBy"
+      :key="filter"
+      :text="filter"
+      color="red"
+      prepend-icon="mdi-memory"
       size="small"
-      variant="elevated" 
+      variant="elevated"
     >
     <template #append>
-      <v-icon icon="mdi-close-circle" @click="filterBy = []" />
+      <v-icon icon="mdi-close-circle" @click="removeFilter(filter)" />
     </template>
   </v-chip>
     <v-spacer></v-spacer>
@@ -148,9 +269,9 @@ const refsMap: Record<string, any> = {
         <template #activator="{ props }">
           <v-btn v-bind="props" icon="mdi-eye" variant="outlined"></v-btn>
         </template>
-        <v-list 
-          :items="viewOptions || DEFAULT_VIEW_OPTIONS" 
-          v-model:selected="viewAs" 
+        <v-list
+          :items="viewOptions || DEFAULT_VIEW_OPTIONS"
+          v-model:selected="viewAs"
           select-strategy="single-independent"
         >
         </v-list>
@@ -159,9 +280,9 @@ const refsMap: Record<string, any> = {
         <template #activator="{ props }">
           <v-btn v-bind="props" icon="mdi-sort" variant="outlined"></v-btn>
         </template>
-        <v-list 
-          :items="sortOptions || DEFAULT_SORT_OPTIONS" 
-          v-model:selected="sortBy" 
+        <v-list
+          :items="sortOptions || DEFAULT_SORT_OPTIONS"
+          v-model:selected="sortBy"
           select-strategy="single-independent"
         >
         </v-list>
@@ -170,14 +291,15 @@ const refsMap: Record<string, any> = {
         <template #activator="{ props }">
           <v-btn v-bind="props" icon="mdi-filter" variant="outlined"></v-btn>
         </template>
-        <v-list 
-          :items="filterBy || DEFAULT_FILTER_OPTIONS" 
-          v-model:selected="filterBy" 
+        <v-list
+          :items="filterBy || DEFAULT_FILTER_OPTIONS"
+          v-model:selected="filterBy"
           select-strategy="single-independent"
         >
         </v-list>
       </v-menu>
     </nav> -->
     </template>
-  </v-bottom-sheet> 
+  </v-bottom-sheet>
+  </template>
 </template>

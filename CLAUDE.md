@@ -125,11 +125,77 @@ pnpm deps:fix         # syncpack: fix mismatches
 1. **Plan before coding** — Use Plan Mode (Shift+Tab twice) for non-trivial changes
 2. **Lint and type-check before committing** — run `pnpm lint && pnpm check-types`
 3. **Use the `/verify-changes` slash command** to confirm nothing is broken
-4. **Add a changelog entry** — run `/changelog` for any user-facing changes
-5. **Use the `/commit-push-pr` slash command** to commit, push, and open a PR
+4. **Update docs if UI changed** — run `/update-docs` to capture screenshots and update MDX docs
+5. **Create a changeset entry** — run `/changelog` before opening a PR (see below)
+6. **Use the `/commit-push-pr` slash command** to commit, push, and open a PR
+
+### Changeset Requirement (MANDATORY)
+
+**Every PR must include a changeset file.** The CI `changeset-check` workflow will **fail the PR** if no `.changeset/*.md` file is added. This is enforced — PRs cannot merge without it.
+
+To create a changeset:
+- Run `/changelog` in Claude Code — it analyzes the branch diff and creates the file automatically
+- Or run `pnpm changeset` interactively
+- Or create a file manually in `.changeset/` (see `.changeset/README.md` for format)
+
+**When to create the changeset:** After your code changes are done, before committing/pushing the PR. The `/commit-push-pr` command should always be preceded by `/changelog`.
+
+**What if there are no user-facing changes?** Still create a changeset — use `patch` bump and describe the internal change (e.g., `changed: **[docs]** Update README`, `improved: **[ci]** Add caching to build workflow`).
+
+### Screenshot & Documentation Updates
+
+When UI changes are made, update screenshots and MDX docs:
+
+- Run `/capture-screenshots [app]` to capture fresh screenshots of app views
+- Run `/update-docs` to auto-detect changed apps, capture screenshots, and update MDX docs
+- The CI `docs-check` workflow will post a reminder on PRs that change UI files without updating docs
+
+**Screenshots** are saved to `apps/dejajs-www/public/screenshots/` using the naming convention `{app}_{desktop|mobile}_{view-name}.png`.
+
+**MDX docs** live in `docs/apps/{app}/overview.mdx` and are synced to the `dejajs-www` docs site at build time.
+
+**Dev auto-login:** Set `VITE_DEV_AUTO_LOGIN=true` in `.env` to bypass auth guards during screenshot capture. Only works in dev mode.
+
+**Test user login:** Alternatively, set `CLAUDE_TEST_EMAIL` and `CLAUDE_TEST_PASSWORD` in `.env` for realistic email/password login during automated testing.
+
+**Worktree env setup:** Git worktrees don't inherit `.env`. Symlink it: `ln -sf /path/to/DEJA.js/.env .env`
 
 ---
 
+
+## Distribution & Build (Private)
+
+DEJA.js is a **private, subscription-gated product**. The repo is private on GitHub. See `docs/superpowers/specs/2026-03-12-private-distribution-design.md` for the full design spec.
+
+### Server Distribution
+- Server is distributed as a **tarball** via GitHub Releases, managed by the `deja` CLI
+- Supports `linux/amd64`, `linux/arm64` (Raspberry Pi), and `darwin` (macOS)
+- Users install via `curl -fsSL https://install.dejajs.com | bash`
+- Server is built using **tsup** (not bare `tsc`) to produce a self-contained ESM bundle with all `@repo/*` workspace deps resolved at build time
+- Native modules (`serialport`, `firebase-admin`) are externals installed via `npm install --production` on the user's machine
+- CLI manages the server as a native Node.js process via PID file (`~/.deja/server.pid`)
+
+### Subscription Validation
+- Server validates subscription on startup via Firebase Admin SDK → Firestore `users/{uid}.subscription`
+- Allowed statuses: `active`, `trialing`, `past_due`
+- Denied statuses: `incomplete`, `incomplete_expired`, `unpaid`, `canceled`, missing
+- 48-hour grace period for offline/network failure
+- Mid-session cancellation logs a warning but does NOT shut down — enforced on next cold start
+- Config stored at `~/.deja/config.json` (uid, layoutId, cached subscription)
+
+### Release Process
+1. Merge to main, create changeset
+2. Tag release: `git tag v1.x.x && git push --tags`
+3. CI builds tarball and creates GitHub Release with `deja-server.tar.gz`, `deja` CLI, and `install.sh`
+4. Users run `deja update` to download and install the new version
+
+### Rules for Distribution Code
+- **Do not expose source code** in releases — only compiled JavaScript (tsup output)
+- **Do not hardcode secrets** in scripts — use env vars and `~/.deja/.env`
+- **Do not auto-update** running servers — updates are user-initiated only
+- **Do not shut down mid-session** on subscription changes — warn and enforce on next start
+
+---
 
 ## Environment Variables
 
@@ -144,6 +210,9 @@ Copy `.env.example` to `.env` at the root. Key variables:
 | `ENABLE_MQTT` | Toggle MQTT communication |
 | `ENABLE_WS` | Toggle WebSocket communication |
 | `VITE_WS_PORT` | WebSocket server port (default: `8082`) |
+| `VITE_DEV_AUTO_LOGIN` | Bypass auth guards in dev mode (for screenshots) |
+| `CLAUDE_TEST_EMAIL` | Test user email for automated login |
+| `CLAUDE_TEST_PASSWORD` | Test user password for automated login |
 
 App-specific env files go in `apps/<app>/.env.local`.
 
@@ -161,6 +230,7 @@ App-specific env files go in `apps/<app>/.env.local`.
 - **Do not run `npm install` or `yarn`** — this is a pnpm workspace; always use `pnpm`
 - **Do not commit `.env` files** — only `.env.example` belongs in git
 - **Do not bypass ESLint with `// eslint-disable`** without a specific reason in the comment
+- **Do not open a PR without a changeset** — run `/changelog` before `/commit-push-pr`; CI will block the PR if no `.changeset/*.md` file is present
 Managed with **pnpm workspaces** + **Turborepo**. Package manager is `pnpm@9.0.0`. Node.js >= 20 required.
 
 ```
@@ -523,6 +593,7 @@ Copy `.env.example` to `.env` (or `.env.local`) at the repo root. Turborepo read
 | `VITE_WS_PORT` | WebSocket server port (default: `8082`) |
 | `VITE_WS_ID` | Server identifier string (default: `DEJA.js`) |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob token for sound file storage |
+| `CLOUDFLARE_TUNNEL_TOKEN` | Cloudflare tunnel token for `pnpm tunnel:named` |
 
 ---
 
