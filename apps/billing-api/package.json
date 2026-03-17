@@ -16,7 +16,6 @@
     "stripe": "^17.5.0"
   },
   "devDependencies": {
-    "@repo/typescript-config": "workspace:*",
     "tsx": "^4.19.0",
     "typescript": "^5.7.2"
   }
