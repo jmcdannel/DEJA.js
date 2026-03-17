@@ -86,7 +86,7 @@ function handleLayoutComplete() {
 }
 
 function handleInstallComplete() {
-  router.push({ name: 'setup-complete' })
+  router.push({ name: 'home' })
 }
 
 const steps = computed(() => [
