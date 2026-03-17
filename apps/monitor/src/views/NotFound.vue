@@ -6,8 +6,7 @@ import { NotFoundPage } from '@repo/ui'
   <NotFoundPage
     :links="[
       { label: 'Dashboard', to: '/', icon: 'mdi-view-dashboard' },
-      { label: 'Roster', to: '/locos', icon: 'mdi-train' },
-      { label: 'Effects', to: '/effects', icon: 'mdi-lightning-bolt' },
+      { label: 'Logs', to: '/logs', icon: 'mdi-text-box-outline' },
     ]"
   />
 </template>

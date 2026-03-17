@@ -40,6 +40,12 @@ const router = createRouter({
       component: () => import('./Dashboard/components/DeviceSerialMonitor/DeviceSerialMonitorDemo.vue'),
       beforeEnter: [requireAuth, requireLayout],
     },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('./views/NotFound.vue'),
+      beforeEnter: [requireAuth],
+    },
     // {
     //   path: '/dccex',
     //   name: 'DCC-EX',

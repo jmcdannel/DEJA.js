@@ -43,6 +43,7 @@
     "./animations": "./src/animations/index.ts",
     "./tailwind/animation-preset": "./src/tailwind/animation-preset.ts",
     "./SplashPage": "./src/SplashPage.vue",
+    "./NotFoundPage": "./src/NotFoundPage.vue",
     "./QuickStart": "./src/QuickStart/QuickStart.vue"
   },
   "dependencies": {
