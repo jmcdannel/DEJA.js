@@ -266,66 +266,8 @@ stop_tunnel() {
 }
 
 # ======================================================================
-# Interactive REPL
+# Interactive TUI
 # ======================================================================
-
-INTERACTIVE_PID=""
-
-handle_repl_command() {
-  local cmd="$1"
-  case "${cmd}" in
-    exit|quit)
-      return 1  # signal to exit the REPL loop
-      ;;
-    help)
-      echo ""
-      echo -e "  ${BOLD}Interactive Commands${NC}"
-      echo -e "    ${CYAN}exit${NC}    Stop the server and exit"
-      echo -e "    ${CYAN}help${NC}    Show this help"
-      echo ""
-      return 0
-      ;;
-    "")
-      # Empty input, ignore
-      return 0
-      ;;
-    *)
-      warn "Unknown command: ${cmd}"
-      echo -e "  ${DIM}Type ${CYAN}help${NC}${DIM} for available commands${NC}"
-      return 0
-      ;;
-  esac
-}
-
-shutdown_server() {
-  if [ -n "${INTERACTIVE_PID}" ] && kill -0 "${INTERACTIVE_PID}" 2>/dev/null; then
-    echo ""
-    info "Stopping server ${DIM}(PID ${INTERACTIVE_PID})${NC}..."
-    kill "${INTERACTIVE_PID}" 2>/dev/null || true
-
-    # Wait up to 12 seconds for graceful shutdown
-    local waited=0
-    while [ ${waited} -lt 12 ]; do
-      if ! kill -0 "${INTERACTIVE_PID}" 2>/dev/null; then
-        break
-      fi
-      sleep 1
-      waited=$((waited + 1))
-    done
-
-    # Force kill if still running
-    if kill -0 "${INTERACTIVE_PID}" 2>/dev/null; then
-      warn "Forcing shutdown..."
-      kill -9 "${INTERACTIVE_PID}" 2>/dev/null || true
-      sleep 1
-    fi
-
-    ok "Server stopped."
-  fi
-  rm -f "${PID_FILE}"
-  INTERACTIVE_PID=""
-  stop_tunnel
-}
 
 cmd_start_interactive() {
   check_installed
@@ -340,68 +282,18 @@ cmd_start_interactive() {
 
   check_env
 
-  # Load env vars into shell for tunnel token access
+  # Load env vars into shell so they're visible to the Node.js TUI process
   if [ -f "${ENV_FILE}" ]; then
     # shellcheck disable=SC1090
     set -a; source "${ENV_FILE}" 2>/dev/null || true; set +a
   fi
 
-  echo ""
-  echo -e "  ${GREEN}${ICON_SERVER} DEJA.js Server${NC} ${DIM}v$(get_version)${NC}"
-  echo -e "  ${DIM}──────────────────────────────${NC}"
-  echo -e "  ${DIM}Type ${CYAN}exit${NC}${DIM} to stop · ${CYAN}help${NC}${DIM} for commands${NC}"
-  echo -e "  ${DIM}──────────────────────────────${NC}"
-  echo ""
-
-  # CWD must be ~/.deja so dotenv/config finds .env
-  cd "${DEJA_DIR}"
-
-  # Start server as a child process with output going to terminal
-  node "${ENTRY}" &
-  INTERACTIVE_PID=$!
-  echo "${INTERACTIVE_PID}" > "${PID_FILE}"
-
-  # Trap Ctrl+C and terminal signals for clean shutdown
-  trap 'shutdown_server; exit 0' INT TERM
-
-  # Brief pause to let the server initialize and print startup messages
-  sleep 1
-
-  # Verify the server actually started
-  if ! kill -0 "${INTERACTIVE_PID}" 2>/dev/null; then
-    err "Server failed to start."
-    rm -f "${PID_FILE}"
-    INTERACTIVE_PID=""
-    exit 1
-  fi
-
-  # Start tunnel for paid plans (background, non-blocking)
-  start_tunnel_bg
-
-  # REPL loop: read commands while server is running
-  while kill -0 "${INTERACTIVE_PID}" 2>/dev/null; do
-    # read with 1-second timeout so we can check if server is still alive
-    if read -r -t 1 input 2>/dev/null; then
-      if ! handle_repl_command "${input}"; then
-        # Command handler returned non-zero — exit requested
-        shutdown_server
-        echo ""
-        exit 0
-      fi
-    fi
-  done
-
-  # If we get here, the server exited on its own
-  echo ""
-  if [ ! -f "${PID_FILE}" ]; then
-    # PID file was cleaned up — likely stopped via `deja stop` from another terminal
-    ok "Server stopped."
-  else
-    warn "Server process exited unexpectedly."
-    rm -f "${PID_FILE}"
-  fi
-  INTERACTIVE_PID=""
-  exit 0
+  # Launch the interactive TUI.
+  # Defaults to blessed; set DEJA_UI=ink to use the ink (React) version.
+  local script_dir
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  local ui="${DEJA_UI:-blessed}"
+  exec node "${script_dir}/deja-ui-${ui}.mjs"
 }
 
 # ======================================================================
