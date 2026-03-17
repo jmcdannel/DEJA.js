@@ -3,8 +3,45 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import type { ViteDevServer } from 'vite'
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'))
+
+function extractFileName(pathname: string): string {
+  const filename = pathname.split('/').pop() || ''
+  return filename
+    .replace(/\.(mp3|wav|ogg|m4a|flac|aac)$/i, '')
+    .replace(/[-_]/g, ' ')
+    .replace(/\b\w/g, (l) => l.toUpperCase())
+}
+
+// Dev middleware that handles /api/sounds without needing a separate sound-api server
+const soundsApiPlugin = () => ({
+  name: 'sounds-api-dev',
+  configureServer(server: ViteDevServer) {
+    server.middlewares.use('/api/sounds', async (_req, res) => {
+      try {
+        const { list } = await import('@vercel/blob')
+        const { blobs } = await list({ limit: 100, prefix: '' })
+        const sounds = blobs.map((blob) => ({
+          name: extractFileName(blob.pathname),
+          url: blob.url,
+          size: blob.size,
+          uploadedAt: blob.uploadedAt?.toISOString() ?? new Date().toISOString(),
+          contentType: 'contentType' in blob ? String(blob.contentType) : 'audio/mpeg',
+          pathname: blob.pathname,
+        }))
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ sounds }))
+      } catch (error) {
+        console.error('[sounds-api-dev] Error listing sounds:', error)
+        res.statusCode = 500
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ error: 'Failed to load sounds' }))
+      }
+    })
+  },
+})
 
 // Custom plugin to handle workspace package resolution
 const workspacePackagePlugin = () => {
