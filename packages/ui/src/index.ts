@@ -40,6 +40,7 @@ export { default as BackgroundThumbnail } from './backgrounds/BackgroundThumbnai
 export { backgrounds, getBackgroundById } from './backgrounds/registry'
 export type { BackgroundDefinition } from './backgrounds/registry'
 export { default as ServerSetupInfo } from './ServerSetupInfo.vue'
+export { default as QuickStart } from './QuickStart/QuickStart.vue'
 export { default as Stat } from './Stat.vue'
 export { default as useColors } from './useColors'
 export { default as DeviceStatusItem } from './DeviceStatus/DeviceStatusItem.vue'
