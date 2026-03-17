@@ -1,12 +1,12 @@
 ---
 title: Onboarding
-description: The onboarding wizard walks new users through account setup — choose a plan, enter payment for paid tiers, and register your first layout.
+description: The onboarding wizard walks new users through account setup — choose a plan, enter payment for paid tiers, register your first layout, and install the DEJA Server.
 order: 10
 ---
 
 # Onboarding
 
-The onboarding wizard (`/onboarding`) guides new users through initial setup after signing up. The wizard has four steps and takes just a few minutes to complete.
+The onboarding wizard (`/onboarding`) guides new users through initial setup after signing up. The wizard has five steps and takes just a few minutes to complete.
 
 ## Onboarding Steps
 
@@ -45,9 +45,25 @@ Give your layout a name and a unique ID. The ID must use lowercase letters, numb
 
 Your layout ID scopes all data in DEJA.js — locomotives, turnouts, effects, routes, signals, and commands are all tied to this ID.
 
+### Step 5 — Install the DEJA Server
+
+The final step provides the personalized install command for the DEJA Server — pre-populated with your account UID and layout ID so the server connects to your layout automatically.
+
+Run the one-line installer on the machine connected to your DCC-EX Command Station (Raspberry Pi, Mac, or Linux):
+
+```bash
+curl -fsSL "https://install.dejajs.com?uid=<your-uid>&layout=<your-layout-id>" | bash
+```
+
+You can click **Skip for Now** if you want to explore the Cloud app first and install the server later. The install command is always available on the **Setup Complete** page and in the [Quick Start](/docs/quick-start) guide.
+
 ## After Onboarding
 
-Once you complete the wizard, you are ready to install the DEJA Server and start controlling trains. See the [Quick Start](/docs/quick-start) guide for the full walkthrough.
+After completing the wizard you are taken to the **Setup Complete** page, where you can:
+
+- Add your first locomotive to the roster
+- Access the personalized server install command again
+- Browse quick links to documentation sections
 
 Your environment credentials (LAYOUT_ID and Firebase configuration) are available at any time under **Settings > View Local Environment Configuration** in the Cloud app.
 
