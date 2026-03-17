@@ -18,6 +18,7 @@ The Cloud app is the central configuration hub for your DEJA.js model railroad l
 The Cloud app covers the full lifecycle of layout configuration:
 
 - **Locomotive Roster** -- Add, edit, and remove locomotives. Configure DCC addresses, decoder functions (F0 through F28), and build multi-unit consists.
+- **Sound Library** -- Upload, browse, preview, and delete sound files. Files are stored in Vercel Blob and served via API endpoints.
 - **Turnouts** -- Define turnout names, DCC indices, pin assignments, and device bindings. Organize them with tags, reorder with drag-and-drop sorting.
 - **Routes** -- Create automated turnout sequences that throw multiple turnouts in a defined order with a single action.
 - **Effects** -- Set up lights, LEDs, street lights, relays, sound effects, macros, addressable LED strips (IALED), and more.
@@ -25,6 +26,7 @@ The Cloud app covers the full lifecycle of layout configuration:
 - **DCC-EX Console** -- Send raw DCC commands to the CommandStation, use preset command buttons, and monitor command history in real time over WebSocket.
 - **Layout Configuration** -- Manage devices, view serial ports, review loaded firmware modules, and organize layout metadata with tags.
 - **Sensors** -- Monitor real-time sensor state from connected hardware.
+- **Upgrade** -- View subscription plans and upgrade to access premium features.
 
 ## Authentication and Access
 
@@ -33,9 +35,9 @@ The Cloud app requires authentication. Users can sign up with email and password
 1. **Welcome** -- An introduction to the system.
 2. **Create Your Layout** -- Set up your first layout with a name and initial configuration.
 
-After onboarding, accounts require approval before full access is granted. Until approved, users see a pending approval screen. This ensures only authorized operators can modify layout configuration.
+After onboarding, users are taken to a **Setup Complete** page that confirms layout creation, displays their Layout ID, offers a quick-add form for their first locomotive, and provides server installation instructions. Layouts are automatically approved on creation -- there is no admin approval step.
 
-Once approved, users select a layout to work with. The selected layout ID is persisted in local storage (`@DEJA/layoutId`) so it carries across sessions.
+Users then select a layout to work with. The selected layout ID is persisted in local storage (`@DEJA/layoutId`) so it carries across sessions.
 
 ## Navigation
 
@@ -70,7 +72,7 @@ The Cloud app is built with:
 - **Vuetify 3** for Material Design UI components
 - **Tailwind CSS** for utility classes
 - **VueFire** for reactive Firebase bindings
-- **Vue Router 4** with authentication guards (`requireAuth`, `requireOnboarding`, `requireApproval`, `requireLayout`)
+- **Vue Router 4** with authentication guards (`requireAuth`, `requireOnboarding`, `requireLayout`)
 - **VueUse** for composable utilities (persistent storage, etc.)
 
 All data flows through Firebase Firestore collections scoped to the selected layout ID. Changes made in the Cloud app are immediately visible in the Throttle, Monitor, and Tour apps.

@@ -48,7 +48,7 @@ export default defineConfig({
         
     // CORS configuration for development
     cors: {
-      origin: ['http://localhost:3031', 'http://localhost:3001', 'http://localhost:3011', 'http://localhost:3021'],
+      origin: ['http://localhost:3031', 'http://localhost:3011', 'http://localhost:3021'],
       credentials: true
     },
     
