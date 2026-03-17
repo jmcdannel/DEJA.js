@@ -10,8 +10,12 @@ import { useMenu } from '@/Core/Menu/useMenu'
 import { useSubscription, PLAN_DISPLAY } from '@repo/modules'
 import { Signout } from '@repo/auth'
 import { isNavigating } from '@/router'
+import { useFeedbackUser } from '@repo/modules/feedback'
+import * as Sentry from '@sentry/vue'
 
 const log = createLogger('CloudApp')
+const { feedbackUser } = useFeedbackUser()
+watch(feedbackUser, (u) => Sentry.setUser(u), { immediate: true })
 
 // Components
 import { AppHeader, NotificationContainer, provideNotifications, PageBackground } from '@repo/ui'
