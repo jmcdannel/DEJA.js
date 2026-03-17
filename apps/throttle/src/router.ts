@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { requireAuth, requireDccEx, requireLayout } from '@repo/auth'
 import HomeView from './views/HomeView.vue'
 import Connect from './connect/Connect.vue'
-import { Login } from '@repo/auth'
+import LoginView from './views/LoginView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,7 +15,7 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: Login,
+      component: LoginView,
     },
     {
       path: '/connect',
