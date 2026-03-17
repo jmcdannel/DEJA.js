@@ -42,7 +42,9 @@
     "./DeviceStatusList": "./src/DeviceStatus/DeviceStatusList.vue",
     "./animations": "./src/animations/index.ts",
     "./tailwind/animation-preset": "./src/tailwind/animation-preset.ts",
-    "./SplashPage": "./src/SplashPage.vue"
+    "./SplashPage": "./src/SplashPage.vue",
+    "./NotFoundPage": "./src/NotFoundPage.vue",
+    "./QuickStart": "./src/QuickStart/QuickStart.vue"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.8.2",

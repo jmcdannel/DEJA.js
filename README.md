@@ -303,6 +303,53 @@ Configuration files are stored in `~/.deja/` — see `~/.deja/.env` for environm
 
 ---
 
+## 🚀 Release Process
+
+Releases are managed via [Changesets](https://github.com/changesets/changesets). Every PR must include a changeset entry — the CI `changeset-check` workflow will block the merge if one is missing.
+
+### 1. Create a Changeset
+
+Run the `/changelog` command in Claude Code, or run interactively:
+
+```bash
+pnpm changeset
+```
+
+This creates a `.changeset/*.md` file describing the change and bump level (`major`, `minor`, or `patch`). Commit this file with your PR.
+
+### 2. Tag the Release
+
+After merging to `main`, tag the release:
+
+```bash
+git tag v1.x.x && git push --tags
+```
+
+### 3. CI Builds & Publishes
+
+Pushing a tag triggers the release workflow, which:
+- Builds the server as a self-contained ESM bundle (via `tsup`) for three targets:
+  - `linux/amd64` (standard Linux / cloud servers)
+  - `linux/arm64` (Raspberry Pi)
+  - `darwin` (macOS)
+- Packages each build as `deja-server.tar.gz`
+- Creates a GitHub Release with:
+  - `deja-server.tar.gz` — server bundle
+  - `deja` — CLI binary
+  - `install.sh` — one-command install script
+
+### 4. Users Update
+
+End users receive the new release by running:
+
+```bash
+deja update
+```
+
+This downloads the latest tarball from GitHub Releases and restarts the server.
+
+---
+
 ## 🗺️ Roadmap
 
 ### 🔥 Current Focus

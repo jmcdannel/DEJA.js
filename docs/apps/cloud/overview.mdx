@@ -6,20 +6,36 @@ order: 2
 
 # Cloud App
 
-The Cloud app is the administration hub for managing your DCC-EX layout. Configure locomotives, turnouts, routes, effects, signals, and connected devices from a centralized dashboard.
+The Cloud app is the administration hub for managing your DCC-EX layout. Configure locomotives, turnouts, routes, effects, signals, sounds, and connected devices from a centralized dashboard.
+
+## Navigation
+
+The left sidebar organizes features into three sections:
+
+| Section | Items |
+|---|---|
+| **Modules** | Roster, Turnouts, Routes, Effects, Signals, Sounds |
+| **Hardware** | Sensors, Devices, DCC-EX |
+| **System** | Settings, Emulator |
+
+A pinned footer row links to the other DEJA suite apps (Cloud, Throttle, Monitor, Tour).
 
 ## Key Features
 
 - **Dashboard** — Overview of layout status, connected devices, and system health
-- **Roster Management** — Add, edit, and organize locomotives with custom names, addresses, and function mappings
+- **Roster Management** — Add, edit, and organize locomotives with custom names, addresses, and function mappings; bidirectional sync with the DCC-EX CommandStation roster
 - **Turnout Configuration** — Define turnouts with DCC addresses and friendly labels
 - **Route Builder** — Create routes that set multiple turnouts in sequence
+- **Sound Library** — Upload, browse, and manage sound files stored in Vercel Blob
 - **Effects Management** — Configure sound effects, lights, and animations
+- **Sound Library** — Upload and manage audio files for playback during effects
 - **Signal Wiring** — Set up signal aspects and output pin mappings
 - **Sensor Management** — Configure sensors and automation rules
 - **Device Management** — Monitor and configure connected hardware devices
 - **DCC-EX Console** — Direct command-line access to the DCC-EX command station
 - **Settings** — Layout settings, user profile, and billing
+- **Upgrade** — View subscription plans and upgrade options
+- **404 Page** — Brand-consistent not-found page with links to Dashboard, Roster, and Effects
 
 ## Onboarding
 
@@ -42,6 +58,13 @@ Layouts are automatically approved on creation — there is no admin approval st
 ### Roster
 
 ![Roster Management](/screenshots/cloud_desktop_roster.png)
+
+The Roster page manages your locomotive collection and supports **bidirectional DCC-EX CommandStation sync**:
+
+- **Sync to DCC-EX** — Pushes all locos from the DEJA roster into the CommandStation's internal memory and saves to EEPROM. This makes your roster available in EX-WebThrottle and other native DCC-EX clients.
+- **Import from DCC-EX** — Reads the CommandStation's roster and imports any locomotives that don't already exist in DEJA Cloud (merge, no overwrites).
+- **Auto-sync on save** — When you edit a locomotive and click Save in the Edit Loco form, the entry is automatically pushed to the CommandStation.
+- **Status feedback** — A snackbar displays sync progress (`Syncing…`, `Success`, or `Error`) via a live Firebase RTDB subscription.
 
 ### Turnouts
 
@@ -66,6 +89,10 @@ Layouts are automatically approved on creation — there is no admin approval st
 ### DCC-EX Console
 
 ![DCC-EX Console](/screenshots/cloud_desktop_dccex.png)
+
+### Sounds
+
+![Sound Library](/screenshots/cloud_desktop_sounds.png)
 
 ### Settings
 

@@ -1,5 +1,5 @@
-import type { VercelRequest } from '@vercel/node'
 import { timingSafeEqual } from 'node:crypto'
+import type { VercelRequest } from '@vercel/node'
 
 interface AuthResult {
   valid: boolean

@@ -106,6 +106,18 @@ const router = createRouter({
       meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
+      path: '/sounds',
+      name: 'Sounds',
+      component: () => import('./Sounds/Sounds.vue'),
+      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+    },
+    {
+      path: '/sounds/new',
+      name: 'Add Sound',
+      component: () => import('./Sounds/AddSound.vue'),
+      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+    },
+    {
       path: '/effects',
       name: 'Effects',
       component: () => import('./Effects/Effects.vue'),
@@ -218,6 +230,24 @@ const router = createRouter({
       name: 'Turnout Labels',
       component: () => import('./Turnouts/TurnoutLabels.vue'),
       meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
+    },
+    {
+      path: '/track-diagrams',
+      name: 'Track Diagrams',
+      component: () => import('./TrackDiagram/TrackDiagram.vue'),
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
+    },
+    {
+      path: '/track-diagrams/new',
+      name: 'Add Track Diagram',
+      component: () => import('./TrackDiagram/AddTrackDiagram.vue'),
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
+    },
+    {
+      path: '/track-diagrams/:diagramId',
+      name: 'Edit Track Diagram',
+      component: () => import('./TrackDiagram/EditTrackDiagram.vue'),
+      beforeEnter: [requireAuth, requireOnboarding, requireApproval, requireLayout],
     },
     {
       path: '/dccex',
