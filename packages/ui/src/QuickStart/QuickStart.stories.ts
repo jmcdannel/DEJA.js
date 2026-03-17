@@ -5,12 +5,6 @@ const meta: Meta<typeof QuickStart> = {
   title: 'UI/QuickStart',
   component: QuickStart,
   tags: ['autodocs'],
-  parameters: {
-    backgrounds: {
-      default: 'dark',
-      values: [{ name: 'dark', value: '#0f172a' }],
-    },
-  },
   argTypes: {
     completed: {
       control: { type: 'check', options: [1, 2] },
