@@ -1,20 +1,30 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useCurrentUser, useFirestore } from 'vuefire'
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { useCurrentUser, useCollection } from 'vuefire'
+import { doc, setDoc, serverTimestamp, collection, query, where } from 'firebase/firestore'
+import { db } from '@repo/firebase-config'
 import { Logo } from '@repo/ui'
 import PlanStep from './steps/PlanStep.vue'
 import PaymentStep from './steps/PaymentStep.vue'
 import LayoutStep from './steps/LayoutStep.vue'
+import InstallStep from './steps/InstallStep.vue'
 import { TIER_ORDER } from '@repo/modules'
 import type { PlanTier, BillingCycle } from '@repo/modules'
 
 const router = useRouter()
 const route = useRoute()
 const user = useCurrentUser()
-const db = useFirestore()
 const currentStep = ref(1)
+
+const userLayouts = useCollection(
+  computed(() =>
+    user.value?.email
+      ? query(collection(db, 'layouts'), where('owner', '==', user.value.email))
+      : null,
+  ),
+)
+const primaryLayoutId = computed(() => userLayouts.value?.[0]?.id ?? '')
 const selectedPlan = ref<PlanTier>('hobbyist')
 const selectedBillingCycle = ref<BillingCycle>('monthly')
 
@@ -72,6 +82,10 @@ function handlePaymentComplete() {
 }
 
 function handleLayoutComplete() {
+  currentStep.value = 4
+}
+
+function handleInstallComplete() {
   router.push({ name: 'setup-complete' })
 }
 
@@ -80,6 +94,7 @@ const steps = computed(() => [
   { value: 1, title: 'Choose Plan', icon: 'mdi-tag-outline', disabled: false },
   { value: 2, title: 'Payment', icon: 'mdi-credit-card-outline', disabled: selectedPlan.value === 'hobbyist' },
   { value: 3, title: 'Register Layout', icon: 'mdi-map-marker-path', disabled: false },
+  { value: 4, title: 'Install', icon: 'mdi-download-outline', disabled: false },
 ])
 </script>
 
@@ -133,6 +148,13 @@ const steps = computed(() => [
       </template>
 
       <LayoutStep v-else-if="currentStep === 3" @complete="handleLayoutComplete" />
+
+      <InstallStep
+        v-else-if="currentStep === 4"
+        :uid="user?.uid"
+        :layout-id="primaryLayoutId"
+        @complete="handleInstallComplete"
+      />
     </div>
   </v-container>
 </template>
