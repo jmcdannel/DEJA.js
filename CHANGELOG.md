@@ -9,6 +9,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-03-14
+
+### Added
+
+#### Billing & Subscription System
+- **[billing-api]** New Hono billing API with Stripe subscription management, webhooks, plan changes, and billing portal
+- **[cloud]** Trial banner, billing settings section, PlanGate and UpgradeBanner components for subscription-aware UI
+- **[cloud]** Plan selection and payment steps in onboarding wizard with Stripe checkout integration
+- **[modules]** Plans module with subscription types, plan constants, and useSubscription composable
+- **[server]** Subscription validation with Firebase Admin SDK, 48-hour offline grace period, and periodic re-check
+
+#### Server Distribution & CLI
+- **[server]** Standalone server distribution via tsup bundling + GitHub Releases tarball
+- **[scripts]** Install script for one-line server deployment with Node.js check and serial port detection
+- **[scripts]** `deja` CLI for native Node.js server management (start, stop, restart, status, logs, update)
+- **[cli]** `deja start` interactive mode by default with live server output and REPL command loop
+- **[cli]** `deja version` command to show installed server version
+- **[ci]** GitHub Actions workflow for server tarball builds and GitHub Releases on tag push
+- **[install-api]** Install API for public release hosting via Vercel Blob
+
+#### Cloudflare Tunnel & Remote Access
+- **[server]** Cloudflare Tunnel support for secure remote access to local DEJA server without port forwarding
+- **[monitor]** Dashboard banner guiding remote users to configure server connection via Cloudflare tunnel
+
+#### Cloud App Enhancements
+- **[cloud]** Redesigned DCC-EX console with retro LCD terminal, predefined command grid, and command cheat sheet
+- **[server]** Server-side DCC command and serial response logging to Firebase RTDB for cloud console consumption
+- **[cloud]** Vercel serverless `/api/cleanup-logs` and `/api/diagnostics` endpoints
+- **[cloud, throttle, monitor]** Display Firebase UID and Layout ID in Settings pages with copy-to-clipboard
+- **[cloud]** Show UID and Layout ID on Pending Approval page with install instructions
+
+#### UI & Theme System
+- **[ui]** Shared theme factory (`createVuetifyThemes`) generating light, dark, and high-contrast Vuetify themes
+- **[ui]** Registry-based theme mode system for extensible theme management
+- **[ui]** ListMenu inline responsive mode — chip dropdowns on desktop, bottom sheet on mobile
+- **[ui]** Storybook testing with 77 stories covering all components, interaction tests, and a11y checks
+
+#### Monitor & Dashboard Redesign
+- **[monitor]** Redesigned monitor app with MonitorStatusBar, device connection cards, and settings navigation
+- **[cloud]** Redesigned page headers with gradient accent strip PageHeader component
+
+#### Documentation
+- **[website]** 44 MDX documentation files for dejajs-www — fixes all 404s on docs pages
+- **[docs]** Overview MDX pages for cloud, monitor, and throttle apps
+- **[docs]** Getting started content updated for new onboarding flow with pricing tiers
+
+#### Automated Workflows
+- **[auth]** `DEV_AUTO_LOGIN` auth bypass for automated testing
+- **[ci]** `/capture-screenshots` and `/update-docs` skills for headless screenshot capture
+- **[ci]** `docs-check.yml` workflow to remind about doc updates on UI PRs
+
+### Changed
+
+- **[monitor]** Default remote WebSocket host to ws.dejajs.com via Cloudflare Tunnel
+- **[cloud]** Replace flat ModuleTitle headers with gradient accent strip PageHeader
+- **[throttle, cloud, monitor]** Replace inline Vuetify theme definitions with shared factory
+- **[monitor]** Convert ~100 hardcoded CSS color values to Vuetify CSS variables
+- **[docs]** Updated ROADMAP.md with new P1/P2 items
+
+### Fixed
+
+- **[monitor]** Fix missing build script and type errors preventing production builds
+- **[monitor]** Fix hardcoded `ws://` protocol that blocked WebSocket connections from HTTPS hosts
+- **[ui]** Fix NaN uptime display in device connection cards by handling Firestore Timestamp objects
+- **[sound-api]** Fix invalid vercel.json causing Vercel build failures
+- **[docs]** Fix broken cross-reference links using incorrect path segment
+- **[server]** ENABLE_WS environment variable now correctly defaults to true
+- **[security]** Remove hardcoded Vercel Blob tokens from vercel.json files
+
+### Improved
+
+- **[monitor]** Shared WebSocket connection composable with smart protocol detection and auto-reconnect
+- **[monitor]** Settings page shows live connection status and expandable tunnel setup instructions
+- **[server]** Clear stale RTDB log/command queues on server startup
+- **[throttle]** Vercel Analytics for real-user page view and visitor tracking
+- **[throttle, cloud]** DEJA Server auto-detect status card in quick connect panels
+
+---
+
 ## [1.2.0] - 2026-03-11
 
 ### Added

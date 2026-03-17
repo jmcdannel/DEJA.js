@@ -5,12 +5,16 @@ const RELEASES_PREFIX = 'releases'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { method, url } = req
-  const path = new URL(url || '/', `http://${req.headers.host}`).pathname
+  const parsedUrl = new URL(url || '/', `http://${req.headers.host}`)
+  const path = parsedUrl.pathname
 
   try {
-    // GET / — serve install script
+    // GET / — serve install script (optionally with ?uid=...&layout=... to skip prompts)
     if (method === 'GET' && (path === '/' || path === '/api')) {
-      const script = await generateInstallScript()
+      const params = parsedUrl.searchParams
+      const uid = params.get('uid') || ''
+      const layoutId = params.get('layout') || ''
+      const script = await generateInstallScript(uid, layoutId)
       res.setHeader('Content-Type', 'text/plain')
       res.setHeader('Cache-Control', 'no-cache')
       return res.status(200).send(script)
@@ -75,7 +79,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
-async function generateInstallScript(): Promise<string> {
+async function generateInstallScript(uid: string, layoutId: string): Promise<string> {
   // Fetch install.sh from blob storage (uploaded alongside release assets)
   const blobUrl = await getReleaseUrl(await getLatestVersion() || '', 'install.sh')
 
@@ -102,6 +106,18 @@ async function generateInstallScript(): Promise<string> {
   for (const [placeholder, value] of Object.entries(replacements)) {
     script = script.replaceAll(placeholder, value)
   }
+
+  // If uid/layoutId provided via query params, prepend env vars so the script
+  // skips the interactive prompts in link_account()
+  if (uid || layoutId) {
+    const envLines: string[] = []
+    if (uid) envLines.push(`DEJA_UID="${uid}"`)
+    if (layoutId) envLines.push(`DEJA_LAYOUT_ID="${layoutId}"`)
+    // Insert after the shebang line
+    const shebangEnd = script.indexOf('\n')
+    script = script.slice(0, shebangEnd + 1) + envLines.join('\n') + '\n' + script.slice(shebangEnd + 1)
+  }
+
   return script
 }
 

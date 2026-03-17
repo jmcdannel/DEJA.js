@@ -16,6 +16,12 @@ ENV_FILE="${DEJA_DIR}/.env"
 ENTRY="${SERVER_DIR}/index.js"
 INSTALL_BASE_URL="https://install.dejajs.com"
 
+# Tunnel
+TUNNEL_PID_FILE="${DEJA_DIR}/tunnel.pid"
+TUNNEL_LOG_FILE="${LOG_DIR}/tunnel.log"
+TUNNEL_URL_FILE="${DEJA_DIR}/tunnel.url"
+CLOUDFLARED_YML="${DEJA_DIR}/cloudflared.yml"
+
 # Max log file size before rotation (10MB)
 MAX_LOG_SIZE=10485760
 
@@ -47,6 +53,7 @@ ICON_MONITOR="📊"
 ICON_UPDATE="↻"
 ICON_LOG="📋"
 ICON_CONFIG="⚙"
+ICON_TUNNEL="🔒"
 
 info()  { echo -e "  ${BLUE}${ICON_ARROW}${NC} $*"; }
 ok()    { echo -e "  ${GREEN}${ICON_CHECK}${NC} $*"; }
@@ -112,6 +119,153 @@ check_env() {
 }
 
 # ======================================================================
+# Tunnel Helpers
+# ======================================================================
+
+check_cloudflared() {
+  if ! command -v cloudflared &>/dev/null; then
+    warn "cloudflared is not installed. Remote monitoring requires cloudflared."
+    info "Install it:"
+    echo -e "    ${DIM}macOS:${NC}  brew install cloudflare/cloudflare/cloudflared"
+    echo -e "    ${DIM}Linux:${NC}  curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null"
+    echo -e "           ${DIM}echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared focal main' | sudo tee /etc/apt/sources.list.d/cloudflared.list${NC}"
+    echo -e "           ${DIM}sudo apt-get update && sudo apt-get install cloudflared${NC}"
+    echo -e "    ${DIM}Docs:${NC}   https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/"
+    return 1
+  fi
+  return 0
+}
+
+get_plan() {
+  if [ ! -f "${CONFIG_FILE}" ]; then
+    echo ""
+    return
+  fi
+  node -e "
+    try {
+      const c = JSON.parse(require('fs').readFileSync('${CONFIG_FILE}', 'utf8'));
+      console.log(c.subscription?.plan || '');
+    } catch(e) { console.log(''); }
+  " 2>/dev/null || echo ""
+}
+
+is_paid_plan() {
+  local plan
+  plan=$(get_plan)
+  [[ "${plan}" == "engineer" || "${plan}" == "conductor" ]]
+}
+
+is_tunnel_running() {
+  if [ -f "${TUNNEL_PID_FILE}" ]; then
+    local pid
+    pid=$(cat "${TUNNEL_PID_FILE}")
+    if kill -0 "${pid}" 2>/dev/null; then
+      return 0
+    else
+      rm -f "${TUNNEL_PID_FILE}"
+      return 1
+    fi
+  fi
+  return 1
+}
+
+get_tunnel_pid() {
+  if [ -f "${TUNNEL_PID_FILE}" ]; then
+    cat "${TUNNEL_PID_FILE}"
+  fi
+}
+
+rotate_tunnel_log() {
+  if [ -f "${TUNNEL_LOG_FILE}" ]; then
+    local size
+    size=$(stat -f%z "${TUNNEL_LOG_FILE}" 2>/dev/null || stat -c%s "${TUNNEL_LOG_FILE}" 2>/dev/null || echo 0)
+    if [ "${size}" -gt "${MAX_LOG_SIZE}" ]; then
+      mv "${TUNNEL_LOG_FILE}" "${TUNNEL_LOG_FILE}.1"
+    fi
+  fi
+}
+
+start_tunnel_bg() {
+  if is_tunnel_running; then
+    local pid
+    pid=$(get_tunnel_pid)
+    ok "Tunnel is already running ${DIM}(PID ${pid})${NC}"
+    return 0
+  fi
+
+  if ! is_paid_plan; then
+    echo ""
+    echo -e "  ${YELLOW}${ICON_TUNNEL} Remote monitoring${NC} requires an ${BOLD}Engineer${NC} or ${BOLD}Conductor${NC} plan."
+    echo -e "  ${DIM}Upgrade at${NC} ${CYAN}https://dejajs.com/pricing${NC}"
+    return 1
+  fi
+
+  if ! check_cloudflared; then
+    return 1
+  fi
+
+  local WS_PORT="${VITE_WS_PORT:-8082}"
+  mkdir -p "${LOG_DIR}"
+  rotate_tunnel_log
+  rm -f "${TUNNEL_URL_FILE}"
+
+  # Load tunnel token from env if available
+  local tunnel_token="${CLOUDFLARE_TUNNEL_TOKEN:-}"
+
+  if [ -n "${tunnel_token}" ]; then
+    info "Starting named Cloudflare tunnel..."
+    nohup cloudflared tunnel run --token "${tunnel_token}" \
+      >> "${TUNNEL_LOG_FILE}" 2>&1 &
+  elif [ -f "${CLOUDFLARED_YML}" ]; then
+    info "Starting named Cloudflare tunnel ${DIM}(cloudflared.yml)${NC}..."
+    nohup cloudflared tunnel --config "${CLOUDFLARED_YML}" run \
+      >> "${TUNNEL_LOG_FILE}" 2>&1 &
+  else
+    info "Starting quick Cloudflare tunnel ${DIM}(ephemeral URL)${NC}..."
+    nohup cloudflared tunnel --url "http://localhost:${WS_PORT}" \
+      >> "${TUNNEL_LOG_FILE}" 2>&1 &
+  fi
+
+  local tunnel_pid=$!
+  echo "${tunnel_pid}" > "${TUNNEL_PID_FILE}"
+
+  # Wait for cloudflared to establish connection and print URL
+  sleep 3
+
+  # Extract URL for quick tunnels
+  local url=""
+  if [ -f "${TUNNEL_LOG_FILE}" ]; then
+    url=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' "${TUNNEL_LOG_FILE}" 2>/dev/null | tail -1 || true)
+    [ -n "${url}" ] && echo "${url}" > "${TUNNEL_URL_FILE}"
+  fi
+
+  if is_tunnel_running; then
+    echo -e "  ${GREEN}${ICON_TUNNEL} Tunnel started${NC} ${DIM}(PID ${tunnel_pid})${NC}"
+    if [ -n "${url}" ]; then
+      echo -e "    ${DIM}URL${NC}       ${CYAN}${url}${NC}"
+    elif [ -n "${tunnel_token}" ] || [ -f "${CLOUDFLARED_YML}" ]; then
+      echo -e "    ${DIM}URL${NC}       ${CYAN}wss://ws.dejajs.com${NC}"
+    fi
+    echo -e "    ${DIM}Logs${NC}      deja tunnel logs"
+  else
+    err "Tunnel failed to start. Check logs: deja tunnel logs"
+    rm -f "${TUNNEL_PID_FILE}"
+    return 1
+  fi
+}
+
+stop_tunnel() {
+  if is_tunnel_running; then
+    local pid
+    pid=$(get_tunnel_pid)
+    kill "${pid}" 2>/dev/null || true
+    sleep 1
+    rm -f "${TUNNEL_PID_FILE}" "${TUNNEL_URL_FILE}"
+    ok "Tunnel stopped."
+  fi
+}
+
+# ======================================================================
 # Interactive REPL
 # ======================================================================
 
@@ -170,6 +324,7 @@ shutdown_server() {
   fi
   rm -f "${PID_FILE}"
   INTERACTIVE_PID=""
+  stop_tunnel
 }
 
 cmd_start_interactive() {
@@ -184,6 +339,12 @@ cmd_start_interactive() {
   fi
 
   check_env
+
+  # Load env vars into shell for tunnel token access
+  if [ -f "${ENV_FILE}" ]; then
+    # shellcheck disable=SC1090
+    set -a; source "${ENV_FILE}" 2>/dev/null || true; set +a
+  fi
 
   echo ""
   echo -e "  ${GREEN}${ICON_SERVER} DEJA.js Server${NC} ${DIM}v$(get_version)${NC}"
@@ -213,6 +374,9 @@ cmd_start_interactive() {
     INTERACTIVE_PID=""
     exit 1
   fi
+
+  # Start tunnel for paid plans (background, non-blocking)
+  start_tunnel_bg
 
   # REPL loop: read commands while server is running
   while kill -0 "${INTERACTIVE_PID}" 2>/dev/null; do
@@ -278,6 +442,12 @@ cmd_start_background() {
   rotate_log
   mkdir -p "${LOG_DIR}"
 
+  # Load env vars into shell for tunnel token access
+  if [ -f "${ENV_FILE}" ]; then
+    # shellcheck disable=SC1090
+    set -a; source "${ENV_FILE}" 2>/dev/null || true; set +a
+  fi
+
   info "Starting DEJA.js server..."
 
   # CWD must be ~/.deja so dotenv/config finds .env
@@ -302,6 +472,9 @@ cmd_start_background() {
     echo -e "    ${LOG_FILE}"
     exit 1
   fi
+
+  # Start tunnel for paid plans
+  start_tunnel_bg
 }
 
 cmd_stop() {
@@ -336,6 +509,7 @@ cmd_stop() {
 
   rm -f "${PID_FILE}"
   ok "Server stopped."
+  stop_tunnel
 }
 
 cmd_restart() {
@@ -420,6 +594,30 @@ cmd_status() {
     done
   else
     echo -e "  ${ICON_SERIAL} ${DIM}Serial${NC}      ${DIM}none detected${NC}"
+  fi
+
+  echo ""
+  echo -e "  ${BOLD}${ICON_TUNNEL} Remote Monitoring${NC}"
+  echo -e "  ${DIM}──────────────────────────────${NC}"
+  if is_tunnel_running; then
+    local tunnel_pid
+    tunnel_pid=$(get_tunnel_pid)
+    echo -e "  ${DIM}Tunnel${NC}      ${GREEN}${ICON_RUNNING} running${NC} ${DIM}(PID ${tunnel_pid})${NC}"
+    if [ -f "${TUNNEL_URL_FILE}" ]; then
+      local tunnel_url
+      tunnel_url=$(cat "${TUNNEL_URL_FILE}")
+      echo -e "  ${ICON_TUNNEL} ${DIM}URL${NC}         ${CYAN}${tunnel_url}${NC}"
+    else
+      echo -e "  ${ICON_TUNNEL} ${DIM}URL${NC}         ${CYAN}wss://ws.dejajs.com${NC}"
+    fi
+  else
+    local plan
+    plan=$(get_plan)
+    if [[ "${plan}" == "engineer" || "${plan}" == "conductor" ]]; then
+      echo -e "  ${DIM}Tunnel${NC}      ${RED}${ICON_STOPPED} stopped${NC} ${DIM}— run: deja tunnel start${NC}"
+    else
+      echo -e "  ${DIM}Tunnel${NC}      ${DIM}not available${NC} ${DIM}(upgrade to Engineer or Conductor — https://dejajs.com/pricing)${NC}"
+    fi
   fi
 
   echo ""
@@ -538,6 +736,68 @@ cmd_update() {
   echo ""
 }
 
+cmd_tunnel() {
+  local subcmd="${1:-start}"
+  shift || true
+
+  case "${subcmd}" in
+    start)
+      if [ -f "${ENV_FILE}" ]; then
+        # shellcheck disable=SC1090
+        set -a; source "${ENV_FILE}" 2>/dev/null || true; set +a
+      fi
+      echo ""
+      start_tunnel_bg
+      echo ""
+      ;;
+    stop)
+      echo ""
+      if is_tunnel_running; then
+        stop_tunnel
+      else
+        warn "Tunnel is not running."
+      fi
+      echo ""
+      ;;
+    status)
+      echo ""
+      echo -e "  ${BOLD}${ICON_TUNNEL} Tunnel Status${NC}"
+      echo -e "  ${DIM}──────────────────────────────${NC}"
+      if is_tunnel_running; then
+        local pid
+        pid=$(get_tunnel_pid)
+        echo -e "  ${DIM}Status${NC}    ${GREEN}${ICON_RUNNING} running${NC} ${DIM}(PID ${pid})${NC}"
+        if [ -f "${TUNNEL_URL_FILE}" ]; then
+          local url
+          url=$(cat "${TUNNEL_URL_FILE}")
+          echo -e "  ${DIM}URL${NC}       ${CYAN}${url}${NC}"
+        fi
+      else
+        local plan
+        plan=$(get_plan)
+        echo -e "  ${DIM}Status${NC}    ${RED}${ICON_STOPPED} stopped${NC}"
+        if [[ "${plan}" != "engineer" && "${plan}" != "conductor" ]]; then
+          echo -e "  ${DIM}Plan${NC}      ${plan:-unknown} ${DIM}(upgrade to enable — https://dejajs.com/pricing)${NC}"
+        fi
+      fi
+      echo ""
+      ;;
+    logs)
+      local lines="${1:-50}"
+      if [ -f "${TUNNEL_LOG_FILE}" ]; then
+        tail -n "${lines}" "${TUNNEL_LOG_FILE}"
+      else
+        warn "No tunnel log found at ${TUNNEL_LOG_FILE}"
+      fi
+      ;;
+    *)
+      echo ""
+      echo -e "  ${DIM}Usage:${NC} deja tunnel ${CYAN}[start|stop|status|logs]${NC}"
+      echo ""
+      ;;
+  esac
+}
+
 cmd_help() {
   echo ""
   echo -e "  ${BOLD}${ICON_SERVER} DEJA.js Server CLI${NC}"
@@ -552,6 +812,12 @@ cmd_help() {
   echo -e "    ${CYAN}status${NC}         Show server status and connections"
   echo -e "    ${CYAN}logs${NC} [-f]      View server logs (-f to follow)"
   echo -e "    ${CYAN}update${NC}         Update to the latest version"
+  echo ""
+  echo -e "  ${BOLD}${ICON_TUNNEL} Remote Monitoring${NC} ${DIM}(Engineer & Conductor plans)${NC}"
+  echo -e "    ${CYAN}tunnel start${NC}   Start Cloudflare tunnel for remote monitor access"
+  echo -e "    ${CYAN}tunnel stop${NC}    Stop the tunnel"
+  echo -e "    ${CYAN}tunnel status${NC}  Show tunnel status and URL"
+  echo -e "    ${CYAN}tunnel logs${NC}    View tunnel logs"
   echo ""
   echo -e "  ${BOLD}Options${NC}"
   echo -e "    ${DIM}--version${NC}      Show installed version"
@@ -577,6 +843,7 @@ case "${1:-}" in
   status)   shift; cmd_status "$@" ;;
   logs)     shift; cmd_logs "$@" ;;
   update)   shift; cmd_update "$@" ;;
+  tunnel)   shift; cmd_tunnel "$@" ;;
   --version|-v)
     echo "deja $(get_version)"
     ;;

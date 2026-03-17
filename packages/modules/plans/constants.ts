@@ -11,6 +11,7 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     routes: 0,
     layouts: 1,
     tourApp: false,
+    remoteMonitoring: false,
   },
   engineer: {
     locos: 25,
@@ -21,6 +22,7 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     routes: 10,
     layouts: 2,
     tourApp: false,
+    remoteMonitoring: true,
   },
   conductor: {
     locos: Infinity,
@@ -31,6 +33,7 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     routes: Infinity,
     layouts: Infinity,
     tourApp: true,
+    remoteMonitoring: true,
   },
 } as const
 
@@ -47,6 +50,7 @@ export const PLAN_DISPLAY: Record<PlanTier, PlanDisplayInfo> = {
       'Basic throttle control',
       '1 layout configuration',
       'Community docs access',
+      'Local network access only',
     ],
   },
   engineer: {
@@ -58,6 +62,7 @@ export const PLAN_DISPLAY: Record<PlanTier, PlanDisplayInfo> = {
       'Up to 25 locomotives',
       '15 turnouts, signals & effects',
       '2 layout configurations',
+      'Remote monitoring via secure tunnel',
       'Basic macros & scheduling',
       'Community forum access',
       'Support tickets (72hr SLA)',
@@ -72,6 +77,7 @@ export const PLAN_DISPLAY: Record<PlanTier, PlanDisplayInfo> = {
       'Unlimited locomotives',
       'Unlimited turnouts, signals & effects',
       'Unlimited layout configurations',
+      'Remote monitoring via secure tunnel',
       'Tour App access',
       'Advanced macros & automations',
       'Priority support (24hr SLA)',

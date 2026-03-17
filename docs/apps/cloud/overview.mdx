@@ -21,6 +21,18 @@ The Cloud app is the administration hub for managing your DCC-EX layout. Configu
 - **DCC-EX Console** — Direct command-line access to the DCC-EX command station
 - **Settings** — Layout settings, user profile, and billing
 
+## Onboarding
+
+New users are guided through an onboarding wizard to create their first layout. After completing onboarding, a **Setup Complete** page provides:
+
+- Confirmation of layout creation with the user's Layout ID
+- Quick-add form to register a first locomotive (DCC address + optional name)
+- Server installation instructions with credentials
+- Curated links to documentation (install guide, roster, turnouts, effects)
+- Direct navigation to the dashboard
+
+Layouts are automatically approved on creation — there is no admin approval step.
+
 ## Screenshots
 
 ### Dashboard
@@ -63,6 +75,6 @@ The Cloud app is the administration hub for managing your DCC-EX layout. Configu
 
 - **Framework:** Vue 3 with Composition API
 - **State:** Firebase Firestore via VueFire
-- **Auth:** Firebase Auth with onboarding wizard and layout approval flow
+- **Auth:** Firebase Auth with onboarding wizard and auto-approved layouts
 - **Routing:** Vue Router 4 with meta-based guard chain
 - **Port:** 3011 (development)

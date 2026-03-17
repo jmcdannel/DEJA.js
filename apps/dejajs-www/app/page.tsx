@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import Carousel, { CarouselItem } from '../components/Carousel';
+import { client } from '../sanity/lib/client';
+import { HOMEPAGE_QUERY } from '../sanity/lib/queries';
 
 const desktopScreenshots: CarouselItem[] = [
   { id: 1, content: <div className="relative w-full aspect-video"><Image src="/screenshots/throttle_desktop_routes.png" alt="DEJA.js Throttle Desktop Routes" fill className="object-cover" /></div> },
@@ -83,7 +85,30 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  let homepage: any = null;
+  try {
+    if (client) homepage = await client.fetch(HOMEPAGE_QUERY);
+  } catch {
+    // Fall back to hardcoded content
+  }
+
+  // Use Sanity data for hero if available
+  const heroTitle = homepage?.hero?.title;
+  const heroSubtitle = homepage?.hero?.subtitle;
+  const heroCta = homepage?.hero?.cta;
+
+  // Use Sanity product showcase if available, otherwise hardcoded
+  const showcaseProducts: Product[] = homepage?.productShowcase?.length
+    ? homepage.productShowcase.map((p: any) => ({
+        name: p.title,
+        desc: p.tagline || '',
+        color: p.color || 'cyan',
+        logo: p.icon?.asset?.url || '/icon-512.png',
+        href: `/${p.slug}`,
+      }))
+    : products;
+
   return (
     <div className="space-y-16">
       {/* 1. Hero & Visual Hook */}
@@ -92,18 +117,17 @@ export default function Home() {
           <Image src="/icon-512.png" alt="DEJA.js Logo" width={192} height={192} className="h-48 w-48 drop-shadow-lg" />
         </div>
         <h1 className="font-display text-5xl md:text-6xl tracking-tight text-slate-900 dark:text-white">
-          The modern throttle for DCC-EX <br className="hidden md:block" />
-          <span className="text-cyan-400">— and much more.</span>
+          {heroTitle ? heroTitle : (<>The modern throttle for DCC-EX <br className="hidden md:block" /><span className="text-cyan-400">— and much more.</span></>)}
         </h1>
         <p className="max-w-2xl text-lg md:text-xl text-gray-500 dark:text-gray-400 mx-auto leading-relaxed">
-          DEJA.js delivers a precise, organized control experience. Replace cluttered legacy interfaces with smooth interactions and an expandable hardware platform.
+          {heroSubtitle || 'DEJA.js delivers a precise, organized control experience. Replace cluttered legacy interfaces with smooth interactions and an expandable hardware platform.'}
         </p>
         <div className="flex gap-4 justify-center pt-4">
           <Link
-            href="/docs/quick-start"
+            href={heroCta?.href || '/docs/quick-start'}
             className="px-6 py-3 bg-cyan-500 text-gray-950 rounded-lg font-bold hover:bg-cyan-400 transition tracking-[0.04em]"
           >
-            Get Started
+            {heroCta?.label || 'Get Started'}
           </Link>
           <Link
             href="/docs"
@@ -191,7 +215,7 @@ export default function Home() {
           <p className="text-gray-500 dark:text-gray-400">A growing suite of applications for complete layout management.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => (
+          {showcaseProducts.map((product) => (
             <a href={product.href} key={product.name} className="block group">
               <article className="flex flex-col p-6 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 hover:border-cyan-500 dark:hover:border-cyan-500 transition h-full">
                 <div className="flex items-center gap-4 mb-4">
