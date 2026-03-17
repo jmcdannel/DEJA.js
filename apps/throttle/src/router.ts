@@ -95,6 +95,12 @@ const router = createRouter({
       component: () => import('./views/SettingsView.vue'),
       beforeEnter: [requireAuth],
     },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('./views/NotFound.vue'),
+      beforeEnter: [requireAuth],
+    },
     // {
     //   path: '/connect/dejajs',
     //   name: 'dejajs',
