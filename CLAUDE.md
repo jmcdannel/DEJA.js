@@ -122,33 +122,70 @@ pnpm deps:fix         # syncpack: fix mismatches
 
 ## Development Workflow
 
+### Feature branch → preview (day-to-day development)
+
 1. **Plan before coding** — Use Plan Mode (Shift+Tab twice) for non-trivial changes
 2. **Lint and type-check before committing** — run `pnpm lint && pnpm check-types`
 3. **Use the `/verify-changes` slash command** to confirm nothing is broken
-4. **Update docs if UI changed** — run `/update-docs` to capture screenshots and update MDX docs
-5. **Create a changeset entry** — run `/changelog` before opening a PR (see below)
-6. **Use the `/commit-push-pr` slash command** to commit, push, and open a PR
+4. **Use the `/commit-push-pr` slash command** — PR targets `preview` automatically (not `main`)
+5. CI runs `claude-code-review` only — no changeset or docs required for feature PRs
+6. Staging domains auto-update 3–6 minutes after merge (via `staging.yml` CI job)
 
-### Changeset Requirement (MANDATORY)
+### preview → main (releasing to production)
 
-**Every PR must include a changeset file.** The CI `changeset-check` workflow will **fail the PR** if no `.changeset/*.md` file is added. This is enforced — PRs cannot merge without it.
+When the `preview` branch has been tested on staging and is ready to ship:
+
+1. **Update docs if UI changed** — run `/update-docs` to capture screenshots and update MDX docs
+2. **Create a changeset entry** — run `/changelog` on the `preview` branch (see below)
+3. **Use the `/commit-push-pr` slash command** — detects `preview` branch and targets `main`
+4. CI runs `changeset-check` + `docs-check` + `claude-code-review` — all must pass
+5. Merge → production Vercel deploy + changelog bot processes all accumulated changesets
+
+### After merging preview → main — sync back
+
+After each merge to `main` (including the changelog bot's automated commit), sync `main` back into `preview`:
+
+```bash
+git checkout preview
+git merge main
+git push
+```
+
+This keeps `preview` in sync with the changelog bot's cleanup commits. Use `/resolve-conflicts` if merge conflicts arise.
+
+### Staging Domains
+
+After merging to `preview`, the following staging URLs automatically reflect the latest build:
+
+| App | Staging URL |
+|---|---|
+| Throttle | https://staging-throttle.dejajs.com |
+| Cloud | https://staging-cloud.dejajs.com |
+| Monitor | https://staging-monitor.dejajs.com |
+| Website | https://staging.dejajs.com |
+
+Use `/stage-pr <branch>` to manually point staging to a specific feature branch for early review.
+
+### Changeset Requirement
+
+**Changesets are required on `preview → main` PRs only.** Feature PRs to `preview` do not need changesets.
+
+Changesets accumulate on the `preview` branch across multiple feature merges. When you run `/changelog` before the release PR, it captures all unreleased changes at once.
 
 To create a changeset:
 - Run `/changelog` in Claude Code — it analyzes the branch diff and creates the file automatically
 - Or run `pnpm changeset` interactively
 - Or create a file manually in `.changeset/` (see `.changeset/README.md` for format)
 
-**When to create the changeset:** After your code changes are done, before committing/pushing the PR. The `/commit-push-pr` command should always be preceded by `/changelog`.
-
 **What if there are no user-facing changes?** Still create a changeset — use `patch` bump and describe the internal change (e.g., `changed: **[docs]** Update README`, `improved: **[ci]** Add caching to build workflow`).
 
 ### Screenshot & Documentation Updates
 
-When UI changes are made, update screenshots and MDX docs:
+When UI changes are made, update screenshots and MDX docs **before the `preview → main` PR**:
 
 - Run `/capture-screenshots [app]` to capture fresh screenshots of app views
 - Run `/update-docs` to auto-detect changed apps, capture screenshots, and update MDX docs
-- The CI `docs-check` workflow will post a reminder on PRs that change UI files without updating docs
+- The CI `docs-check` workflow will block the `preview → main` PR if UI files changed without updated docs
 
 **Screenshots** are saved to `apps/dejajs-www/public/screenshots/` using the naming convention `{app}_{desktop|mobile}_{view-name}.png`.
 
