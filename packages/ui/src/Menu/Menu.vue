@@ -59,12 +59,13 @@ const ungroupedItems = computed(() =>
 )
 
 // Pinned footer: icon-only links to other DEJA apps
+// Colors match each app's brand color from dejajs.com
 // Monitor has no production URL — it runs locally alongside the server
-const DEJA_SUITE_APPS: SuiteApp[] = [
-  { label: 'Cloud',    icon: 'mdi-cloud',             href: 'https://cloud.dejajs.com/' },
-  { label: 'Throttle', icon: 'mdi-train-variant',     href: 'https://throttle.dejajs.com/' },
-  { label: 'Monitor',  icon: 'mdi-monitor-dashboard', href: 'http://localhost:4014/' },
-  { label: 'Tour',     icon: 'mdi-map-marker-path',   href: 'https://www.dejajs.com/' },
+const DEJA_SUITE_APPS = [
+  { label: 'Cloud',    icon: 'mdi-cloud',             href: 'https://cloud.dejajs.com/',    color: 'text-fuchsia-500' },
+  { label: 'Throttle', icon: 'mdi-train-variant',     href: 'https://throttle.dejajs.com/', color: 'text-lime-500' },
+  { label: 'Monitor',  icon: 'mdi-monitor-dashboard', href: 'http://localhost:4014/',        color: 'text-red-500' },
+  { label: 'Tour',     icon: 'mdi-map-marker-path',   href: 'https://www.dejajs.com/',      color: 'text-cyan-400' },
 ]
 </script>
 
@@ -89,7 +90,7 @@ const DEJA_SUITE_APPS: SuiteApp[] = [
             :key="item.name"
             :active="false"
             :class="[
-              'py-1 min-h-10 transition-colors duration-150',
+              'py-0.5 min-h-8 transition-colors duration-150',
               isActive(item) ? '!bg-white/10' : 'hover:!bg-white/5',
             ]"
             link
@@ -98,7 +99,7 @@ const DEJA_SUITE_APPS: SuiteApp[] = [
             <template #prepend>
               <v-icon
                 size="20"
-                :class="`text-${item.color}-500 dark:text-${item.color}-400 stroke-none mr-3`"
+                :class="`text-${item.color}-500 dark:text-${item.color}-400 stroke-none mr-2`"
               >
                 {{ item.icon }}
               </v-icon>
@@ -116,14 +117,14 @@ const DEJA_SUITE_APPS: SuiteApp[] = [
           :title="item.label"
           :color="item.color || 'primary'"
           :active="route.name === item.name"
-          class="py-1 min-h-10"
+          class="py-0.5 min-h-8"
           link
           @click="onHandleMenu(item)"
         >
           <template #prepend>
             <v-icon
               size="20"
-              :class="`text-${item.color}-500 dark:text-${item.color}-400 stroke-none mr-3`"
+              :class="`text-${item.color}-500 dark:text-${item.color}-400 stroke-none mr-2`"
             >
               {{ item.icon }}
             </v-icon>
@@ -149,11 +150,13 @@ const DEJA_SUITE_APPS: SuiteApp[] = [
               <v-btn
                 v-bind="tooltipProps"
                 variant="text"
-                :icon="app.icon"
                 :href="app.href"
                 target="_blank"
                 size="small"
-              />
+                :class="app.color"
+              >
+                <v-icon size="20">{{ app.icon }}</v-icon>
+              </v-btn>
             </template>
           </v-tooltip>
         </div>
