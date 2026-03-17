@@ -61,3 +61,6 @@ packages/sounds/assets/
 *.tsbuildinfo
 storybook-static/
 reports/
+
+# Git worktrees
+.worktrees/
