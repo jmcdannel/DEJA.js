@@ -16,6 +16,7 @@ import App from './App.vue'
 import router from './router'
 import { firebaseApp } from '@repo/firebase-config'
 import { createVuetifyThemes } from '@repo/ui'
+import { feedbackConfig } from '@repo/modules/feedback'
 // Style
 import './style.css'
 import '@mdi/font/css/materialdesignicons.css'
@@ -63,11 +64,17 @@ Sentry.init({
   integrations: [
     Sentry.browserTracingIntegration({ router }),
     Sentry.replayIntegration(),
+    Sentry.feedbackIntegration(feedbackConfig),
   ],
   tracesSampleRate: 1.0,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 })
+
+app.config.errorHandler = (err, _instance, info) => {
+  const eventId = Sentry.captureException(err, { extra: { info } })
+  Sentry.showReportDialog({ eventId })
+}
 
 if (import.meta.env.PROD) {
   injectAnalytics()
