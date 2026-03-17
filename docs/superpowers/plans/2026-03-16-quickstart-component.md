@@ -46,7 +46,8 @@ import ServerSetupInfo from '../ServerSetupInfo.vue'
 interface Props {
   /** Step numbers (1-based) that the parent considers already completed. */
   completed?: number[]
-  /** Firebase UID — passed to ServerSetupInfo for a personalized install URL. */
+  /** Firebase UID — passed to ServerSetupInfo for a personalized install URL.
+   *  `string | null` matches ServerSetupInfo's own prop type exactly. */
   uid?: string | null
   /** Layout ID — passed to ServerSetupInfo for a personalized install URL. */
   layoutId?: string
@@ -325,7 +326,7 @@ export { default as QuickStart } from './QuickStart/QuickStart.vue'
 
 - [ ] **Step 2: Add the subpath export to `packages/ui/package.json`**
 
-In the `"exports"` object, add an entry for `./QuickStart`. A good place is after the `"./SplashPage"` entry at the end:
+In the `"exports"` object, add an entry for `./QuickStart`. The existing pattern uses `"./ComponentName": "./src/path/Component.vue"` (confirmed from existing entries like `"./SplashPage"`, `"./TurnoutList"` etc.). Add after `"./SplashPage"`:
 
 ```json
 "./SplashPage": "./src/SplashPage.vue",
@@ -356,17 +357,7 @@ git commit -m "feat(ui): export QuickStart from @repo/ui barrel"
 
 The `@repo/ui` package uses Storybook for visual QA. Stories are the test mechanism for presentational components in this package.
 
-- [ ] **Step 1: Look at an existing story file for the pattern to follow**
-
-```bash
-cat packages/ui/src/EmptyState/EmptyState.stories.ts 2>/dev/null || \
-cat packages/ui/src/Stat.stories.ts 2>/dev/null || \
-ls packages/ui/src/**/*.stories.ts | head -3
-```
-
-Note the import path pattern and `Meta`/`StoryObj` usage.
-
-- [ ] **Step 2: Create the stories file**
+- [ ] **Step 1: Create the stories file**
 
 Create `packages/ui/src/QuickStart/QuickStart.stories.ts`:
 
@@ -484,6 +475,22 @@ Expected: clean — no TypeScript errors. If errors appear referencing `QuickSta
 ```bash
 git add -p
 git commit -m "fix(ui): resolve lint/type issues in QuickStart"
+```
+
+- [ ] **Step 4: Create a changeset entry (required — CI will block the PR without it)**
+
+Per project convention, every PR needs a `.changeset/*.md` file. Run the slash command:
+
+```bash
+# In Claude Code terminal:
+/changelog
+```
+
+This analyzes the branch diff and creates the file automatically. Commit the result:
+
+```bash
+git add .changeset/
+git commit -m "chore: add changeset for QuickStart component"
 ```
 
 ---
