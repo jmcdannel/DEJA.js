@@ -36,7 +36,7 @@ export default function TerminalBlock({ title = 'terminal', lines, className }: 
       </div>
       <div className="p-4 space-y-1">
         {lines.map((line, i) => (
-          <div key={i} className={colorMap[line.type]}>
+          <div key={`${line.type}-${i}`} className={colorMap[line.type]}>
             <span className="opacity-50">{prefixMap[line.type]}</span>
             {line.text}
           </div>
