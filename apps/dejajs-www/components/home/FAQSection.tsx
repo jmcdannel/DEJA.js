@@ -66,9 +66,9 @@ export default function FAQSection() {
               indicator: 'text-deja-cyan',
             }}
           >
-            {faqs.map((faq, i) => (
+            {faqs.map((faq) => (
               <AccordionItem
-                key={i}
+                key={faq.q}
                 aria-label={faq.q}
                 title={faq.q}
               >

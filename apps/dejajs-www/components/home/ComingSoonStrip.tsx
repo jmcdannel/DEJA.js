@@ -32,7 +32,7 @@ export default function ComingSoonStrip() {
         <div className="flex animate-marquee whitespace-nowrap gap-8">
           {doubledItems.map((item, index) => (
             <span
-              key={index}
+              key={`item-${index}`}
               className="px-4 py-2 rounded-full border border-deja-magenta/20 bg-deja-magenta/5 text-gray-400 text-sm font-medium flex-shrink-0"
             >
               {item}
