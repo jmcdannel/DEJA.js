@@ -11,7 +11,8 @@
       "name": "cloud",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter=deja-cloud", "dev"],
-      "port": 5174
+      "port": 5174,
+      "autoPort": true
     },
     {
       "name": "monitor",
