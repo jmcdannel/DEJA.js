@@ -41,7 +41,8 @@
     "./DeviceStatusItem": "./src/DeviceStatus/DeviceStatusItem.vue",
     "./DeviceStatusList": "./src/DeviceStatus/DeviceStatusList.vue",
     "./animations": "./src/animations/index.ts",
-    "./tailwind/animation-preset": "./src/tailwind/animation-preset.ts"
+    "./tailwind/animation-preset": "./src/tailwind/animation-preset.ts",
+    "./SplashPage": "./src/SplashPage.vue"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.8.2",
