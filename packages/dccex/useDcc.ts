@@ -84,12 +84,51 @@ export const useDcc = (options?: DccWriteOptions) => {
     }
   }
 
+  async function syncRosterEntry(
+    address: number,
+    name: string,
+    functions?: Array<{ id: number; label: string }>,
+  ): Promise<void> {
+    try {
+      log.debug('[DCC API].syncRosterEntry', address, name)
+      await send('syncRoster', { locos: [{ address, name, functions }] })
+    } catch (err: unknown) {
+      log.error('[DCC API].syncRosterEntry', err)
+      throw err instanceof Error ? err : new Error(String(err))
+    }
+  }
+
+  async function syncAllRoster(
+    locos: Array<{ address: number; name: string; functions?: Array<{ id: number; label: string }> }>,
+  ): Promise<void> {
+    try {
+      log.debug('[DCC API].syncAllRoster', locos.length, 'locos')
+      await send('syncRoster', { locos })
+    } catch (err: unknown) {
+      log.error('[DCC API].syncAllRoster', err)
+      throw err instanceof Error ? err : new Error(String(err))
+    }
+  }
+
+  async function importRoster(): Promise<void> {
+    try {
+      log.debug('[DCC API].importRoster')
+      await send('importRoster', {})
+    } catch (err: unknown) {
+      log.error('[DCC API].importRoster', err)
+      throw err instanceof Error ? err : new Error(String(err))
+    }
+  }
+
   return {
     sendDccCommand,
     send,
     setPower,
     setFunction,
     sendOutput,
+    syncRosterEntry,
+    syncAllRoster,
+    importRoster,
   }
 }
 
