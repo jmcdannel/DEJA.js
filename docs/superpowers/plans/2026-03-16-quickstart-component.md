@@ -335,7 +335,7 @@ In the `"exports"` object, add an entry for `./QuickStart`. A good place is afte
 - [ ] **Step 3: Run the type-checker to verify exports resolve**
 
 ```bash
-pnpm --filter=@repo/ui check-types 2>&1 || pnpm check-types 2>&1 | grep -E "QuickStart|error"
+pnpm check-types
 ```
 
 Expected: no TypeScript errors related to QuickStart.
@@ -377,6 +377,7 @@ import QuickStart from './QuickStart.vue'
 const meta: Meta<typeof QuickStart> = {
   title: 'UI/QuickStart',
   component: QuickStart,
+  tags: ['autodocs'],
   parameters: {
     backgrounds: {
       default: 'dark',
