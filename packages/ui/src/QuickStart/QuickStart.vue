@@ -59,7 +59,7 @@ const ctaLinks = [
           v-if="!isComplete(1)"
           href="https://cloud.dejajs.com/sign-up"
           target="_blank"
-          rel="noopener"
+          rel="noopener noreferrer"
           color="primary"
           size="small"
           variant="flat"
@@ -104,7 +104,7 @@ const ctaLinks = [
         :key="link.label"
         :href="link.url"
         target="_blank"
-        rel="noopener"
+        rel="noopener noreferrer"
         class="quick-start__link"
       >{{ link.label }}</a>
     </div>
