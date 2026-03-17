@@ -1,0 +1,84 @@
+# .github/workflows/staging.yml
+name: Update Staging Domains
+
+on:
+  push:
+    branches: [preview]
+
+jobs:
+  stage:
+    permissions: {}   # No GITHUB_TOKEN permissions needed — uses VERCEL_TOKEN only
+    timeout-minutes: 25
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Poll for ready deployments and alias staging domains
+        # Vercel builds for a Turborepo monorepo typically take 2–4 minutes.
+        # We poll per-project (each with its own timeout) and capture the deployment URL
+        # in the same step to avoid a second API call in the alias step.
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          echo "::add-mask::$VERCEL_TOKEN"
+          TEAM="jmcdannels-projects"
+          BRANCH="preview"
+          MAX_WAIT=300   # 5 minutes per project
+          INTERVAL=15
+
+          # NOTE: If staging.dejajs.com fails to alias, verify the website project name.
+          # The /stage-pr skill is the source of truth. It may be `dejajs-website` or `deja-js-www`.
+          declare -A DOMAINS=(
+            ["deja-js-throttle"]="staging-throttle.dejajs.com"
+            ["deja-js-cloud"]="staging-cloud.dejajs.com"
+            ["deja-js-monitor"]="staging-monitor.dejajs.com"
+            ["dejajs-website"]="staging.dejajs.com"
+          )
+
+          for PROJECT in "${!DOMAINS[@]}"; do
+            DOMAIN="${DOMAINS[$PROJECT]}"
+            ELAPSED=0   # reset per project so each gets its own full timeout window
+            DEPLOYMENT_URL=""
+
+            echo "Waiting for $PROJECT to be ready..."
+            while [ "$ELAPSED" -lt "$MAX_WAIT" ]; do
+              DEPLOYMENT_URL=$(curl -s --fail \
+                "https://api.vercel.com/v6/deployments?projectId=${PROJECT}&meta-gitBranch=${BRANCH}&limit=1&target=preview&teamId=${TEAM}" \
+                -H "Authorization: Bearer $VERCEL_TOKEN" \
+                | jq -r '.deployments[0] | select(.readyState == "READY") | .url // empty')
+
+              if [ -n "$DEPLOYMENT_URL" ]; then
+                echo "$PROJECT is ready at $DEPLOYMENT_URL"
+                break
+              fi
+
+              sleep "$INTERVAL"
+              ELAPSED=$((ELAPSED + INTERVAL))
+            done
+
+            if [ -z "$DEPLOYMENT_URL" ]; then
+              echo "Timed out waiting for $PROJECT — skipping alias"
+              continue
+            fi
+
+            # Use the URL from polling directly — avoids a second API call and race conditions
+            echo "Aliasing $DOMAIN -> $DEPLOYMENT_URL"
+            vercel alias "$DEPLOYMENT_URL" "$DOMAIN" --scope "$TEAM" --token "$VERCEL_TOKEN"
+          done
+
+          echo ""
+          echo "Staging domains updated:"
+          echo "  https://staging-throttle.dejajs.com"
+          echo "  https://staging-cloud.dejajs.com"
+          echo "  https://staging-monitor.dejajs.com"
+          echo "  https://staging.dejajs.com"
+
+          # Note: merging main back into preview (sync step) also triggers this workflow.
+          # That re-aliasing is harmless — staging domains will correctly reflect preview.

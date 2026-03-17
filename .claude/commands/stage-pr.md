@@ -1,7 +1,9 @@
 # /stage-pr — Point all DEJA.js staging domains to a PR or branch
  
 Alias all 4 DEJA.js staging domains to the latest Vercel preview deployment for a given PR number or branch name.
- 
+
+> **Auto-staging:** Staging domains now automatically update on every push to the `preview` branch via the `staging.yml` GitHub Actions workflow. Use this command when you need to point staging to a **specific feature branch** for early review before it merges to `preview`.
+
 **Usage:**
 - `/stage-pr 42` — use PR number
 - `/stage-pr my-feature-branch` — use branch name directly
@@ -36,7 +38,7 @@ You'll need a Vercel token. Check if `VERCEL_TOKEN` is set; if not, run `vercel 
 # deja-js-throttle  → staging-throttle.dejajs.com
 # deja-js-cloud     → staging-cloud.dejajs.com
 # deja-js-monitor   → staging-monitor.dejajs.com
-# deja-js-www       → staging.dejajs.com
+# dejajs-website    → staging.dejajs.com
  
 TEAM="jmcdannels-projects"
 BRANCH="<resolved branch from Step 1>"
