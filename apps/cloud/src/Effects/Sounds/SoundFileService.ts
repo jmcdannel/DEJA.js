@@ -1,4 +1,5 @@
 import { createLogger } from '@repo/utils'
+import { getAuth } from 'firebase/auth'
 
 const log = createLogger('SoundFileService')
 
@@ -12,23 +13,23 @@ export interface SoundFile {
   pathname?: string
 }
 
-export class SoundFileService {
-  private apiBaseUrl: string
-
-  constructor() {
-    // Use the cloud app's own sound API at /api/sounds (Vercel Function)
-    // Falls back to VITE_API_BASE_URL env var for custom deployments
-    const viteUrl = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_API_BASE_URL : undefined
-    const nodeUrl = typeof process !== 'undefined' ? process.env.VITE_API_BASE_URL : undefined
-    this.apiBaseUrl = viteUrl || nodeUrl || '/api'
-    log.debug('SoundFileService initialized with API URL:', this.apiBaseUrl)
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const user = getAuth().currentUser
+    if (!user) return null
+    return user.getIdToken()
+  } catch {
+    return null
   }
+}
+
+export class SoundFileService {
+  private apiBaseUrl = '/api'
 
   async listSoundFiles(): Promise<SoundFile[]> {
     try {
-      // Call the Next.js API endpoint
       const response = await fetch(`${this.apiBaseUrl}/sounds`)
-      
+
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`)
       }
@@ -43,9 +44,10 @@ export class SoundFileService {
 
   async getSoundFileInfo(pathname: string): Promise<SoundFile | null> {
     try {
-      // Call the Next.js API endpoint for specific file info
-      const response = await fetch(`${this.apiBaseUrl}/sounds/${encodeURIComponent(pathname)}`)
-      
+      const response = await fetch(
+        `${this.apiBaseUrl}/sounds/${encodeURIComponent(pathname)}`,
+      )
+
       if (!response.ok) {
         return null
       }
@@ -58,15 +60,51 @@ export class SoundFileService {
     }
   }
 
-  // Method to set a different API base URL (useful for switching between dev and production)
-  setApiBaseUrl(url: string): void {
-    this.apiBaseUrl = url
-    log.debug('SoundFileService API URL updated to:', this.apiBaseUrl)
+  async uploadSoundFile(file: File): Promise<SoundFile> {
+    const token = await getAuthToken()
+    if (!token) {
+      throw new Error('Authentication required to upload sounds')
+    }
+
+    const response = await fetch(`${this.apiBaseUrl}/sounds/upload`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': file.type || 'audio/mpeg',
+        'x-filename': file.name,
+      },
+      body: file,
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Upload failed' }))
+      throw new Error(error.error || `Upload failed: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return data.sound
   }
 
-  // Method to get current API base URL
-  getApiBaseUrl(): string {
-    return this.apiBaseUrl
+  async deleteSoundFile(pathname: string): Promise<void> {
+    const token = await getAuthToken()
+    if (!token) {
+      throw new Error('Authentication required to delete sounds')
+    }
+
+    const response = await fetch(
+      `${this.apiBaseUrl}/sounds/${encodeURIComponent(pathname)}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    )
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Delete failed' }))
+      throw new Error(error.error || `Delete failed: ${response.status}`)
+    }
   }
 }
 

@@ -57,7 +57,13 @@ const router = createRouter({
       component: AreaDetail,
       props: true,
       beforeEnter: authGuard
-    }
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('../views/NotFound.vue'),
+      beforeEnter: authGuard,
+    },
   ]
 })
 

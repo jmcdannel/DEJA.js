@@ -106,6 +106,18 @@ const router = createRouter({
       meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
+      path: '/sounds',
+      name: 'Sounds',
+      component: () => import('./Sounds/Sounds.vue'),
+      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+    },
+    {
+      path: '/sounds/new',
+      name: 'Add Sound',
+      component: () => import('./Sounds/AddSound.vue'),
+      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+    },
+    {
       path: '/effects',
       name: 'Effects',
       component: () => import('./Effects/Effects.vue'),

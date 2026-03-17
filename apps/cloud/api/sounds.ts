@@ -9,7 +9,10 @@ function extractFileName(pathname: string): string {
     .replace(/\b\w/g, (l) => l.toUpperCase())
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse,
+) {
   if (req.method === 'OPTIONS') {
     return res.status(200).end()
   }
@@ -26,11 +29,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       url: blob.url,
       size: blob.size,
       uploadedAt: blob.uploadedAt?.toISOString() ?? new Date().toISOString(),
-      contentType: 'contentType' in blob ? String(blob.contentType) : 'audio/mpeg',
+      contentType:
+        'contentType' in blob ? String(blob.contentType) : 'audio/mpeg',
       pathname: blob.pathname,
     }))
 
-    return res.json({ sounds })
+    return res.status(200).json({ sounds })
   } catch (error) {
     console.error('Error listing sounds:', error)
     return res.status(500).json({ error: 'Failed to load sounds' })
