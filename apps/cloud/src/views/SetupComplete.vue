@@ -7,7 +7,7 @@ import { collection, query, where } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { useLocos } from '@repo/modules/locos'
 import { Signout } from '@repo/auth'
-import { ServerSetupInfo } from '@repo/ui'
+import { QuickStart } from '@repo/ui'
 
 const router = useRouter()
 const user = useCurrentUser()
@@ -145,15 +145,7 @@ function goToDashboard() {
 
       <!-- Install Server -->
       <div class="glass-card mb-6">
-        <div class="flex items-center gap-3 mb-4">
-          <v-icon color="primary" size="28">mdi-download-outline</v-icon>
-          <h2 class="text-lg font-semibold text-sky-100">Install DEJA Server</h2>
-        </div>
-        <p class="text-slate-400 text-sm mb-5">
-          Run the install script on the machine connected to your DCC-EX Command Station. The installer will prompt for the credentials below.
-        </p>
-
-        <ServerSetupInfo :uid="user?.uid" :layout-id="primaryLayoutId" />
+        <QuickStart :completed="[1]" :uid="user?.uid" :layout-id="primaryLayoutId" />
       </div>
 
       <!-- Explore More -->
