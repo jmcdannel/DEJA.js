@@ -421,7 +421,7 @@ export const StepOneCompleteNoUid: Story = {
 }
 ```
 
-- [ ] **Step 3: Start Storybook and visually verify all four stories**
+- [ ] **Step 2: Start Storybook and visually verify all four stories**
 
 ```bash
 pnpm --filter=@repo/ui storybook
@@ -436,14 +436,14 @@ Open `http://localhost:6006` and navigate to **UI / QuickStart**. Check each sto
 | BothComplete | Both circles green ✓, both steps dimmed + strikethrough |
 | StepOneCompleteNoUid | Circle 1 = green ✓, install URL is the plain `https://install.dejajs.com` (no query params) |
 
-- [ ] **Step 4: Fix any visual issues found during Storybook review**
+- [ ] **Step 3: Fix any visual issues found during Storybook review**
 
 Common things to check:
 - Connector line height — adjust `height` in `.quick-start__connector` if it doesn't reach the second circle
 - `content--done` opacity — make sure strikethrough renders on the title only, not on `ServerSetupInfo`
 - CTA link spacing and color on dark background
 
-- [ ] **Step 5: Commit the stories**
+- [ ] **Step 4: Commit the stories**
 
 ```bash
 git add packages/ui/src/QuickStart/QuickStart.stories.ts
