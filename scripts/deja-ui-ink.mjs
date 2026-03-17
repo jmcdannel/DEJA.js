@@ -18,16 +18,41 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { render, Box, Text, useInput, useStdout } from 'ink'
-import { spawn } from 'node:child_process'
-import { existsSync, readFileSync } from 'node:fs'
+import { spawn, execFileSync } from 'node:child_process'
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { createServer } from 'node:net'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-// ── Paths ─────────────────────────────────────────────────────────────────────
+// ── Load env ──────────────────────────────────────────────────────────────────
 
-const DEJA_DIR     = join(homedir(), '.deja')
-const ENTRY        = join(DEJA_DIR, 'server', 'index.js')
-const VERSION_FILE = join(DEJA_DIR, 'server', 'version.txt')
+function loadEnvFile(filepath) {
+  try {
+    const content = readFileSync(filepath, 'utf8')
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('#')) continue
+      const eq = trimmed.indexOf('=')
+      if (eq === -1) continue
+      const key = trimmed.slice(0, eq).trim()
+      const val = trimmed.slice(eq + 1).trim().replace(/^["']|["']$/g, '')
+      if (!process.env[key]) process.env[key] = val
+    }
+  } catch {}
+}
+
+const DEJA_DIR = join(homedir(), '.deja')
+loadEnvFile(join(DEJA_DIR, '.env'))
+
+// ── Paths ─────────────────────────────────────────────────────────────────────
+const ENTRY           = join(DEJA_DIR, 'server', 'index.js')
+const VERSION_FILE    = join(DEJA_DIR, 'server', 'version.txt')
+const CONFIG_FILE     = join(DEJA_DIR, 'config.json')
+const LOG_DIR         = join(DEJA_DIR, 'logs')
+const TUNNEL_PID_FILE = join(DEJA_DIR, 'tunnel.pid')
+const TUNNEL_LOG_FILE = join(LOG_DIR, 'tunnel.log')
+const TUNNEL_URL_FILE = join(DEJA_DIR, 'tunnel.url')
+const CLOUDFLARED_YML = join(DEJA_DIR, 'cloudflared.yml')
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -48,7 +73,37 @@ function ts() {
   return new Date().toLocaleTimeString('en-US', { hour12: false })
 }
 
+function checkPort(port) {
+  return new Promise((resolve) => {
+    const srv = createServer()
+    srv.once('error', () => resolve(false))   // port in use
+    srv.once('listening', () => srv.close(() => resolve(true))) // port free
+    srv.listen(port)
+  })
+}
+
+function getPlan() {
+  try {
+    const config = JSON.parse(readFileSync(CONFIG_FILE, 'utf8'))
+    return config.subscription?.plan || ''
+  } catch { return '' }
+}
+
+function isPaidPlan() {
+  const plan = getPlan()
+  return plan === 'engineer' || plan === 'conductor'
+}
+
+function hasCloudflared() {
+  try {
+    execFileSync('which', ['cloudflared'], { stdio: 'ignore' })
+    return true
+  } catch { return false }
+}
+
+const WS_PORT = parseInt(process.env.VITE_WS_PORT || '8082', 10)
 const VERSION = getVersion()
+const h = React.createElement
 
 // ── App ───────────────────────────────────────────────────────────────────────
 
@@ -60,14 +115,32 @@ function App() {
   const [pid, setPid]             = useState(null)
   const [startTime, setStartTime] = useState(null)
   const [uptime, setUptime]       = useState('00:00:00')
+  const [tunnelUrl, setTunnelUrl] = useState(null)
   const childRef = useRef(null)
+  const tunnelRef = useRef(null)
 
   // ── Logging ────────────────────────────────────────────────────────────────
 
   const addLog = useCallback((text) => {
-    const lines = String(text).split('\n')
+    const raw = String(text)
+
+    // Detect EADDRINUSE and replace the entire block with a friendly one-liner
+    if (raw.includes('EADDRINUSE')) {
+      const portMatch = raw.match(/address already in use (?:::)?(\d+)/) || raw.match(/port:\s*(\d+)/)
+      const p = portMatch?.[1] || port
+      const line = `[${ts()}] Port ${p} is already in use — is another server instance running?`
+      setLogLines(prev => {
+        const next = [...prev, line]
+        return next.length > 500 ? next.slice(next.length - 500) : next
+      })
+      return
+    }
+
+    const lines = raw.split('\n')
       .map(l => l.trimEnd())
       .filter(l => l.length > 0)
+      // Strip stack trace lines and error object property dumps
+      .filter(l => !(/^\s+at\s/.test(l) || /^\s+(code|errno|syscall|address|port):/.test(l) || /^\s*[{}]\s*$/.test(l)))
       .map(l => `[${ts()}] ${l}`)
     if (!lines.length) return
     setLogLines(prev => {
@@ -87,10 +160,18 @@ function App() {
 
   // ── Server lifecycle ───────────────────────────────────────────────────────
 
-  const spawnServer = useCallback(() => {
+  const spawnServer = useCallback(async () => {
     if (!existsSync(ENTRY)) {
       addLog(`ERROR: Server not found at ${ENTRY}`)
       addLog('Run "deja update" to install the server first.')
+      setStatus('stopped')
+      return
+    }
+
+    const portFree = await checkPort(WS_PORT)
+    if (!portFree) {
+      addLog(`Port ${WS_PORT} is already in use — is another server instance running?`)
+      addLog(`Stop the other process or change VITE_WS_PORT in ~/.deja/.env`)
       setStatus('stopped')
       return
     }
@@ -99,7 +180,7 @@ function App() {
 
     const child = spawn('node', [ENTRY], {
       cwd: DEJA_DIR,
-      env: { ...process.env },
+      env: { ...process.env, FORCE_COLOR: '1' },
       stdio: ['ignore', 'pipe', 'pipe'],
     })
 
@@ -113,10 +194,17 @@ function App() {
     })
 
     child.on('close', (code) => {
+      const upSecs = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0
       setPid(null)
       setStartTime(null)
       setStatus('stopped')
-      addLog(code != null ? `Server exited (code ${code})` : 'Server stopped.')
+      if (code === 0 || code == null) {
+        addLog('Server stopped.')
+      } else if (upSecs < 5) {
+        addLog(`Server failed to start (exit ${code}). Check logs or run "deja status".`)
+      } else {
+        addLog(`Server exited unexpectedly (code ${code}).`)
+      }
       childRef.current = null
     })
 
@@ -129,11 +217,101 @@ function App() {
     childRef.current = child
   }, [addLog])
 
+  // ── Tunnel lifecycle ─────────────────────────────────────────────────────
+
+  const stopTunnel = useCallback(() => {
+    if (tunnelRef.current) {
+      tunnelRef.current.kill('SIGTERM')
+      tunnelRef.current = null
+    }
+    try { existsSync(TUNNEL_PID_FILE) && writeFileSync(TUNNEL_PID_FILE, '') } catch {}
+    try { existsSync(TUNNEL_URL_FILE) && writeFileSync(TUNNEL_URL_FILE, '') } catch {}
+    setTunnelUrl(null)
+  }, [])
+
+  const spawnTunnel = useCallback(() => {
+    if (!isPaidPlan()) return
+    if (!hasCloudflared()) {
+      addLog('cloudflared not installed — skipping tunnel. Install: brew install cloudflare/cloudflare/cloudflared')
+      return
+    }
+
+    const token = process.env.CLOUDFLARE_TUNNEL_TOKEN || ''
+    const tunnelName = process.env.CLOUDFLARE_TUNNEL_NAME || ''
+    let args
+    let isNamedTunnel = false
+
+    if (token) {
+      addLog('Starting named Cloudflare tunnel (via token)...')
+      args = ['tunnel', 'run', '--token', token]
+      isNamedTunnel = true
+    } else if (tunnelName) {
+      addLog(`Starting named Cloudflare tunnel "${tunnelName}"...`)
+      args = ['tunnel', 'run', tunnelName]
+      isNamedTunnel = true
+    } else if (existsSync(CLOUDFLARED_YML)) {
+      addLog('Starting named Cloudflare tunnel (via config)...')
+      args = ['tunnel', '--config', CLOUDFLARED_YML, 'run']
+      isNamedTunnel = true
+    } else {
+      addLog('Starting temporary Cloudflare tunnel (no token or name configured)...')
+      args = ['tunnel', '--url', `http://localhost:${WS_PORT}`]
+    }
+
+    mkdirSync(LOG_DIR, { recursive: true })
+
+    const tunnel = spawn('cloudflared', args, {
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+
+    tunnel.on('spawn', () => {
+      try { writeFileSync(TUNNEL_PID_FILE, String(tunnel.pid)) } catch {}
+    })
+
+    // cloudflared writes connection info to stderr
+    tunnel.stderr.on('data', (d) => {
+      const text = String(d)
+      // Extract temporary tunnel URL
+      const urlMatch = text.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/)
+      if (urlMatch) {
+        setTunnelUrl(urlMatch[0])
+        try { writeFileSync(TUNNEL_URL_FILE, urlMatch[0]) } catch {}
+        addLog(`Temporary tunnel ready: ${urlMatch[0]}`)
+      }
+      // For named tunnels, show the configured URL
+      if (isNamedTunnel && text.includes('Registered tunnel connection') && !tunnelUrl) {
+        const url = 'wss://ws.dejajs.com'
+        setTunnelUrl(url)
+        addLog(`Named tunnel connected: ${url}`)
+      }
+    })
+
+    tunnel.on('close', () => {
+      tunnelRef.current = null
+      setTunnelUrl(null)
+    })
+
+    tunnelRef.current = tunnel
+  }, [addLog])
+
   // Spawn server on mount; clean up on unmount
   useEffect(() => {
     spawnServer()
-    return () => { childRef.current?.kill('SIGTERM') }
-  }, [spawnServer])
+    return () => {
+      childRef.current?.kill('SIGTERM')
+      stopTunnel()
+    }
+  }, [spawnServer, stopTunnel])
+
+  // Start tunnel once server is running
+  useEffect(() => {
+    if (status === 'running' && !tunnelRef.current) {
+      spawnTunnel()
+    }
+    if (status === 'stopped' && tunnelRef.current) {
+      stopTunnel()
+    }
+  }, [status, spawnTunnel, stopTunnel])
 
   // ── Commands ───────────────────────────────────────────────────────────────
 
@@ -143,12 +321,14 @@ function App() {
       case 'exit':
       case 'quit':
         addLog('Stopping server...')
+        stopTunnel()
         childRef.current?.kill('SIGTERM')
         setTimeout(() => process.exit(0), 400)
         break
 
       case 'restart':
         addLog('Restarting server...')
+        stopTunnel()
         childRef.current?.kill('SIGTERM')
         childRef.current = null
         setStatus('starting')
@@ -176,6 +356,7 @@ function App() {
     // Ctrl+C → stop
     if (key.ctrl && input === 'c') {
       addLog('Stopping...')
+      stopTunnel()
       childRef.current?.kill('SIGTERM')
       setTimeout(() => process.exit(0), 400)
       return
@@ -214,51 +395,49 @@ function App() {
   const statusIcon  = status === 'running' ? '●' : '○'
   const pidText     = pid ? `  pid ${pid}` : ''
   const uptimeText  = status === 'running' ? `  uptime ${uptime}` : ''
+  const tunnelText  = tunnelUrl ? `  🔒 ${tunnelUrl}` : ''
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  return (
-    <Box flexDirection="column" height={termHeight}>
+  return h(Box, { flexDirection: 'column', height: termHeight },
+    // Title
+    h(Box, null,
+      h(Text, { bold: true, color: 'green' }, '⚡ DEJA.js Server  '),
+      h(Text, { dimColor: true }, `v${VERSION}  ·  help for commands  ·  Ctrl+C to stop`)
+    ),
+    h(Box, null,
+      h(Text, { dimColor: true }, '─'.repeat(stdout?.columns ?? 80))
+    ),
 
-      {/* Title */}
-      <Box>
-        <Text bold color="green">⚡ DEJA.js Server  </Text>
-        <Text dimColor>v{VERSION}  ·  help for commands  ·  Ctrl+C to stop</Text>
-      </Box>
-      <Box>
-        <Text dimColor>{'─'.repeat(stdout?.columns ?? 80)}</Text>
-      </Box>
+    // Log pane — padding rows keep the height fixed
+    h(Box, { flexDirection: 'column', height: logHeight },
+      ...Array.from({ length: paddingLines }, (_, i) =>
+        h(Text, { key: `pad-${i}` }, ' ')
+      ),
+      ...visibleLines.map((line, i) =>
+        h(Text, { key: i, wrap: 'truncate' }, line)
+      )
+    ),
 
-      {/* Log pane — padding rows keep the height fixed */}
-      <Box flexDirection="column" height={logHeight}>
-        {Array.from({ length: paddingLines }, (_, i) => (
-          <Text key={`pad-${i}`}> </Text>
-        ))}
-        {visibleLines.map((line, i) => (
-          <Text key={i} wrap="truncate">{line}</Text>
-        ))}
-      </Box>
+    // Divider
+    h(Box, null,
+      h(Text, { dimColor: true }, '─'.repeat(stdout?.columns ?? 80))
+    ),
 
-      {/* Divider */}
-      <Box>
-        <Text dimColor>{'─'.repeat(stdout?.columns ?? 80)}</Text>
-      </Box>
+    // Status bar
+    h(Box, null,
+      h(Text, { color: statusColor }, statusIcon),
+      h(Text, null, ` ${status}${pidText}${uptimeText}`),
+      tunnelUrl ? h(Text, { dimColor: true }, tunnelText) : null
+    ),
 
-      {/* Status bar */}
-      <Box>
-        <Text color={statusColor}>{statusIcon}</Text>
-        <Text> {status}{pidText}{uptimeText}</Text>
-      </Box>
-
-      {/* Input */}
-      <Box>
-        <Text color="cyan">{'> '}</Text>
-        <Text>{inputText}</Text>
-        <Text color="cyan">▌</Text>
-      </Box>
-
-    </Box>
+    // Input
+    h(Box, null,
+      h(Text, { color: 'cyan' }, '> '),
+      h(Text, null, inputText),
+      h(Text, { color: 'cyan' }, '▌')
+    )
   )
 }
 
-render(<App />, { exitOnCtrlC: false })
+render(h(App), { exitOnCtrlC: false })

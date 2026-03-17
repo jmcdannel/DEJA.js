@@ -292,7 +292,7 @@ cmd_start_interactive() {
   # Defaults to blessed; set DEJA_UI=ink to use the ink (React) version.
   local script_dir
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  local ui="${DEJA_UI:-blessed}"
+  local ui="${DEJA_UI:-ink}"
   exec node "${script_dir}/deja-ui-${ui}.mjs"
 }
 
