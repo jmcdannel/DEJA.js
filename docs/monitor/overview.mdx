@@ -1,0 +1,107 @@
+---
+title: Monitor App
+description: Real-time diagnostics dashboard for monitoring DCC commands, device serial output, turnout changes, effect activity, and system health across your DEJA.js layout.
+section: apps
+order: 3
+---
+
+# Monitor App
+
+The Monitor app is a real-time diagnostics dashboard that gives you full visibility into your DEJA.js layout. It streams live DCC command logs, turnout and effect change events, and device serial output -- all in a single split-screen interface. Use it during development to debug command flow or during operations to keep an eye on system health.
+
+![Monitor dashboard overview](/images/docs/monitor/dashboard-overview.png)
+
+{/* VIDEO: Walkthrough of the Monitor dashboard showing live DCC logs and device serial output */}
+
+## Dashboard Layout
+
+The dashboard is divided into two main regions that share the available screen height equally.
+
+### Upper Half -- Log Panels
+
+The top half of the screen is a three-column grid displaying live event streams side by side:
+
+| Column | Content | What It Shows |
+|--------|---------|---------------|
+| **DCC Log** | DCC commands flowing through the system | Parsed DCC-EX commands received over WebSocket, displayed with action type and payload |
+| **Turnout Logs** | Turnout state changes | Every turnout modification detected via Firestore snapshot listeners, showing the turnout ID and updated state |
+| **Effect Logs** | Effect activity | Effect activations and deactivations captured from Firestore change events |
+
+Each log panel scrolls independently, so you can review one domain without losing your place in another.
+
+### Lower Half -- Device Serial Monitors
+
+The bottom half displays serial output from connected hardware devices. Each device registered in your layout's Firestore `devices` collection gets its own monitor panel. The monitor subscribes to device-specific WebSocket messages using the subscribe/unsubscribe protocol, so you only see serial traffic relevant to each device.
+
+## Statistics Cards
+
+The dashboard includes statistics cards (currently commented out in the codebase but available for re-enabling) that summarize key metrics at a glance:
+
+- **Layout Card** -- Current layout ID and connection status.
+- **Turnout Stats** -- Total turnout count and number of recent throws.
+- **Effect Stats** -- Total effects, active effects, signal count, and active signals.
+- **Throttle Stats** -- Total throttles and number currently moving (speed greater than zero).
+
+These cards pull live data from Firestore using the `useLayout`, `useTurnouts`, `useEfx`, `useSignals`, and `useLocos` composables from `@repo/modules`.
+
+## Full-Screen Log Views
+
+Click through any log panel on the dashboard to open a dedicated full-screen log view. The full-screen view is routed at `/logs/:logType` and supports four log types:
+
+- `/logs/dcc` -- DCC command logger
+- `/logs/turnouts` -- Turnout change log
+- `/logs/effects` -- Effect activity log
+- `/logs/devices` -- Device serial monitors (all devices)
+
+Each full-screen view includes a header bar with:
+
+- A **back button** to return to the dashboard.
+- The **log type title** displayed prominently.
+- A **Live** status chip (green, with a radar icon) confirming that the view is receiving real-time data.
+
+![Full-screen log view with live indicator](/images/docs/monitor/log-view-fullscreen.png)
+
+### Individual Device Serial Monitor
+
+Navigate to `/logs/devices/:deviceId` to view the serial output for a single device. This view shows:
+
+- The device name (resolved from the device record or falling back to port/topic info).
+- Connection status (connected or disconnected).
+- A **Live** chip when the device is actively streaming.
+- An **All devices** button to jump back to the multi-device view.
+
+If the requested device is not found, the view displays a warning with links back to the device list or the main dashboard.
+
+## How Log Data Flows
+
+The Monitor app gathers data from two sources:
+
+1. **Firestore snapshot listeners** -- The `useLayoutLogListeners` composable sets up `onSnapshot` listeners on the `turnouts`, `effects`, `signals`, and `sensors` subcollections under `layouts/{layoutId}`. When a document is modified, the change is pushed into a reactive array that the log components consume.
+
+2. **WebSocket connection** -- The DCC log and device serial monitors connect to the DEJA.js WebSocket server (default port 8082). The DCC log parses incoming `dcc` action messages and maps them to human-readable entries. Device serial monitors use the `subscribe-device` / `unsubscribe-device` protocol to receive only the serial traffic for their assigned device.
+
+## Settings
+
+The Settings page (`/settings`) provides configuration controls for the monitoring experience:
+
+- **Auto-refresh toggle** -- Enable or disable automatic data refresh.
+- **Refresh interval** -- Set the refresh frequency in seconds (5 to 120).
+- **Alert destinations** -- Choose where to receive alerts: email, SMS, or webhook.
+- **Verbose diagnostics** -- Include detailed diagnostic information in alerts.
+- **Dashboard theme** -- Switch between system default, light, or dark theme.
+
+These settings are currently mock controls with a placeholder save button. Full persistence is planned for a future release.
+
+## Running the Monitor
+
+The Monitor app is hosted at [monitor.dejajs.com](https://monitor.dejajs.com). Open it in any browser, log in with your DEJA Cloud account, and select your layout to begin monitoring.
+
+### Developer Mode
+
+If you're working with the full monorepo, you can also run the Monitor locally in development mode:
+
+```bash
+pnpm --filter=deja-monitor dev
+```
+
+The Monitor app requires authentication (`requireAuth`) and a selected layout (`requireLayout`) before the dashboard loads.

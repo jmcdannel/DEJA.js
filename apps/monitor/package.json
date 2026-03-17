@@ -1,6 +1,6 @@
 {
   "name": "deja-monitor",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -29,7 +29,7 @@
   "devDependencies": {
     "@formkit/auto-animate": "^0.8.2",
     "@mdi/font": "^7.4.47",
-    "@repo/auth": "workspace:^0.0.0",
+    "@repo/auth": "workspace:^0.0.1",
     "@repo/dccex": "workspace:*",
     "@repo/deja": "workspace:*",
     "@repo/eslint-config": "workspace:*",

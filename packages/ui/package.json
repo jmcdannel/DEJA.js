@@ -1,6 +1,6 @@
 {
   "name": "@repo/ui",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -41,7 +41,10 @@
     "./DeviceStatusItem": "./src/DeviceStatus/DeviceStatusItem.vue",
     "./DeviceStatusList": "./src/DeviceStatus/DeviceStatusList.vue",
     "./animations": "./src/animations/index.ts",
-    "./tailwind/animation-preset": "./src/tailwind/animation-preset.ts"
+    "./tailwind/animation-preset": "./src/tailwind/animation-preset.ts",
+    "./SplashPage": "./src/SplashPage.vue",
+    "./NotFoundPage": "./src/NotFoundPage.vue",
+    "./QuickStart": "./src/QuickStart/QuickStart.vue"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.8.2",

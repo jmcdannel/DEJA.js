@@ -1,0 +1,117 @@
+---
+title: Getting Started with DEJA.js
+description: Set up your model railroad control system in minutes — sign up, pick a plan, register your layout, and start driving trains.
+section: docs
+order: 1
+---
+
+# Getting Started with DEJA.js
+
+DEJA.js (DCC-EX JavaScript API) is a modern control system for model railroads. It connects your web browser to a [DCC-EX CommandStation](https://dcc-ex.com/) over USB serial, giving you real-time control of locomotives, turnouts, signals, sound effects, and more — all from a modern web interface.
+
+Whether you run a small switching layout on your desk or a large club layout with multiple operators, DEJA.js provides the tools to control it from any device with a browser.
+
+## Four Steps to Running Trains
+
+Getting started takes just a few minutes:
+
+1. **Sign Up** — Create your free DEJA Cloud account with one click (Google, GitHub, or email).
+2. **Choose a Plan** — Start with the free Hobbyist tier or pick a paid plan with a 14-day free trial.
+3. **Register Your Layout** — Give your layout a name and you're configured.
+4. **Install & Run** — Run one command to install the DEJA Server, connect your CommandStation, and go.
+
+That's it. Once the server is running, open [DEJA Throttle](https://throttle.dejajs.com) on any device and drive.
+
+Head to the [Quick Start](/docs/quick-start) guide for the full walkthrough.
+
+## How It Works
+
+```
+[DCC-EX CommandStation] --USB--> [DEJA Server] <--WiFi/LAN--> [Throttle App]
+       (your hardware)          (your computer)               (any device)
+                                      |
+                               [DEJA Cloud]
+                          (layout config & roster)
+```
+
+The **DEJA Server** is the only piece you install locally. It bridges your CommandStation over USB to the rest of the system. The Throttle, Cloud, and Monitor apps are hosted web apps you open in a browser.
+
+## Who Is DEJA.js For?
+
+- **Model railroad hobbyists** who want browser-based train control without installing desktop software.
+- **Club operators** who need multi-user access to a shared layout over a local network.
+- **Tinkerers and makers** who want to extend their layout with custom effects, sound, and automation using JavaScript and TypeScript.
+
+No programming experience is required to use the apps. If you want to customize or extend the system, familiarity with TypeScript and Vue.js will help.
+
+## Pricing Plans
+
+DEJA.js offers three tiers so you can start free and grow into the features you need:
+
+| | Hobbyist | Engineer | Conductor |
+|---|---|---|---|
+| **Price** | Free | $7/mo or $67/yr | $18/mo or $173/yr |
+| **Locomotives** | 5 | 25 | Unlimited |
+| **Layouts** | 1 | 2 | Unlimited |
+| **Turnouts, Signals, Effects** | — | 15 each | Unlimited |
+| **Tour App** | — | — | Included |
+
+Paid plans include a **14-day free trial** — no charge until the trial ends.
+
+## What's Included
+
+DEJA.js is a suite of specialized applications that work together:
+
+### Apps
+
+| App | Purpose | Description |
+|-----|---------|-------------|
+| **Throttle** | Train control | The primary operator interface. Control locomotive speed, direction, and functions. Throw turnouts, activate routes, and trigger effects. |
+| **Cloud** | Layout management | Configure your layout: manage your locomotive roster, set up turnouts and routes, wire signals, and define effects. |
+| **Monitor** | System dashboard | A diagnostics and logging dashboard showing real-time system status, connected devices, and communication logs. |
+| **Tour** | Interactive tours | Run scripted tours and effects sequences — useful for open houses, demonstrations, and automated layout operations. *(Conductor plan)* |
+| **Server** | Backend bridge | A Node.js backend that bridges your browser apps to the DCC-EX CommandStation over USB serial. |
+
+There is also a **Sound API** (Next.js) that manages sound effect assets stored in Vercel Blob storage.
+
+### Shared Packages
+
+The `packages/` directory contains reusable libraries shared across apps:
+
+- **@repo/modules** -- Core business logic for locomotives, turnouts, effects, signals, and routes.
+- **@repo/ui** -- Shared Vue components (locomotive avatars, turnout switches, track power controls, and more).
+- **@repo/dccex** -- DCC-EX command protocol integration.
+- **@repo/deja** -- Core DEJA composable for writing commands to Firebase.
+- **@repo/firebase-config** -- Firebase client and admin SDK initialization.
+- **@repo/auth** -- Authentication and route guards.
+
+### Device Firmware
+
+The `io/` directory contains Arduino and Raspberry Pi Pico W firmware for hardware I/O boards that communicate with the server over MQTT.
+
+## System Requirements
+
+### End Users
+
+To install and run the DEJA Server, you need:
+
+- **Node.js 20** or later
+- A **DCC-EX CommandStation** connected via USB
+- A **USB cable** connecting the CommandStation to your computer
+
+> Confirm Node.js is ready: `node --version` should print `v20.x.x` or higher.
+
+### Developers
+
+If you want to work with the full monorepo source code, you also need:
+
+- **pnpm 9** or later
+- **Git** for cloning the repository
+
+## Next Steps
+
+Ready to get running?
+
+- [Quick Start](/docs/quick-start) -- Sign up, install, and drive your first train in minutes.
+- [Installation](/docs/installation) -- Detailed setup for developers who want the full monorepo experience.
+- [Architecture](/docs/architecture) -- Understand how the system is structured and how data flows between components.

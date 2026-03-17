@@ -1,6 +1,6 @@
 {
   "name": "deja-throttle",
-  "version": "0.1.0alpha",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "run-p type-check build-only",

@@ -1,0 +1,82 @@
+---
+title: Effects
+description: Control sound effects, LED lighting, relays, macros, and other layout effects from the Throttle app — filter by device, type, or tag, and toggle effects on and off in real time.
+section: apps
+order: 6
+---
+
+# Effects
+
+The Effects screen (`/effects`) lets you trigger and control layout effects including sound playback, LED lighting, street lights, relays, power switches, and multi-step macros. Effects are configured in the [Cloud app](/docs/cloud) and controlled here in the Throttle app during operating sessions.
+
+![Effects list with cards](/images/docs/throttle/effects-list.png)
+
+{/* VIDEO: Browsing effects, filtering by device and type, toggling a sound effect and a lighting pattern */}
+
+## Effect Types
+
+DEJA.js supports ten categories of effects, each with a distinct icon and color in the UI:
+
+| Type | Icon | Description |
+|------|------|-------------|
+| **IALED** | LED strip | Individually addressable LED strip patterns. Requires a device, strip ID, pattern name, range, and configuration. |
+| **Light** | Lightbulb | Simple on/off light control via a specific pin on a connected device. |
+| **LED** | LED | Individual LED control, similar to Light but specifically for LED indicators. |
+| **Street Light** | Post lamp | Street light or scenery lamp control via a device pin. |
+| **Relay** | Electric switch | Relay module control for switching external circuits. |
+| **Frog Juicer** | Blender | Frog juicer (auto-reversing module) control for track polarity management. |
+| **Power** | Power | Power control for layout sections or accessories. |
+| **PIN** | Pin | Raw digital pin control on a connected device (Arduino or Pico W). |
+| **Sound** | Volume | Sound effect playback through the DEJA.js server. Sound files are stored in Vercel Blob storage and cached locally by the server. |
+| **Macro** | Magic staff | Multi-step sequences that can combine multiple effects, turnout operations, and throttle commands into a single trigger. |
+
+## Effect Cards
+
+Each effect is rendered as a **tonal card** (Vuetify `v-card` with `variant="tonal"`) that displays:
+
+- **Icon and name** in the card title, using the icon for the effect's type.
+- **Effect name** repeated in the card body for clarity.
+- **Metadata chips** showing:
+  - The target **device** (e.g., `deja-arduino-01`, `deja-server`).
+  - The effect **type** (e.g., Sound, Light, Macro).
+  - Any assigned **tags** for categorization.
+  - A "Guest Access" chip if the effect is available to unauthenticated users.
+- **Toggle switch** in the card actions area to turn the effect on or off. The switch is disabled and shows a loading indicator while the effect is being executed.
+
+The card color is determined by the effect's `color` property (set during configuration), or falls back to the primary theme color.
+
+## Filtering and Organization
+
+The Effects list supports three filter dimensions accessible from a filter menu:
+
+- **Device** -- filter by the hardware device that executes the effect (e.g., a specific Arduino board or the DEJA.js server).
+- **Type** -- filter by effect category (Sound, Light, LED, Macro, etc.).
+- **Tags** -- filter by user-defined tags configured at the layout level.
+
+Effects are displayed in a responsive grid that adjusts column count based on screen width:
+
+| Screen Size | Columns |
+|-------------|---------|
+| Extra small | 1 |
+| Small | 2 |
+| Medium | 3 |
+| Large | 3 |
+| Extra large | 4 |
+| Extra extra large | 6 |
+
+## How Effects Work
+
+When you toggle an effect switch:
+
+1. The `runEffect` function from the `useEfx()` composable is called with the effect data and the new state (on or off).
+2. For simple effects (Light, LED, PIN, Relay, etc.), a command is written to Firebase that the server translates into a DCC-EX output command (`<Z pin state>`) or an MQTT message to the target device.
+3. For sound effects, the server downloads (and caches) the audio file from Vercel Blob storage and plays it through the server's audio output.
+4. For macros, the server executes each step in the macro's `on` or `off` sequence, which can include turnout throws, speed changes, direction changes, and other effect triggers.
+
+## Empty State
+
+If no effects are configured for the current layout, the screen displays an empty state with a magic wand icon and the message "No effects -- Create effects to control lights and sounds." Effects are created and configured in the Cloud app.
+
+## Guest Effects
+
+Effects with the `allowGuest` flag set to `true` can be triggered by unauthenticated users. This is useful for open house events or public demonstrations where visitors can interact with specific layout features without needing an account.

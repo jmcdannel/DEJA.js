@@ -25,6 +25,7 @@ A pinned footer row links to the other DEJA suite apps (Cloud, Throttle, Monitor
 - **Roster Management** — Add, edit, and organize locomotives with custom names, addresses, and function mappings
 - **Turnout Configuration** — Define turnouts with DCC addresses and friendly labels
 - **Route Builder** — Create routes that set multiple turnouts in sequence
+- **Sound Library** — Upload, browse, and manage sound files stored in Vercel Blob
 - **Effects Management** — Configure sound effects, lights, and animations
 - **Sound Library** — Upload and manage audio files for playback during effects
 - **Signal Wiring** — Set up signal aspects and output pin mappings
@@ -32,6 +33,20 @@ A pinned footer row links to the other DEJA suite apps (Cloud, Throttle, Monitor
 - **Device Management** — Monitor and configure connected hardware devices
 - **DCC-EX Console** — Direct command-line access to the DCC-EX command station
 - **Settings** — Layout settings, user profile, and billing
+- **Upgrade** — View subscription plans and upgrade options
+- **404 Page** — Brand-consistent not-found page with links to Dashboard, Roster, and Effects
+
+## Onboarding
+
+New users are guided through an onboarding wizard to create their first layout. After completing onboarding, a **Setup Complete** page provides:
+
+- Confirmation of layout creation with the user's Layout ID
+- Quick-add form to register a first locomotive (DCC address + optional name)
+- Server installation instructions with credentials
+- Curated links to documentation (install guide, roster, turnouts, effects)
+- Direct navigation to the dashboard
+
+Layouts are automatically approved on creation — there is no admin approval step.
 
 ## Screenshots
 
@@ -79,6 +94,6 @@ A pinned footer row links to the other DEJA suite apps (Cloud, Throttle, Monitor
 
 - **Framework:** Vue 3 with Composition API
 - **State:** Firebase Firestore via VueFire
-- **Auth:** Firebase Auth with onboarding wizard and layout approval flow
+- **Auth:** Firebase Auth with onboarding wizard and auto-approved layouts
 - **Routing:** Vue Router 4 with meta-based guard chain
 - **Port:** 3011 (development)

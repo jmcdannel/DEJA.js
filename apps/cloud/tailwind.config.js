@@ -18,6 +18,7 @@ module.exports = {
     'text-lime-500',
     'text-blue-500',
     'text-rose-500',
+    'text-violet-500',
     // App switcher footer brand colors (from dejajs.com)
     'text-fuchsia-500',
     'text-cyan-400',

@@ -6,7 +6,41 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Logo from './Logo';
 
-const products = [
+interface SiteSettings {
+  siteName?: string;
+  productNavItems?: Array<{
+    _key: string;
+    label: string;
+    href: string;
+    description?: string;
+    icon?: string;
+    comingSoon?: boolean;
+  }>;
+  docsNavItems?: Array<{
+    _key: string;
+    label: string;
+    href: string;
+    description?: string;
+    comingSoon?: boolean;
+  }>;
+  loginUrl?: string;
+  signupUrl?: string;
+}
+
+interface ProductItem {
+  name: string;
+  desc: string;
+  logo: string;
+  href: string;
+}
+
+interface DocItem {
+  name: string;
+  href: string;
+  comingSoon?: boolean;
+}
+
+const defaultProducts: ProductItem[] = [
   {
     name: 'Server',
     desc: 'Connect to your DCC-EX CommandStation via USB.',
@@ -45,7 +79,7 @@ const products = [
   },
 ];
 
-const docsLinks = [
+const defaultDocsLinks: DocItem[] = [
   { name: 'Getting Started', href: '/docs' },
   { name: 'Server', href: '/docs/server' },
   { name: 'Throttle', href: '/docs/throttle' },
@@ -90,10 +124,30 @@ function useDropdown() {
   return { isOpen, open, close, toggle, ref, triggerRef };
 }
 
-export default function Header() {
+export default function Header({ settings }: { settings?: SiteSettings | null }) {
   const pathname = usePathname();
   const productsDropdown = useDropdown();
   const docsDropdown = useDropdown();
+
+  const products: ProductItem[] = settings?.productNavItems
+    ? settings.productNavItems.map((item) => ({
+        name: item.label,
+        desc: item.description ?? '',
+        logo: item.icon ?? '/icon-512.png',
+        href: item.href,
+      }))
+    : defaultProducts;
+
+  const docsLinks: DocItem[] = settings?.docsNavItems
+    ? settings.docsNavItems.map((item) => ({
+        name: item.label,
+        href: item.href,
+        comingSoon: item.comingSoon,
+      }))
+    : defaultDocsLinks;
+
+  const loginUrl = settings?.loginUrl ?? 'https://cloud.dejajs.com/';
+  const signupUrl = settings?.signupUrl ?? 'https://cloud.dejajs.com/signup';
 
   const handleMenuKeyDown = (
     e: React.KeyboardEvent,
@@ -254,8 +308,8 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-4 text-[0.875rem]">
-          <a href="https://cloud.dejajs.com/" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors hidden sm:block tracking-[0.06em] font-mono text-[0.8rem]">Log in</a>
-          <a href="https://cloud.dejajs.com/signup" className="px-5 py-2 bg-cyan-500 hover:bg-cyan-400 text-gray-950 rounded-lg shadow-sm transition-colors text-center whitespace-nowrap font-bold tracking-[0.06em] font-mono text-[0.8rem]">Sign up</a>
+          <a href={loginUrl} className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors hidden sm:block tracking-[0.06em] font-mono text-[0.8rem]">Log in</a>
+          <a href={signupUrl} className="px-5 py-2 bg-cyan-500 hover:bg-cyan-400 text-gray-950 rounded-lg shadow-sm transition-colors text-center whitespace-nowrap font-bold tracking-[0.06em] font-mono text-[0.8rem]">Sign up</a>
         </div>
       </div>
     </header>

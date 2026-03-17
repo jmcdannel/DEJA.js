@@ -181,7 +181,7 @@ function scrollTo(id: string) {
           </div>
           <div class="settings-row settings-row--actions">
             <div class="flex flex-wrap gap-3">
-              <v-btn v-if="plan !== 'conductor'" variant="tonal" color="primary" size="small" prepend-icon="mdi-arrow-up-bold" class="text-none" :to="{ name: 'Settings' }">
+              <v-btn v-if="plan !== 'conductor'" variant="tonal" color="primary" size="small" prepend-icon="mdi-arrow-up-bold" class="text-none" :to="{ name: 'Upgrade' }">
                 Upgrade to {{ plan === 'hobbyist' ? 'Engineer' : 'Conductor' }}
               </v-btn>
               <v-btn v-if="subscription?.stripeCustomerId" variant="outlined" size="small" prepend-icon="mdi-open-in-new" :loading="portalLoading" class="text-none" @click="openBillingPortal">
