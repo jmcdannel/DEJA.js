@@ -16,3 +16,45 @@ body {
 .font-sans {
   font-family: var(--font-dm-sans), system-ui, sans-serif;
 }
+
+/* ─── DEJA brand tokens (Tailwind v4 @theme) ─── */
+@theme {
+  --color-deja-cyan: #00E5FF;
+  --color-deja-magenta: #D500F9;
+  --color-deja-lime: #C6FF00;
+  --animate-marquee: marquee 30s linear infinite;
+  --animate-pulse-glow: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* ─── Glow utilities ─── */
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), 0 0 60px rgba(0, 229, 255, 0.15);
+}
+.glow-magenta {
+  box-shadow: 0 0 20px rgba(213, 0, 249, 0.4), 0 0 60px rgba(213, 0, 249, 0.15);
+}
+.glow-lime {
+  box-shadow: 0 0 20px rgba(198, 255, 0, 0.4), 0 0 60px rgba(198, 255, 0, 0.15);
+}
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #00E5FF 0%, #0891b2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.bg-grid-dark {
+  background-image:
+    linear-gradient(rgba(0, 229, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
