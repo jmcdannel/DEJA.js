@@ -16,7 +16,8 @@
     "./routes": "./routes/index.ts",
     "./types": "./types.ts",
     "./plans/types": "./plans/types.ts",
-    "./feedback": "./feedback/index.ts"
+    "./feedback": "./feedback/index.ts",
+    "./sensors": "./sensors/index.ts"
   },
   "scripts": {
     "test": "vitest run",

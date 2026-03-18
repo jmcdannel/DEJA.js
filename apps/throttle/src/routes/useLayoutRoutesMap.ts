@@ -45,7 +45,7 @@ export const useLayoutRoutesMap = () => {
   })
 
   function getMapClasses(): string {
-    let classes = ['']
+    const classes = ['']
     // log.debug('getMapClasses', p1.value, p2.value, routes.value)
 
     if (p1.value) {
@@ -127,13 +127,13 @@ export const useLayoutRoutesMap = () => {
     }
   }
 
-  async function handleMapClick2(e: MouseEvent) {
+  async function _handleMapClick2(e: MouseEvent) {
     log.debug('handleMapClick', e.target)
     const clickableParent = findClickableParent(e.target)
     if (!clickableParent) return
 
     const { target, type } = clickableParent
-    const targetType = target?.id
+    const _targetType = target?.id
 
     if (type === 'Turnouts') {
       const turnoutId = target?.getAttribute('data-turnout-id')

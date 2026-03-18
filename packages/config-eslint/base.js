@@ -18,6 +18,7 @@ import typescriptExtension from "./rules/typescript/extension.js";
 import typescriptImport from "./rules/typescript/import.js";
 
 const project = resolve(cwd(), "tsconfig.json");
+const projectDir = resolve(cwd());
 
 // Create a combined import config that includes both the recommended rules and your custom rules
 const importCombinedConfig = {
@@ -62,7 +63,8 @@ const config = [
       languageOptions: {
         parserOptions: {
           projectService: true,
-          tsconfigRootDir: project,
+          extraFileExtensions: ['.vue'],
+          tsconfigRootDir: projectDir,
         },
       },
       settings: {
@@ -81,12 +83,31 @@ const config = [
     },
   ),
 
+  // Global ignores (standalone entry = global ignore pattern)
+  {
+    ignores: [
+      "node_modules/**",
+      "dist/**",
+      "**/*.vue",
+      "**/tailwind.config.*",
+      "**/vite-env.d.ts",
+      "**/vite.config.*",
+      "**/vite.dev.config.*",
+      "**/vitest.config.*",
+      "**/postcss.config.*",
+      "**/playwright.config.*",
+      "**/e2e/**",
+      "**/*.mts",
+      "**/eslint.config.*",
+      "**/capacitor.config.*",
+    ],
+  },
+
   // Global settings that apply to all files
   {
     linterOptions: {
       reportUnusedDisableDirectives: true,
     },
-    ignores: ["node_modules/**", "dist/**"],
   },
 ];
 
