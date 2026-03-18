@@ -65,7 +65,7 @@ Where `{vp}` = `desktop` or `mobile`.
 
 ### Cloud App (22 views)
 
-Port is defined in `.claude/launch.json` (currently 5174, with `autoPort: true`; canonical Vite config is 3011).
+Port is defined in `.claude/launch.json` (3011).
 
 **List views (11):**
 

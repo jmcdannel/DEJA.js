@@ -206,18 +206,18 @@ export default defineConfig(({ mode }) => {
       sourcemap: mode === 'development'
     },
     server: {
-      port: 5174, // Changed from 5000 to avoid conflicts
+      port: 3011, // Standardized cloud app port
       host: true, // Allow external connections
-            
+
       // CORS configuration for development
       cors: {
         origin: [
-          'http://localhost:5174', // Primary development port
-          'http://localhost:5000', // Original port (if available)
-          'http://localhost:3000', 
-          'http://localhost:5173',
-          'http://localhost:5175',
-          'http://localhost:5176'
+          'http://localhost:3011', // Standardized cloud port
+          'http://localhost:3000',
+          'http://localhost:3021',
+          'http://localhost:3031',
+          'http://localhost:3041',
+          'http://localhost:3051'
         ],
         credentials: true
       },
