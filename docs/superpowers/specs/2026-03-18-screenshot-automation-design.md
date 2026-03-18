@@ -63,9 +63,11 @@ Where `{vp}` = `desktop` or `mobile`.
 
 > **Note:** The throttle app uses per-route `beforeEnter` guards from `@repo/auth` (`requireAuth`, `requireDccEx`, `requireLayout`). The `VITE_DEV_AUTO_LOGIN=true` flag bypasses all these guards in dev mode.
 
-### Cloud App (11 views)
+### Cloud App (22 views)
 
 Port is defined in `.claude/launch.json` (currently 5174, with `autoPort: true`; canonical Vite config is 3011).
+
+**List views (11):**
 
 | Route | Screenshot Name | Notes |
 |-------|----------------|-------|
@@ -80,6 +82,29 @@ Port is defined in `.claude/launch.json` (currently 5174, with `autoPort: true`;
 | `/dccex` | `cloud_{vp}_dccex` | DCC-EX console |
 | `/devices` | `cloud_{vp}_devices` | Device management |
 | `/settings` | `cloud_{vp}_settings` | Settings |
+
+**Add/New views (6):**
+
+| Route | Screenshot Name | Notes |
+|-------|----------------|-------|
+| `/locos/new` | `cloud_{vp}_roster-add` | Add locomotive form |
+| `/turnouts/new` | `cloud_{vp}_turnouts-add` | Add turnout form |
+| `/routes/new` | `cloud_{vp}_routes-add` | Add route form |
+| `/effects/new` | `cloud_{vp}_effects-add` | Add effect form |
+| `/signals/new` | `cloud_{vp}_signals-add` | Add signal form |
+| `/sensors/new` | `cloud_{vp}_sensors-add` | Add sensor form |
+
+**Edit views (5) — navigate to first existing item dynamically:**
+
+| Route | Screenshot Name | Notes |
+|-------|----------------|-------|
+| `/locos/:address` | `cloud_{vp}_roster-edit` | Edit locomotive (first roster loco) |
+| `/turnouts/:turnoutId` | `cloud_{vp}_turnouts-edit` | Edit turnout (first turnout) |
+| `/routes/:routeId` | `cloud_{vp}_routes-edit` | Edit route (first route) |
+| `/effects/:effectId` | `cloud_{vp}_effects-edit` | Edit effect (first effect) |
+| `/signals/:signalId` | `cloud_{vp}_signals-edit` | Edit signal (first signal) |
+
+**Edit view ID resolution:** For each edit view, navigate to the corresponding list view first, scrape the first item's link href (e.g., `a[href^="/locos/"]`), and navigate to it. If no items exist for that type, skip the edit screenshot and log a warning.
 
 ### Monitor App (1 view)
 
@@ -260,6 +285,6 @@ The full workflow when running `/capture-screenshots --layout betatrack`:
 - Screenshot diffing or visual regression testing
 - Video capture or animated GIFs
 - Tour app screenshots (not requested)
-- Cloud sub-routes (e.g., `/locos/new`, `/effects/:effectId`) — only top-level list views
+- Cloud sub-sub-routes (e.g., `/sensors/automations`, `/sensors/automations/new`) — only top-level list/add/edit views
 - Cloud `/track-diagrams` route (feature-gated, not yet ready for marketing)
 - Monitor `/settings` route (intentionally dropped — not marketing-relevant)
