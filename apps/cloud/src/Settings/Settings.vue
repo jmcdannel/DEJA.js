@@ -83,8 +83,7 @@ async function openBillingPortal() {
   portalLoading.value = true
   try {
     const token = await getIdToken(user.value)
-    const billingApiUrl = import.meta.env.VITE_BILLING_API_URL
-    const res = await fetch(`${billingApiUrl}/api/billing-portal`, {
+    const res = await fetch('/api/billing-portal', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

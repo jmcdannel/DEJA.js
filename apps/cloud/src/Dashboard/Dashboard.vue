@@ -9,6 +9,7 @@ import {
   CommandActivityChart,
   DeviceConnectionChart,
   StatusPulse,
+  ThrottleLaunchQR,
 } from '@repo/ui'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
@@ -197,5 +198,14 @@ function navigateToAddDevice() {
         />
       </v-col>
     </v-row>
+
+    <!-- Launch Throttle QR -->
+    <v-divider class="my-6" />
+    <v-card variant="tonal" class="pa-4 text-center">
+      <v-card-title class="text-subtitle-1 font-weight-bold mb-2">Open Throttle on Your Phone</v-card-title>
+      <v-card-text class="d-flex justify-center">
+        <ThrottleLaunchQR :size="140" label="Scan to open DEJA Throttle" />
+      </v-card-text>
+    </v-card>
   </v-container>
 </template>
