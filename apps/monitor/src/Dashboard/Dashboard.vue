@@ -112,7 +112,7 @@ function deviceIdFromPaneId(paneId: string): string {
 
 // Dev-only: expose mock data injection for screenshot automation
 if (import.meta.env.DEV) {
-  import('../dev/mockData').then((mockData) => {
+  import('../dev/mock-data').then((mockData) => {
     ;(window as any).__DEJA_MOCK__ = {
       seedAll: () => {
         // Seed log panes (turnout/effect/sensor are props-driven from these refs)
