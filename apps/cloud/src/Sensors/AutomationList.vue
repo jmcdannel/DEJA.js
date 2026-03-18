@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useSensors, type Automation } from '@repo/modules/sensors'
+import { useAutomations, type SensorAutomation } from '@repo/modules/sensors'
 import EmptyState from '@/Core/UI/EmptyState.vue'
 
 defineEmits(['edit'])
 
-const { getAutomations, deleteAutomation } = useSensors()
+const { getAutomations, deleteAutomation } = useAutomations()
 const automations = getAutomations()
 
 const color = ref('teal')
@@ -58,7 +58,7 @@ function getTriggerLabel(trigger: string): string {
                 {{ item.sensorId }}
               </v-chip>
               <v-chip variant="tonal" color="blue-grey">
-                {{ getTriggerLabel(item.trigger) }}
+                {{ getTriggerLabel(item.triggerOn) }}
               </v-chip>
             </div>
             <div class="text-sm opacity-70">

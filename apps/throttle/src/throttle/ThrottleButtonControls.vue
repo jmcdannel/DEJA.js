@@ -96,7 +96,7 @@
       :class="`${getBtnClasses('up5')} ${horizontal ? 'rounded-r-none rounded-l-3xl py-3' : 'rounded-b-none rounded-t-3xl'}`"
       color="green"
       @click="handleUp5"
-      @pointerdown="(e) => handlePointerDown(e, 'up5')"
+      @pointerdown="(e: PointerEvent) => handlePointerDown(e, 'up5')"
       @pointerup="handlePointerUp"
       @pointerleave="handlePointerLeave"
       @pointercancel="handlePointerLeave">
@@ -112,7 +112,7 @@
       :class="`${getBtnClasses('up')} ${horizontal ? 'py-3' : ''}`"
       color="green"
       @click="handleUp"
-      @pointerdown="(e) => handlePointerDown(e, 'up')"
+      @pointerdown="(e: PointerEvent) => handlePointerDown(e, 'up')"
       @pointerup="handlePointerUp"
       @pointerleave="handlePointerLeave"
       @pointercancel="handlePointerLeave">
@@ -125,7 +125,7 @@
       :class="`${getStopBtnClasses()} ${horizontal ? '@[960px]:h-36 rounded-none py-3 px-4' : 'w-28 py-6 @[960px]:w-36 rounded-3xl'}`"
       color="red"
       @click="handleStop"
-      @pointerdown="(e) => handlePointerDown(e, 'stop')"
+      @pointerdown="(e: PointerEvent) => handlePointerDown(e, 'stop')"
       @pointerup="handlePointerUp"
       @pointerleave="handlePointerLeave"
       @pointercancel="handlePointerLeave">
@@ -136,7 +136,7 @@
       :class="`${getBtnClasses('down')} ${horizontal ? 'py-3' : ''}`"
       color="green"
       @click="handleDown"
-      @pointerdown="(e) => handlePointerDown(e, 'down')"
+      @pointerdown="(e: PointerEvent) => handlePointerDown(e, 'down')"
       @pointerup="handlePointerUp"
       @pointerleave="handlePointerLeave"
       @pointercancel="handlePointerLeave">
@@ -151,7 +151,7 @@
       :class="`${getBtnClasses('down5')} ${horizontal ? 'rounded-l-none rounded-r-3xl py-3' : 'rounded-t-none rounded-b-3xl'}`"
       color="green"
       @click="handleDown5"
-      @pointerdown="(e) => handlePointerDown(e, 'down5')"
+      @pointerdown="(e: PointerEvent) => handlePointerDown(e, 'down5')"
       @pointerup="handlePointerUp"
       @pointerleave="handlePointerLeave"
       @pointercancel="handlePointerLeave">
