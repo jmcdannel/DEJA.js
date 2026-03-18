@@ -11,6 +11,7 @@ import { usePageSwipe } from '@/composables/usePageSwipe'
 import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import { wiThrottleService } from '@/services/WiThrottleService'
 import { watch, onMounted, onUnmounted } from 'vue'
+import { useStorage } from '@vueuse/core'
 import { useFeedbackUser } from '@repo/modules/feedback'
 import * as Sentry from '@sentry/vue'
 
@@ -28,6 +29,15 @@ function handleWiThrottleSend(event: Event) {
   }
 }
 
+function handleWiThrottleFunction(event: Event) {
+  const { address, func, state } = (event as CustomEvent<{ address: number; func: number; state: boolean }>).detail
+  wiThrottleService.setThrottleFunction(address, func, state)
+}
+
+function handleWiThrottleEstop() {
+  wiThrottleService.emergencyStopAll()
+}
+
 watch(() => wiThrottleService.state.value, (newState) => {
   // Expose connection state to the window object so @repo/modules can read it without circular imports
   ;(window as any).__WI_THROTTLE_CONNECTED__ = newState === 'CONNECTED'
@@ -35,11 +45,26 @@ watch(() => wiThrottleService.state.value, (newState) => {
 
 onMounted(() => {
   window.addEventListener('withrottle-send', handleWiThrottleSend)
+  window.addEventListener('withrottle-function', handleWiThrottleFunction)
+  window.addEventListener('withrottle-estop', handleWiThrottleEstop)
 })
 
-onUnmounted(() => {
+onUnmounted(async () => {
   window.removeEventListener('withrottle-send', handleWiThrottleSend)
+  window.removeEventListener('withrottle-function', handleWiThrottleFunction)
+  window.removeEventListener('withrottle-estop', handleWiThrottleEstop)
+  await wiThrottleService.disconnect()
 })
+
+const layoutId = useStorage('@DEJA/layoutId', '')
+
+watch(layoutId, async (newId) => {
+  if (newId) {
+    await wiThrottleService.connect()
+  } else {
+    await wiThrottleService.disconnect()
+  }
+}, { immediate: true })
 
 const mainContentRef = useTemplateRef('mainContentRef')
 usePageSwipe(mainContentRef as any, { disabledRoutes: ['throttle'] })

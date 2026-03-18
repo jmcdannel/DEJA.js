@@ -1,4 +1,4 @@
-import { computed, watch, type Ref } from 'vue'
+import { computed, onMounted, onUnmounted, watch, type Ref } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { deleteDoc, doc, setDoc } from 'firebase/firestore'
 import { useDocument } from 'vuefire'
@@ -8,6 +8,7 @@ import { db } from '@repo/firebase-config'
 import { getSignedSpeed } from '@/throttle/utils'
 import { createLogger } from '@repo/utils'
 import { useCommandQueue } from '@/composables/useCommandQueue'
+import { wiThrottleService } from '@/services/WiThrottleService'
 
 const log = createLogger('Throttle')
 
@@ -24,6 +25,27 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
   )
 
   log.debug('throttle doc ref:', throttle)
+
+  // Acquire the loco on WiThrottle server when connected
+  async function acquireOnWiThrottle() {
+    const addr = address.value
+    if (addr !== undefined && addr !== null && wiThrottleService.state.value === 'CONNECTED') {
+      await wiThrottleService.acquireLoco(addr)
+    }
+  }
+
+  onMounted(acquireOnWiThrottle)
+
+  // Re-acquire if WiThrottle connects after the throttle is already mounted
+  const stopWiThrottleWatch = watch(() => wiThrottleService.state.value, (state) => {
+    if (state === 'CONNECTED') {
+      acquireOnWiThrottle()
+    }
+  })
+
+  onUnmounted(() => {
+    stopWiThrottleWatch()
+  })
 
   // Derive loco from the locos collection so we use the shared `getLocos` hook
   const locos = getLocos()
@@ -57,6 +79,7 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
   async function releaseThrottle() {
     const addr = address.value
     if (addr === undefined || addr === null) return
+    await wiThrottleService.releaseLoco(addr)
     await enqueue(
       async () => {
         const throttleDoc = doc(db, `layouts/${layoutId.value}/throttles`, addr.toString())
@@ -69,6 +92,7 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
   async function updateSpeed(speed: number) {
     const addr = address.value
     if (addr === undefined || addr === null) return
+    await wiThrottleService.setThrottleSpeed(addr, Math.abs(speed), speed >= 0)
     await enqueue(
       async () => {
         await setDoc(

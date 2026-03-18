@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { computed, onBeforeUnmount, ref, watch } from 'vue'
+  import { computed, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue'
   import { useDisplay } from 'vuetify'
   import { useDcc } from '@repo/dccex'
   import { useFunctionIcon } from '@repo/modules/locos'
@@ -40,11 +40,24 @@
     }
   )
 
+  function handleWiThrottleFunctionState(event: Event) {
+    const { address, func, state } = (event as CustomEvent<{ address: number; func: number; state: boolean }>).detail
+    if (address === props.address && func === props.func?.id) {
+      func1State.value = state
+    }
+  }
+
   function sendFunctionState(state: boolean) {
     if (props.address == null || props.func?.id == null) {
       return
     }
     setFunction(props.address, props.func.id, state)
+    // Bridge to WiThrottle if connected
+    if ((window as any).__WI_THROTTLE_CONNECTED__) {
+      window.dispatchEvent(new CustomEvent('withrottle-function', {
+        detail: { address: props.address, func: props.func.id, state },
+      }))
+    }
   }
 
   function activateMomentary() {
@@ -156,6 +169,14 @@
       }
     }
     return classes.join(' ')
+  })
+
+  onMounted(() => {
+    window.addEventListener('withrottle-function-state', handleWiThrottleFunctionState)
+  })
+
+  onUnmounted(() => {
+    window.removeEventListener('withrottle-function-state', handleWiThrottleFunctionState)
   })
 
   onBeforeUnmount(() => {

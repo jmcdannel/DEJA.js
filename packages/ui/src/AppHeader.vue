@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useDisplay } from 'vuetify'
 import { useCurrentUser } from 'vuefire'
@@ -53,6 +53,7 @@ const devices = getDevices()
 
 const isLayoutModalOpen = ref(false)
 const isDeviceModalOpen = ref(false)
+const wiThrottlePower = ref<0 | 1 | 2>(2) // 0=off, 1=on, 2=unknown
 
 
 // Event handlers
@@ -78,9 +79,7 @@ function handleLayoutPowerToggle(newState: boolean) {
 
 async function handleEmergencyStop() {
   if ((window as any).__WI_THROTTLE_CONNECTED__) {
-    // WiThrottle emergency stop command: usually '*' or a specific stop command
-    // but DCC-EX accepts '*' as e-stop for everything. Wait, standard WiThrottle e-stop is '!' for all locos.
-    window.dispatchEvent(new CustomEvent('withrottle-send', { detail: '!' }))
+    window.dispatchEvent(new CustomEvent('withrottle-estop'))
     return
   }
   await sendDccCommand({ action: 'dcc', payload: '!' })
@@ -109,6 +108,19 @@ function openDeviceModal() {
   isDeviceModalOpen.value = true
 }
 
+function handleWiThrottlePowerState(event: Event) {
+  const { state } = (event as CustomEvent<{ state: 0 | 1 | 2 }>).detail
+  wiThrottlePower.value = state
+}
+
+onMounted(() => {
+  window.addEventListener('withrottle-power-state', handleWiThrottlePowerState)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('withrottle-power-state', handleWiThrottlePowerState)
+})
+
 function handleDrawerToggle() {
   emit('drawerToggle', !(props.drawer ?? false))
 }
@@ -124,9 +136,16 @@ const dccexConnected = computed(() => {
 
 const currentLayout = computed(() => {
   log.debug('Current layoutId in AppHeader:', layoutId?.value, user?.value, layouts?.value)
-  return layouts?.value ? 
+  return layouts?.value ?
     layouts.value?.find(l => l.id === layoutId.value)
     : { id: layoutId.value, name: layoutId.value }
+})
+
+const effectiveTrackPower = computed<boolean>(() => {
+  if ((window as any).__WI_THROTTLE_CONNECTED__) {
+    return wiThrottlePower.value === 1
+  }
+  return props.layoutPowerState ?? false
 })
 
 const defaultProps = {
@@ -199,7 +218,7 @@ const defaultProps = {
       </template>
       <UserProfile v-if="showUserProfile !== false && user" class="mx-2" />
       <template v-if="layoutId && user">
-        <TrackPower class="ma-1" :power-state="layoutPowerState" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
+        <TrackPower class="ma-1" :power-state="effectiveTrackPower" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
         <Power class="ma-1" v-if="showLayoutPower" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />
         <EmergencyStop class="ma-1" v-if="showEmergencyStop" @stop="handleEmergencyStop" />
       </template>
