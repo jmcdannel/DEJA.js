@@ -804,6 +804,25 @@ importers:
         specifier: ^3.2.1
         version: 3.2.2(consola@3.4.2)(firebase@10.14.1)(vue@3.5.22(typescript@5.9.3))
 
+  packages/blob-assets:
+    dependencies:
+      '@vercel/blob':
+        specifier: ^1.1.1
+        version: 1.1.1
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.23
+      tsx:
+        specifier: ^4.20.4
+        version: 4.20.6
+      typescript:
+        specifier: '*'
+        version: 5.9.3
+
   packages/config-eslint:
     dependencies:
       '@eslint/eslintrc':
@@ -1150,9 +1169,6 @@ importers:
 
   scripts:
     dependencies:
-      blessed:
-        specifier: ^0.1.81
-        version: 0.1.81
       ink:
         specifier: ^5.1.0
         version: 5.2.1(@types/react@18.3.26)(react@18.3.1)

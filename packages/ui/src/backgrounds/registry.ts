@@ -13,19 +13,8 @@ export interface BackgroundDefinition {
   css?: CSSProperties
 }
 
-// Image assets — imported statically so Vite can resolve/hash them
-import northernlightsUrl from '../assets/backgrounds/northernlights.jpg'
-import tracksUrl from '../assets/backgrounds/tracks1.jpg'
-import forestUrl from '../assets/backgrounds/foresttracks.jpg'
-import wavesUrl from '../assets/backgrounds/vertwaves.jpg'
-import viaductUrl from '../assets/backgrounds/viaduct.jpg'
-import nebulaUrl from '../assets/backgrounds/nebula.jpg'
-import milkywayUrl from '../assets/backgrounds/milkyway.jpg'
-import neonLinesUrl from '../assets/backgrounds/neon-lines.jpg'
-import railroadNightUrl from '../assets/backgrounds/railroad-night.jpg'
-import darkTracksUrl from '../assets/backgrounds/dark-tracks.jpg'
-import steamLocoUrl from '../assets/backgrounds/steam-locomotive.jpg'
-import trainStationUrl from '../assets/backgrounds/train-station-night.jpg'
+// Image assets — hosted on Vercel Blob
+import { backgroundUrls } from './blob-urls'
 
 export const backgrounds: BackgroundDefinition[] = [
   {
@@ -33,35 +22,35 @@ export const backgrounds: BackgroundDefinition[] = [
     name: 'Northern Lights',
     type: 'image',
     category: 'photo',
-    asset: northernlightsUrl,
+    asset: backgroundUrls.northernlights,
   },
   {
     id: 'tracks',
     name: 'Railroad Tracks',
     type: 'image',
     category: 'photo',
-    asset: tracksUrl,
+    asset: backgroundUrls.tracks1,
   },
   {
     id: 'forest',
     name: 'Forest Tracks',
     type: 'image',
     category: 'photo',
-    asset: forestUrl,
+    asset: backgroundUrls.foresttracks,
   },
   {
     id: 'waves',
     name: 'Vertical Waves',
     type: 'image',
     category: 'photo',
-    asset: wavesUrl,
+    asset: backgroundUrls.vertwaves,
   },
   {
     id: 'viaduct',
     name: 'Viaduct Bridge',
     type: 'image',
     category: 'photo',
-    asset: viaductUrl,
+    asset: backgroundUrls.viaduct,
   },
   {
     id: 'decor',
@@ -82,49 +71,49 @@ export const backgrounds: BackgroundDefinition[] = [
     name: 'Nebula',
     type: 'image',
     category: 'photo',
-    asset: nebulaUrl,
+    asset: backgroundUrls.nebula,
   },
   {
     id: 'milkyway',
     name: 'Milky Way',
     type: 'image',
     category: 'photo',
-    asset: milkywayUrl,
+    asset: backgroundUrls.milkyway,
   },
   {
     id: 'neon',
     name: 'Neon Lines',
     type: 'image',
     category: 'photo',
-    asset: neonLinesUrl,
+    asset: backgroundUrls['neon-lines'],
   },
   {
     id: 'railroad-night',
     name: 'Railroad at Night',
     type: 'image',
     category: 'photo',
-    asset: railroadNightUrl,
+    asset: backgroundUrls['railroad-night'],
   },
   {
     id: 'dark-tracks',
     name: 'Dark Tracks',
     type: 'image',
     category: 'photo',
-    asset: darkTracksUrl,
+    asset: backgroundUrls['dark-tracks'],
   },
   {
     id: 'steam-locomotive',
     name: 'Steam Locomotive',
     type: 'image',
     category: 'photo',
-    asset: steamLocoUrl,
+    asset: backgroundUrls['steam-locomotive'],
   },
   {
     id: 'train-station',
     name: 'Train Station at Night',
     type: 'image',
     category: 'photo',
-    asset: trainStationUrl,
+    asset: backgroundUrls['train-station-night'],
   },
   {
     id: 'starfield',

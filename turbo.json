@@ -82,6 +82,10 @@
       "cache": false,
       "outputs": []
     },
+    "upload-assets": {
+      "cache": false,
+      "outputs": []
+    },
     "deps:check": {
       "cache": false
     },

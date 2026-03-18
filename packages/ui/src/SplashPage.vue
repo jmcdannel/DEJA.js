@@ -2,13 +2,7 @@
 import Logo from './Logo.vue'
 import BackgroundStarfield from './BackgroundStarfield.vue'
 import BackgroundAurora from './BackgroundAurora.vue'
-import nebulaUrl from './assets/backgrounds/nebula.jpg'
-import milkywayUrl from './assets/backgrounds/milkyway.jpg'
-import neonLinesUrl from './assets/backgrounds/neon-lines.jpg'
-import railroadNightUrl from './assets/backgrounds/railroad-night.jpg'
-import darkTracksUrl from './assets/backgrounds/dark-tracks.jpg'
-import steamLocoUrl from './assets/backgrounds/steam-locomotive.jpg'
-import trainStationUrl from './assets/backgrounds/train-station-night.jpg'
+import { backgroundUrls } from './backgrounds/blob-urls'
 import { computed } from 'vue'
 
 export type SplashBackground = 'starfield' | 'nebula' | 'milkyway' | 'neon' | 'aurora' | 'railroad-night' | 'dark-tracks' | 'steam-locomotive' | 'train-station'
@@ -36,13 +30,13 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const bgImageMap: Record<string, string> = {
-  nebula: nebulaUrl,
-  milkyway: milkywayUrl,
-  neon: neonLinesUrl,
-  'railroad-night': railroadNightUrl,
-  'dark-tracks': darkTracksUrl,
-  'steam-locomotive': steamLocoUrl,
-  'train-station': trainStationUrl,
+  nebula: backgroundUrls.nebula,
+  milkyway: backgroundUrls.milkyway,
+  neon: backgroundUrls['neon-lines'],
+  'railroad-night': backgroundUrls['railroad-night'],
+  'dark-tracks': backgroundUrls['dark-tracks'],
+  'steam-locomotive': backgroundUrls['steam-locomotive'],
+  'train-station': backgroundUrls['train-station-night'],
 }
 
 const bgImageUrl = computed(() => bgImageMap[props.background] ?? null)
