@@ -12,4 +12,4 @@ echo ""
 echo -e "  \033[1mDCC-EX JavaScript API\033[0m — Installer"
 echo ""
 
-exec turbo run deja --filter=deja-serverts --filter=deja-monitor
+exec turbo run deja --filter=deja-serverts
