@@ -109,6 +109,22 @@ function handleClear(id: string) {
 function deviceIdFromPaneId(paneId: string): string {
   return paneId.replace('device-', '')
 }
+
+// Dev-only: expose mock data injection for screenshot automation
+if (import.meta.env.DEV) {
+  import('../dev/mockData').then((mockData) => {
+    ;(window as any).__DEJA_MOCK__ = {
+      seedAll: () => {
+        // Seed log panes (turnout/effect/sensor are props-driven from these refs)
+        turnoutChanges.value.push(...mockData.mockTurnoutChanges)
+        effectChanges.value.push(...mockData.mockEffectChanges)
+        sensorChanges.value.push(...mockData.mockSensorChanges)
+        // Seed DCC log via the pane's seed method
+        dccLogRef.value?.seed(mockData.mockDccLog)
+      },
+    }
+  })
+}
 </script>
 
 <template>
