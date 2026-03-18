@@ -3,6 +3,7 @@ import { doc, getDoc } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import type { Layout } from '@repo/modules'
 import { db } from '@repo/firebase-config'
+import { WI_THROTTLE_EVENTS } from '@repo/ui/src/constants/wiThrottleEvents'
 
 // Dynamically import the Capacitor socket plugin so web/Vercel builds don't fail.
 // The plugin only exists in native Capacitor environments.
@@ -39,6 +40,7 @@ export class WiThrottleService {
   // Map from loco DCC address → single-char throttle identifier (A, B, C…)
   private acquiredLocos = new Map<number, string>()
   private nextCharCode = 65 // 'A'
+  private releasedChars: string[] = [] // Pool of released chars for reuse
 
   public state = ref<WiThrottleConnectionState>('DISCONNECTED')
   public errorMessage = ref<string>('')
@@ -56,11 +58,27 @@ export class WiThrottleService {
     return this.acquiredLocos.get(address) ?? null
   }
 
+  private resetState() {
+    this.acquiredLocos.clear()
+    this.nextCharCode = 65
+    this.releasedChars = []
+    this.trackPower.value = 2
+  }
+
   /** Acquire a loco on the WiThrottle server. Must be called before sending speed/function commands. */
   public async acquireLoco(address: number): Promise<void> {
     if (this.state.value !== 'CONNECTED') return
     if (this.acquiredLocos.has(address)) return
-    const char = String.fromCharCode(this.nextCharCode++)
+    // Reuse a released char slot, or allocate next (max 26 locos: A–Z)
+    const char = this.releasedChars.pop() ?? (
+      this.nextCharCode <= 90
+        ? String.fromCharCode(this.nextCharCode++)
+        : null
+    )
+    if (!char) {
+      console.warn('WiThrottle: max 26 locos can be acquired simultaneously')
+      return
+    }
     this.acquiredLocos.set(address, char)
     const roster = this.getRosterAddress(address)
     await this.send(`M${char}+${roster}<;>${roster}`)
@@ -73,6 +91,7 @@ export class WiThrottleService {
     const roster = this.getRosterAddress(address)
     await this.send(`M${char}-${roster}<;>r`)
     this.acquiredLocos.delete(address)
+    this.releasedChars.push(char)
   }
 
   /** Send a speed + direction update for an acquired loco. */
@@ -81,6 +100,7 @@ export class WiThrottleService {
     const char = this.getThrottleChar(address)
     if (!char) return
     const roster = this.getRosterAddress(address)
+    // Send speed before direction — sequential is intentional for TCP ordering
     await this.send(`M${char}A${roster}<;>V${speed}`)
     await this.send(`M${char}A${roster}<;>R${direction ? 1 : 0}`)
   }
@@ -97,9 +117,9 @@ export class WiThrottleService {
   /** Send emergency stop to all currently acquired locos. */
   public async emergencyStopAll(): Promise<void> {
     if (this.state.value !== 'CONNECTED') return
-    for (const [, char] of this.acquiredLocos) {
-      await this.send(`M${char}A*<;>X`)
-    }
+    await Promise.all(
+      Array.from(this.acquiredLocos.values()).map(char => this.send(`M${char}A*<;>X`))
+    )
   }
 
   public async connect(): Promise<void> {
@@ -118,7 +138,7 @@ export class WiThrottleService {
       const connConfig = layoutData.throttleConnection
       if (connConfig?.type !== 'withrottle') {
         // If not explicitly set to WiThrottle, we default to the DEJA server.
-        // For DEJA server via WiThrottle protocol (if eventually supported natively) or 
+        // For DEJA server via WiThrottle protocol (if eventually supported natively) or
         // to just skip this TCP connection entirely.
         // For now, DEJA.js App uses Firebase / WebSockets for DEJA Server connection natively,
         // so we just mark it as "DISCONNECTED" from a TCP WiThrottle perspective,
@@ -136,10 +156,10 @@ export class WiThrottleService {
         this.state.value = 'ERROR'
         return
       }
-      
+
       this.state.value = 'CONNECTING'
       this.errorMessage.value = ''
-      
+
       const Socket = await getSocketClass()
       if (!Socket) {
         this.handleDisconnect('WiThrottle requires a native Capacitor environment')
@@ -162,14 +182,14 @@ export class WiThrottleService {
       }
 
       await this.socket.open(host, port)
-      
+
       this.state.value = 'CONNECTED'
-      
+
       // Set a global flag so UI components (like AppHeader) know they can use sendDccCommand native override
       ;(window as any).__WI_THROTTLE_CONNECTED__ = true
-      
+
       this.startHeartbeat()
-      
+
       // Handshake: send hardware/app info
       await this.send('NDEJA Throttle')
       await this.send('*+') // enable heartbeat monitoring
@@ -188,10 +208,10 @@ export class WiThrottleService {
 
   public async disconnect(): Promise<void> {
     if (this.state.value === 'CONNECTED') {
-      // Release all acquired locos gracefully
-      for (const [address] of this.acquiredLocos) {
-        await this.releaseLoco(address)
-      }
+      // Release all acquired locos gracefully in parallel
+      await Promise.all(
+        Array.from(this.acquiredLocos.keys()).map(address => this.releaseLoco(address))
+      )
       await this.send('Q')
     }
     if (this.socket) {
@@ -204,9 +224,7 @@ export class WiThrottleService {
     }
     ;(window as any).__WI_THROTTLE_CONNECTED__ = false
     this.stopHeartbeat()
-    this.acquiredLocos.clear()
-    this.nextCharCode = 65
-    this.trackPower.value = 2
+    this.resetState()
     this.state.value = 'DISCONNECTED'
   }
 
@@ -229,7 +247,7 @@ export class WiThrottleService {
       console.warn('Cannot send data, socket not connected')
       return
     }
-    
+
     // WiThrottle commands typically end with newline
     const payload = data.endsWith('\n') ? data : data + '\n'
     try {
@@ -243,12 +261,12 @@ export class WiThrottleService {
 
   private handleData(data: Uint8Array) {
     if (!data || data.length === 0) return
-    
+
     try {
       const decoder = new TextDecoder()
       const text = decoder.decode(data)
       const commands = text.split('\n')
-      
+
       for (const cmd of commands) {
         if (!cmd.trim()) continue
         this.parseCommand(cmd)
@@ -281,7 +299,7 @@ export class WiThrottleService {
       const state = parseInt(cmd.substring(3), 10)
       if (state === 0 || state === 1 || state === 2) {
         this.trackPower.value = state as 0 | 1 | 2
-        window.dispatchEvent(new CustomEvent('withrottle-power-state', { detail: { state } }))
+        window.dispatchEvent(new CustomEvent(WI_THROTTLE_EVENTS.POWER_STATE, { detail: { state } }))
       }
     }
 
@@ -293,7 +311,7 @@ export class WiThrottleService {
       const func = parseInt(fnStateMatch[3], 10)
       const address = parseInt(addrStr.substring(1), 10)
       if (!isNaN(address) && !isNaN(func)) {
-        window.dispatchEvent(new CustomEvent('withrottle-function-state', {
+        window.dispatchEvent(new CustomEvent(WI_THROTTLE_EVENTS.FUNCTION_STATE, {
           detail: { address, func, state },
         }))
       }
@@ -307,7 +325,7 @@ export class WiThrottleService {
       const address = parseInt(addrStr.substring(1), 10)
       const labels = labelsRaw.split(']\\[').filter(s => s.length > 0)
       if (!isNaN(address)) {
-        window.dispatchEvent(new CustomEvent('withrottle-function-labels', {
+        window.dispatchEvent(new CustomEvent(WI_THROTTLE_EVENTS.FUNCTION_LABELS, {
           detail: { address, labels },
         }))
       }
@@ -330,9 +348,7 @@ export class WiThrottleService {
     this.stopHeartbeat()
     this.socket = null
     ;(window as any).__WI_THROTTLE_CONNECTED__ = false
-    this.acquiredLocos.clear()
-    this.nextCharCode = 65
-    this.trackPower.value = 2
+    this.resetState()
 
     // If we get an error while connecting, transition to ERROR instead of just DISCONNECTED
     if (this.state.value === 'CONNECTING') {

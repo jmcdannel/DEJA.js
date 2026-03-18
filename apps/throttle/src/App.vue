@@ -12,6 +12,7 @@ import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import { wiThrottleService } from '@/services/WiThrottleService'
 import { watch, onMounted, onUnmounted } from 'vue'
 import { useStorage } from '@vueuse/core'
+import { WI_THROTTLE_EVENTS } from '@repo/ui/src/constants/wiThrottleEvents'
 import { useFeedbackUser } from '@repo/modules/feedback'
 import * as Sentry from '@sentry/vue'
 
@@ -39,20 +40,23 @@ function handleWiThrottleEstop() {
 }
 
 watch(() => wiThrottleService.state.value, (newState) => {
+  const connected = newState === 'CONNECTED'
   // Expose connection state to the window object so @repo/modules can read it without circular imports
-  ;(window as any).__WI_THROTTLE_CONNECTED__ = newState === 'CONNECTED'
+  ;(window as any).__WI_THROTTLE_CONNECTED__ = connected
+  // Dispatch reactive event so UI packages can update without polling the window flag
+  window.dispatchEvent(new CustomEvent(WI_THROTTLE_EVENTS.CONNECTION_STATE, { detail: { connected } }))
 })
 
 onMounted(() => {
-  window.addEventListener('withrottle-send', handleWiThrottleSend)
-  window.addEventListener('withrottle-function', handleWiThrottleFunction)
-  window.addEventListener('withrottle-estop', handleWiThrottleEstop)
+  window.addEventListener(WI_THROTTLE_EVENTS.SEND, handleWiThrottleSend)
+  window.addEventListener(WI_THROTTLE_EVENTS.FUNCTION, handleWiThrottleFunction)
+  window.addEventListener(WI_THROTTLE_EVENTS.ESTOP, handleWiThrottleEstop)
 })
 
 onUnmounted(async () => {
-  window.removeEventListener('withrottle-send', handleWiThrottleSend)
-  window.removeEventListener('withrottle-function', handleWiThrottleFunction)
-  window.removeEventListener('withrottle-estop', handleWiThrottleEstop)
+  window.removeEventListener(WI_THROTTLE_EVENTS.SEND, handleWiThrottleSend)
+  window.removeEventListener(WI_THROTTLE_EVENTS.FUNCTION, handleWiThrottleFunction)
+  window.removeEventListener(WI_THROTTLE_EVENTS.ESTOP, handleWiThrottleEstop)
   await wiThrottleService.disconnect()
 })
 
@@ -60,9 +64,13 @@ const layoutId = useStorage('@DEJA/layoutId', '')
 
 watch(layoutId, async (newId) => {
   if (newId) {
-    await wiThrottleService.connect()
+    if (wiThrottleService.state.value === 'DISCONNECTED') {
+      await wiThrottleService.connect()
+    }
   } else {
-    await wiThrottleService.disconnect()
+    if (wiThrottleService.state.value !== 'DISCONNECTED') {
+      await wiThrottleService.disconnect()
+    }
   }
 }, { immediate: true })
 

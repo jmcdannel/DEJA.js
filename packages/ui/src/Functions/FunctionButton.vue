@@ -3,6 +3,7 @@
   import { useDisplay } from 'vuetify'
   import { useDcc } from '@repo/dccex'
   import { useFunctionIcon } from '@repo/modules/locos'
+  import { WI_THROTTLE_EVENTS } from '../constants/wiThrottleEvents'
 
   const props = defineProps({
     func: {
@@ -54,7 +55,7 @@
     setFunction(props.address, props.func.id, state)
     // Bridge to WiThrottle if connected
     if ((window as any).__WI_THROTTLE_CONNECTED__) {
-      window.dispatchEvent(new CustomEvent('withrottle-function', {
+      window.dispatchEvent(new CustomEvent(WI_THROTTLE_EVENTS.FUNCTION, {
         detail: { address: props.address, func: props.func.id, state },
       }))
     }
@@ -172,11 +173,11 @@
   })
 
   onMounted(() => {
-    window.addEventListener('withrottle-function-state', handleWiThrottleFunctionState)
+    window.addEventListener(WI_THROTTLE_EVENTS.FUNCTION_STATE, handleWiThrottleFunctionState)
   })
 
   onUnmounted(() => {
-    window.removeEventListener('withrottle-function-state', handleWiThrottleFunctionState)
+    window.removeEventListener(WI_THROTTLE_EVENTS.FUNCTION_STATE, handleWiThrottleFunctionState)
   })
 
   onBeforeUnmount(() => {

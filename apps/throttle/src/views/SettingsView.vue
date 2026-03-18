@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useCurrentUser } from 'vuefire'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
@@ -20,7 +20,7 @@ const { themePreference, setTheme } = useThemeSwitcher()
 const { mdAndUp } = useDisplay()
 
 const { isScanning, discoveredServers, startScan, isAvailable, checkAvailability } = useServerDiscovery()
-checkAvailability()
+onMounted(() => { checkAvailability() })
 
 const planName = computed(() => PLAN_DISPLAY[plan.value].name)
 const planPrice = computed(() => {

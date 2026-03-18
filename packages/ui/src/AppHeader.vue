@@ -13,6 +13,7 @@ import SelectLayout from './SelectLayout.vue'
 import { useLayout, useServerStatus } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
 import { createLogger } from '@repo/utils'
+import { WI_THROTTLE_EVENTS } from './constants/wiThrottleEvents'
 
 const log = createLogger('AppHeader')
 // import { useEfx, type Effect } from '@repo/modules'
@@ -54,13 +55,14 @@ const devices = getDevices()
 const isLayoutModalOpen = ref(false)
 const isDeviceModalOpen = ref(false)
 const wiThrottlePower = ref<0 | 1 | 2>(2) // 0=off, 1=on, 2=unknown
+const wiThrottleConnected = ref(false)
 
 
 // Event handlers
 async function handleTrackPowerToggle(newState: boolean) {
-  if ((window as any).__WI_THROTTLE_CONNECTED__) {
+  if (wiThrottleConnected.value) {
     // WiThrottle power command: PPA1 for on, PPA0 for off
-    window.dispatchEvent(new CustomEvent('withrottle-send', { detail: `PPA${newState ? '1' : '0'}` }))
+    window.dispatchEvent(new CustomEvent(WI_THROTTLE_EVENTS.SEND, { detail: `PPA${newState ? '1' : '0'}` }))
     return
   }
   const DEFAULT_ON = '1 MAIN'
@@ -78,8 +80,8 @@ function handleLayoutPowerToggle(newState: boolean) {
 }
 
 async function handleEmergencyStop() {
-  if ((window as any).__WI_THROTTLE_CONNECTED__) {
-    window.dispatchEvent(new CustomEvent('withrottle-estop'))
+  if (wiThrottleConnected.value) {
+    window.dispatchEvent(new CustomEvent(WI_THROTTLE_EVENTS.ESTOP))
     return
   }
   await sendDccCommand({ action: 'dcc', payload: '!' })
@@ -113,12 +115,18 @@ function handleWiThrottlePowerState(event: Event) {
   wiThrottlePower.value = state
 }
 
+function handleWiThrottleConnectionState(event: Event) {
+  wiThrottleConnected.value = (event as CustomEvent<{ connected: boolean }>).detail.connected
+}
+
 onMounted(() => {
-  window.addEventListener('withrottle-power-state', handleWiThrottlePowerState)
+  window.addEventListener(WI_THROTTLE_EVENTS.POWER_STATE, handleWiThrottlePowerState)
+  window.addEventListener(WI_THROTTLE_EVENTS.CONNECTION_STATE, handleWiThrottleConnectionState)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('withrottle-power-state', handleWiThrottlePowerState)
+  window.removeEventListener(WI_THROTTLE_EVENTS.POWER_STATE, handleWiThrottlePowerState)
+  window.removeEventListener(WI_THROTTLE_EVENTS.CONNECTION_STATE, handleWiThrottleConnectionState)
 })
 
 function handleDrawerToggle() {
@@ -129,7 +137,7 @@ const allConnected = computed(() => devices.value.every(device => device.isConne
 const hasDevices = computed(() => devices.value.length > 0)
 const connectedDevicesCount = computed(() => devices.value.filter(d => d.isConnected).length)
 const dccexConnected = computed(() => {
-  if ((window as any).__WI_THROTTLE_CONNECTED__) return true
+  if (wiThrottleConnected.value) return true
   const dccexDevice = devices.value.find(device => device.type === 'dcc-ex')
   return dccexDevice?.isConnected ?? false
 })
@@ -142,7 +150,7 @@ const currentLayout = computed(() => {
 })
 
 const effectiveTrackPower = computed<boolean>(() => {
-  if ((window as any).__WI_THROTTLE_CONNECTED__) {
+  if (wiThrottleConnected.value) {
     return wiThrottlePower.value === 1
   }
   return props.layoutPowerState ?? false

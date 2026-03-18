@@ -30,6 +30,7 @@ export function useServerDiscovery() {
   const isAvailable = ref<boolean | null>(null) // null = not yet checked
 
   let stopFn: (() => Promise<void>) | null = null
+  let autoStopTimer: ReturnType<typeof setTimeout> | null = null
 
   async function checkAvailability(): Promise<boolean> {
     const zc = await getZeroConf()
@@ -81,7 +82,11 @@ export function useServerDiscovery() {
       }
 
       // Auto-stop after 10 seconds
-      setTimeout(() => stopScan(), 10_000)
+      if (autoStopTimer) clearTimeout(autoStopTimer)
+      autoStopTimer = setTimeout(() => {
+        autoStopTimer = null
+        stopScan()
+      }, 10_000)
     } catch (e) {
       console.error('ZeroConf scan error', e)
       isScanning.value = false
@@ -89,6 +94,10 @@ export function useServerDiscovery() {
   }
 
   async function stopScan(): Promise<void> {
+    if (autoStopTimer) {
+      clearTimeout(autoStopTimer)
+      autoStopTimer = null
+    }
     if (stopFn) {
       await stopFn()
       stopFn = null
