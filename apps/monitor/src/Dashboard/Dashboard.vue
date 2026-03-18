@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useWebSocket } from '@vueuse/core'
 import { useLayout, useLocos, useTurnouts, useEfx, useSignals } from '@repo/modules'
 import { useLayoutLogListeners } from '../composables/useLayoutLogListeners'
@@ -111,18 +111,21 @@ function deviceIdFromPaneId(paneId: string): string {
 }
 
 // Dev-only: expose mock data injection for screenshot automation
+// Wrapped in onMounted so dccLogRef is populated before seedAll can be called
 if (import.meta.env.DEV) {
-  import('../dev/mock-data').then((mockData) => {
-    ;(window as any).__DEJA_MOCK__ = {
-      seedAll: () => {
-        // Seed log panes (turnout/effect/sensor are props-driven from these refs)
-        turnoutChanges.value.push(...mockData.mockTurnoutChanges)
-        effectChanges.value.push(...mockData.mockEffectChanges)
-        sensorChanges.value.push(...mockData.mockSensorChanges)
-        // Seed DCC log via the pane's seed method
-        dccLogRef.value?.seed(mockData.mockDccLog)
-      },
-    }
+  onMounted(() => {
+    import('../dev/mock-data').then((mockData) => {
+      ;(window as any).__DEJA_MOCK__ = {
+        seedAll: () => {
+          // Seed log panes (turnout/effect/sensor are props-driven from these refs)
+          turnoutChanges.value.push(...mockData.mockTurnoutChanges)
+          effectChanges.value.push(...mockData.mockEffectChanges)
+          sensorChanges.value.push(...mockData.mockSensorChanges)
+          // Seed DCC log via the pane's seed method
+          dccLogRef.value?.seed(mockData.mockDccLog)
+        },
+      }
+    })
   })
 }
 </script>
