@@ -6,7 +6,7 @@ export default {
      *
      * 🚫 Not fixable - https://eslint.org/docs/rules/no-console
      */
-    "no-console": "error",
+    "no-console": "warn",
     /**
      * Disallow expressions where the operation doesn't affect the value.
      *

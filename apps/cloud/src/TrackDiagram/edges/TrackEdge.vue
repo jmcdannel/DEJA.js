@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BezierEdge } from '@vue-flow/core'
+import { BezierEdge, Position } from '@vue-flow/core'
 import type { TrackDiagramEdgeData } from '@repo/modules'
 import { DEFAULT_TRACK_COLORS } from '../constants'
 
@@ -12,8 +12,8 @@ const props = defineProps<{
   sourceY: number
   targetX: number
   targetY: number
-  sourcePosition: string
-  targetPosition: string
+  sourcePosition: Position
+  targetPosition: Position
 }>()
 
 const edgeColor = props.data?.color || DEFAULT_TRACK_COLORS[props.data?.trackLine] || '#888'

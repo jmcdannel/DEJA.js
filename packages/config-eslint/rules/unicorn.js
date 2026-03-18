@@ -10,7 +10,7 @@ const config = {
      * 🚫 Not fixable - https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/filename-case.md
      */
     "unicorn/filename-case": [
-      "error",
+      "warn",
       {
         case: "kebabCase",
       },

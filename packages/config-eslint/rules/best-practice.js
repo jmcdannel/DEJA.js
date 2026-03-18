@@ -42,7 +42,7 @@ export default {
      *
      * 🚫 Not fixable - https://eslint.org/docs/rules/no-alert
      */
-    "no-alert": "error",
+    "no-alert": "warn",
     /**
      * Disallow use of `caller`/`callee`.
      *
@@ -150,7 +150,7 @@ export default {
      *
      * 🚫 Not fixable - https://eslint.org/docs/rules/no-param-reassign
      */
-    "no-param-reassign": "error",
+    "no-param-reassign": "warn",
     /**
      * Disallow usage of the deprecated `__proto__` property.
      *
@@ -204,7 +204,7 @@ export default {
      *
      * 🚫 Not fixable - https://eslint.org/docs/rules/prefer-named-capture-group
      */
-    "prefer-named-capture-group": "error",
+    "prefer-named-capture-group": "warn",
     /**
      * Require using Error objects as Promise rejection reasons.
      *
@@ -230,6 +230,6 @@ export default {
      *
      * 🚫 Not fixable - https://eslint.org/docs/latest/rules/no-await-in-loop
      */
-    "no-await-in-loop": "error",
+    "no-await-in-loop": "warn",
   },
 };

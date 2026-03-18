@@ -70,6 +70,9 @@ const deviceCount = computed(() => ({
   connected: connectedCount.value,
   total: devices.value?.length ?? 0,
 }))
+const commandActivityData = computed(() =>
+  commandActivity.value.map(b => ({ timestamp: b.timestamp, count: b.count })),
+)
 const totalCommandCount = computed(() =>
   commandActivity.value.reduce((sum, b) => sum + b.count, 0),
 )
@@ -185,7 +188,7 @@ function navigateToAddDevice() {
     <!-- Graphs Row -->
     <v-row dense>
       <v-col cols="12" md="6">
-        <CommandActivityChart :data="commandActivity" />
+        <CommandActivityChart :data="commandActivityData" />
       </v-col>
       <v-col cols="12" md="6">
         <DeviceConnectionChart
