@@ -2,6 +2,7 @@
 import { useStorage } from '@vueuse/core'
 import TourLogo from '../components/TourLogo.vue'
 import { BackgroundFallingStars } from '@repo/ui'
+import { TOUR_ASSETS } from '../assets/blob-urls'
 
 const layoutId = useStorage('@DEJA/layoutId', '')
 
@@ -75,16 +76,15 @@ const quickStartSteps = [
               <span class="text-6xl font-light uppercase bg-clip-text bg-gradient-to-r from-violet-600 to-cyan-400">Junction</span>           
           </v-card-title>
           <v-card-text>
-              <img src="/TamarackJunctionLogo.png" alt="Tamarack Logo" />
+              <img :src="TOUR_ASSETS.tamarackJunctionLogo" alt="Tamarack Logo" />
 
               <h2 class="text-h6 text-medium-emphasis my-6">Featuring:</h2>
               <v-carousel height="250" :show-arrows="false" cycle>
-                <v-carousel-item src="/tamarack-logo.png" alt="Tamarack Logo" cover></v-carousel-item>
-                <v-carousel-item src="/DejaJsLogo.png" alt="DEJA.js Logo" cover></v-carousel-item>
-                <v-carousel-item src="/tc-casino.png" alt="Thunder City Logo" cover></v-carousel-item>
-                <v-carousel-item src="/oa-trestle.png" alt="Oregon Trestle Logo" cover></v-carousel-item>
+                <v-carousel-item :src="TOUR_ASSETS.tamarackLogo" alt="Tamarack Logo" cover></v-carousel-item>
+                <v-carousel-item :src="TOUR_ASSETS.dejaJsLogo" alt="DEJA.js Logo" cover></v-carousel-item>
+                <v-carousel-item :src="TOUR_ASSETS.tcCasino" alt="Thunder City Logo" cover></v-carousel-item>
+                <v-carousel-item :src="TOUR_ASSETS.oaTrestle" alt="Oregon Trestle Logo" cover></v-carousel-item>
               </v-carousel>
-              <!-- <img src="/oa-trestle.jpeg" /> -->
               <!-- v-carousel -->
               <!-- DEJA.js -->
               <!-- Thunder City -->
