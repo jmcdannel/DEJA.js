@@ -1,6 +1,6 @@
 {
   "name": "@repo/modules",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -14,7 +14,8 @@
     "./turnouts": "./turnouts/index.ts",
     "./preferences": "./preferences/index.ts",
     "./routes": "./routes/index.ts",
-    "./types": "./types.ts"
+    "./types": "./types.ts",
+    "./plans/types": "./plans/types.ts"
   },
   "scripts": {
     "test": "vitest run",

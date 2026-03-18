@@ -8,7 +8,7 @@ import { db } from '@repo/firebase-config'
 import { useSubscription, PLAN_DISPLAY } from '@repo/modules'
 import type { Layout } from '@repo/modules'
 import SelectFavorites from '@/core/Menu/SelectFavorites.vue'
-import { BackgroundSettings } from '@repo/ui'
+import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
 
@@ -127,12 +127,15 @@ const sections = [
   { id: 'appearance', label: 'Appearance', icon: 'mdi-palette-outline' },
   { id: 'throttle', label: 'Throttle', icon: 'mdi-speedometer' },
   { id: 'connection', label: 'Connection', icon: 'mdi-server-network' },
+  { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'favorites', label: 'Favorites', icon: 'mdi-star-outline' },
 ]
 
 function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
+
+const appVersion = __APP_VERSION__
 
 const backgroundPages = [
   { path: '/', label: 'Home', icon: 'mdi-home' },
@@ -304,6 +307,15 @@ const backgroundPages = [
           </div>
         </div>
 
+        <!-- Server Setup -->
+        <div id="server-setup" class="settings-section">
+          <div class="settings-section__header">
+            <v-icon size="20" class="settings-section__icon">mdi-download-outline</v-icon>
+            <h2 class="settings-section__title">Server Setup</h2>
+          </div>
+          <ServerSetupInfo :uid="user?.uid" :layout-id="layoutId" />
+        </div>
+
         <!-- Favorites -->
         <div id="favorites" class="settings-section">
           <div class="settings-section__header">
@@ -314,6 +326,9 @@ const backgroundPages = [
             <SelectFavorites />
           </div>
         </div>
+
+        <!-- Version -->
+        <p class="settings-version">DEJA.js Throttle v{{ appVersion }}</p>
       </div>
 
       <!-- Jump-to nav (desktop only, right side) -->
@@ -440,5 +455,12 @@ const backgroundPages = [
   border-color: rgba(56, 189, 248, 0.5);
   background: rgba(56, 189, 248, 0.08);
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.1);
+}
+
+.settings-version {
+  text-align: center;
+  font-size: 0.7rem;
+  color: rgba(148, 163, 184, 0.4);
+  padding: 16px 0 8px;
 }
 </style>

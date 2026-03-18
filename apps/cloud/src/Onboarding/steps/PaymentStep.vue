@@ -128,14 +128,8 @@ async function handleSubmit() {
     }
 
     const token = await getIdToken(user.value)
-    const billingApiUrl = import.meta.env.VITE_BILLING_API_URL
 
-    if (!billingApiUrl) {
-      error.value = 'Billing service is not configured. Please contact support.'
-      return
-    }
-
-    const response = await fetch(`${billingApiUrl}/api/subscribe`, {
+    const response = await fetch('/api/subscribe', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -170,20 +170,34 @@ export const connect = async (): Promise<WebSocketServer | null> => {
   return new Promise((resolve, reject) => {
     try {
       weServer = new WebSocketServer({ port: parseInt(port) })
-      weServer.on('connection', (ws, req) => handleConnection(ws, req) && resolve(weServer))
 
-      // Subscribe to broadcast events from the event emitter
-      dejaEmitter.onBroadcast(handleBroadcastEvent)
+      weServer.on('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'EADDRINUSE') {
+          log.error(`[WS] Port ${port} is already in use — is another server instance running?`)
+          log.note(`[WS] Stop the other process or set a different port via VITE_WS_PORT`)
+        } else {
+          log.error('[WS] WebSocket server error:', err)
+        }
+        weServer = null
+        reject(err)
+      })
 
-      const serverIp =
-        os?.networkInterfaces()
-        ?.['en0']
-        ?.find(details => details.family === 'IPv4')?.address
-        ||
-        os?.networkInterfaces()
-        ?.['en1']
-        ?.find(details => details.family === 'IPv4')?.address
-      log.start('WebSocket server started', port, serverId, serverIp)
+      weServer.on('listening', () => {
+        dejaEmitter.onBroadcast(handleBroadcastEvent)
+
+        const serverIp =
+          os?.networkInterfaces()
+          ?.['en0']
+          ?.find(details => details.family === 'IPv4')?.address
+          ||
+          os?.networkInterfaces()
+          ?.['en1']
+          ?.find(details => details.family === 'IPv4')?.address
+        log.start('WebSocket server started', port, serverId, serverIp)
+        resolve(weServer)
+      })
+
+      weServer.on('connection', (ws, req) => handleConnection(ws, req))
     } catch (err) {
       log.error('error', err)
       reject(err)

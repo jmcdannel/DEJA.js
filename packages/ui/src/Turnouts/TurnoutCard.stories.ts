@@ -1,22 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
-import { fn } from '@storybook/test'
 import TurnoutCard from './TurnoutCard.vue'
+import { createTurnout } from '../../.storybook/mocks/data'
 
-// Stub the Firebase-dependent useTurnouts composable so stories run without a backend
-vi.mock('@repo/modules', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@repo/modules')>()
-  return {
-    ...actual,
-    useTurnouts: () => ({
-      setTurnout: fn(),
-      getTurnouts: fn(() => ({ value: [] })),
-      getTurnoutsByDevice: fn(),
-      getTurnoutsByIds: fn(),
-      getTurnout: fn(),
-      switchTurnout: fn(),
-    }),
-  }
-})
+// No vi.mock needed — @repo/modules is aliased to the mock via Vite in main.ts
 
 const meta: Meta<typeof TurnoutCard> = {
   title: 'Turnouts/TurnoutCard',
@@ -31,28 +17,18 @@ const meta: Meta<typeof TurnoutCard> = {
 export default meta
 type Story = StoryObj<typeof TurnoutCard>
 
-const baseTurnout = {
-  id: 'turnout-1',
-  name: 'Yard Entry',
-  desc: 'Controls the yard entry track switch',
-  type: 'servo',
-  state: false,
-  color: 'blue',
-  device: 'arduino-01',
-  tags: ['yard', 'mainline'],
-  order: 1,
-}
+const baseTurnout = createTurnout()
 
 export const Closed: Story = {
   args: {
-    turnout: { ...baseTurnout, state: false },
+    turnout: createTurnout({ state: false }),
     isRunning: false,
   },
 }
 
 export const Thrown: Story = {
   args: {
-    turnout: { ...baseTurnout, state: true },
+    turnout: createTurnout({ state: true }),
     isRunning: false,
   },
 }
@@ -66,14 +42,14 @@ export const Loading: Story = {
 
 export const NoDescription: Story = {
   args: {
-    turnout: { ...baseTurnout, desc: undefined, tags: [] },
+    turnout: createTurnout({ desc: undefined, tags: [] }),
     isRunning: false,
   },
 }
 
 export const ElectricSwitch: Story = {
   args: {
-    turnout: { ...baseTurnout, type: 'electric', color: 'green' },
+    turnout: createTurnout({ type: 'electric', color: 'green' }),
     isRunning: false,
   },
 }

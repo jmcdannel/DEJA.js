@@ -1,0 +1,75 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+
+const props = defineProps<{
+  uid?: string | null
+  layoutId?: string
+}>()
+
+const copiedInstall = ref(false)
+
+const installCommand = computed(() => {
+  const params = new URLSearchParams()
+  if (props.uid) params.set('uid', props.uid)
+  if (props.layoutId) params.set('layout', props.layoutId)
+  const qs = params.toString()
+  const url = qs
+    ? `https://install.dejajs.com?${qs}`
+    : 'https://install.dejajs.com'
+  return `curl -fsSL "${url}" | bash`
+})
+
+async function copyToClipboard(text: string) {
+  await navigator.clipboard.writeText(text)
+  copiedInstall.value = true
+  setTimeout(() => { copiedInstall.value = false }, 2000)
+}
+</script>
+
+<template>
+  <div class="setup-row setup-row--block">
+    <div class="setup-row__label mb-3">
+      <span class="setup-row__name">Install Command</span>
+      <span class="setup-row__desc">Run this on the machine connected to your DCC-EX Command Station. Your account and layout are linked automatically.</span>
+    </div>
+    <div class="setup-install">
+      <code class="setup-install__text">{{ installCommand }}</code>
+      <v-btn variant="text" size="x-small" :icon="copiedInstall ? 'mdi-check' : 'mdi-content-copy'" :color="copiedInstall ? 'success' : undefined" @click="copyToClipboard(installCommand)" />
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.setup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  gap: 16px;
+}
+.setup-row:last-child { border-bottom: none; }
+.setup-row--block { flex-direction: column; align-items: stretch; }
+
+.setup-row__label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.setup-row__name { font-size: 0.875rem; font-weight: 500; color: #cbd5e1; }
+.setup-row__desc { font-size: 0.75rem; color: rgba(148, 163, 184, 0.6); }
+.setup-install {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(2, 6, 23, 0.6);
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.setup-install__text {
+  flex: 1;
+  font-family: 'Roboto Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  color: #22d3ee;
+  word-break: break-all;
+  user-select: all;
+}
+</style>

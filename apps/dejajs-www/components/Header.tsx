@@ -4,9 +4,42 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import Logo from './Logo';
 
-const products = [
+interface SiteSettings {
+  siteName?: string;
+  productNavItems?: Array<{
+    _key: string;
+    label: string;
+    href: string;
+    description?: string;
+    icon?: string;
+    comingSoon?: boolean;
+  }>;
+  docsNavItems?: Array<{
+    _key: string;
+    label: string;
+    href: string;
+    description?: string;
+    comingSoon?: boolean;
+  }>;
+  loginUrl?: string;
+  signupUrl?: string;
+}
+
+interface ProductItem {
+  name: string;
+  desc: string;
+  logo: string;
+  href: string;
+}
+
+interface DocItem {
+  name: string;
+  href: string;
+  comingSoon?: boolean;
+}
+
+const defaultProducts: ProductItem[] = [
   {
     name: 'Server',
     desc: 'Connect to your DCC-EX CommandStation via USB.',
@@ -45,7 +78,7 @@ const products = [
   },
 ];
 
-const docsLinks = [
+const defaultDocsLinks: DocItem[] = [
   { name: 'Getting Started', href: '/docs' },
   { name: 'Server', href: '/docs/server' },
   { name: 'Throttle', href: '/docs/throttle' },
@@ -90,10 +123,30 @@ function useDropdown() {
   return { isOpen, open, close, toggle, ref, triggerRef };
 }
 
-export default function Header() {
+export default function Header({ settings }: { settings?: SiteSettings | null }) {
   const pathname = usePathname();
   const productsDropdown = useDropdown();
   const docsDropdown = useDropdown();
+
+  const products: ProductItem[] = settings?.productNavItems
+    ? settings.productNavItems.map((item) => ({
+        name: item.label,
+        desc: item.description ?? '',
+        logo: item.icon ?? '/icon-512.png',
+        href: item.href,
+      }))
+    : defaultProducts;
+
+  const docsLinks: DocItem[] = settings?.docsNavItems
+    ? settings.docsNavItems.map((item) => ({
+        name: item.label,
+        href: item.href,
+        comingSoon: item.comingSoon,
+      }))
+    : defaultDocsLinks;
+
+  const loginUrl = settings?.loginUrl ?? 'https://cloud.dejajs.com/';
+  const signupUrl = settings?.signupUrl ?? 'https://cloud.dejajs.com/signup';
 
   const handleMenuKeyDown = (
     e: React.KeyboardEvent,
@@ -131,13 +184,21 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full border-b bg-white dark:border-gray-800 dark:bg-gray-950 sticky top-0 z-50">
+    <header className="w-full border-b border-gray-800/60 bg-gray-950/90 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-6 pt-7 pb-4 flex items-center justify-between gap-6">
         <Link href="/" className="flex items-center gap-2">
-          <Logo size="lg" />
+          <Image src="/icon-512.png" alt="DEJA.js" width={40} height={40} className="rounded-xl w-10 h-10 flex-shrink-0" />
           <span className="sr-only">DEJA.js Home</span>
         </Link>
         <nav className="hidden md:flex flex-1 items-center gap-8 ml-6" aria-label="Main navigation">
+          {/* Guides */}
+          <Link
+            href="/guides"
+            className={`text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-[0.8rem] tracking-[0.06em] font-mono ${pathname?.startsWith('/guides') ? 'text-gray-900 dark:text-white' : ''}`}
+          >
+            Guides
+          </Link>
+
           {/* Products Mega Menu */}
           <div className="relative group py-2" ref={productsDropdown.ref}>
             <button
@@ -254,8 +315,8 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-4 text-[0.875rem]">
-          <a href="https://cloud.dejajs.com/" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors hidden sm:block tracking-[0.06em] font-mono text-[0.8rem]">Log in</a>
-          <a href="https://cloud.dejajs.com/signup" className="px-5 py-2 bg-cyan-500 hover:bg-cyan-400 text-gray-950 rounded-lg shadow-sm transition-colors text-center whitespace-nowrap font-bold tracking-[0.06em] font-mono text-[0.8rem]">Sign up</a>
+          <a href={loginUrl} className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors hidden sm:block tracking-[0.06em] font-mono text-[0.8rem]">Log in</a>
+          <a href={signupUrl} className="px-5 py-2 border border-deja-lime text-deja-lime hover:bg-deja-lime/10 rounded-lg transition-colors text-center whitespace-nowrap font-bold tracking-[0.06em] font-mono text-[0.8rem]">Sign up</a>
         </div>
       </div>
     </header>

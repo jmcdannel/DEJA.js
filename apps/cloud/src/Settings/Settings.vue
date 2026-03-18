@@ -4,8 +4,8 @@ import { useCurrentUser } from 'vuefire'
 import { useStorage } from '@vueuse/core'
 import { getIdToken } from 'firebase/auth'
 import { useSubscription, PLAN_DISPLAY, useLayout } from '@repo/modules'
-import { BackgroundSettings } from '@repo/ui'
-import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
+import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
+import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
 import PageHeader from '@/Core/UI/PageHeader.vue'
 import LayoutTags from '@/Layout/LayoutTags.vue'
@@ -82,8 +82,7 @@ async function openBillingPortal() {
   portalLoading.value = true
   try {
     const token = await getIdToken(user.value)
-    const billingApiUrl = import.meta.env.VITE_BILLING_API_URL
-    const res = await fetch(`${billingApiUrl}/api/billing-portal`, {
+    const res = await fetch('/api/billing-portal', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -105,6 +104,8 @@ const themeOptions: { value: ThemeMode; label: string; icon: string }[] = [
   { value: 'high-contrast', label: 'High Contrast', icon: 'mdi-contrast-box' },
 ]
 
+const appVersion = __APP_VERSION__
+
 const backgroundPages = [
   { path: '/', label: 'Home', icon: 'mdi-home' },
   { path: '/locos', label: 'Roster', icon: 'mdi-train' },
@@ -122,6 +123,7 @@ const sections = [
   { id: 'billing', label: 'Billing', icon: 'mdi-credit-card-outline' },
   { id: 'appearance', label: 'Appearance', icon: 'mdi-palette-outline' },
   { id: 'connection', label: 'Connection', icon: 'mdi-server-network' },
+  { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'layout', label: 'Layout', icon: 'mdi-floor-plan' },
 ]
 
@@ -178,7 +180,7 @@ function scrollTo(id: string) {
           </div>
           <div class="settings-row settings-row--actions">
             <div class="flex flex-wrap gap-3">
-              <v-btn v-if="plan !== 'conductor'" variant="tonal" color="primary" size="small" prepend-icon="mdi-arrow-up-bold" class="text-none" :to="{ name: 'Settings' }">
+              <v-btn v-if="plan !== 'conductor'" variant="tonal" color="primary" size="small" prepend-icon="mdi-arrow-up-bold" class="text-none" :to="{ name: 'Upgrade' }">
                 Upgrade to {{ plan === 'hobbyist' ? 'Engineer' : 'Conductor' }}
               </v-btn>
               <v-btn v-if="subscription?.stripeCustomerId" variant="outlined" size="small" prepend-icon="mdi-open-in-new" :loading="portalLoading" class="text-none" @click="openBillingPortal">
@@ -250,6 +252,15 @@ function scrollTo(id: string) {
           </div>
         </div>
 
+        <!-- Server Setup -->
+        <div id="server-setup" class="settings-section">
+          <div class="settings-section__header">
+            <v-icon size="20" class="settings-section__icon">mdi-download-outline</v-icon>
+            <h2 class="settings-section__title">Server Setup</h2>
+          </div>
+          <ServerSetupInfo :uid="user?.uid" :layout-id="storedLayoutId" />
+        </div>
+
         <!-- Layout Configuration -->
         <div id="layout" class="settings-section">
           <div class="settings-section__header">
@@ -271,6 +282,9 @@ function scrollTo(id: string) {
             <PortList :ports="layout?.ports || []" />
           </div>
         </div>
+
+        <!-- Version -->
+        <p class="settings-version">DEJA.js Cloud v{{ appVersion }}</p>
       </div>
 
       <!-- Jump-to nav (desktop only, right side) -->
@@ -399,5 +413,12 @@ function scrollTo(id: string) {
   border-color: rgba(56, 189, 248, 0.5);
   background: rgba(56, 189, 248, 0.08);
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.1);
+}
+
+.settings-version {
+  text-align: center;
+  font-size: 0.7rem;
+  color: rgba(148, 163, 184, 0.4);
+  padding: 16px 0 8px;
 }
 </style>

@@ -19,6 +19,13 @@ import tracksUrl from '../assets/backgrounds/tracks1.jpg'
 import forestUrl from '../assets/backgrounds/foresttracks.jpg'
 import wavesUrl from '../assets/backgrounds/vertwaves.jpg'
 import viaductUrl from '../assets/backgrounds/viaduct.jpg'
+import nebulaUrl from '../assets/backgrounds/nebula.jpg'
+import milkywayUrl from '../assets/backgrounds/milkyway.jpg'
+import neonLinesUrl from '../assets/backgrounds/neon-lines.jpg'
+import railroadNightUrl from '../assets/backgrounds/railroad-night.jpg'
+import darkTracksUrl from '../assets/backgrounds/dark-tracks.jpg'
+import steamLocoUrl from '../assets/backgrounds/steam-locomotive.jpg'
+import trainStationUrl from '../assets/backgrounds/train-station-night.jpg'
 
 export const backgrounds: BackgroundDefinition[] = [
   {
@@ -69,6 +76,69 @@ export const backgrounds: BackgroundDefinition[] = [
     type: 'effect',
     category: 'animated',
     component: () => import('../BackgroundFallingStars.vue'),
+  },
+  {
+    id: 'nebula',
+    name: 'Nebula',
+    type: 'image',
+    category: 'photo',
+    asset: nebulaUrl,
+  },
+  {
+    id: 'milkyway',
+    name: 'Milky Way',
+    type: 'image',
+    category: 'photo',
+    asset: milkywayUrl,
+  },
+  {
+    id: 'neon',
+    name: 'Neon Lines',
+    type: 'image',
+    category: 'photo',
+    asset: neonLinesUrl,
+  },
+  {
+    id: 'railroad-night',
+    name: 'Railroad at Night',
+    type: 'image',
+    category: 'photo',
+    asset: railroadNightUrl,
+  },
+  {
+    id: 'dark-tracks',
+    name: 'Dark Tracks',
+    type: 'image',
+    category: 'photo',
+    asset: darkTracksUrl,
+  },
+  {
+    id: 'steam-locomotive',
+    name: 'Steam Locomotive',
+    type: 'image',
+    category: 'photo',
+    asset: steamLocoUrl,
+  },
+  {
+    id: 'train-station',
+    name: 'Train Station at Night',
+    type: 'image',
+    category: 'photo',
+    asset: trainStationUrl,
+  },
+  {
+    id: 'starfield',
+    name: 'Starfield',
+    type: 'effect',
+    category: 'animated',
+    component: () => import('../BackgroundStarfield.vue'),
+  },
+  {
+    id: 'aurora',
+    name: 'Aurora',
+    type: 'effect',
+    category: 'animated',
+    component: () => import('../BackgroundAurora.vue'),
   },
 ]
 

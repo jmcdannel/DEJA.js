@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "composite": false,
+    "declaration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "target": "ESNext",
+    "outDir": "./dist",
+    "rootDir": "./api"
+  },
+  "include": ["api/**/*.ts"],
+  "exclude": ["node_modules"]
+}
