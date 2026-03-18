@@ -213,7 +213,7 @@ VITE_FIREBASE_STORAGE_BUCKET=${fb_storage_bucket}
 VITE_FIREBASE_MESSAGING_SENDER_ID=${fb_messaging_id}
 VITE_FIREBASE_APP_ID=${fb_app_id}
 FIREBASE_CLIENT_EMAIL=${fb_client_email}
-FIREBASE_PRIVATE_KEY=${fb_private_key}
+FIREBASE_PRIVATE_KEY="${fb_private_key}"
 ENVEOF
 
   chmod 600 "${ENV_FILE}"
