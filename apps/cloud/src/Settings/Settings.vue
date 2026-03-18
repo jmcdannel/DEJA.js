@@ -54,8 +54,9 @@ const serverSaving = ref(false)
 const serverSaved = ref(false)
 
 watch(() => layout, (l) => {
-  if (l?.throttleConnection?.type) {
-    serverType.value = l.throttleConnection.type
+  const layoutData = l as { throttleConnection?: { type: 'deja-server' | 'withrottle' } } | undefined
+  if (layoutData?.throttleConnection?.type) {
+    serverType.value = layoutData.throttleConnection.type
   }
 }, { immediate: true })
 

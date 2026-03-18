@@ -12,10 +12,11 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
-import App from './App.vue'
-import router from './router'
 import { firebaseApp } from '@repo/firebase-config'
 import { createVuetifyThemes } from '@repo/ui'
+import { feedbackConfig } from '@repo/modules/feedback'
+import router from './router'
+import App from './App.vue'
 // Style
 import './style.css'
 import '@mdi/font/css/materialdesignicons.css'
@@ -63,11 +64,17 @@ Sentry.init({
   integrations: [
     Sentry.browserTracingIntegration({ router }),
     Sentry.replayIntegration(),
+    Sentry.feedbackIntegration(feedbackConfig),
   ],
   tracesSampleRate: 1.0,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 })
+
+app.config.errorHandler = (err, _instance, info) => {
+  const eventId = Sentry.captureException(err, { extra: { info } })
+  Sentry.showReportDialog({ eventId })
+}
 
 if (import.meta.env.PROD) {
   injectAnalytics()

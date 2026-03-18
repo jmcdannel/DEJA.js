@@ -108,7 +108,7 @@ export default {
      * 🚫 Not fixable - https://typescript-eslint.io/rules/member-ordering/
      */
     "@typescript-eslint/member-ordering": [
-      "error",
+      "warn",
       {
         default: {
           memberTypes: ["field", "signature"],
