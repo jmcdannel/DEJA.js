@@ -17,12 +17,13 @@ Capture screenshots of DEJA.js app views using Claude Preview MCP (headless Play
 ## Usage
 
 ```
-/capture-screenshots [app] [--views view1,view2] [--viewport desktop|mobile|both]
+/capture-screenshots [app] [--views view1,view2] [--viewport desktop|mobile|both] [--layout layoutId]
 ```
 
 - `app`: throttle, cloud, monitor, or "all" (default: all)
 - `--views`: comma-separated list of view names to capture (default: all views for the app)
 - `--viewport`: desktop, mobile, or both (default: both)
+- `--layout`: Override layout ID (default: betatrack). If omitted, reads `LAYOUT_ID` from `.env`.
 
 ## Procedure
 
@@ -47,9 +48,11 @@ Wait for the server to be ready by checking `preview_logs`.
 
 ### 3. Set Up App State
 
+If `--layout` flag is provided, use that value. Otherwise read `LAYOUT_ID` from `.env`. Default layout for docs/marketing: `betatrack`.
+
 Use `preview_eval` to set required localStorage values:
 ```javascript
-localStorage.setItem('@DEJA/layoutId', '<LAYOUT_ID from .env>')
+localStorage.setItem('@DEJA/layoutId', '<layout-id>')
 ```
 
 If using email/password login (not DEV_AUTO_LOGIN):
@@ -57,6 +60,45 @@ If using email/password login (not DEV_AUTO_LOGIN):
 2. Use `preview_fill` to enter credentials
 3. Use `preview_click` to submit
 4. Wait for redirect
+
+### 3.5. Monitor Mock Data Seeding (monitor app only)
+
+After auth and before capturing:
+1. Wait for Dashboard to mount:
+   ```javascript
+   preview_eval({ expression: "await new Promise(r => setTimeout(r, 3000))" })
+   ```
+2. Seed all panes:
+   ```javascript
+   preview_eval({ expression: "window.__DEJA_MOCK__?.seedAll()" })
+   ```
+3. Wait for reactivity:
+   ```javascript
+   preview_eval({ expression: "await new Promise(r => setTimeout(r, 1000))" })
+   ```
+
+### 3.6. Dynamic ID Resolution — Throttle Detail View
+
+For `/throttle/:address`:
+1. Navigate to `/throttles` first
+2. Use `preview_eval` to scrape available loco links:
+   ```javascript
+   Array.from(document.querySelectorAll('a[href^="/throttle/"]')).map(a => parseInt(a.getAttribute('href').split('/').pop())).filter(n => !isNaN(n))
+   ```
+3. Pick the first address that is not `3`, fallback to `3` if it is the only option
+4. If no addresses are found, skip this screenshot and log a warning
+
+### 3.7. Dynamic ID Resolution — Cloud Edit Views
+
+For each cloud edit view (`/locos/:address`, `/turnouts/:turnoutId`, `/routes/:routeId`, `/effects/:effectId`, `/signals/:signalId`):
+1. Navigate to the corresponding list view first (e.g., `/locos`, `/turnouts`, etc.)
+2. Use `preview_eval` to scrape the first item link:
+   ```javascript
+   document.querySelector('a[href^="/<entity>/"]')?.getAttribute('href')
+   ```
+   Replace `<entity>` with the actual entity path segment (e.g., `locos`, `turnouts`, `routes`, `effects`, `signals`).
+3. Navigate to that href
+4. If no items exist, skip the edit screenshot and log a warning
 
 ### 4. Capture Screenshots
 
@@ -76,12 +118,13 @@ Screenshots are saved to `apps/dejajs-www/public/screenshots/` using the naming 
 
 ## View Registry
 
-### Throttle App (port 3041)
+### Throttle App (12 views, port 3041)
 
 | Route | Screenshot Name | Description |
 |-------|----------------|-------------|
 | `/` | `throttle_{vp}_home` | Home / landing page |
 | `/throttles` | `throttle_{vp}_throttle-list` | Throttle list view |
+| `/throttle/:address` | `throttle_{vp}_throttle` | Individual loco control (dynamic, see step 3.6) |
 | `/turnouts` | `throttle_{vp}_turnouts` | Turnout control view |
 | `/routes` | `throttle_{vp}_routes` | Route management |
 | `/effects` | `throttle_{vp}_effects` | Effects control |
@@ -90,28 +133,52 @@ Screenshots are saved to `apps/dejajs-www/public/screenshots/` using the naming 
 | `/locos` | `throttle_{vp}_roster` | Locomotive roster |
 | `/connect` | `throttle_{vp}_connect` | Connection setup |
 | `/settings` | `throttle_{vp}_settings` | App settings |
+| `/programming` | `throttle_{vp}_programming` | DCC programming |
 
-### Cloud App (port 3011)
+### Cloud App (22 views, port 3011)
+
+**List views (11):**
 
 | Route | Screenshot Name | Description |
 |-------|----------------|-------------|
 | `/` | `cloud_{vp}_dashboard` | Dashboard overview |
-| `/locos` | `cloud_{vp}_roster` | Locomotive roster management |
+| `/locos` | `cloud_{vp}_roster` | Locomotive roster |
 | `/turnouts` | `cloud_{vp}_turnouts` | Turnout configuration |
 | `/routes` | `cloud_{vp}_routes` | Route configuration |
 | `/effects` | `cloud_{vp}_effects` | Effects configuration |
 | `/signals` | `cloud_{vp}_signals` | Signal wiring |
 | `/sensors` | `cloud_{vp}_sensors` | Sensor management |
+| `/sounds` | `cloud_{vp}_sounds` | Sound management |
 | `/dccex` | `cloud_{vp}_dccex` | DCC-EX console |
 | `/devices` | `cloud_{vp}_devices` | Device management |
 | `/settings` | `cloud_{vp}_settings` | Settings |
 
-### Monitor App (port 3021)
+**Add views (6):**
 
 | Route | Screenshot Name | Description |
 |-------|----------------|-------------|
-| `/` | `monitor_{vp}_dashboard` | Monitor dashboard |
-| `/settings` | `monitor_{vp}_settings` | Monitor settings |
+| `/locos/new` | `cloud_{vp}_roster-add` | Add locomotive form |
+| `/turnouts/new` | `cloud_{vp}_turnouts-add` | Add turnout form |
+| `/routes/new` | `cloud_{vp}_routes-add` | Add route form |
+| `/effects/new` | `cloud_{vp}_effects-add` | Add effect form |
+| `/signals/new` | `cloud_{vp}_signals-add` | Add signal form |
+| `/sensors/new` | `cloud_{vp}_sensors-add` | Add sensor form |
+
+**Edit views (5 -- dynamic, see step 3.7):**
+
+| Route | Screenshot Name | Description |
+|-------|----------------|-------------|
+| `/locos/:address` | `cloud_{vp}_roster-edit` | Edit locomotive |
+| `/turnouts/:turnoutId` | `cloud_{vp}_turnouts-edit` | Edit turnout |
+| `/routes/:routeId` | `cloud_{vp}_routes-edit` | Edit route |
+| `/effects/:effectId` | `cloud_{vp}_effects-edit` | Edit effect |
+| `/signals/:signalId` | `cloud_{vp}_signals-edit` | Edit signal |
+
+### Monitor App (1 view, port 3021)
+
+| Route | Screenshot Name | Description |
+|-------|----------------|-------------|
+| `/` | `monitor_{vp}_dashboard` | Monitor dashboard (mock data seeded, see step 3.5) |
 
 Where `{vp}` = `desktop` or `mobile`.
 
@@ -125,7 +192,8 @@ After capturing, report:
 ## Notes
 
 - Screenshots replace existing files with the same name
-- JPEG format (Claude Preview default) — compressed for web
+- JPEG format (Claude Preview default) -- compressed for web
 - Desktop viewport: 1280x800, Mobile viewport: 375x812
 - Allow 2-3 seconds after navigation for Vue components to render
-- Some views require `requireDccEx` or `requireLayout` guards — DEV_AUTO_LOGIN bypasses all guards
+- Some views require `requireDccEx` or `requireLayout` guards -- DEV_AUTO_LOGIN bypasses all guards
+- Monitor dashboard requires `window.__DEJA_MOCK__.seedAll()` call before capture (dev mode only)
