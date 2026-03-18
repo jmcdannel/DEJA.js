@@ -11,10 +11,6 @@ interface FAQ {
 
 const faqs: FAQ[] = [
   {
-    q: 'Is DEJA.js open source?',
-    a: 'No. DEJA.js is a private, subscription-gated product. The source code is not publicly available. Your subscription funds ongoing development and infrastructure.',
-  },
-  {
     q: 'What DCC-EX hardware do I need?',
     a: 'Any DCC-EX CommandStation (Arduino Mega or similar) running the DCC-EX EX-CommandStation firmware. Connect it to the computer running DEJA Server via USB.',
   },
@@ -57,12 +53,12 @@ export default function FAQSection() {
 
         <AnimateIn delay={0.1}>
           <Accordion
-            className="gap-2 flex flex-col"
+            className="gap-3 flex flex-col"
             itemClasses={{
-              base: 'bg-gray-900 border border-gray-800 rounded-xl hover:border-deja-cyan/30 transition-colors',
+              base: 'bg-gray-900/80 border border-gray-700 rounded-xl hover:border-deja-cyan/40 transition-colors',
               title: 'font-semibold text-white text-base',
-              content: 'text-gray-400 text-sm pb-4',
-              trigger: 'px-5 py-4',
+              content: 'text-gray-300 text-sm leading-relaxed px-6 pb-6',
+              trigger: 'px-6 py-5',
               indicator: 'text-deja-cyan',
             }}
           >

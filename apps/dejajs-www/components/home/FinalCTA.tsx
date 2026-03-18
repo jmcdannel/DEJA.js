@@ -48,6 +48,33 @@ export default function FinalCTA() {
             No credit card required for free tier · Cancel anytime
           </p>
         </AnimateIn>
+
+        <AnimateIn delay={0.25}>
+          <div className="border-t border-gray-800 pt-6 flex flex-col items-center gap-3">
+            <p className="text-sm text-gray-400">
+              DEJA.js is developed by{' '}
+              <a
+                href="https://trackandtrestletech.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white hover:text-deja-cyan transition-colors underline underline-offset-2"
+              >
+                Track and Trestle Technology, LLC
+              </a>
+            </p>
+            <p className="text-sm text-gray-500">
+              We offer consulting services for DEJA.js projects — big or small.{' '}
+              <a
+                href="https://trackandtrestletech.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-deja-cyan hover:text-deja-cyan/70 transition-colors font-semibold"
+              >
+                Get in touch →
+              </a>
+            </p>
+          </div>
+        </AnimateIn>
       </div>
     </section>
   );

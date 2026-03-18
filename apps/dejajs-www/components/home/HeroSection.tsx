@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import Logo from '../Logo';
 import AnimateIn from './AnimateIn';
 import SectionLabel from './SectionLabel';
+import Logo from '../Logo';
 
 export default function HeroSection() {
   return (
@@ -35,17 +35,17 @@ export default function HeroSection() {
           {/* Left: text column */}
           <div className="flex flex-col gap-8">
             <AnimateIn delay={0.1}>
-              <Logo size="xl" />
+              <Logo size="2xl" />
             </AnimateIn>
 
             <AnimateIn delay={0.2}>
               <h1
-                className="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl leading-none tracking-tight text-white"
+                className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-none tracking-tight text-white"
                 style={{ fontFamily: 'var(--font-bebas-neue)' }}
               >
-                Run your railroad.
+                Simple to start. Built to grow.
                 <br />
-                <span className="text-deja-cyan">From anywhere.</span>
+                <span className="text-deja-cyan">The cloud platform for DCC-EX.</span>
               </h1>
             </AnimateIn>
 
@@ -53,7 +53,9 @@ export default function HeroSection() {
               <p className="text-lg sm:text-xl text-gray-400 leading-relaxed max-w-lg">
                 DEJA.js connects your DCC-EX CommandStation to every device on
                 your network. Throttle, manage, and automate your layout from
-                any browser — no app store required.
+                any browser — no app store required. Our cloud platform is built
+                to grow with your layout and expand your masterpiece into an
+                immersive experience.
               </p>
             </AnimateIn>
 

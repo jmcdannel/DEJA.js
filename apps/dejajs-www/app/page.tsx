@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import HeroSection from '../components/home/HeroSection';
 import QuickStartSection from '../components/home/QuickStartSection';
+import VideoPlaceholder from '../components/home/VideoPlaceholder';
 import ThrottleSpotlight from '../components/home/ThrottleSpotlight';
 import CloudSpotlight from '../components/home/CloudSpotlight';
 import MonitorSpotlight from '../components/home/MonitorSpotlight';
@@ -9,6 +10,7 @@ import DejaIOSection from '../components/home/DejaIOSection';
 import PlatformFeatures from '../components/home/PlatformFeatures';
 import ComingSoonStrip from '../components/home/ComingSoonStrip';
 import FAQSection from '../components/home/FAQSection';
+import SupportSection from '../components/home/SupportSection';
 import FinalCTA from '../components/home/FinalCTA';
 
 export const metadata: Metadata = {
@@ -25,10 +27,10 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    // Escape the layout container (max-w-5xl px-6 py-10) for full-bleed sections
-    <div className="-mx-6 -my-10">
+    <div>
       <HeroSection />
       <QuickStartSection />
+      <VideoPlaceholder />
       <ThrottleSpotlight />
       <CloudSpotlight />
       <MonitorSpotlight />
@@ -37,6 +39,7 @@ export default function Home() {
       <PlatformFeatures />
       <ComingSoonStrip />
       <FAQSection />
+      <SupportSection />
       <FinalCTA />
     </div>
   );

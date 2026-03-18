@@ -31,10 +31,11 @@ export default function MonitorSpotlight() {
       }}
       mainScreenshot={{ src: '/screenshots/monitor_desktop_dashboard.png', alt: 'DEJA Monitor dashboard' }}
       pipScreenshot={{ src: '/screenshots/monitor_mobile_dashboard.png', alt: 'DEJA Monitor mobile view' }}
-      pipBorderColor="#06b6d4"
       logoPath="/monitor/icon-512.png"
-      ctaHref="https://monitor.dejajs.com"
-      docsHref="/monitor"
+      ctaHref="/monitor"
+      ctaLabel="Learn More"
+      docsHref="/docs/monitor"
+      docsLabel="View Docs"
       flip={true}
       bgClass="bg-gray-950"
     >

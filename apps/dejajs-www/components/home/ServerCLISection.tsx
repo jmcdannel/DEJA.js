@@ -11,24 +11,26 @@ const features = [
 
 const platforms = ['macOS', 'Linux', 'Raspberry Pi'];
 
-const terminalLines = [
-  { type: 'comment' as const, text: 'Install DEJA Server' },
+const installLines = [
   { type: 'command' as const, text: 'curl -fsSL https://install.dejajs.com | bash' },
+  { type: 'output' as const, text: 'Downloading DEJA Server v1.2.0...' },
+  { type: 'output' as const, text: 'Installing dependencies...' },
   { type: 'success' as const, text: 'DEJA Server v1.2.0 installed' },
   { type: 'output' as const, text: '' },
-  { type: 'comment' as const, text: 'Initialize with your layout ID' },
-  { type: 'command' as const, text: 'deja init' },
-  { type: 'info' as const, text: 'Signed in · Layout: Pittsburg & Shasta' },
-  { type: 'output' as const, text: '' },
-  { type: 'comment' as const, text: 'Start the server' },
-  { type: 'command' as const, text: 'deja start' },
+  { type: 'info' as const, text: 'Starting server...' },
   { type: 'success' as const, text: 'Server running on ws://localhost:8082' },
   { type: 'success' as const, text: 'CommandStation connected on /dev/ttyUSB0' },
-  { type: 'output' as const, text: '' },
-  { type: 'comment' as const, text: 'Other commands' },
-  { type: 'command' as const, text: 'deja status   # Check server health' },
-  { type: 'command' as const, text: 'deja update   # Update to latest version' },
-  { type: 'command' as const, text: 'deja stop     # Stop the server' },
+  { type: 'info' as const, text: 'Signed in · Layout: Pittsburg & Shasta 1:87' },
+];
+
+const cliLines = [
+  { type: 'command' as const, text: 'deja start      # Start the server' },
+  { type: 'command' as const, text: 'deja stop       # Stop the server' },
+  { type: 'command' as const, text: 'deja restart    # Restart the server' },
+  { type: 'command' as const, text: 'deja update     # Update to latest version' },
+  { type: 'command' as const, text: 'deja status     # Check server health' },
+  { type: 'command' as const, text: 'deja logs       # Stream server logs' },
+  { type: 'command' as const, text: 'deja init       # Re-initialize layout' },
 ];
 
 export default function ServerCLISection() {
@@ -74,9 +76,18 @@ export default function ServerCLISection() {
           </div>
         </AnimateIn>
 
-        {/* Right column */}
+        {/* Right column — two stacked terminals */}
         <AnimateIn direction="right" delay={0.15}>
-          <TerminalBlock title="deja-server" lines={terminalLines} />
+          <div className="flex flex-col gap-4">
+            <div>
+              <p className="text-xs font-mono text-gray-500 mb-2 pl-1">install</p>
+              <TerminalBlock title="bash" lines={installLines} />
+            </div>
+            <div>
+              <p className="text-xs font-mono text-gray-500 mb-2 pl-1">deja cli</p>
+              <TerminalBlock title="deja" lines={cliLines} />
+            </div>
+          </div>
         </AnimateIn>
       </div>
     </section>

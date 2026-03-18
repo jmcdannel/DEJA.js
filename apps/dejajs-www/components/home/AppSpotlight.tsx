@@ -26,13 +26,15 @@ export interface AppSpotlightProps {
   callout: SpotlightCallout;
   mainScreenshot: { src: string; alt: string };
   pipScreenshot: { src: string; alt: string };
-  pipBorderColor: string;
   logoPath: string;
   ctaHref: string;
+  ctaLabel?: string;
   docsHref: string;
+  docsLabel?: string;
   flip?: boolean;
   bgClass?: string;
   children?: React.ReactNode;
+  visualSlot?: React.ReactNode;
 }
 
 export default function AppSpotlight({
@@ -45,13 +47,15 @@ export default function AppSpotlight({
   callout,
   mainScreenshot,
   pipScreenshot,
-  pipBorderColor,
   logoPath,
   ctaHref,
+  ctaLabel = 'Learn More',
   docsHref,
+  docsLabel = 'View Docs',
   flip = false,
   bgClass = '',
   children,
+  visualSlot,
 }: AppSpotlightProps) {
   const textCol = (
     <AnimateIn direction={flip ? 'right' : 'left'} className="flex flex-col gap-6">
@@ -100,24 +104,24 @@ export default function AppSpotlight({
       <div className="flex flex-wrap gap-3 pt-2">
         <a
           href={ctaHref}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-deja-lime text-black font-bold text-sm hover:opacity-90 transition-opacity"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-deja-cyan/10 border border-deja-cyan/40 text-deja-cyan font-bold text-sm hover:bg-deja-cyan/20 transition-colors"
         >
-          Try {appName}
+          {ctaLabel}
         </a>
         <a
           href={docsHref}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-gray-600 text-gray-300 font-semibold text-sm hover:border-gray-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-500 hover:text-white transition-colors"
         >
-          View Docs
+          {docsLabel}
         </a>
       </div>
     </AnimateIn>
   );
 
-  const visualCol = (
-    <AnimateIn direction={flip ? 'left' : 'right'} className="relative">
+  const defaultVisual = (
+    <AnimateIn direction={flip ? 'left' : 'right'} className="relative pb-8">
       {/* Main screenshot */}
-      <div className="rounded-2xl overflow-hidden border border-gray-800 shadow-2xl glow-cyan">
+      <div className="rounded-2xl overflow-hidden border border-gray-800 shadow-2xl">
         <Image
           src={mainScreenshot.src}
           alt={mainScreenshot.alt}
@@ -129,10 +133,9 @@ export default function AppSpotlight({
 
       {/* PiP screenshot */}
       <div
-        className="absolute -bottom-6 w-2/5 rounded-xl overflow-hidden shadow-xl border-2"
+        className="absolute -bottom-2 w-2/5 rounded-xl overflow-hidden shadow-xl border border-gray-700"
         style={{
-          borderColor: pipBorderColor,
-          ...(flip ? { right: '-1.5rem' } : { left: '-1.5rem' }),
+          ...(flip ? { right: '-1rem' } : { left: '-1rem' }),
         } as React.CSSProperties}
       >
         <Image
@@ -155,7 +158,7 @@ export default function AppSpotlight({
             {textCol}
           </div>
           <div className={flip ? 'lg:order-1' : 'lg:order-2'}>
-            {visualCol}
+            {visualSlot ?? defaultVisual}
           </div>
         </div>
       </div>
