@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useLayout, useServerStatus } from '@repo/modules'
+import { useCurrentUser } from 'vuefire'
+import { useLayout, useServerStatus, useLocos } from '@repo/modules'
 import { useDejaJS } from '@repo/deja'
 import {
   DeviceConnectionList,
-  SystemOverviewStats,
   CommandActivityChart,
-  DeviceConnectionChart,
-  StatusPulse,
+  QuickConnectPanel,
+  LayoutInfoCard,
+  DashboardEmptyState,
   ThrottleLaunchQR,
 } from '@repo/ui'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
@@ -18,9 +19,11 @@ import { formatUptime } from '@repo/utils'
 import { useCommandActivity } from '@/composables/useCommandActivity'
 
 const router = useRouter()
+const user = useCurrentUser()
 const { getDevices, getLayout, connectDevice, disconnectDevice } = useLayout()
 const { sendDejaCommand } = useDejaJS()
 const { serverStatus } = useServerStatus()
+const { createLoco } = useLocos()
 
 // Device data
 const devices = getDevices()
@@ -29,14 +32,13 @@ const layout = getLayout()
 // Port list from RTDB
 const ports = ref<string[]>([])
 const layoutId = useStorage('@DEJA/layoutId', '')
+const wsPort = import.meta.env.VITE_WS_PORT || '8082'
 
 let unsubPorts: (() => void) | null = null
 
 onMounted(() => {
-  // Request port list
   sendDejaCommand({ action: 'listPorts', payload: {} })
 
-  // Listen to RTDB portList
   if (layoutId.value) {
     const portRef = rtdbRef(rtdb, `portList/${layoutId.value}`)
     onValue(portRef, (snapshot) => {
@@ -53,27 +55,29 @@ onUnmounted(() => {
   unsubPorts?.()
 })
 
-// Command activity (placeholder -- wired to empty ref until WebSocket integration)
+// Command activity
 const wsMessages = ref<{ action: string; payload?: unknown }[]>([])
 const { activity: commandActivity } = useCommandActivity(wsMessages)
 
-// Server uptime
+// Computed
 const serverUptime = computed(() => {
   if (!serverStatus.value?.online || !serverStatus.value?.lastSeen) return ''
   return formatUptime(serverStatus.value.lastSeen)
 })
 
-// Computed stats
 const trackPower = computed(() => layout?.value?.dccEx?.power ?? null)
 const connectedCount = computed(() => devices.value?.filter((d) => d.isConnected).length ?? 0)
-const disconnectedCount = computed(() => (devices.value?.length ?? 0) - connectedCount.value)
-const deviceCount = computed(() => ({
-  connected: connectedCount.value,
-  total: devices.value?.length ?? 0,
-}))
 const totalCommandCount = computed(() =>
   commandActivity.value.reduce((sum, b) => sum + b.count, 0),
 )
+
+// Empty state
+const showEmptyState = computed(() => !devices.value || devices.value.length === 0)
+const emptyStateSteps = computed(() => {
+  const steps: number[] = [1] // Always signed in
+  if (serverStatus.value?.online) steps.push(2)
+  return steps
+})
 
 // Event handlers
 async function handleConnect(deviceId: string, serial?: string, topic?: string) {
@@ -90,7 +94,6 @@ async function handleReconnect(deviceId: string) {
   const device = devices.value?.find((d) => d.id === deviceId)
   if (!device) return
   await disconnectDevice(deviceId)
-  // Wait briefly for Firestore to propagate
   setTimeout(async () => {
     await connectDevice(device, device.port, device.topic)
   }, 1000)
@@ -107,102 +110,70 @@ function refreshPorts() {
 function navigateToAddDevice() {
   router.push({ name: 'Devices' })
 }
+
+async function handleAddLoco(address: number, name: string) {
+  await createLoco(address, name, undefined, true)
+}
 </script>
 
 <template>
   <v-container fluid class="pa-4 pa-md-6">
-    <!-- DEJA Server Status (auto-detect) -->
-    <v-card
-      class="mb-4"
-      :style="{
-        borderLeftColor: serverStatus?.online
-          ? 'rgb(var(--v-theme-success))'
-          : 'rgb(var(--v-theme-error))',
-        borderLeftWidth: '4px',
-        borderLeftStyle: 'solid',
-      }"
-      variant="tonal"
-    >
-      <v-card-text class="pa-4">
-        <div class="d-flex justify-space-between align-center">
-          <div class="d-flex align-center ga-3">
-            <v-avatar color="success" variant="tonal" size="40" rounded="lg">
-              <v-icon icon="mdi-server-network" />
-            </v-avatar>
-            <div>
-              <div
-                class="text-subtitle-1 font-weight-bold"
-                :class="serverStatus?.online ? 'text-success' : 'text-error'"
-              >
-                DEJA Server
-              </div>
-              <div v-if="serverStatus?.version" class="text-caption text-medium-emphasis">
-                v{{ serverStatus.version }}
-              </div>
-            </div>
-          </div>
-          <div class="text-right">
-            <div class="d-flex align-center ga-1">
-              <StatusPulse :status="serverStatus?.online ? 'connected' : 'disconnected'" size="sm" />
-              <span class="text-caption" :class="serverStatus?.online ? 'text-success' : 'text-error'">
-                {{ serverStatus?.online ? 'Online' : 'Offline' }}
-              </span>
-            </div>
-            <div v-if="serverUptime" class="text-caption text-medium-emphasis">
-              uptime {{ serverUptime }}
-            </div>
-          </div>
-        </div>
-      </v-card-text>
-    </v-card>
-
-    <!-- Device Connection List (Hero) -->
-    <DeviceConnectionList
-      :devices="devices ?? []"
-      :available-ports="ports"
-      link-mode="page"
-      @connect="handleConnect"
-      @disconnect="handleDisconnect"
-      @reconnect="handleReconnect"
-      @navigate="navigateToDevice"
-      @refresh-ports="refreshPorts"
-      @add-device="navigateToAddDevice"
+    <!-- Empty State -->
+    <DashboardEmptyState
+      v-if="showEmptyState"
+      :completed="emptyStateSteps"
+      :uid="user?.uid"
+      :layout-id="layoutId"
+      :server-online="serverStatus?.online ?? false"
+      @add-loco="handleAddLoco"
     />
 
-    <!-- Divider -->
-    <v-divider class="my-6" />
-
-    <!-- System Overview -->
-    <h2 class="text-h5 font-weight-bold mb-4">System Overview</h2>
-
-    <SystemOverviewStats
-      :server-status="serverStatus"
-      :device-count="deviceCount"
-      :track-power="trackPower"
-      :command-count="totalCommandCount"
-      class="mb-4"
-    />
-
-    <!-- Graphs Row -->
-    <v-row dense>
-      <v-col cols="12" md="6">
-        <CommandActivityChart :data="commandActivity" />
-      </v-col>
-      <v-col cols="12" md="6">
-        <DeviceConnectionChart
-          :connected="connectedCount"
-          :disconnected="disconnectedCount"
+    <!-- Active Dashboard -->
+    <v-row v-else>
+      <!-- Left Column: Devices -->
+      <v-col cols="12" md="8">
+        <DeviceConnectionList
+          :devices="devices ?? []"
+          :available-ports="ports"
+          tile-mode
+          link-mode="page"
+          :server-uptime="serverUptime"
+          :connected-device-count="connectedCount"
+          :total-device-count="devices?.length ?? 0"
+          :command-count="totalCommandCount"
+          @connect="handleConnect"
+          @disconnect="handleDisconnect"
+          @reconnect="handleReconnect"
+          @navigate="navigateToDevice"
+          @refresh-ports="refreshPorts"
+          @add-device="navigateToAddDevice"
         />
       </v-col>
-    </v-row>
 
-    <!-- Launch Throttle QR -->
-    <v-divider class="my-6" />
-    <v-card variant="tonal" class="pa-4 text-center">
-      <v-card-title class="text-subtitle-1 font-weight-bold mb-2">Open Throttle on Your Phone</v-card-title>
-      <v-card-text class="d-flex justify-center">
-        <ThrottleLaunchQR :size="140" label="Scan to open DEJA Throttle" />
-      </v-card-text>
-    </v-card>
+      <!-- Right Column: Sidebar -->
+      <v-col cols="12" md="4" class="d-flex flex-column ga-3">
+        <QuickConnectPanel
+          :devices="devices ?? []"
+          :available-ports="ports"
+          @connect="handleConnect"
+        />
+
+        <LayoutInfoCard
+          :layout-name="layout?.name"
+          :layout-id="layoutId"
+          :server-ip="serverStatus?.ip"
+          :ws-port="wsPort"
+        />
+
+        <CommandActivityChart :data="commandActivity" />
+
+        <v-card variant="flat" class="pa-3 text-center" style="background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+          <div class="text-overline text-medium-emphasis mb-2">Launch Throttle</div>
+          <div class="d-flex justify-center">
+            <ThrottleLaunchQR :size="100" label="Scan to open on mobile" />
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
