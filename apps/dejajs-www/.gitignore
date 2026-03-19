@@ -20,6 +20,9 @@ build/
 out/
 .next/
 
+# Synced docs (generated from /docs/ by sync-docs.mjs)
+content/docs/
+
 # Caches
 .cache/
 .parcel-cache/
