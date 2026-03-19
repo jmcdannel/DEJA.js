@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { createLogger } from '@repo/utils'
 import TourLogo from '../components/TourLogo.vue'
+import { TOUR_ASSETS } from '../assets/blob-urls'
 
 const log = createLogger('Welcome')
 
@@ -84,7 +85,7 @@ const playIntroVideo = () => {
               <p class="text-h6 mt-4">Layout Overview & Welcome</p>
               <p class="text-body-2">Duration: 3:45</p>
             </div> -->
-            <video src="/Adventure Awaits at Tamarack-VEED.mp4?cb=1" controls class="w-full my-2"></video>
+            <video :src="TOUR_ASSETS.adventureVideo" controls class="w-full my-2"></video>
             <!-- <v-btn 
               color="primary" 
               size="large" 

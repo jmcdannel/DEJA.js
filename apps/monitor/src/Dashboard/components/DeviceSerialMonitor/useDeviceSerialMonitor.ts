@@ -43,7 +43,7 @@ export function useDeviceSerialMonitor(deviceId: string) {
     if (status.value === 'OPEN' && deviceId && !isSubscribed.value) {
       const subscribeMessage = {
         action: 'subscribe-device',
-        deviceId: deviceId
+        deviceId
       }
 
       // Send subscription message
@@ -58,7 +58,7 @@ export function useDeviceSerialMonitor(deviceId: string) {
     if (status.value === 'OPEN' && deviceId && isSubscribed.value) {
       const unsubscribeMessage = {
         action: 'unsubscribe-device',
-        deviceId: deviceId
+        deviceId
       }
 
       // Send unsubscription message
@@ -131,7 +131,7 @@ export function useDeviceSerialMonitor(deviceId: string) {
         // }
 
         // addMessage(serialMessage)
-        return
+        
       }
       
     } catch (error) {

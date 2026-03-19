@@ -1,0 +1,69 @@
+{
+  "version": "1",
+  "updatedAt": "2026-03-18T18:34:03.063Z",
+  "assets": {
+    "apps/tour/public/DejaJsLogo.png": {
+      "originalPath": "apps/tour/public/DejaJsLogo.png",
+      "blobUrl": "https://xndozjm68szqabqe.public.blob.vercel-storage.com/tour/DejaJsLogo.png",
+      "blobPathname": "tour/DejaJsLogo.png",
+      "contentType": "image/png",
+      "size": 1357498,
+      "category": "tour",
+      "uploadedAt": "2026-03-18T17:09:59.081Z"
+    },
+    "apps/tour/public/TamarackJunctionLogo.png": {
+      "originalPath": "apps/tour/public/TamarackJunctionLogo.png",
+      "blobUrl": "https://xndozjm68szqabqe.public.blob.vercel-storage.com/tour/TamarackJunctionLogo.png",
+      "blobPathname": "tour/TamarackJunctionLogo.png",
+      "contentType": "image/png",
+      "size": 1657165,
+      "category": "tour",
+      "uploadedAt": "2026-03-18T17:10:40.923Z"
+    },
+    "apps/tour/public/oa-trestle.png": {
+      "originalPath": "apps/tour/public/oa-trestle.png",
+      "blobUrl": "https://xndozjm68szqabqe.public.blob.vercel-storage.com/tour/oa-trestle.png",
+      "blobPathname": "tour/oa-trestle.png",
+      "contentType": "image/png",
+      "size": 601074,
+      "category": "tour",
+      "uploadedAt": "2026-03-18T17:10:56.773Z"
+    },
+    "apps/tour/public/oa_trestle.jpeg": {
+      "originalPath": "apps/tour/public/oa_trestle.jpeg",
+      "blobUrl": "https://xndozjm68szqabqe.public.blob.vercel-storage.com/tour/oa_trestle.jpeg",
+      "blobPathname": "tour/oa_trestle.jpeg",
+      "contentType": "image/jpeg",
+      "size": 2577905,
+      "category": "tour",
+      "uploadedAt": "2026-03-18T17:12:08.024Z"
+    },
+    "apps/tour/public/tamarack-logo.png": {
+      "originalPath": "apps/tour/public/tamarack-logo.png",
+      "blobUrl": "https://xndozjm68szqabqe.public.blob.vercel-storage.com/tour/tamarack-logo.png",
+      "blobPathname": "tour/tamarack-logo.png",
+      "contentType": "image/png",
+      "size": 2096930,
+      "category": "tour",
+      "uploadedAt": "2026-03-18T17:13:10.926Z"
+    },
+    "apps/tour/public/tc-casino.png": {
+      "originalPath": "apps/tour/public/tc-casino.png",
+      "blobUrl": "https://xndozjm68szqabqe.public.blob.vercel-storage.com/tour/tc-casino.png",
+      "blobPathname": "tour/tc-casino.png",
+      "contentType": "image/png",
+      "size": 3058847,
+      "category": "tour",
+      "uploadedAt": "2026-03-18T17:15:20.556Z"
+    },
+    "apps/tour/public/Adventure Awaits at Tamarack-VEED.mp4": {
+      "originalPath": "apps/tour/public/Adventure Awaits at Tamarack-VEED.mp4",
+      "blobUrl": "https://xndozjm68szqabqe.public.blob.vercel-storage.com/tour/Adventure%20Awaits%20at%20Tamarack-VEED.mp4",
+      "blobPathname": "tour/Adventure Awaits at Tamarack-VEED.mp4",
+      "contentType": "video/mp4",
+      "size": 21803168,
+      "category": "tour",
+      "uploadedAt": "2026-03-18T18:34:03.058Z"
+    }
+  }
+}

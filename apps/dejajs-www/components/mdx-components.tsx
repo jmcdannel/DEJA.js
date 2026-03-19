@@ -1,6 +1,12 @@
 import type { MDXComponents } from 'mdx/types';
+import { ArchitectureDiagram } from './diagrams/ArchitectureDiagram';
 
 export const mdxComponents: MDXComponents = {
+    // Usage in MDX: <ArchitectureDiagram config="full" />
+    // Available config IDs: minimal | standard | full | io-focused
+    ArchitectureDiagram: ({ config, width }: { config: string; width?: number }) => (
+      <ArchitectureDiagram config={config} width={width} className="my-6 mx-auto block" />
+    ),
     h1: ({ children }) => (
       <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-6 mt-2">
         {children}

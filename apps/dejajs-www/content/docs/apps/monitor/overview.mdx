@@ -11,11 +11,12 @@ The Monitor app is a tmux-style system monitoring dashboard for your DCC-EX layo
 ## Key Features
 
 - **Tmux-Style Dashboard** — Tiled panes for DCC Log, Turnouts, Effects, Sensors, and Stats with minimize/maximize/clear controls
-- **MonitorStatusBar** — Compact IDE-like header with track power, e-stop, layout selector, WS/server status indicators, and user profile
+- **MonitorStatusBar** — Global status bar with track power, e-stop, layout selector, server status indicators, and user profile; redesigned with DEJA Server device type support and server IP broadcasting
 - **Real-Time Logs** — Live streaming of DCC commands, turnout changes, effect triggers, and sensor events
 - **System Stats** — Active locos, device count, turnout/effect/signal totals, and server uptime
 - **Device Serial Monitor** — Subscribe to individual device serial output for debugging
-- **Settings** — Account, billing, theme (dark/light/high-contrast), background customization, and WS connection config
+- **Settings** — Account, billing, theme (dark/light/high-contrast), background customization, and WS connection config; navigation moved to right side with sticky positioning
+- **404 Page** — Brand-consistent not-found page with links to Dashboard and Logs
 
 ## Screenshots
 
@@ -43,4 +44,4 @@ The Monitor app is a tmux-style system monitoring dashboard for your DCC-EX layo
 - **Real-time:** WebSocket subscriptions for device serial data, Firebase RTDB for DCC logs
 - **Routing:** Vue Router 4 with auth guards (`requireAuth`, `requireLayout`)
 - **Theme:** Dark/Light/High-Contrast via `useThemeSwitcher`
-- **Port:** 3031 (development)
+- **Port:** 3021 (development)

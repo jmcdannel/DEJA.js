@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useTourStore } from '../stores/tour'
-import { useCollection } from 'vuefire'
-import { useEfx } from '@repo/modules'
+import { useEfx, type Effect } from '@repo/modules'
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import GuestEffectCard from '../components/GuestEffectCard.vue'
 
 const tourStore = useTourStore()
 const selectedCategory = ref<string | null>(null)
 const { getGuestEffects } = useEfx()
-const effects = getGuestEffects()
+const effects = getGuestEffects() as unknown as Effect[]
 
 </script>
 

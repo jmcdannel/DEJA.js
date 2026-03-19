@@ -6,19 +6,19 @@ order: 2
 
 # Cloud App
 
-The Cloud app is the administration hub for managing your DCC-EX layout. Configure locomotives, turnouts, routes, effects, signals, sounds, and connected devices from a centralized dashboard.
+The Cloud app is the administration hub for managing your DCC-EX layout. Configure locomotives, turnouts, routes, effects, signals, sounds, track diagrams, and connected devices from a centralized dashboard.
 
 ## Navigation
 
-The left sidebar organizes features into three sections:
+The left sidebar organizes features into three grouped sections with a Vercel-style neutral active state:
 
 | Section | Items |
 |---|---|
 | **Modules** | Roster, Turnouts, Routes, Effects, Signals, Sounds |
-| **Hardware** | Sensors, Devices, DCC-EX |
-| **System** | Settings, Emulator |
+| **Hardware** | Sensors, Devices, DCC-EX, Track Diagrams |
+| **System** | Settings, Upgrade |
 
-A pinned footer row links to the other DEJA suite apps (Cloud, Throttle, Monitor, Tour).
+A compact icon-only row at the drawer footer links to the other DEJA suite apps (Cloud, Throttle, Monitor, Tour).
 
 ## Key Features
 
@@ -26,20 +26,28 @@ A pinned footer row links to the other DEJA suite apps (Cloud, Throttle, Monitor
 - **Roster Management** — Add, edit, and organize locomotives with custom names, addresses, and function mappings; bidirectional sync with the DCC-EX CommandStation roster
 - **Turnout Configuration** — Define turnouts with DCC addresses and friendly labels
 - **Route Builder** — Create routes that set multiple turnouts in sequence
-- **Sound Library** — Upload, browse, and manage sound files stored in Vercel Blob
 - **Effects Management** — Configure sound effects, lights, and animations
-- **Sound Library** — Upload and manage audio files for playback during effects
+- **Sound Library** — Upload, browse, and manage sound files via integrated Vercel Serverless API (consolidated from the standalone sound-api service)
 - **Signal Wiring** — Set up signal aspects and output pin mappings
 - **Sensor Management** — Configure sensors and automation rules
-- **Device Management** — Monitor and configure connected hardware devices
+- **Device Management** — Monitor and configure connected hardware devices with DEJA Server auto-detect status
+- **Track Diagram Editor** — VueFlow-based visual track diagram editor with custom nodes and edges, live SVG preview, CSS export, and Firebase Storage upload
 - **DCC-EX Console** — Direct command-line access to the DCC-EX command station
 - **Settings** — Layout settings, user profile, and billing
-- **Upgrade** — View subscription plans and upgrade options
+- **Upgrade** — Compare and switch subscription plans (Hobbyist, Engineer, Conductor)
+- **Sentry Feedback** — Persistent floating feedback button for general feedback plus automatic error report dialog, with user identity pre-filled from Firebase Auth
 - **404 Page** — Brand-consistent not-found page with links to Dashboard, Roster, and Effects
 
 ## Onboarding
 
-New users are guided through an onboarding wizard to create their first layout. After completing onboarding, a **Setup Complete** page provides:
+New users are guided through a multi-step onboarding wizard:
+
+1. **Layout creation** — Choose a layout name and ID
+2. **Plan selection** — Compare Hobbyist, Engineer, and Conductor tiers with feature highlights (Remote Monitoring gated to paid plans)
+3. **Payment** — Stripe-powered subscription checkout (for paid plans)
+4. **Install** — Server installation instructions using the QuickStart component with personalized install command
+
+After completing onboarding, a **Setup Complete** page provides:
 
 - Confirmation of layout creation with the user's Layout ID
 - Quick-add form to register a first locomotive (DCC address + optional name)
@@ -53,7 +61,7 @@ Layouts are automatically approved on creation — there is no admin approval st
 
 ### Dashboard
 
-![Cloud Dashboard](/screenshots/cloud_desktop_dashboard.png)
+{/* Screenshot pending: cloud_desktop_dashboard.png */}
 
 ### Roster
 
@@ -84,19 +92,23 @@ The Roster page manages your locomotive collection and supports **bidirectional 
 
 ### Devices
 
-![Device Management](/screenshots/cloud_desktop_devices.png)
+{/* Screenshot pending: cloud_desktop_devices.png */}
 
 ### DCC-EX Console
 
-![DCC-EX Console](/screenshots/cloud_desktop_dccex.png)
+{/* Screenshot pending: cloud_desktop_dccex.png */}
 
 ### Sounds
 
-![Sound Library](/screenshots/cloud_desktop_sounds.png)
+{/* Screenshot pending: cloud_desktop_sounds.png */}
 
 ### Settings
 
-![Settings](/screenshots/cloud_desktop_settings.png)
+{/* Screenshot pending: cloud_desktop_settings.png */}
+
+### Track Diagrams
+
+{/* Screenshot pending: cloud_desktop_track-diagrams.png */}
 
 ## Technical Details
 
@@ -104,4 +116,5 @@ The Roster page manages your locomotive collection and supports **bidirectional 
 - **State:** Firebase Firestore via VueFire
 - **Auth:** Firebase Auth with onboarding wizard and auto-approved layouts
 - **Routing:** Vue Router 4 with meta-based guard chain
-- **Port:** 3011 (development)
+- **API:** Integrated Vercel Serverless Functions for sound management and Stripe billing
+- **Port:** 5174 (development)

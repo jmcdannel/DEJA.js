@@ -5,6 +5,7 @@ import { useLayout, useLocos, useTurnouts, useEfx, useSignals } from '@repo/modu
 import { useLayoutLogListeners } from '../composables/useLayoutLogListeners'
 import { usePaneManager, PANE_COLORS, type PaneColorKey } from '../composables/usePaneManager'
 import { useWsConnection } from '../composables/useWsConnection'
+import { ThrottleLaunchQR } from '@repo/ui'
 import MonitorPane from './components/MonitorPane.vue'
 import DccLogPane from './components/DccLogPane.vue'
 import DeviceSerialPaneContent from './components/DeviceSerialPaneContent.vue'
@@ -256,6 +257,11 @@ if (import.meta.env.DEV) {
           />
         </div>
       </div>
+    </div>
+
+    <!-- Quick Throttle Launch -->
+    <div class="fixed bottom-6 right-6 z-50">
+      <ThrottleLaunchQR :size="80" label="Open Throttle" />
     </div>
   </div>
 </template>
