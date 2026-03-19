@@ -27,7 +27,6 @@ const LEGEND_ITEMS = [
   { label: 'DEJA.js platform', color: CONN_COLORS.websocket },
   { label: 'DEJA IO devices', color: CONN_COLORS.mqtt },
   { label: 'DCC-EX (3rd party)', color: CONN_COLORS.usb },
-  { label: 'Physical hardware', color: CONN_COLORS.dcc },
   { label: 'Connected peripherals', color: CONN_COLORS.peripheral },
 ] as const
 
