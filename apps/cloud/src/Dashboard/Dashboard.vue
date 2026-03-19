@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { useLayout, useServerStatus, useLocos } from '@repo/modules'
@@ -71,17 +71,8 @@ const totalCommandCount = computed(() =>
   commandActivity.value.reduce((sum, b) => sum + b.count, 0),
 )
 
-// Loading state — devices starts as undefined while Firestore loads
-const devicesLoaded = ref(false)
-watch(
-  () => devices.value,
-  (val) => {
-    if (val !== undefined && !devicesLoaded.value) {
-      devicesLoaded.value = true
-    }
-  },
-  { immediate: true },
-)
+// Loading state — use VueFire's built-in pending ref
+const devicesLoaded = computed(() => !devices.pending.value)
 
 // Empty state — only decide after data has loaded to prevent flash
 const showEmptyState = computed(() => devicesLoaded.value && (!devices.value || devices.value.length === 0))
