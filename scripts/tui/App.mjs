@@ -29,10 +29,18 @@ import { useLogger } from './hooks/useLogger.mjs'
 import { useServerProcess } from './hooks/useServerProcess.mjs'
 import { useTunnel } from './hooks/useTunnel.mjs'
 
+// Commands
+import { registerAllCommands } from './commands/index.mjs'
+import { lookup } from './commands/registry.mjs'
+import { CommandInput, useCommandInput } from './components/CommandInput.mjs'
+
 const h = React.createElement
 
 // Load env ONCE at module scope
 loadEnvFile(`${DEJA_DIR}/.env`)
+
+// Register all slash commands at module scope
+registerAllCommands()
 
 const WS_PORT = parseInt(process.env.VITE_WS_PORT || '8082', 10)
 const VERSION = getVersion()
@@ -51,7 +59,7 @@ export function App() {
   const [portIndex, setPortIndex]           = useState(0)
   const [availablePorts, setAvailablePorts] = useState([])
   const [showHelp, setShowHelp]             = useState(false)
-  const [inputText, setInputText]           = useState('')
+  const { inputText, setInputText, handleTab, handleChar, handleBackspace, handleClear } = useCommandInput()
   const [startupTip]                        = useState(() =>
     STARTUP_TIPS[Math.floor(Math.random() * STARTUP_TIPS.length)]
   )
@@ -99,6 +107,16 @@ export function App() {
         addLog(`Unknown command: "${cmd}". Type help or press [?] for shortcuts.`)
     }
   }, [addLog, spawnServer, stopTunnel, childRef, setStatus])
+
+  // ── Command context (passed to slash command execute()) ───────────────────
+
+  const commandContext = {
+    addLog, showHint, transitionMode,
+    spawnServer, stopServer, restartServer, setStatus,
+    childRef,
+    toggleTunnel, tunnelCleanup,
+    exportLogs, cycleFilter,
+  }
 
   // ── Auto-start: triggers on mode='logs' (onboarding-aware) ────────────────
 
@@ -196,7 +214,48 @@ export function App() {
     }
 
     // Log view (default mode)
-    if (key.escape || input === 'm') { transitionMode('menu'); return }
+
+    // Tab: cycle through slash-command completions
+    if (key.tab) { handleTab(); return }
+
+    // Enter: execute slash command or legacy text command
+    if (key.return) {
+      const raw = inputText.trim()
+      if (!raw) return
+      if (raw.startsWith('/')) {
+        const result = lookup(raw)
+        if (result) {
+          result.command.execute(result.args, commandContext)
+        } else {
+          addLog(`Unknown command: "${raw}". Type /help for available commands.`)
+        }
+      } else {
+        handleCommand(raw)
+      }
+      handleClear()
+      return
+    }
+
+    // Esc: clear input if non-empty, otherwise open menu
+    if (key.escape) {
+      if (inputText.length > 0) { handleClear(); return }
+      transitionMode('menu')
+      return
+    }
+
+    // Backspace/Delete
+    if (key.backspace || key.delete) { handleBackspace(); return }
+
+    // When input is non-empty, all keys go to input buffer (hotkeys disabled)
+    if (inputText.length > 0) {
+      if (!key.ctrl && !key.meta && input) {
+        handleChar(input)
+      }
+      return
+    }
+
+    // Hotkeys (only when input is empty)
+    if (input === 'm') { transitionMode('menu'); return }
     if (input === '?') { setShowHelp(v => !v); return }
     if (input === 'r') { handleCommand('restart'); return }
     if (input === 's') { handleCommand('stop'); return }
@@ -204,16 +263,9 @@ export function App() {
     if (input === 'e') { exportLogs(); return }
     if (input === 'l') { cycleFilter(); return }
 
-    // Text input (command box)
-    if (key.return) {
-      const cmd = inputText.trim()
-      setInputText('')
-      if (cmd) handleCommand(cmd)
-      return
-    }
-    if (key.backspace || key.delete) { setInputText(t => t.slice(0, -1)); return }
-    if (!key.ctrl && !key.meta && !key.tab && !key.escape && input) {
-      setInputText(t => t + input)
+    // Regular character input
+    if (!key.ctrl && !key.meta && input) {
+      handleChar(input)
     }
   })
 
@@ -296,11 +348,7 @@ export function App() {
 
     // Input row (logs mode only)
     mode === 'logs'
-      ? h(Box, null,
-          h(Text, { color: '#00C4FF' }, '> '),
-          h(Text, null, inputText),
-          h(Text, { color: '#00C4FF' }, '▌')
-        )
+      ? h(CommandInput, { value: inputText })
       : null,
 
     // Help bar (always shown in logs mode)
