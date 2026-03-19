@@ -91,12 +91,11 @@ These panels use the LCD display component, which renders text in a retro termin
 
 When you send a command from the console:
 
-1. The `sendDccCommand` function from `useDcc()` writes the command to Firebase Realtime Database at `dccCommands/{layoutId}`.
-2. The server's RTDB listener in `dejaCloud.ts` picks up the new entry.
-3. The server's DCC handler in `lib/dcc.ts` wraps the command in angle brackets and sends it over USB serial: `<command>\n`.
-4. The CommandStation processes the command and sends any response back over serial.
-5. The server broadcasts the response to all connected WebSocket clients.
-6. The DCC Log displays the response in the console.
+1. The Cloud app sends the command to Firebase.
+2. The DEJA Server picks up the command and forwards it over USB serial to the CommandStation.
+3. The CommandStation processes the command and sends any response back.
+4. The server broadcasts the response to all connected apps.
+5. The DCC Log displays the response in the console.
 
 ## Common Use Cases
 

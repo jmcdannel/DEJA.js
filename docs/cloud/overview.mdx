@@ -67,32 +67,11 @@ The home screen serves as a system overview. If a DCC-EX CommandStation device i
 
 If no DCC-EX device has been configured yet, the dashboard shows an onboarding prompt titled "Set Up Your Command Station" with quick-links to layout setup. This empty state highlights three key capabilities: monitoring layout status, tracking connected devices, and viewing a system health overview.
 
-## Tech Stack
+Changes made in the Cloud app are immediately visible in the Throttle, Monitor, and Tour apps — all data syncs in real time.
 
-The Cloud app is built with:
+## Accessing the Cloud App
 
-- **Vue 3** with Composition API (`<script setup lang="ts">`)
-- **Vuetify 3** for Material Design UI components
-- **Tailwind CSS** for utility classes
-- **VueFire** for reactive Firebase bindings
-- **Vue Router 4** with authentication guards (`requireAuth`, `requireOnboarding`, `requireLayout`)
-- **VueUse** for composable utilities (persistent storage, etc.)
-
-All data flows through Firebase Firestore collections scoped to the selected layout ID. Changes made in the Cloud app are immediately visible in the Throttle, Monitor, and Tour apps.
-
-## Running the Cloud App
-
-Start the Cloud app in development mode:
-
-```bash
-pnpm --filter=deja-cloud dev
-```
-
-The app launches on a Vite development server. For development without a live Firebase connection, a mock mode is available:
-
-```bash
-pnpm --filter=deja-cloud dev:mock
-```
+The Cloud app is available at [cloud.dejajs.com](https://cloud.dejajs.com). Log in with your DEJA Cloud account and select a layout to get started.
 
 ## Next Steps
 

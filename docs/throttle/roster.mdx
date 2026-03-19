@@ -1,11 +1,25 @@
 ---
 title: Roster
-description: Browse your locomotive roster, view decoder details, and select a locomotive to control from the Throttle app.
+description: Browse your locomotive roster and select a train to drive from the Throttle app.
 order: 3
 ---
 
-# Roster
+# Your Locomotive Roster
 
-The Roster screen (`/locos`) displays all locomotives configured for your layout. Each entry shows the locomotive's name, DCC address, road name, and color. Tap a locomotive to open its throttle control screen.
+The Roster screen displays all locomotives configured for your layout. From here, you can browse your collection and select a locomotive to drive.
 
-Locomotives are configured in the [Cloud app](/docs/cloud) and stored in Firebase Firestore at `layouts/{layoutId}/throttles`. The roster updates in real time as changes are made in the Cloud app.
+## Viewing Your Roster
+
+Each locomotive in the roster shows:
+
+- **Name** — The locomotive's display name (e.g., "UP 4014 Big Boy")
+- **DCC Address** — The decoder address used for communication
+- **Road Name** — The railroad company (e.g., Union Pacific, BNSF)
+
+Tap any locomotive to open its [throttle control screen](/docs/throttle/throttle) and start driving.
+
+## Managing Your Roster
+
+Locomotives are added and configured in the [Cloud app](/docs/cloud/roster). Changes made in the Cloud app — adding new locos, editing decoder functions, or building consists — appear in the Throttle roster automatically in real time.
+
+{/* TODO: Screenshot */}

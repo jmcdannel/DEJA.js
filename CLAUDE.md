@@ -728,10 +728,19 @@ Frontend apps (throttle, cloud) are deployed to **Vercel** (see `vercel.json` in
 
 | File | Purpose |
 |---|---|
-| `README.md` | Project overview, setup, quick start |
-| `API_DOCUMENTATION.md` | Public APIs, composables, types, usage examples |
+| `README.md` | Project overview, monorepo structure, dev setup |
+| `ARCHITECTURE.md` | System architecture, communication layers, data flow |
+| `CONTRIBUTING.md` | Development setup, coding conventions, workflow |
 | `CHANGELOG.md` | Version history (Keep a Changelog format) |
 | `ROADMAP.md` | Planned features |
 | `TODO.md` | Short-term task list |
 | `apps/server/WEBSOCKET_PROTOCOL.md` | WebSocket message format & device subscription protocol |
 | `apps/*/README.md` | Per-app documentation |
+| `packages/modules/README.md` | Core business logic composables and types |
+| `packages/dccex/README.md` | DCC-EX command protocol and useDcc() API |
+| `packages/deja/README.md` | Core DEJA composable (useDejaJS) |
+| `packages/ui/README.md` | Shared Vue component library |
+| `packages/auth/README.md` | Firebase auth guards and components |
+| `packages/firebase-config/README.md` | Firebase client and admin SDK initialization |
+| `packages/utils/README.md` | Common utility functions |
+| `io/README.md` | Arduino and Pico W firmware documentation |

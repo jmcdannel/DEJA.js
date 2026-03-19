@@ -149,14 +149,4 @@ The Tour app supports two authentication modes:
 - **Guest Auth** -- Lightweight guest access using the `requireGuestOrAuth` route guard. Guests do not need an account; the `useGuestStore` Pinia store tracks their session.
 - **Demo Mode** -- When `VITE_DEMO_MODE=true` is set, authentication guards are bypassed entirely, allowing unrestricted access for demonstrations.
 
-The login page (`/login`) is rendered by the `TourLogin` component and supports both authentication paths.
-
-## Running the Tour App
-
-Start the Tour app in development mode:
-
-```bash
-pnpm --filter=deja-tour dev
-```
-
-The app runs on its default Vite port (3031) and requires a Firebase connection for effects data and layout information.
+The login page supports both authentication paths — full sign-in for registered users and quick guest access for visitors.
