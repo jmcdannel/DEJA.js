@@ -55,11 +55,11 @@ watch(() => route.fullPath, () => {
   if (!routeReady.value && !isNavigating.value) {
     routeReady.value = true
   }
-})
+}, { immediate: true })
 // Also mark ready when navigation finishes
 watch(isNavigating, (navigating) => {
   if (!navigating) routeReady.value = true
-})
+}, { immediate: true })
 
 const isFullscreen = computed(() => {
   // Before initial route resolves, hide chrome to prevent flash

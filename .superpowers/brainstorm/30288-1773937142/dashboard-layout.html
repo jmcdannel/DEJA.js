@@ -1,0 +1,146 @@
+<h2>Dashboard Layout — Desktop Column Structure</h2>
+<p class="subtitle">How should the main dashboard organize its content on desktop? All options stack to single-column on mobile.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Two-Column: Devices + Sidebar</h3>
+      <p>Left column (8/12): Devices list as the hero. Right column (4/12): Server status card, system overview stats stacked vertically, QR code, quick links.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-body" style="display:flex;gap:12px;min-height:280px">
+          <div style="flex:2;display:flex;flex-direction:column;gap:8px">
+            <div style="background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.2);border-left:4px solid #38bdf8;padding:12px;border-radius:6px;display:flex;align-items:center;gap:8px">
+              <div style="width:32px;height:32px;border-radius:6px;background:rgba(56,189,248,0.2);display:flex;align-items:center;justify-content:center;font-size:14px">🖥</div>
+              <div><div style="font-size:12px;font-weight:700;color:#38bdf8">DEJA Server</div><div style="font-size:10px;opacity:0.5">Online · 192.168.1.100</div></div>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:4px"><div style="width:6px;height:6px;border-radius:50%;background:#22c55e"></div><span style="font-size:10px;color:#22c55e">Connected</span></div>
+            </div>
+            <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-left:4px solid #8b5cf6;padding:12px;border-radius:6px;display:flex;align-items:center;gap:8px">
+              <div style="width:32px;height:32px;border-radius:6px;background:rgba(139,92,246,0.2);display:flex;align-items:center;justify-content:center;font-size:14px">🔌</div>
+              <div><div style="font-size:12px;font-weight:700;color:#8b5cf6">DCC-EX CommandStation</div><div style="font-size:10px;opacity:0.5">USB · /dev/ttyACM0</div></div>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:4px"><div style="width:6px;height:6px;border-radius:50%;background:#22c55e"></div><span style="font-size:10px;color:#22c55e">Connected</span></div>
+            </div>
+            <div style="background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.2);border-left:4px solid #fb923c;padding:12px;border-radius:6px;display:flex;align-items:center;gap:8px">
+              <div style="width:32px;height:32px;border-radius:6px;background:rgba(251,146,60,0.2);display:flex;align-items:center;justify-content:center;font-size:14px">📡</div>
+              <div><div style="font-size:12px;font-weight:700;color:#fb923c">DEJA Arduino LED</div><div style="font-size:10px;opacity:0.5">WiFi · deja/led-strip</div></div>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:4px"><div style="width:6px;height:6px;border-radius:50%;background:#ef4444"></div><span style="font-size:10px;color:#ef4444">Disconnected</span></div>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:12px;border-radius:6px;text-align:center">
+              <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5;margin-bottom:4px">Server</div>
+              <div style="font-size:18px;font-weight:700;color:#22c55e">Online</div>
+              <div style="font-size:10px;opacity:0.4">uptime 2h 14m</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center">
+                <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5;margin-bottom:2px">Devices</div>
+                <div style="font-size:16px;font-weight:700;color:#38bdf8">2/3</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center">
+                <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5;margin-bottom:2px">Power</div>
+                <div style="font-size:16px;font-weight:700;color:#f59e0b">ON</div>
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:12px;border-radius:6px;text-align:center">
+              <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5;margin-bottom:4px">Activity</div>
+              <div style="display:flex;align-items:end;gap:2px;height:40px;justify-content:center">
+                <div style="width:6px;height:15%;background:rgba(56,189,248,0.3);border-radius:2px"></div>
+                <div style="width:6px;height:40%;background:rgba(56,189,248,0.3);border-radius:2px"></div>
+                <div style="width:6px;height:70%;background:rgba(56,189,248,0.4);border-radius:2px"></div>
+                <div style="width:6px;height:30%;background:rgba(56,189,248,0.3);border-radius:2px"></div>
+                <div style="width:6px;height:90%;background:rgba(56,189,248,0.5);border-radius:2px"></div>
+                <div style="width:6px;height:50%;background:rgba(56,189,248,0.4);border-radius:2px"></div>
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:12px;border-radius:6px;text-align:center">
+              <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5;margin-bottom:6px">Throttle</div>
+              <div style="width:60px;height:60px;background:rgba(255,255,255,0.06);border:1px dashed rgba(255,255,255,0.15);border-radius:6px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:10px;opacity:0.4">QR</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Stats Top + Devices Below</h3>
+      <p>Full-width stat cards row across the top (server, devices, power, commands). Then devices list fills the width below. Charts and QR in a bottom row.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-body" style="display:flex;flex-direction:column;gap:12px;min-height:280px">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center">
+              <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5">Server</div>
+              <div style="font-size:16px;font-weight:700;color:#22c55e">Online</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center">
+              <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5">Devices</div>
+              <div style="font-size:16px;font-weight:700;color:#38bdf8">2/3</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center">
+              <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5">Power</div>
+              <div style="font-size:16px;font-weight:700;color:#f59e0b">ON</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center">
+              <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5">Commands</div>
+              <div style="font-size:16px;font-weight:700;color:#a78bfa">47</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.2);border-left:4px solid #38bdf8;padding:10px;border-radius:6px;font-size:11px"><span style="color:#38bdf8;font-weight:700">DEJA Server</span> <span style="opacity:0.5">· Online · 192.168.1.100</span></div>
+            <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-left:4px solid #8b5cf6;padding:10px;border-radius:6px;font-size:11px"><span style="color:#8b5cf6;font-weight:700">DCC-EX CommandStation</span> <span style="opacity:0.5">· Connected</span></div>
+            <div style="background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.2);border-left:4px solid #fb923c;padding:10px;border-radius:6px;font-size:11px"><span style="color:#fb923c;font-weight:700">DEJA Arduino LED</span> <span style="opacity:0.5">· Disconnected</span></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center;font-size:10px;opacity:0.5">Activity Chart</div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center;font-size:10px;opacity:0.5">Connection Chart</div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center;font-size:10px;opacity:0.5">QR Code</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Three-Zone: Stats + Devices + Insights</h3>
+      <p>Left column (3/12): Compact stat cards stacked vertically. Center column (6/12): Devices as the main focus. Right column (3/12): Activity chart, connection chart, QR, quick actions.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-body" style="display:flex;gap:12px;min-height:280px">
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center">
+              <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5">Server</div>
+              <div style="font-size:16px;font-weight:700;color:#22c55e">Online</div>
+              <div style="font-size:9px;opacity:0.4">2h 14m</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center">
+              <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5">Devices</div>
+              <div style="font-size:16px;font-weight:700;color:#38bdf8">2/3</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center">
+              <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5">Power</div>
+              <div style="font-size:16px;font-weight:700;color:#f59e0b">ON</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center">
+              <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5">Commands</div>
+              <div style="font-size:16px;font-weight:700;color:#a78bfa">47</div>
+            </div>
+          </div>
+          <div style="flex:2;display:flex;flex-direction:column;gap:8px">
+            <div style="background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.2);border-left:4px solid #38bdf8;padding:12px;border-radius:6px;font-size:11px"><span style="color:#38bdf8;font-weight:700">DEJA Server</span> <span style="opacity:0.5">· Online</span></div>
+            <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-left:4px solid #8b5cf6;padding:12px;border-radius:6px;font-size:11px"><span style="color:#8b5cf6;font-weight:700">DCC-EX</span> <span style="opacity:0.5">· Connected</span></div>
+            <div style="background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.2);border-left:4px solid #fb923c;padding:12px;border-radius:6px;font-size:11px"><span style="color:#fb923c;font-weight:700">Arduino LED</span> <span style="opacity:0.5">· Disconnected</span></div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center;font-size:10px;opacity:0.5;flex:1">Activity</div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center;font-size:10px;opacity:0.5;flex:1">Connections</div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:6px;text-align:center;font-size:10px;opacity:0.5">QR</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
