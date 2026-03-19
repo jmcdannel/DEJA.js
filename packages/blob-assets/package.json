@@ -1,0 +1,21 @@
+{
+  "name": "@repo/blob-assets",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Upload and manage binary assets on Vercel Blob for DEJA.js",
+  "main": "src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "upload-assets": "tsx scripts/upload-assets.ts"
+  },
+  "dependencies": {
+    "@vercel/blob": "^1.1.1"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.20.4",
+    "typescript": "*"
+  }
+}

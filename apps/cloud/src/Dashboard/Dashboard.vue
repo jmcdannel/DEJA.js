@@ -9,6 +9,7 @@ import {
   CommandActivityChart,
   DeviceConnectionChart,
   StatusPulse,
+  ThrottleLaunchQR,
 } from '@repo/ui'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
@@ -70,6 +71,9 @@ const deviceCount = computed(() => ({
   connected: connectedCount.value,
   total: devices.value?.length ?? 0,
 }))
+const commandActivityData = computed(() =>
+  commandActivity.value.map(b => ({ timestamp: b.timestamp, count: b.count })),
+)
 const totalCommandCount = computed(() =>
   commandActivity.value.reduce((sum, b) => sum + b.count, 0),
 )
@@ -185,7 +189,7 @@ function navigateToAddDevice() {
     <!-- Graphs Row -->
     <v-row dense>
       <v-col cols="12" md="6">
-        <CommandActivityChart :data="commandActivity" />
+        <CommandActivityChart :data="commandActivityData" />
       </v-col>
       <v-col cols="12" md="6">
         <DeviceConnectionChart
@@ -194,5 +198,14 @@ function navigateToAddDevice() {
         />
       </v-col>
     </v-row>
+
+    <!-- Launch Throttle QR -->
+    <v-divider class="my-6" />
+    <v-card variant="tonal" class="pa-4 text-center">
+      <v-card-title class="text-subtitle-1 font-weight-bold mb-2">Open Throttle on Your Phone</v-card-title>
+      <v-card-text class="d-flex justify-center">
+        <ThrottleLaunchQR :size="140" label="Scan to open DEJA Throttle" />
+      </v-card-text>
+    </v-card>
   </v-container>
 </template>

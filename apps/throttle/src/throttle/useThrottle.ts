@@ -2,11 +2,11 @@ import { computed, onMounted, onUnmounted, watch, type Ref } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { deleteDoc, doc, setDoc } from 'firebase/firestore'
 import { useDocument } from 'vuefire'
-import type { Throttle } from '@/throttle/types'
 import { type Loco, useLocos } from '@repo/modules'
 import { db } from '@repo/firebase-config'
-import { getSignedSpeed } from '@/throttle/utils'
 import { createLogger } from '@repo/utils'
+import { getSignedSpeed } from '@/throttle/utils'
+import type { Throttle } from '@/throttle/types'
 import { useCommandQueue } from '@/composables/useCommandQueue'
 import { wiThrottleService } from '@/services/WiThrottleService'
 
@@ -52,13 +52,13 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
   const loco = computed(() => {
     const addr = address.value
     if (addr === undefined || addr === null) return undefined
-    return (locos.value || []).find((l: Loco) => l.address === addr)
+    return (locos.value as Loco[] || []).find((l) => l.address === addr)
   })
   const currentSpeed = computed(() => throttle.value ? getSignedSpeed({
     speed: throttle.value?.speed,
     direction: throttle.value?.direction
   }) : 0)
-  const direction = computed(() => currentSpeed.value > -1 ? true : false)
+  const direction = computed(() => currentSpeed.value > -1)
 
   watch(currentSpeed, (newSpeed: number) => {
     updateSpeed(newSpeed)

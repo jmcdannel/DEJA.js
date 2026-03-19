@@ -36,7 +36,7 @@ const effectId = ref(props.sensor?.effectId ?? '')
 const automationId = ref(props.sensor?.automationId ?? '')
 const description = ref(props.sensor?.description ?? '')
 const tags = ref<string[]>(props.sensor?.tags ?? [])
-const color = ref(props.sensor?.color ?? 'teal')
+const color = ref((props.sensor as Sensor & { color?: string })?.color ?? 'teal')
 const loading = ref(false)
 const error = ref<string | null>(null)
 
@@ -62,7 +62,7 @@ watch(() => props.sensor, (next) => {
   automationId.value = next?.automationId ?? ''
   description.value = next?.description ?? ''
   tags.value = next?.tags ?? []
-  color.value = next?.color ?? 'teal'
+  color.value = (next as Sensor & { color?: string })?.color ?? 'teal'
 }, { immediate: true })
 
 watch(devices, (list) => {
@@ -138,7 +138,7 @@ async function submit() {
       payload.color = color.value
     }
 
-    await setSensor(props.sensor?.id || '', payload)
+    await setSensor(props.sensor?.id || '', payload as unknown as import('@repo/modules/sensors').SensorInput)
     emit('close')
   } catch (err) {
     log.error('Failed to save sensor', err)

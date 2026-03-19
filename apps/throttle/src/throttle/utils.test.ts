@@ -24,14 +24,14 @@ describe('getSignedSpeed', () => {
 
   it('returns raw speed and warns when direction is undefined', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    expect(getSignedSpeed({ speed: 30, direction: undefined as any })).toBe(30)
+    expect(getSignedSpeed({ speed: 30, direction: undefined as unknown as boolean })).toBe(30)
     expect(warnSpy).toHaveBeenCalledWith('Invalid direction value:', undefined)
     warnSpy.mockRestore()
   })
 
   it('returns raw speed and warns when direction is a non-boolean', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    expect(getSignedSpeed({ speed: 30, direction: 1 as any })).toBe(30)
+    expect(getSignedSpeed({ speed: 30, direction: 1 as unknown as boolean })).toBe(30)
     expect(warnSpy).toHaveBeenCalledWith('Invalid direction value:', 1)
     warnSpy.mockRestore()
   })
