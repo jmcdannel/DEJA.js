@@ -11,6 +11,12 @@ import {
   mdiToggleSwitch,
   mdiRotateRight,
   mdiMotionSensor,
+  mdiLedStripVariant,
+  mdiLightbulb,
+  mdiElectricSwitch,
+  mdiVolumeHigh,
+  mdiPostLamp,
+  mdiPower,
 } from '@mdi/js'
 import type { DiagramConfig, DiagramLayout, NodeDef, ConnectionDef, AreaDef, AppId, DeviceId } from './types'
 
@@ -26,13 +32,33 @@ const IO_H = 90      // compact — icon + label only
 const TRACK_W = 165
 const TRACK_H = 100
 
-// Peripheral mini-node dimensions (4 per IO device, icon-circle only)
-const PERIPH_SIZE = 24
-const PERIPH_GAP = 8
-const PERIPH_COUNT = 4
-const PERIPH_ROW_W = PERIPH_COUNT * PERIPH_SIZE + (PERIPH_COUNT - 1) * PERIPH_GAP  // = 120 = IO_W ✓
+// Peripheral mini-node dimensions (count varies by config)
+const PERIPH_SIZE = 32
+const PERIPH_GAP = 14
 const PERIPH_OFFSET_Y = 48   // gap from IO device bottom to peripheral row top (outside DEJA.js box)
-const PERIPH_ROW_H = PERIPH_OFFSET_Y + PERIPH_SIZE  // = 72
+const PERIPH_LABEL_H = 14    // space for label text below the circle
+
+function periphRowWidth(count: number) {
+  const cols = Math.min(count, PERIPH_MAX_PER_ROW)
+  return cols * PERIPH_SIZE + (cols - 1) * PERIPH_GAP
+}
+function periphTotalHeight(count: number) {
+  const rows = Math.ceil(count / PERIPH_MAX_PER_ROW)
+  return PERIPH_OFFSET_Y + rows * (PERIPH_SIZE + PERIPH_LABEL_H) + (rows - 1) * PERIPH_ROW_GAP
+}
+
+// How many peripherals to show per IO device, by config id
+const PERIPH_COUNTS: Record<string, number> = {
+  tabletop: 3,
+  withrottle: 3,
+  shelf: 3,
+  bedroom: 4,
+  basement: 5,
+  club: 6,
+}
+// Max peripherals per row — more than this wraps to a second row
+const PERIPH_MAX_PER_ROW = 3
+const PERIPH_ROW_GAP = 8  // vertical gap between peripheral rows
 
 const NODE_GAP = 20
 const IO_BOUNDARY_GAP = 54  // extra gap between DCC-EX group and IO group (clears DEJA IO label strip)
@@ -87,12 +113,17 @@ const DEVICE_ICONS: Partial<Record<DeviceId, string>> = {
   'mqtt-generic': mdiRouterWireless,
 }
 
-// Peripheral device icons shown below Arduino / Pico W
-const PERIPHERAL_ICONS = [
-  mdiLedOn,         // LED strip
-  mdiToggleSwitch,  // Relay
-  mdiRotateRight,   // Servo
-  mdiMotionSensor,  // IR / motion sensor
+// All available peripheral types — configs pick a subset
+const ALL_PERIPHERALS = [
+  { icon: mdiLedStripVariant, label: 'IALED' },
+  { icon: mdiLightbulb, label: 'Light' },
+  { icon: mdiElectricSwitch, label: 'Relay' },
+  { icon: mdiRotateRight, label: 'Servo' },
+  { icon: mdiPostLamp, label: 'Signal' },
+  { icon: mdiMotionSensor, label: 'Sensor' },
+  { icon: mdiVolumeHigh, label: 'Sound' },
+  { icon: mdiPower, label: 'Power' },
+  { icon: mdiLedOn, label: 'LED' },
 ] as const
 
 export function getLayout(config: DiagramConfig): DiagramLayout {
@@ -105,20 +136,26 @@ export function getLayout(config: DiagramConfig): DiagramLayout {
   const hasDccEx = dccexInstances.length > 0
   const hasIoDevices = ioDeviceList.length > 0
 
+  // Peripheral count for this config
+  const periphCount = PERIPH_COUNTS[config.id] ?? 3
+  // Effective width of an IO device column = max(device box, peripheral row)
+  const ioEffectiveW = Math.max(IO_W, periphRowWidth(periphCount))
+
   // All layer-3 items (DCC-EX instances first, then IO devices)
-  type Layer3Item = { id: string; isDccEx: boolean; deviceId: DeviceId; width: number; height: number }
+  // `slotWidth` is the horizontal space each item occupies for centering/spacing
+  type Layer3Item = { id: string; isDccEx: boolean; deviceId: DeviceId; width: number; height: number; slotWidth: number }
   const layer3Items: Layer3Item[] = [
     ...dccexInstances.map((_, i) => ({
-      id: `dccex-${i}`, isDccEx: true, deviceId: 'dccex' as DeviceId, width: DCCEX_W, height: DCCEX_H,
+      id: `dccex-${i}`, isDccEx: true, deviceId: 'dccex' as DeviceId, width: DCCEX_W, height: DCCEX_H, slotWidth: DCCEX_W,
     })),
     ...ioDeviceList.map((deviceId, i) => ({
-      id: `device-${deviceId}-${i}`, isDccEx: false, deviceId, width: IO_W, height: IO_H,
+      id: `device-${deviceId}-${i}`, isDccEx: false, deviceId, width: IO_W, height: IO_H, slotWidth: ioEffectiveW,
     })),
   ]
 
   const hasDccExIoBoundary = dccexInstances.length > 0 && ioDeviceList.length > 0
   const layer3TotalW = layer3Items.length > 0
-    ? layer3Items.reduce((s, item) => s + item.width, 0) +
+    ? layer3Items.reduce((s, item) => s + item.slotWidth, 0) +
       (layer3Items.length - 1) * NODE_GAP +
       (hasDccExIoBoundary ? IO_BOUNDARY_GAP : 0)
     : 0
@@ -158,7 +195,7 @@ export function getLayout(config: DiagramConfig): DiagramLayout {
       const trackX = (CANVAS_W - TRACK_W) / 2
       nodes.push({
         id: 'track', x: trackX, y, width: TRACK_W, height: TRACK_H,
-        label: 'Track / Trains', color: COLORS.track, iconPath: mdiFenceElectric, layer: 4,
+        label: 'Track', color: COLORS.track, iconPath: mdiFenceElectric, layer: 4,
       })
       y += TRACK_H
     }
@@ -212,70 +249,99 @@ export function getLayout(config: DiagramConfig): DiagramLayout {
       // Extra gap at the DCC-EX → IO boundary so DEJA IO label strip doesn't overlap
       if (!item.isDccEx && prevWasDccEx) currentX += IO_BOUNDARY_GAP
 
+      // Center the device box within its slot (slot may be wider due to peripheral row)
+      const boxX = currentX + (item.slotWidth - item.width) / 2
+
       if (item.isDccEx) {
         nodes.push({
-          id: item.id, x: currentX, y: layer3Y, width: DCCEX_W, height: DCCEX_H,
+          id: item.id, x: boxX, y: layer3Y, width: DCCEX_W, height: DCCEX_H,
           label: 'DCC-EX', sublabel: 'Command Station',
           color: COLORS.dccex, logoSrc: '/dcc-ex/android-chrome-512x512.png', layer: 3,
         })
       } else {
         nodes.push({
-          id: item.id, x: currentX, y: layer3Y, width: IO_W, height: IO_H,
+          id: item.id, x: boxX, y: layer3Y, width: IO_W, height: IO_H,
           label: DEVICE_LABELS[item.deviceId],
           color: COLORS.io, iconPath: DEVICE_ICONS[item.deviceId], layer: 3,
         })
       }
       prevWasDccEx = item.isDccEx
-      currentX += item.width + NODE_GAP
+      currentX += item.slotWidth + NODE_GAP
     })
 
     // Peripheral mini-nodes below each IO device
     if (hasIoDevices) {
+      let periphOffset = 0  // rotate through ALL_PERIPHERALS so each device gets variety
       ioDeviceList.forEach((_, i) => {
         const ioNodeId = `device-${ioDeviceList[i]}-${i}`
         const ioNode = nodes.find(n => n.id === ioNodeId)!
-        const periphRowX = ioNode.x + (IO_W - PERIPH_ROW_W) / 2
-        const periphRowY = ioNode.y + IO_H + PERIPH_OFFSET_Y
+        const rowW = periphRowWidth(periphCount)
+        const ioCenterX = ioNode.x + IO_W / 2
+        const baseRowX = ioCenterX - rowW / 2
+        const baseRowY = ioNode.y + IO_H + PERIPH_OFFSET_Y
 
-        PERIPHERAL_ICONS.forEach((iconPath, pi) => {
+        for (let pi = 0; pi < periphCount; pi++) {
+          const row = Math.floor(pi / PERIPH_MAX_PER_ROW)
+          const col = pi % PERIPH_MAX_PER_ROW
+          // Center each row independently (last row may have fewer items)
+          const itemsInRow = Math.min(PERIPH_MAX_PER_ROW, periphCount - row * PERIPH_MAX_PER_ROW)
+          const thisRowW = itemsInRow * PERIPH_SIZE + (itemsInRow - 1) * PERIPH_GAP
+          const thisRowX = ioCenterX - thisRowW / 2
+
+          const periph = ALL_PERIPHERALS[(periphOffset + pi) % ALL_PERIPHERALS.length]
           const periphId = `periph-${ioNodeId}-${pi}`
-          const px = periphRowX + pi * (PERIPH_SIZE + PERIPH_GAP)
+          const px = thisRowX + col * (PERIPH_SIZE + PERIPH_GAP)
+          const py = baseRowY + row * (PERIPH_SIZE + PERIPH_LABEL_H + PERIPH_ROW_GAP)
           nodes.push({
-            id: periphId, x: px, y: periphRowY,
+            id: periphId, x: px, y: py,
             width: PERIPH_SIZE, height: PERIPH_SIZE,
-            label: '', color: COLORS.peripheral, iconPath, layer: 3, mini: true,
+            label: periph.label, color: COLORS.peripheral, iconPath: periph.icon, layer: 3, mini: true,
           })
-          // Short dashed connector from IO device bottom to this peripheral
           connections.push({
             id: `conn-${ioNodeId}-periph-${pi}`,
             fromId: ioNodeId, toId: periphId,
             label: '', color: CONN_COLORS.peripheral, type: 'peripheral',
             showLabel: false,
           })
-        })
+        }
+        periphOffset += periphCount  // next IO device gets different peripherals
       })
     }
 
-    // Height of layer 3 section (IO devices + their peripheral row if present)
+    // Height of layer 3 section (IO devices + their peripheral rows if present)
     const layer3H = layer3Items.length > 0 ? Math.max(DCCEX_H, IO_H) : 0
-    const ioExtraH = hasIoDevices ? PERIPH_ROW_H : 0
+    const ioExtraH = hasIoDevices ? periphTotalHeight(periphCount) : 0
     y = layer3Y + layer3H + ioExtraH + LAYER_GAP
 
-    // Layer 4: Track centered under the DCC-EX group
+    // Layer 4: Track blocks — one per DCC-EX on "full", single track otherwise
     if (config.track && hasDccEx) {
       const dccexGroupItems = layer3Items.filter(item => item.isDccEx)
-      const firstId = dccexGroupItems[0].id
-      const lastId = dccexGroupItems[dccexGroupItems.length - 1].id
-      const firstDccexNode = nodes.find(n => n.id === firstId)!
-      const lastDccexNode = nodes.find(n => n.id === lastId)!
-      const groupCenterX = (firstDccexNode.x + lastDccexNode.x + lastDccexNode.width) / 2
-      const trackX = groupCenterX - TRACK_W / 2
 
-      nodes.push({
-        id: 'track', x: trackX, y, width: TRACK_W, height: TRACK_H,
-        label: 'Track / Trains', color: COLORS.track, iconPath: mdiFenceElectric, layer: 4,
-      })
-      y += TRACK_H
+      if (dccexInstances.length > 1) {
+        // Multiple DCC-EX → separate track blocks, each centered under its DCC-EX
+        const BLOCK_GAP = 24
+        const BLOCK_W = TRACK_W  // each block is the same width as a single track
+        dccexGroupItems.forEach((item, i) => {
+          const dccexNode = nodes.find(n => n.id === item.id)!
+          const blockCenterX = dccexNode.x + dccexNode.width / 2
+          const blockX = blockCenterX - BLOCK_W / 2
+          nodes.push({
+            id: `track-block-${i}`, x: blockX, y, width: BLOCK_W, height: TRACK_H,
+            label: `Block ${i + 1}`, color: COLORS.track, iconPath: mdiFenceElectric, layer: 4,
+          })
+        })
+        y += TRACK_H
+      } else {
+        // Single DCC-EX → one track centered under it
+        const firstDccexNode = nodes.find(n => n.id === dccexGroupItems[0].id)!
+        const groupCenterX = firstDccexNode.x + firstDccexNode.width / 2
+        const trackX = groupCenterX - TRACK_W / 2
+        nodes.push({
+          id: 'track', x: trackX, y, width: TRACK_W, height: TRACK_H,
+          label: 'Track', color: COLORS.track, iconPath: mdiFenceElectric, layer: 4,
+        })
+        y += TRACK_H
+      }
     }
 
     // Apps → Server (WebSocket)
@@ -296,20 +362,24 @@ export function getLayout(config: DiagramConfig): DiagramLayout {
       })
     })
 
-    // Server → IO devices (MQTT)
+    // Server → IO devices (USB for Arduino, MQTT for wireless devices)
     ioDeviceList.forEach((deviceId, i) => {
+      const isUsb = deviceId === 'arduino'
       connections.push({
         id: `conn-server-${deviceId}-${i}`, fromId: 'server', toId: `device-${deviceId}-${i}`,
-        label: 'MQTT', color: CONN_COLORS.mqtt, type: 'mqtt',
-        showLabel: true, iconPath: mdiWifi,
+        label: isUsb ? 'USB Serial' : 'MQTT',
+        color: isUsb ? CONN_COLORS.usb : CONN_COLORS.mqtt,
+        type: isUsb ? 'usb' : 'mqtt',
+        showLabel: true, iconPath: isUsb ? mdiUsb : mdiWifi,
       })
     })
 
-    // Each DCC-EX → Track (DCC +/-)
+    // Each DCC-EX → its track block (or single track)
     if (config.track && hasDccEx) {
       dccexInstances.forEach((_, i) => {
+        const trackId = dccexInstances.length > 1 ? `track-block-${i}` : 'track'
         connections.push({
-          id: `conn-dccex-${i}-track`, fromId: `dccex-${i}`, toId: 'track',
+          id: `conn-dccex-${i}-track`, fromId: `dccex-${i}`, toId: trackId,
           label: 'DCC +/-', color: CONN_COLORS.dcc, type: 'dcc',
           showLabel: true, iconPath: mdiBolt,
         })
@@ -341,14 +411,14 @@ export function getLayout(config: DiagramConfig): DiagramLayout {
     })
   }
 
-  // DEJA IO area (yellow) — Arduino, Pico W, and other MQTT IO devices
-  const ioNodes3 = nodes.filter(n => n.layer === 3 && !n.id.startsWith('dccex-') && !n.mini)
+  // DEJA IO area (yellow) — Arduino, Pico W, MQTT IO devices + their peripherals
+  const ioAllNodes = nodes.filter(n => n.layer === 3 && !n.id.startsWith('dccex-'))
 
-  if (ioNodes3.length > 0) {
-    const minX = Math.min(...ioNodes3.map(n => n.x))
-    const maxX = Math.max(...ioNodes3.map(n => n.x + n.width))
-    const minY = Math.min(...ioNodes3.map(n => n.y))
-    const maxY = Math.max(...ioNodes3.map(n => n.y + n.height))
+  if (ioAllNodes.length > 0) {
+    const minX = Math.min(...ioAllNodes.map(n => n.x))
+    const maxX = Math.max(...ioAllNodes.map(n => n.x + n.width))
+    const minY = Math.min(...ioAllNodes.filter(n => !n.mini).map(n => n.y))
+    const maxY = Math.max(...ioAllNodes.map(n => n.y + n.height))
     areas.push({
       id: 'area-io', label: 'DEJA IO',
       x: minX - AREA_PAD - AREA_LABEL_STRIP, y: minY - AREA_PAD,

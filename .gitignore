@@ -75,3 +75,4 @@ apps/tour/public/DejaJsLogo.png
 apps/tour/public/oa-trestle.png
 apps/throttle/resources/*.png
 packages/ui/src/assets/backgrounds/*.jpg
+.superpowers/

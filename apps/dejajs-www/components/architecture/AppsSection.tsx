@@ -1,8 +1,15 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import AnimateIn from '../home/AnimateIn';
 import PhoneMockup from './PhoneMockup';
+
+const apps = [
+  { label: 'Throttle', desc: 'Drive trains, throw turnouts, trigger effects', href: '/throttle', docsHref: '/docs/apps/throttle' },
+  { label: 'Cloud', desc: 'Manage your roster, routes, and automation', href: '/cloud', docsHref: '/docs/apps/cloud' },
+  { label: 'Monitor', desc: 'See everything happening on your layout', href: '/monitor', docsHref: '/docs/apps/monitor' },
+];
 
 export default function AppsSection() {
   return (
@@ -12,18 +19,23 @@ export default function AppsSection() {
           <p className="text-xs text-deja-cyan font-mono tracking-[0.2em] uppercase mb-3">DEJA.js Apps</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Control from any device.</h2>
           <p className="text-gray-400 leading-relaxed mb-6">Throttle, Cloud, Monitor — every app connected to the same layout in real time. Open Throttle on your phone, Cloud on your tablet, Monitor on your laptop. Changes sync instantly across all of them.</p>
-          <div className="flex flex-col gap-3">
-            {[
-              { label: 'Throttle', desc: 'Drive trains, throw turnouts, trigger effects' },
-              { label: 'Cloud', desc: 'Manage your roster, routes, and automation' },
-              { label: 'Monitor', desc: 'See everything happening on your layout' },
-            ].map((app) => (
+          <div className="flex flex-col gap-3 mb-6">
+            {apps.map((app) => (
               <div key={app.label} className="flex items-start gap-3">
                 <span className="w-1.5 h-1.5 rounded-full bg-deja-cyan mt-2 shrink-0" />
-                <span className="text-gray-300"><span className="font-semibold text-white">{app.label}</span> — {app.desc}</span>
+                <span className="text-gray-300">
+                  <Link href={app.href} className="font-semibold text-white hover:text-deja-cyan transition-colors">{app.label}</Link>
+                  {' — '}
+                  {app.desc}
+                  {' '}
+                  <Link href={app.docsHref} className="text-deja-cyan/60 hover:text-deja-cyan text-xs font-mono transition-colors">docs →</Link>
+                </span>
               </div>
             ))}
           </div>
+          <p className="text-gray-500 text-sm">
+            Explore each app to see what it can do for your layout.
+          </p>
         </AnimateIn>
         <AnimateIn direction="right" className="flex items-end justify-center gap-4">
           <PhoneMockup src="/screenshots/throttle_mobile_throttle.png" alt="Throttle app on mobile" className="w-[140px]" />

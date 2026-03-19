@@ -185,7 +185,7 @@ export default function Header({ settings }: { settings?: SiteSettings | null })
 
   return (
     <header className="w-full border-b border-gray-800/60 bg-gray-950/90 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-5xl mx-auto px-6 pt-7 pb-4 flex items-center justify-between gap-6">
+      <div className="max-w-7xl mx-auto px-6 pt-7 pb-4 flex items-center justify-between gap-6">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/icon-512.png" alt="DEJA.js" width={40} height={40} className="rounded-xl w-10 h-10 flex-shrink-0" />
           <span className="sr-only">DEJA.js Home</span>
