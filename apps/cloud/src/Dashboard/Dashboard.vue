@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { useLayout, useServerStatus, useLocos } from '@repo/modules'
@@ -71,8 +71,20 @@ const totalCommandCount = computed(() =>
   commandActivity.value.reduce((sum, b) => sum + b.count, 0),
 )
 
-// Empty state
-const showEmptyState = computed(() => !devices.value || devices.value.length === 0)
+// Loading state — devices starts as undefined while Firestore loads
+const devicesLoaded = ref(false)
+watch(
+  () => devices.value,
+  (val) => {
+    if (val !== undefined && !devicesLoaded.value) {
+      devicesLoaded.value = true
+    }
+  },
+  { immediate: true },
+)
+
+// Empty state — only decide after data has loaded to prevent flash
+const showEmptyState = computed(() => devicesLoaded.value && (!devices.value || devices.value.length === 0))
 const emptyStateSteps = computed(() => {
   const steps: number[] = [1] // Always signed in
   if (serverStatus.value?.online) steps.push(2)
@@ -118,9 +130,22 @@ async function handleAddLoco(address: number, name: string) {
 
 <template>
   <v-container fluid class="pa-4 pa-md-6">
+    <!-- Loading Skeleton -->
+    <v-row v-if="!devicesLoaded">
+      <v-col cols="12" md="8">
+        <v-skeleton-loader type="heading" class="mb-4" />
+        <v-skeleton-loader v-for="i in 3" :key="i" type="card" class="mb-2" style="border-radius: 8px" />
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-skeleton-loader type="card" class="mb-3" style="border-radius: 8px" />
+        <v-skeleton-loader type="card" class="mb-3" style="border-radius: 8px" />
+        <v-skeleton-loader type="card" class="mb-3" style="border-radius: 8px" />
+      </v-col>
+    </v-row>
+
     <!-- Empty State -->
     <DashboardEmptyState
-      v-if="showEmptyState"
+      v-else-if="showEmptyState"
       :completed="emptyStateSteps"
       :uid="user?.uid"
       :layout-id="layoutId"
@@ -156,6 +181,7 @@ async function handleAddLoco(address: number, name: string) {
           :devices="devices ?? []"
           :available-ports="ports"
           @connect="handleConnect"
+          @navigate="navigateToDevice"
         />
 
         <LayoutInfoCard

@@ -353,6 +353,7 @@ function handleConnect() {
 
   .device-tile__port-select {
     flex: 1;
+    max-width: 280px;
   }
 }
 </style>

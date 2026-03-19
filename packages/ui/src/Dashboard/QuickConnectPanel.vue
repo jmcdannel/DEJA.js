@@ -16,6 +16,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   connect: [deviceId: string, serial?: string, topic?: string]
+  navigate: [deviceId: string]
 }>()
 
 const { deviceTypes } = useLayout()
@@ -100,7 +101,10 @@ function handleConnect(device: Device) {
           :key="device.id"
           class="quick-connect-panel__row"
         >
-          <div class="d-flex align-center ga-2 mb-1">
+          <div
+            class="d-flex align-center ga-2 mb-1 quick-connect-panel__device-link"
+            @click="emit('navigate', device.id)"
+          >
             <v-avatar
               :color="getDeviceConfig(device.type)?.color ?? 'grey'"
               variant="tonal"
@@ -167,5 +171,14 @@ function handleConnect(device: Device) {
 
 .quick-connect-panel__row + .quick-connect-panel__row {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.quick-connect-panel__device-link {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.quick-connect-panel__device-link:hover {
+  opacity: 0.75;
 }
 </style>
