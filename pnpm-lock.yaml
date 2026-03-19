@@ -1150,12 +1150,12 @@ importers:
 
   scripts:
     dependencies:
-      blessed:
-        specifier: ^0.1.81
-        version: 0.1.81
       ink:
         specifier: ^5.1.0
         version: 5.2.1(@types/react@18.3.26)(react@18.3.1)
+      playwright:
+        specifier: ^1.44.0
+        version: 1.58.2
       react:
         specifier: ^18.3.1
         version: 18.3.1
