@@ -64,3 +64,4 @@ reports/
 
 # Git worktrees
 .worktrees/
+package-lock.json
