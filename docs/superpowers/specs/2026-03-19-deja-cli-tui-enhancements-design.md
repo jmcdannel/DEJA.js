@@ -131,7 +131,7 @@ The `context` object passed to `execute()` provides access to TUI state and acti
 | `/start` | | Start server |
 | `/stop` | `/quit`, `/exit` | Stop server & exit |
 | `/restart` | `/r` | Restart server |
-| `/devices` | `/d` | Open device list mode |
+| `/devices` | `/d`, `/io`, `/iodevices` | Open device list mode |
 | `/connect` | `/c` | Connect device (opens list if no arg) |
 | `/disconnect` | `/dc` | Disconnect device |
 | `/tunnel` | `/t` | Toggle tunnel |
