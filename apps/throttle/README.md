@@ -5,10 +5,10 @@
 **Transform your device into a professional locomotive throttle!** Vue.js 3 Web App to control DCC locomotives with [🛰️ DEJA.js](https://github.com/jmcdannel/DEJA.js) and [DCC-EX EX-CommandStation](https://dcc-ex.com/ex-commandstation/index.html).
 
 <p align="center">
-  <img src="./resources/screen-throttle.png" alt="Size Limit CLI" width="360">
-  <img src="./resources/screen-connect.png" alt="Size Limit CLI" width="360">
-  <img src="./resources/screen-select-loco.png" alt="Size Limit CLI" width="360">
-  <img src="./resources/screen-dejajs.png" alt="Size Limit CLI" width="360">
+  <img src="https://xndozjm68szqabqe.public.blob.vercel-storage.com/docs/screen-throttle.png" alt="Throttle" width="360">
+  <img src="https://xndozjm68szqabqe.public.blob.vercel-storage.com/docs/screen-connect.png" alt="Connect" width="360">
+  <img src="https://xndozjm68szqabqe.public.blob.vercel-storage.com/docs/screen-select-loco.png" alt="Select Loco" width="360">
+  <img src="https://xndozjm68szqabqe.public.blob.vercel-storage.com/docs/screen-dejajs.png" alt="DEJA.js" width="360">
 </p>
 
 ---

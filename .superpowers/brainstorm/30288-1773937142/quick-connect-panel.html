@@ -1,0 +1,138 @@
+<h2>Quick Connect Panel — Sidebar Component</h2>
+<p class="subtitle">A compact sidebar widget for fast device connections. Shows in the right column of the two-column layout alongside stats, QR, etc.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Inline Quick Connect</h3>
+      <p>Each disconnected device gets a tight row: device icon + name, port/topic selector, connect button. When all connected, shows a green "All devices connected" badge. Lives in the sidebar as its own card.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">Sidebar — 1 disconnected device</div>
+        <div class="mockup-body" style="padding:12px">
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5;margin-bottom:10px;font-weight:600">Quick Connect</div>
+            <!-- Disconnected device row -->
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;border-radius:6px;background:rgba(251,146,60,0.12);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">📡</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:11px;font-weight:600;color:#fb923c">Arduino LED</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center">
+                <select style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;padding:5px 8px;border-radius:4px;font-size:10px"><option>Select topic...</option><option>deja/led-strip</option></select>
+                <button style="font-size:10px;background:rgba(34,197,94,0.2);border:1px solid rgba(34,197,94,0.3);color:#22c55e;padding:5px 12px;border-radius:4px;cursor:pointer;font-weight:600;white-space:nowrap">Connect</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mockup" style="margin-top:8px">
+        <div class="mockup-header">Sidebar — All connected</div>
+        <div class="mockup-body" style="padding:12px">
+          <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);border-radius:8px;padding:14px;text-align:center">
+            <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+              <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.4)"></div>
+              <span style="font-size:12px;color:#22c55e;font-weight:600">All devices connected</span>
+            </div>
+            <div style="font-size:10px;opacity:0.4;margin-top:4px">3 of 3 online</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Multi-Device Quick Connect</h3>
+      <p>When multiple devices are disconnected, stack them vertically with a shared "Connect All" button at the bottom. Individual port selectors per device, but one action to connect everything at once.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">Sidebar — 2 disconnected devices</div>
+        <div class="mockup-body" style="padding:12px">
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5;margin-bottom:10px;font-weight:600">Quick Connect</div>
+            <!-- Device 1 -->
+            <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06)">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <div style="width:24px;height:24px;border-radius:6px;background:rgba(139,92,246,0.12);display:flex;align-items:center;justify-content:center;font-size:11px">🔌</div>
+                <span style="font-size:11px;font-weight:600;color:#8b5cf6">DCC-EX</span>
+              </div>
+              <select style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;padding:5px 8px;border-radius:4px;font-size:10px"><option>/dev/ttyACM0</option><option>/dev/ttyUSB0</option></select>
+            </div>
+            <!-- Device 2 -->
+            <div style="margin-bottom:12px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <div style="width:24px;height:24px;border-radius:6px;background:rgba(251,146,60,0.12);display:flex;align-items:center;justify-content:center;font-size:11px">📡</div>
+                <span style="font-size:11px;font-weight:600;color:#fb923c">Arduino LED</span>
+              </div>
+              <select style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;padding:5px 8px;border-radius:4px;font-size:10px"><option>Select topic...</option></select>
+            </div>
+            <!-- Connect All -->
+            <button style="width:100%;font-size:11px;background:rgba(34,197,94,0.2);border:1px solid rgba(34,197,94,0.3);color:#22c55e;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:600">Connect All (2 devices)</button>
+          </div>
+        </div>
+      </div>
+      <div class="mockup" style="margin-top:8px">
+        <div class="mockup-header">Sidebar — All connected</div>
+        <div class="mockup-body" style="padding:12px">
+          <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);border-radius:8px;padding:14px;text-align:center">
+            <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+              <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.4)"></div>
+              <span style="font-size:12px;color:#22c55e;font-weight:600">All devices connected</span>
+            </div>
+            <div style="font-size:10px;opacity:0.4;margin-top:4px">3 of 3 online</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Combined: Individual + Connect All</h3>
+      <p>Each device has its own row with port selector and individual Connect button. If 2+ are disconnected, a "Connect All" button appears at the bottom too. Best of both — connect one at a time or batch.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">Sidebar — 2 disconnected</div>
+        <div class="mockup-body" style="padding:12px">
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px">
+            <div style="display:flex;align-items:center;justify-content:between;margin-bottom:10px">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5;font-weight:600;flex:1">Quick Connect</div>
+              <span style="font-size:10px;background:rgba(239,68,68,0.12);color:#ef4444;padding:2px 8px;border-radius:10px">2 offline</span>
+            </div>
+            <!-- Device 1 -->
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+              <div style="width:24px;height:24px;border-radius:6px;background:rgba(139,92,246,0.12);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">🔌</div>
+              <select style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;padding:4px 6px;border-radius:4px;font-size:10px"><option>/dev/ttyACM0</option></select>
+              <button style="font-size:9px;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.25);color:#22c55e;padding:4px 10px;border-radius:4px;cursor:pointer;font-weight:600;white-space:nowrap">Connect</button>
+            </div>
+            <!-- Device 2 -->
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+              <div style="width:24px;height:24px;border-radius:6px;background:rgba(251,146,60,0.12);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">📡</div>
+              <select style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;padding:4px 6px;border-radius:4px;font-size:10px"><option>Select topic...</option></select>
+              <button style="font-size:9px;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.25);color:#22c55e;padding:4px 10px;border-radius:4px;cursor:pointer;font-weight:600;white-space:nowrap">Connect</button>
+            </div>
+            <!-- Divider + Connect All -->
+            <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:10px">
+              <button style="width:100%;font-size:11px;background:rgba(34,197,94,0.2);border:1px solid rgba(34,197,94,0.3);color:#22c55e;padding:7px 14px;border-radius:6px;cursor:pointer;font-weight:600">Connect All</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mockup" style="margin-top:8px">
+        <div class="mockup-header">Sidebar — All connected</div>
+        <div class="mockup-body" style="padding:12px">
+          <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);border-radius:8px;padding:12px;display:flex;align-items:center;gap:8px">
+            <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.4);flex-shrink:0"></div>
+            <div>
+              <div style="font-size:12px;color:#22c55e;font-weight:600">All devices connected</div>
+              <div style="font-size:10px;opacity:0.4">3 of 3 online</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
