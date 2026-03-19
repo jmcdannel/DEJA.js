@@ -75,13 +75,13 @@ function handleConnect(device: Device) {
 
 <template>
   <v-card variant="flat" class="quick-connect-panel mb-3">
-    <v-card-text class="pa-3">
+    <v-card-text class="pa-4">
       <!-- All connected state -->
-      <div v-if="allConnected" class="d-flex align-center justify-center ga-2 pa-2">
+      <div v-if="allConnected" class="d-flex align-center justify-center ga-3 pa-3">
         <StatusPulse status="connected" size="sm" />
         <div>
-          <div class="text-caption text-success font-weight-bold">All devices connected</div>
-          <div class="text-caption text-medium-emphasis">
+          <div class="quick-connect-panel__label text-success font-weight-bold">All devices connected</div>
+          <div class="quick-connect-panel__sublabel">
             {{ connectedCount }} of {{ devices.length }} online
           </div>
         </div>
@@ -89,8 +89,8 @@ function handleConnect(device: Device) {
 
       <!-- Has disconnected devices -->
       <template v-else-if="disconnectedDevices.length > 0">
-        <div class="d-flex align-center justify-space-between mb-2">
-          <div class="text-overline text-medium-emphasis">Quick Connect</div>
+        <div class="d-flex align-center justify-space-between mb-3">
+          <div class="text-overline text-medium-emphasis" style="font-size: 0.625rem">Quick Connect</div>
           <v-chip size="x-small" color="error" variant="tonal">
             {{ disconnectedDevices.length }} offline
           </v-chip>
@@ -102,19 +102,19 @@ function handleConnect(device: Device) {
           class="quick-connect-panel__row"
         >
           <div
-            class="d-flex align-center ga-2 mb-1 quick-connect-panel__device-link"
+            class="d-flex align-center ga-2 mb-2 quick-connect-panel__device-link"
             @click="emit('navigate', device.id)"
           >
             <v-avatar
               :color="getDeviceConfig(device.type)?.color ?? 'grey'"
               variant="tonal"
-              size="24"
+              size="22"
               rounded="lg"
             >
-              <v-icon :icon="getDeviceConfig(device.type)?.icon ?? 'mdi-devices'" size="14" />
+              <v-icon :icon="getDeviceConfig(device.type)?.icon ?? 'mdi-devices'" size="12" />
             </v-avatar>
             <span
-              class="text-caption font-weight-bold"
+              class="quick-connect-panel__device-name"
               :class="`text-${getDeviceConfig(device.type)?.color ?? 'grey'}`"
             >
               {{ device.name || getDeviceConfig(device.type)?.label }}
@@ -129,7 +129,7 @@ function handleConnect(device: Device) {
               density="compact"
               variant="outlined"
               hide-details
-              class="flex-grow-1"
+              class="flex-grow-1 quick-connect-panel__input"
               no-data-text="No ports"
             />
             <v-text-field
@@ -140,10 +140,10 @@ function handleConnect(device: Device) {
               density="compact"
               variant="outlined"
               hide-details
-              class="flex-grow-1"
+              class="flex-grow-1 quick-connect-panel__input"
             />
             <v-btn
-              size="small"
+              size="x-small"
               color="success"
               variant="flat"
               :disabled="isUsbDevice(device) ? !selections[device.id] : false"
@@ -160,17 +160,32 @@ function handleConnect(device: Device) {
 
 <style scoped>
 .quick-connect-panel {
-  background: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.6) !important;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+}
+
+.quick-connect-panel__label {
+  font-size: 0.75rem;
+}
+
+.quick-connect-panel__sublabel {
+  font-size: 0.6875rem;
+  opacity: 0.5;
+}
+
+.quick-connect-panel__device-name {
+  font-size: 0.6875rem;
+  font-weight: 600;
 }
 
 .quick-connect-panel__row {
-  padding: 8px 0;
+  padding: 10px 0;
 }
 
 .quick-connect-panel__row + .quick-connect-panel__row {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .quick-connect-panel__device-link {
@@ -180,5 +195,20 @@ function handleConnect(device: Device) {
 
 .quick-connect-panel__device-link:hover {
   opacity: 0.75;
+}
+
+.quick-connect-panel__input :deep(.v-field) {
+  font-size: 0.75rem;
+}
+
+.quick-connect-panel__input :deep(.v-field__input) {
+  font-size: 0.75rem;
+  min-height: 32px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.quick-connect-panel__input :deep(.v-label) {
+  font-size: 0.75rem;
 }
 </style>
