@@ -52,7 +52,7 @@ export { default as DeviceStatusList } from './DeviceStatus/DeviceStatusList.vue
 export { DeviceConnectionCard, DeviceConnectionList } from './DeviceConnection'
 
 // Dashboard widgets
-export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart } from './Dashboard'
+export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart, DeviceTile, QuickConnectPanel, LayoutInfoCard, DashboardEmptyState } from './Dashboard'
 export { default as EmptyState } from './EmptyState/EmptyState.vue'
 export { default as ModuleList } from './ModuleList/List.vue'
 export { default as LocoList } from './Locos/LocoList.vue'
