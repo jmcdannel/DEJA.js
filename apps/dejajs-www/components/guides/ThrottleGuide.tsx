@@ -89,14 +89,14 @@ function AnnotatedScreenshot({
   src,
   alt,
   callouts,
-  aspectClass,
-  objectPosition,
+  cropTop = '0%',
+  cropHeight = '100%',
 }: {
   src: string;
   alt: string;
   callouts: Callout[];
-  aspectClass: string; // e.g. "6/1"
-  objectPosition: string;
+  cropTop?: string;
+  cropHeight?: string;
 }) {
   return (
     <div className="space-y-0">
@@ -107,13 +107,13 @@ function AnnotatedScreenshot({
             <span className="w-2 h-2 rounded-full bg-yellow-500/70" />
             <span className="w-2 h-2 rounded-full bg-green-500/70" />
           </div>
-          <div className="relative overflow-hidden rounded-xl" style={{ aspectRatio: aspectClass }}>
+          <div className="relative overflow-hidden rounded-xl" style={{ height: cropHeight }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={src}
               alt={alt}
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ objectPosition }}
+              className="w-full h-auto absolute left-0"
+              style={{ top: cropTop }}
             />
             {callouts.map((c) => (
               <div
@@ -255,8 +255,8 @@ export default function ThrottleGuide() {
           <AnnotatedScreenshot
             src="/screenshots/throttle_desktop_home.png"
             alt="Throttle header bar with numbered callouts"
-            aspectClass="6/1"
-            objectPosition="center 7.5%"
+            cropTop="0%"
+            cropHeight="72px"
             callouts={[
               { number: 1, label: 'Menu', desc: 'Opens the side navigation drawer', x: '4%', y: '50%' },
               { number: 2, label: 'App Logo', desc: 'Tap to go home', x: '13%', y: '50%' },
@@ -279,15 +279,15 @@ export default function ThrottleGuide() {
           <AnnotatedScreenshot
             src="/screenshots/throttle_desktop_throttle-list.png"
             alt="Throttle bottom navigation bar with numbered callouts"
-            aspectClass="6/1"
-            objectPosition="center 100%"
+            cropTop="-87%"
+            cropHeight="72px"
             callouts={[
-              { number: 1, label: 'Throttles', desc: 'Multi-train grid view', x: '32%', y: '40%' },
-              { number: 2, label: 'Effects', desc: 'Sound and lighting effects', x: '40%', y: '40%' },
-              { number: 3, label: 'Locos', desc: 'Locomotive roster', x: '48%', y: '40%' },
-              { number: 4, label: 'Routes', desc: 'Track route execution', x: '55%', y: '40%' },
-              { number: 5, label: 'Turnouts', desc: 'Switch control', x: '62%', y: '40%' },
-              { number: 6, label: 'Signals', desc: 'Signal aspect monitoring', x: '70%', y: '40%' },
+              { number: 1, label: 'Throttles', desc: 'Multi-train grid view', x: '32%', y: '50%' },
+              { number: 2, label: 'Effects', desc: 'Sound and lighting effects', x: '40%', y: '50%' },
+              { number: 3, label: 'Locos', desc: 'Locomotive roster', x: '48%', y: '50%' },
+              { number: 4, label: 'Routes', desc: 'Track route execution', x: '55%', y: '50%' },
+              { number: 5, label: 'Turnouts', desc: 'Switch control', x: '62%', y: '50%' },
+              { number: 6, label: 'Signals', desc: 'Signal aspect monitoring', x: '70%', y: '50%' },
             ]}
           />
         </div>
