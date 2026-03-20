@@ -1159,6 +1159,9 @@ importers:
       figlet:
         specifier: ^1.7.0
         version: 1.11.0
+      firebase-admin:
+        specifier: ^13.4.0
+        version: 13.5.0
       ink:
         specifier: ^5.1.0
         version: 5.2.1(@types/react@18.3.26)(react@18.3.1)
