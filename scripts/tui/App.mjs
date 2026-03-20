@@ -299,12 +299,21 @@ export function App() {
 
     // ── Log view (default mode) ──────────────────────────────────────────────
 
+    // Arrow keys: route to command menu dropdown if open
+    if (key.upArrow) {
+      if (inputRef.current?.handleArrowUp?.()) return
+    }
+    if (key.downArrow) {
+      if (inputRef.current?.handleArrowDown?.()) return
+    }
+
     // Tab: cycle through slash-command completions
     if (key.tab) { inputRef.current?.handleTab(); return }
 
-    // Enter: execute slash command or legacy text command
+    // Enter: if command menu is open, use selected command; otherwise normal execution
     if (key.return) {
-      const raw = (inputRef.current?.getText() || '').trim()
+      const selectedCmd = inputRef.current?.getSelectedCommand?.()
+      const raw = selectedCmd || (inputRef.current?.getText() || '').trim()
       if (!raw) return
       if (raw.startsWith('/')) {
         const result = lookup(raw)
