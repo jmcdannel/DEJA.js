@@ -5,6 +5,7 @@ import Link from 'next/link';
 import AnimateIn from '../home/AnimateIn';
 import SectionLabel from '../home/SectionLabel';
 import PhoneMockup from '../architecture/PhoneMockup';
+import DocLink from '../DocLink';
 
 /* ── Shared sub-components ── */
 
@@ -37,14 +38,6 @@ function CloudNote({ children }: { children: React.ReactNode }) {
         <div className="text-sm text-gray-300 leading-relaxed">{children}</div>
       </div>
     </AnimateIn>
-  );
-}
-
-function DocLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link href={href} className="inline-flex items-center gap-1 text-sm text-deja-cyan hover:underline transition-colors">
-      {children} →
-    </Link>
   );
 }
 
