@@ -1,8 +1,8 @@
 <template>
   <div class="font-sans">
     <div class="text-center mb-6">
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">BBC Sound Effects</h3>
-      <p class="text-gray-600 text-sm">Quality sound effects from the BBC archive</p>
+      <h3 class="text-xl font-semibold mb-2">BBC Sound Effects</h3>
+      <p class="opacity-60 text-sm">Quality sound effects from the BBC archive</p>
     </div>
     
     <!-- Search bar -->
@@ -18,14 +18,14 @@
         color="primary"
         bg-color="surface"
       ></v-text-field>
-      <div v-if="searchQuery && !loading" class="text-xs text-gray-600 mt-1">
+      <div v-if="searchQuery && !loading" class="text-xs opacity-60 mt-1">
         {{ filteredSoundFiles.length }} of {{ soundFiles.length }} sound files
       </div>
     </div>
     
     <div v-if="loading" class="text-center py-8">
       <v-progress-circular indeterminate color="primary" size="32" class="mb-3"></v-progress-circular>
-      <p class="text-gray-700 text-sm font-medium">Loading sound files...</p>
+      <p class="opacity-70 text-sm font-medium">Loading sound files...</p>
     </div>
     
     <div v-else-if="error" class="text-center py-10">
@@ -38,11 +38,11 @@
     </div>
     
     <div v-else-if="filteredSoundFiles.length === 0" class="text-center py-8">
-      <v-icon icon="mdi-music-note-off" size="48" class="text-gray-400 mb-2"></v-icon>
-      <p v-if="searchQuery" class="text-lg font-medium text-gray-800">No sound files match "{{ searchQuery }}"</p>
-      <p v-else class="text-lg font-medium text-gray-800">No sound files found</p>
-      <p v-if="!searchQuery" class="text-sm text-gray-600">Sound files will appear here once they are added to your blob store.</p>
-      <p v-else class="text-sm text-gray-600">Try adjusting your search terms</p>
+      <v-icon icon="mdi-music-note-off" size="48" class="opacity-60 mb-2"></v-icon>
+      <p v-if="searchQuery" class="text-lg font-medium">No sound files match "{{ searchQuery }}"</p>
+      <p v-else class="text-lg font-medium">No sound files found</p>
+      <p v-if="!searchQuery" class="text-sm opacity-60">Sound files will appear here once they are added to your blob store.</p>
+      <p v-else class="text-sm opacity-60">Try adjusting your search terms</p>
     </div>
     
     <!-- Responsive Grid Layout -->
@@ -80,13 +80,13 @@
                     </svg>
                   </div>
                   
-                  <h4 class="text-sm font-semibol text-gray-9s00 dark:text-gray-200 mb-0 flex-1 line-clamp-2">
+                  <h4 class="text-sm font-semibold mb-0 flex-1 line-clamp-2">
                     {{ sound.name }}
                   </h4>
                 </div>
                 
                 <!-- Metadata -->
-                <div class="d-flex gap-2 text-xs text-gray-700 mb-3">
+                <div class="d-flex gap-2 text-xs opacity-70 mb-3">
                   <v-chip 
                     v-if="sound.duration" 
                     size="x-small" 
@@ -129,8 +129,8 @@
       </v-row>
     </div>
     
-    <div class="text-center mt-4 pt-3 border-t border-gray-200">
-      <p class="text-xs text-gray-600">
+    <div class="text-center mt-4 pt-3 border-t border-opacity-20">
+      <p class="text-xs opacity-60">
         Sound effects provided by 
         <a href="https://sound-effects.bbcrewind.co.uk/licensing" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">
           BBC Sound Effects

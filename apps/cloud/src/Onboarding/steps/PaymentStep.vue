@@ -171,11 +171,11 @@ async function handleSubmit() {
     <div class="payment-container">
       <!-- Order Summary -->
       <div class="summary-card mb-6">
-        <h3 class="text-xs text-slate-500 uppercase tracking-widest mb-3 font-medium">Order Summary</h3>
+        <h3 class="text-xs opacity-50 uppercase tracking-widest mb-3 font-medium">Order Summary</h3>
         <div class="flex justify-between items-start mb-2">
           <div>
             <p class="text-lg font-semibold text-sky-100">{{ planInfo.name }} Plan</p>
-            <p class="text-sm text-slate-400">{{ activeBillingCycle === 'annual' ? 'Annual' : 'Monthly' }} billing</p>
+            <p class="text-sm opacity-60">{{ activeBillingCycle === 'annual' ? 'Annual' : 'Monthly' }} billing</p>
           </div>
           <div class="text-right">
             <p class="text-xl font-bold text-sky-100">{{ priceLabel }}</p>
@@ -186,7 +186,7 @@ async function handleSubmit() {
         <div class="divider-line my-4" />
 
         <ul class="space-y-2">
-          <li v-for="feature in planInfo.features" :key="feature" class="flex items-start gap-2 text-sm text-slate-400">
+          <li v-for="feature in planInfo.features" :key="feature" class="flex items-start gap-2 text-sm opacity-60">
             <v-icon size="16" color="primary" class="mt-0.5 flex-shrink-0">mdi-check</v-icon>
             {{ feature }}
           </li>
@@ -199,7 +199,7 @@ async function handleSubmit() {
           <v-icon color="amber" size="22" class="mt-0.5 flex-shrink-0">mdi-star-four-points</v-icon>
           <div class="flex-1">
             <p class="text-sm font-semibold text-sky-100 mb-1">Save ${{ annualSavings }}/year with annual billing</p>
-            <p class="text-xs text-slate-400">
+            <p class="text-xs opacity-60">
               Pay <strong class="text-sky-200">${{ annualPrice }}/yr</strong> instead of ${{ monthlyPrice * 12 }}/yr
               — that's just <strong class="text-sky-200">${{ (annualPrice / 12).toFixed(2) }}/mo</strong>.
             </p>
@@ -227,13 +227,13 @@ async function handleSubmit() {
         <template v-if="stripeLoading">
           <div class="card-element-container mb-5 flex items-center justify-center gap-3">
             <v-progress-circular size="20" width="2" indeterminate color="primary" />
-            <span class="text-sm text-slate-400">Loading payment form...</span>
+            <span class="text-sm opacity-60">Loading payment form...</span>
           </div>
         </template>
 
         <!-- Stripe loaded -->
         <template v-else-if="stripeReady">
-          <p class="text-xs text-slate-500 uppercase tracking-widest mb-2 font-medium">Card Information</p>
+          <p class="text-xs opacity-50 uppercase tracking-widest mb-2 font-medium">Card Information</p>
           <div
             ref="cardElementRef"
             class="card-element-container mb-5"
@@ -265,8 +265,8 @@ async function handleSubmit() {
         </v-btn>
 
         <div class="flex items-center justify-center gap-2 mt-4">
-          <v-icon size="14" class="text-slate-500">mdi-shield-check</v-icon>
-          <span class="text-xs text-slate-500">Secured by Stripe. Cancel anytime.</span>
+          <v-icon size="14" class="opacity-50">mdi-shield-check</v-icon>
+          <span class="text-xs opacity-50">Secured by Stripe. Cancel anytime.</span>
         </div>
       </div>
     </div>

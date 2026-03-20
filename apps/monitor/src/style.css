@@ -738,3 +738,159 @@ textarea,
 select {
   background-color: transparent;
 }
+
+/* ==========================================================================
+   🌞 Light mode — boost contrast, solid backgrounds, visible borders
+   ========================================================================== */
+
+:root:not(.dark) .monitor-card {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 244, 248, 0.95) 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+:root:not(.dark) .monitor-card::after {
+  opacity: 0.5;
+}
+
+:root:not(.dark) .monitor-card:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+:root:not(.dark) .monitor-card__header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: linear-gradient(90deg, rgba(var(--v-theme-primary), 0.08), transparent);
+}
+
+:root:not(.dark) .monitor-card__footer,
+:root:not(.dark) .monitor-card__actions,
+:root:not(.dark) .monitor-card__toolbar-row {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.02));
+}
+
+:root:not(.dark) .monitor-card__icon-btn {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+
+:root:not(.dark) .monitor-card__icon-btn:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+  border-color: rgba(0, 0, 0, 0.2);
+  color: rgba(0, 0, 0, 0.9) !important;
+}
+
+:root:not(.dark) .monitor-card__ghost-btn {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+
+:root:not(.dark) .monitor-card__ghost-btn:hover:not(.v-btn--disabled) {
+  background: rgba(0, 0, 0, 0.08) !important;
+  border-color: rgba(0, 0, 0, 0.2);
+  color: rgba(0, 0, 0, 0.9) !important;
+}
+
+:root:not(.dark) .monitor-card__terminal {
+  background: rgba(248, 250, 252, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+:root:not(.dark) .monitor-card__scroll {
+  background: rgba(248, 250, 252, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:root:not(.dark) .monitor-chip {
+  background-color: rgba(var(--v-theme-primary), 0.08) !important;
+  border: 1px solid rgba(var(--v-theme-primary), 0.2);
+  color: rgba(0, 0, 0, 0.75) !important;
+}
+
+:root:not(.dark) .monitor-pane {
+  background: rgb(var(--v-theme-background));
+}
+
+:root:not(.dark) .monitor-pane__title-bar {
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+:root:not(.dark) .monitor-pane__action-btn {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+:root:not(.dark) .monitor-pane__action-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.8);
+}
+
+:root:not(.dark) .monitor-grid {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+:root:not(.dark) .monitor-minimized-bar {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+:root:not(.dark) .monitor-status-bar {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(240, 244, 248, 1) 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.6);
+}
+
+:root:not(.dark) .monitor-pane__stat-row {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* ==========================================================================
+   ⬛⬜ High-contrast — pure black, white borders, max readability
+   ========================================================================== */
+
+.high-contrast .monitor-card {
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  background: #000000;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.high-contrast .monitor-card::after {
+  display: none;
+}
+
+.high-contrast .monitor-card:hover {
+  border-color: #FFFFFF;
+  box-shadow: none;
+}
+
+.high-contrast .monitor-card__header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  color: #FFFFFF;
+}
+
+.high-contrast .monitor-pane {
+  background: #000000;
+}
+
+.high-contrast .monitor-pane__title-bar {
+  border-bottom-color: rgba(255, 255, 255, 0.4);
+}
+
+.high-contrast .monitor-grid {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.high-contrast .monitor-status-bar {
+  background: #000000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.high-contrast .monitor-card__terminal {
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}

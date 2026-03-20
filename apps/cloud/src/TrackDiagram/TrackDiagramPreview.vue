@@ -12,7 +12,7 @@ const svgHtml = computed(() => generateSvg(props.nodes, props.edges, props.viewB
 </script>
 <template>
   <div class="h-full w-full flex flex-col">
-    <div class="text-xs text-gray-500 p-1 flex items-center gap-2">
+    <div class="text-xs opacity-50 p-1 flex items-center gap-2">
       <v-icon icon="mdi-eye" size="14" /> SVG Preview
     </div>
     <div class="flex-1 overflow-auto bg-black" v-html="svgHtml" />

@@ -35,7 +35,7 @@ function handleCreateNew() {
         Choose Your Layout
       </h1>
       
-      <p class="text-lg text-gray-600 dark:text-gray-300 mb-8 text-center">
+      <p class="text-lg opacity-60 mb-8 text-center">
         Select an existing layout or create a new one to get started with your model railroad control system.
       </p>
 
@@ -46,7 +46,8 @@ function handleCreateNew() {
           <div 
             v-for="layout in layouts" 
             :key="layout.id" 
-            class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer border border-gray-200 dark:border-gray-700"
+            class="rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer"
+            style="background: rgba(var(--v-theme-surface), 1); border: 1px solid rgba(var(--v-theme-on-surface), 0.12)"
             @click="handleLayoutSelect(layout.id)"
           >
             <div class="p-6">
@@ -57,15 +58,15 @@ function handleCreateNew() {
                 <span class="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
                   {{ layout.id }}
                 </span>
-                <p v-if="layout.description" class="text-gray-600 dark:text-gray-300 text-sm">
+                <p v-if="layout.description" class="opacity-60 text-sm">
                   {{ layout.description }}
                 </p>
-                <p v-else class="text-gray-500 dark:text-gray-400 text-sm italic">
+                <p v-else class="opacity-50 text-sm italic">
                   No description available
                 </p>
               </div>
               <button 
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
+                class="w-full bg-blue-600 hover:bg-blue-700 font-medium py-2 px-4 rounded-md transition-colors duration-200"
                 @click="handleLayoutSelect(layout.id)"
               >
                 Select Layout
@@ -77,15 +78,15 @@ function handleCreateNew() {
 
       <!-- No Layouts Message -->
       <div v-else-if="layouts && layouts.length === 0" class="text-center py-12">
-        <div class="text-gray-400 mb-4">
+        <div class="opacity-50 mb-4">
           <svg class="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z"/>
           </svg>
         </div>
-        <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
+        <h3 class="text-xl font-semibold opacity-60 mb-2">
           No Layouts Found
         </h3>
-        <p class="text-gray-500 dark:text-gray-400 mb-6">
+        <p class="opacity-50 mb-6">
           You don't have any layouts yet. Create your first layout to get started!
         </p>
       </div>
@@ -93,7 +94,7 @@ function handleCreateNew() {
       <!-- Create New Layout -->
       <div class="text-center">
         <button 
-          class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200 inline-flex items-center"
+          class="bg-green-600 hover:bg-green-700 font-medium py-3 px-6 rounded-md transition-colors duration-200 inline-flex items-center"
           @click="handleCreateNew"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,7 +107,7 @@ function handleCreateNew() {
       <!-- Loading State -->
       <div v-if="!layouts" class="text-center py-12">
         <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
-        <p class="mt-4 text-gray-500 dark:text-gray-400">Loading layouts...</p>
+        <p class="mt-4 opacity-50">Loading layouts...</p>
       </div>
     </div>
   </div>

@@ -193,7 +193,7 @@ function handleUpdateState(item: DocumentData, newState: boolean) {
 </script>
 
 <template>
-  <v-toolbar :elevation="8" class="border-1 bg-slate-900 bg-opacity-70" density="compact" rounded="pill">
+  <v-toolbar :elevation="8" class="border-1 module-toolbar" density="compact" rounded="pill">
     <template #prepend>
       <v-icon :icon="icon"></v-icon>
     </template>
@@ -217,7 +217,7 @@ function handleUpdateState(item: DocumentData, newState: boolean) {
             </template>
             <v-list
               v-if="filter.options"
-              class="bg-green-darken-4"
+              color="surface-variant"
               v-model:selected="filterSelections[filter.type]"
               select-strategy="single-independent"
             >
@@ -235,7 +235,7 @@ function handleUpdateState(item: DocumentData, newState: boolean) {
           <template v-slot:activator="{ props }">
             <v-chip v-bind="props" color="blue-darken-4" variant="flat" prepend-icon="mdi-eye">{{  viewOption.label }}</v-chip>
           </template>
-          <v-list class="bg-blue-darken-4" v-model:selected="viewOptionModel" select-strategy="single-independent">
+          <v-list color="surface-variant" v-model:selected="viewOptionModel" select-strategy="single-independent">
             <v-list-item
               v-for="item in viewOptions"
               :key="item?.value || item?.label"
@@ -249,7 +249,7 @@ function handleUpdateState(item: DocumentData, newState: boolean) {
           <template v-slot:activator="{ props }">
             <v-chip v-bind="props" color="teal-darken-4" variant="flat" prepend-icon="mdi-sort">{{ sortOption.label }}</v-chip>
           </template>
-          <v-list class="bg-teal-darken-4" v-model:selected="sortOptionModel" select-strategy="single-independent">
+          <v-list color="surface-variant" v-model:selected="sortOptionModel" select-strategy="single-independent">
             <v-list-item
               v-for="(item, index) in sortOptions"
               :key="item.value"
@@ -304,3 +304,10 @@ function handleUpdateState(item: DocumentData, newState: boolean) {
     </v-row>
   </div>
 </template>
+
+<style scoped>
+.module-toolbar {
+  background: rgba(var(--v-theme-surface), 0.8) !important;
+  border-color: rgba(var(--v-theme-on-surface), 0.12) !important;
+}
+</style>

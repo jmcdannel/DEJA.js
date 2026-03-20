@@ -256,11 +256,11 @@ async function selectPlan(tier: PlanTier) {
 
     <!-- Comparison Modal -->
     <v-dialog v-model="showCompare" max-width="900" scrollable>
-      <v-card class="bg-[#0f172a] border border-white/10">
+      <v-card color="surface" class="border border-opacity-10">
         <v-card-title class="font-display text-2xl text-sky-100 pa-6 pb-0">
           Full Feature Breakdown
         </v-card-title>
-        <v-card-subtitle class="px-6 text-slate-400">
+        <v-card-subtitle class="px-6 opacity-60">
           Everything you get, spelled out clearly.
         </v-card-subtitle>
         <v-card-text class="pa-6">

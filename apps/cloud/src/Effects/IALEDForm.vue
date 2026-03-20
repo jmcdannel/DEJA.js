@@ -451,7 +451,7 @@ watch(() => pattern.value, () => emitChange())
           LED Strip
         </h3>
       </header>
-      <p class="text-xs text-slate-400">
+      <p class="text-xs opacity-60">
         Select which addressable LED strip this animation should target.
       </p>
       <v-select
@@ -465,7 +465,7 @@ watch(() => pattern.value, () => emitChange())
         hide-details
         class="max-w-sm"
       />
-      <div class="flex items-center gap-4 text-xs text-slate-400">
+      <div class="flex items-center gap-4 text-xs opacity-60">
         <v-icon size="14">mdi-information-outline</v-icon>
         <span>Strip length: <strong class="text-sky-300">{{ maxRange }} LEDs</strong></span>
       </div>
@@ -483,7 +483,7 @@ watch(() => pattern.value, () => emitChange())
           Pattern
         </h3>
       </header>
-      <p class="text-xs text-slate-400">
+      <p class="text-xs opacity-60">
         Choose how the animation behaves on the strip.
       </p>
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
@@ -493,7 +493,7 @@ watch(() => pattern.value, () => emitChange())
           class="cursor-pointer transition-all duration-150"
           :class="pattern === p.id
             ? 'border-2 border-sky-400 shadow-lg shadow-sky-400/20'
-            : 'border border-slate-700 hover:border-slate-500'"
+            : 'border border-opacity-20 hover:border-opacity-40'"
           :color="pattern === p.id ? props.color || 'teal' : 'surface'"
           variant="tonal"
           @click="pattern = p.id"
@@ -519,7 +519,7 @@ watch(() => pattern.value, () => emitChange())
           LED Range
         </h3>
       </header>
-      <p class="text-xs text-slate-400">
+      <p class="text-xs opacity-60">
         Target the entire strip or a custom subset of LEDs.
       </p>
       <v-btn-toggle v-model="rangeMode" mandatory class="flex gap-2">
@@ -545,8 +545,8 @@ watch(() => pattern.value, () => emitChange())
         </v-btn>
       </v-btn-toggle>
 
-      <div v-if="rangeMode === 'custom'" class="space-y-2 p-4 rounded-lg bg-[#0f172a]/50 border border-slate-700">
-        <div class="flex justify-between text-xs uppercase tracking-[0.12em] text-slate-400">
+      <div v-if="rangeMode === 'custom'" class="space-y-2 p-4 rounded-lg bg-surface-variant border border-opacity-20">
+        <div class="flex justify-between text-xs uppercase tracking-[0.12em] opacity-60">
           <span>Start: <strong class="text-sky-300">{{ rangeSelection[0] }}</strong></span>
           <span>End: <strong class="text-sky-300">{{ rangeSelection[1] }}</strong></span>
         </div>
@@ -571,7 +571,7 @@ watch(() => pattern.value, () => emitChange())
             hide-details
             class="max-w-[8rem]"
           />
-          <v-icon size="16" class="text-slate-500">mdi-arrow-right</v-icon>
+          <v-icon size="16" class="opacity-50">mdi-arrow-right</v-icon>
           <v-text-field
             v-model.number="rangeSelection[1]"
             label="End LED"
@@ -600,7 +600,7 @@ watch(() => pattern.value, () => emitChange())
             <h3 class="text-sm font-semibold uppercase tracking-[0.12em] text-sky-200">
               Animation Steps
             </h3>
-            <p class="text-xs text-slate-400 mt-0.5">
+            <p class="text-xs opacity-60 mt-0.5">
               Build a sequence of timed color changes for the strip.
             </p>
           </div>
@@ -619,7 +619,7 @@ watch(() => pattern.value, () => emitChange())
       <!-- Timeline Preview Bar -->
       <div
         v-if="steps.length > 0"
-        class="relative h-12 rounded-lg bg-[#0f172a]/60 border border-slate-700 overflow-hidden"
+        class="relative h-12 rounded-lg bg-surface-variant border border-opacity-20 overflow-hidden"
       >
         <div
           v-for="step in steps"
@@ -632,7 +632,7 @@ watch(() => pattern.value, () => emitChange())
           }"
         />
         <!-- Time markers -->
-        <div class="absolute bottom-0 left-0 right-0 flex justify-between px-2 text-[0.6rem] text-slate-500">
+        <div class="absolute bottom-0 left-0 right-0 flex justify-between px-2 text-[0.6rem] opacity-50">
           <span>0s</span>
           <span>{{ (totalDuration / 2000).toFixed(1) }}s</span>
           <span>{{ (totalDuration / 1000).toFixed(1) }}s</span>
@@ -642,10 +642,10 @@ watch(() => pattern.value, () => emitChange())
       <!-- Empty State -->
       <div
         v-if="steps.length === 0"
-        class="rounded-lg border border-dashed border-slate-600 p-8 text-center"
+        class="rounded-lg border border-dashed border-opacity-30 p-8 text-center"
       >
-        <v-icon size="48" class="text-slate-600 mb-2">mdi-led-strip-variant</v-icon>
-        <p class="text-sm text-slate-400">
+        <v-icon size="48" class="opacity-40 mb-2">mdi-led-strip-variant</v-icon>
+        <p class="text-sm opacity-60">
           No animation steps yet. Click <strong>"Add Step"</strong> to begin building your animation.
         </p>
       </div>
@@ -656,7 +656,7 @@ watch(() => pattern.value, () => emitChange())
           v-for="(step, index) in steps"
           :key="step.id"
           variant="tonal"
-          class="border border-slate-700/60"
+          class="border border-opacity-20"
         >
           <v-card-item class="py-3">
             <div class="flex flex-col gap-3">
@@ -710,7 +710,7 @@ watch(() => pattern.value, () => emitChange())
                   v-if="patternNeedsColor"
                   class="flex items-center gap-2"
                 >
-                  <span class="text-xs uppercase tracking-[0.1em] text-slate-400">Color</span>
+                  <span class="text-xs uppercase tracking-[0.1em] opacity-60">Color</span>
                   <v-btn
                     :style="{ backgroundColor: step.color }"
                     class="h-9 w-9 rounded-lg border border-white/20 transition-transform duration-150 hover:scale-110"
@@ -718,7 +718,7 @@ watch(() => pattern.value, () => emitChange())
                     size="small"
                     @click="openColorPicker(index)"
                   />
-                  <span class="text-xs font-mono text-slate-400">{{ step.color }}</span>
+                  <span class="text-xs font-mono opacity-60">{{ step.color }}</span>
                 </div>
               </div>
 

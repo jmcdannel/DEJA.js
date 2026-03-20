@@ -7,7 +7,7 @@ const user = useCurrentUser()
 <template>
   <button
     type="button"
-    class="flex mx-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+    class="flex mx-3 text-sm rounded-full md:mr-0 focus:ring-4 focus:ring-primary/30"
     id="user-menu-button"
     aria-expanded="false"
     data-dropdown-toggle="user-dropdown"
@@ -22,16 +22,17 @@ const user = useCurrentUser()
   </button>
   <!-- Dropdown menu -->
   <div
-    class="hidden z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 rounded-xl"
+    class="hidden z-50 my-4 w-56 text-base list-none rounded divide-y shadow rounded-xl"
+    style="background: rgb(var(--v-theme-surface)); border-color: rgba(var(--v-border-color), var(--v-border-opacity));"
     id="user-dropdown"
   >
     <div class="py-3 px-4">
       <!-- <pre>{{  user  }}</pre> -->
       <span
-        class="block text-sm font-semibold text-gray-900 dark:text-white"
+        class="block text-sm font-semibold"
         >{{ user?.displayName }}</span>
       <span
-        class="block text-sm text-gray-900 truncate dark:text-white"
+        class="block text-sm truncate opacity-70"
         >{{ user?.email }}</span>
     </div>
     <!-- <ul
@@ -131,7 +132,7 @@ const user = useCurrentUser()
       </li>
     </ul> -->
     <ul
-      class="py-1 text-gray-700 dark:text-gray-300"
+      class="py-1"
       aria-labelledby="user-dropdown"
     >
       <li>
