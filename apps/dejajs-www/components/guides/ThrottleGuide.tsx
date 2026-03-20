@@ -30,16 +30,22 @@ function Screenshot({ src, alt, device }: { src: string; alt: string; device: 'm
   );
 }
 
-function FeatureList({ items }: { items: string[] }) {
+function FeatureCard({ emoji, text }: { emoji: string; text: string }) {
   return (
-    <ul className="space-y-1.5 text-sm text-gray-300">
+    <div className="flex items-start gap-3 p-3 rounded-lg border border-gray-800 bg-gray-900/50">
+      <span className="text-lg shrink-0 mt-0.5">{emoji}</span>
+      <span className="text-sm text-gray-300">{text}</span>
+    </div>
+  );
+}
+
+function FeatureGrid({ items }: { items: { emoji: string; text: string }[] }) {
+  return (
+    <div className="grid sm:grid-cols-2 gap-2">
       {items.map((item) => (
-        <li key={item} className="flex gap-2">
-          <span className="text-deja-cyan shrink-0">•</span>
-          <span>{item}</span>
-        </li>
+        <FeatureCard key={item.text} emoji={item.emoji} text={item.text} />
       ))}
-    </ul>
+    </div>
   );
 }
 
@@ -73,16 +79,6 @@ function VideoPlaceholder() {
         </div>
         <p className="text-gray-400 text-sm">Video walkthrough coming soon</p>
       </div>
-    </div>
-  );
-}
-
-function NavItem({ label, color, desc }: { label: string; color: string; desc: string }) {
-  return (
-    <div className="flex items-center gap-3 py-1.5">
-      <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${color}`} />
-      <span className="text-white text-sm font-medium">{label}</span>
-      <span className="text-gray-500 text-xs">— {desc}</span>
     </div>
   );
 }
@@ -208,13 +204,13 @@ export default function ThrottleGuide() {
         {/* ── Navigation Breakdown ── */}
         <Section title="Navigating the App">
           <p>
-            Throttle has three navigation layers that are always available, no matter which screen you&apos;re on.
+            Throttle has two persistent navigation elements visible on every screen.
           </p>
 
           {/* Header — annotated zoomed screenshot */}
           <h3 className="text-white font-semibold text-lg mt-6">🔝 Header Bar</h3>
           <p className="text-sm text-gray-300">
-            The top bar gives you system-level controls and status at a glance. It&apos;s visible on every screen.
+            The top bar gives you system-level controls and status at a glance.
           </p>
           <AnnotatedScreenshot
             src="/screenshots/throttle_desktop_home.png"
@@ -235,7 +231,8 @@ export default function ThrottleGuide() {
           <h3 className="text-white font-semibold text-lg mt-10">🔽 Bottom Navigation</h3>
           <p className="text-sm text-gray-300">
             A pill-shaped button bar at the bottom of the screen. Shows your favorite pages as
-            color-coded icon buttons. Customize which items appear in Settings.
+            color-coded icon buttons. Customize which items appear in{' '}
+            <Link href="#settings" className="text-deja-cyan hover:underline">Settings</Link>.
           </p>
           <AnnotatedScreenshot
             src="/screenshots/throttle_desktop_throttle-list.png"
@@ -251,24 +248,8 @@ export default function ThrottleGuide() {
               { number: 6, label: 'Signals', desc: 'Signal aspect monitoring', x: '70%', y: '45%', offset: 'below' as const },
             ]}
           />
-          <p className="text-xs text-gray-500 mt-2">
-            The bottom bar is fully customizable — add or remove items in{' '}
-            <Link href="/docs/throttle/settings" className="text-deja-cyan hover:underline">Settings</Link>.
-          </p>
 
-          {/* Side menu */}
-          <h3 className="text-white font-semibold text-lg mt-10">☰ Side Menu</h3>
-          <p className="text-sm text-gray-300">
-            Slide out from the left via the hamburger icon. Shows the full list of pages with
-            icons and labels. On mobile it closes automatically after you tap an item.
-          </p>
-          <FeatureList items={[
-            'All 11 pages listed with color-coded icons',
-            'DEJA Suite app switcher at the bottom — quick links to Cloud, Monitor, and Tour',
-            'Active page highlighted',
-          ]} />
-
-          <Screenshot src="/screenshots/throttle_desktop_home.png" alt="Throttle app full view showing header and bottom nav" device="desktop" />
+          <Screenshot src="/screenshots/throttle_mobile_home.png" alt="Throttle app full view on mobile" device="mobile" />
         </Section>
 
         {/* ── Connect ── */}
@@ -278,10 +259,10 @@ export default function ThrottleGuide() {
             of your command station. When the server is running and connected, the status
             indicator turns green.
           </p>
-          <FeatureList items={[
-            'Automatic connection to your DEJA.js server',
-            'Status indicators for server, devices, and track power',
-            'Speedometer widgets for active throttles on the home screen',
+          <FeatureGrid items={[
+            { emoji: '🔌', text: 'Automatic connection to your DEJA.js server' },
+            { emoji: '🟢', text: 'Status indicators for server, devices, and track power' },
+            { emoji: '🕐', text: 'Speedometer widgets for active throttles on the home screen' },
           ]} />
           <Screenshot src="/screenshots/throttle_mobile_home.png" alt="Throttle home screen showing connection status" device="mobile" />
           <DocLink href="/docs/throttle/connect">Connection setup reference</DocLink>
@@ -293,13 +274,13 @@ export default function ThrottleGuide() {
             Tap the <strong>+</strong> button on the throttle list to add a locomotive to your
             session. Enter the DCC address and a name.
           </p>
-          <FeatureList items={[
-            'Enter DCC address (1–9999) and locomotive name',
-            'Assign a road name (BNSF, UP, CSX, NS, and more)',
-            'Set an image for the locomotive avatar',
-            'Added locomotives appear immediately in the throttle list',
+          <FeatureGrid items={[
+            { emoji: '🔢', text: 'Enter DCC address (1–9999) and locomotive name' },
+            { emoji: '🏷️', text: 'Assign a road name (BNSF, UP, CSX, NS, and more)' },
+            { emoji: '🖼️', text: 'Set an image for the locomotive avatar' },
+            { emoji: '⚡', text: 'Added locomotives appear immediately in the throttle list' },
           ]} />
-          <Screenshot src="/screenshots/throttle_desktop_add-loco.png" alt="Add locomotive dialog" device="desktop" />
+          <Screenshot src="/screenshots/throttle_mobile_home.png" alt="Add locomotive from throttle list" device="mobile" />
           <CloudNote>
             Full locomotive management happens in{' '}
             <Link href="/guides/cloud" className="text-deja-cyan hover:underline">DEJA Cloud</Link>{' '}
@@ -315,13 +296,13 @@ export default function ThrottleGuide() {
             The throttle list shows all locomotives in your session. Tap a locomotive to open
             its throttle control screen.
           </p>
-          <FeatureList items={[
-            'Grid view of all active throttles with speed, name, and avatar',
-            'Drag tiles to reorder (order persists between sessions)',
-            'Quick control buttons on each tile',
-            'Responsive layout — 1 column on mobile, 2+ on tablet and desktop',
+          <FeatureGrid items={[
+            { emoji: '🎴', text: 'Grid view of all active throttles with speed, name, and avatar' },
+            { emoji: '🔀', text: 'Drag tiles to reorder (order persists between sessions)' },
+            { emoji: '🎮', text: 'Quick control buttons on each tile' },
+            { emoji: '📱', text: 'Responsive layout — 1 column on mobile, 2+ on tablet and desktop' },
           ]} />
-          <Screenshot src="/screenshots/throttle_desktop_throttle-list.png" alt="Throttle list with locomotives" device="desktop" />
+          <Screenshot src="/screenshots/throttle_mobile_home.png" alt="Throttle list with locomotives" device="mobile" />
           <DocLink href="/docs/throttle/throttle-list">Throttle list reference</DocLink>
         </Section>
 
@@ -331,14 +312,13 @@ export default function ThrottleGuide() {
             The throttle control screen gives you everything you need to drive a single locomotive.
             Use the speed controls to set speed and tap direction to switch between forward and reverse.
           </p>
-          <FeatureList items={[
-            'Speed slider (0–126 DCC steps) on desktop and tablet',
-            '5-button vertical speed controls (+5, +1, Stop, −1, −5) on all screen sizes',
-            'Direction slider — REV / IDLE / FWD (only changeable at zero speed)',
-            'Brake control (0–10) for gradual deceleration',
-            'Swipe left/right to switch between active throttles',
-            'Park button — stops the loco and releases the throttle',
-            'Emergency stop accessible from the header on every page',
+          <FeatureGrid items={[
+            { emoji: '🎚️', text: 'Speed slider (0–126 DCC steps) on desktop and tablet' },
+            { emoji: '🔘', text: '5-button speed controls (+5, +1, Stop, −1, −5) on all screens' },
+            { emoji: '↔️', text: 'Direction — REV / IDLE / FWD (only changeable at zero speed)' },
+            { emoji: '🛑', text: 'Brake control (0–10) for gradual deceleration' },
+            { emoji: '👉', text: 'Swipe left/right to switch between active throttles' },
+            { emoji: '🅿️', text: 'Park button — stops the loco and releases the throttle' },
           ]} />
           <Screenshot src="/screenshots/throttle_mobile_throttle.png" alt="Throttle control screen with speed controls" device="mobile" />
           <DocLink href="/docs/throttle/throttle">Throttle control reference</DocLink>
@@ -350,12 +330,11 @@ export default function ThrottleGuide() {
             Tap the function button to open the speed dial. Toggle decoder functions like
             headlights, bell, and horn. Each button shows its current state — on or off.
           </p>
-          <FeatureList items={[
-            'Speed dial with up to 29 function buttons (F0–F28)',
-            'F0: Headlight, F1: Bell, F2: Horn/Whistle',
-            'F3–F28: Decoder-specific features (dynamic brake, coupler, sounds, lighting)',
-            'Each function shows a labeled icon',
-            'Consist display shows linked multi-unit groups',
+          <FeatureGrid items={[
+            { emoji: '🎛️', text: 'Speed dial with up to 29 function buttons (F0–F28)' },
+            { emoji: '💡', text: 'F0: Headlight, F1: Bell, F2: Horn/Whistle' },
+            { emoji: '🔧', text: 'F3–F28: Decoder-specific (dynamic brake, coupler, sounds, lighting)' },
+            { emoji: '🔗', text: 'Consist display shows linked multi-unit groups' },
           ]} />
           <Screenshot src="/screenshots/throttle_mobile_functions.png" alt="Function speed dial expanded" device="mobile" />
           <CloudNote>
@@ -372,14 +351,14 @@ export default function ThrottleGuide() {
             The turnouts view shows all configured turnouts on your layout. Tap a turnout
             to toggle between straight (normal) and divergent (reverse).
           </p>
-          <FeatureList items={[
-            'CTC-style lever switches as the default view',
-            'Color-coded state indicators — normal vs. reverse',
-            'Multiple view modes: Switch, Button, Card, Table',
-            'Filter by device or tags',
-            '3-second cooldown per toggle prevents rapid repeated throws',
+          <FeatureGrid items={[
+            { emoji: '🎛️', text: 'CTC-style lever switches as the default view' },
+            { emoji: '🟢', text: 'Color-coded state indicators — normal vs. reverse' },
+            { emoji: '👁️', text: 'Multiple view modes: Switch, Button, Card, Table' },
+            { emoji: '🏷️', text: 'Filter by device or tags' },
+            { emoji: '⏱️', text: '3-second cooldown per toggle prevents rapid repeated throws' },
           ]} />
-          <Screenshot src="/screenshots/throttle_desktop_turnouts.png" alt="Turnouts view with state indicators" device="desktop" />
+          <Screenshot src="/screenshots/throttle_mobile_turnouts2.png" alt="Turnouts view with state indicators" device="mobile" />
           <CloudNote>
             Turnouts are defined in{' '}
             <Link href="/guides/cloud" className="text-deja-cyan hover:underline">DEJA Cloud</Link>{' '}
@@ -395,14 +374,14 @@ export default function ThrottleGuide() {
             Routes execute a sequence of turnout changes with a single tap. Select a route
             from the list or tap a location on the track map.
           </p>
-          <FeatureList items={[
-            'Interactive SVG track maps with clickable origin and destination points',
-            'Select origin (P1) → destination (P2) to execute a route',
-            'Horizontal timeline showing the turnout sequence',
-            'Progress bar fills during execution (2 seconds per step)',
-            'Alternative list view with route cards and a Run button',
+          <FeatureGrid items={[
+            { emoji: '🗺️', text: 'Interactive SVG track maps with clickable origin and destination' },
+            { emoji: '📍', text: 'Select origin (P1) → destination (P2) to execute a route' },
+            { emoji: '📊', text: 'Horizontal timeline showing the turnout sequence' },
+            { emoji: '⏳', text: 'Progress bar fills during execution (2 seconds per step)' },
+            { emoji: '📋', text: 'Alternative list view with route cards and a Run button' },
           ]} />
-          <Screenshot src="/screenshots/throttle_desktop_routes.png" alt="Routes view with route list" device="desktop" />
+          <Screenshot src="/screenshots/throttle_desktop_routes.png" alt="Routes view with route list and track map" device="desktop" />
           <CloudNote>
             Routes are created in{' '}
             <Link href="/guides/cloud" className="text-deja-cyan hover:underline">DEJA Cloud</Link>{' '}
@@ -418,12 +397,13 @@ export default function ThrottleGuide() {
             Trigger sound and lighting effects on your layout. The effects view shows all
             available effects grouped by category. Tap an effect to toggle it on or off.
           </p>
-          <FeatureList items={[
-            '10 effect types: Light, LED, Street Light, Relay, Frog Juicer, Power, PIN, Sound, IALED, Macro',
-            'Toggle effects on/off with a switch in each card',
-            'Filter by device, type, or tags',
-            'Guest-accessible effects marked with an indicator chip',
-            'Responsive grid layout adapts to screen size',
+          <FeatureGrid items={[
+            { emoji: '💡', text: 'Light, LED, Street Light, Relay, Frog Juicer, Power, PIN' },
+            { emoji: '🔊', text: 'Sound effects from your uploaded sound library' },
+            { emoji: '🌈', text: 'IALED — individually addressable LED strips and patterns' },
+            { emoji: '⚙️', text: 'Macros — custom on/off command sequences' },
+            { emoji: '🏷️', text: 'Filter by device, type, or tags' },
+            { emoji: '👤', text: 'Guest-accessible effects marked with an indicator chip' },
           ]} />
           <Screenshot src="/screenshots/throttle_mobile_effects.png" alt="Effects view with available effects" device="mobile" />
           <CloudNote>
@@ -435,6 +415,22 @@ export default function ThrottleGuide() {
           </CloudNote>
           <DocLink href="/docs/throttle/effects">Effects reference</DocLink>
         </Section>
+
+        {/* ── Settings ── */}
+        <Section title="Settings">
+          <p>
+            Customize how Throttle looks and behaves. Open Settings from the bottom navigation
+            bar or the side menu.
+          </p>
+          <FeatureGrid items={[
+            { emoji: '🎨', text: 'Switch between light and dark themes' },
+            { emoji: '📌', text: 'Choose which pages appear in the bottom navigation bar' },
+            { emoji: '🔗', text: 'Configure server connection URL and port' },
+            { emoji: '🏠', text: 'Select and switch between layouts' },
+            { emoji: '👤', text: 'Manage your account and sign out' },
+          ]} />
+          <DocLink href="/docs/throttle/settings">Settings reference</DocLink>
+        </Section>
       </div>
 
       {/* What's Next */}
@@ -444,7 +440,7 @@ export default function ThrottleGuide() {
           {[
             { label: 'Conductor Mode', desc: 'Full operator station with a three-pane layout', href: '/docs/throttle/conductor' },
             { label: 'Signals', desc: 'Monitor signal aspects across your layout', href: '/docs/throttle/signals' },
-            { label: 'Settings', desc: 'Customize navigation, themes, and preferences', href: '/docs/throttle/settings' },
+            { label: 'Cloud Guide', desc: 'Configure your roster, turnouts, effects, and more', href: '/guides/cloud' },
             { label: 'Home Screen', desc: 'Speedometer widgets and layout overview', href: '/docs/throttle/home' },
           ].map((item) => (
             <Link
