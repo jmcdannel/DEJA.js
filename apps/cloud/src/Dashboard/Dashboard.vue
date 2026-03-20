@@ -67,14 +67,6 @@ const serverUptime = computed(() => {
 
 const trackPower = computed(() => layout?.value?.dccEx?.power ?? null)
 const connectedCount = computed(() => devices.value?.filter((d) => d.isConnected).length ?? 0)
-const disconnectedCount = computed(() => (devices.value?.length ?? 0) - connectedCount.value)
-const deviceCount = computed(() => ({
-  connected: connectedCount.value,
-  total: devices.value?.length ?? 0,
-}))
-const commandActivityData = computed(() =>
-  commandActivity.value.map(b => ({ timestamp: b.timestamp, count: b.count })),
-)
 const totalCommandCount = computed(() =>
   commandActivity.value.reduce((sum, b) => sum + b.count, 0),
 )

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useCurrentUser } from 'vuefire'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
@@ -11,11 +11,16 @@ import SelectFavorites from '@/core/Menu/SelectFavorites.vue'
 import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
+import { wiThrottleService } from '@/services/WiThrottleService'
+import { useServerDiscovery } from '@/composables/useServerDiscovery'
 
 const user = useCurrentUser()
 const { plan, status, isTrialing, trialDaysLeft, subscription } = useSubscription()
 const { themePreference, setTheme } = useThemeSwitcher()
 const { mdAndUp } = useDisplay()
+
+const { isScanning, discoveredServers, startScan, isAvailable, checkAvailability } = useServerDiscovery()
+onMounted(() => { checkAvailability() })
 
 const planName = computed(() => PLAN_DISPLAY[plan.value].name)
 const planPrice = computed(() => {
@@ -107,6 +112,9 @@ async function saveLayoutConnectionSettings() {
     await setDoc(doc(db, 'layouts', layoutId), {
       throttleConnection: { type: connectionType.value, host: connectionHost.value, port: connectionPort.value }
     }, { merge: true })
+    // Reconnect with new settings
+    await wiThrottleService.disconnect()
+    await wiThrottleService.connect()
   } catch (e) {
     console.error('Error saving throttle connection:', e)
   }
@@ -293,6 +301,41 @@ const backgroundPages = [
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                 <v-text-field v-model="connectionHost" label="Host IP" placeholder="192.168.1.50" density="compact" variant="outlined" hide-details="auto" />
                 <v-text-field v-model.number="connectionPort" label="Port" type="number" placeholder="44444" density="compact" variant="outlined" hide-details="auto" />
+              </div>
+              <!-- mDNS server discovery -->
+              <div class="mb-3">
+                <v-btn
+                  v-if="isAvailable !== false"
+                  size="small"
+                  variant="tonal"
+                  color="cyan"
+                  :loading="isScanning"
+                  prepend-icon="mdi-magnify"
+                  class="text-none mb-2"
+                  @click="startScan"
+                >
+                  {{ isScanning ? 'Scanning...' : 'Scan for WiThrottle Servers' }}
+                </v-btn>
+                <p v-else class="text-xs text-slate-400 mb-2">
+                  Server discovery requires the native app (iOS/Android).
+                </p>
+                <div v-if="discoveredServers.length > 0" class="flex flex-col gap-2 mt-2">
+                  <div
+                    v-for="server in discoveredServers"
+                    :key="`${server.host}:${server.port}`"
+                    class="flex items-center justify-between p-2 rounded border border-cyan-500/30 bg-cyan-500/5 cursor-pointer hover:bg-cyan-500/10 transition-colors"
+                    @click="connectionHost = server.host; connectionPort = server.port"
+                  >
+                    <div>
+                      <div class="text-sm font-medium text-cyan-300">{{ server.name }}</div>
+                      <div class="text-xs text-slate-400">{{ server.host }}:{{ server.port }}</div>
+                    </div>
+                    <v-icon size="18" color="cyan">mdi-arrow-right-circle</v-icon>
+                  </div>
+                </div>
+                <p v-else-if="!isScanning && isAvailable === true" class="text-xs text-slate-400">
+                  No servers found yet. Make sure JMRI or DCC-EX WiThrottle is running.
+                </p>
               </div>
             </template>
             <v-btn color="primary" variant="tonal" size="small" :loading="isLayoutSaving" prepend-icon="mdi-content-save" class="text-none" @click="saveLayoutConnectionSettings">

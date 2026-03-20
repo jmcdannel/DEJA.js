@@ -61,12 +61,13 @@ async function handleDisconnect () {
     density="compact"
   >
     <template #prepend>
-      <img v-if="deviceType?.image" :src="deviceType.image" alt="DCC-EX Logo" class="w-16 h-16 mr-2" />
-      <v-icon v-else :icon="deviceType?.icon || 'mdi-help'" class="w-16 h-16 mr-2 border rounded-full" />
+      <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 mr-1" size="small">mdi-drag</v-icon>
+      <img v-if="deviceType?.image" :src="deviceType.image" alt="DCC-EX Logo" class="w-12 h-12 mr-2" />
+      <v-icon v-else :icon="deviceType?.icon || 'mdi-help'" class="w-12 h-12 mr-2 border rounded-full" />
     </template>
     <template #title>
       <div class="flex flex-col">
-        <span class="text-lg font-bold tracking-wide">{{device?.id}}</span>
+        <span class="text-sm font-bold tracking-wide">{{device?.id}}</span>
         <span class="text-xs opacity-70 uppercase tracking-wider font-semibold">{{device?.type || 'ID'}}</span>
       </div>
     </template>

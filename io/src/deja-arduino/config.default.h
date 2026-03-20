@@ -1,6 +1,6 @@
 #include <TurnoutPulser.h>
 
-#define DEVICE_ID "daja-arduino"
+#define DEVICE_ID "deja-arduino"
 #define ENABLE_PWM false
 #define ENABLE_OUTPUTS false
 #define ENABLE_SIGNALS false

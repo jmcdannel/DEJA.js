@@ -77,6 +77,7 @@ export interface Device {
   timestamp?: Date
   topic?: string
   type: 'dcc-ex' | 'deja-arduino' | 'deja-arduino-led' | 'deja-mqtt' | 'deja-server'
+  order?: number
 }
 
 export interface DeviceType {

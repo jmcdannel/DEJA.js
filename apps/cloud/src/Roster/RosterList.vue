@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { vAutoAnimate } from '@formkit/auto-animate/vue'
+import draggable from 'vuedraggable'
 import EmptyState from '@/Core/UI/EmptyState.vue'
 import RosterItem from '@/Roster/RosterItem.vue'
 import { useLocos, type Loco } from '@repo/modules/locos'
 import { createLogger } from '@repo/utils'
+import { useSortableList } from '@/Core/composables/useSortableList'
 
 const log = createLogger('RosterList')
 
 const emit = defineEmits(['edit'])
 
-const { getLocos } = useLocos()
+const { getLocos, updateLoco } = useLocos()
 
-let locos = getLocos()
+const rawLocos = getLocos()
+const { list: locos, onDragStart, onDragEnd } = useSortableList<Loco>(rawLocos as any, (id, data) => updateLoco(id, data as any))
 
 function handleEdit(loco: Loco) {
   log.debug('handleEdit', loco)
@@ -20,10 +22,27 @@ function handleEdit(loco: Loco) {
 
 </script>
 <template>
-  <div v-if="locos?.length" v-auto-animate class="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-    <slot name="prepend"></slot>
-    <RosterItem v-for="loco in locos" :key="loco.id" :loco="loco as Loco" @edit="handleEdit"></RosterItem>
-  </div>
+  <draggable
+    v-if="locos?.length"
+    :list="locos"
+    item-key="id"
+    handle=".drag-handle"
+    ghost-class="ghost"
+    class="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4"
+    @start="onDragStart"
+    @end="onDragEnd"
+  >
+    <template #header>
+      <div>
+        <slot name="prepend"></slot>
+      </div>
+    </template>
+    <template #item="{ element }">
+      <div>
+        <RosterItem :loco="element as Loco" @edit="handleEdit" />
+      </div>
+    </template>
+  </draggable>
   <EmptyState
     v-if="!locos?.length"
     icon="mdi-train"
@@ -35,3 +54,8 @@ function handleEdit(loco: Loco) {
     action-to="/locos/new"
   />
 </template>
+<style scoped>
+.ghost {
+  opacity: 0.5;
+}
+</style>
