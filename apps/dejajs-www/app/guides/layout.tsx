@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 const guides = [
   { label: 'Getting Started', href: '/guides/getting-started', desc: 'From zero to driving trains' },
-  { label: 'Throttle', href: '/guides/throttle', desc: 'Train control & functions', comingSoon: true },
+  { label: 'Throttle', href: '/guides/throttle', desc: 'Train control & functions' },
   { label: 'Cloud', href: '/guides/cloud', desc: 'Roster, turnouts & effects', comingSoon: true },
   { label: 'Monitor', href: '/guides/monitor', desc: 'Diagnostics & logging', comingSoon: true },
   { label: 'Server', href: '/guides/server', desc: 'Installation & CLI reference', comingSoon: true },
