@@ -10,11 +10,11 @@ export interface DocNavItem {
 }
 
 const SECTION_ORDER = [
+  'Server',
   'Throttle',
   'Cloud',
   'Monitor',
   'Tour',
-  'Server',
   'IO Devices'
 ];
 
