@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0] - 2026-03-18
+
+### Added
+
+- **[cloud]** Add "Install" step (step 4) to the onboarding wizard using the QuickStart component, and refactor the Setup Complete page to use QuickStart in place of the bare install command card
+- **[cli]** `deja start` now launches an interactive terminal UI — scrolling log pane, live status bar (pid + uptime), and a command input line supporting `restart`, `stop`, and `help`. Two implementations available: `blessed` (default, ncurses-style with real scrolling) and `ink` (React-based, set `DEJA_UI=ink` to use).
+- **[cloud, throttle]** Sentry user feedback widget — persistent floating button for general feedback plus automatic report dialog on unhandled errors, with user identity pre-filled from Firebase Auth
+
+### Fixed
+
+- **[cloud]** Resolve `requireAuth is not defined` crash on track-diagram routes
+- **[server]** Handle EADDRINUSE error on WebSocket startup with a clear "port already in use" message instead of a silent crash
+
+### Improved
+
+- **[ci]** Add preview branch staging workflow — feature PRs now target `preview`, staging domains auto-update on merge, and only `preview → main` PRs require changesets and docs review
+
+---
+
 ## [1.4.0] - 2026-03-16
 
 ### Added

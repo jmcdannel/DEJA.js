@@ -53,3 +53,8 @@ export * from './plans'
 // CV module
 export * from './cv/types'
 export * from './cv/constants'
+
+// Feedback
+export { default as useFeedbackUser } from './feedback/useFeedbackUser'
+export * from './feedback/types'
+export * from './feedback/config'
