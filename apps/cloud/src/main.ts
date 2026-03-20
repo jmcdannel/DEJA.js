@@ -13,6 +13,7 @@ import { VueFire, VueFireAuth } from 'vuefire'
 // Firebase
 import { firebaseApp } from '@repo/firebase-config'
 import { createVuetifyThemes } from '@repo/ui'
+import { feedbackConfig } from '@repo/modules/feedback'
 
 // Motion
 import { MotionPlugin } from '@vueuse/motion'
@@ -76,11 +77,17 @@ Sentry.init({
   integrations: [
     Sentry.browserTracingIntegration({ router }),
     Sentry.replayIntegration(),
+    Sentry.feedbackIntegration(feedbackConfig),
   ],
   tracesSampleRate: 1.0,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 })
+
+app.config.errorHandler = (err, _instance, info) => {
+  const eventId = Sentry.captureException(err, { extra: { info } })
+  Sentry.showReportDialog({ eventId })
+}
 
 app.use(VueFire, {
   firebaseApp,

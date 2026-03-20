@@ -249,15 +249,15 @@ async function handleExport() {
         <VueFlow
           :nodes="nodes"
           :edges="edges"
-          :node-types="{ station: StationNode, turnout: TurnoutNode, waypoint: WaypointNode }"
-          :edge-types="{ track: TrackEdge }"
+          :node-types="{ station: StationNode, turnout: TurnoutNode, waypoint: WaypointNode } as any"
+          :edge-types="{ track: TrackEdge } as any"
           :snap-to-grid="true"
           :snap-grid="[GRID_SIZE, GRID_SIZE]"
           fit-view-on-init
           @node-click="onNodeClick"
           @edge-click="onEdgeClick"
           @pane-click="onPaneClick"
-          @connect="onConnect"
+          @connect="onConnect as any"
           @node-drag-stop="markDirty"
         >
           <Background :gap="GRID_SIZE" />

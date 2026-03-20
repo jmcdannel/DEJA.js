@@ -11,8 +11,12 @@ import { usePageSwipe } from '@/composables/usePageSwipe'
 import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import { wiThrottleService } from '@/services/WiThrottleService'
 import { watch, onMounted, onUnmounted } from 'vue'
+import { useFeedbackUser } from '@repo/modules/feedback'
+import * as Sentry from '@sentry/vue'
 
 provideNotifications()
+const { feedbackUser } = useFeedbackUser()
+watch(feedbackUser, (u) => Sentry.setUser(u), { immediate: true })
 const drawer = ref(false)
 const { handleMenu, menuConfig } = useMenu()
 
