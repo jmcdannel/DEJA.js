@@ -15,7 +15,7 @@ interface GuideItem {
 const guides: GuideItem[] = [
   { title: 'Getting Started', href: '/guides/getting-started', desc: 'From zero to driving trains' },
   { title: 'Architecture', href: '/guides/architecture', desc: 'How the platform works' },
-  { title: 'Throttle', href: '/guides/throttle', desc: 'Train control & functions', comingSoon: true },
+  { title: 'Throttle', href: '/guides/throttle', desc: 'Train control & functions' },
   { title: 'Cloud', href: '/guides/cloud', desc: 'Roster, turnouts & effects', comingSoon: true },
   { title: 'Monitor', href: '/guides/monitor', desc: 'Diagnostics & logging', comingSoon: true },
   { title: 'Server', href: '/guides/server', desc: 'Installation & CLI reference', comingSoon: true },
