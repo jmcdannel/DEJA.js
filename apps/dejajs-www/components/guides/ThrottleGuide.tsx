@@ -240,15 +240,15 @@ export default function ThrottleGuide() {
           <AnnotatedScreenshot
             src="/screenshots/throttle_desktop_throttle-list.png"
             alt="Throttle bottom navigation bar with numbered callouts"
-            aspectClass="aspect-[8/1]"
-            objectPosition="center 95%"
+            aspectClass="aspect-[6/1]"
+            objectPosition="center 100%"
             callouts={[
-              { number: 1, label: 'Throttles', desc: 'Multi-train grid view', x: '32%', y: '50%', offset: 'above' as const },
-              { number: 2, label: 'Effects', desc: 'Sound and lighting effects', x: '40%', y: '50%', offset: 'above' as const },
-              { number: 3, label: 'Locos', desc: 'Locomotive roster', x: '48%', y: '50%', offset: 'above' as const },
-              { number: 4, label: 'Routes', desc: 'Track route execution', x: '55%', y: '50%', offset: 'above' as const },
-              { number: 5, label: 'Turnouts', desc: 'Switch control', x: '62%', y: '50%', offset: 'above' as const },
-              { number: 6, label: 'Signals', desc: 'Signal aspect monitoring', x: '70%', y: '50%', offset: 'above' as const },
+              { number: 1, label: 'Throttles', desc: 'Multi-train grid view', x: '32%', y: '45%', offset: 'below' as const },
+              { number: 2, label: 'Effects', desc: 'Sound and lighting effects', x: '40%', y: '45%', offset: 'below' as const },
+              { number: 3, label: 'Locos', desc: 'Locomotive roster', x: '48%', y: '45%', offset: 'below' as const },
+              { number: 4, label: 'Routes', desc: 'Track route execution', x: '55%', y: '45%', offset: 'below' as const },
+              { number: 5, label: 'Turnouts', desc: 'Switch control', x: '62%', y: '45%', offset: 'below' as const },
+              { number: 6, label: 'Signals', desc: 'Signal aspect monitoring', x: '70%', y: '45%', offset: 'below' as const },
             ]}
           />
           <p className="text-xs text-gray-500 mt-2">
