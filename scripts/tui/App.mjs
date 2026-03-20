@@ -266,13 +266,17 @@ export function App() {
       if (key.upArrow)   { setDeviceIndex(i => Math.max(0, i - 1)); return }
       if (key.downArrow) { setDeviceIndex(i => Math.min(Math.max(0, devices.length - 1), i + 1)); return }
       if (key.escape)    { transitionMode('logs'); return }
-      if (input === 'p') { transitionMode('ports'); return }
-      // [t] — open topic input for selected device
-      if (input === 't' && devices.length > 0) {
+      // [p] — context-aware: serial port selector for serial devices, topic input for MQTT
+      if (input === 'p' && devices.length > 0) {
         const device = devices[deviceIndex]
         if (device) {
-          editingDeviceRef.current = device
-          transitionMode('topic-input')
+          const isMqtt = device.type === 'deja-mqtt'
+          if (isMqtt) {
+            editingDeviceRef.current = device
+            transitionMode('topic-input')
+          } else {
+            transitionMode('ports')
+          }
         }
         return
       }
@@ -286,10 +290,14 @@ export function App() {
           disconnectDevice(device)
           showHint(`Disconnecting ${device.id}...`)
         } else {
-          // MQTT devices without a topic — prompt for one
+          // No endpoint configured — open the right editor
           if (!device.port && !device.topic && device.type !== 'deja-server') {
-            editingDeviceRef.current = device
-            transitionMode('topic-input')
+            if (device.type === 'deja-mqtt') {
+              editingDeviceRef.current = device
+              transitionMode('topic-input')
+            } else {
+              showHint(`No port assigned to ${device.id}. Press [p] to assign one.`)
+            }
             return
           }
           connectDevice(device)
