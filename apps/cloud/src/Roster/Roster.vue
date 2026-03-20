@@ -10,6 +10,7 @@ import { useDcc } from '@repo/dccex'
 import PageHeader from '@/Core/UI/PageHeader.vue'
 import RosterList from '@/Roster/RosterList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
+import { ThrottleLaunchQR } from '@repo/ui'
 
 const router = useRouter()
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -110,6 +111,11 @@ async function importFromCS() {
   <RosterList @edit="handleEditLoco">
     <template #prepend>
       <AddTile @click="handleAddLoco" />
+    </template>
+    <template #append>
+      <v-card variant="outlined" class="d-flex flex-column align-center justify-center pa-4 text-center" min-height="120">
+        <ThrottleLaunchQR :size="100" label="Open Throttle on phone" />
+      </v-card>
     </template>
   </RosterList>
 

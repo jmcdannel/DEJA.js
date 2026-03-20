@@ -64,3 +64,14 @@ reports/
 
 # Git worktrees
 .worktrees/
+
+# Binary assets migrated to Vercel Blob
+apps/tour/public/Adventure Awaits at Tamarack-VEED.mp4
+apps/tour/public/tc-casino.png
+apps/tour/public/oa_trestle.jpeg
+apps/tour/public/tamarack-logo.png
+apps/tour/public/TamarackJunctionLogo.png
+apps/tour/public/DejaJsLogo.png
+apps/tour/public/oa-trestle.png
+apps/throttle/resources/*.png
+packages/ui/src/assets/backgrounds/*.jpg

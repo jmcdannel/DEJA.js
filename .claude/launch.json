@@ -24,7 +24,8 @@
       "name": "tour",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter=deja-tour", "dev"],
-      "port": 3031
+      "port": 3031,
+      "autoPort": true
     },
     {
       "name": "server",

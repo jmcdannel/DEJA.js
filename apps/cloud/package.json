@@ -28,6 +28,7 @@
     "firebase": "^10.14.1",
     "firebase-admin": "^13.4.0",
     "jszip": "^3.10.1",
+    "stripe": "^17.5.0",
     "vue": "^3.5.17",
     "vue-router": "^4.2.2",
     "vuefire": "^3.2.1",

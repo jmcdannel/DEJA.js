@@ -15,7 +15,7 @@ const list = computed(() => sensors.value || [])
 
 function getTypeLabel(type: string): string {
   const found = sensorTypes.find((t) => t.value === type)
-  return found?.title ?? type
+  return found?.label ?? type
 }
 
 function getTypeIcon(type: string): string {
@@ -33,7 +33,7 @@ function getTypeIcon(type: string): string {
 
 function getInputTypeLabel(inputType: string): string {
   const found = sensorInputTypes.find((t) => t.value === inputType)
-  return found?.title ?? inputType
+  return found?.label ?? inputType
 }
 </script>
 <template>
@@ -69,7 +69,7 @@ function getInputTypeLabel(inputType: string): string {
                 {{ getTypeLabel(item.type) }}
               </v-chip>
               <v-chip variant="tonal" color="blue-grey">
-                {{ getInputTypeLabel(item.inputType) }}
+                {{ getInputTypeLabel(item.inputType ?? '') }}
               </v-chip>
             </div>
             <div class="flex flex-wrap gap-4 text-sm">
