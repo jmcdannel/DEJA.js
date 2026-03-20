@@ -11,7 +11,7 @@ The Throttle app is the primary user-facing application in the DEJA.js system. I
 
 Operators can run a single train with detailed throttle controls, manage multiple trains simultaneously in a grid view, or use the Conductor view for full-station operation on large screens. Every control writes to Firebase in real time, and the DEJA.js server translates those changes into DCC-EX serial commands sent to your CommandStation.
 
-![Throttle app main screen](/images/docs/throttle/overview-main.png)
+![Throttle app main screen](/screenshots/throttle_desktop_home.png)
 
 {/* VIDEO: Quick tour of the Throttle app — navigating between views, controlling a locomotive, throwing a turnout */}
 
@@ -30,21 +30,6 @@ Operators can run a single train with detailed throttle controls, manage multipl
 - **Emergency stop** accessible from the app header on every page.
 - **Theme switching** between light and dark modes.
 - **Guest access** available without authentication for quick demonstrations.
-
-## Tech Stack
-
-| Technology | Role |
-|------------|------|
-| Vue 3 | Application framework (Composition API with `<script setup lang="ts">`) |
-| Vuetify 3 | UI component library (Material Design) |
-| Tailwind CSS | Utility-first styling |
-| Pinia | State management |
-| Vue Router 4 | Client-side routing with auth guards |
-| VueFire | Reactive Firebase Firestore bindings |
-| VueUse | Composable utilities (`useStorage`, `useSwipe`, `useDebounce`) |
-| Firebase | Real-time database and authentication |
-| MQTT | Optional message transport via `mqtt-vue-hook` |
-| Vite | Development server and production builds |
 
 ## Navigation Structure
 
@@ -67,15 +52,7 @@ The Throttle app uses a customizable footer navigation bar and a slide-out side 
 | Select Layout | `/select-layout` | Layout picker for multi-layout setups |
 | Login | `/login` | Authentication screen |
 
-### Route Guards
-
-Most routes require authentication. Some also require an active DCC-EX connection and a selected layout before they are accessible.
-
-| Guard | Applied To |
-|-------|------------|
-| `requireAuth` | All pages except Home and Login |
-| `requireLayout` | Effects, Signals, Routes, Turnouts, Conductor, Throttle, Throttle List |
-| `requireDccEx` | Roster, Conductor, Throttle, Throttle List |
+Most pages require you to be logged in and have a layout selected before they are accessible. The Home page and Login page are always available.
 
 ## App Shell
 

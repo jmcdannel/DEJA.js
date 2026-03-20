@@ -1,9 +1,42 @@
 ---
 title: Media Library
-description: Browse and play layout media — videos, photos, and audio content showcasing the model railroad.
+description: Browse and play layout media — videos, photos, and audio content organized by area, type, and category.
 order: 6
 ---
 
 # Media Library
 
-The Media Library (`/media`) provides access to all layout media content including videos, photos, and audio recordings. Content is organized by area and can be browsed or searched.
+The Media Library gives visitors access to all layout media content — introduction videos, construction timelapses, technical deep-dives, and audio commentary. Content is organized by area and can be filtered to find exactly what you're looking for.
+
+## Filtering Content
+
+A sidebar on the left provides three filter controls:
+
+| Filter | Options |
+|--------|---------|
+| **Layout Area** | Filter by area (e.g., Tamarack Station, Thunder City, Eagle Nest) |
+| **Content Type** | Video or Audio |
+| **Category** | Introduction, Area Detail, Technical, or Overview |
+
+Below the filters, **Quick Access** buttons jump directly to:
+- 🎬 Introduction content
+- 🔧 Technical Details
+- 🗺️ Layout Overview
+
+## Media Cards
+
+Filtered results appear as a responsive grid of media cards. Each card shows:
+
+- **Thumbnail** — A preview image (or placeholder)
+- **Title and description** — What the content is about
+- **Duration** — How long the video or audio clip runs
+- **Content type badge** — Video or Audio indicator
+- **Play button** — Opens the media player
+
+## Playback
+
+Clicking a play button opens a modal dialog with the media player. Both video and audio content play with standard controls — play/pause, seek, volume, and fullscreen (video only).
+
+The Media Library supports deep linking — for example, the **Technical Details** card on the Tour home page links directly to `/media?filter=technical`, pre-filtering the library to show only technical content.
+
+![Tour media library](/screenshots/tour_desktop_media.png)

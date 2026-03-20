@@ -60,7 +60,7 @@ const supportOptions = [
 export default function SupportSection() {
   return (
     <section className="py-20 px-4 sm:px-8 bg-slate-900/60">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <AnimateIn className="text-center space-y-4 mb-12">
           <SectionLabel color="cyan">Support</SectionLabel>
           <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">

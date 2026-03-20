@@ -9,7 +9,7 @@ order: 2
 
 The Roster section is where you build and maintain your digital locomotive fleet. Each locomotive entry stores its DCC address, display name, road name, color, sound capability, decoder function mappings, and consist configuration. All data is stored in Firebase Firestore under `layouts/{layoutId}/throttles` and is immediately available to the Throttle app for real-time control.
 
-![Locomotive roster grid](/images/docs/cloud/roster-list.png)
+![Locomotive roster grid](/screenshots/cloud_desktop_roster.png)
 
 {/* VIDEO: Adding a new locomotive and configuring its functions */}
 
@@ -36,7 +36,7 @@ The road name selection uses a chip group with filter-style selection. Each road
 
 After filling in the form, click **Submit** to create the locomotive. The `createLoco` function from `useLocos()` writes the document to Firestore. Click **Close** to return to the roster list without saving.
 
-![Add locomotive form](/images/docs/cloud/roster-add.png)
+![Add locomotive form](/screenshots/cloud_desktop_roster.png)
 
 ## Editing a Locomotive
 
@@ -54,7 +54,7 @@ The top card ("Edit Loco") contains:
 
 Click **Submit** to save changes or **Close** to discard and return to the roster.
 
-![Edit locomotive form](/images/docs/cloud/roster-edit.png)
+![Edit locomotive form](/screenshots/cloud_desktop_roster.png)
 
 ### Consist Management
 
@@ -68,7 +68,7 @@ Click **Edit Consist** to open a dialog where you can add or remove consist memb
 
 Changes to the consist are saved along with the lead locomotive's document.
 
-![Consist editor dialog](/images/docs/cloud/roster-consist.png)
+![Consist editor dialog](/screenshots/cloud_desktop_roster.png)
 
 ### Function Configuration
 
@@ -82,7 +82,7 @@ The function list is pre-populated from `defaultFunctions` in `@repo/modules/loc
 
 After making changes, click **Save** (enabled only when modifications have been detected) to persist the updated function configuration.
 
-![Function configuration](/images/docs/cloud/roster-functions.png)
+![Function configuration](/screenshots/cloud_desktop_roster.png)
 
 ## Viewing Raw Data
 

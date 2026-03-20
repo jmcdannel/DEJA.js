@@ -12,7 +12,7 @@ export function getAllMdxFiles(): string[] {
 
 export function getMdxFilePath(slugParams?: string[]): string | null {
   if (!slugParams || slugParams.length === 0) {
-    const defaultPath = path.join(CONTENT_DIR, 'getting-started.mdx');
+    const defaultPath = path.join(CONTENT_DIR, 'throttle/overview.mdx');
     return fs.existsSync(defaultPath) ? defaultPath : null;
   }
 
@@ -38,11 +38,6 @@ export function parseMdx(filePath: string) {
 // Convert a file path relative to CONTENT_DIR into a URL slug array
 export function getSlugFromFile(file: string): string[] | null {
   let relativePath = file.replace(/\.mdx$/, '');
-  
-  // Rule: getting-started.mdx -> []
-  if (relativePath === 'getting-started') {
-    return [];
-  }
   
   // Rule: apps/{app}/overview -> [{app}]
   // Rule: {category}/overview -> [{category}]

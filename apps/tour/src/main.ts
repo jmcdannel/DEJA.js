@@ -8,18 +8,14 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
-import colors from 'vuetify/util/colors'
 // VueFire
 import { VueFire, VueFireAuth } from 'vuefire'
 // Firebase
 import { firebaseApp } from '@repo/firebase-config'
 // Motion
 import { MotionPlugin } from '@vueuse/motion'
-
 import App from './App.vue'
 import router from './router'
-import { useGuestStore } from './stores/guest'
-
 import './style.css'
 import '@mdi/font/css/materialdesignicons.css'
 
@@ -68,17 +64,19 @@ const vuetify = createVuetify({
 const app = createApp(App)
 const pinia = createPinia()
 
-Sentry.init({
-  app,
-  dsn: import.meta.env.VITE_SENTRY_DSN,
-  integrations: [
-    Sentry.browserTracingIntegration({ router }),
-    Sentry.replayIntegration(),
-  ],
-  tracesSampleRate: 1.0,
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
-})
+if (import.meta.env.VITE_SENTRY_DSN) {
+  Sentry.init({
+    app,
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    integrations: [
+      Sentry.browserTracingIntegration({ router }),
+      Sentry.replayIntegration(),
+    ],
+    tracesSampleRate: 1.0,
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+  })
+}
 
 app.use(pinia)
 app.use(vuetify)
@@ -87,10 +85,6 @@ app.use(VueFire, {
   firebaseApp,
   modules: [VueFireAuth()]
 })
-
-// Initialize guest store
-// const guestStore = useGuestStore()
-// guestStore.initialize()
 
 app.use(router)
 

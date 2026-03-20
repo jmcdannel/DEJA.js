@@ -381,7 +381,7 @@ router.beforeEach(async (to) => {
 
     // 1. Redirect-if-authenticated (login / signup pages)
     if (meta.redirectIfAuthenticated) {
-      const redirect = checkRedirectIfAuthenticated(currentUser)
+      const redirect = checkRedirectIfAuthenticated(currentUser ?? null)
       if (redirect) {
         log.debug('redirectIfAuthenticated → redirecting', redirect)
         return redirect
@@ -390,7 +390,7 @@ router.beforeEach(async (to) => {
 
     // 2. Require authentication
     if (meta.requireAuth) {
-      const redirect = checkRequireAuth(currentUser, to)
+      const redirect = checkRequireAuth(currentUser ?? null, to)
       if (redirect) {
         log.debug('requireAuth → redirecting to login')
         return redirect

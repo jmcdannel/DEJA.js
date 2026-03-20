@@ -1,173 +1,267 @@
-# WebSocket Protocol for Device-Specific Serial Monitoring
+# WebSocket Protocol
 
-## Overview
-
-The WebSocket server now supports both general broadcast messages and device-specific serial monitoring. This allows the monitor app to:
-
-1. **Receive general broadcast messages** (DCC commands, status updates, etc.)
-2. **Subscribe to device-specific serial monitoring** for individual devices
-3. **Receive filtered serial communication** for each device separately
+The DEJA.js server provides a WebSocket interface for real-time bidirectional communication between browser apps and the backend. All messages are JSON objects with an `action` field and a `payload` field. The default port is **8082**, configurable via the `VITE_WS_PORT` environment variable.
 
 ## Connection
 
-Connect to the WebSocket server at the configured port (default: 8082).
+Connect to the WebSocket server at the configured host and port:
 
-## Message Types
+```
+ws://localhost:8082
+```
 
-### 1. General Broadcast Messages
+In production or when served over HTTPS, clients should use `wss://` instead. The Monitor app resolves the protocol automatically based on `window.location.protocol`.
 
-These are sent to all connected clients and include:
-- DCC commands (`action: 'dcc'`)
-- Connection status (`action: 'connected'`)
-- Port lists (`action: 'portList'`)
-- Status updates (`action: 'status'`)
+## Connection Lifecycle
 
-### 2. Device-Specific Serial Messages
+1. **Client connects** -- The server adds the client to its general connections pool.
+2. **Server sends `ack`** -- Immediately after connection, the server sends an acknowledgment with the layout ID and server ID.
+3. **Server sends `wsconnected`** -- The server sends the client's IP address and server ID.
+4. **Client sends/receives messages** -- Normal bidirectional communication.
+5. **Client subscribes to devices** (optional) -- The client can subscribe to device-specific serial monitoring.
+6. **Client disconnects** -- The server removes the client from all connection pools and device subscriptions.
 
-These are only sent to clients subscribed to specific devices:
-- Incoming serial data (`action: 'serial-data', direction: 'incoming'`)
-- Outgoing serial commands (`action: 'serial-data', direction: 'outgoing'`)
+## Message Format
 
-## Subscription Protocol
+Every message is a JSON object with two fields:
 
-### Subscribe to Device Serial Monitoring
+```json
+{
+  "action": "string",
+  "payload": {}
+}
+```
 
-To start monitoring a specific device's serial communication:
+The `action` field identifies the message type. The `payload` field contains action-specific data and its structure varies by action.
+
+## Server-to-Client Actions
+
+These messages are broadcast from the server to all connected clients.
+
+### `ack` -- Connection Acknowledgment
+
+Sent immediately when a client connects.
+
+```json
+{
+  "action": "ack",
+  "payload": {
+    "layoutId": "tamarack",
+    "serverId": "DEJA.js"
+  }
+}
+```
+
+### `wsconnected` -- Client Connected
+
+Sent after the `ack` message with client identification.
+
+```json
+{
+  "action": "wsconnected",
+  "payload": {
+    "ip": "192.168.1.42",
+    "serverId": "DEJA.js"
+  }
+}
+```
+
+### `dcc` -- DCC Command Broadcast
+
+Broadcast whenever a DCC-EX command is sent to the serial port. Allows clients to display a live command log.
+
+```json
+{
+  "action": "dcc",
+  "payload": "t 3 50 1"
+}
+```
+
+### `connected` -- Serial Port Connected
+
+Broadcast when a serial connection to a DCC-EX CommandStation is established.
+
+```json
+{
+  "action": "connected",
+  "payload": {
+    "baudRate": 115200,
+    "device": "CommandStation",
+    "path": "/dev/tty.usbmodem1101"
+  }
+}
+```
+
+### `portList` -- Available Serial Ports
+
+Broadcast in response to a `listPorts` command.
+
+```json
+{
+  "action": "portList",
+  "payload": [
+    "/dev/tty.usbmodem1101",
+    "/dev/tty.usbserial-110"
+  ]
+}
+```
+
+### `status` -- Server Status
+
+Broadcast in response to a `getStatus`, `status`, or `ping` command.
+
+```json
+{
+  "action": "status",
+  "payload": {
+    "client": "dejaJS",
+    "isConnected": true
+  }
+}
+```
+
+### `broadcast` -- General Broadcast
+
+Wraps miscellaneous messages from serial connection handlers.
+
+```json
+{
+  "action": "broadcast",
+  "payload": {}
+}
+```
+
+## Device Serial Monitoring
+
+The WebSocket server supports device-specific serial monitoring through a subscribe/unsubscribe protocol. This allows the Monitor app to receive filtered serial I/O for individual hardware devices without getting traffic from other devices.
+
+### Client-to-Server: Subscribe to Device
 
 ```json
 {
   "action": "subscribe-device",
-  "deviceId": "device-123"
+  "deviceId": "tj-eagle-nest-pico"
 }
 ```
 
-**Response:**
+**Server response:**
+
 ```json
 {
   "action": "device-subscribed",
   "payload": {
-    "deviceId": "device-123",
+    "deviceId": "tj-eagle-nest-pico",
     "success": true
   }
 }
 ```
 
-### Unsubscribe from Device Serial Monitoring
-
-To stop monitoring a specific device:
+### Client-to-Server: Unsubscribe from Device
 
 ```json
 {
   "action": "unsubscribe-device",
-  "deviceId": "device-123"
+  "deviceId": "tj-eagle-nest-pico"
 }
 ```
 
-**Response:**
+**Server response:**
+
 ```json
 {
   "action": "device-unsubscribed",
   "payload": {
-    "deviceId": "device-123",
+    "deviceId": "tj-eagle-nest-pico",
     "success": true
   }
 }
 ```
 
-## Serial Data Messages
+### Server-to-Client: Serial Data
 
-### Incoming Serial Data
+Sent only to clients subscribed to the specific device.
 
-When serial data is received from a device:
+**Incoming serial data (from device to server):**
 
 ```json
 {
   "action": "serial-data",
   "payload": {
-    "deviceId": "device-123",
-    "data": "T 1 1",
-    "timestamp": "2024-01-15T14:30:22.123Z",
+    "deviceId": "tj-eagle-nest-pico",
+    "data": "<p1>",
+    "timestamp": "2025-01-15T14:30:22.123Z",
     "direction": "incoming"
   }
 }
 ```
 
-### Outgoing Serial Commands
-
-When serial commands are sent to a device:
+**Outgoing serial commands (from server to device):**
 
 ```json
 {
   "action": "serial-data",
   "payload": {
-    "deviceId": "device-123",
+    "deviceId": "tj-eagle-nest-pico",
     "data": "T 1 1",
-    "timestamp": "2024-01-15T14:30:22.123Z",
+    "timestamp": "2025-01-15T14:30:22.456Z",
     "direction": "outgoing"
   }
 }
 ```
 
-## Usage Example
+## Connection Management
 
-### Monitor App Implementation
+### General Connections
+
+All connected clients receive broadcast messages (DCC commands, status updates, port lists). The server maintains an array of active WebSocket connections and iterates over them for each broadcast, skipping any that are not in the `OPEN` state.
+
+### Device Connections
+
+Device-specific connections are tracked in a separate `Map<string, WebSocket[]>` keyed by device ID. A single client can subscribe to multiple devices, and multiple clients can subscribe to the same device. When a client disconnects, the server removes it from all device subscription lists.
+
+### Cleanup
+
+On server shutdown (`SIGINT` or `SIGTERM`):
+
+1. All general connections are closed with code `1000` (normal closure).
+2. All device-specific connections are closed.
+3. The connection maps are cleared.
+4. The WebSocket server is closed.
+
+## Example: Monitoring a Device
 
 ```javascript
 const ws = new WebSocket('ws://localhost:8082')
 
-// Listen for general broadcast messages
-ws.onmessage = (event) => {
-  const message = JSON.parse(event.data)
-  
-  if (message.action === 'serial-data') {
-    // This is device-specific serial data
-    const { deviceId, data, direction, timestamp } = message.payload
-    
-    // Route to appropriate device monitor window
-    if (deviceMonitors[deviceId]) {
-      deviceMonitors[deviceId].addSerialMessage(data, direction, timestamp)
-    }
-  } else {
-    // This is a general broadcast message
-    handleGeneralMessage(message)
-  }
-}
-
-// Subscribe to device serial monitoring
-function subscribeToDevice(deviceId) {
+ws.onopen = () => {
+  // Subscribe to a specific device
   ws.send(JSON.stringify({
     action: 'subscribe-device',
-    deviceId: deviceId
+    deviceId: 'tj-thunder-city-pico'
   }))
 }
 
-// Unsubscribe from device serial monitoring
-function unsubscribeFromDevice(deviceId) {
-  ws.send(JSON.stringify({
-    action: 'unsubscribe-device',
-    deviceId: deviceId
-  }))
+ws.onmessage = (event) => {
+  const message = JSON.parse(event.data)
+
+  switch (message.action) {
+    case 'device-subscribed':
+      console.log('Subscribed to', message.payload.deviceId)
+      break
+
+    case 'serial-data':
+      const { deviceId, data, direction, timestamp } = message.payload
+      console.log(`[${direction}] ${deviceId}: ${data}`)
+      break
+
+    case 'dcc':
+      // General DCC command broadcast
+      console.log('DCC:', message.payload)
+      break
+
+    default:
+      // Other broadcast messages
+      break
+  }
 }
 ```
-
-## Benefits
-
-1. **Separation of Concerns**: General broadcast messages don't clutter device-specific monitors
-2. **Real-time Monitoring**: See serial communication as it happens for each device
-3. **Filtered Views**: Each device monitor only shows its own serial traffic
-4. **Efficient**: No need to filter messages on the client side
-5. **Scalable**: Multiple clients can monitor different devices independently
-
-## Device Lifecycle
-
-1. **Device Connected**: Serial port is mapped to device ID
-2. **Client Subscribes**: Client sends subscription message
-3. **Serial Monitoring Active**: All serial I/O for that device is sent to subscribed clients
-4. **Device Disconnected**: Port mapping is cleaned up
-5. **Client Unsubscribes**: Client stops receiving device-specific messages
-
-## Error Handling
-
-- Invalid device IDs will result in subscription failure
-- Disconnected devices will not send serial messages
-- WebSocket connection issues will automatically clean up subscriptions 

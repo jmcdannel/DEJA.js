@@ -6,7 +6,6 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
-import { VStepperVertical } from 'vuetify/labs/VStepperVertical'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 // VueFire
 import { VueFire, VueFireAuth } from 'vuefire'
@@ -41,10 +40,7 @@ const themes = createVuetifyThemes({
 })
 
 const vuetify = createVuetify({
-  components: {
-    ...components,
-    VStepperVertical,
-  },
+  components,
   defaults: {
     VDialog: { transition: 'dialog-bottom-transition' },
     VMenu: { transition: 'scale-transition' },
@@ -71,22 +67,24 @@ const vuetify = createVuetify({
 })
 const app = createApp(App)
 
-Sentry.init({
-  app,
-  dsn: import.meta.env.VITE_SENTRY_DSN,
-  integrations: [
-    Sentry.browserTracingIntegration({ router }),
-    Sentry.replayIntegration(),
-    Sentry.feedbackIntegration(feedbackConfig),
-  ],
-  tracesSampleRate: 1.0,
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
-})
+if (import.meta.env.VITE_SENTRY_DSN) {
+  Sentry.init({
+    app,
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    integrations: [
+      Sentry.browserTracingIntegration({ router }),
+      Sentry.replayIntegration(),
+      Sentry.feedbackIntegration(feedbackConfig),
+    ],
+    tracesSampleRate: 1.0,
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+  })
 
-app.config.errorHandler = (err, _instance, info) => {
-  const eventId = Sentry.captureException(err, { extra: { info } })
-  Sentry.showReportDialog({ eventId })
+  app.config.errorHandler = (err, _instance, info) => {
+    const eventId = Sentry.captureException(err, { extra: { info } })
+    Sentry.showReportDialog({ eventId })
+  }
 }
 
 app.use(VueFire, {

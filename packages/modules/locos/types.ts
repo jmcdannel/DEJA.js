@@ -16,6 +16,7 @@ export interface Loco {
     color?: string
     roadname?: string
   }
+  order?: number
 }
 export interface Throttle {
   id?: number

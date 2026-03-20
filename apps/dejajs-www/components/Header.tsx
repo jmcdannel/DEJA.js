@@ -78,14 +78,23 @@ const defaultProducts: ProductItem[] = [
   },
 ];
 
+const defaultGuidesLinks: DocItem[] = [
+  { name: 'Getting Started', href: '/guides/getting-started' },
+  { name: 'Architecture', href: '/guides/architecture' },
+  { name: 'Throttle', href: '/guides/throttle', comingSoon: true },
+  { name: 'Cloud', href: '/guides/cloud', comingSoon: true },
+  { name: 'Monitor', href: '/guides/monitor', comingSoon: true },
+  { name: 'Server', href: '/guides/server', comingSoon: true },
+  { name: 'IO', href: '/guides/io', comingSoon: true },
+];
+
 const defaultDocsLinks: DocItem[] = [
-  { name: 'Getting Started', href: '/docs' },
   { name: 'Server', href: '/docs/server' },
   { name: 'Throttle', href: '/docs/throttle' },
   { name: 'Cloud', href: '/docs/cloud' },
-  { name: 'IO', href: '/docs/io' },
   { name: 'Monitor', href: '/docs/monitor' },
   { name: 'Tour', href: '/docs/tour' },
+  { name: 'IO', href: '/docs/io' },
   { name: 'Program', href: '#', comingSoon: true },
   { name: 'AI Ops', href: '#', comingSoon: true },
   { name: 'Dispatcher', href: '#', comingSoon: true },
@@ -125,6 +134,7 @@ function useDropdown() {
 
 export default function Header({ settings }: { settings?: SiteSettings | null }) {
   const pathname = usePathname();
+  const guidesDropdown = useDropdown();
   const productsDropdown = useDropdown();
   const docsDropdown = useDropdown();
 
@@ -185,19 +195,62 @@ export default function Header({ settings }: { settings?: SiteSettings | null })
 
   return (
     <header className="w-full border-b border-gray-800/60 bg-gray-950/90 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-5xl mx-auto px-6 pt-7 pb-4 flex items-center justify-between gap-6">
+      <div className="max-w-7xl mx-auto px-6 pt-7 pb-4 flex items-center justify-between gap-6">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/icon-512.png" alt="DEJA.js" width={40} height={40} className="rounded-xl w-10 h-10 flex-shrink-0" />
           <span className="sr-only">DEJA.js Home</span>
         </Link>
         <nav className="hidden md:flex flex-1 items-center gap-8 ml-6" aria-label="Main navigation">
-          {/* Guides */}
-          <Link
-            href="/guides"
-            className={`text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-[0.8rem] tracking-[0.06em] font-mono ${pathname?.startsWith('/guides') ? 'text-gray-900 dark:text-white' : ''}`}
-          >
-            Guides
-          </Link>
+          {/* Guides Dropdown */}
+          <div className="relative group py-2" ref={guidesDropdown.ref}>
+            <button
+              ref={guidesDropdown.triggerRef}
+              onClick={guidesDropdown.toggle}
+              onMouseEnter={guidesDropdown.open}
+              aria-expanded={guidesDropdown.isOpen}
+              aria-haspopup="true"
+              className={`cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1 bg-transparent border-none text-[0.8rem] tracking-[0.06em] font-mono ${pathname?.startsWith('/guides') ? 'text-gray-900 dark:text-white' : ''}`}
+            >
+              Guides
+              <svg className={`w-4 h-4 opacity-70 transition-transform ${guidesDropdown.isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            {guidesDropdown.isOpen && (
+              <div
+                className="absolute left-0 top-full pt-2 w-48 bg-transparent"
+                onMouseLeave={guidesDropdown.close}
+              >
+                <div
+                  className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden p-2 flex flex-col gap-1"
+                  role="menu"
+                  aria-label="Guides"
+                  onKeyDown={(e) =>
+                    handleMenuKeyDown(
+                      e,
+                      defaultGuidesLinks,
+                      guidesDropdown.ref,
+                      guidesDropdown.close,
+                      guidesDropdown.triggerRef
+                    )
+                  }
+                >
+                  {defaultGuidesLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      role="menuitem"
+                      tabIndex={link.comingSoon ? -1 : 0}
+                      aria-disabled={link.comingSoon ? true : undefined}
+                      aria-current={!link.comingSoon && pathname === link.href ? 'page' : undefined}
+                      className={`px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center justify-between ${link.comingSoon ? 'text-gray-400 dark:text-gray-500' : ''}`}
+                    >
+                      {link.name}
+                      {link.comingSoon && <span className="text-[10px] uppercase tracking-wider font-semibold text-gray-400 dark:text-gray-500" aria-label="Coming soon">Soon</span>}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Products Mega Menu */}
           <div className="relative group py-2" ref={productsDropdown.ref}>

@@ -130,16 +130,16 @@ const GUEST_USERNAMES = [
 ]
 
 export interface GuestUser {
-  id: string
-  username: string
-  isGuest: true
   createdAt: Date
+  id: string
+  isGuest: true
   lastActive: Date
   preferences: {
-    theme: 'light' | 'dark'
-    soundEnabled: boolean
     notificationsEnabled: boolean
+    soundEnabled: boolean
+    theme: 'light' | 'dark'
   }
+  username: string
 }
 
 export const useGuestStore = defineStore('guest', () => {
@@ -165,13 +165,13 @@ export const useGuestStore = defineStore('guest', () => {
           }
         }
 
-        const raw_guest = parsed as Record<string, unknown>
-        if (raw_guest) {
+        const rawGuest = parsed as Record<string, unknown>
+        if (rawGuest) {
           // revive date strings into Date objects
           const guest: GuestUser = {
-            ...raw_guest,
-            createdAt: raw_guest.createdAt ? new Date(raw_guest.createdAt as string) : new Date(),
-            lastActive: raw_guest.lastActive ? new Date(raw_guest.lastActive as string) : new Date(),
+            ...rawGuest,
+            createdAt: rawGuest.createdAt ? new Date(rawGuest.createdAt as string) : new Date(),
+            lastActive: rawGuest.lastActive ? new Date(rawGuest.lastActive as string) : new Date(),
           } as GuestUser
           return guest
         }
