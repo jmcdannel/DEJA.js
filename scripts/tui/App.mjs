@@ -85,9 +85,10 @@ export function App() {
     STARTUP_TIPS[Math.floor(Math.random() * STARTUP_TIPS.length)]
   )
 
-  const configRef  = useRef(readConfig())
-  const inputRef   = useRef(null)
-  const devicesRef = useRef([])
+  const configRef    = useRef(readConfig())
+  const inputRef     = useRef(null)
+  const devicesRef   = useRef([])
+  const prevModeRef  = useRef('logs')
 
   // Tips — must be after mode/status/contextHint declarations
   const currentTip = useTips(mode, status, contextHint)
@@ -98,13 +99,16 @@ export function App() {
   // ── Mode transitions ───────────────────────────────────────────────────────
 
   const transitionMode = useCallback((next) => {
+    setMode(prev => {
+      prevModeRef.current = prev
+      return next
+    })
     if (next === 'ports') {
       setAvailablePorts(detectSerialPorts())
       setPortIndex(0)
     }
     if (next === 'menu') setMenuIndex(0)
     if (next === 'devices') setDeviceIndex(0)
-    setMode(next)
   }, [])
 
   // ── Connect / Disconnect device ────────────────────────────────────────────
@@ -277,7 +281,7 @@ export function App() {
     if (mode === 'ports') {
       if (key.upArrow)   { setPortIndex(i => Math.max(0, i - 1)); return }
       if (key.downArrow) { setPortIndex(i => Math.min(Math.max(0, availablePorts.length - 1), i + 1)); return }
-      if (key.escape)    { transitionMode('menu'); return }
+      if (key.escape)    { transitionMode(prevModeRef.current || 'logs'); return }
       if (key.return) {
         if (availablePorts.length > 0) {
           const selected = availablePorts[portIndex]
@@ -285,7 +289,7 @@ export function App() {
           configRef.current = readConfig()
           showHint(`Serial port saved: ${selected}`)
         }
-        transitionMode('menu')
+        transitionMode(prevModeRef.current || 'logs')
         return
       }
       return
