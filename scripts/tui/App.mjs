@@ -73,7 +73,6 @@ export function App() {
   const { db, rtdb, layoutId, cleanup: firebaseCleanup } = useFirebase()
   const { devices, connectedCount, totalCount, cleanup: devicesCleanup } = useDevices(db, layoutId)
   const { throttleCount, cleanup: throttlesCleanup } = useThrottles(db, layoutId)
-  const currentTip = useTips(mode, status, contextHint)
 
   // ── Local TUI state ────────────────────────────────────────────────────────
   const [mode, setMode]                     = useState(() => isFirstRun() ? 'onboarding' : 'logs')
@@ -89,6 +88,9 @@ export function App() {
   const configRef  = useRef(readConfig())
   const inputRef   = useRef(null)
   const devicesRef = useRef([])
+
+  // Tips — must be after mode/status/contextHint declarations
+  const currentTip = useTips(mode, status, contextHint)
 
   // Keep devicesRef in sync with devices state
   useEffect(() => { devicesRef.current = devices }, [devices])
