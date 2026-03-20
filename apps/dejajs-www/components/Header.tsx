@@ -79,13 +79,12 @@ const defaultProducts: ProductItem[] = [
 ];
 
 const defaultDocsLinks: DocItem[] = [
-  { name: 'Getting Started', href: '/docs' },
-  { name: 'Server', href: '/docs/server' },
   { name: 'Throttle', href: '/docs/throttle' },
   { name: 'Cloud', href: '/docs/cloud' },
-  { name: 'IO', href: '/docs/io' },
   { name: 'Monitor', href: '/docs/monitor' },
   { name: 'Tour', href: '/docs/tour' },
+  { name: 'Server', href: '/docs/server' },
+  { name: 'IO', href: '/docs/io' },
   { name: 'Program', href: '#', comingSoon: true },
   { name: 'AI Ops', href: '#', comingSoon: true },
   { name: 'Dispatcher', href: '#', comingSoon: true },

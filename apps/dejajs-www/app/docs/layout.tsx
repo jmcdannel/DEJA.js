@@ -10,15 +10,17 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
   const nav = generateDocsNav();
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 min-h-[60vh]">
-      <aside className="lg:w-64 flex-shrink-0">
-        <div className="p-4 bg-white/60 dark:bg-slate-900/60 rounded-xl border border-gray-200 dark:border-gray-700">
-          <DocsSidebar nav={nav} />
-        </div>
-      </aside>
-      <article className="flex-1 min-w-0 max-w-3xl">
-        {children}
-      </article>
+    <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="flex flex-col lg:flex-row gap-8 min-h-[60vh]">
+        <aside className="lg:w-64 flex-shrink-0">
+          <div className="p-4 bg-white/60 dark:bg-slate-900/60 rounded-xl border border-gray-200 dark:border-gray-700">
+            <DocsSidebar nav={nav} />
+          </div>
+        </aside>
+        <article className="flex-1 min-w-0 max-w-3xl">
+          {children}
+        </article>
+      </div>
     </div>
   );
 }

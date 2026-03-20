@@ -10,7 +10,6 @@ export interface DocNavItem {
 }
 
 const SECTION_ORDER = [
-  'Getting Started',
   'Throttle',
   'Cloud',
   'Monitor',
