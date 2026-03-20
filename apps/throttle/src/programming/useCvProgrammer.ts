@@ -216,7 +216,7 @@ export function useCvProgrammer() {
       results.set(cvDef.cv, response)
       batchProgress.value++
       // Small delay between reads to give DCC-EX time to reset
-      await new Promise((r) => setTimeout(r, CV_BATCH_READ_DELAY_MS))
+      await new Promise<void>((r) => { setTimeout(r, CV_BATCH_READ_DELAY_MS) })
     }
 
     batchProgress.value = 0

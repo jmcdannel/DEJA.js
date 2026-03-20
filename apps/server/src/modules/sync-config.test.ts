@@ -27,8 +27,8 @@ describe('Device Config Sync', () => {
   it('should setup firestore listener on start', () => {
     startDeviceConfigSync()
     expect(db.collection).toHaveBeenCalledWith('layouts')
-    expect(db.collection().doc().collection).toHaveBeenCalledWith('devices')
-    expect(db.collection().doc().collection().onSnapshot).toHaveBeenCalled()
+    expect(db.collection('layouts').doc('x').collection).toHaveBeenCalledWith('devices')
+    expect(db.collection('layouts').doc('x').collection('devices').onSnapshot).toHaveBeenCalled()
   })
 
   it('should write payload to serial port when config is modified', () => {
@@ -43,7 +43,7 @@ describe('Device Config Sync', () => {
 
     // Capture the onSnapshot callback
     let snapshotCallback: any
-    vi.mocked(db.collection().doc().collection().onSnapshot).mockImplementation((cb: any) => {
+    vi.mocked(db.collection('layouts').doc('x').collection('devices').onSnapshot).mockImplementation((cb: any) => {
       snapshotCallback = cb
       return vi.fn() // unsubscribe mock
     })

@@ -235,7 +235,7 @@ export interface Device {
   tags?: Tag[]
   timestamp?: Date
   topic?: string
-  type: 'dcc-ex' | 'deja-arduino' | 'deja-arduino-led' | 'deja-mqtt'
+  type: 'dcc-ex' | 'deja-arduino' | 'deja-arduino-led' | 'deja-mqtt' | 'deja-server'
 }
 
 export interface RouteTurnoutConfig {

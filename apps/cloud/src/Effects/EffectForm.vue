@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onErrorCaptured, computed } from 'vue'
-import { useEfx, useLayout, type Effect, type EffectType } from '@repo/modules'
+import { useEfx, useLayout, type Effect, type EffectType, type MacroItem } from '@repo/modules'
 import { efxTypes } from '@repo/modules/effects/constants'
 import { createLogger } from '@repo/utils'
 import ViewJson from '@/Core/UI/ViewJson.vue'
@@ -40,7 +40,7 @@ try {
   log.debug('EffectForm: useLayout hook loaded successfully')
 } catch (error) {
   log.error('EffectForm: Failed to load useLayout hook:', error)
-  getDevices = () => [] as never[]
+  getDevices = (() => []) as unknown as ReturnType<typeof useLayout>['getDevices']
 }
 
 let setEfx: ReturnType<typeof useEfx>['setEfx']
@@ -182,7 +182,7 @@ async function submit () {
   emit('close')
 }
 
-function handleMacro({on , off}: {on: string[], off: string[]}) {
+function handleMacro({on , off}: {on: MacroItem[], off: MacroItem[]}) {
   macroOn.value = on
   macroOff.value = off
 }

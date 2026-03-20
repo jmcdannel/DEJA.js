@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { getFirestore, doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import type { Layout } from '@repo/modules'
 import { db } from '@repo/firebase-config'
@@ -8,8 +8,8 @@ import { db } from '@repo/firebase-config'
 // The plugin only exists in native Capacitor environments.
 // Use a variable to hide the specifier from Vite's static import analysis.
 const CAPACITOR_SOCKET_PKG = '@spryrocks/capacitor-socket-connection-plugin'
-let SocketClass: (new () => any) | null = null
-async function getSocketClass(): Promise<(new () => any) | null> {
+let SocketClass: (new () => unknown) | null = null
+async function getSocketClass(): Promise<(new () => unknown) | null> {
   if (SocketClass) return SocketClass
   try {
     const mod = await import(/* @vite-ignore */ CAPACITOR_SOCKET_PKG)
@@ -24,9 +24,9 @@ export type WiThrottleConnectionState = 'DISCONNECTED' | 'CONNECTING' | 'CONNECT
 
 // Capacitor socket type — loaded dynamically since the plugin is only available in native builds
 type CapacitorSocket = {
-  open(host: string, port: number): Promise<void>
-  close(): Promise<void>
-  write(data: Uint8Array): Promise<void>
+  open: (host: string, port: number) => Promise<void>
+  close: () => Promise<void>
+  write: (data: Uint8Array) => Promise<void>
   onData: ((data: Uint8Array) => void) | null
   onClose: (() => void) | null
   onError: ((err: unknown) => void) | null
@@ -43,9 +43,6 @@ export class WiThrottleService {
   // Roster arrays etc
   public roster = ref<{ id: string; name: string }[]>([])
   public turnouts = ref<{ id: string; name: string; state: number }[]>([])
-
-  constructor() {
-  }
 
   public async connect(): Promise<void> {
     const layoutId = useStorage<string>('@DEJA/layoutId', '').value
@@ -111,8 +108,8 @@ export class WiThrottleService {
       this.state.value = 'CONNECTED'
       
       // Set a global flag so UI components (like AppHeader) know they can use sendDccCommand native override
-      ;(window as any).__WI_THROTTLE_CONNECTED__ = true
-      
+      ;(window as unknown as Record<string, boolean>).__WI_THROTTLE_CONNECTED__ = true
+
       this.startHeartbeat()
       
       // Handshake: send hardware/app info
@@ -138,7 +135,7 @@ export class WiThrottleService {
       }
       this.socket = null
     }
-    ;(window as any).__WI_THROTTLE_CONNECTED__ = false
+    ;(window as unknown as Record<string, boolean>).__WI_THROTTLE_CONNECTED__ = false
     this.stopHeartbeat()
     this.state.value = 'DISCONNECTED'
   }
@@ -163,7 +160,7 @@ export class WiThrottleService {
     }
     
     // WiThrottle commands typically end with newline
-    const payload = data.endsWith('\n') ? data : data + '\n'
+    const payload = data.endsWith('\n') ? data : `${data  }\n`
     try {
       const encoder = new TextEncoder()
       const uint8Array = encoder.encode(payload)
@@ -208,21 +205,21 @@ export class WiThrottleService {
     console.log('WiThrottle RX:', cmd)
   }
 
-  private parseRoster(data: string) {
+  private parseRoster(_data: string) {
     // Format: name}|{id}|{name}|{id}...
-    const parts = data.split(']|[') // Actual delimiter is usually ]\[
+    const _parts = _data.split(']|[') // Actual delimiter is usually ]\[
     // Just a placeholder for roster parsing
   }
 
-  private parseTurnoutList(data: string) {
+  private parseTurnoutList(_data: string) {
     // Format: id}|{name}|{state...
   }
 
   private handleDisconnect(reason: string) {
     this.stopHeartbeat()
     this.socket = null
-    ;(window as any).__WI_THROTTLE_CONNECTED__ = false
-    
+    ;(window as unknown as Record<string, boolean>).__WI_THROTTLE_CONNECTED__ = false
+
     // If we get an error while connecting, transition to ERROR instead of just DISCONNECTED
     if (this.state.value === 'CONNECTING') {
       this.state.value = 'ERROR'

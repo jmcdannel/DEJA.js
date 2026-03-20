@@ -19,7 +19,13 @@
     "VITE_FIREBASE_APP_ID",
     "VITE_WS_PORT",
     "VITE_WS_ID",
-    "BLOB_READ_WRITE_TOKEN"
+    "BLOB_READ_WRITE_TOKEN",
+    "BASE_URL",
+    "FIREBASE_CLIENT_EMAIL",
+    "FIREBASE_PRIVATE_KEY",
+    "CRON_SECRET",
+    "DEV",
+    "PROD"
   ],
   "ui": "tui",
   "tasks": {
@@ -79,6 +85,10 @@
       "outputs": []
     },
     "scan-sounds": {
+      "cache": false,
+      "outputs": []
+    },
+    "upload-assets": {
       "cache": false,
       "outputs": []
     },
