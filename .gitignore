@@ -76,3 +76,6 @@ apps/tour/public/DejaJsLogo.png
 apps/tour/public/oa-trestle.png
 apps/throttle/resources/*.png
 packages/ui/src/assets/backgrounds/*.jpg
+
+# Generated docs (synced from /docs/ at build time)
+apps/dejajs-www/content/docs/
