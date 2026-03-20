@@ -87,6 +87,85 @@ function NavItem({ label, color, desc }: { label: string; color: string; desc: s
   );
 }
 
+interface Callout {
+  number: number;
+  label: string;
+  desc: string;
+  x: string;
+  y: string;
+}
+
+function CalloutMarker({ number, x, y }: { number: number; x: string; y: string }) {
+  return (
+    <div
+      className="absolute z-10 flex items-center justify-center"
+      style={{ left: x, top: y, transform: 'translate(-50%, -50%)' }}
+    >
+      <span className="absolute w-8 h-8 rounded-full bg-deja-cyan/20 animate-ping" />
+      <span className="relative w-6 h-6 rounded-full bg-deja-cyan text-gray-950 text-xs font-bold flex items-center justify-center shadow-lg shadow-deja-cyan/30">
+        {number}
+      </span>
+    </div>
+  );
+}
+
+function CalloutKey({ callouts }: { callouts: Callout[] }) {
+  return (
+    <div className="mt-4 grid gap-2">
+      {callouts.map((c) => (
+        <div key={c.number} className="flex items-start gap-3">
+          <span className="w-6 h-6 rounded-full bg-deja-cyan text-gray-950 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+            {c.number}
+          </span>
+          <div>
+            <span className="text-white text-sm font-medium">{c.label}</span>
+            <span className="text-gray-400 text-sm"> — {c.desc}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AnnotatedScreenshot({
+  src,
+  alt,
+  callouts,
+  aspectClass,
+  objectPosition,
+}: {
+  src: string;
+  alt: string;
+  callouts: Callout[];
+  aspectClass: string;
+  objectPosition: string;
+}) {
+  return (
+    <div className="my-6 space-y-0">
+      <div className="rounded-xl border border-gray-800 overflow-hidden bg-gray-900/50">
+        <div className="flex items-center gap-1.5 px-3 py-2 border-b border-gray-800 bg-gray-900">
+          <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+          <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+          <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+        </div>
+        <div className={`relative ${aspectClass} overflow-hidden`}>
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            className="object-cover"
+            style={{ objectPosition }}
+          />
+          {callouts.map((c) => (
+            <CalloutMarker key={c.number} number={c.number} x={c.x} y={c.y} />
+          ))}
+        </div>
+      </div>
+      <CalloutKey callouts={callouts} />
+    </div>
+  );
+}
+
 export default function ThrottleGuide() {
   return (
     <article className="max-w-3xl mx-auto">
@@ -125,56 +204,64 @@ export default function ThrottleGuide() {
             Throttle has three navigation layers that are always available, no matter which screen you&apos;re on.
           </p>
 
-          <div className="space-y-6 mt-4">
-            {/* Header */}
-            <div className="p-5 rounded-xl border border-gray-800 bg-gray-900/50">
-              <h3 className="text-white font-semibold mb-3">🔝 Header Bar</h3>
-              <p className="text-sm text-gray-300 mb-3">
-                The top bar gives you system-level controls and status at a glance.
-              </p>
-              <FeatureList items={[
-                'Hamburger menu — opens the side navigation drawer',
-                'Layout chip — shows the active layout name; tap to switch layouts',
-                'Device status — shows connected device count (e.g., 3/4)',
-                'Track power toggle — turn main track power on or off',
-                'Emergency stop — red button that immediately halts all trains',
-                'User profile — account menu (far right)',
-              ]} />
-            </div>
+          {/* Header — annotated zoomed screenshot */}
+          <h3 className="text-white font-semibold text-lg mt-6">🔝 Header Bar</h3>
+          <p className="text-sm text-gray-300">
+            The top bar gives you system-level controls and status at a glance. It&apos;s visible on every screen.
+          </p>
+          <AnnotatedScreenshot
+            src="/screenshots/throttle_desktop_home.png"
+            alt="Throttle header bar with numbered callouts"
+            aspectClass="aspect-[6/1]"
+            objectPosition="center 7.5%"
+            callouts={[
+              { number: 1, label: 'Menu', desc: 'Opens the side navigation drawer', x: '4%', y: '50%' },
+              { number: 2, label: 'App Logo', desc: 'DEJA Throttle branding — tap to go home', x: '13%', y: '50%' },
+              { number: 3, label: 'Layout Chip', desc: 'Shows active layout name; tap to switch layouts', x: '68%', y: '50%' },
+              { number: 4, label: 'Device Status', desc: 'Connected device count (e.g., 5/5) — tap for details', x: '78%', y: '50%' },
+              { number: 5, label: 'User Profile', desc: 'Account menu and sign-out', x: '88%', y: '50%' },
+              { number: 6, label: 'Emergency Stop', desc: 'Red button — immediately halts all trains on the layout', x: '95%', y: '50%' },
+            ]}
+          />
 
-            {/* Footer nav */}
-            <div className="p-5 rounded-xl border border-gray-800 bg-gray-900/50">
-              <h3 className="text-white font-semibold mb-3">🔽 Bottom Navigation</h3>
-              <p className="text-sm text-gray-300 mb-3">
-                A pill-shaped button bar at the bottom of the screen. Shows your favorite pages as color-coded icon buttons for quick access. Customize which items appear in Settings.
-              </p>
-              <div className="grid grid-cols-2 gap-x-6">
-                <NavItem label="Locos" color="bg-pink-400" desc="Roster" />
-                <NavItem label="Throttles" color="bg-lime-400" desc="Multi-train grid" />
-                <NavItem label="Effects" color="bg-indigo-400" desc="Sound & lights" />
-                <NavItem label="Conductor" color="bg-rose-400" desc="Operator station" />
-                <NavItem label="Routes" color="bg-purple-400" desc="Track routes" />
-                <NavItem label="Turnouts" color="bg-amber-400" desc="Switch control" />
-                <NavItem label="Signals" color="bg-emerald-400" desc="Signal aspects" />
-                <NavItem label="Settings" color="bg-blue-400" desc="Preferences" />
-              </div>
-            </div>
+          {/* Bottom nav — annotated zoomed screenshot */}
+          <h3 className="text-white font-semibold text-lg mt-10">🔽 Bottom Navigation</h3>
+          <p className="text-sm text-gray-300">
+            A pill-shaped button bar at the bottom of the screen. Shows your favorite pages as
+            color-coded icon buttons. Customize which items appear in Settings.
+          </p>
+          <AnnotatedScreenshot
+            src="/screenshots/throttle_desktop_throttle-list.png"
+            alt="Throttle bottom navigation bar with numbered callouts"
+            aspectClass="aspect-[8/1]"
+            objectPosition="center 95%"
+            callouts={[
+              { number: 1, label: 'Throttles', desc: 'Multi-train grid view', x: '32%', y: '50%' },
+              { number: 2, label: 'Effects', desc: 'Sound and lighting effects', x: '40%', y: '50%' },
+              { number: 3, label: 'Locos', desc: 'Locomotive roster', x: '48%', y: '50%' },
+              { number: 4, label: 'Routes', desc: 'Track route execution', x: '55%', y: '50%' },
+              { number: 5, label: 'Turnouts', desc: 'Switch control', x: '62%', y: '50%' },
+              { number: 6, label: 'Signals', desc: 'Signal aspect monitoring', x: '70%', y: '50%' },
+            ]}
+          />
+          <p className="text-xs text-gray-500 mt-2">
+            The bottom bar is fully customizable — add or remove items in{' '}
+            <Link href="/docs/throttle/settings" className="text-deja-cyan hover:underline">Settings</Link>.
+          </p>
 
-            {/* Side menu */}
-            <div className="p-5 rounded-xl border border-gray-800 bg-gray-900/50">
-              <h3 className="text-white font-semibold mb-3">☰ Side Menu</h3>
-              <p className="text-sm text-gray-300 mb-3">
-                Slide out from the left via the hamburger icon. Shows the full list of pages with icons and labels. On mobile it closes automatically after you tap an item.
-              </p>
-              <FeatureList items={[
-                'All 11 pages listed with color-coded icons',
-                'DEJA Suite app switcher at the bottom — quick links to Cloud, Monitor, and Tour',
-                'Active page highlighted',
-              ]} />
-            </div>
-          </div>
+          {/* Side menu */}
+          <h3 className="text-white font-semibold text-lg mt-10">☰ Side Menu</h3>
+          <p className="text-sm text-gray-300">
+            Slide out from the left via the hamburger icon. Shows the full list of pages with
+            icons and labels. On mobile it closes automatically after you tap an item.
+          </p>
+          <FeatureList items={[
+            'All 11 pages listed with color-coded icons',
+            'DEJA Suite app switcher at the bottom — quick links to Cloud, Monitor, and Tour',
+            'Active page highlighted',
+          ]} />
 
-          <Screenshot src="/screenshots/throttle_desktop_home.png" alt="Throttle app showing header, bottom nav, and side menu" device="desktop" />
+          <Screenshot src="/screenshots/throttle_desktop_home.png" alt="Throttle app full view showing header and bottom nav" device="desktop" />
         </Section>
 
         {/* ── Connect ── */}
