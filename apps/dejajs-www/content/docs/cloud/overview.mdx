@@ -30,12 +30,15 @@ The Cloud app covers the full lifecycle of layout configuration:
 
 ## Authentication and Access
 
-The Cloud app requires authentication. Users can sign up with email and password, or sign in with GitHub OAuth. After signing up, new users go through a two-step onboarding wizard:
+The Cloud app requires authentication. Users can sign up with email and password, or sign in with GitHub OAuth. After signing up, new users go through a five-step onboarding wizard:
 
-1. **Welcome** -- An introduction to the system.
-2. **Create Your Layout** -- Set up your first layout with a name and initial configuration.
+1. **Create Account** -- Sign up and verify your identity.
+2. **Choose Plan** -- Select Hobbyist (free), Engineer, or Conductor.
+3. **Payment** -- Enter payment details for paid tiers (skipped for Hobbyist).
+4. **Register Layout** -- Name your layout and choose a unique layout ID.
+5. **Install** -- Get the personalized install command for the DEJA Server, pre-populated with your UID and layout ID.
 
-After onboarding, users are taken to a **Setup Complete** page that confirms layout creation, displays their Layout ID, offers a quick-add form for their first locomotive, and provides server installation instructions. Layouts are automatically approved on creation -- there is no admin approval step.
+After onboarding, users are taken to a **Setup Complete** page that confirms layout creation, offers a quick-add form for their first locomotive, and provides the server install command again. Layouts are automatically approved on creation -- there is no admin approval step.
 
 Users then select a layout to work with. The selected layout ID is persisted in local storage (`@DEJA/layoutId`) so it carries across sessions.
 

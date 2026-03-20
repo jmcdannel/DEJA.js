@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
 import { useCollection } from 'vuefire'
-import { useColors } from '@repo/ui/src/useColors'
+import { useColors } from '../useColors'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { deviceTypes, useTurnouts, useEfx, type Device } from '@repo/modules'
 import { createLogger } from '@repo/utils'
-import Stat from '@repo/ui/src/Stat.vue'
+import Stat from '../Stat.vue'
 import { StatusPulse } from '../animations'
 
 const log = createLogger('DeviceStatusItem')

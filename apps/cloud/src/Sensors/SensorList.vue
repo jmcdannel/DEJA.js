@@ -77,7 +77,7 @@ function getInputTypeLabel(inputType: string): string {
                   {{ getTypeLabel(item.type) }}
                 </v-chip>
                 <v-chip variant="tonal" color="blue-grey" size="x-small">
-                  {{ getInputTypeLabel(item.inputType) }}
+                  {{ getInputTypeLabel(item.inputType ?? '') }}
                 </v-chip>
               </div>
               <div class="flex flex-wrap gap-3 text-xs">

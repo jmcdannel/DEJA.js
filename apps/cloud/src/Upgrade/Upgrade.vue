@@ -239,14 +239,8 @@ async function changePlan(newPlan: PlanTier) {
 
   try {
     const token = await getIdToken(user.value)
-    const billingApiUrl = import.meta.env.VITE_BILLING_API_URL
 
-    if (!billingApiUrl) {
-      error.value = 'Billing service is not configured.'
-      return
-    }
-
-    const res = await fetch(`${billingApiUrl}/api/change-plan`, {
+    const res = await fetch('/api/change-plan', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -293,14 +287,8 @@ async function handleNewSubscription() {
     }
 
     const token = await getIdToken(user.value)
-    const billingApiUrl = import.meta.env.VITE_BILLING_API_URL
 
-    if (!billingApiUrl) {
-      error.value = 'Billing service is not configured.'
-      return
-    }
-
-    const response = await fetch(`${billingApiUrl}/api/subscribe`, {
+    const response = await fetch('/api/subscribe', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -343,8 +331,7 @@ async function openBillingPortal() {
   portalLoading.value = true
   try {
     const token = await getIdToken(user.value)
-    const billingApiUrl = import.meta.env.VITE_BILLING_API_URL
-    const res = await fetch(`${billingApiUrl}/api/billing-portal`, {
+    const res = await fetch('/api/billing-portal', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

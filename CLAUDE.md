@@ -66,6 +66,8 @@ DEJA.js/
 
 ## Key Commands
 
+> **In a Claude worktree?** Run `/worktree-dev-setup [app]` first — it symlinks `.env` and `node_modules/` from the main repo, then starts the server.
+
 ```bash
 # Run all at once
 pnpm dev              # Start all apps in development mode
@@ -195,13 +197,7 @@ When UI changes are made, update screenshots and MDX docs **before the `preview 
 
 **Test user login:** Alternatively, set `CLAUDE_TEST_EMAIL` and `CLAUDE_TEST_PASSWORD` in `.env` for realistic email/password login during automated testing.
 
-**Worktree env setup:** Git worktrees don't inherit `.env`. Vite reads `.env` from the **app directory** (e.g., `apps/cloud/`), not the monorepo root. Symlink into each app you're running:
-```bash
-ln -sf /Users/jmcdannel/TTT/worktrees/preview/.env apps/cloud/.env
-ln -sf /Users/jmcdannel/TTT/worktrees/preview/.env apps/throttle/.env
-# etc. for each app
-```
-**Vite must be restarted** after creating the symlink (it does not hot-reload env vars).
+**Worktree dev setup:** Git worktrees don't inherit `.env` or `node_modules/`. Run `/worktree-dev-setup [app]` before starting any dev server in a worktree — it symlinks both automatically and starts the server. **Note:** Vite reads `.env` from the **app directory** (e.g., `apps/cloud/`), not the monorepo root — the setup script handles this.
 
 ---
 
@@ -309,6 +305,8 @@ Internal packages use the `@repo/` scope (e.g. `@repo/modules`, `@repo/ui`). The
 ---
 
 ## Key Commands
+
+> **In a Claude worktree?** Run `/worktree-dev-setup [app]` first — it symlinks `.env` and `node_modules/` from the main repo, then starts the server.
 
 Run from the repo root using `turbo` (or `pnpm`):
 
