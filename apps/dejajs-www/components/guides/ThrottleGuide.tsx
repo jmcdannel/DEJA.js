@@ -93,18 +93,25 @@ interface Callout {
   desc: string;
   x: string;
   y: string;
+  offset?: 'above' | 'below';
 }
 
-function CalloutMarker({ number, x, y }: { number: number; x: string; y: string }) {
+function CalloutMarker({ number, x, y, offset }: { number: number; x: string; y: string; offset?: 'above' | 'below' }) {
+  const translateY = offset === 'above' ? '-150%' : offset === 'below' ? '50%' : '-50%';
   return (
     <div
-      className="absolute z-10 flex items-center justify-center"
-      style={{ left: x, top: y, transform: 'translate(-50%, -50%)' }}
+      className="absolute z-10 flex flex-col items-center"
+      style={{ left: x, top: y, transform: `translate(-50%, ${translateY})` }}
     >
-      <span className="absolute w-8 h-8 rounded-full bg-deja-cyan/20 animate-ping" />
-      <span className="relative w-6 h-6 rounded-full bg-deja-cyan text-gray-950 text-xs font-bold flex items-center justify-center shadow-lg shadow-deja-cyan/30">
+      {offset === 'below' && (
+        <span className="w-px h-3 bg-deja-cyan/50" />
+      )}
+      <span className="relative w-6 h-6 rounded-full bg-deja-cyan text-gray-950 text-xs font-bold flex items-center justify-center shadow-lg shadow-deja-cyan/30 shrink-0">
         {number}
       </span>
+      {offset === 'above' && (
+        <span className="w-px h-3 bg-deja-cyan/50" />
+      )}
     </div>
   );
 }
@@ -157,7 +164,7 @@ function AnnotatedScreenshot({
             style={{ objectPosition }}
           />
           {callouts.map((c) => (
-            <CalloutMarker key={c.number} number={c.number} x={c.x} y={c.y} />
+            <CalloutMarker key={c.number} number={c.number} x={c.x} y={c.y} offset={c.offset} />
           ))}
         </div>
       </div>
@@ -236,12 +243,12 @@ export default function ThrottleGuide() {
             aspectClass="aspect-[8/1]"
             objectPosition="center 95%"
             callouts={[
-              { number: 1, label: 'Throttles', desc: 'Multi-train grid view', x: '32%', y: '50%' },
-              { number: 2, label: 'Effects', desc: 'Sound and lighting effects', x: '40%', y: '50%' },
-              { number: 3, label: 'Locos', desc: 'Locomotive roster', x: '48%', y: '50%' },
-              { number: 4, label: 'Routes', desc: 'Track route execution', x: '55%', y: '50%' },
-              { number: 5, label: 'Turnouts', desc: 'Switch control', x: '62%', y: '50%' },
-              { number: 6, label: 'Signals', desc: 'Signal aspect monitoring', x: '70%', y: '50%' },
+              { number: 1, label: 'Throttles', desc: 'Multi-train grid view', x: '32%', y: '50%', offset: 'above' as const },
+              { number: 2, label: 'Effects', desc: 'Sound and lighting effects', x: '40%', y: '50%', offset: 'above' as const },
+              { number: 3, label: 'Locos', desc: 'Locomotive roster', x: '48%', y: '50%', offset: 'above' as const },
+              { number: 4, label: 'Routes', desc: 'Track route execution', x: '55%', y: '50%', offset: 'above' as const },
+              { number: 5, label: 'Turnouts', desc: 'Switch control', x: '62%', y: '50%', offset: 'above' as const },
+              { number: 6, label: 'Signals', desc: 'Signal aspect monitoring', x: '70%', y: '50%', offset: 'above' as const },
             ]}
           />
           <p className="text-xs text-gray-500 mt-2">
