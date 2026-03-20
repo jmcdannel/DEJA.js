@@ -23,6 +23,7 @@ export default function GuidesLayout({ children }: { children: React.ReactNode }
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 flex flex-col lg:flex-row gap-10">
         {/* Sidebar */}
         <aside className="lg:w-56 shrink-0">
+          <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
           <p className="text-xs text-gray-500 font-mono tracking-widest uppercase mb-4">Guides</p>
           <nav className="flex flex-col gap-1">
             {guides.map((g) => (
@@ -45,6 +46,7 @@ export default function GuidesLayout({ children }: { children: React.ReactNode }
               )
             ))}
           </nav>
+          </div>
         </aside>
 
         {/* Main content */}
