@@ -83,7 +83,7 @@ export const DeviceList = React.memo(function DeviceList({ devices, selectedInde
       ...rows,
       h(Text, null, ''),
       h(Text, { dimColor: true }, '  [up/down] navigate  [enter] connect'),
-      h(Text, { dimColor: true }, '  [p] port  [esc] back'),
+      h(Text, { dimColor: true }, '  [p] port  [t] topic  [esc] back'),
     )
   )
 })

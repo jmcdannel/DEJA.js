@@ -6,7 +6,8 @@ const h = React.createElement
 const HELP_TEXT = {
   logs:    '  / commands  [r]estart  [s]top  [t]unnel  [?]help',
   menu:    '  [↑↓] navigate  [Enter] select  [Esc] back',
-  devices: '  [↑↓] navigate  [Enter] connect  [p] port  [Esc] back',
+  devices: '  [↑↓] navigate  [Enter] connect  [p] port  [t] topic  [Esc] back',
+  'topic-input': '  [Enter] save  [Esc] cancel',
   ports:   '  [↑↓] navigate  [Enter] save  [Esc] back',
   status:  '  [Esc] back to logs',
 }

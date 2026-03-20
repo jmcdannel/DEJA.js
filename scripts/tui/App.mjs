@@ -25,6 +25,7 @@ import { StatusPanel } from './components/StatusPanel.mjs'
 import { OnboardingScreen } from './components/OnboardingScreen.mjs'
 import { CommandInput } from './components/CommandInput.mjs'
 import { DeviceList } from './components/DeviceList.mjs'
+import { TopicInput } from './components/TopicInput.mjs'
 
 // Hooks
 import { useLogger } from './hooks/useLogger.mjs'
@@ -85,10 +86,12 @@ export function App() {
     STARTUP_TIPS[Math.floor(Math.random() * STARTUP_TIPS.length)]
   )
 
-  const configRef    = useRef(readConfig())
-  const inputRef     = useRef(null)
-  const devicesRef   = useRef([])
-  const prevModeRef  = useRef('logs')
+  const configRef       = useRef(readConfig())
+  const inputRef        = useRef(null)
+  const topicInputRef   = useRef(null)
+  const editingDeviceRef = useRef(null)
+  const devicesRef      = useRef([])
+  const prevModeRef     = useRef('logs')
 
   // Tips — must be after mode/status/contextHint declarations
   const currentTip = useTips(mode, status, contextHint)
@@ -124,6 +127,13 @@ export function App() {
       timestamp: ServerValue.TIMESTAMP,
     })
   }, [rtdb, layoutId])
+
+  const saveDeviceTopic = useCallback((deviceId, topic) => {
+    if (!db || !layoutId) return
+    db.collection('layouts').doc(layoutId).collection('devices').doc(deviceId)
+      .update({ topic })
+      .catch(() => {})
+  }, [db, layoutId])
 
   const disconnectDevice = useCallback((device) => {
     if (!rtdb || !layoutId) return
@@ -257,16 +267,29 @@ export function App() {
       if (key.downArrow) { setDeviceIndex(i => Math.min(Math.max(0, devices.length - 1), i + 1)); return }
       if (key.escape)    { transitionMode('logs'); return }
       if (input === 'p') { transitionMode('ports'); return }
+      // [t] — open topic input for selected device
+      if (input === 't' && devices.length > 0) {
+        const device = devices[deviceIndex]
+        if (device) {
+          editingDeviceRef.current = device
+          transitionMode('topic-input')
+        }
+        return
+      }
       if (key.return && devices.length > 0) {
         const device = devices[deviceIndex]
         if (!device) return
-        const isConn = device.isConnected || device.connected
+        const isConn = device.type === 'deja-server'
+          ? status === 'running'
+          : (device.isConnected || device.connected)
         if (isConn) {
           disconnectDevice(device)
           showHint(`Disconnecting ${device.id}...`)
         } else {
-          if (!device.port && !device.topic) {
-            showHint(`No port assigned to ${device.id}. Press [p] to assign one.`)
+          // MQTT devices without a topic — prompt for one
+          if (!device.port && !device.topic && device.type !== 'deja-server') {
+            editingDeviceRef.current = device
+            transitionMode('topic-input')
             return
           }
           connectDevice(device)
@@ -274,6 +297,25 @@ export function App() {
         }
         return
       }
+      return
+    }
+
+    // Topic input mode
+    if (mode === 'topic-input') {
+      if (key.escape) { transitionMode('devices'); return }
+      if (key.return) {
+        const topic = topicInputRef.current?.getText()?.trim()
+        const device = editingDeviceRef.current
+        if (topic && device) {
+          saveDeviceTopic(device.id, topic)
+          showHint(`Topic saved for ${device.id}: ${topic}`)
+        }
+        editingDeviceRef.current = null
+        transitionMode('devices')
+        return
+      }
+      if (key.backspace || key.delete) { topicInputRef.current?.handleBackspace(); return }
+      if (!key.ctrl && !key.meta && input) { topicInputRef.current?.handleChar(input); return }
       return
     }
 
@@ -439,6 +481,12 @@ export function App() {
                 })
               : mode === 'devices'
                 ? h(DeviceList, { devices, selectedIndex: deviceIndex, cols, serverStatus: status })
+                : mode === 'topic-input'
+                  ? h(TopicInput, {
+                      ref: topicInputRef,
+                      deviceName: editingDeviceRef.current?.id || '',
+                      currentTopic: editingDeviceRef.current?.topic || '',
+                    })
                 : h(LogPane, { visibleLines, paddingLines, logHeight, filter: logFilter }),
 
           // Contextual hint row — system hints take priority, tips shown as fallback
