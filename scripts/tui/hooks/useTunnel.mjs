@@ -7,6 +7,11 @@ import { isPaidPlan, hasCloudflared } from '../lib/serial.mjs'
 /**
  * useTunnel — manages Cloudflare tunnel lifecycle.
  *
+ * Plan gating: only spawns if isPaidPlan() (engineer or conductor).
+ * Named tunnel priority: token env → name env → cloudflared.yml → temporary.
+ * URL dedup: uses a ref to prevent duplicate "connected" messages.
+ * Persistent files: writes PID to ~/.deja/tunnel.pid, URL to ~/.deja/tunnel.url.
+ *
  * @param {number}   wsPort   WebSocket port
  * @param {Function} addLog   Logger callback from useLogger
  * @param {Function} showHint Hint callback from useLogger
@@ -14,7 +19,8 @@ import { isPaidPlan, hasCloudflared } from '../lib/serial.mjs'
  */
 export function useTunnel(wsPort, addLog, showHint) {
   const [tunnelUrl, setTunnelUrl] = useState(null)
-  const tunnelRef                 = useRef(null)
+  const tunnelRef        = useRef(null)
+  const tunnelUrlSetRef  = useRef(false)  // dedup flag — prevents duplicate URL messages
 
   // ── Stop tunnel ────────────────────────────────────────────────────────────
 
@@ -23,6 +29,7 @@ export function useTunnel(wsPort, addLog, showHint) {
       tunnelRef.current.kill('SIGTERM')
       tunnelRef.current = null
     }
+    tunnelUrlSetRef.current = false
     try { existsSync(TUNNEL_PID_FILE) && writeFileSync(TUNNEL_PID_FILE, '') } catch {}
     try { existsSync(TUNNEL_URL_FILE) && writeFileSync(TUNNEL_URL_FILE, '') } catch {}
     setTunnelUrl(null)
@@ -71,13 +78,17 @@ export function useTunnel(wsPort, addLog, showHint) {
 
     tunnel.stderr.on('data', (d) => {
       const text = String(d)
+      // Temporary tunnel URL detection
       const urlMatch = text.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/)
-      if (urlMatch) {
+      if (urlMatch && !tunnelUrlSetRef.current) {
+        tunnelUrlSetRef.current = true
         setTunnelUrl(urlMatch[0])
         try { writeFileSync(TUNNEL_URL_FILE, urlMatch[0]) } catch {}
         addLog(`Temporary tunnel ready: ${urlMatch[0]}`)
       }
-      if (isNamedTunnel && text.includes('Registered tunnel connection') && !tunnelUrl) {
+      // Named tunnel detection
+      if (isNamedTunnel && text.includes('Registered tunnel connection') && !tunnelUrlSetRef.current) {
+        tunnelUrlSetRef.current = true
         const url = 'wss://ws.dejajs.com'
         setTunnelUrl(url)
         addLog(`Named tunnel connected: ${url}`)
@@ -86,11 +97,12 @@ export function useTunnel(wsPort, addLog, showHint) {
 
     tunnel.on('close', () => {
       tunnelRef.current = null
+      tunnelUrlSetRef.current = false
       setTunnelUrl(null)
     })
 
     tunnelRef.current = tunnel
-  }, [addLog, tunnelUrl, wsPort])
+  }, [addLog, wsPort])  // NO tunnelUrl in deps — dedup via ref
 
   // ── Toggle tunnel ──────────────────────────────────────────────────────────
 
