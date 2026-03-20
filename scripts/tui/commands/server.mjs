@@ -16,7 +16,7 @@ export function registerServerCommands() {
         ctx.setStatus('starting')
         ctx.spawnServer()
       } else {
-        ctx.addLog('Server is already running. Use /restart to restart.')
+        ctx.showHint('Server is already running. Use /restart to restart.')
       }
     },
   })
