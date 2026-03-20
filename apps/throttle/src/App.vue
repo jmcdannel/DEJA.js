@@ -95,8 +95,8 @@ const throttleDefaults: AppBackgroundPrefs = {
 </script>
 
 <template>
-  <v-responsive class="min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
-    <v-app :theme="themePreference" class="!bg-transparent">
+  <v-app :theme="themePreference">
+    <div class="app-bg min-h-screen">
       <PageBackground app-name="throttle" :defaults="throttleDefaults">
         <AppHeader
           app-name="Throttle"
@@ -125,6 +125,12 @@ const throttleDefaults: AppBackgroundPrefs = {
         <ConnectionStatusBanner />
         <NotificationContainer />
       </PageBackground>
-    </v-app>
-  </v-responsive>
+    </div>
+  </v-app>
 </template>
+
+<style scoped>
+.app-bg {
+  background: rgb(var(--v-theme-background));
+}
+</style>

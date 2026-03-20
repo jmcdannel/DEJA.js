@@ -167,7 +167,7 @@ const handleContentChange = (event: Event) => {
     <!-- Interactive Demo -->
     <div class="mt-8">
       <h2 class="text-lg font-semibold mb-3">Interactive Demo</h2>
-      <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+      <div class="bg-surface-variant p-4 rounded-lg">
         <div class="mb-4">
           <label class="block text-sm font-medium mb-2">Content:</label>
           <textarea 

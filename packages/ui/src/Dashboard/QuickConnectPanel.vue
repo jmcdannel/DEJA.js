@@ -160,8 +160,8 @@ function handleConnect(device: Device) {
 
 <style scoped>
 .quick-connect-panel {
-  background: rgba(15, 23, 42, 0.6) !important;
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(var(--v-theme-surface), 0.6) !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
   border-radius: 10px;
   backdrop-filter: blur(8px);
 }
@@ -185,7 +185,7 @@ function handleConnect(device: Device) {
 }
 
 .quick-connect-panel__row + .quick-connect-panel__row {
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(var(--v-theme-on-surface), 0.05);
 }
 
 .quick-connect-panel__device-link {

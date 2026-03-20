@@ -70,7 +70,8 @@ const hasIconSlot = computed(() => !!slots.icon)
     <!-- Optional app title suffix -->
     <span
       v-if="appTitle"
-      class="text-white font-semibold leading-none whitespace-nowrap"
+      class="font-semibold leading-none whitespace-nowrap"
+      style="color: rgba(var(--v-theme-on-surface), 0.9)"
       :class="s.title"
     >
       {{ appTitle }}
