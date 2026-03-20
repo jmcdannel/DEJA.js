@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
+import draggable from 'vuedraggable'
 import { useSensors, type Sensor, sensorTypes, sensorInputTypes } from '@repo/modules/sensors'
+import { useSortableList } from '@/Core/composables/useSortableList'
 import EmptyState from '@/Core/UI/EmptyState.vue'
 
 defineEmits(['edit'])
 
-const { getSensors, deleteSensor } = useSensors()
+const { getSensors, setSensor, deleteSensor } = useSensors()
 const sensors = getSensors()
 
 const color = ref('teal')
 const confirmDelete = ref('')
 
-const list = computed(() => sensors.value || [])
+const { list, onDragStart, onDragEnd } = useSortableList<Sensor>(sensors as any, (id, data) => setSensor(id, data as any))
 
 function getTypeLabel(type: string): string {
   const found = sensorTypes.find((t) => t.value === type)
@@ -38,89 +40,96 @@ function getInputTypeLabel(inputType: string): string {
 </script>
 <template>
   <v-container v-if="list?.length">
-    <v-row>
-      <v-col
-        cols="12"
-        xs="12"
-        sm="6"
-        lg="4">
-        <slot name="prepend"></slot>
-      </v-col>
-      <v-col v-for="item in list" :key="item.id"
-        cols="12"
-        xs="12"
-        sm="6"
-        lg="4">
-        <v-card
-          class="mx-auto w-full h-full justify-between flex flex-col"
-          :color="color"
-          variant="tonal"
-          density="compact">
-          <v-card-title class="flex items-center justify-between">
-            <span>{{ item.name || item.id }}</span>
-            <v-icon
-              :color="item.state ? 'green' : 'red'"
-              size="small"
-            >mdi-circle</v-icon>
-          </v-card-title>
-          <v-card-text>
-            <div class="flex flex-wrap gap-2 items-center mb-3">
-              <v-chip variant="tonal" :color="color" :prepend-icon="getTypeIcon(item.type)">
-                {{ getTypeLabel(item.type) }}
-              </v-chip>
-              <v-chip variant="tonal" color="blue-grey">
-                {{ getInputTypeLabel(item.inputType ?? '') }}
-              </v-chip>
-            </div>
-            <div class="flex flex-wrap gap-4 text-sm">
-              <div v-if="item.device">
-                <span class="opacity-70">Device:</span> {{ item.device }}
+    <draggable
+      :list="list"
+      item-key="id"
+      handle=".drag-handle"
+      ghost-class="ghost"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+      @start="onDragStart"
+      @end="onDragEnd"
+    >
+      <template #header>
+        <div>
+          <slot name="prepend"></slot>
+        </div>
+      </template>
+      <template #item="{ element: item }">
+        <div>
+          <v-card
+            class="mx-auto w-full h-full justify-between flex flex-col"
+            :color="color"
+            variant="tonal"
+            density="compact">
+            <v-card-title class="flex items-center justify-between text-sm py-1">
+              <div class="flex items-center gap-1">
+                <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100" size="small">mdi-drag</v-icon>
+                <span>{{ item.name || item.id }}</span>
               </div>
-              <div v-if="item.pin !== undefined">
-                <span class="opacity-70">Pin:</span> {{ item.pin }}
+              <v-icon
+                :color="item.state ? 'green' : 'red'"
+                size="x-small"
+              >mdi-circle</v-icon>
+            </v-card-title>
+            <v-card-text class="py-1">
+              <div class="flex flex-wrap gap-1 items-center mb-2">
+                <v-chip variant="tonal" :color="color" size="x-small" :prepend-icon="getTypeIcon(item.type)">
+                  {{ getTypeLabel(item.type) }}
+                </v-chip>
+                <v-chip variant="tonal" color="blue-grey" size="x-small">
+                  {{ getInputTypeLabel(item.inputType ?? '') }}
+                </v-chip>
               </div>
-              <div v-if="item.index !== undefined">
-                <span class="opacity-70">Index:</span> {{ item.index }}
+              <div class="flex flex-wrap gap-3 text-xs">
+                <div v-if="item.device">
+                  <span class="opacity-70">Device:</span> {{ item.device }}
+                </div>
+                <div v-if="item.pin !== undefined">
+                  <span class="opacity-70">Pin:</span> {{ item.pin }}
+                </div>
+                <div v-if="item.index !== undefined">
+                  <span class="opacity-70">Index:</span> {{ item.index }}
+                </div>
               </div>
-            </div>
-          </v-card-text>
-          <v-card-actions>
-            <template v-if="confirmDelete === item?.id">
+            </v-card-text>
+            <v-card-actions class="py-1">
+              <template v-if="confirmDelete === item?.id">
+                <v-btn
+                  class="ma-1"
+                  text="Cancel"
+                  variant="outlined"
+                  size="x-small"
+                  @click="confirmDelete = ''" />
+                <v-btn
+                  class="ma-1"
+                  text="Confirm"
+                  variant="tonal"
+                  size="x-small"
+                  prepend-icon="mdi-delete"
+                  @click="deleteSensor(item?.id)" />
+              </template>
               <v-btn
-                class="ma-2"
-                text="Cancel"
-                variant="outlined"
-                size="small"
-                @click="confirmDelete = ''" />
-              <v-btn
-                class="ma-2"
-                text="Confirm"
+                v-else
+                class="ma-1"
+                icon="mdi-delete"
                 variant="tonal"
-                size="small"
-                prepend-icon="mdi-delete"
-                @click="deleteSensor(item?.id)" />
-            </template>
-            <v-btn
-              v-else
-              class="ma-2"
-              icon="mdi-delete"
-              variant="tonal"
-              size="small"
-              @click="confirmDelete = item?.id"
-            ></v-btn>
-            <v-spacer></v-spacer>
+                size="x-small"
+                @click="confirmDelete = item?.id"
+              ></v-btn>
+              <v-spacer></v-spacer>
 
-            <v-btn
-              text="Edit"
-              variant="tonal"
-              prepend-icon="mdi-pencil"
-              size="small"
-              @click="$emit('edit', item)"
-            ></v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row>
+              <v-btn
+                text="Edit"
+                variant="tonal"
+                prepend-icon="mdi-pencil"
+                size="x-small"
+                @click="$emit('edit', item)"
+              ></v-btn>
+            </v-card-actions>
+          </v-card>
+        </div>
+      </template>
+    </draggable>
   </v-container>
   <EmptyState
     v-if="!list?.length"
@@ -133,3 +142,8 @@ function getInputTypeLabel(inputType: string): string {
     action-to="/sensors/new"
   />
 </template>
+<style scoped>
+.ghost {
+  opacity: 0.5;
+}
+</style>

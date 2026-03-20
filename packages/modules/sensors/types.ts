@@ -25,6 +25,7 @@ export interface Sensor {
   analogValue?: number
   analogThreshold?: number
   description?: string
+  order?: number
   tags?: string[]
   timestamp?: Timestamp | null
 }
