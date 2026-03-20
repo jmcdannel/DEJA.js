@@ -6,10 +6,11 @@ const PADDING_TOP = 10
 const FONT_SIZE_PRIMARY = 12
 const FONT_SIZE_SUB = 10
 
-// Mini peripheral node — small circle with icon only
-const MINI_R = 13
-const MINI_ICON_SIZE = 12
+// Mini peripheral node — circle with icon + label below
+const MINI_R = 16
+const MINI_ICON_SIZE = 16
 const MINI_ICON_SCALE = MINI_ICON_SIZE / 24
+const MINI_LABEL_SIZE = 9
 
 interface DiagramNodeProps {
   node: NodeDef
@@ -35,8 +36,12 @@ function stadiumPath(cx: number, cy: number, rh: number, sh: number): string {
 
 export function DiagramNode({ node }: DiagramNodeProps) {
   // ── Track node — stadium oval loop ─────────────────────────────────────────
-  if (node.id === 'track') {
+  if (node.id === 'track' || node.id.startsWith('track-block-')) {
     const { x, y, width, height, label, color } = node
+    const isBlock = node.id.startsWith('track-block-')
+    const blockIdx = isBlock ? Number(node.id.split('-').pop()) : -1
+    // Blocks use slightly different hue to distinguish power districts
+    const blockOpacity = isBlock ? (blockIdx === 0 ? 0.9 : 0.65) : 0.9
     const cx = x + width / 2
     const cy = y + TRACK_TOP_PAD + TRACK_OUTER_RH
     const sh = width / 2 - TRACK_OVAL_PAD_X - TRACK_OUTER_RH  // straight half-length
@@ -70,18 +75,19 @@ export function DiagramNode({ node }: DiagramNodeProps) {
     return (
       <g>
         <rect x={x} y={y} width={width} height={height} rx={10} ry={10}
-          fill={color} fillOpacity={0.12} stroke={color} strokeWidth={2} />
+          fill={color} fillOpacity={isBlock ? 0.08 : 0.12} stroke={color} strokeWidth={2}
+          strokeDasharray={isBlock ? '6 3' : undefined} />
         {[...straightTies, ...curveTies].map((t, i) => (
           <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
-            stroke={color} strokeWidth={2} strokeOpacity={0.4} />
+            stroke={color} strokeWidth={2} strokeOpacity={0.4 * blockOpacity} />
         ))}
         <path d={stadiumPath(cx, cy, TRACK_OUTER_RH, sh)}
-          fill="none" stroke={color} strokeWidth={2.5} strokeOpacity={0.9} />
+          fill="none" stroke={color} strokeWidth={2.5} strokeOpacity={blockOpacity} />
         <path d={stadiumPath(cx, cy, TRACK_INNER_RH, sh)}
-          fill="none" stroke={color} strokeWidth={2.5} strokeOpacity={0.9} />
+          fill="none" stroke={color} strokeWidth={2.5} strokeOpacity={blockOpacity} />
         <text x={cx} y={primaryTextY} textAnchor="middle"
           fontSize={FONT_SIZE_PRIMARY} fontFamily="system-ui, -apple-system, sans-serif"
-          fontWeight="700" fill={color}>
+          fontWeight="700" fill={color} fillOpacity={blockOpacity}>
           {label}
         </text>
       </g>
@@ -106,6 +112,20 @@ export function DiagramNode({ node }: DiagramNodeProps) {
             fillOpacity={0.9}
             transform={`translate(${cx - MINI_ICON_SIZE / 2}, ${cy - MINI_ICON_SIZE / 2}) scale(${MINI_ICON_SCALE})`}
           />
+        )}
+        {node.label && (
+          <text
+            x={cx}
+            y={cy + MINI_R + MINI_LABEL_SIZE + 2}
+            textAnchor="middle"
+            fontSize={MINI_LABEL_SIZE}
+            fontFamily="system-ui, -apple-system, sans-serif"
+            fontWeight="600"
+            fill={node.color}
+            fillOpacity={0.75}
+          >
+            {node.label}
+          </text>
         )}
       </g>
     )

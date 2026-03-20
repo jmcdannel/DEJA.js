@@ -6,6 +6,7 @@ import { useStorage } from '@vueuse/core'
 import { collection, query, where } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { useLocos } from '@repo/modules/locos'
+import { useServerStatus } from '@repo/modules'
 import { Signout } from '@repo/auth'
 import { QuickStart } from '@repo/ui'
 
@@ -13,6 +14,7 @@ const router = useRouter()
 const user = useCurrentUser()
 const layoutId = useStorage('@DEJA/layoutId', '')
 const { createLoco } = useLocos()
+const { serverStatus } = useServerStatus()
 
 const userLayouts = useCollection(
   computed(() =>
@@ -22,6 +24,12 @@ const userLayouts = useCollection(
   ),
 )
 const primaryLayoutId = computed(() => userLayouts.value?.[0]?.id || layoutId.value)
+
+const quickStartCompleted = computed(() => {
+  const steps: number[] = [1] // Always registered on this page
+  if (serverStatus.value?.online) steps.push(2)
+  return steps
+})
 
 // Quick-add loco
 const locoAddress = ref<string>('')
@@ -52,6 +60,12 @@ function addAnother() {
   locoAddress.value = ''
   locoName.value = ''
   locoAdded.value = false
+}
+
+async function handleQuickStartAddLoco(address: number, name: string) {
+  locoAddress.value = String(address)
+  locoName.value = name
+  await handleAddLoco()
 }
 
 function goToDashboard() {
@@ -145,7 +159,13 @@ function goToDashboard() {
 
       <!-- Install Server -->
       <div class="glass-card mb-6">
-        <QuickStart :completed="[1]" :uid="user?.uid" :layout-id="primaryLayoutId" />
+        <QuickStart
+          :completed="quickStartCompleted"
+          :uid="user?.uid"
+          :layout-id="primaryLayoutId"
+          :server-online="serverStatus?.online ?? false"
+          @add-loco="handleQuickStartAddLoco"
+        />
       </div>
 
       <!-- Explore More -->

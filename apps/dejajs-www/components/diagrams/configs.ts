@@ -2,8 +2,8 @@ import type { DiagramConfig } from './types'
 
 export const DIAGRAM_CONFIGS: DiagramConfig[] = [
   {
-    id: 'minimal',
-    label: 'Minimal',
+    id: 'tabletop',
+    label: 'Starter',
     apps: ['throttle'],
     server: true,
     devices: ['dccex'],
@@ -20,8 +20,8 @@ export const DIAGRAM_CONFIGS: DiagramConfig[] = [
     mqtt: false,
   },
   {
-    id: 'standard',
-    label: 'Standard',
+    id: 'shelf',
+    label: 'Shelf',
     apps: ['throttle', 'cloud'],
     server: true,
     devices: ['dccex', 'arduino'],
@@ -29,9 +29,27 @@ export const DIAGRAM_CONFIGS: DiagramConfig[] = [
     mqtt: true,
   },
   {
-    id: 'full',
-    label: 'Full',
-    apps: ['throttle', 'cloud', 'monitor', 'tour'],
+    id: 'bedroom',
+    label: 'Bedroom',
+    apps: ['throttle', 'cloud', 'monitor'],
+    server: true,
+    devices: ['dccex', 'arduino', 'pico-w'],
+    track: true,
+    mqtt: true,
+  },
+  {
+    id: 'basement',
+    label: 'Basement',
+    apps: ['throttle', 'throttle', 'cloud', 'monitor'],
+    server: true,
+    devices: ['dccex', 'dccex', 'arduino', 'arduino', 'pico-w'],
+    track: true,
+    mqtt: true,
+  },
+  {
+    id: 'club',
+    label: 'Club',
+    apps: ['throttle', 'throttle', 'throttle', 'cloud', 'monitor', 'tour'],
     server: true,
     devices: ['dccex', 'dccex', 'arduino', 'arduino', 'pico-w', 'pico-w'],
     track: true,

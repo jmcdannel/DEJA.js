@@ -83,6 +83,8 @@ export interface DeviceType {
   value: string
   label: string
   icon: string
+  color?: string
+  image?: string
 }
 
 /** @deprecated Use Sensor from sensors/types instead */
