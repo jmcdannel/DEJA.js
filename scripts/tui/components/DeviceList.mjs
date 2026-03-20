@@ -11,14 +11,6 @@ const DEVICE_TYPE_LABELS = {
   'deja-server':       'DEJA Server',
 }
 
-const DEVICE_TYPE_ICONS = {
-  'dcc-ex':            '🚂',
-  'deja-arduino':      '🔧',
-  'deja-arduino-led':  '💡',
-  'deja-mqtt':         '📡',
-  'deja-server':       '⚡',
-}
-
 /**
  * DeviceList — interactive device panel with connection status.
  *
@@ -29,7 +21,7 @@ const DEVICE_TYPE_ICONS = {
  *   serverStatus: 'running' | 'starting' | 'stopped' — used to show deja-server as connected
  */
 export const DeviceList = React.memo(function DeviceList({ devices, selectedIndex, cols, serverStatus }) {
-  const width = 58
+  const width = 54
   const pad   = Math.max(0, Math.floor((cols - width) / 2))
   const hasDevices = devices && devices.length > 0
 
@@ -44,11 +36,10 @@ export const DeviceList = React.memo(function DeviceList({ devices, selectedInde
         ? serverStatus === 'running'
         : (device.isConnected || device.connected)
       const typeLabel = DEVICE_TYPE_LABELS[device.type] || device.type || 'Unknown'
-      const icon = DEVICE_TYPE_ICONS[device.type] || '⬡'
       const endpoint = device.port || device.topic || ''
-      const statusText = isConn ? 'connected' : 'disconnected'
-      const statusColor = isConn ? 'green' : 'red'
-      const nameColor = selected ? '#00FFFF' : '#FFFFFF'
+      const dot = isConn ? '●' : '○'
+      const dotColor = isConn ? 'green' : 'red'
+      const nameColor = selected ? '#00FFFF' : undefined
 
       // Device name row
       rows.push(
@@ -56,19 +47,23 @@ export const DeviceList = React.memo(function DeviceList({ devices, selectedInde
           h(Text, { color: selected ? '#00FFFF' : undefined, bold: selected },
             `  ${selected ? '▸' : ' '} `
           ),
-          h(Text, null, `${icon} `),
+          h(Text, { color: dotColor }, `${dot} `),
           h(Text, { color: nameColor, bold: selected }, typeLabel),
-          h(Text, { color: statusColor }, `  ${statusText}`),
         )
       )
 
-      // Endpoint row (indented)
+      // Endpoint row (indented, dimmed)
       if (endpoint) {
         rows.push(
           h(Box, { key: `${device.id}-ep` },
-            h(Text, { dimColor: true }, `       ${endpoint}`)
+            h(Text, { dimColor: true }, `        ${endpoint}`)
           )
         )
+      }
+
+      // Blank line between devices (except after last)
+      if (i < devices.length - 1) {
+        rows.push(h(Text, { key: `${device.id}-sp` }, ' '))
       }
     }
   } else {
@@ -83,12 +78,12 @@ export const DeviceList = React.memo(function DeviceList({ devices, selectedInde
       flexDirection: 'column',
       paddingX: 1,
     },
-      h(Text, { bold: true, color: '#00FFFF' }, ' 🔌 DEJA IO Devices'),
+      h(Text, { bold: true, color: '#00FFFF' }, ' DEJA IO Devices'),
       h(Text, null, ''),
       ...rows,
       h(Text, null, ''),
-      h(Text, { dimColor: true }, '  [↑↓] navigate  [Enter] connect'),
-      h(Text, { dimColor: true }, '  [p] port  [Esc] back'),
+      h(Text, { dimColor: true }, '  [up/down] navigate  [enter] connect'),
+      h(Text, { dimColor: true }, '  [p] port  [esc] back'),
     )
   )
 })
