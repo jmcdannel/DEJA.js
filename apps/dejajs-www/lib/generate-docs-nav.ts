@@ -10,13 +10,12 @@ export interface DocNavItem {
 }
 
 const SECTION_ORDER = [
+  'Server',
   'Throttle',
   'Cloud',
   'Monitor',
   'Tour',
-  'Server',
-  'IO Devices',
-  'Developer'
+  'IO Devices'
 ];
 
 function getSectionFromPath(file: string): string {
@@ -26,7 +25,6 @@ function getSectionFromPath(file: string): string {
   if (file.startsWith('server/')) return 'Server';
   if (file.startsWith('tour/')) return 'Tour';
   if (file.startsWith('io/')) return 'IO Devices';
-  if (file.startsWith('dev/')) return 'Developer';
   return 'Getting Started';
 }
 
@@ -38,7 +36,6 @@ function getSectionSlug(sectionName: string): string {
     'Server': 'server',
     'Tour': 'tour',
     'IO Devices': 'io',
-    'Developer': 'dev',
   };
   return map[sectionName] || '';
 }
