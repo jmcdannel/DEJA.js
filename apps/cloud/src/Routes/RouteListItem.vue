@@ -53,12 +53,13 @@ function getTurnoutState(tId: string) {
     density="compact"
   >
     <template #title>
-      <span class="text-md">{{ route?.name }}</span>
+      <span class="text-sm">{{ route?.name }}</span>
     </template>
     <template #prepend>
+      <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 mr-1" size="small">mdi-drag</v-icon>
       <v-icon
         :icon="routeType.icon"
-        class="text-2xl m-3"></v-icon>
+        class="text-xl m-1"></v-icon>
     </template>
     <v-card-text 
       class="min-h-8 flex py-2 justify-space-between">
@@ -102,27 +103,27 @@ function getTurnoutState(tId: string) {
       </v-stepper>
     </v-card-text>
     <v-spacer></v-spacer>
-    <v-card-actions>
+    <v-card-actions class="py-1">
       <v-btn
         v-if="!confirmDelete"
-        class="ma-2"
+        class="ma-1"
         icon="mdi-delete"
         variant="tonal"
-        size="small"
+        size="x-small"
         @click="confirmDelete = true"
       ></v-btn>
       <template v-else>
         <v-btn
-          class="ma-2"
+          class="ma-1"
           text="Cancel"
           variant="outlined"
-          size="small"
+          size="x-small"
           @click="confirmDelete = false" />
         <v-btn
-          class="ma-2"
+          class="ma-1"
           text="Confirm"
           variant="tonal"
-          size="small"
+          size="x-small"
           prepend-icon="mdi-delete"
           @click="handleDelete" />
       </template>
@@ -131,14 +132,14 @@ function getTurnoutState(tId: string) {
         text="Edit"
         variant="tonal"
         prepend-icon="mdi-pencil"
-        size="small"
+        size="x-small"
         @click="$emit('edit', route)"
       ></v-btn>
       <v-btn
         text="Run"
         variant="tonal"
         prepend-icon="mdi-play"
-        size="small"
+        size="x-small"
         :loading="running"
         @click="handleRun"
       ></v-btn>

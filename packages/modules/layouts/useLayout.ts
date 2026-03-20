@@ -207,6 +207,21 @@ export const useLayout = () => {
     }
   }
 
+  async function updateDevice(id: string, data: Partial<Device>) {
+    if (!layoutId.value) {
+      log.error('No layoutId set, cannot update device')
+      return false
+    }
+    try {
+      const deviceDoc = doc(db, `layouts/${layoutId.value}/devices`, id)
+      await setDoc(deviceDoc, { ...data, timestamp: serverTimestamp() }, { merge: true })
+      return true
+    } catch (e) {
+      log.error('Error updating device: ', e)
+      return false
+    }
+  }
+
   async function autoConnectDevice(id: string, autoConnect: boolean) {
     if (!layoutId.value) {
       log.error('No layoutId set, cannot auto-connect device')
@@ -299,6 +314,7 @@ export const useLayout = () => {
     getLayoutDevices,
     getDevices,
     createDevice,
+    updateDevice,
     autoConnectDevice,
     deviceTypes,
     connectDevice,

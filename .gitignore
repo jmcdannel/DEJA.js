@@ -64,6 +64,7 @@ reports/
 
 # Git worktrees
 .worktrees/
+package-lock.json
 
 # Binary assets migrated to Vercel Blob
 apps/tour/public/Adventure Awaits at Tamarack-VEED.mp4
@@ -75,3 +76,7 @@ apps/tour/public/DejaJsLogo.png
 apps/tour/public/oa-trestle.png
 apps/throttle/resources/*.png
 packages/ui/src/assets/backgrounds/*.jpg
+.superpowers/
+
+# Generated docs (synced from /docs/ at build time)
+apps/dejajs-www/content/docs/
