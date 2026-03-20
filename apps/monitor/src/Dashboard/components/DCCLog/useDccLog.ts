@@ -1,9 +1,9 @@
 import { ref, watch } from 'vue'
 import { isObject, useWebSocket } from '@vueuse/core'
 import { createLogger } from '@repo/utils'
+import { useWsConnection } from '../../../composables/useWsConnection'
 import type { LogEntry } from './types'
 import { defuaultEntry, dccMessages } from './constants'
-import { useWsConnection } from '../../../composables/useWsConnection'
 
 const logger = createLogger('DccLog')
 
@@ -51,9 +51,9 @@ export function useDccLog(isEnabled: boolean) {
         ...dcc,
       }
       return formattedEntry
-    } else {
+    } 
       return null
-    }
+    
       
   }
 

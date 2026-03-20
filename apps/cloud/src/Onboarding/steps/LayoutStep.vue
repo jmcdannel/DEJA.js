@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useCurrentUser } from 'vuefire'
 import { useStorage } from '@vueuse/core'
 import { useLayout } from '@repo/modules'
@@ -19,6 +19,12 @@ const error = ref<string | null>(null)
 const loading = ref(false)
 
 const storedLayoutId = useStorage('@DEJA/layoutId', '')
+
+onMounted(() => {
+  if (user.value?.email) {
+    layoutName.value = user.value.email.split('@')[0]
+  }
+})
 
 // Auto-slugify layout name into ID when not in custom mode
 watch(layoutName, (name) => {
