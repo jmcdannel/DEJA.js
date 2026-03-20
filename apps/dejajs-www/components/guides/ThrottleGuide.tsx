@@ -107,11 +107,11 @@ function AnnotatedScreenshot({
             <span className="w-2 h-2 rounded-full bg-green-500/70" />
           </div>
           <div className={`relative ${aspectClass} overflow-hidden rounded-xl`}>
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={src}
               alt={alt}
-              fill
-              className="object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
               style={{ objectPosition }}
             />
             {callouts.map((c) => (
