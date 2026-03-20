@@ -102,7 +102,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" className="dark">
-      <body className={`${dmSans.variable} ${dmMono.variable} ${bebasNeue.variable} font-sans bg-gray-50 text-gray-800 transition-colors duration-200 dark:bg-gray-950 dark:text-gray-50 relative antialiased`}>
+      <body className={`${dmSans.variable} ${dmMono.variable} ${bebasNeue.variable} font-sans bg-gray-950 text-gray-50 relative antialiased`}>
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="fixed w-[600px] h-[600px] rounded-full bg-cyan-600/10 blur-[100px] -top-[100px] left-[50%] translate-x-[-50%]"></div>
           <div className="fixed w-[500px] h-[500px] rounded-full bg-fuchsia-500/10 blur-[80px] -bottom-[-10%] -right-[200px]"></div>
@@ -113,7 +113,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             Skip to main content
           </a>
           <Header settings={settings} />
-          <main id="main-content" className="max-w-5xl mx-auto px-6 py-10">
+          <main id="main-content" className="w-full">
             {children}
           </main>
           <Footer settings={settings} />

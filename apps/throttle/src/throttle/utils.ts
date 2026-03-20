@@ -12,5 +12,5 @@ export function getSignedSpeed({ speed, direction }
     log.warn('Invalid direction value:', direction)
     return speed
   }
-  return speed && !!direction ? speed : -speed || 0
+  return speed && Boolean(direction) ? speed : -speed || 0
 }

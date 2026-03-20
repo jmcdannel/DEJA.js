@@ -2,83 +2,53 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { createLogger } from '@repo/utils'
+import { useGuestStore } from './guest'
 
 const log = createLogger('TourStore')
 // Local Effect interface to avoid @repo/modules dependency
 interface Effect {
+  allowGuest?: boolean
+  device?: string
   id: string
   name: string
-  type: string
-  state?: boolean
-  device?: string
   pin?: number
   soundDuration?: number // Duration in seconds, optional
+  state?: boolean
   tags?: string[]
-  allowGuest?: boolean
+  type: string
 }
-import { useGuestStore } from './guest'
 
 export interface TourEffect extends Effect {
-  description?: string
-  category?: string
-  icon?: string
-  hasTimeout?: boolean
-  timeoutDuration?: number
   area?: string
+  category?: string
+  description?: string
+  hasTimeout?: boolean
+  icon?: string
+  timeoutDuration?: number
 }
 
 export interface MediaItem {
-  id: string
-  title: string
-  description: string
-  type: 'video' | 'audio'
-  category: 'introduction' | 'technical' | 'overview' | 'area-detail'
   area: string
+  category: 'introduction' | 'technical' | 'overview' | 'area-detail'
+  description: string
   duration: string
-  thumbnail?: string
-  url: string
   featured: boolean
+  id: string
+  thumbnail?: string
+  title: string
+  type: 'video' | 'audio'
+  url: string
 }
 
 // Local helper functions to replace @repo/modules dependencies
 function getEfxTypeLocal(type: string) {
-  const types: Record<string, { label: string; icon: string }> = {
+  const types: Record<string, { icon: string; label: string }> = {
     'light': { label: 'Light', icon: 'mdi-lightbulb' },
     'sound': { label: 'Sound', icon: 'mdi-volume-high' },
     'relay': { label: 'Relay', icon: 'mdi-switch' },
     'macro': { label: 'Macro', icon: 'mdi-play-circle' }
   }
   return types[type] || { label: type, icon: 'mdi-lightning-bolt' }
-}
-
-function getCategoryFromType(type: string): string {
-  const categories: Record<string, string> = {
-    'light': 'Lighting',
-    'sound': 'Audio',
-    'relay': 'Control',
-    'macro': 'Automation'
-  }
-  return categories[type] || 'Other'
-}
-
-function shouldHaveTimeout(type: string): boolean {
-  return ['sound', 'relay', 'macro'].includes(type)
-}
-
-function getTimeoutForType(type: string): number {
-  const timeouts: Record<string, number> = {
-    'sound': 5000,
-    'relay': 10000,
-    'macro': 15000
-  }
-  return timeouts[type] || 0
-}
-
-function getAreaFromTags(tags: string[]): string {
-  if (tags.includes('station')) return 'Tamarack Station'
-  if (tags.includes('yard')) return 'Roseberry Yard'
-  if (tags.includes('crossing')) return 'Payette Subdivision'
-  return 'General'
 }
 
 function formatDuration(seconds: number): string {

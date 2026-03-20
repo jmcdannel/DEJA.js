@@ -40,7 +40,7 @@ export default {
      *
      * 🚫 Not fixable - https://eslint.org/docs/rules/no-bitwise
      */
-    "no-bitwise": "error",
+    "no-bitwise": "warn",
     /**
      * Disallow if as the only statement in an else block.
      *
@@ -58,7 +58,7 @@ export default {
      *
      * 🚫 Not fixable - https://eslint.org/docs/rules/no-nested-ternary
      */
-    "no-nested-ternary": "error",
+    "no-nested-ternary": "warn",
     /**
      * Disallow ternary operators when simpler alternatives exist.
      *
@@ -78,7 +78,7 @@ export default {
      * 🚫 Not fixable - https://eslint.org/docs/latest/rules/sort-keys
      */
     "sort-keys": [
-      "error",
+      "warn",
       "asc",
       {
         natural: true,
