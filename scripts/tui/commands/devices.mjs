@@ -18,7 +18,7 @@ export function registerDeviceCommands() {
 
   register({
     name: 'connect',
-    aliases: ['c'],
+    aliases: ['c', 'ioconnect'],
     description: 'Connect a device',
     usage: '/connect <device-name>',
     execute(args, ctx) {
@@ -47,7 +47,7 @@ export function registerDeviceCommands() {
 
   register({
     name: 'disconnect',
-    aliases: ['dc'],
+    aliases: ['dc', 'iodisconnect'],
     description: 'Disconnect a device',
     usage: '/disconnect <device-name>',
     execute(args, ctx) {
