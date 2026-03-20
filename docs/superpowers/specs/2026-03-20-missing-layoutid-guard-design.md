@@ -39,6 +39,8 @@ When `layoutId` is not set in localStorage, pages that depend on it can render w
 
 The guard is upgraded from a simple localStorage check to a full layout resolution flow.
 
+**Breaking change:** This changes the `requireLayout` export from a zero-argument function to one requiring `userEmail` and `to`. The only callers are the cloud and throttle routers, both of which are updated in this spec. The throttle's `beforeEnter` arrays that referenced the old signature are removed entirely (replaced by `beforeEach`).
+
 **New signature:**
 
 ```typescript
@@ -53,14 +55,21 @@ export async function requireLayout(
 ```
 requireLayout(userEmail, to)
   │
+  ├─ await nextTick() (allow useStorage to hydrate from localStorage)
+  │
   ├─ layoutId in localStorage and non-empty?
   │   └─ ✅ return undefined (pass)
   │
   └─ No layoutId → query Firestore layouts where owner == userEmail
       │
+      ├─ Error fetching → return { path: '/select-layout', query: { redirect: to.fullPath } }
+      │                    (fail-safe: let the select-layout page handle it)
+      │
       ├─ 0 layouts → return { path: '/onboarding', query: { redirect: to.fullPath } }
       │
-      ├─ 1 layout → write layout.id to useStorage('@DEJA/layoutId')
+      ├─ 1 layout → localStorage.setItem('@DEJA/layoutId', JSON.stringify(layout.id))
+      │              (direct write — more reliable than useStorage in guard context)
+      │              also update the useStorage ref so reactive reads pick it up
       │              return undefined (pass — auto-selected, navigation continues)
       │
       └─ 2+ layouts → return { path: '/select-layout', query: { redirect: to.fullPath } }
@@ -68,10 +77,13 @@ requireLayout(userEmail, to)
 
 **Key details:**
 
-- The guard always fetches layouts itself when `layoutId` is missing. Both apps call it identically — no optional snapshot parameter.
-- Auto-select writes directly to `useStorage('@DEJA/layoutId')`. The navigation continues as if the user had always had it set. Completely invisible to single-layout users.
+- The guard always fetches layouts itself when `layoutId` is missing. Both apps call it identically — no optional snapshot parameter. This means the cloud app's `requireOnboarding` step may have already fetched layouts, and the guard will fetch again. This duplicate query only fires when `layoutId` is missing (not on every navigation), so the overhead is acceptable in exchange for keeping both apps' call sites identical.
+- The existing `await nextTick()` pattern is preserved before the localStorage check, ensuring `useStorage` has hydrated.
+- Auto-select writes via `localStorage.setItem()` directly (more reliable than `useStorage` in a navigation guard context), then updates the `useStorage` ref so reactive reads pick it up immediately.
 - The `VITE_LAYOUT_ID` env var fallback is preserved — if set, it seeds the default and the guard passes immediately.
 - The guard imports `db` from `@repo/firebase-config` and queries Firestore directly (same pattern as cloud's `getUserLayouts`).
+- **New dependency:** `@repo/firebase-config` must be listed in `packages/auth/package.json` dependencies (verify and add if missing).
+- **Error handling:** If the Firestore `getDocs` call fails (network error, permissions), the guard falls through to the `/select-layout` redirect as a fail-safe. The select-layout page can display its own error/retry UI.
 
 ### 2. Router Changes
 
@@ -136,6 +148,8 @@ router.beforeEach(async (to) => {
 | `/locos`, `/effects`, `/signals`, `/routes`, `/turnouts` | `requireAuth: true, requireLayout: true` |
 | `/throttle/:address`, `/throttles`, `/conductor`, `/programming` | `requireAuth: true, requireLayout: true, requireDccEx: true` |
 
+**Differences from cloud:** The throttle router does not have `requireOnboarding` — throttle users are expected to create their first layout via the cloud app's onboarding wizard. If a throttle user somehow has 0 layouts, the guard redirects to `/onboarding`, which will hit the throttle's 404 catch-all. This is acceptable since the zero-layout case is not reachable from throttle in normal usage. A future enhancement could redirect to the cloud app's onboarding URL instead.
+
 ### 3. Select Layout Page (Shared Fullscreen Gate)
 
 **File:** `packages/ui/src/SelectLayout.vue` (replace existing)
@@ -168,17 +182,19 @@ A polished fullscreen gate page used by both apps.
 **Component API:**
 
 ```typescript
-// Props
+// Props — names match existing LayoutChip usage for backward compatibility
 defineProps<{
   /** Currently selected layoutId (to show active indicator) */
-  currentLayoutId?: string | null
+  layoutId?: string | null
 }>()
 
-// Emits
+// Emits — "selected" matches existing LayoutChip event name
 defineEmits<{
-  select: [layoutId: string]
+  selected: [layoutId: string]
 }>()
 ```
+
+**Data fetching:** The component fetches layouts internally using `useCurrentUser()` from VueFire to get the user's email, then calls `useLayout().getLayouts(email)`. This avoids requiring every consumer to pass layouts as a prop.
 
 **Visual details:**
 
@@ -190,21 +206,22 @@ defineEmits<{
 - **Grid:** `v-row` + `v-col` — single column on mobile, 2 columns on md+.
 - **Loading:** Vuetify `v-skeleton-loader` type="card" while layouts are fetched.
 - **Empty state:** Should not be reachable (guard redirects 0-layout users to onboarding), but defensive message included.
+- **No "Create New Layout" button** — removed from the shared component. The 0-layout case is handled by the guard redirecting to onboarding. The existing throttle `SelectLayoutView` had a non-functional "Create New Layout" button that is intentionally dropped.
 
 **Behavior on select:**
 
-1. Emit `select` event with `layoutId`.
+1. Emit `selected` event with `layoutId`.
 2. Parent route component (or inline handler) writes to `useStorage('@DEJA/layoutId')` and navigates to the `redirect` query param or `/`.
 
 #### App-Specific Wrappers
 
 **Cloud** (`apps/cloud/src/Layout/SelectLayout.vue`):
 - Replace current content with a thin wrapper importing `SelectLayout` from `@repo/ui`.
-- Handles the `@select` event: write `layoutId`, `router.push(route.query.redirect || '/')`.
+- Handles the `@selected` event: write `layoutId`, `router.push(route.query.redirect || '/')`.
 
 **Throttle** (`apps/throttle/src/views/SelectLayoutView.vue`):
 - Replace current content with same thin wrapper pattern.
-- Handles the `@select` event identically.
+- Handles the `@selected` event identically.
 
 ### 4. Fullscreen Mode in Throttle App
 
@@ -214,7 +231,15 @@ The throttle app currently always renders `AppHeader`, `Menu`, `Footer`, and `Co
 
 ```typescript
 const route = useRoute()
-const isFullscreen = computed(() => route.meta.fullscreen === true)
+
+// Prevent flash of nav chrome before initial route resolves (mirrors cloud pattern)
+const routeReady = ref(false)
+watch(() => route.fullPath, () => { if (!routeReady.value) routeReady.value = true })
+
+const isFullscreen = computed(() => {
+  if (!routeReady.value) return true  // hide chrome until route resolves
+  return route.meta.fullscreen === true
+})
 ```
 
 **Template changes:**
@@ -231,10 +256,11 @@ Add `fullscreen?: boolean` to the throttle's route meta type (cloud already has 
 
 **File:** `packages/ui/src/LayoutChip.vue`
 
-Minor update — the `LayoutChip` dialog currently uses the old `SelectLayout` component. After the shared component is updated, the chip's dialog should use it too.
+The `LayoutChip` dialog already uses the `SelectLayout` component with `:layoutId` prop and `@selected` event — these names are preserved in the new component API for backward compatibility. No code change needed in `LayoutChip.vue` itself.
 
 - The chip's `handleSelect` already writes to `useStorage` and reloads — no behavior change needed.
 - The visual update comes for free from the shared component update.
+- The chip dialog renders the component in a `v-sheet` — the fullscreen gate styling (background, hero header) is only applied when the component is used as a route page, not inside the chip dialog. The component should detect this via a `variant` prop or by checking if it's rendered inside a dialog.
 
 ---
 
@@ -249,7 +275,8 @@ Minor update — the `LayoutChip` dialog currently uses the old `SelectLayout` c
 | `packages/ui/src/SelectLayout.vue` | Replace with polished fullscreen gate page component |
 | `apps/cloud/src/Layout/SelectLayout.vue` | Thin wrapper around shared component |
 | `apps/throttle/src/views/SelectLayoutView.vue` | Thin wrapper around shared component |
-| `packages/ui/src/LayoutChip.vue` | Benefits from shared component update (no code change needed unless dialog styling diverges) |
+| `packages/ui/src/LayoutChip.vue` | No code change — prop/event names preserved for backward compatibility |
+| `packages/auth/package.json` | Verify `@repo/firebase-config` is listed as a dependency (add if missing) |
 
 ## Edge Cases
 
@@ -262,12 +289,25 @@ Minor update — the `LayoutChip` dialog currently uses the old `SelectLayout` c
 | `VITE_LAYOUT_ID` env var set | Guard passes immediately (existing behavior preserved) |
 | layoutId set to deleted/invalid layout | Not addressed in this spec — Firebase queries will return empty data. Future enhancement could validate layoutId against Firestore. |
 | LayoutChip mid-session switch | Existing behavior preserved — chip opens dialog, user selects, page reloads |
+| Redirect query param | Uses `to.fullPath` (preserves query params and hash) — behavior change from old guard which used `window.location.pathname` |
+| Firestore query failure in guard | Fail-safe redirect to `/select-layout` — page handles its own error/retry |
 
 ## Testing
 
-- **Single-layout user:** Verify they never see select-layout page. Clear localStorage, navigate — should auto-select and land on home.
-- **Multi-layout user:** Verify they see the polished gate page. Clear localStorage, navigate — should land on fullscreen select-layout.
-- **Zero-layout user:** Verify redirect to onboarding still works.
-- **Fullscreen isolation:** Verify no AppHeader, Menu, Footer, or ConnectionStatusBanner on select-layout in both apps.
-- **Redirect query param:** After selecting layout, verify navigation to the original destination (not always home).
-- **LayoutChip:** Verify the chip dialog still works for mid-session layout switching.
+### Unit Tests (Vitest — `packages/auth`)
+
+- **Guard with layoutId set:** Returns `undefined` (pass).
+- **Guard with empty layoutId, 1 layout:** Writes to localStorage, returns `undefined`.
+- **Guard with empty layoutId, 2+ layouts:** Returns redirect to `/select-layout`.
+- **Guard with empty layoutId, 0 layouts:** Returns redirect to `/onboarding`.
+- **Guard with Firestore error:** Returns redirect to `/select-layout` (fail-safe).
+- **Guard with `VITE_LAYOUT_ID` set:** Returns `undefined` immediately.
+
+### Manual Testing (both apps)
+
+- **Single-layout user:** Clear localStorage, navigate — should auto-select and land on home without ever seeing select-layout.
+- **Multi-layout user:** Clear localStorage, navigate — should land on fullscreen select-layout page with polished UI.
+- **Zero-layout user (cloud only):** Redirect to onboarding still works.
+- **Fullscreen isolation:** No AppHeader, Menu, Footer, or ConnectionStatusBanner visible on select-layout in both apps.
+- **Redirect query param:** Navigate to `/effects` without layoutId → guard redirects to `/select-layout?redirect=/effects` → select layout → lands on `/effects`.
+- **LayoutChip:** Chip dialog still works for mid-session layout switching (no fullscreen styling inside dialog).
