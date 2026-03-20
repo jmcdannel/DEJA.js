@@ -393,10 +393,6 @@ export function App() {
 
   return h(Box, { flexDirection: 'column', height: termHeight },
 
-    // Header: logo + startup tip
-    h(LogoHeader, { version: VERSION, startupTip }),
-    h(Box, null, h(Text, { dimColor: true }, divider)),
-
     // Body — status panel takes full body; other modes share the log area
     mode === 'status'
       ? h(StatusPanel, {
@@ -451,5 +447,9 @@ export function App() {
 
     // Help bar (always shown)
     h(HelpBar, { mode, logFilter }),
+
+    // Footer: logo + startup tip
+    h(Box, null, h(Text, { dimColor: true }, divider)),
+    h(LogoHeader, { version: VERSION, startupTip }),
   )
 }
