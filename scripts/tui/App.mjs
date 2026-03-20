@@ -434,7 +434,7 @@ export function App() {
                   cols,
                 })
               : mode === 'devices'
-                ? h(DeviceList, { devices, selectedIndex: deviceIndex, cols })
+                ? h(DeviceList, { devices, selectedIndex: deviceIndex, cols, serverStatus: status })
                 : h(LogPane, { visibleLines, paddingLines, logHeight, filter: logFilter }),
 
           // Contextual hint row — system hints take priority, tips shown as fallback
