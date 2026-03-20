@@ -1,3 +1,8 @@
+/**
+ * scripts/tui/lib/config.mjs
+ * Environment loading, path constants, and config helpers.
+ */
+
 import { readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
@@ -19,10 +24,9 @@ export function loadEnvFile(filepath) {
   } catch {}
 }
 
-// ── Paths ──────────────────────────────────────────────────────────────────────
+// ── Paths (all derived from ~/.deja/) ───────────────────────────────────────────
 
-export const DEJA_DIR = join(homedir(), '.deja')
-
+export const DEJA_DIR        = join(homedir(), '.deja')
 export const ENTRY           = join(DEJA_DIR, 'server', 'index.js')
 export const VERSION_FILE    = join(DEJA_DIR, 'server', 'version.txt')
 export const CONFIG_FILE     = join(DEJA_DIR, 'config.json')
