@@ -1,36 +1,33 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { DEJA_DIR, ENTRY } from '../lib/config.mjs'
-import { formatUptime, checkPort } from '../lib/helpers.mjs'
+import { checkPort } from '../lib/helpers.mjs'
 
 /**
  * useServerProcess — manages server spawn/kill/restart and status tracking.
  *
+ * Anti-flicker: startTime lives in a ref (not state) so that spawnServer's
+ * useCallback identity stays stable — it never depends on startTime.  The
+ * close handler reads the ref directly to compute uptime.
+ *
  * @param {number}   wsPort   WebSocket port
  * @param {Function} addLog   Logger callback from useLogger
  * @param {Function} showHint Hint callback from useLogger
- * @returns {{ status, pid, uptime, childRef, spawnServer, stopServer, restartServer, setStatus, cleanup }}
+ * @returns {{ status, pid, startTime, childRef, spawnServer, stopServer, restartServer, setStatus, cleanup }}
  */
 export function useServerProcess(wsPort, addLog, showHint) {
-  const [status, setStatus]       = useState('starting')
-  const [pid, setPid]             = useState(null)
-  const [startTime, setStartTime] = useState(null)
-  const [uptime, setUptime]       = useState('00:00:00')
+  const [status, setStatus] = useState('starting')
+  const [pid, setPid]       = useState(null)
 
-  const childRef = useRef(null)
-
-  // ── Uptime counter ─────────────────────────────────────────────────────────
-
-  useEffect(() => {
-    if (status !== 'running' || !startTime) return
-    const timer = setInterval(() => setUptime(formatUptime(startTime)), 1000)
-    return () => clearInterval(timer)
-  }, [status, startTime])
+  // startTime in a REF (not state!) to avoid dependency in spawnServer
+  const startTimeRef = useRef(null)
+  const childRef     = useRef(null)
 
   // ── Spawn server ───────────────────────────────────────────────────────────
 
   const spawnServer = useCallback(async () => {
+    // Pre-flight: check ENTRY exists
     if (!existsSync(ENTRY)) {
       addLog(`ERROR: Server not found at ${ENTRY}`)
       addLog('Run "deja update" to install the server first.')
@@ -38,10 +35,11 @@ export function useServerProcess(wsPort, addLog, showHint) {
       return
     }
 
+    // Pre-flight: check port is free
     const portFree = await checkPort(wsPort)
     if (!portFree) {
       addLog(`Port ${wsPort} is already in use — is another server instance running?`)
-      addLog(`Stop the other process or change VITE_WS_PORT in ~/.deja/.env`)
+      addLog('Stop the other process or change VITE_WS_PORT in ~/.deja/.env')
       setStatus('stopped')
       return
     }
@@ -59,15 +57,19 @@ export function useServerProcess(wsPort, addLog, showHint) {
 
     child.on('spawn', () => {
       setPid(child.pid)
-      setStartTime(Date.now())
+      startTimeRef.current = Date.now()
       setStatus('running')
     })
 
     child.on('close', (code) => {
-      const upSecs = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0
+      const upSecs = startTimeRef.current
+        ? Math.floor((Date.now() - startTimeRef.current) / 1000)
+        : 0
       setPid(null)
-      setStartTime(null)
+      startTimeRef.current = null
       setStatus('stopped')
+      childRef.current = null
+
       if (code === 0 || code == null) {
         addLog('Server stopped.')
       } else if (upSecs < 5) {
@@ -77,7 +79,6 @@ export function useServerProcess(wsPort, addLog, showHint) {
         addLog(`Server exited unexpectedly (code ${code}).`)
         showHint('Server crashed. Press [r] to restart.')
       }
-      childRef.current = null
     })
 
     child.on('error', (err) => {
@@ -87,7 +88,7 @@ export function useServerProcess(wsPort, addLog, showHint) {
     })
 
     childRef.current = child
-  }, [addLog, showHint, wsPort, startTime])
+  }, [addLog, showHint, wsPort])
 
   // ── Stop server ────────────────────────────────────────────────────────────
 
@@ -96,7 +97,7 @@ export function useServerProcess(wsPort, addLog, showHint) {
   }, [])
 
   // ── Restart server ─────────────────────────────────────────────────────────
-  // NOTE: restartServer does NOT stop the tunnel here — the auto-start effect in App.mjs handles this
+  // NOTE: restartServer does NOT stop the tunnel — App handles that via effects
 
   const restartServer = useCallback(() => {
     childRef.current?.kill('SIGTERM')
@@ -111,5 +112,5 @@ export function useServerProcess(wsPort, addLog, showHint) {
     childRef.current?.kill('SIGTERM')
   }, [])
 
-  return { status, pid, uptime, childRef, spawnServer, stopServer, restartServer, setStatus, cleanup }
+  return { status, pid, startTime: startTimeRef, childRef, spawnServer, stopServer, restartServer, setStatus, cleanup }
 }
