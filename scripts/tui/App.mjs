@@ -33,6 +33,7 @@ import { useTunnel } from './hooks/useTunnel.mjs'
 import { useFirebase, ServerValue } from './hooks/useFirebase.mjs'
 import { useDevices } from './hooks/useDevices.mjs'
 import { useThrottles } from './hooks/useThrottles.mjs'
+import { useTips } from './hooks/useTips.mjs'
 
 // Commands
 import { registerAllCommands } from './commands/index.mjs'
@@ -72,6 +73,7 @@ export function App() {
   const { db, rtdb, layoutId, cleanup: firebaseCleanup } = useFirebase()
   const { devices, connectedCount, totalCount, cleanup: devicesCleanup } = useDevices(db, layoutId)
   const { throttleCount, cleanup: throttlesCleanup } = useThrottles(db, layoutId)
+  const currentTip = useTips(mode, status, contextHint)
 
   // ── Local TUI state ────────────────────────────────────────────────────────
   const [mode, setMode]                     = useState(() => isFirstRun() ? 'onboarding' : 'logs')
@@ -424,8 +426,8 @@ export function App() {
                 ? h(DeviceList, { devices, selectedIndex: deviceIndex, cols })
                 : h(LogPane, { visibleLines, paddingLines, logHeight, filter: logFilter }),
 
-          // Contextual hint row (always 1 line for layout stability)
-          h(ContextHintRow, { hint: contextHint }),
+          // Contextual hint row — system hints take priority, tips shown as fallback
+          h(ContextHintRow, { hint: contextHint, tip: currentTip }),
         ),
 
     // Footer

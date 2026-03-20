@@ -35,6 +35,42 @@ export const STARTUP_TIPS = [
   'Tip: Use the Cloud app to manage your layout config',
 ]
 
+// ── Contextual Tips — shown when no system hint is active ────────────────────
+
+/** Tips keyed by context. Each key maps to an array of possible tips. */
+export const CONTEXTUAL_TIPS = {
+  idle: [
+    'Type / to see available commands',
+    'Press [?] for keyboard shortcuts',
+    'Press [m] to open the command menu',
+    'Press [e] to export logs to a file',
+    'Use /devices to manage connected hardware',
+    'Press [l] to filter logs by severity',
+  ],
+  serverRunning: [
+    'Server is running — press [r] to restart',
+    'Press [t] to toggle the Cloudflare tunnel',
+    'Use /status to see connection details',
+  ],
+  serverStopped: [
+    'Server stopped — press [r] or type /start',
+    'Check logs above for error details',
+  ],
+  devicesMode: [
+    'Press [Enter] to connect/disconnect a device',
+    'Press [p] to assign a serial port',
+  ],
+  menuMode: [
+    'Use ↑↓ arrows to navigate, Enter to select',
+  ],
+  afterRestart: [
+    'Server restarting — watching for startup...',
+  ],
+  afterFilterCycle: [
+    'Press [l] again to cycle: all → error → warn',
+  ],
+}
+
 // ── Menu Items (8) ─────────────────────────────────────────────────────────────
 
 export const MENU_ITEMS = [

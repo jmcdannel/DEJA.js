@@ -4,14 +4,16 @@ import { Text } from 'ink'
 const h = React.createElement
 
 /**
- * ContextHintRow — auto-clearing contextual hint displayed for 5 seconds.
+ * ContextHintRow — shows system hints (priority) or contextual tips (fallback).
  *
- * Always occupies exactly 1 line for layout stability: renders a single
- * space when no hint is active, or `▸ {hint}` in cyan when a hint is set.
+ * - When `hint` is set: shows `▸ {hint}` in cyan (system feedback, auto-clears after 5s)
+ * - When `hint` is null and `tip` is set: shows `💡 {tip}` in dim (contextual guidance)
+ * - When both are null: renders a single space (layout stability)
  *
- * Wrapped in React.memo to skip re-renders when the hint prop is unchanged.
+ * Wrapped in React.memo to skip re-renders when props are unchanged.
  */
-export const ContextHintRow = React.memo(function ContextHintRow({ hint }) {
-  if (!hint) return h(Text, null, ' ')
-  return h(Text, { color: '#00C4FF' }, `  ▸ ${hint}`)
+export const ContextHintRow = React.memo(function ContextHintRow({ hint, tip }) {
+  if (hint) return h(Text, { color: '#00C4FF' }, `  ▸ ${hint}`)
+  if (tip)  return h(Text, { dimColor: true },    `  💡 ${tip}`)
+  return h(Text, null, ' ')
 })
