@@ -4,6 +4,14 @@ import { join } from 'node:path'
 import { LOG_DIR } from '../lib/config.mjs'
 import { ts } from '../lib/helpers.mjs'
 
+// ── Noise filters (hoisted to module scope for stable identity) ────────────────
+const NOISE_RE_STACK = /^\s+at\s/
+const NOISE_RE_META  = /^\s+(code|errno|syscall|address|port):/
+const NOISE_RE_BRACE = /^\s*[{}]\s*$/
+function isNoise(line) {
+  return NOISE_RE_STACK.test(line) || NOISE_RE_META.test(line) || NOISE_RE_BRACE.test(line)
+}
+
 /**
  * useLogger — manages log lines with debounced flushing, filtering,
  * contextual hints, and log export.
@@ -26,15 +34,9 @@ export function useLogger(wsPort) {
   const flushTimerRef = useRef(null)      // setTimeout ID for debounce
   const idCounterRef  = useRef(0)         // monotonic ID counter
   const hintTimerRef  = useRef(null)      // setTimeout ID for hint auto-clear
+  const logLinesRef   = useRef([])        // mirror of logLines state for stable export callback
 
-  // ── Noise filters ─────────────────────────────────────────────────────────────
-  const NOISE_RE_STACK    = /^\s+at\s/
-  const NOISE_RE_META     = /^\s+(code|errno|syscall|address|port):/
-  const NOISE_RE_BRACE    = /^\s*[{}]\s*$/
-
-  function isNoise(line) {
-    return NOISE_RE_STACK.test(line) || NOISE_RE_META.test(line) || NOISE_RE_BRACE.test(line)
-  }
+  // ── Noise filters (module-scope for stable identity) ──────────────────────────
 
   // ── Flush buffer → React state ────────────────────────────────────────────────
   const flushBuffer = useCallback(() => {
@@ -43,7 +45,9 @@ export function useLogger(wsPort) {
     bufferRef.current = []
     setLogLines(prev => {
       const next = [...prev, ...newLines]
-      return next.length > 500 ? next.slice(-500) : next
+      const result = next.length > 500 ? next.slice(-500) : next
+      logLinesRef.current = result
+      return result
     })
   }, [])
 
@@ -112,14 +116,14 @@ export function useLogger(wsPort) {
       mkdirSync(LOG_DIR, { recursive: true })
       const filename = `export-${Date.now()}.txt`
       const filepath = join(LOG_DIR, filename)
-      // Combine flushed state + any unflushed buffer lines
-      const allLines = [...logLines, ...bufferRef.current]
+      // Combine flushed state (via ref) + any unflushed buffer lines
+      const allLines = [...logLinesRef.current, ...bufferRef.current]
       writeFileSync(filepath, allLines.map(l => l.text).join('\n'))
       showHint(`Logs exported → ~/.deja/logs/${filename}`)
     } catch (err) {
       showHint(`Export failed: ${err.message}`)
     }
-  }, [logLines, showHint])
+  }, [showHint])
 
   // ── Cycle filter: all → error → warn → all ───────────────────────────────────
   const cycleFilter = useCallback(() => {

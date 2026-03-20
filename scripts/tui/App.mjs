@@ -135,17 +135,14 @@ export function App() {
       case 'quit':
         addLog('Stopping server...')
         stopTunnel()
-        childRef.current?.kill('SIGTERM')
+        stopServer()
         setTimeout(() => process.exit(0), 400)
         break
 
       case 'restart':
         addLog('Restarting server...')
         stopTunnel()
-        childRef.current?.kill('SIGTERM')
-        childRef.current = null
-        setStatus('starting')
-        setTimeout(spawnServer, 800)
+        restartServer()
         break
 
       case 'help':
@@ -155,7 +152,7 @@ export function App() {
       default:
         addLog(`Unknown command: "${cmd}". Type help or press [?] for shortcuts.`)
     }
-  }, [addLog, spawnServer, stopTunnel, childRef, setStatus])
+  }, [addLog, stopServer, restartServer, stopTunnel])
 
   // ── Command context (passed to slash command execute()) ───────────────────
 
