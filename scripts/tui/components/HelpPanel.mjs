@@ -3,7 +3,7 @@ import { Box, Text } from 'ink'
 
 const h = React.createElement
 
-export function HelpPanel({ visible }) {
+export const HelpPanel = React.memo(function HelpPanel({ visible }) {
   if (!visible) return null
   return h(Box, {
     flexDirection: 'column',
@@ -22,4 +22,4 @@ export function HelpPanel({ visible }) {
     h(Text, null, '  ?        Toggle this help panel'),
     h(Text, null, '  Ctrl+C   Force exit'),
   )
-}
+})

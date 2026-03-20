@@ -6,7 +6,7 @@ import { CONFIG_FILE, LOG_DIR, DEJA_DIR } from '../lib/config.mjs'
 
 const h = React.createElement
 
-export function OnboardingScreen() {
+export const OnboardingScreen = React.memo(function OnboardingScreen() {
   return h(Box, { flexDirection: 'column', paddingX: 2, paddingY: 1 },
     ...LOGO_LINES.map((line, i) =>
       h(Text, { key: i, color: LOGO_COLORS[i] ?? '#007FFF', bold: true }, line)
@@ -22,4 +22,4 @@ export function OnboardingScreen() {
     h(Text, null, ''),
     h(Text, { color: '#00C4FF' }, '  Press any key to start the server...')
   )
-}
+})

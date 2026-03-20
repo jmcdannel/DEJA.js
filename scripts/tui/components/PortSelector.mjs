@@ -3,11 +3,12 @@ import { Box, Text } from 'ink'
 
 const h = React.createElement
 
-export function PortSelector({ ports, portIndex, currentPort, cols }) {
+export const PortSelector = React.memo(function PortSelector({ ports, portIndex, currentPort, cols }) {
   const width        = 50
   const pad          = Math.max(0, Math.floor((cols - width) / 2))
   const displayPorts = ports.length > 0 ? ports : ['(no serial ports detected)']
   const hasPort      = ports.length > 0
+
   return h(Box, { flexDirection: 'column', paddingLeft: pad },
     h(Box, {
       borderStyle: 'round',
@@ -34,4 +35,4 @@ export function PortSelector({ ports, portIndex, currentPort, cols }) {
         : h(Text, { dimColor: true }, '  [Esc] back')
     )
   )
-}
+})

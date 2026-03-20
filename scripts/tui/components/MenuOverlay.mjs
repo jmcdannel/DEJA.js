@@ -3,7 +3,7 @@ import { Box, Text } from 'ink'
 
 const h = React.createElement
 
-export function MenuOverlay({ items, selectedIndex, cols }) {
+export const MenuOverlay = React.memo(function MenuOverlay({ items, selectedIndex, cols }) {
   const width = 40
   const pad   = Math.max(0, Math.floor((cols - width) / 2))
   return h(Box, { flexDirection: 'column', paddingLeft: pad },
@@ -28,4 +28,4 @@ export function MenuOverlay({ items, selectedIndex, cols }) {
       h(Text, { dimColor: true }, '  [↑↓] navigate  [Enter] select  [Esc] back')
     )
   )
-}
+})

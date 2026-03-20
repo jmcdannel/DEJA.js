@@ -1,17 +1,40 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Box, Text } from 'ink'
+import { formatUptime } from '../lib/helpers.mjs'
 
 const h = React.createElement
 
-export function StatusPanel({ version, status, pid, uptime, tunnelUrl, selectedPort, layoutId, wsPort }) {
+const StatusUptime = React.memo(function StatusUptime({ status, startTimeRef }) {
+  const [display, setDisplay] = useState('00:00:00')
+
+  useEffect(() => {
+    if (status !== 'running' || !startTimeRef?.current) {
+      setDisplay('00:00:00')
+      return
+    }
+    setDisplay(formatUptime(startTimeRef.current))
+    const timer = setInterval(() => {
+      if (startTimeRef?.current) setDisplay(formatUptime(startTimeRef.current))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [status, startTimeRef])
+
+  if (status !== 'running') return null
+  return h(Text, null, `  Uptime    ${display}`)
+})
+
+export const StatusPanel = React.memo(function StatusPanel({
+  version, status, pid, startTimeRef, tunnelUrl, selectedPort, layoutId, wsPort
+}) {
   const stColor = status === 'running' ? 'green' : 'red'
+
   return h(Box, { flexDirection: 'column', paddingX: 2, paddingY: 1 },
     h(Text, { bold: true, color: '#00FFFF' }, 'System Status'),
     h(Text, { dimColor: true }, '─'.repeat(32)),
     h(Text, null, ''),
     h(Text, { color: stColor }, `  ${status === 'running' ? '● running' : '○ stopped'}`),
     pid ? h(Text, null, `  PID       ${pid}`) : null,
-    status === 'running' ? h(Text, null, `  Uptime    ${uptime}`) : null,
+    h(StatusUptime, { status, startTimeRef }),
     h(Text, null, `  Version   ${version}`),
     h(Text, null, ''),
     h(Text, { bold: true }, 'Connections'),
@@ -30,4 +53,4 @@ export function StatusPanel({ version, status, pid, uptime, tunnelUrl, selectedP
     h(Text, null, ''),
     h(Text, { dimColor: true }, '  [Esc] back to logs')
   )
-}
+})
