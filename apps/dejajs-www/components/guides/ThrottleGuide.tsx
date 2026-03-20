@@ -368,29 +368,6 @@ export default function ThrottleGuide() {
           <DocLink href="/docs/throttle/turnouts">Turnouts reference</DocLink>
         </Section>
 
-        {/* ── Routes ── */}
-        <Section title="Fire a Route">
-          <p>
-            Routes execute a sequence of turnout changes with a single tap. Select a route
-            from the list or tap a location on the track map.
-          </p>
-          <FeatureGrid items={[
-            { emoji: '🗺️', text: 'Interactive SVG track maps with clickable origin and destination' },
-            { emoji: '📍', text: 'Select origin (P1) → destination (P2) to execute a route' },
-            { emoji: '📊', text: 'Horizontal timeline showing the turnout sequence' },
-            { emoji: '⏳', text: 'Progress bar fills during execution (2 seconds per step)' },
-            { emoji: '📋', text: 'Alternative list view with route cards and a Run button' },
-          ]} />
-          <Screenshot src="/screenshots/throttle_desktop_routes.png" alt="Routes view with route list and track map" device="desktop" />
-          <CloudNote>
-            Routes are created in{' '}
-            <Link href="/guides/cloud" className="text-deja-cyan hover:underline">DEJA Cloud</Link>{' '}
-            — define Point 1 (origin) and Point 2 (destination), set the turnout sequence with target
-            states, and test the route before saving.
-          </CloudNote>
-          <DocLink href="/docs/throttle/routes">Routes reference</DocLink>
-        </Section>
-
         {/* ── Effects ── */}
         <Section title="Try Effects">
           <p>
@@ -416,6 +393,24 @@ export default function ThrottleGuide() {
           <DocLink href="/docs/throttle/effects">Effects reference</DocLink>
         </Section>
 
+        {/* ── Conductor ── */}
+        <Section title="Conductor Mode">
+          <p>
+            Conductor mode is a three-pane operator station designed for large screens.
+            It combines the throttle list, active throttle controls, and turnouts into a single view
+            — everything you need to run a full session without switching pages.
+          </p>
+          <FeatureGrid items={[
+            { emoji: '🖥️', text: 'Three-pane layout: throttle list + active throttle + turnouts' },
+            { emoji: '🚂', text: 'Select any locomotive from the left panel to control it in the center' },
+            { emoji: '🔀', text: 'Throw turnouts from the right panel without leaving the throttle' },
+            { emoji: '📱', text: 'On mobile, panes stack vertically for single-hand operation' },
+          ]} />
+          <Screenshot src="/screenshots/throttle_desktop_conductor.png" alt="Conductor mode three-pane layout on desktop" device="desktop" />
+          <Screenshot src="/screenshots/throttle_mobile_conductor.png" alt="Conductor mode on mobile" device="mobile" />
+          <DocLink href="/docs/throttle/conductor">Conductor mode reference</DocLink>
+        </Section>
+
         {/* ── Settings ── */}
         <Section title="Settings">
           <p>
@@ -438,7 +433,6 @@ export default function ThrottleGuide() {
         <h2 className="text-white font-bold text-xl mb-5">What&apos;s Next</h2>
         <div className="grid sm:grid-cols-2 gap-4">
           {[
-            { label: 'Conductor Mode', desc: 'Full operator station with a three-pane layout', href: '/docs/throttle/conductor' },
             { label: 'Signals', desc: 'Monitor signal aspects across your layout', href: '/docs/throttle/signals' },
             { label: 'Cloud Guide', desc: 'Configure your roster, turnouts, effects, and more', href: '/guides/cloud' },
             { label: 'Home Screen', desc: 'Speedometer widgets and layout overview', href: '/docs/throttle/home' },
