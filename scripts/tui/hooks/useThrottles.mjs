@@ -9,13 +9,14 @@ import { useState, useEffect, useRef, useCallback } from 'react'
  *
  * @param {FirebaseFirestore.Firestore | null} db        Firestore instance
  * @param {string | null}                      layoutId  Active layout ID
- * @returns {{ throttleCount, error, cleanup }}
+ * @returns {{ throttleCount, activeThrottleCount, error, cleanup }}
  */
 export function useThrottles(db, layoutId) {
-  const [throttleCount, setThrottleCount] = useState(0)
-  const [error, setError]                 = useState(null)
-  const prevCountRef = useRef(0)
-  const unsubRef     = useRef(null)
+  const [throttleCount, setThrottleCount]             = useState(0)
+  const [activeThrottleCount, setActiveThrottleCount] = useState(0)
+  const [error, setError]                             = useState(null)
+  const fingerprintRef = useRef('')
+  const unsubRef       = useRef(null)
 
   useEffect(() => {
     if (!db || !layoutId) return
@@ -25,9 +26,15 @@ export function useThrottles(db, layoutId) {
     unsubRef.current = ref.onSnapshot(
       (snapshot) => {
         const count = snapshot.size
-        if (count === prevCountRef.current) return // dedup
-        prevCountRef.current = count
+        const active = snapshot.docs.filter(doc => {
+          const data = doc.data()
+          return data.speed != null && data.speed !== 0
+        }).length
+        const fp = `${count}:${active}`
+        if (fp === fingerprintRef.current) return // dedup
+        fingerprintRef.current = fp
         setThrottleCount(count)
+        setActiveThrottleCount(active)
       },
       (err) => {
         setError(err.message || 'Firestore throttle listener error')
@@ -43,5 +50,5 @@ export function useThrottles(db, layoutId) {
     if (unsubRef.current) unsubRef.current()
   }, [])
 
-  return { throttleCount, error, cleanup }
+  return { throttleCount, activeThrottleCount, error, cleanup }
 }

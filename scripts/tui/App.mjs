@@ -72,7 +72,7 @@ export function App() {
   const { tunnelUrl, tunnelRef, spawnTunnel, stopTunnel, toggleTunnel, cleanup: tunnelCleanup } = useTunnel(WS_PORT, addLog, showHint)
   const { db, rtdb, layoutId, cleanup: firebaseCleanup } = useFirebase()
   const { devices, connectedCount, totalCount, cleanup: devicesCleanup } = useDevices(db, layoutId)
-  const { throttleCount, cleanup: throttlesCleanup } = useThrottles(db, layoutId)
+  const { throttleCount, activeThrottleCount, cleanup: throttlesCleanup } = useThrottles(db, layoutId)
 
   // ── Local TUI state ────────────────────────────────────────────────────────
   const [mode, setMode]                     = useState(() => isFirstRun() ? 'onboarding' : 'logs')
@@ -450,7 +450,9 @@ export function App() {
       connectedCount,
       totalCount,
       throttleCount,
+      activeThrottleCount,
       tunnelUrl,
+      selectedPort: cfg.serialPort || null,
     }),
 
     // Input row (logs mode only)

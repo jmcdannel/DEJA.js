@@ -7,7 +7,6 @@ const h = React.createElement
 /**
  * UptimeTicker — self-contained uptime display with its own 1s interval.
  * Prevents uptime ticks from re-rendering App or StatusBar's parent.
- * Only ticks when status === 'running' and startTimeRef.current is set.
  */
 const UptimeTicker = React.memo(function UptimeTicker({ status, startTimeRef }) {
   const [display, setDisplay] = useState('00:00:00')
@@ -17,7 +16,6 @@ const UptimeTicker = React.memo(function UptimeTicker({ status, startTimeRef }) 
       setDisplay('00:00:00')
       return
     }
-    // Update immediately
     setDisplay(formatUptime(startTimeRef.current))
     const timer = setInterval(() => {
       if (startTimeRef?.current) {
@@ -28,43 +26,82 @@ const UptimeTicker = React.memo(function UptimeTicker({ status, startTimeRef }) 
   }, [status, startTimeRef])
 
   if (status !== 'running') return null
-  return h(Text, null, `  uptime ${display}`)
+  return h(Text, { color: '#00C4FF' }, `  ⏱ ${display}`)
 })
 
 /**
- * StatusBar — footer with server status, PID, uptime, device/throttle counts, tunnel URL.
+ * StatusBar — colorful footer with server status, uptime, devices, throttles, tunnel.
  *
  * Props:
  *   status: 'starting' | 'running' | 'stopped'
  *   pid: number | null
- *   startTimeRef: React.MutableRefObject<number | null> (from useServerProcess)
+ *   startTimeRef: React.MutableRefObject<number | null>
  *   connectedCount: number
  *   totalCount: number
  *   throttleCount: number
+ *   activeThrottleCount: number (throttles with speed !== 0)
  *   tunnelUrl: string | null
+ *   selectedPort: string | null
  */
 export const StatusBar = React.memo(function StatusBar({
   status, pid, startTimeRef,
-  connectedCount = 0, totalCount = 0, throttleCount = 0,
-  tunnelUrl
+  connectedCount = 0, totalCount = 0,
+  throttleCount = 0, activeThrottleCount = 0,
+  tunnelUrl, selectedPort,
 }) {
-  const color   = status === 'running' ? 'green' : status === 'stopped' ? 'red' : 'yellow'
-  const icon    = status === 'running' ? '●' : '○'
-  const pidText = pid ? `  pid ${pid}` : ''
+  // Status icon + color
+  const statusColor = status === 'running' ? 'green' : status === 'stopped' ? 'red' : 'yellow'
+  const statusIcon  = status === 'running' ? '● ' : status === 'starting' ? '◐ ' : '○ '
+  const statusLabel = status === 'running' ? 'running' : status === 'starting' ? 'starting' : 'stopped'
+
+  // Device connection health color
+  const deviceColor = totalCount === 0
+    ? undefined
+    : connectedCount === totalCount
+      ? 'green'
+      : connectedCount > 0
+        ? 'yellow'
+        : 'red'
+
+  // Throttle activity indicator
+  const throttleColor = activeThrottleCount > 0 ? '#00FF88' : '#00FFFF'
 
   return h(Box, null,
-    h(Text, { color }, icon),
-    h(Text, null, ` ${status}${pidText}`),
+    // Server status
+    h(Text, { color: statusColor, bold: true }, statusIcon),
+    h(Text, { color: statusColor, bold: status === 'running' }, statusLabel),
+
+    // PID
+    pid ? h(Text, { dimColor: true }, `  #${pid}`) : null,
+
+    // Uptime (self-contained ticker)
     h(UptimeTicker, { status, startTimeRef }),
+
+    // Separator
+    (totalCount > 0 || throttleCount > 0 || tunnelUrl || selectedPort)
+      ? h(Text, { dimColor: true }, '  │')
+      : null,
+
+    // Device connections
     totalCount > 0
-      ? h(Text, { color: connectedCount > 0 ? '#00FFFF' : undefined, dimColor: connectedCount === 0 },
-          `  ⬡ ${connectedCount}/${totalCount} devices`)
+      ? h(Text, { color: deviceColor },
+          `  🔌 ${connectedCount}/${totalCount}`)
       : null,
+
+    // Throttles
     throttleCount > 0
-      ? h(Text, { color: '#00FFFF' }, `  🚂 ${throttleCount} throttles`)
+      ? h(Text, { color: throttleColor },
+          `  🚂 ${activeThrottleCount > 0 ? `${activeThrottleCount}↑` : ''}${throttleCount}`)
       : null,
+
+    // Serial port
+    selectedPort
+      ? h(Text, { color: '#A078FF' }, `  ⬡ ${selectedPort}`)
+      : null,
+
+    // Tunnel
     tunnelUrl
-      ? h(Text, { dimColor: true }, `  🔒 ${tunnelUrl}`)
+      ? h(Text, { color: '#00FF88' }, `  🔒 ${tunnelUrl}`)
       : null,
   )
 })
