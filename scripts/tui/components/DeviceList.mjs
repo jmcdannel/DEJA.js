@@ -16,7 +16,7 @@ const DEVICE_TYPE_ICONS = {
   'deja-arduino':      '🔧',
   'deja-arduino-led':  '💡',
   'deja-mqtt':         '📡',
-  'deja-server':       '🖥️',
+  'deja-server':       '⚡',
 }
 
 /**
@@ -29,7 +29,7 @@ const DEVICE_TYPE_ICONS = {
  *   serverStatus: 'running' | 'starting' | 'stopped' — used to show deja-server as connected
  */
 export const DeviceList = React.memo(function DeviceList({ devices, selectedIndex, cols, serverStatus }) {
-  const width = 56
+  const width = 58
   const pad   = Math.max(0, Math.floor((cols - width) / 2))
   const hasDevices = devices && devices.length > 0
 
