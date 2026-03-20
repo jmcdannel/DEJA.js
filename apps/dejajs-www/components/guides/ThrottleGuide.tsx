@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import AnimateIn from '../home/AnimateIn';
 import SectionLabel from '../home/SectionLabel';
+import Logo from '../Logo';
 import PhoneMockup from '../architecture/PhoneMockup';
 import DocLink from '../DocLink';
 
@@ -94,7 +95,7 @@ function AnnotatedScreenshot({
   src: string;
   alt: string;
   callouts: Callout[];
-  aspectClass: string;
+  aspectClass: string; // e.g. "6/1"
   objectPosition: string;
 }) {
   return (
@@ -106,7 +107,7 @@ function AnnotatedScreenshot({
             <span className="w-2 h-2 rounded-full bg-yellow-500/70" />
             <span className="w-2 h-2 rounded-full bg-green-500/70" />
           </div>
-          <div className={`relative ${aspectClass} overflow-hidden rounded-xl`}>
+          <div className="relative overflow-hidden rounded-xl" style={{ aspectRatio: aspectClass }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={src}
@@ -211,9 +212,9 @@ export default function ThrottleGuide() {
             <SectionLabel color="magenta">Guide</SectionLabel>
           </AnimateIn>
           <AnimateIn delay={0.1}>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white tracking-tight mt-6 mb-6">
-              Throttle
-            </h1>
+            <div className="mt-6 mb-6 flex justify-center">
+              <Logo size="3xl" appTitle="Throttle" />
+            </div>
           </AnimateIn>
           <AnimateIn delay={0.2}>
             <p className="text-gray-400 text-lg sm:text-xl leading-relaxed max-w-2xl mx-auto mb-10">
@@ -254,7 +255,7 @@ export default function ThrottleGuide() {
           <AnnotatedScreenshot
             src="/screenshots/throttle_desktop_home.png"
             alt="Throttle header bar with numbered callouts"
-            aspectClass="aspect-[6/1]"
+            aspectClass="6/1"
             objectPosition="center 7.5%"
             callouts={[
               { number: 1, label: 'Menu', desc: 'Opens the side navigation drawer', x: '4%', y: '50%' },
@@ -275,12 +276,20 @@ export default function ThrottleGuide() {
               <Link href="#settings" className="text-deja-cyan hover:underline">Settings</Link>.
             </p>
           </AnimateIn>
-
-          <AnimateIn delay={0.1}>
-            <div className="flex justify-center">
-              <PhoneMockup src="/screenshots/throttle_mobile_home.png" alt="Throttle app on mobile showing bottom navigation" className="w-[220px]" />
-            </div>
-          </AnimateIn>
+          <AnnotatedScreenshot
+            src="/screenshots/throttle_desktop_throttle-list.png"
+            alt="Throttle bottom navigation bar with numbered callouts"
+            aspectClass="6/1"
+            objectPosition="center 100%"
+            callouts={[
+              { number: 1, label: 'Throttles', desc: 'Multi-train grid view', x: '32%', y: '40%' },
+              { number: 2, label: 'Effects', desc: 'Sound and lighting effects', x: '40%', y: '40%' },
+              { number: 3, label: 'Locos', desc: 'Locomotive roster', x: '48%', y: '40%' },
+              { number: 4, label: 'Routes', desc: 'Track route execution', x: '55%', y: '40%' },
+              { number: 5, label: 'Turnouts', desc: 'Switch control', x: '62%', y: '40%' },
+              { number: 6, label: 'Signals', desc: 'Signal aspect monitoring', x: '70%', y: '40%' },
+            ]}
+          />
         </div>
       </section>
 
