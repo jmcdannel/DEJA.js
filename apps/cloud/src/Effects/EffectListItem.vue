@@ -56,78 +56,80 @@ async function handleEfx (event: Event) {
     density="compact"
   >
     <template #title>
-      <span>{{efx?.name}}</span>
+      <span class="text-sm">{{efx?.name}}</span>
+    </template>
+    <template #prepend>
+      <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 mr-1" size="small">mdi-drag</v-icon>
     </template>
     <template #append>
       <v-avatar
+        size="small"
         :color="color"
       >{{ efx?.pin }}</v-avatar>
     </template>
-    <v-card-text 
-      class="min-h-8 flex border-t-2 py-2 justify-space-between"
+    <v-card-text
+      class="min-h-6 flex border-t-2 py-1 justify-space-between"
       variant="flat">
-      <div class="grid grid-cols-2 gap-2">
+      <div class="grid grid-cols-2 gap-1">
         <v-chip-group column>
           <v-label class="text-xs">{{ efxId }}</v-label>
           <v-chip
-            size="small"
-            class=""
+            size="x-small"
             :color="color"
           >{{ efxType?.label || 'Effect' }}</v-chip>
-          
+
           <v-chip
-            size="small"
-            class=""
+            size="x-small"
             :color="color"
             prepend-icon="mdi-memory"
           >
             {{ efx?.device }}
           </v-chip>
-          
+
           <v-chip
             v-if="efx?.allowGuest"
-            size="small"
+            size="x-small"
             color="success"
             prepend-icon="mdi-account-check"
           >
-            Guest Access
+            Guest
           </v-chip>
-          
+
         </v-chip-group>
         <div class="flex flex-col items-center justify-center">
-          <v-icon 
+          <v-icon
             :icon="efxType?.icon || 'mdi-help'"
-            class="text-5xl m-3"></v-icon>
+            class="text-3xl m-1"></v-icon>
           <v-switch
             hide-details
             :color="color"
+            density="compact"
             @click="handleEfx"
           ></v-switch>
         </div>
       </div>
     </v-card-text>
-    <v-spacer></v-spacer>
-    <v-card-actions>
+    <v-card-actions class="py-1">
       <v-btn
         v-if="!confirmDelete"
-        class="ma-2"
+        class="ma-1"
         icon="mdi-delete"
         variant="tonal"
-        size="small"
+        size="x-small"
         @click="confirmDelete = true"
       ></v-btn>
       <template v-else>
         <v-btn
-          class="ma-2"
+          class="ma-1"
           text="Cancel"
           variant="outlined"
-          size="small"
+          size="x-small"
           @click="confirmDelete = false" />
         <v-btn
-          class="ma-2"
+          class="ma-1"
           text="Confirm"
           variant="tonal"
-          size="small"
+          size="x-small"
           prepend-icon="mdi-delete"
           @click="deleteEfx(efx?.id)" />
       </template>
@@ -137,7 +139,7 @@ async function handleEfx (event: Event) {
         text="Edit"
         variant="tonal"
         prepend-icon="mdi-pencil"
-        size="small"
+        size="x-small"
         @click="$emit('edit', efx)"
       ></v-btn>
     </v-card-actions>
