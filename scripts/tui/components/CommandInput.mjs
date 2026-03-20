@@ -15,23 +15,8 @@ import { complete, list } from '../commands/registry.mjs'
 
 const h = React.createElement
 
-const COL_WIDTH = 38
-
-function renderMenuItem(cmd, index, activeIndex) {
-  const selected = index === activeIndex
-  const name = `/${cmd.name}`
-  const desc = cmd.description
-  // Pad the name+desc to fixed column width
-  const cell = `${selected ? '▸' : ' '} ${name}  ${desc}`
-  return h(Box, { width: COL_WIDTH },
-    h(Text, {
-      color: selected ? '#00FFFF' : undefined,
-      bold: selected,
-      dimColor: !selected,
-      wrap: 'truncate',
-    }, cell)
-  )
-}
+// Fixed width for command name column so descriptions align
+const CMD_COL = 16
 
 export const CommandInput = React.memo(forwardRef(function CommandInput(_props, ref) {
   const [inputText, setInputText] = useState('')
@@ -130,15 +115,24 @@ export const CommandInput = React.memo(forwardRef(function CommandInput(_props, 
       h(Text, { color: '#00C4FF' }, '▌')
     ),
 
-    // Command dropdown menu — two-column layout
+    // Command dropdown menu — single column with aligned descriptions
     showMenu
       ? h(Box, { flexDirection: 'column', paddingLeft: 2 },
-          ...Array.from({ length: Math.ceil(menuItems.length / 2) }, (_, row) => {
-            const left  = menuItems[row * 2]
-            const right = menuItems[row * 2 + 1]
-            return h(Box, { key: row },
-              renderMenuItem(left,  row * 2,     menuIndex),
-              right ? renderMenuItem(right, row * 2 + 1, menuIndex) : null,
+          ...menuItems.map((cmd, i) => {
+            const selected = i === menuIndex
+            const name = `/${cmd.name}`
+            const padded = name.padEnd(CMD_COL)
+            return h(Box, { key: cmd.name },
+              h(Text, {
+                color: selected ? '#00FFFF' : undefined,
+                bold: selected,
+              }, `${selected ? '▸' : ' '} `),
+              h(Text, {
+                color: selected ? '#00FFFF' : undefined,
+                bold: selected,
+                dimColor: !selected,
+              }, padded),
+              h(Text, { dimColor: true }, cmd.description),
             )
           })
         )
