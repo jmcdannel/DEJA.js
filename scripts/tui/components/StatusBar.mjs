@@ -85,13 +85,13 @@ export const StatusBar = React.memo(function StatusBar({
     // Device connections
     totalCount > 0
       ? h(Text, { color: deviceColor },
-          `  🔌 ${connectedCount}/${totalCount}`)
+          `  🔌 ${connectedCount}/${totalCount} devices`)
       : null,
 
     // Throttles
     throttleCount > 0
       ? h(Text, { color: throttleColor },
-          `  🚂 ${activeThrottleCount > 0 ? `${activeThrottleCount}↑` : ''}${throttleCount}`)
+          `  🚂 ${activeThrottleCount > 0 ? `${activeThrottleCount}↑ ` : ''}${throttleCount} throttles`)
       : null,
 
     // Serial port

@@ -23,7 +23,7 @@ export function registerServerCommands() {
 
   register({
     name: 'stop',
-    aliases: ['quit', 'exit'],
+    aliases: [],
     description: 'Stop the server and exit',
     usage: '/stop',
     execute(_args, ctx) {
@@ -31,6 +31,17 @@ export function registerServerCommands() {
       ctx.tunnelCleanup()
       ctx.stopServer()
       setTimeout(() => process.exit(0), 400)
+    },
+  })
+
+  register({
+    name: 'quit',
+    aliases: ['exit', 'q'],
+    description: 'Exit TUI (server keeps running)',
+    usage: '/quit',
+    execute(_args, ctx) {
+      ctx.addLog('Exiting DEJA TUI...')
+      setTimeout(() => process.exit(0), 200)
     },
   })
 
