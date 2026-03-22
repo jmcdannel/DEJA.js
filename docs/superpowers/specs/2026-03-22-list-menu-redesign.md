@@ -195,8 +195,10 @@ Mobile bottom sheet for filter selection.
 
 Convenience wrapper that assembles all controls and handles responsive behavior.
 
+**State ownership:** `ListControlBar` does NOT own state. The parent view calls `useListControls()` and passes the composable's return value into `ListControlBar` via the `controls` prop. This avoids dual instantiation and keeps the parent as the single source of truth for `filteredList`.
+
 **Props:**
-- `moduleName: string` — module key for state persistence
+- `controls: ReturnType<typeof useListControls>` — **required** — the composable instance from the parent
 - `color?: string` — accent color for active states
 - `showSearch?: boolean` — show search (default: `true`)
 - `showFilters?: boolean` — show filter controls (default: `true`)
@@ -215,8 +217,8 @@ Convenience wrapper that assembles all controls and handles responsive behavior.
 - Filter icon gets red badge with count when filters are applied
 - Sort icon gets accent highlight when sort is non-default
 - Each icon button opens its respective bottom sheet
-- Uses `useListControls()` internally for state management
-- Exposes state via `defineExpose` or `provide/inject` for parent access
+- Binds `controls.searchQuery`, `controls.viewAs`, `controls.sortBy`, `controls.activeFilters` to sub-components via v-model
+- Reads `controls.hasActiveFilters`, `controls.activeFilterCount`, `controls.isNonDefaultSort` for active state indicators
 
 ### useListControls Composable
 
@@ -254,7 +256,9 @@ function useListControls(
 }
 ```
 
-**Storage keys:** `@DEJA/prefs/{moduleName}/View`, `@DEJA/prefs/{moduleName}/Sort`, `@DEJA/prefs/{moduleName}/Filter`, `@DEJA/prefs/{moduleName}/Search`
+**Storage keys:** `@DEJA/prefs/{moduleName}/View`, `@DEJA/prefs/{moduleName}/Sort`, `@DEJA/prefs/{moduleName}/Filter`, `@DEJA/prefs/{moduleName}/Search` (same keys as existing code — preferences migrate automatically)
+
+**Naming convention:** All option shapes use `{ value, label }` (not `{ value, title }` from old `ListMenu.vue`). The old `ListMenu` used `title`; new components standardize on `label`.
 
 **Filtering logic:** applies search query (matches against `name` field, case-insensitive) + active filters (AND across filter types, OR within a type). Same logic as current `ModuleList/List.vue`.
 
@@ -335,27 +339,31 @@ function useListControls(
 
 ```vue
 <script setup lang="ts">
-import { PageHeader, ListControlBar } from '@repo/ui'
-import { useListControls } from '@repo/ui'
+import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
 
-const { filteredList, ...controls } = useListControls('effects', {
+const filters = [
+  { type: 'device', label: 'Device', options: deviceOptions },
+  { type: 'type', label: 'Type', options: typeOptions },
+  { type: 'tags', label: 'Tags', options: tagOptions },
+]
+const viewOptions = [
+  { value: 'card', icon: 'mdi-view-grid-outline', label: 'Grid' },
+  { value: 'list', icon: 'mdi-view-list-outline', label: 'List' },
+  { value: 'table', icon: 'mdi-table', label: 'Table' },
+]
+const sortOptions = [
+  { value: 'order', label: 'Default' },
+  { value: 'name', label: 'Name' },
+  { value: 'device', label: 'Device' },
+  { value: 'type', label: 'Type' },
+]
+
+// Parent owns state — single source of truth
+const controls = useListControls('effects', {
   list: effectsList,
-  filters: [
-    { type: 'device', label: 'Device', options: deviceOptions },
-    { type: 'type', label: 'Type', options: typeOptions },
-    { type: 'tags', label: 'Tags', options: tagOptions },
-  ],
-  viewOptions: [
-    { value: 'card', icon: 'mdi-view-grid-outline', label: 'Grid' },
-    { value: 'list', icon: 'mdi-view-list-outline', label: 'List' },
-    { value: 'table', icon: 'mdi-table', label: 'Table' },
-  ],
-  sortOptions: [
-    { value: 'order', label: 'Default' },
-    { value: 'name', label: 'Name' },
-    { value: 'device', label: 'Device' },
-    { value: 'type', label: 'Type' },
-  ],
+  filters,
+  viewOptions,
+  sortOptions,
 })
 </script>
 
@@ -363,7 +371,7 @@ const { filteredList, ...controls } = useListControls('effects', {
   <PageHeader title="Effects" icon="mdi-rocket-launch" color="indigo">
     <template #controls>
       <ListControlBar
-        module-name="effects"
+        :controls="controls"
         color="indigo"
         :view-options="viewOptions"
         :sort-options="sortOptions"
@@ -372,18 +380,24 @@ const { filteredList, ...controls } = useListControls('effects', {
       />
     </template>
   </PageHeader>
-  <ModuleList :list="filteredList" :view-as="controls.viewAs.value" />
+  <ModuleList :list="controls.filteredList.value" :view-as="controls.viewAs.value" />
 </template>
 ```
 
 ### Search only (Sounds)
 
 ```vue
+<script setup lang="ts">
+import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
+
+const controls = useListControls('sounds', { list: soundsList })
+</script>
+
 <template>
   <PageHeader title="Sounds" icon="mdi-volume-high" color="sky">
     <template #controls>
       <ListControlBar
-        module-name="sounds"
+        :controls="controls"
         :show-filters="false"
         :show-view="false"
         :show-sort="false"
@@ -405,6 +419,12 @@ const { filteredList, ...controls } = useListControls('effects', {
 ### Custom actions (Roster)
 
 ```vue
+<script setup lang="ts">
+import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
+
+const controls = useListControls('roster', { list: rosterList })
+</script>
+
 <template>
   <PageHeader title="Roster" icon="mdi-train" color="pink">
     <template #actions>
@@ -413,7 +433,7 @@ const { filteredList, ...controls } = useListControls('effects', {
     </template>
     <template #controls>
       <ListControlBar
-        module-name="roster"
+        :controls="controls"
         :show-filters="false"
         :show-view="true"
         :show-sort="true"
