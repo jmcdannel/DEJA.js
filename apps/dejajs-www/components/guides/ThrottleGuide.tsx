@@ -137,7 +137,6 @@ function AnnotatedScreenshot({
 /* ── Two-column feature section ── */
 
 function FeatureSection({
-  label,
   title,
   desc,
   features,
@@ -150,7 +149,6 @@ function FeatureSection({
   docLabel,
   children,
 }: {
-  label: string;
   title: string;
   desc: string;
   features: { emoji: string; text: string }[];
@@ -167,8 +165,7 @@ function FeatureSection({
     <section className="py-20">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <AnimateIn direction={flip ? 'right' : 'left'} className={flip ? 'lg:order-2' : ''}>
-          <SectionLabel>{label}</SectionLabel>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mt-4 mb-3">{title}</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">{title}</h2>
           <p className="text-gray-400 leading-relaxed mb-6">{desc}</p>
           <FeatureGrid items={features} />
           {cloudNote && <div className="mt-4">{cloudNote}</div>}
@@ -295,7 +292,6 @@ export default function ThrottleGuide() {
 
       {/* ── Connect ── */}
       <FeatureSection
-        label="Step 1"
         title="Connect"
         desc="Open Throttle in your browser. The home screen shows your command station's connection status. Green means you're ready to go."
         features={[
@@ -312,7 +308,6 @@ export default function ThrottleGuide() {
       {/* ── Add a Loco ── */}
       <div className="bg-gray-900/50 border-y border-gray-800/50 -mx-6 px-6">
         <FeatureSection
-          label="Step 2"
           title="Add a Locomotive"
           desc="Tap the + button on the throttle list to add a locomotive to your session. Enter the DCC address and a name."
           features={[
@@ -338,7 +333,6 @@ export default function ThrottleGuide() {
 
       {/* ── Select a Loco ── */}
       <FeatureSection
-        label="Step 3"
         title="Select a Locomotive"
         desc="The throttle list shows all locomotives in your session. Tap one to open full throttle control."
         features={[
@@ -356,7 +350,6 @@ export default function ThrottleGuide() {
       {/* ── Speed & Direction ── */}
       <div className="bg-gray-900/50 border-y border-gray-800/50 -mx-6 px-6">
         <FeatureSection
-          label="Step 4"
           title="Control Speed & Direction"
           desc="Everything you need to drive. Set speed, change direction, and stop — all from one screen."
           features={[
@@ -377,7 +370,6 @@ export default function ThrottleGuide() {
 
       {/* ── Functions ── */}
       <FeatureSection
-        label="Step 5"
         title="Use Functions"
         desc="Tap the function button to open the speed dial. Toggle lights, horn, bell, and 25+ decoder features."
         features={[
@@ -401,7 +393,6 @@ export default function ThrottleGuide() {
       {/* ── Turnouts ── */}
       <div className="bg-gray-900/50 border-y border-gray-800/50 -mx-6 px-6">
         <FeatureSection
-          label="Step 6"
           title="Throw Turnouts"
           desc="Tap a turnout to toggle between straight and divergent. Color changes instantly to show state."
           features={[
@@ -428,7 +419,6 @@ export default function ThrottleGuide() {
 
       {/* ── Effects ── */}
       <FeatureSection
-        label="Step 7"
         title="Try Effects"
         desc="Trigger sound and lighting effects across your layout. Tap to toggle — everything updates in real time."
         features={[
