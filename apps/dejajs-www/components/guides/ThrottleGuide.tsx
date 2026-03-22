@@ -141,11 +141,16 @@ interface CarouselSlide {
   id: string;
   emoji: string;
   title: string;
+  tagline: string;
   desc: string;
-  screenshot: string;
+  mobileScreenshot: string;
+  desktopScreenshot: string;
   features: { emoji: string; text: string }[];
   docHref: string;
   docLabel: string;
+  accentColor: string;
+  accentBg: string;
+  accentBorder: string;
 }
 
 const layoutFeatures: CarouselSlide[] = [
@@ -153,76 +158,103 @@ const layoutFeatures: CarouselSlide[] = [
     id: 'turnouts',
     emoji: '🔀',
     title: 'Turnouts',
-    desc: 'Tap to toggle between straight and divergent. Color changes instantly to show state.',
-    screenshot: '/screenshots/throttle_mobile_turnouts2.png',
+    tagline: 'Throw switches with a tap',
+    desc: 'Control every turnout on your layout. Tap to toggle between straight and divergent — color changes instantly to show state. Multiple view modes let you operate the way you prefer.',
+    mobileScreenshot: '/screenshots/throttle_mobile_turnouts2.png',
+    desktopScreenshot: '/screenshots/throttle_desktop_turnouts.png',
     features: [
-      { emoji: '🎛️', text: 'CTC-style lever switches' },
-      { emoji: '🟢', text: 'Color-coded state indicators' },
-      { emoji: '👁️', text: 'Switch, Button, Card, Table views' },
-      { emoji: '🏷️', text: 'Filter by device or tags' },
+      { emoji: '🎛️', text: 'CTC-style lever switches as the default view' },
+      { emoji: '🟢', text: 'Color-coded state — green for normal, amber for reverse' },
+      { emoji: '👁️', text: 'Switch, Button, Card, and Table view modes' },
+      { emoji: '🏷️', text: 'Filter by device, type, or tags' },
+      { emoji: '⏱️', text: '3-second cooldown prevents accidental double-throws' },
     ],
     docHref: '/docs/throttle/turnouts',
     docLabel: 'Turnouts',
+    accentColor: 'text-amber-400',
+    accentBg: 'bg-amber-400/10',
+    accentBorder: 'border-amber-400/40',
   },
   {
     id: 'effects',
     emoji: '💡',
     title: 'Effects',
-    desc: 'Trigger sound and lighting effects across your layout. Tap to toggle — updates in real time.',
-    screenshot: '/screenshots/throttle_mobile_effects.png',
+    tagline: 'Bring your layout to life',
+    desc: 'Toggle lights, trigger sounds, and activate animations across your entire layout. Effects are organized by type and update in real time as you tap.',
+    mobileScreenshot: '/screenshots/throttle_mobile_effects.png',
+    desktopScreenshot: '/screenshots/throttle_desktop_effects.png',
     features: [
-      { emoji: '💡', text: 'Light, LED, Street Light, Relay, Power' },
-      { emoji: '🔊', text: 'Sound effects from your library' },
-      { emoji: '🌈', text: 'IALED — addressable LED strips' },
-      { emoji: '⚙️', text: 'Macros — custom command sequences' },
+      { emoji: '💡', text: 'Light, LED, Street Light, Relay, Frog Juicer, Power, PIN' },
+      { emoji: '🔊', text: 'Sound effects from your uploaded sound library' },
+      { emoji: '🌈', text: 'IALED — individually addressable LED strip patterns' },
+      { emoji: '⚙️', text: 'Macros — custom on/off command sequences' },
+      { emoji: '👤', text: 'Mark effects as guest-accessible for visitors' },
     ],
     docHref: '/docs/throttle/effects',
     docLabel: 'Effects',
+    accentColor: 'text-indigo-400',
+    accentBg: 'bg-indigo-400/10',
+    accentBorder: 'border-indigo-400/40',
   },
   {
     id: 'signals',
     emoji: '🚦',
     title: 'Signals',
-    desc: 'Monitor signal aspects across your layout. Red, yellow, and green indicators update in real time.',
-    screenshot: '/screenshots/throttle_mobile_signals.png',
+    tagline: 'Monitor every block',
+    desc: 'See signal aspects across your layout in real time. Red, yellow, and green indicators update as block conditions change on your command station.',
+    mobileScreenshot: '/screenshots/throttle_mobile_signals.png',
+    desktopScreenshot: '/screenshots/throttle_mobile_signals.png',
     features: [
       { emoji: '🔴', text: 'Red, yellow, green aspect indicators' },
-      { emoji: '📡', text: 'Real-time state from your command station' },
-      { emoji: '🏷️', text: 'Filter by device or tags' },
-      { emoji: '🗂️', text: 'Organized by block or location' },
+      { emoji: '📡', text: 'Real-time updates from your command station' },
+      { emoji: '🏷️', text: 'Filter and organize by device or tags' },
+      { emoji: '🗂️', text: 'Grouped by block or location' },
     ],
     docHref: '/docs/throttle/signals',
     docLabel: 'Signals',
+    accentColor: 'text-emerald-400',
+    accentBg: 'bg-emerald-400/10',
+    accentBorder: 'border-emerald-400/40',
   },
   {
     id: 'sensors',
     emoji: '📡',
     title: 'Sensors',
-    desc: 'Track block occupancy, IR detection, and automation triggers across your layout.',
-    screenshot: '/screenshots/throttle_mobile_home.png',
+    tagline: 'Detect and automate',
+    desc: 'Track block occupancy, IR detection, and automation triggers. Sensors feed data to your layout in real time, enabling automated responses for turnouts, signals, and effects.',
+    mobileScreenshot: '/screenshots/throttle_mobile_home.png',
+    desktopScreenshot: '/screenshots/throttle_desktop_home.png',
     features: [
-      { emoji: '🔍', text: 'Block occupancy detection' },
-      { emoji: '📡', text: 'IR and proximity sensors' },
-      { emoji: '⚡', text: 'Automation trigger points' },
-      { emoji: '🔗', text: 'Linked to turnouts and effects' },
+      { emoji: '🔍', text: 'Block occupancy detection for ABS signaling' },
+      { emoji: '📡', text: 'IR and proximity sensors for trigger zones' },
+      { emoji: '⚡', text: 'Automation trigger points for events' },
+      { emoji: '🔗', text: 'Link sensors to turnouts, signals, and effects' },
     ],
     docHref: '/docs/throttle/signals',
     docLabel: 'Sensors',
+    accentColor: 'text-rose-400',
+    accentBg: 'bg-rose-400/10',
+    accentBorder: 'border-rose-400/40',
   },
   {
     id: 'sounds',
     emoji: '🔊',
     title: 'Sounds',
-    desc: 'Play crossing bells, ambient sounds, and announcements from speakers placed across your layout.',
-    screenshot: '/screenshots/throttle_mobile_effects.png',
+    tagline: 'Immersive audio everywhere',
+    desc: 'Place speakers across your layout and trigger crossing bells, ambient sounds, station announcements, and custom audio. Upload your own files or use the built-in sound library.',
+    mobileScreenshot: '/screenshots/throttle_mobile_effects.png',
+    desktopScreenshot: '/screenshots/throttle_desktop_effects.png',
     features: [
-      { emoji: '🔔', text: 'Crossing bells and whistles' },
-      { emoji: '🌲', text: 'Ambient sounds — wind, water, crowds' },
-      { emoji: '📢', text: 'Station announcements' },
-      { emoji: '🎵', text: 'Upload custom audio files' },
+      { emoji: '🔔', text: 'Crossing bells, horns, and whistles' },
+      { emoji: '🌲', text: 'Ambient sounds — wind, water, crowds, wildlife' },
+      { emoji: '📢', text: 'Station announcements and PA systems' },
+      { emoji: '🎵', text: 'Upload custom audio files to your library' },
     ],
     docHref: '/docs/throttle/effects',
     docLabel: 'Sounds',
+    accentColor: 'text-purple-400',
+    accentBg: 'bg-purple-400/10',
+    accentBorder: 'border-purple-400/40',
   },
 ];
 
@@ -232,11 +264,11 @@ function LayoutFeaturesCarousel() {
 
   return (
     <section className="py-20">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <AnimateIn>
           <SectionLabel color="lime">Layout Control</SectionLabel>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mt-4 mb-3">Control Your Entire Layout</h2>
-          <p className="text-gray-400 leading-relaxed mb-8">
+          <p className="text-gray-400 leading-relaxed mb-10">
             Beyond driving trains, Throttle gives you control over every aspect of your layout.
             These features are configured in{' '}
             <Link href="/guides/cloud" className="text-deja-cyan hover:underline">DEJA Cloud</Link>{' '}
@@ -244,40 +276,73 @@ function LayoutFeaturesCarousel() {
           </p>
         </AnimateIn>
 
-        {/* Tab buttons */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        {/* Tab buttons — large and bright */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-12">
           {layoutFeatures.map((slide, i) => (
             <button
               key={slide.id}
               onClick={() => setActiveIdx(i)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+              className={`flex flex-col items-center gap-2 px-4 py-4 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                 i === activeIdx
-                  ? 'bg-deja-cyan/10 border border-deja-cyan/40 text-deja-cyan shadow-lg shadow-deja-cyan/10'
-                  : 'border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-gray-200'
+                  ? `${slide.accentBg} border-2 ${slide.accentBorder} ${slide.accentColor} shadow-lg`
+                  : 'border-2 border-gray-800/60 text-gray-500 hover:border-gray-600 hover:text-gray-300 hover:bg-gray-900/50'
               }`}
             >
-              <span>{slide.emoji}</span>
+              <span className="text-2xl">{slide.emoji}</span>
               <span>{slide.title}</span>
             </button>
           ))}
         </div>
 
         {/* Active slide */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <h3 className="text-2xl font-bold text-white mb-3">{active.emoji} {active.title}</h3>
-            <p className="text-gray-400 leading-relaxed mb-6">{active.desc}</p>
-            <FeatureGrid items={active.features} />
-            <div className="mt-4">
-              <DocLink href={active.docHref}>{active.docLabel}</DocLink>
-            </div>
+        <div key={active.id}>
+          {/* Tagline */}
+          <div className="mb-8">
+            <h3 className={`text-3xl font-bold ${active.accentColor} mb-2`}>{active.title}</h3>
+            <p className="text-xl text-white font-semibold">{active.tagline}</p>
+            <p className="text-gray-400 leading-relaxed mt-3 max-w-2xl">{active.desc}</p>
           </div>
-          <div className="flex justify-center">
-            <PhoneMockup
-              src={active.screenshot}
-              alt={`${active.title} view in Throttle`}
-              className="w-[220px]"
-            />
+
+          {/* Screenshots + features side by side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            {/* Screenshots — desktop + phone PiP */}
+            <div className="relative">
+              <div className="rounded-2xl border-2 border-gray-700 bg-gray-900 p-2 shadow-2xl">
+                <div className="mx-auto w-8 h-1 bg-gray-800 rounded-full mb-1" />
+                <div className="rounded-xl overflow-hidden">
+                  <Image
+                    src={active.desktopScreenshot}
+                    alt={`${active.title} desktop view`}
+                    width={1200}
+                    height={675}
+                    className="w-full h-auto"
+                  />
+                </div>
+              </div>
+              {/* Phone PiP overlay */}
+              <div className="absolute -bottom-4 -right-2 sm:-right-6">
+                <PhoneMockup
+                  src={active.mobileScreenshot}
+                  alt={`${active.title} mobile view`}
+                  className="w-[100px] sm:w-[120px]"
+                />
+              </div>
+            </div>
+
+            {/* Features */}
+            <div>
+              <FeatureGrid items={active.features} />
+              <div className="mt-6 flex flex-wrap gap-3">
+                <DocLink href={active.docHref}>{active.docLabel}</DocLink>
+              </div>
+
+              {/* Placeholder for custom graphic */}
+              <div className={`mt-6 p-6 rounded-xl border-2 border-dashed ${active.accentBorder} ${active.accentBg} flex flex-col items-center gap-2`}>
+                <span className="text-4xl">{active.emoji}</span>
+                <p className={`text-sm font-medium ${active.accentColor}`}>Illustration coming soon</p>
+                <p className="text-xs text-gray-500 text-center">Custom graphic for {active.title.toLowerCase()}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
