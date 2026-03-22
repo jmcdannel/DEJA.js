@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import AnimateIn from '../home/AnimateIn';
@@ -131,6 +132,156 @@ function AnnotatedScreenshot({
       </AnimateIn>
       <CalloutKey callouts={callouts} />
     </div>
+  );
+}
+
+/* ── Layout Features Carousel ── */
+
+interface CarouselSlide {
+  id: string;
+  emoji: string;
+  title: string;
+  desc: string;
+  screenshot: string;
+  features: { emoji: string; text: string }[];
+  docHref: string;
+  docLabel: string;
+}
+
+const layoutFeatures: CarouselSlide[] = [
+  {
+    id: 'turnouts',
+    emoji: '🔀',
+    title: 'Turnouts',
+    desc: 'Tap to toggle between straight and divergent. Color changes instantly to show state.',
+    screenshot: '/screenshots/throttle_mobile_turnouts2.png',
+    features: [
+      { emoji: '🎛️', text: 'CTC-style lever switches' },
+      { emoji: '🟢', text: 'Color-coded state indicators' },
+      { emoji: '👁️', text: 'Switch, Button, Card, Table views' },
+      { emoji: '🏷️', text: 'Filter by device or tags' },
+    ],
+    docHref: '/docs/throttle/turnouts',
+    docLabel: 'Turnouts',
+  },
+  {
+    id: 'effects',
+    emoji: '💡',
+    title: 'Effects',
+    desc: 'Trigger sound and lighting effects across your layout. Tap to toggle — updates in real time.',
+    screenshot: '/screenshots/throttle_mobile_effects.png',
+    features: [
+      { emoji: '💡', text: 'Light, LED, Street Light, Relay, Power' },
+      { emoji: '🔊', text: 'Sound effects from your library' },
+      { emoji: '🌈', text: 'IALED — addressable LED strips' },
+      { emoji: '⚙️', text: 'Macros — custom command sequences' },
+    ],
+    docHref: '/docs/throttle/effects',
+    docLabel: 'Effects',
+  },
+  {
+    id: 'signals',
+    emoji: '🚦',
+    title: 'Signals',
+    desc: 'Monitor signal aspects across your layout. Red, yellow, and green indicators update in real time.',
+    screenshot: '/screenshots/throttle_mobile_signals.png',
+    features: [
+      { emoji: '🔴', text: 'Red, yellow, green aspect indicators' },
+      { emoji: '📡', text: 'Real-time state from your command station' },
+      { emoji: '🏷️', text: 'Filter by device or tags' },
+      { emoji: '🗂️', text: 'Organized by block or location' },
+    ],
+    docHref: '/docs/throttle/signals',
+    docLabel: 'Signals',
+  },
+  {
+    id: 'sensors',
+    emoji: '📡',
+    title: 'Sensors',
+    desc: 'Track block occupancy, IR detection, and automation triggers across your layout.',
+    screenshot: '/screenshots/throttle_mobile_home.png',
+    features: [
+      { emoji: '🔍', text: 'Block occupancy detection' },
+      { emoji: '📡', text: 'IR and proximity sensors' },
+      { emoji: '⚡', text: 'Automation trigger points' },
+      { emoji: '🔗', text: 'Linked to turnouts and effects' },
+    ],
+    docHref: '/docs/throttle/signals',
+    docLabel: 'Sensors',
+  },
+  {
+    id: 'sounds',
+    emoji: '🔊',
+    title: 'Sounds',
+    desc: 'Play crossing bells, ambient sounds, and announcements from speakers placed across your layout.',
+    screenshot: '/screenshots/throttle_mobile_effects.png',
+    features: [
+      { emoji: '🔔', text: 'Crossing bells and whistles' },
+      { emoji: '🌲', text: 'Ambient sounds — wind, water, crowds' },
+      { emoji: '📢', text: 'Station announcements' },
+      { emoji: '🎵', text: 'Upload custom audio files' },
+    ],
+    docHref: '/docs/throttle/effects',
+    docLabel: 'Sounds',
+  },
+];
+
+function LayoutFeaturesCarousel() {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const active = layoutFeatures[activeIdx];
+
+  return (
+    <section className="py-20">
+      <div className="max-w-4xl mx-auto">
+        <AnimateIn>
+          <SectionLabel color="lime">Layout Control</SectionLabel>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mt-4 mb-3">Control Your Entire Layout</h2>
+          <p className="text-gray-400 leading-relaxed mb-8">
+            Beyond driving trains, Throttle gives you control over every aspect of your layout.
+            These features are configured in{' '}
+            <Link href="/guides/cloud" className="text-deja-cyan hover:underline">DEJA Cloud</Link>{' '}
+            and controlled here in real time.
+          </p>
+        </AnimateIn>
+
+        {/* Tab buttons */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          {layoutFeatures.map((slide, i) => (
+            <button
+              key={slide.id}
+              onClick={() => setActiveIdx(i)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                i === activeIdx
+                  ? 'bg-deja-cyan/10 border border-deja-cyan/40 text-deja-cyan shadow-lg shadow-deja-cyan/10'
+                  : 'border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-gray-200'
+              }`}
+            >
+              <span>{slide.emoji}</span>
+              <span>{slide.title}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Active slide */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h3 className="text-2xl font-bold text-white mb-3">{active.emoji} {active.title}</h3>
+            <p className="text-gray-400 leading-relaxed mb-6">{active.desc}</p>
+            <FeatureGrid items={active.features} />
+            <div className="mt-4">
+              <DocLink href={active.docHref}>{active.docLabel}</DocLink>
+            </div>
+          </div>
+          <div className="flex justify-center">
+            <PhoneMockup
+              src={active.screenshot}
+              alt={`${active.title} view in Throttle`}
+              className="w-[220px]"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -390,58 +541,6 @@ export default function ThrottleGuide() {
         docLabel="Functions reference"
       />
 
-      {/* ── Turnouts ── */}
-      <div className="bg-gray-900/50 border-y border-gray-800/50 -mx-6 px-6">
-        <FeatureSection
-          title="Throw Turnouts"
-          desc="Tap a turnout to toggle between straight and divergent. Color changes instantly to show state."
-          features={[
-            { emoji: '🎛️', text: 'CTC-style lever switches as the default view' },
-            { emoji: '🟢', text: 'Color-coded state indicators — normal vs. reverse' },
-            { emoji: '👁️', text: 'Multiple views: Switch, Button, Card, Table' },
-            { emoji: '🏷️', text: 'Filter by device or tags' },
-            { emoji: '⏱️', text: '3-second cooldown prevents rapid repeated throws' },
-          ]}
-          screenshot="/screenshots/throttle_mobile_turnouts2.png"
-          screenshotAlt="Turnouts view"
-          flip
-          cloudNote={
-            <CloudNote>
-              Turnouts are defined in{' '}
-              <Link href="/guides/cloud" className="text-deja-cyan hover:underline">DEJA Cloud</Link>{' '}
-              — name, DCC index, type, pin values, and hardware device.
-            </CloudNote>
-          }
-          docLink="/docs/throttle/turnouts"
-          docLabel="Turnouts reference"
-        />
-      </div>
-
-      {/* ── Effects ── */}
-      <FeatureSection
-        title="Try Effects"
-        desc="Trigger sound and lighting effects across your layout. Tap to toggle — everything updates in real time."
-        features={[
-          { emoji: '💡', text: 'Light, LED, Street Light, Relay, Frog Juicer, Power, PIN' },
-          { emoji: '🔊', text: 'Sound effects from your uploaded library' },
-          { emoji: '🌈', text: 'IALED — individually addressable LED strips' },
-          { emoji: '⚙️', text: 'Macros — custom on/off command sequences' },
-          { emoji: '🏷️', text: 'Filter by device, type, or tags' },
-          { emoji: '👤', text: 'Guest-accessible effects marked with a chip' },
-        ]}
-        screenshot="/screenshots/throttle_mobile_effects.png"
-        screenshotAlt="Effects view"
-        cloudNote={
-          <CloudNote>
-            Effects are configured in{' '}
-            <Link href="/guides/cloud" className="text-deja-cyan hover:underline">DEJA Cloud</Link>{' '}
-            — hardware devices, pins, sound library, macros, and guest access.
-          </CloudNote>
-        }
-        docLink="/docs/throttle/effects"
-        docLabel="Effects reference"
-      />
-
       {/* ── Conductor ── */}
       <div className="bg-gray-900/50 border-y border-gray-800/50 py-20 -mx-6 px-6">
         <div className="max-w-4xl mx-auto">
@@ -476,6 +575,9 @@ export default function ThrottleGuide() {
           </div>
         </div>
       </div>
+
+      {/* ── Layout Features Carousel ── */}
+      <LayoutFeaturesCarousel />
 
       {/* ── Settings ── */}
       <section className="py-20">
