@@ -41,6 +41,8 @@ export interface PlanLimits {
   sounds: number
   routes: number
   layouts: number
+  devices: number
+  sensors: number
   tourApp: boolean
   remoteMonitoring: boolean
 }
