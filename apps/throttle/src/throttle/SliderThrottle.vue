@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { toRef } from 'vue'
+import { ref, toRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useDebounce } from '@vueuse/core'
 import type { Loco } from '@repo/modules/locos'
-import SliderControls from '@/throttle/SliderControls.vue'
 import Speedometer from '@/throttle/Speedometer.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
@@ -29,9 +29,30 @@ const {
 
 const $router = useRouter()
 
-async function handleAdjustSliderSpeed(val: number) {
-  if (currentSpeed.value === val) return
-  setSpeed(val)
+// Local slider state synced with currentSpeed
+const sliderVal = ref(Math.abs(currentSpeed.value))
+const isForward = ref(currentSpeed.value >= 0)
+
+watch(currentSpeed, (v) => {
+  sliderVal.value = Math.abs(v)
+  isForward.value = v >= 0
+})
+
+// Debounced speed emission (same pattern as SliderControls / ThrottleSlider)
+const debouncedSpeed = useDebounce(sliderVal, 500)
+
+watch(debouncedSpeed, (speed) => {
+  const signedSpeed = isForward.value ? speed : -speed
+  if (currentSpeed.value === signedSpeed) return
+  setSpeed(signedSpeed)
+})
+
+function toggleDirection() {
+  isForward.value = !isForward.value
+  if (sliderVal.value !== 0) {
+    const signedSpeed = isForward.value ? sliderVal.value : -sliderVal.value
+    setSpeed(signedSpeed)
+  }
 }
 
 async function clearLoco() {
@@ -68,9 +89,32 @@ async function clearLoco() {
         <Consist v-if="showConsist && loco" :loco="loco" class="mt-4" />
       </section>
 
-      <!-- Center: Slider controls -->
-      <section class="flex flex-col gap-2 items-center justify-center flex-1">
-        <SliderControls @update:currentSpeed="handleAdjustSliderSpeed" @stop="handleStop" :speed="currentSpeed" />
+      <!-- Center: Vertical slider + direction toggle -->
+      <section class="flex flex-col items-center justify-center flex-1 h-full py-4">
+        <v-slider
+          v-model="sliderVal"
+          direction="vertical"
+          step="1"
+          max="126"
+          thumb-label="always"
+          show-ticks
+          track-size="40"
+          thumb-size="28"
+          color="purple"
+          track-color="purple-darken-4"
+          track-fill-color="purple-darken-2"
+          thumb-color="purple"
+          class="h-full"
+        />
+        <v-btn
+          :color="isForward ? 'purple' : 'pink'"
+          variant="tonal"
+          size="large"
+          class="mt-2"
+          @click="toggleDirection"
+        >
+          {{ isForward ? 'FWD' : 'REV' }}
+        </v-btn>
       </section>
 
       <!-- Right: Loco info + functions (desktop) -->
