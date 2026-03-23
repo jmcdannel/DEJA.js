@@ -7,7 +7,7 @@ import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import { createLogger } from '@repo/utils'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { useMenu } from '@/Core/Menu/useMenu'
-import { useSubscription, PLAN_DISPLAY } from '@repo/modules'
+import { useSubscription, PLAN_DISPLAY, usePromotions, PROMO_SLOTS } from '@repo/modules'
 import { Signout } from '@repo/auth'
 import { isNavigating } from '@/router'
 import { useFeedbackUser } from '@repo/modules/feedback'
@@ -18,7 +18,7 @@ const { feedbackUser } = useFeedbackUser()
 watch(feedbackUser, (u) => Sentry.setUser(u), { immediate: true })
 
 // Components
-import { AppHeader, NotificationContainer, provideNotifications, PageBackground } from '@repo/ui'
+import { AppHeader, NotificationContainer, provideNotifications, PageBackground, PromoBanner } from '@repo/ui'
 
 provideNotifications()
 const drawer = ref(true)
@@ -78,6 +78,7 @@ function handleLogoClick() {
 
 const { isTrialing, trialDaysLeft, plan } = useSubscription()
 const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
+const { promotions: activePromos, hasPromotions } = usePromotions(PROMO_SLOTS.BANNER_TOP)
 </script>
 <template>
   <v-responsive class="border rounded min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
@@ -119,6 +120,11 @@ const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
             <v-btn variant="text" size="small" :to="{ name: 'Settings' }">Manage subscription</v-btn>
           </template>
         </v-banner>
+        <PromoBanner
+          v-for="promo in activePromos"
+          :key="promo.id"
+          :promotion="promo"
+        />
         <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
       <v-main>
         <v-progress-linear
