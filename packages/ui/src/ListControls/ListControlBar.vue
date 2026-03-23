@@ -42,38 +42,72 @@ const showFilterSheet = ref(false)
 
 <template>
   <!-- Desktop: inline controls bar -->
-  <div v-if="mdAndUp" class="lcb-bar">
-    <ListFilters
-      v-if="showFilters && filters.length"
-      :model-value="controls.activeFilters.value"
-      @update:model-value="controls.activeFilters.value = $event"
-      :filters="filters"
-    />
+  <div v-if="mdAndUp">
+    <div class="lcb-bar">
+      <ListFilters
+        v-if="showFilters && filters.length"
+        :model-value="controls.activeFilters.value"
+        @update:model-value="controls.activeFilters.value = $event"
+        :filters="filters"
+      />
 
-    <ListViewToggle
-      v-if="showView && viewOptions.length"
-      :model-value="controls.viewAs.value"
-      @update:model-value="controls.viewAs.value = $event"
-      :options="viewOptions"
-      :color="color"
-    />
+      <ListViewToggle
+        v-if="showView && viewOptions.length"
+        :model-value="controls.viewAs.value"
+        @update:model-value="controls.viewAs.value = $event"
+        :options="viewOptions"
+        :color="color"
+      />
 
-    <div class="flex-grow" />
+      <div class="flex-grow" />
 
-    <ListSort
-      v-if="showSort && sortOptions.length"
-      :model-value="controls.sortBy.value"
-      @update:model-value="controls.sortBy.value = $event"
-      :options="sortOptions"
-    />
+      <ListSort
+        v-if="showSort && sortOptions.length"
+        :model-value="controls.sortBy.value"
+        @update:model-value="controls.sortBy.value = $event"
+        :options="sortOptions"
+      />
 
-    <ListSearch
-      v-if="showSearch"
-      :model-value="controls.searchQuery.value"
-      @update:model-value="controls.searchQuery.value = $event"
-      :placeholder="searchPlaceholder"
-      collapsible
-    />
+      <ListSearch
+        v-if="showSearch"
+        :model-value="controls.searchQuery.value"
+        @update:model-value="controls.searchQuery.value = $event"
+        :placeholder="searchPlaceholder"
+        collapsible
+      />
+    </div>
+
+    <!-- Active filter chips (desktop) -->
+    <div v-if="controls.hasActiveFilters.value || controls.searchQuery.value" class="lcb-active-filters">
+      <template v-for="filter in filters" :key="filter.type">
+        <button
+          v-for="val in (controls.activeFilters.value[filter.type] ?? [])"
+          :key="val"
+          class="lcb-active-chip"
+          @click="controls.removeFilter(filter.type, val)"
+        >
+          <span class="opacity-50 text-[10px] uppercase mr-1">{{ filter.label }}:</span>
+          {{ filter.options.find(o => o.value === val)?.label ?? val }}
+          <v-icon icon="mdi-close" size="12" class="ml-1 opacity-50" />
+        </button>
+      </template>
+      <button
+        v-if="controls.searchQuery.value"
+        class="lcb-active-chip"
+        @click="controls.searchQuery.value = ''"
+      >
+        <span class="opacity-50 text-[10px] uppercase mr-1">Search:</span>
+        "{{ controls.searchQuery.value }}"
+        <v-icon icon="mdi-close" size="12" class="ml-1 opacity-50" />
+      </button>
+      <button
+        v-if="controls.activeFilterCount.value > 1"
+        class="lcb-clear-all"
+        @click="controls.clearFilters()"
+      >
+        Clear all
+      </button>
+    </div>
   </div>
 
   <!-- Mobile: search bar + icon buttons -->
@@ -315,5 +349,48 @@ const showFilterSheet = ref(false)
 .lcb-mobile-btn--active {
   border-color: rgb(99 102 241) !important;
   background: rgb(99 102 241 / 0.15) !important;
+}
+
+/* Active filter chips row */
+.lcb-active-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 20px;
+  border-bottom: 1px solid rgb(30 41 59);
+  background: rgb(15 23 42 / 0.4);
+}
+.lcb-active-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  background: rgb(30 41 59);
+  border: 1px solid rgb(51 65 85);
+  border-radius: 12px;
+  color: rgb(148 163 184);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+.lcb-active-chip:hover {
+  border-color: rgb(239 68 68 / 0.5);
+  background: rgb(239 68 68 / 0.1);
+  color: rgb(252 165 165);
+}
+.lcb-clear-all {
+  padding: 3px 10px;
+  background: none;
+  border: none;
+  color: rgb(100 116 139);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.lcb-clear-all:hover {
+  color: rgb(239 68 68);
 }
 </style>
