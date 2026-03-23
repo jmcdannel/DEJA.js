@@ -1,6 +1,6 @@
 import { ref, readonly, computed, watch } from 'vue'
-import { useConnectionStatus } from '@/composables/useConnectionStatus'
 import { createLogger } from '@repo/utils'
+import { useConnectionStatus } from '@/composables/useConnectionStatus'
 
 const log = createLogger('CommandQueue')
 
@@ -27,7 +27,7 @@ let nextId = 0
  * flushed when the connection is restored.
  */
 export function useCommandQueue() {
-  const { isOnline, wasOffline, acknowledgeReconnection } = useConnectionStatus()
+  const { isOnline, wasOffline: _wasOffline, acknowledgeReconnection } = useConnectionStatus()
 
   // Watch for reconnection and flush the queue
   watch(isOnline, (online) => {

@@ -97,6 +97,12 @@ service cloud.firestore {
       allow read, write: if isAuth();
     }
 
+    // Promotions — public read, admin SDK handles writes (bypasses rules)
+    match /promotions/{promoId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // Deny everything else by default
     match /{document=**} {
       allow read, write: if false;

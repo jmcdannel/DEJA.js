@@ -34,10 +34,10 @@ const user = useCurrentUser()
         <v-list-item>
           <v-list-item-title>
             <span
-              class="block text-sm font-semibold text-gray-900 dark:text-white"
+              class="block text-sm font-semibold"
               >{{ user?.displayName }}</span>
             <span
-              class="block text-sm text-gray-900 truncate dark:text-white"
+              class="block text-sm truncate opacity-80"
               >{{ user?.email }}</span>
           </v-list-item-title>          
         </v-list-item>

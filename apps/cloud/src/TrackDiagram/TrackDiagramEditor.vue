@@ -229,7 +229,7 @@ async function handleExport() {
 <template>
   <div class="flex flex-col h-[calc(100vh-120px)]">
     <!-- Top bar -->
-    <div class="flex items-center justify-between p-2 bg-gray-900 rounded-t-lg">
+    <div class="flex items-center justify-between p-2 bg-surface-variant rounded-t-lg">
       <div class="flex items-center gap-2">
         <v-icon icon="mdi-map-marker-path" color="indigo" />
         <span class="text-lg font-bold">{{ diagram.name }}</span>
@@ -249,15 +249,15 @@ async function handleExport() {
         <VueFlow
           :nodes="nodes"
           :edges="edges"
-          :node-types="{ station: StationNode, turnout: TurnoutNode, waypoint: WaypointNode }"
-          :edge-types="{ track: TrackEdge }"
+          :node-types="{ station: StationNode, turnout: TurnoutNode, waypoint: WaypointNode } as any"
+          :edge-types="{ track: TrackEdge } as any"
           :snap-to-grid="true"
           :snap-grid="[GRID_SIZE, GRID_SIZE]"
           fit-view-on-init
           @node-click="onNodeClick"
           @edge-click="onEdgeClick"
           @pane-click="onPaneClick"
-          @connect="onConnect"
+          @connect="onConnect as any"
           @node-drag-stop="markDirty"
         >
           <Background :gap="GRID_SIZE" />
@@ -267,7 +267,7 @@ async function handleExport() {
       </div>
 
       <!-- Side panel -->
-      <div class="w-72 p-2 bg-gray-950 overflow-y-auto border-l border-gray-800">
+      <div class="w-72 p-2 bg-surface overflow-y-auto border-l border-opacity-20">
         <TrackDiagramProperties
           :node="selectedNode"
           :edge="selectedEdge"
@@ -278,7 +278,7 @@ async function handleExport() {
     </div>
 
     <!-- Preview panel (toggleable) -->
-    <div v-if="showPreview" class="h-64 border-t border-gray-800 bg-black">
+    <div v-if="showPreview" class="h-64 border-t border-opacity-20 bg-black">
       <TrackDiagramPreview :nodes="nodes" :edges="edges" :view-box="diagram.viewBox" />
     </div>
   </div>

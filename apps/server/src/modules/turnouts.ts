@@ -1,28 +1,9 @@
 import { type DocumentData } from 'firebase/firestore'
 import { db } from '@repo/firebase-config/firebase-admin-node'
-import type { Turnout } from '@repo/modules'
+import type { Turnout, KatoCommand, ServoCommand } from '@repo/modules'
 import { log } from '../utils/logger.js'
 import { dcc, type TurnoutPayload } from '../lib/dcc.js'
 import { layout } from './layout.js'
-
-export interface KatoCommand {
-  action: string
-  device: string
-  payload: {
-    state?: boolean
-    turnout?: number
-  }
-}
-
-export interface ServoCommand {
-  action: string
-  device: string
-  payload: {
-    current?: number
-    servo: number
-    value?: number
-  }
-}
 
 const layoutId = process.env.LAYOUT_ID
 const turnoutStates: { [key: string]: boolean } = {}
@@ -35,23 +16,25 @@ export async function handleTurnout(turnout: Turnout): Promise<void> {
       log.error('Device not connected', turnout.device)
       return
     }
-    const command = turnoutCommand(turnout)
-    const layoutDevice = layout
-      .devices()
-      ?.find(({ id }) => id === turnout.device)
-    // log.log('handleTurnout', turnout, command, conn?.isConnected, layoutDevice)
+
+    const layoutDevice = layout.devices()?.find(({ id }) => id === turnout.device)
+
+    // DCC-EX: send directly via serial, no command object needed
     if (layoutDevice?.type === 'dcc-ex') {
       await dcc.sendTurnout({
         state: turnout.state,
         turnoutIdx: turnout.turnoutIdx,
       } as TurnoutPayload)
-    } else if (layoutDevice?.connection === 'usb' && conn?.port && conn.send) {
+      return
+    }
+
+    // Non-DCC-EX: build device-specific command
+    const command = turnoutCommand(turnout)
+    if (!command) return
+
+    if (layoutDevice?.connection === 'usb' && conn?.port && conn.send) {
       await conn.send(conn, JSON.stringify(command))
-    } else if (
-      layoutDevice?.connection === 'wifi' &&
-      conn?.topic &&
-      conn.publish
-    ) {
+    } else if (layoutDevice?.connection === 'wifi' && conn?.topic && conn.publish) {
       await conn.publish(conn.topic, JSON.stringify(command), true)
     }
   } catch (err) {
@@ -79,25 +62,16 @@ export async function getTurnout(id: string): Promise<Turnout | undefined> {
 
 export function turnoutCommand(
   turnout: Turnout
-): KatoCommand | ServoCommand | Turnout | undefined {
+): KatoCommand | ServoCommand | undefined {
   try {
-    if (turnout.device === 'dccex') {
-      return turnout
-    }
-    let command: KatoCommand | ServoCommand | undefined
-
     switch (turnout?.type) {
       case 'kato':
-        command = katoCommand(turnout)      
-        break
+        return katoCommand(turnout)
       case 'servo':
-        command = servoCommand(turnout) 
-        break
+        return servoCommand(turnout)
       default:
-        // no op
-        break
-    }  
-    return command //  TODO: refactor to return all commands
+        return undefined
+    }
   } catch (err) {
     log.error(`[COMMANDS] turnoutCommand ${err}`)
   }
@@ -136,12 +110,6 @@ function servoCommand(turnout: Turnout): ServoCommand | undefined {
   }
   if (!turnout.device) {
     log.error(`[COMMANDS] servoCommand: device is undefined for turnout ${turnout.id}`)
-    return undefined
-  }
-  if (turnout.straight === undefined || turnout.divergent === undefined) {
-    log.error(
-      `[COMMANDS] servoCommand: straight/divergent is undefined for turnout ${turnout.id}`
-    )
     return undefined
   }
   if (turnout.straight === turnout.divergent) {

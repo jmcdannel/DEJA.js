@@ -1,13 +1,14 @@
-import { computed, watch, type Ref } from 'vue'
+import { computed, onMounted, onUnmounted, watch, type Ref } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { deleteDoc, doc, setDoc } from 'firebase/firestore'
 import { useDocument } from 'vuefire'
-import type { Throttle } from '@/throttle/types'
 import { type Loco, useLocos } from '@repo/modules'
 import { db } from '@repo/firebase-config'
-import { getSignedSpeed } from '@/throttle/utils'
 import { createLogger } from '@repo/utils'
+import { getSignedSpeed } from '@/throttle/utils'
+import type { Throttle } from '@/throttle/types'
 import { useCommandQueue } from '@/composables/useCommandQueue'
+import { wiThrottleService } from '@/services/WiThrottleService'
 
 const log = createLogger('Throttle')
 
@@ -25,18 +26,39 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
 
   log.debug('throttle doc ref:', throttle)
 
+  // Acquire the loco on WiThrottle server when connected
+  async function acquireOnWiThrottle() {
+    const addr = address.value
+    if (addr !== undefined && addr !== null && wiThrottleService.state.value === 'CONNECTED') {
+      await wiThrottleService.acquireLoco(addr)
+    }
+  }
+
+  onMounted(acquireOnWiThrottle)
+
+  // Re-acquire if WiThrottle connects after the throttle is already mounted
+  const stopWiThrottleWatch = watch(() => wiThrottleService.state.value, (state) => {
+    if (state === 'CONNECTED') {
+      acquireOnWiThrottle()
+    }
+  })
+
+  onUnmounted(() => {
+    stopWiThrottleWatch()
+  })
+
   // Derive loco from the locos collection so we use the shared `getLocos` hook
   const locos = getLocos()
   const loco = computed(() => {
     const addr = address.value
     if (addr === undefined || addr === null) return undefined
-    return (locos.value || []).find((l: Loco) => l.address === addr)
+    return (locos.value as Loco[] || []).find((l) => l.address === addr)
   })
   const currentSpeed = computed(() => throttle.value ? getSignedSpeed({
     speed: throttle.value?.speed,
     direction: throttle.value?.direction
   }) : 0)
-  const direction = computed(() => currentSpeed.value > -1 ? true : false)
+  const direction = computed(() => currentSpeed.value > -1)
 
   watch(currentSpeed, (newSpeed: number) => {
     updateSpeed(newSpeed)
@@ -57,6 +79,7 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
   async function releaseThrottle() {
     const addr = address.value
     if (addr === undefined || addr === null) return
+    await wiThrottleService.releaseLoco(addr)
     await enqueue(
       async () => {
         const throttleDoc = doc(db, `layouts/${layoutId.value}/throttles`, addr.toString())
@@ -69,6 +92,7 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
   async function updateSpeed(speed: number) {
     const addr = address.value
     if (addr === undefined || addr === null) return
+    await wiThrottleService.setThrottleSpeed(addr, Math.abs(speed), speed >= 0)
     await enqueue(
       async () => {
         await setDoc(

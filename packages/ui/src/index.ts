@@ -1,4 +1,5 @@
 export { default as AppHeader } from './AppHeader.vue'
+export { default as ThrottleLaunchQR } from './ThrottleLaunchQR.vue'
 export { default as Logo } from './Logo.vue'
 export { default as SplashPage } from './SplashPage.vue'
 export { default as NotFoundPage } from './NotFoundPage.vue'
@@ -51,7 +52,7 @@ export { default as DeviceStatusList } from './DeviceStatus/DeviceStatusList.vue
 export { DeviceConnectionCard, DeviceConnectionList } from './DeviceConnection'
 
 // Dashboard widgets
-export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart } from './Dashboard'
+export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart, DeviceTile, QuickConnectPanel, LayoutInfoCard, DashboardEmptyState } from './Dashboard'
 export { default as EmptyState } from './EmptyState/EmptyState.vue'
 export { default as ModuleList } from './ModuleList/List.vue'
 export { default as LocoList } from './Locos/LocoList.vue'
@@ -60,6 +61,7 @@ export { default as NotificationContainer } from './Notifications/NotificationCo
 export { useNotification, provideNotifications } from './Notifications/useNotification'
 export type { Notification, NotificationType, NotifyMethods } from './Notifications/useNotification'
 export { OnboardingBanner } from './OnboardingBanner/index'
+export { default as PromoBanner } from './Promotions/PromoBanner.vue'
 export { default as SensorList } from './Sensors/SensorList.vue'
 export { default as SensorItem } from './Sensors/SensorItem.vue'
 export { default as SensorCard } from './Sensors/SensorCard.vue'
@@ -69,9 +71,14 @@ export * from './animations'
 export { appIcons } from './assets/icons'
 export type { AppIconName } from './assets/icons'
 
+export { default as FeatureGate } from './FeatureGate.vue'
+
 // Themes
 export { createVuetifyThemes, THEME_MODES, THEME_MODE_DEFINITIONS } from './themes'
 export type { AppThemeConfig, ThemeMode, ThemeOverrides, ThemeVariables, ThemeModeDefinition } from './themes'
+// 🎨 A11y color utilities
+export { ensureContrast, ensureUIContrast, ensureAllContrast, meetsContrast, contrastReport, isBadContrast, WCAG } from './themes'
+export type { WcagLevel } from './themes'
 
 // Composables
 export { useThemeSwitcher } from './composables/useThemeSwitcher'

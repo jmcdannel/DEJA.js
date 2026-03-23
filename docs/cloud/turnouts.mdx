@@ -9,7 +9,7 @@ order: 3
 
 The Turnouts section lets you define every turnout on your layout, assign it to a hardware device, configure its DCC index and servo/relay pins, and organize turnouts with tags and custom sort order. Turnout data is stored in Firebase Firestore at `layouts/{layoutId}/turnouts` and is used by the Throttle app, Routes, and the server for real-time control.
 
-![Turnouts list view](/images/docs/cloud/turnouts-list.png)
+![Turnouts list view](/screenshots/cloud_desktop_turnouts.png)
 
 {/* VIDEO: Adding a turnout and configuring its pins, device, and tags */}
 
@@ -36,7 +36,7 @@ An "Add" tile appears at the start of the list as a visual prompt to create new 
 
 Click the sort button to open the **Sort Turnouts** dialog. This presents all turnouts as draggable buttons arranged in a grid (up to 8 columns on wide screens). Drag and drop to reorder, then click **Save** to persist the new order. Each turnout's `order` field is updated in Firestore, and the new sequence is reflected across all apps.
 
-![Turnout sorter dialog](/images/docs/cloud/turnouts-sorter.png)
+![Turnout sorter dialog](/screenshots/cloud_desktop_turnouts.png)
 
 ### Turnout Labels View
 
@@ -71,7 +71,7 @@ Below the text fields, four large picker buttons let you configure additional pr
 
 A tag picker component lets you assign tags to the turnout for filtering purposes. Tags are layout-level metadata that you can create and manage from the Layout Configuration page.
 
-![Turnout form](/images/docs/cloud/turnouts-form.png)
+![Turnout form](/screenshots/cloud_desktop_turnouts.png)
 
 ## Editing a Turnout
 

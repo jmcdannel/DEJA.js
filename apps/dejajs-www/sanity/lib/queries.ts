@@ -135,3 +135,19 @@ export const SITE_SETTINGS_QUERY = defineQuery(/* groq */ `
     signupUrl
   }
 `)
+
+// ─── Active Promotions ───────────────────────────────────
+export const ACTIVE_PROMOTIONS_QUERY = defineQuery(/* groq */ `
+  *[_type == "promotion" && active == true]{
+    _id,
+    slug,
+    title,
+    body,
+    icon,
+    variant,
+    ctas[] { label, url, style },
+    slots,
+    startDate,
+    endDate
+  }
+`)

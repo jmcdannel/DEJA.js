@@ -7,7 +7,7 @@ import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import { createLogger } from '@repo/utils'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { useMenu } from '@/Core/Menu/useMenu'
-import { useSubscription, PLAN_DISPLAY, useOnboarding, useLocos } from '@repo/modules'
+import { useSubscription, PLAN_DISPLAY, useOnboarding, useLocos, usePromotions, PROMO_SLOTS } from '@repo/modules'
 import { Signout } from '@repo/auth'
 import { isNavigating } from '@/router'
 import { useFeedbackUser } from '@repo/modules/feedback'
@@ -18,7 +18,7 @@ const { feedbackUser } = useFeedbackUser()
 watch(feedbackUser, (u) => Sentry.setUser(u), { immediate: true })
 
 // Components
-import { AppHeader, NotificationContainer, provideNotifications, PageBackground, OnboardingBanner } from '@repo/ui'
+import { AppHeader, NotificationContainer, provideNotifications, PageBackground, OnboardingBanner, PromoBanner } from '@repo/ui'
 
 provideNotifications()
 const drawer = ref(true)
@@ -55,11 +55,11 @@ watch(() => route.fullPath, () => {
   if (!routeReady.value && !isNavigating.value) {
     routeReady.value = true
   }
-})
+}, { immediate: true })
 // Also mark ready when navigation finishes
 watch(isNavigating, (navigating) => {
   if (!navigating) routeReady.value = true
-})
+}, { immediate: true })
 
 const isFullscreen = computed(() => {
   // Before initial route resolves, hide chrome to prevent flash
@@ -88,10 +88,16 @@ const dismissedOnboarding = useStorage('@DEJA/dismissedOnboardingBanner', false)
 function openThrottle() {
   window.open('https://throttle.dejajs.com', '_blank')
 }
+
+const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
+console.log('activePromos', activePromos.value)
+watch(activePromos, (val) => {
+  console.log('🚀 activePromos changed:', val, 'length:', val.length)
+}, { immediate: true })
 </script>
 <template>
-  <v-responsive class="border rounded min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
-      <v-app :theme="themePreference" class="!bg-transparent">
+  <v-app :theme="themePreference">
+    <div class="app-bg min-h-screen">
         <PageBackground
           app-name="cloud"
           :background-id="isFullscreen ? 'stars' : undefined"
@@ -137,6 +143,12 @@ function openThrottle() {
           @add-loco="router.push({ name: 'Roster' })"
           @open-throttle="openThrottle"
           @dismiss="dismissedOnboarding = true"
+        />
+        <PromoBanner
+          v-if="!isFullscreen"
+          v-for="promo in activePromos"
+          :key="promo.id"
+          :promotion="promo"
         />
         <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
       <v-main>
@@ -185,11 +197,15 @@ function openThrottle() {
       </v-main>
       <NotificationContainer />
       </PageBackground>
-    </v-app>
-  </v-responsive>
+    </div>
+  </v-app>
 </template>
 
 <style scoped>
+.app-bg {
+  background: rgb(var(--v-theme-background));
+}
+
 .fullscreen-header {
   position: fixed;
   top: 0;

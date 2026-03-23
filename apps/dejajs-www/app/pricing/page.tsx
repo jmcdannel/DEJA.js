@@ -39,7 +39,7 @@ export default function PricingPage() {
   const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly');
 
   return (
-    <div className="space-y-16 -mt-4">
+    <div className="space-y-16 max-w-7xl mx-auto px-4 sm:px-6 py-12 -mt-4">
       {/* Hero */}
       <div className="text-center space-y-5">
         <div className="font-mono text-xs tracking-[0.2em] text-cyan-400 uppercase animate-fade-up">

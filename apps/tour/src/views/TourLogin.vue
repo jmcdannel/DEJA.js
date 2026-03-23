@@ -6,6 +6,7 @@ import { useFirebaseAuth, useCurrentUser } from 'vuefire'
 import { createLogger } from '@repo/utils'
 import { useGuestStore } from '../stores/guest'
 import TourLogo from '../components/TourLogo.vue'
+import { TOUR_ASSETS } from '../assets/blob-urls'
 
 const log = createLogger('TourLogin')
 
@@ -163,7 +164,7 @@ onMounted(async () => {
         <v-col cols="12" sm="8" md="6" lg="4">
           <v-card elevation="8" class="pa-0 bg-transparent">
             <v-card-text class="text-center">
-              <img src="/TamarackJunctionLogo.png" alt="Tamarack Logo" />
+              <img :src="TOUR_ASSETS.tamarackJunctionLogo" alt="Tamarack Logo" />
               
               <h1 class="text-h4 my-2">Welcome to the Tour</h1>
               <p class="text-h6 text-medium-emphasis mb-6">

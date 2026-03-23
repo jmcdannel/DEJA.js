@@ -3,7 +3,9 @@ import * as Sentry from '@sentry/node'
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
-  tracesSampleRate: 1.0,
+  enabled: process.env.NODE_ENV === 'production',
+  environment: process.env.NODE_ENV || 'development',
+  tracesSampleRate: 0.2,
 })
 
 import { wsServer } from './src/lib/ws-server.js'

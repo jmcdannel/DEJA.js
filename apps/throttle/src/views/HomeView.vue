@@ -4,6 +4,7 @@ import { useCurrentUser } from 'vuefire'
 import { useRouter } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import DeviceStatusList from '@repo/ui/src/DeviceStatus/DeviceStatusList.vue'
+import { ThrottleLaunchQR } from '@repo/ui'
 import { Login } from '@repo/auth'
 import { useOnboarding, useLocos } from '@repo/modules'
 import { OnboardingBanner } from '@repo/ui'
@@ -51,6 +52,11 @@ function openCloudSetup() {
       @open-cloud-setup="openCloudSetup"
       class="mb-4"
     />
+
+    <div v-if="user && layoutId" class="flex justify-end mb-6">
+      <ThrottleLaunchQR :size="100" label="Share throttle link" />
+    </div>
+
     <DeviceStatusList v-if="user && layoutId"
       :show-throttles="true"
       @disconnect="router.push('/connect')"
@@ -68,7 +74,7 @@ function openCloudSetup() {
     <template v-else-if="!user">
       <div class="flex gap-4 flex-col md:flex-row w-full">
         <v-card
-          class="mx-auto bg-slate-900 bg-opacity-70 rounded-lg basis-full md:basis-1/2 w-full"
+          class="mx-auto rounded-lg basis-full md:basis-1/2 w-full"
           title="Login"
           color="primary"
           variant="outlined"
@@ -78,7 +84,7 @@ function openCloudSetup() {
           </v-card-text>
         </v-card>
         <v-card
-          class="mx-auto bg-slate-900 bg-opacity-70 rounded-lg basis-full md:basis-1/2 w-full"
+          class="mx-auto rounded-lg basis-full md:basis-1/2 w-full"
           title="Sign up"
           color="primary"
           variant="outlined"
@@ -94,10 +100,10 @@ function openCloudSetup() {
               </div>
 
               <div class="flex items-center justify-between">
-                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded">Request Acceess</button>
+                <button type="submit" class="px-4 py-2 bg-indigo-600 rounded">Request Acceess</button>
                 <button
                   type="button"
-                  class="text-sm text-gray-500 underline"
+                  class="text-sm opacity-50 underline"
                   @click="router.push('/guest')">
                   Continue as guest
                 </button>

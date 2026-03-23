@@ -150,9 +150,9 @@ function formatFileSize(bytes: number): string {
         />
 
         <div v-if="!file">
-          <v-icon size="48" class="text-slate-400 mb-2">mdi-cloud-upload-outline</v-icon>
-          <p class="text-slate-400 mb-1">Drag and drop an audio file here</p>
-          <p class="text-xs text-slate-500">or click to browse. MP3, WAV, OGG, M4A, FLAC, AAC</p>
+          <v-icon size="48" class="opacity-60 mb-2">mdi-cloud-upload-outline</v-icon>
+          <p class="opacity-60 mb-1">Drag and drop an audio file here</p>
+          <p class="text-xs opacity-50">or click to browse. MP3, WAV, OGG, M4A, FLAC, AAC</p>
         </div>
 
         <div v-else>
@@ -167,7 +167,7 @@ function formatFileSize(bytes: number): string {
 
       <!-- Audio preview -->
       <div v-if="audioPreviewUrl && !uploadedSound" class="mb-4">
-        <p class="text-xs text-slate-400 mb-1">Preview</p>
+        <p class="text-xs opacity-60 mb-1">Preview</p>
         <audio :src="audioPreviewUrl" controls class="w-100" style="height: 36px" />
       </div>
     </v-card-text>

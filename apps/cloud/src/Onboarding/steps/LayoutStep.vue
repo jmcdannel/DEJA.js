@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useCurrentUser } from 'vuefire'
 import { useStorage } from '@vueuse/core'
 import { useLayout } from '@repo/modules'
@@ -19,6 +19,12 @@ const error = ref<string | null>(null)
 const loading = ref(false)
 
 const storedLayoutId = useStorage('@DEJA/layoutId', '')
+
+onMounted(() => {
+  if (user.value?.email) {
+    layoutName.value = user.value.email.split('@')[0]
+  }
+})
 
 // Auto-slugify layout name into ID when not in custom mode
 watch(layoutName, (name) => {
@@ -64,14 +70,14 @@ async function handleCreate() {
           <v-icon color="primary" size="24">mdi-map-marker-path</v-icon>
           <h2 class="text-lg font-semibold text-sky-100">Register Your Layout</h2>
         </div>
-        <p class="text-sm text-slate-400 mb-6">Give your railroad a name and we'll generate a unique ID for it.</p>
+        <p class="text-sm opacity-60 mb-6">Give your railroad a name and we'll generate a unique ID for it.</p>
 
         <v-alert v-if="error" type="error" variant="tonal" density="compact" class="mb-5" closable @click:close="error = null">
           {{ error }}
         </v-alert>
 
         <v-form v-slot="{ isValid }">
-          <p class="text-xs text-slate-500 uppercase tracking-widest mb-2 font-medium">Layout Name</p>
+          <p class="text-xs opacity-50 uppercase tracking-widest mb-2 font-medium">Layout Name</p>
           <v-text-field
             v-model="layoutName"
             placeholder="My Railroad"
@@ -91,11 +97,11 @@ async function handleCreate() {
               density="compact"
               hide-details
               color="primary"
-              class="text-slate-400 text-sm"
+              class="opacity-60 text-sm"
             />
           </div>
 
-          <p class="text-xs text-slate-500 uppercase tracking-widest mb-2 font-medium">Layout ID</p>
+          <p class="text-xs opacity-50 uppercase tracking-widest mb-2 font-medium">Layout ID</p>
           <v-text-field
             v-model="layoutId"
             placeholder="my-railroad"
@@ -109,7 +115,7 @@ async function handleCreate() {
             hide-details="auto"
             required
           />
-          <p class="text-xs text-slate-500 mt-1 mb-5">Lowercase letters, numbers, and hyphens only</p>
+          <p class="text-xs opacity-50 mt-1 mb-5">Lowercase letters, numbers, and hyphens only</p>
 
           <v-btn
             @click="handleCreate"

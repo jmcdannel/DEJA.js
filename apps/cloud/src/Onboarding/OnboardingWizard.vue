@@ -98,7 +98,7 @@ function handleLayoutComplete() {
 }
 
 function handleInstallComplete() {
-  router.push({ name: 'setup-complete' })
+  router.push({ name: 'home' })
 }
 
 const steps = computed(() => [
@@ -114,7 +114,7 @@ const steps = computed(() => [
   <v-container class="max-w-5xl mx-auto py-8">
     <div class="flex flex-col items-center mb-8">
       <Logo size="xl" :show-icon="true" variant="cloud" app-title="Cloud" class="mb-2" />
-      <p class="text-slate-400 text-sm">
+      <p class="opacity-60 text-sm">
         Time to put the "smart" in your choo-choos. Let's get you on the rails.
       </p>
     </div>
@@ -154,7 +154,7 @@ const steps = computed(() => [
           :billing-cycle="selectedBillingCycle"
           @complete="handlePaymentComplete"
         />
-        <div v-else class="text-center py-8 text-slate-400">
+        <div v-else class="text-center py-8 opacity-60">
           No payment required for the Hobbyist plan.
         </div>
       </template>

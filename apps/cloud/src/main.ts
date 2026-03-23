@@ -6,7 +6,6 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
-import { VStepperVertical } from 'vuetify/labs/VStepperVertical'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 // VueFire
 import { VueFire, VueFireAuth } from 'vuefire'
@@ -34,17 +33,14 @@ const themes = createVuetifyThemes({
     primary: '#00B8D4',
   },
   custom: {
-    light: { 'device-connected': '#4CAF50', 'device-disconnected': '#F44336', 'stat-card': '#F5F7FA' },
+    light: { 'device-connected': '#2E7D32', 'device-disconnected': '#C62828', 'stat-card': '#E8EDF2' },
     dark: { 'device-connected': '#66BB6A', 'device-disconnected': '#EF5350', 'stat-card': '#1A2332' },
-    'high-contrast': { 'device-connected': '#00FF00', 'device-disconnected': '#FF0000', 'stat-card': '#1A1A1A' },
+    'high-contrast': { 'device-connected': '#00FF00', 'device-disconnected': '#FF0000', 'stat-card': '#000000' },
   },
 })
 
 const vuetify = createVuetify({
-  components: {
-    ...components,
-    VStepperVertical,
-  },
+  components,
   defaults: {
     VDialog: { transition: 'dialog-bottom-transition' },
     VMenu: { transition: 'scale-transition' },
@@ -71,22 +67,25 @@ const vuetify = createVuetify({
 })
 const app = createApp(App)
 
-Sentry.init({
-  app,
-  dsn: import.meta.env.VITE_SENTRY_DSN,
-  integrations: [
-    Sentry.browserTracingIntegration({ router }),
-    Sentry.replayIntegration(),
-    Sentry.feedbackIntegration(feedbackConfig),
-  ],
-  tracesSampleRate: 1.0,
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
-})
+if (import.meta.env.PROD) {
+  Sentry.init({
+    app,
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    environment: 'production',
+    integrations: [
+      Sentry.browserTracingIntegration({ router }),
+      Sentry.replayIntegration(),
+      Sentry.feedbackIntegration(feedbackConfig),
+    ],
+    tracesSampleRate: 0.2,
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+  })
 
-app.config.errorHandler = (err, _instance, info) => {
-  const eventId = Sentry.captureException(err, { extra: { info } })
-  Sentry.showReportDialog({ eventId })
+  app.config.errorHandler = (err, _instance, info) => {
+    const eventId = Sentry.captureException(err, { extra: { info } })
+    Sentry.showReportDialog({ eventId })
+  }
 }
 
 app.use(VueFire, {

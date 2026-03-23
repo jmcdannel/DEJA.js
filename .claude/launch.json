@@ -11,8 +11,7 @@
       "name": "cloud",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter=deja-cloud", "dev"],
-      "port": 5174,
-      "autoPort": true
+      "port": 3011
     },
     {
       "name": "monitor",
@@ -24,7 +23,8 @@
       "name": "tour",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter=deja-tour", "dev"],
-      "port": 3031
+      "port": 3031,
+      "autoPort": true
     },
     {
       "name": "server",

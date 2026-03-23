@@ -1,5 +1,6 @@
 // packages/modules/plans/types.ts
 import type { Timestamp } from 'firebase/firestore'
+import type { UserRole } from '../features/types'
 
 export type PlanTier = 'hobbyist' | 'engineer' | 'conductor'
 
@@ -31,6 +32,7 @@ export interface UserDocument {
   displayName: string | null
   createdAt: Timestamp
   subscription: UserSubscription
+  role?: UserRole
 }
 
 export interface PlanLimits {
