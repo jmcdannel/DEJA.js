@@ -17,7 +17,8 @@
     "./types": "./types.ts",
     "./plans/types": "./plans/types.ts",
     "./feedback": "./feedback/index.ts",
-    "./sensors": "./sensors/index.ts"
+    "./sensors": "./sensors/index.ts",
+    "./features": "./features/index.ts"
   },
   "scripts": {
     "test": "vitest run",
@@ -39,6 +40,7 @@
     "@repo/typescript-config": "workspace:*",
     "@repo/utils": "workspace:*",
     "typescript": "latest",
+    "vite": "^4.4.9",
     "vitest": "^2.0.5",
     "vue": "^3.5.17"
   }
