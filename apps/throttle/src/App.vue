@@ -2,7 +2,7 @@
 import { ref, computed, useTemplateRef } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
-import { AppHeader, TransitionFade, NotificationContainer, provideNotifications, PageBackground } from '@repo/ui'
+import { AppHeader, TransitionFade, NotificationContainer, provideNotifications, PageBackground, PromoBanner } from '@repo/ui'
 import { Signout } from '@repo/auth'
 import type { AppBackgroundPrefs } from '@repo/modules'
 import Footer from '@/core/Footer.vue'
@@ -16,9 +16,11 @@ import { watch, onMounted, onUnmounted } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { WI_THROTTLE_EVENTS } from '@repo/ui/src/constants/wiThrottleEvents'
 import { useFeedbackUser } from '@repo/modules/feedback'
+import { usePromotions, PROMO_SLOTS } from '@repo/modules'
 import * as Sentry from '@sentry/vue'
 
 provideNotifications()
+const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
 const { feedbackUser } = useFeedbackUser()
 watch(feedbackUser, (u) => Sentry.setUser(u), { immediate: true })
 const drawer = ref(false)
@@ -132,6 +134,11 @@ const throttleDefaults: AppBackgroundPrefs = {
           :show-device-status-label="true"
           :show-user-profile="true"
           @drawer-toggle="drawer = !drawer"
+        />
+        <PromoBanner
+          v-for="promo in activePromos"
+          :key="promo.id"
+          :promotion="promo"
         />
         <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="menuConfig" @handle-menu="handleMenu" />
         <v-main>
