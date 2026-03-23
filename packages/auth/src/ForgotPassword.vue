@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { sendPasswordResetEmail } from 'firebase/auth'
 import { useFirebaseAuth } from 'vuefire'
 import { Logo } from '@repo/ui'
+import { getAuthErrorMessage } from './errors'
 
 const emit = defineEmits<{
   'navigate-login': []
@@ -27,8 +28,10 @@ async function handleReset() {
     await sendPasswordResetEmail(auth, email.value)
     sent.value = true
   } catch (err: unknown) {
-    const firebaseErr = err as { message?: string }
-    error.value = firebaseErr.message ?? 'Failed to send reset email'
+    const message = getAuthErrorMessage(err)
+    if (message !== null) {
+      error.value = message
+    }
   } finally {
     loading.value = false
   }
