@@ -12,9 +12,24 @@
 
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { Timestamp } from 'firebase-admin/firestore'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import * as dotenv from 'dotenv'
+import { initializeApp, cert } from 'firebase-admin/app'
+import { getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { createClient } from '@sanity/client'
+
+// ─── Firebase Admin Init (self-contained, no workspace import) ──
+dotenv.config()
+
+const firebaseApp = initializeApp({
+  credential: cert({
+    projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+  }),
+  databaseURL: process.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+})
+const db = getFirestore(firebaseApp)
 
 // ─── Sanity Client ──────────────────────────────────────
 const sanityToken = process.env.SANITY_API_TOKEN
