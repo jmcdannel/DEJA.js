@@ -7,7 +7,6 @@ import { useRouter } from 'vue-router'
 import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
 import EffectsList from '@/Effects/EffectsList.vue'
-import AddTile from '@/Core/UI/AddTile.vue'
 
 const router = useRouter()
 const { getEffects } = useEfx()
@@ -60,7 +59,17 @@ function handleAdd() {
 }
 </script>
 <template>
-  <PageHeader title="Effects" icon="mdi-rocket-launch" color="indigo">
+  <PageHeader title="Effects" icon="mdi-rocket-launch" color="indigo" subtitle="Manage lighting, sound, and special effects for your layout.">
+    <template #actions>
+      <v-btn
+        prepend-icon="mdi-plus"
+        color="indigo"
+        variant="flat"
+        @click="handleAdd"
+      >
+        New Effect
+      </v-btn>
+    </template>
     <template #controls>
       <ListControlBar
         :controls="controls"
@@ -73,9 +82,5 @@ function handleAdd() {
     </template>
   </PageHeader>
 
-  <EffectsList :filtered-list="controls.filteredList.value" @edit="handleEdit">
-    <template #prepend>
-      <AddTile @click="handleAdd" color="purple" />
-    </template>
-  </EffectsList>
+  <EffectsList :filtered-list="controls.filteredList.value" @edit="handleEdit" />
 </template>

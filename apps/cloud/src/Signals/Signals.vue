@@ -7,7 +7,6 @@ import { useRouter } from 'vue-router'
 import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
 import SignalList from '@/Signals/SignalsList.vue'
-import AddTile from '@/Core/UI/AddTile.vue'
 
 const router = useRouter()
 const { getSignals } = useSignals()
@@ -55,7 +54,12 @@ function handleAdd() {
 }
 </script>
 <template>
-  <PageHeader title="Signals" icon="mdi-traffic-light" color="emerald">
+  <PageHeader title="Signals" icon="mdi-traffic-light" color="emerald" subtitle="Manage signal aspects and track-side indicators.">
+    <template #actions>
+      <v-btn prepend-icon="mdi-plus" color="emerald" variant="flat" @click="handleAdd">
+        New Signal
+      </v-btn>
+    </template>
     <template #controls>
       <ListControlBar
         :controls="controls"
@@ -67,11 +71,7 @@ function handleAdd() {
       />
     </template>
   </PageHeader>
-  <SignalList :filtered-list="controls.filteredList.value" @edit="handleEdit">
-    <template #prepend>
-      <AddTile @click="handleAdd" color="emerald" />
-    </template>
-  </SignalList>
+  <SignalList :filtered-list="controls.filteredList.value" @edit="handleEdit" />
 </template>
 
 

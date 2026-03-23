@@ -52,19 +52,20 @@ const textClass = TEXT_CLASSES[resolvedColor] ?? TEXT_CLASSES.sky
 <template>
   <div class="mb-4">
     <!-- Title Row -->
-    <div :class="[gradientClass, 'rounded-xl px-4 py-3']">
-      <div class="flex items-center">
-        <h2 class="flex items-center" :class="textClass">
-          <v-icon v-if="icon" size="32" :class="textClass" class="mr-2">{{ icon }}</v-icon>
-          <span class="text-2xl font-bold">{{ title }}</span>
-        </h2>
-        <v-spacer />
-        <div class="flex items-center gap-2">
+    <div :class="[gradientClass, 'px-5 pt-6 pb-4']">
+      <div class="flex items-start justify-between">
+        <div>
+          <h1 class="flex items-center tracking-tight" :class="textClass">
+            <v-icon v-if="icon" :class="textClass" class="mr-3" size="28">{{ icon }}</v-icon>
+            <span class="text-3xl font-black uppercase">{{ title }}</span>
+          </h1>
+          <div v-if="subtitle || $slots.subtitle" class="text-sm text-slate-400 mt-2 ml-[42px]">
+            <slot name="subtitle">{{ subtitle }}</slot>
+          </div>
+        </div>
+        <div v-if="$slots.actions" class="flex items-center gap-2 mt-1">
           <slot name="actions" />
         </div>
-      </div>
-      <div v-if="subtitle || $slots.subtitle" class="text-sm text-slate-400 mt-1">
-        <slot name="subtitle">{{ subtitle }}</slot>
       </div>
     </div>
 

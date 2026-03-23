@@ -7,7 +7,6 @@ import { useRouter } from 'vue-router'
 import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
 import SensorList from '@/Sensors/SensorList.vue'
-import AddTile from '@/Core/UI/AddTile.vue'
 
 const router = useRouter()
 const { getSensors } = useSensors()
@@ -55,7 +54,12 @@ function handleAdd() {
 }
 </script>
 <template>
-  <PageHeader title="Sensors" icon="mdi-access-point" color="teal">
+  <PageHeader title="Sensors" icon="mdi-access-point" color="teal" subtitle="Monitor track occupancy and feedback sensors.">
+    <template #actions>
+      <v-btn prepend-icon="mdi-plus" color="teal" variant="flat" @click="handleAdd">
+        New Sensor
+      </v-btn>
+    </template>
     <template #controls>
       <ListControlBar
         :controls="controls"
@@ -67,9 +71,5 @@ function handleAdd() {
       />
     </template>
   </PageHeader>
-  <SensorList :filtered-list="controls.filteredList.value" @edit="handleEdit">
-    <template #prepend>
-      <AddTile @click="handleAdd" color="teal" />
-    </template>
-  </SensorList>
+  <SensorList :filtered-list="controls.filteredList.value" @edit="handleEdit" />
 </template>

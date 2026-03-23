@@ -6,7 +6,6 @@ import { useLayout, type Tag } from '@repo/modules'
 import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
 import TurnoutsList from '@/Turnouts/TurnoutsList.vue'
-import Addtile from '@/Core/UI/AddTile.vue'
 
 const router = useRouter()
 const { getTurnouts } = useTurnouts()
@@ -54,7 +53,12 @@ function handleAdd() {
 }
 </script>
 <template>
-  <PageHeader title="Turnouts" icon="mdi-call-split" color="amber">
+  <PageHeader title="Turnouts" icon="mdi-call-split" color="amber" subtitle="Configure and control track switches across your layout.">
+    <template #actions>
+      <v-btn prepend-icon="mdi-plus" color="amber" variant="flat" @click="handleAdd">
+        New Turnout
+      </v-btn>
+    </template>
     <template #controls>
       <ListControlBar
         :controls="controls"
@@ -67,9 +71,5 @@ function handleAdd() {
     </template>
   </PageHeader>
 
-  <TurnoutsList :filtered-list="controls.filteredList.value" :viewAs="controls.viewAs.value" @edit="handleEdit">
-    <template #prepend>
-      <Addtile @click="handleAdd" color="yellow" />
-    </template>
-  </TurnoutsList>
+  <TurnoutsList :filtered-list="controls.filteredList.value" :viewAs="controls.viewAs.value" @edit="handleEdit" />
 </template>
