@@ -79,6 +79,10 @@ function handleLogoClick() {
 const { isTrialing, trialDaysLeft, plan } = useSubscription()
 const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
 const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
+console.log('activePromos', activePromos.value)
+watch(activePromos, (val) => {
+  console.log('🚀 activePromos changed:', val, 'length:', val.length)
+}, { immediate: true })
 </script>
 <template>
   <v-app :theme="themePreference">
