@@ -115,12 +115,12 @@ onMounted(() => {
     </div>
     
     <!-- Usage Instructions -->
-    <div class="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+    <div class="mt-8 p-4 bg-surface-variant rounded-lg">
       <h3 class="text-lg font-semibold mb-2">Usage</h3>
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+      <p class="text-sm opacity-60 mb-2">
         The LCD Display component provides a retro terminal aesthetic for displaying:
       </p>
-      <ul class="text-sm text-gray-600 dark:text-gray-400 list-disc list-inside space-y-1">
+      <ul class="text-sm opacity-60 list-disc list-inside space-y-1">
         <li>Device status and connection information</li>
         <li>Command logs and responses</li>
         <li>Error messages and debugging info</li>

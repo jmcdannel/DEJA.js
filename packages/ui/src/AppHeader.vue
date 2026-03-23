@@ -269,8 +269,8 @@ const defaultProps = {
         <v-card-text>
           <div v-if="hasDevices" class="space-y-3">
             <div v-for="device in devices" :key="device.id" 
-              class="p-4 rounded-lg border cursor-pointer transition-all hover:bg-gray-50"
-              :class="{ 'border-green-500 bg-green-50': device.isConnected, 'border-red-500 bg-red-50': !device.isConnected }"
+              class="p-4 rounded-lg border cursor-pointer transition-all"
+              :class="{ 'border-green-500': device.isConnected, 'border-red-500': !device.isConnected }"
               @click="handleDeviceSelect(device.id)">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -278,8 +278,8 @@ const defaultProps = {
                     {{ device.type === 'dcc-ex' || device.connection === 'usb' ? 'mdi-memory' : device.connection === 'wifi' ? 'mdi-wifi' : 'mdi-bluetooth' }}
                   </v-icon>
                   <div>
-                    <h4 class="font-medium text-white">{{ device.id }}</h4>
-                    <div class="flex gap-2 text-sm text-gray-400">
+                    <h4 class="font-medium">{{ device.id }}</h4>
+                    <div class="flex gap-2 text-sm opacity-60">
                       <span>{{ device.connection }}</span>
                       <span v-if="device.port">{{ device.port }}</span>
                       <span v-if="device.topic">{{ device.topic }}</span>
@@ -297,8 +297,8 @@ const defaultProps = {
           </div>
           <div v-else class="text-center py-8">
             <v-icon size="48" color="grey">mdi-devices-outline</v-icon>
-            <h3 class="text-lg font-medium text-white mt-2">No Devices Available</h3>
-            <p class="text-gray-400">There are currently no devices configured.</p>
+            <h3 class="text-lg font-medium mt-2">No Devices Available</h3>
+            <p class="opacity-60">There are currently no devices configured.</p>
           </div>
         </v-card-text>
         <v-card-actions class="justify-end">
@@ -309,43 +309,33 @@ const defaultProps = {
 </template>
 
 <style scoped>
+/* ═══════════════════════════════════════════════
+   Dark mode (default) — translucent dark header
+   ═══════════════════════════════════════════════ */
 .header-gradient {
   background: rgba(11, 17, 32, 0.6);
   backdrop-filter: blur(24px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
-.header-gradient2 {
-  background: rgba(11, 17, 32, 0.3);
-  backdrop-filter: blur(24px);
-}
 
-/* Premium translucent elements */
 :deep(.v-btn) {
   backdrop-filter: blur(16px);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-:deep(.v-chip) {
-  backdrop-filter: blur(16px);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Consistent spacing and sizing */
-:deep(.v-btn) {
   min-width: 40px;
   height: 40px;
 }
 
 :deep(.v-chip) {
+  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 32px;
 }
 
-/* Glowing hover effects */
 :deep(.v-btn:hover) {
   transform: translateY(-2px);
   background: rgba(255, 255, 255, 0.1);
@@ -360,13 +350,80 @@ const defaultProps = {
   border-color: rgba(213, 0, 249, 0.3);
 }
 
-/* Ensure consistent gap between elements */
+:deep(.v-list-item-title) {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
 .header-controls {
   gap: 8px;
 }
 
-/* Ensure text has proper contrast */
-:deep(.v-list-item-title) {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+/* ═══════════════════════════════════════════════
+   🌞 Light mode — solid light header
+   ═══════════════════════════════════════════════ */
+:root:not(.dark) .header-gradient {
+  background: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+:root:not(.dark) :deep(.v-btn) {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:root:not(.dark) :deep(.v-chip) {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:root:not(.dark) :deep(.v-btn:hover) {
+  background: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+:root:not(.dark) :deep(.v-chip:hover) {
+  background: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+:root:not(.dark) :deep(.v-list-item-title) {
+  text-shadow: none;
+}
+
+/* ═══════════════════════════════════════════════
+   ⬛⬜ High-contrast — pure black header, white borders
+   ═══════════════════════════════════════════════ */
+.high-contrast .header-gradient {
+  background: #000000;
+  border-bottom: 2px solid #FFFFFF;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.high-contrast :deep(.v-btn) {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: none;
+}
+
+.high-contrast :deep(.v-chip) {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: none;
+}
+
+.high-contrast :deep(.v-btn:hover) {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: none;
+  border-color: #FFFFFF;
+}
+
+.high-contrast :deep(.v-chip:hover) {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: none;
+  border-color: #FFFFFF;
 }
 </style>

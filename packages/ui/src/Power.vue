@@ -52,14 +52,9 @@ async function togglePower() {
 
 <style scoped>
 .power-off-btn {
-  background: linear-gradient(135deg, 
-    rgba(30, 41, 59, 0.9) 0%, 
-    rgba(51, 65, 85, 0.8) 25%,
-    rgba(71, 85, 105, 0.7) 50%,
-    rgba(51, 65, 85, 0.8) 75%,
-    rgba(30, 41, 59, 0.9) 100%) !important;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  box-shadow: 
+  background: rgba(var(--v-theme-surface-variant), 0.7) !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.2);
+  box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 0 -1px 0 rgba(0, 0, 0, 0.2);
@@ -71,13 +66,8 @@ async function togglePower() {
 }
 
 .power-off-btn:hover {
-  background: linear-gradient(135deg, 
-    rgba(51, 65, 85, 0.9) 0%, 
-    rgba(71, 85, 105, 0.8) 25%,
-    rgba(100, 116, 139, 0.7) 50%,
-    rgba(71, 85, 105, 0.8) 75%,
-    rgba(51, 65, 85, 0.9) 100%) !important;
-  border-color: rgba(148, 163, 184, 0.5);
+  background: rgba(var(--v-theme-surface-variant), 0.85) !important;
+  border-color: rgba(var(--v-theme-on-surface), 0.35);
   box-shadow: 
     0 6px 16px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.15),

@@ -109,7 +109,7 @@ function isActive(cmd: CommandButtonConfig): boolean {
 
   <!-- Prompt Dialog -->
   <v-dialog v-model="promptDialog" max-width="320">
-    <v-card color="#0d1117" class="border border-slate-700">
+    <v-card color="surface" class="border border-opacity-20">
       <v-card-title class="text-sm text-cyan-400">{{ promptLabel }}</v-card-title>
       <v-card-text>
         <v-text-field
@@ -132,9 +132,9 @@ function isActive(cmd: CommandButtonConfig): boolean {
 
   <!-- Confirm Dialog -->
   <v-dialog v-model="confirmDialog" max-width="320">
-    <v-card color="#0d1117" class="border border-slate-700">
+    <v-card color="surface" class="border border-opacity-20">
       <v-card-title class="text-sm text-amber-400">Confirm {{ confirmLabel }}</v-card-title>
-      <v-card-text class="text-slate-300">
+      <v-card-text>
         Are you sure you want to execute <strong>{{ confirmLabel }}</strong>?
       </v-card-text>
       <v-card-actions>
@@ -148,9 +148,9 @@ function isActive(cmd: CommandButtonConfig): boolean {
 
 <style scoped>
 .command-panel {
-  background: rgba(15, 23, 42, 0.55);
+  background: rgba(var(--v-theme-surface-variant), 0.55);
   backdrop-filter: blur(6px);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border: 1px solid rgba(var(--v-border-color), 0.18);
   border-radius: 12px;
   padding: 14px;
 }
@@ -175,7 +175,7 @@ function isActive(cmd: CommandButtonConfig): boolean {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  background: #0d1117;
+  background: rgb(var(--v-theme-surface));
   border: 1px solid;
   border-radius: 8px;
   padding: 10px 8px;
@@ -185,7 +185,7 @@ function isActive(cmd: CommandButtonConfig): boolean {
 
 .command-btn:hover {
   transform: translateY(-1px);
-  background: #151d2b;
+  background: rgba(var(--v-theme-on-surface), 0.08);
 }
 
 .command-btn-label {

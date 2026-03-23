@@ -39,7 +39,7 @@ defineEmits(['action'])
       :class="`text-${color}-500 dark:text-${color}-400`"
     >{{ title }}</h3>
 
-    <p class="text-slate-400 text-center max-w-md mb-8 text-sm leading-relaxed">
+    <p class="opacity-60 text-center max-w-md mb-8 text-sm leading-relaxed">
       {{ description }}
     </p>
 
