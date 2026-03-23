@@ -18,7 +18,9 @@
     "deja": "bash scripts/deja.sh",
     "scan-sounds": "turbo run scan-sounds --filter=@repo/sounds",
     "changeset": "changeset",
-    "changeset:status": "changeset status"
+    "changeset:status": "changeset status",
+    "promo:push": "tsx scripts/push-promo.ts",
+    "promo:deactivate": "tsx scripts/push-promo.ts --deactivate"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
