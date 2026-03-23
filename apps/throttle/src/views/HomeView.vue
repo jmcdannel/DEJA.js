@@ -1,15 +1,22 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useCurrentUser } from 'vuefire'
 import { useRouter } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import DeviceStatusList from '@repo/ui/src/DeviceStatus/DeviceStatusList.vue'
 import { Login } from '@repo/auth'
+import { useOnboarding, useLocos } from '@repo/modules'
+import { OnboardingBanner } from '@repo/ui'
 import Speedometer from '@/throttle/Speedometer.vue'
 
 const user = useCurrentUser()
 const router = useRouter()
 const layoutId = useStorage('@DEJA/layoutId', '')
 
+const { state: onboardingState, isComplete: onboardingComplete } = useOnboarding()
+const { getLocos } = useLocos()
+const locos = getLocos()
+const locoCount = computed(() => locos.value?.length ?? 0)
 
 function handleThrottleClick(address: number) {
   router.push({ name: 'throttle', params: { address } })
@@ -17,6 +24,10 @@ function handleThrottleClick(address: number) {
 
 function handleRequestAccess() {
   alert('Request access functionality is not yet implemented.')
+}
+
+function openCloudSetup() {
+  window.open('https://cloud.dejajs.com', '_blank')
 }
 
 </script>
@@ -31,6 +42,15 @@ function handleRequestAccess() {
       </h2>
     </header>
     
+    <OnboardingBanner
+      v-if="user && layoutId && !onboardingComplete"
+      :state="onboardingState"
+      :loco-count="locoCount"
+      variant="throttle"
+      @add-loco="router.push({ name: 'roster' })"
+      @open-cloud-setup="openCloudSetup"
+      class="mb-4"
+    />
     <DeviceStatusList v-if="user && layoutId"
       :show-throttles="true"
       @disconnect="router.push('/connect')"
