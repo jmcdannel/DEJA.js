@@ -1014,6 +1014,9 @@ importers:
       typescript:
         specifier: latest
         version: 5.9.3
+      vite:
+        specifier: ^4.4.9
+        version: 4.5.14(@types/node@20.19.23)(lightningcss@1.31.1)(terser@5.44.0)
       vitest:
         specifier: ^2.0.5
         version: 2.1.9(@edge-runtime/vm@3.2.0)(@types/node@20.19.23)(jsdom@22.1.0)(lightningcss@1.31.1)(terser@5.44.0)
@@ -1150,9 +1153,6 @@ importers:
 
   scripts:
     dependencies:
-      blessed:
-        specifier: ^0.1.81
-        version: 0.1.81
       ink:
         specifier: ^5.1.0
         version: 5.2.1(@types/react@18.3.26)(react@18.3.1)
