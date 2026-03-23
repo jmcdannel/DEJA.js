@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3'
-import { expect, userEvent, within } from '@storybook/test'
+import { ref } from 'vue'
 import CTCSwitch from './CTCSwitch.vue'
 import { createTurnout } from '../../.storybook/mocks/data'
 
@@ -54,14 +54,13 @@ export const WithTurnoutId: Story = {
 export const ClickToToggle: Story = {
   args: {
     turnout: createTurnout({ name: 'Interactive CTC' }),
-    state: false,
   },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const svg = canvasElement.querySelector('svg')
-    await expect(svg).toBeInTheDocument()
-    if (svg) {
-      await userEvent.click(svg)
-    }
-  },
+  render: (args: typeof ClickToToggle.args) => ({
+    components: { CTCSwitch },
+    setup() {
+      const state = ref(false)
+      return { args, state }
+    },
+    template: '<CTCSwitch v-bind="args" v-model:state="state" />',
+  }),
 }
