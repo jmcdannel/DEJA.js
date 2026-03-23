@@ -92,13 +92,14 @@ async function push(filePath: string) {
   console.log(`Pushing promotion: ${promo.slug}`)
 
   // ── Firestore ──
+  const existingDoc = await db.collection('promotions').doc(promo.slug).get()
   const firestoreDoc = {
     ...promo,
     startDate: parseDate(promo.startDate),
     endDate: parseDate(promo.endDate),
     active: promo.active ?? true,
     updatedAt: Timestamp.now(),
-    createdAt: Timestamp.now(),
+    ...(existingDoc.exists ? {} : { createdAt: Timestamp.now() }),
   }
   await db.collection('promotions').doc(promo.slug).set(firestoreDoc, { merge: true })
   console.log(`  [ok] Firestore: promotions/${promo.slug}`)
@@ -117,7 +118,7 @@ async function push(filePath: string) {
       startDate: promo.startDate ?? null,
       endDate: promo.endDate ?? null,
       slots: promo.slots,
-      ctas: promo.ctas.map((cta: any, i: number) => ({
+      ctas: promo.ctas.map((cta: { label: string; url: string; style: string }, i: number) => ({
         _key: `cta-${i}`,
         ...cta,
       })),

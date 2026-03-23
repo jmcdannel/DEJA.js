@@ -1,31 +1,6 @@
 import { client } from '../sanity/lib/client'
 import { ACTIVE_PROMOTIONS_QUERY } from '../sanity/lib/queries'
-
-interface PromoCTA {
-  label: string
-  url: string
-  style: 'primary' | 'secondary' | 'ghost'
-}
-
-interface SanityPromotion {
-  _id: string
-  slug: string
-  title: string
-  body: string
-  icon: string | null
-  variant: string
-  ctas: PromoCTA[]
-  slots: string[]
-  startDate: string | null
-  endDate: string | null
-}
-
-function isActiveNow(promo: SanityPromotion): boolean {
-  const now = new Date()
-  if (promo.startDate && new Date(promo.startDate) > now) return false
-  if (promo.endDate && new Date(promo.endDate) < now) return false
-  return true
-}
+import { type SanityPromotion, isActiveNow } from '../lib/promotions'
 
 export default async function PromoBannerStrip() {
   if (!client) return null

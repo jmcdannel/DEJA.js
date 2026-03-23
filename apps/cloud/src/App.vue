@@ -78,7 +78,7 @@ function handleLogoClick() {
 
 const { isTrialing, trialDaysLeft, plan } = useSubscription()
 const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
-const { promotions: activePromos, hasPromotions } = usePromotions(PROMO_SLOTS.BANNER_TOP)
+const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
 </script>
 <template>
   <v-responsive class="border rounded min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
@@ -121,6 +121,7 @@ const { promotions: activePromos, hasPromotions } = usePromotions(PROMO_SLOTS.BA
           </template>
         </v-banner>
         <PromoBanner
+          v-if="!isFullscreen"
           v-for="promo in activePromos"
           :key="promo.id"
           :promotion="promo"
