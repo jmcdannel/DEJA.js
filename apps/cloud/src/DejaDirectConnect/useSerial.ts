@@ -9,12 +9,6 @@ declare global {
   }
 }
 
-type SendFunctionPayload = {
-  address: number
-  func: number
-  state: boolean
-}
-
 export function useSerial(handleMessage: (message: string) => void) {
   const isConnected = ref(false)
   /*        
@@ -34,10 +28,7 @@ export function useSerial(handleMessage: (message: string) => void) {
     inputDone: Promise<void> | null,
     inputStream,
     reader: ReadableStreamDefaultReader<string> | null,
-    stream: { write: (arg0: string) => void; releaseLock: () => void },
-    csVersion: string | number,
-    csIsReadyRequestSent: boolean,
-    csIsReady: boolean
+    stream: { write: (arg0: string) => void; releaseLock: () => void }
 
   async function send(payload: string) {
     try {
@@ -94,7 +85,7 @@ export function useSerial(handleMessage: (message: string) => void) {
       // Create an input stream and a reader to read the data. port.readable gets the readable stream
       // DCC++ commands are text, so we will pipe it through a text decoder.
       const decoder = new TextDecoderStream()
-      inputDone = port?.readable.pipeTo(decoder.writable)
+      inputDone = port?.readable.pipeTo(decoder.writable) ?? null
       inputStream = decoder.readable
       //  .pipeThrough(new TransformStream(new LineBreakTransformer())); // added this line to pump through transformer
       //.pipeThrough(new TransformStream(new JSONTransformer()));
@@ -137,7 +128,7 @@ export function useSerial(handleMessage: (message: string) => void) {
             i
 
           for (i = 0; i < commandString.length; i++) {
-            if (commandString.charAt(i) == "\n" && i > 0) {
+            if (commandString.charAt(i) === "\n" && i > 0) {
               end = i
               break
             }
@@ -186,7 +177,8 @@ export function useSerial(handleMessage: (message: string) => void) {
 
       if (stream) {
         lines.forEach((line) => {
-          if (line == "\x03" || line == "echo(false);") {
+          if (line === "\x03" || line === "echo(false);") {
+            // Skip logging control characters and echo commands
           } else {
             displayLog(`[S] &lt;${  line?.toString()  }&gt;`)
           }
@@ -210,8 +202,6 @@ export function useSerial(handleMessage: (message: string) => void) {
     //   $("#power-switch").prop("checked", false)
     //   $("#power-status").html("Off")
     // }
-    csIsReady = false
-    csIsReadyRequestSent = false
     // uiDisable(true)
     if (port) {
       // Close the input stream (reader).
@@ -298,7 +288,7 @@ export function useSerial(handleMessage: (message: string) => void) {
     )
   }
 
-  function browserType() {
+  function _browserType() {
     const userAgent = navigator.userAgent
     let browser = "Unknown"
     let browserOk = false

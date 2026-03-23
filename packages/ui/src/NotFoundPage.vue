@@ -43,7 +43,7 @@ const props = withDefaults(defineProps<Props>(), {
 <style scoped>
 .not-found-page {
   min-height: 100vh;
-  background-color: #0f172a;
+  background-color: rgb(var(--v-theme-background));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -53,16 +53,16 @@ const props = withDefaults(defineProps<Props>(), {
 }
 
 .not-found-code {
-  color: #00e3ef;
+  color: rgb(var(--v-theme-primary));
   font-size: 6rem !important;
   line-height: 1;
 }
 
 .not-found-heading {
-  color: #94a3b8;
+  color: rgba(var(--v-theme-on-surface), 0.6);
 }
 
 .not-found-sub {
-  color: #94a3b8;
+  color: rgba(var(--v-theme-on-surface), 0.6);
 }
 </style>

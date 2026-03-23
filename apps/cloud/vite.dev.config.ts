@@ -1,9 +1,8 @@
 import { fileURLToPath, URL } from 'node:url'
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { defineConfig, loadEnv, type Plugin } from 'vite'
+import { defineConfig, loadEnv, type Plugin , type ViteDevServer } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import type { ViteDevServer } from 'vite'
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'))
 
@@ -16,7 +15,7 @@ function extractFileName(pathname: string): string {
 }
 
 // Dev middleware that handles /api/sounds without needing a separate sound-api server
-const soundsApiPlugin = () => ({
+const _soundsApiPlugin = () => ({
   name: 'sounds-api-dev',
   configureServer(server: ViteDevServer) {
     server.middlewares.use('/api/sounds', async (_req, res) => {
@@ -96,7 +95,7 @@ const vercelApiPlugin = (envVars: Record<string, string>): Plugin => ({
             const files = readdirSync(parentDir)
             const dynamicFile = files.find(f => f.startsWith('[') && f.endsWith('].ts'))
             if (dynamicFile) {
-              const paramName = dynamicFile.match(/^\[(.+)\]\.ts$/)?.[1]
+              const paramName = (/^\[(.+)\]\.ts$/.exec(dynamicFile))?.[1]
               if (paramName) {
                 modulePath = join(parentDir, dynamicFile)
                 dynamicParams[paramName] = lastSegment
@@ -206,18 +205,18 @@ export default defineConfig(({ mode }) => {
       sourcemap: mode === 'development'
     },
     server: {
-      port: 5174, // Changed from 5000 to avoid conflicts
+      port: 3011, // Standardized cloud app port
       host: true, // Allow external connections
-            
+
       // CORS configuration for development
       cors: {
         origin: [
-          'http://localhost:5174', // Primary development port
-          'http://localhost:5000', // Original port (if available)
-          'http://localhost:3000', 
-          'http://localhost:5173',
-          'http://localhost:5175',
-          'http://localhost:5176'
+          'http://localhost:3011', // Standardized cloud port
+          'http://localhost:3000',
+          'http://localhost:3021',
+          'http://localhost:3031',
+          'http://localhost:3041',
+          'http://localhost:3051'
         ],
         credentials: true
       },

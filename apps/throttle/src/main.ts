@@ -12,11 +12,11 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
-import App from './App.vue'
-import router from './router'
 import { firebaseApp } from '@repo/firebase-config'
 import { createVuetifyThemes } from '@repo/ui'
 import { feedbackConfig } from '@repo/modules/feedback'
+import router from './router'
+import App from './App.vue'
 // Style
 import './style.css'
 import '@mdi/font/css/materialdesignicons.css'
@@ -29,9 +29,9 @@ const themes = createVuetifyThemes({
     primary: '#00B8D4',
   },
   custom: {
-    light: { 'device-connected': '#4CAF50', 'device-disconnected': '#F44336', 'stat-card': '#F5F7FA' },
+    light: { 'device-connected': '#2E7D32', 'device-disconnected': '#C62828', 'stat-card': '#E8EDF2' },
     dark: { 'device-connected': '#66BB6A', 'device-disconnected': '#EF5350', 'stat-card': '#1A2332' },
-    'high-contrast': { 'device-connected': '#00FF00', 'device-disconnected': '#FF0000', 'stat-card': '#1A1A1A' },
+    'high-contrast': { 'device-connected': '#00FF00', 'device-disconnected': '#FF0000', 'stat-card': '#000000' },
   },
 })
 

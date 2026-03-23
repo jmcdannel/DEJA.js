@@ -59,7 +59,7 @@ async function clearLoco() {
   <main v-if="throttle" class="flex flex-col gap-2 p-2 overflow-hidden w-full h-full flex-1 shadow-xl relative  ">
     <ThrottleHeader class="bg-gradient-to-r from-purple-300/10 to-pink-600/10 text-purple-400/10">
       <template v-slot:left>
-        <div class="flex flex-row items-center justify-center gap-1 px-4 bg-gray-900">
+        <div class="flex flex-row items-center justify-center gap-1 px-4" style="background: rgba(var(--v-theme-surface), 0.6)">
           <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" :variant="'flat'" />
           <MiniConsist v-if="loco" :loco="loco" />
           <v-spacer class="w-2 md:w-6" />
@@ -98,7 +98,7 @@ async function clearLoco() {
   </main>
   <main v-else>
     <div class="flex flex-col items-center justify-center h-full w-full gap-4">
-      <h2 class="text-2xl font-bold text-gray-700">No Throttle Assigned</h2>
+      <h2 class="text-2xl font-bold opacity-50">No Throttle Assigned</h2>
       <v-btn color="pink" variant="outlined" @click="$router.push({ name: 'throttle-list' })">
         Go to Throttle List
       </v-btn>

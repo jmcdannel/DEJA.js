@@ -133,7 +133,7 @@ export function useTurnouts() {
       { merge: true })
       return true
     } catch (e) {
-      log.error('Error adding throttle: ', e)
+      log.error('Error setting turnout: ', e)
     }
   }
 

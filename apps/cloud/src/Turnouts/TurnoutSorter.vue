@@ -13,7 +13,7 @@ const list = getTurnouts()
 const dragging = ref(false)
 
 function handleSave() {
-  log.debug('Saving new order:', list.value.map(async (item: Turnout, order: number) => {
+  log.debug('Saving new order:', (list.value as Turnout[]).map(async (item: Turnout, order: number) => {
     const turnout = item
     log.debug('Setting turnout', turnout.name, 'to order', order)
     await setTurnout(turnout.id, { ...turnout, order })
@@ -25,7 +25,7 @@ function handleSave() {
 <template>
   <v-card title="Sort Turnouts" color="primary" variant="flat">
     <v-card-text>
-      <p class="text-white">Drag and drop to sort turnouts.</p>
+      <p>Drag and drop to sort turnouts.</p>
       <draggable
         :list="list"
         item-key="name"

@@ -66,6 +66,8 @@ DEJA.js/
 
 ## Key Commands
 
+> **In a Claude worktree?** Run `/worktree-dev-setup [app]` first — it symlinks `.env` and `node_modules/` from the main repo, then starts the server.
+
 ```bash
 # Run all at once
 pnpm dev              # Start all apps in development mode
@@ -195,7 +197,7 @@ When UI changes are made, update screenshots and MDX docs **before the `preview 
 
 **Test user login:** Alternatively, set `CLAUDE_TEST_EMAIL` and `CLAUDE_TEST_PASSWORD` in `.env` for realistic email/password login during automated testing.
 
-**Worktree env setup:** Git worktrees don't inherit `.env`. Symlink it: `ln -sf /path/to/DEJA.js/.env .env`
+**Worktree dev setup:** Git worktrees don't inherit `.env` or `node_modules/`. Run `/worktree-dev-setup [app]` before starting any dev server in a worktree — it symlinks both automatically and starts the server. **Note:** Vite reads `.env` from the **app directory** (e.g., `apps/cloud/`), not the monorepo root — the setup script handles this.
 
 ---
 
@@ -303,6 +305,8 @@ Internal packages use the `@repo/` scope (e.g. `@repo/modules`, `@repo/ui`). The
 ---
 
 ## Key Commands
+
+> **In a Claude worktree?** Run `/worktree-dev-setup [app]` first — it symlinks `.env` and `node_modules/` from the main repo, then starts the server.
 
 Run from the repo root using `turbo` (or `pnpm`):
 
@@ -728,10 +732,19 @@ Frontend apps (throttle, cloud) are deployed to **Vercel** (see `vercel.json` in
 
 | File | Purpose |
 |---|---|
-| `README.md` | Project overview, setup, quick start |
-| `API_DOCUMENTATION.md` | Public APIs, composables, types, usage examples |
+| `README.md` | Project overview, monorepo structure, dev setup |
+| `ARCHITECTURE.md` | System architecture, communication layers, data flow |
+| `CONTRIBUTING.md` | Development setup, coding conventions, workflow |
 | `CHANGELOG.md` | Version history (Keep a Changelog format) |
 | `ROADMAP.md` | Planned features |
 | `TODO.md` | Short-term task list |
 | `apps/server/WEBSOCKET_PROTOCOL.md` | WebSocket message format & device subscription protocol |
 | `apps/*/README.md` | Per-app documentation |
+| `packages/modules/README.md` | Core business logic composables and types |
+| `packages/dccex/README.md` | DCC-EX command protocol and useDcc() API |
+| `packages/deja/README.md` | Core DEJA composable (useDejaJS) |
+| `packages/ui/README.md` | Shared Vue component library |
+| `packages/auth/README.md` | Firebase auth guards and components |
+| `packages/firebase-config/README.md` | Firebase client and admin SDK initialization |
+| `packages/utils/README.md` | Common utility functions |
+| `io/README.md` | Arduino and Pico W firmware documentation |

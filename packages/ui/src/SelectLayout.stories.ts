@@ -7,7 +7,7 @@ const meta: Meta<typeof SelectLayout> = {
   component: SelectLayout,
   tags: ['autodocs'],
   args: {
-    onSelect: fn(),
+    onSelected: fn(),
   },
   decorators: [
     () => ({

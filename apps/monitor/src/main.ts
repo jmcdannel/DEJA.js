@@ -7,10 +7,6 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
-// Vuetify components
-import { VBtn } from 'vuetify/components/VBtn'
-import { VCard } from 'vuetify/components/VCard'
-
 // VueFire
 import { VueFire, VueFireAuth } from 'vuefire'
 // Firebase
@@ -49,7 +45,7 @@ const vuetify = createVuetify({
       padding: 0,
       rounded: 'lg',
     },
-    VCardIten: {
+    VCardItem: {
       padding: 0,
     },
     VTextField: {
