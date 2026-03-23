@@ -11,11 +11,16 @@ import SelectFavorites from '@/core/Menu/SelectFavorites.vue'
 import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
+import { useThrottleSettings } from '@/throttle/useThrottleSettings'
 
 const user = useCurrentUser()
 const { plan, status, isTrialing, trialDaysLeft, subscription } = useSubscription()
 const { themePreference, setTheme } = useThemeSwitcher()
 const { mdAndUp } = useDisplay()
+const {
+  variant, showFunctions, showSpeedometer, showConsist,
+  setVariant, setShowFunctions, setShowSpeedometer, setShowConsist,
+} = useThrottleSettings()
 
 const planName = computed(() => PLAN_DISPLAY[plan.value].name)
 const planPrice = computed(() => {
@@ -60,14 +65,6 @@ async function openBillingPortal() {
     portalLoading.value = false
   }
 }
-
-// Speed steps
-const speedSteps = ref('128')
-const speedStepOptions = [
-  { title: '14 steps', value: '14' },
-  { title: '28 steps', value: '28' },
-  { title: '128 steps', value: '128' },
-]
 
 // DEJA server config
 const wsServerUrl = useStorage('@DEJA/wsServerUrl', '')
@@ -242,13 +239,51 @@ const backgroundPages = [
           </div>
           <div class="settings-row">
             <div class="settings-row__label">
-              <span class="settings-row__name">Speed Steps</span>
-              <span class="settings-row__desc">Number of throttle speed increments</span>
+              <span class="settings-row__name">Throttle Type</span>
+              <span class="settings-row__desc">Choose your preferred throttle control style</span>
             </div>
             <div class="settings-row__value">
-              <v-btn-toggle v-model="speedSteps" mandatory divided density="compact" variant="outlined" color="primary">
-                <v-btn v-for="opt in speedStepOptions" :key="opt.value" :value="opt.value" size="small" class="text-none">{{ opt.title }}</v-btn>
+              <v-btn-toggle :model-value="variant" @update:model-value="(v) => setVariant(v)" mandatory divided density="compact" variant="outlined" color="primary">
+                <v-btn value="buttons" size="small" class="text-none">
+                  <v-icon start size="16">mdi-gesture-tap-button</v-icon>
+                  <span class="hidden sm:inline">Buttons</span>
+                </v-btn>
+                <v-btn value="slider" size="small" class="text-none">
+                  <v-icon start size="16">mdi-tune-vertical</v-icon>
+                  <span class="hidden sm:inline">Slider</span>
+                </v-btn>
+                <v-btn value="protothrottle" size="small" class="text-none">
+                  <v-icon start size="16">mdi-train</v-icon>
+                  <span class="hidden sm:inline">ProtoThrottle</span>
+                </v-btn>
               </v-btn-toggle>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row__label">
+              <span class="settings-row__name">Functions Panel</span>
+              <span class="settings-row__desc">Show DCC function buttons (F0-F28)</span>
+            </div>
+            <div class="settings-row__value">
+              <v-switch :model-value="showFunctions" @update:model-value="(v) => setShowFunctions(!!v)" color="primary" density="compact" hide-details />
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row__label">
+              <span class="settings-row__name">Speedometer</span>
+              <span class="settings-row__desc">Show speed gauge on desktop, auto-hide on small screens</span>
+            </div>
+            <div class="settings-row__value">
+              <v-switch :model-value="showSpeedometer" @update:model-value="(v) => setShowSpeedometer(!!v)" color="primary" density="compact" hide-details />
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row__label">
+              <span class="settings-row__name">Consist Info</span>
+              <span class="settings-row__desc">Show coupled locomotive information</span>
+            </div>
+            <div class="settings-row__value">
+              <v-switch :model-value="showConsist" @update:model-value="(v) => setShowConsist(!!v)" color="primary" density="compact" hide-details />
             </div>
           </div>
         </div>
