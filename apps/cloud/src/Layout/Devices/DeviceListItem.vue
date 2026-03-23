@@ -67,8 +67,8 @@ async function handleDisconnect () {
     </template>
     <template #title>
       <div class="flex flex-col">
-        <span class="text-sm font-bold text-white tracking-wide">{{device?.id}}</span>
-        <span class="text-xs text-white/70 uppercase tracking-wider font-semibold">{{device?.type || 'ID'}}</span>
+        <span class="text-sm font-bold tracking-wide">{{device?.id}}</span>
+        <span class="text-xs opacity-70 uppercase tracking-wider font-semibold">{{device?.type || 'ID'}}</span>
       </div>
     </template>
     <template #append>

@@ -108,15 +108,18 @@ const selectedDevice = computed(() => {
       <v-card-text>
         <h2 class="text-h6 mb-2">Your Layouts</h2>
         <div v-for="layout in layouts" :key="layout.id"
-          class="p-4 rounded-lg border cursor-pointer transition-all hover:bg-gray-800 my-2"
-          :class="{ 'border-green-500 bg-green-800': layout.id === layoutId, 'border-gray-200 bg-gray-900': layout.id !== layoutId }"
+          class="p-4 rounded-lg border cursor-pointer transition-all my-2"
+          :style="{
+            borderColor: layout.id === layoutId ? 'rgb(var(--v-theme-success))' : 'rgba(var(--v-theme-on-surface), 0.12)',
+            background: layout.id === layoutId ? 'rgba(var(--v-theme-success), 0.12)' : 'rgba(var(--v-theme-surface), 0.6)',
+          }"
           @click="handleLayoutSelect(layout.id)">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <v-icon :color="layout.id === layoutId ? 'green' : 'grey'">mdi-home</v-icon>
               <div>
                 <h4 class="font-medium">{{ layout.name }}</h4>
-                <p v-if="layout.description" class="text-sm text-gray-600">{{ layout.description }}</p>
+                <p v-if="layout.description" class="text-sm opacity-60">{{ layout.description }}</p>
               </div>
             </div>
             <v-icon v-if="layout.id === layoutId" color="green">mdi-check-circle</v-icon>

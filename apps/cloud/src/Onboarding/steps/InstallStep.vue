@@ -49,7 +49,7 @@ function addAnother() {
   <div class="install-step">
     <div class="mb-6">
       <h2 class="text-xl font-semibold text-sky-100 mb-2">Install the DEJA Server</h2>
-      <p class="text-slate-400 text-sm">
+      <p class="opacity-60 text-sm">
         Run the installer on the machine connected to your DCC-EX Command Station — a Raspberry Pi,
         Mac, or Linux box. Your account and layout are linked automatically via the URL below.
       </p>
@@ -65,7 +65,7 @@ function addAnother() {
         <v-icon color="pink" size="28">mdi-train</v-icon>
         <h2 class="text-lg font-semibold text-sky-100">Add Your First Locomotive</h2>
       </div>
-      <p class="text-slate-400 text-sm mb-4">
+      <p class="opacity-60 text-sm mb-4">
         Enter the DCC address programmed into your locomotive decoder to get running right away.
       </p>
 
@@ -134,7 +134,7 @@ function addAnother() {
         <v-icon color="primary" size="28">mdi-compass-outline</v-icon>
         <h2 class="text-lg font-semibold text-sky-100">Explore More</h2>
       </div>
-      <p class="text-slate-400 text-sm mb-4">
+      <p class="opacity-60 text-sm mb-4">
         Ready to dig deeper? Here are some next steps.
       </p>
       <div class="flex flex-col gap-2">

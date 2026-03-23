@@ -64,7 +64,7 @@
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </header>
-  <hr class="my-1 border-slate-500" />
+  <hr class="my-1" style="border-color: rgba(var(--v-theme-on-surface), 0.2)" />
       <ul v-if="loco" class="p-2 flex flex-row flex-wrap items-center">
         <li v-for="(func, fIdx) in _functions" :key="func.id"      
         class=" items-center

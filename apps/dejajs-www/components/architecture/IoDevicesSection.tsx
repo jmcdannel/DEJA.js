@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import AnimateIn from '../home/AnimateIn';
+import DocLink from '../DocLink';
 
 const peripherals = [
   { label: 'IALED Strips', icon: '💡', desc: 'Animated lighting effects, building interiors, streetlamps' },
@@ -40,9 +40,7 @@ export default function IoDevicesSection() {
               </div>
             ))}
           </div>
-          <Link href="/docs/io" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-700 text-gray-300 text-sm hover:border-gray-500 hover:text-white transition-colors">
-            IO Docs →
-          </Link>
+          <DocLink href="/docs/io">IO</DocLink>
         </AnimateIn>
         <div>
           <AnimateIn delay={0.1}>

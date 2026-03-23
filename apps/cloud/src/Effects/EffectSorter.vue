@@ -25,7 +25,7 @@ function handleSave() {
 <template>
   <v-card title="Sort Effects" color="primary" variant="flat">
     <v-card-text>
-      <p class="text-white">Drag and drop to sort effects.</p>
+      <p>Drag and drop to sort effects.</p>
       <draggable
         :list="list"
         item-key="name"

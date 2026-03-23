@@ -227,8 +227,8 @@ const ctaLinks = [
 .empty-state__prereq {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(var(--v-theme-on-surface), 0.02);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.06);
   border-radius: 6px;
   padding: 8px 12px;
 }
@@ -271,12 +271,12 @@ const ctaLinks = [
 
 .empty-state__circle--pending {
   border: 2px solid rgba(var(--v-theme-primary), 0.2);
-  color: rgba(148, 163, 184, 0.5);
+  color: rgba(var(--v-theme-on-surface), 0.4);
 }
 
 .empty-state__circle--complete {
   background-color: rgb(var(--v-theme-success));
-  color: #fff;
+  color: rgb(var(--v-theme-on-success, 255, 255, 255));
 }
 
 .empty-state__connector {
@@ -315,18 +315,18 @@ const ctaLinks = [
 
 .empty-state__content--done .empty-state__title {
   text-decoration: line-through;
-  text-decoration-color: rgba(148, 163, 184, 0.4);
+  text-decoration-color: rgba(var(--v-theme-on-surface), 0.3);
 }
 
 .empty-state__desc {
   font-size: 0.75rem;
-  color: rgba(148, 163, 184, 0.7);
+  color: rgba(var(--v-theme-on-surface), 0.5);
   margin-bottom: 8px;
 }
 
 .empty-state__hint {
   font-size: 0.75rem;
-  color: rgba(148, 163, 184, 0.5);
+  color: rgba(var(--v-theme-on-surface), 0.4);
   font-style: italic;
 }
 
@@ -335,7 +335,7 @@ const ctaLinks = [
   gap: 20px;
   flex-wrap: wrap;
   padding-top: 14px;
-  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  border-top: 1px solid rgba(var(--v-theme-on-surface), 0.1);
   margin-top: 8px;
   justify-content: center;
 }
@@ -348,7 +348,7 @@ const ctaLinks = [
 }
 
 .empty-state__link:hover {
-  color: #bae6fd;
+  color: rgba(var(--v-theme-primary), 0.7);
   text-decoration: underline;
 }
 </style>

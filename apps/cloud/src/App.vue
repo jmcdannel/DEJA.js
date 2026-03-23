@@ -81,8 +81,8 @@ const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
 const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
 </script>
 <template>
-  <v-responsive class="border rounded min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
-      <v-app :theme="themePreference" class="!bg-transparent">
+  <v-app :theme="themePreference">
+    <div class="app-bg min-h-screen">
         <PageBackground
           app-name="cloud"
           :background-id="isFullscreen ? 'stars' : undefined"
@@ -173,11 +173,15 @@ const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
       </v-main>
       <NotificationContainer />
       </PageBackground>
-    </v-app>
-  </v-responsive>
+    </div>
+  </v-app>
 </template>
 
 <style scoped>
+.app-bg {
+  background: rgb(var(--v-theme-background));
+}
+
 .fullscreen-header {
   position: fixed;
   top: 0;

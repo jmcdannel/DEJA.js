@@ -73,6 +73,9 @@ export type { AppIconName } from './assets/icons'
 // Themes
 export { createVuetifyThemes, THEME_MODES, THEME_MODE_DEFINITIONS } from './themes'
 export type { AppThemeConfig, ThemeMode, ThemeOverrides, ThemeVariables, ThemeModeDefinition } from './themes'
+// 🎨 A11y color utilities
+export { ensureContrast, ensureUIContrast, ensureAllContrast, meetsContrast, contrastReport, isBadContrast, WCAG } from './themes'
+export type { WcagLevel } from './themes'
 
 // Composables
 export { useThemeSwitcher } from './composables/useThemeSwitcher'
