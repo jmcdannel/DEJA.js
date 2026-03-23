@@ -58,22 +58,25 @@ const pinia = createPinia()
 const vfireConfig = { firebaseApp, modules: [VueFireAuth()] }
 const app = createApp(App)
 
-Sentry.init({
-  app,
-  dsn: import.meta.env.VITE_SENTRY_DSN,
-  integrations: [
-    Sentry.browserTracingIntegration({ router }),
-    Sentry.replayIntegration(),
-    Sentry.feedbackIntegration(feedbackConfig),
-  ],
-  tracesSampleRate: 1.0,
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
-})
+if (import.meta.env.PROD) {
+  Sentry.init({
+    app,
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    environment: 'production',
+    integrations: [
+      Sentry.browserTracingIntegration({ router }),
+      Sentry.replayIntegration(),
+      Sentry.feedbackIntegration(feedbackConfig),
+    ],
+    tracesSampleRate: 0.2,
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+  })
 
-app.config.errorHandler = (err, _instance, info) => {
-  const eventId = Sentry.captureException(err, { extra: { info } })
-  Sentry.showReportDialog({ eventId })
+  app.config.errorHandler = (err, _instance, info) => {
+    const eventId = Sentry.captureException(err, { extra: { info } })
+    Sentry.showReportDialog({ eventId })
+  }
 }
 
 if (import.meta.env.PROD) {
