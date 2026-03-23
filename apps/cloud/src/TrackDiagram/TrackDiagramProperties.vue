@@ -76,7 +76,7 @@ const trackLineOptions = computed(() =>
     />
   </v-card>
 
-  <v-card v-else variant="outlined" class="pa-3 text-center text-gray-500">
+  <v-card v-else variant="outlined" class="pa-3 text-center opacity-50">
     <p class="text-sm">Select a node or edge to edit its properties.</p>
   </v-card>
 </template>

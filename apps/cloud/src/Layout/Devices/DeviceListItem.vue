@@ -58,6 +58,7 @@ async function handleDisconnect () {
     density="compact"
   >
     <v-card-title class="flex flex-nowrap items-center gap-3 !overflow-visible">
+      <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 flex-shrink-0" size="small">mdi-drag</v-icon>
       <router-link :to="{ name: 'DeviceDetails', params: { deviceId: device?.id } }" class="flex items-center gap-3 min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
         <img v-if="deviceType?.image" :src="deviceType.image" alt="" class="w-8 h-8 flex-shrink-0" />
         <v-icon v-else :icon="deviceType?.icon || 'mdi-help'" :color="color.value" class="flex-shrink-0" />

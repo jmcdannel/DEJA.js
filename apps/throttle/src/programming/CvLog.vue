@@ -49,7 +49,7 @@ function formatTime(timestamp: string): string {
 <template>
   <v-card-text>
     <div class="flex items-center justify-between mb-4">
-      <div class="text-sm text-slate-400">
+      <div class="text-sm opacity-50">
         {{ log.length }} {{ log.length === 1 ? 'entry' : 'entries' }}
       </div>
       <v-btn
@@ -63,7 +63,7 @@ function formatTime(timestamp: string): string {
       </v-btn>
     </div>
 
-    <div v-if="log.length === 0" class="text-center text-slate-500 py-8">
+    <div v-if="log.length === 0" class="text-center opacity-40 py-8">
       No operations yet. Use the Read/Write tab to get started.
     </div>
 
@@ -87,7 +87,7 @@ function formatTime(timestamp: string): string {
           <span v-if="entry.cv !== undefined" class="font-mono ml-2">CV{{ entry.cv }}</span>
           <span v-if="entry.value !== undefined" class="font-mono ml-1">= {{ entry.value }}</span>
           <span v-if="entry.bit !== undefined" class="font-mono ml-1">[bit {{ entry.bit }}]</span>
-          <span v-if="entry.address !== undefined" class="text-slate-400 ml-2">@{{ entry.address }}</span>
+          <span v-if="entry.address !== undefined" class="opacity-50 ml-2">@{{ entry.address }}</span>
         </v-list-item-title>
 
         <v-list-item-subtitle class="text-xs">

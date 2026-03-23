@@ -52,7 +52,7 @@ export { default as DeviceStatusList } from './DeviceStatus/DeviceStatusList.vue
 export { DeviceConnectionCard, DeviceConnectionList } from './DeviceConnection'
 
 // Dashboard widgets
-export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart } from './Dashboard'
+export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart, DeviceTile, QuickConnectPanel, LayoutInfoCard, DashboardEmptyState } from './Dashboard'
 export { default as EmptyState } from './EmptyState/EmptyState.vue'
 export { default as ModuleList } from './ModuleList/List.vue'
 export { default as LocoList } from './Locos/LocoList.vue'
@@ -72,6 +72,9 @@ export type { AppIconName } from './assets/icons'
 // Themes
 export { createVuetifyThemes, THEME_MODES, THEME_MODE_DEFINITIONS } from './themes'
 export type { AppThemeConfig, ThemeMode, ThemeOverrides, ThemeVariables, ThemeModeDefinition } from './themes'
+// 🎨 A11y color utilities
+export { ensureContrast, ensureUIContrast, ensureAllContrast, meetsContrast, contrastReport, isBadContrast, WCAG } from './themes'
+export type { WcagLevel } from './themes'
 
 // Composables
 export { useThemeSwitcher } from './composables/useThemeSwitcher'

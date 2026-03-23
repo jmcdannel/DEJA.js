@@ -1,0 +1,371 @@
+---
+title: Building Custom Devices
+description: How to build custom MQTT and serial devices that communicate with the DEJA.js server for layout automation.
+section: io
+order: 9
+---
+
+# 🔧 Building Custom Devices
+
+Want to go beyond the stock DEJA.js firmware? You can build your own MQTT-connected devices using **any microcontroller with WiFi** — ESP32, Raspberry Pi Pico W, ESP8266, or even a full Linux board. As long as your device can publish and subscribe to MQTT topics, it can talk to the DEJA.js server.
+
+This guide covers the MQTT protocol, command format, and provides minimal working examples you can use as a starting point.
+
+---
+
+## 📡 MQTT Topic Structure
+
+DEJA.js uses a simple hierarchical topic scheme:
+
+```
+{topicId}/{layoutId}/{deviceId}
+```
+
+| Segment | Description | Example |
+|---------|-------------|---------|
+| `topicId` | MQTT topic prefix (default: `DEJA`) | `DEJA` |
+| `layoutId` | Your layout identifier from DEJA Cloud | `tamarack` |
+| `deviceId` | Unique ID for this device | `my-custom-pico` |
+
+### 📥 Subscribing for Commands
+
+Your device subscribes to its own command topic to receive instructions from the server:
+
+```
+DEJA/tamarack/my-custom-pico
+```
+
+### 📤 Publishing Status Messages
+
+Your device publishes status and sensor data back to the server on the `/messages` subtopic:
+
+```
+DEJA/tamarack/my-custom-pico/messages
+```
+
+---
+
+## 📦 Command Format
+
+All commands arrive as **JSON messages** on your subscription topic with three fields:
+
+```json
+{
+  "action": "pin",
+  "device": "my-custom-pico",
+  "payload": { "pin": 6, "state": true }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `action` | `string` | The type of command to execute |
+| `device` | `string` | Target device ID — **always check this** against your own device ID and ignore messages for other devices |
+| `payload` | `object` | Action-specific data (see below) |
+
+> ⚠️ **Important:** Multiple devices can share the same MQTT topic. Always compare the `device` field against your device's ID and ignore messages not intended for you.
+
+---
+
+## 🎯 Supported Actions
+
+### `pin` — Digital Pin Control
+
+Turn a GPIO pin on or off. Used for LEDs, relays, and other digital outputs.
+
+```json
+{
+  "action": "pin",
+  "device": "my-custom-pico",
+  "payload": { "pin": 6, "state": true }
+}
+```
+
+| Payload Field | Type | Description |
+|---------------|------|-------------|
+| `pin` | `number` | Logical pin number (mapped to physical GPIO in your config) |
+| `state` | `boolean` | `true` = on, `false` = off |
+
+### `servo` — Servo Positioning
+
+Set a servo to a specific angle via a PCA9685 servo driver.
+
+```json
+{
+  "action": "servo",
+  "device": "my-custom-pico",
+  "payload": { "servo": 0, "value": 90 }
+}
+```
+
+| Payload Field | Type | Description |
+|---------------|------|-------------|
+| `servo` | `number` | Servo channel on the PCA9685 (0–15) |
+| `value` | `number` | Target angle in degrees (0–180) |
+
+### `turnout` — Turnout Control
+
+Throw or close a turnout (uses servo positioning under the hood).
+
+```json
+{
+  "action": "turnouts",
+  "device": "my-custom-pico",
+  "payload": { "servo": 0, "value": 90 }
+}
+```
+
+| Payload Field | Type | Description |
+|---------------|------|-------------|
+| `servo` | `number` | Servo channel for this turnout |
+| `value` | `number` | Servo angle for thrown/closed position |
+
+> 💡 Both `servo` and `turnouts` actions route to the same servo handler in the reference firmware.
+
+### `effects` — Effects Control
+
+Trigger lighting effects, animations, or other GPIO-based effects. Uses the same payload format as `pin`.
+
+```json
+{
+  "action": "effects",
+  "device": "my-custom-pico",
+  "payload": { "pin": 8, "state": true }
+}
+```
+
+### `ialed` — Addressable LED Control
+
+Control individually addressable LEDs (NeoPixel, WS2812, etc.) for signal heads, building lights, and animated effects.
+
+---
+
+## ✅ Server Acknowledgment
+
+When a device first connects and subscribes, it should publish a status message to its `/messages` topic. The server sends an acknowledgment back:
+
+```json
+{
+  "action": "ack",
+  "payload": { "layoutId": "tamarack" }
+}
+```
+
+Use this to confirm your device is properly registered and communicating with the server.
+
+---
+
+## 🗄️ Device Registration
+
+For the DEJA.js server and Monitor app to track your device, register it in **Firestore** at:
+
+```
+layouts/{layoutId}/devices
+```
+
+Create a document with at minimum:
+
+| Field | Value | Description |
+|-------|-------|-------------|
+| `deviceId` | `"my-custom-pico"` | Must match the device ID in your MQTT config |
+| `connection` | `"wifi"` | Connection type (`wifi` for MQTT devices, `serial` for USB) |
+| `label` | `"My Custom Pico"` | Human-readable name shown in Monitor |
+
+You can register devices through the DEJA Cloud app or directly in the Firebase console.
+
+---
+
+## 🏗️ Minimal CircuitPython Example (Pico W)
+
+This is a stripped-down version of the DEJA.js Pico W firmware — just enough to connect to WiFi, subscribe to MQTT, and handle a `pin` command. Use this as a starting point for your own device.
+
+### `settings.toml`
+
+```toml
+CIRCUITPY_WIFI_SSID = "YourNetwork"
+CIRCUITPY_WIFI_PASSWORD = "YourPassword"
+MQTT_BROKER = "192.168.1.100"
+LAYOUT_ID = "tamarack"
+DEVICE_ID = "my-custom-pico"
+TOPIC_ID = "DEJA"
+```
+
+### `code.py`
+
+```python
+import board
+import digitalio
+import os
+import json
+import socketpool
+import wifi
+import adafruit_minimqtt.adafruit_minimqtt as MQTT
+
+# 🔧 Configuration from settings.toml
+ssid = os.getenv("CIRCUITPY_WIFI_SSID")
+password = os.getenv("CIRCUITPY_WIFI_PASSWORD")
+broker = os.getenv("MQTT_BROKER")
+layout_id = os.getenv("LAYOUT_ID")
+device_id = os.getenv("DEVICE_ID")
+topic_id = os.getenv("TOPIC_ID")
+
+subscribe_topic = f"{topic_id}/{layout_id}/{device_id}"
+publish_topic = f"{topic_id}/{layout_id}/{device_id}/messages"
+
+# 💡 Set up a single LED pin for demo purposes
+led = digitalio.DigitalInOut(board.GP6)
+led.direction = digitalio.Direction.OUTPUT
+
+# 📥 Handle incoming MQTT messages
+def on_message(client, topic, message):
+    data = json.loads(message)
+
+    # ⚠️ Ignore messages for other devices
+    if data.get("device") != device_id:
+        return
+
+    action = data.get("action")
+    payload = data.get("payload")
+
+    if action == "pin" and payload:
+        pin_num = payload.get("pin")
+        state = payload.get("state", False)
+        if pin_num == 6:
+            led.value = state
+            client.publish(publish_topic, f"Pin 6 set to {state}")
+            print(f"✅ Pin 6 → {state}")
+
+def on_connect(client, userdata, flags, rc):
+    client.subscribe(subscribe_topic)
+    client.publish(publish_topic, f"Connected: {device_id}")
+    print(f"📡 Subscribed to {subscribe_topic}")
+
+# 🌐 Connect to WiFi
+print("Connecting to WiFi...")
+wifi.radio.connect(ssid, password)
+print(f"Connected! IP: {wifi.radio.ipv4_address}")
+
+# 📡 Connect to MQTT broker
+pool = socketpool.SocketPool(wifi.radio)
+mqtt_client = MQTT.MQTT(broker=broker, port=1883, socket_pool=pool)
+mqtt_client.on_connect = on_connect
+mqtt_client.on_message = on_message
+
+print("Connecting to MQTT...")
+mqtt_client.connect()
+
+# 🔄 Main loop — poll for messages
+while True:
+    mqtt_client.loop()
+```
+
+> 📦 **Required libraries:** Copy `adafruit_minimqtt` into the `lib/` folder on your Pico W's CIRCUITPY drive. Get it from the [Adafruit CircuitPython Bundle](https://circuitpython.org/libraries).
+
+---
+
+## 💻 Minimal Python Script (Desktop/Raspberry Pi)
+
+Control your layout from any computer on the network using the `paho-mqtt` library.
+
+```bash
+pip install paho-mqtt
+```
+
+```python
+import json
+import paho.mqtt.client as mqtt
+
+# 🔧 Configuration
+BROKER = "192.168.1.100"
+LAYOUT_ID = "tamarack"
+DEVICE_ID = "my-custom-pico"
+TOPIC_ID = "DEJA"
+
+topic = f"{TOPIC_ID}/{LAYOUT_ID}/{DEVICE_ID}"
+
+client = mqtt.Client()
+client.connect(BROKER, 1883)
+
+# 💡 Turn on pin 6
+command = {
+    "action": "pin",
+    "device": DEVICE_ID,
+    "payload": {"pin": 6, "state": True}
+}
+client.publish(topic, json.dumps(command))
+print(f"📤 Sent: {json.dumps(command)}")
+
+# 🔄 Turn a servo to 90 degrees
+servo_command = {
+    "action": "servo",
+    "device": DEVICE_ID,
+    "payload": {"servo": 0, "value": 90}
+}
+client.publish(topic, json.dumps(servo_command))
+print(f"📤 Sent: {json.dumps(servo_command)}")
+
+client.disconnect()
+```
+
+---
+
+## 🟢 Minimal Node.js Script
+
+Control your layout from Node.js using the `mqtt` npm package.
+
+```bash
+npm install mqtt
+```
+
+```javascript
+import mqtt from 'mqtt'
+
+// 🔧 Configuration
+const BROKER = 'mqtt://192.168.1.100'
+const LAYOUT_ID = 'tamarack'
+const DEVICE_ID = 'my-custom-pico'
+const TOPIC_ID = 'DEJA'
+
+const topic = `${TOPIC_ID}/${LAYOUT_ID}/${DEVICE_ID}`
+
+const client = mqtt.connect(BROKER)
+
+client.on('connect', () => {
+  console.log('📡 Connected to MQTT broker')
+
+  // 💡 Turn on pin 6
+  client.publish(topic, JSON.stringify({
+    action: 'pin',
+    device: DEVICE_ID,
+    payload: { pin: 6, state: true }
+  }))
+
+  // 🔄 Move servo to 90 degrees
+  client.publish(topic, JSON.stringify({
+    action: 'servo',
+    device: DEVICE_ID,
+    payload: { servo: 0, value: 90 }
+  }))
+
+  console.log('✅ Commands sent!')
+  client.end()
+})
+```
+
+---
+
+## 🧪 Testing Your Device
+
+1. **Start an MQTT broker** — Install [Mosquitto](https://mosquitto.org/) or use any MQTT broker on your network
+2. **Enable MQTT on the DEJA server** — Set `ENABLE_MQTT=true` in your server's `.env`
+3. **Use an MQTT explorer** — Tools like [MQTT Explorer](https://mqtt-explorer.com/) let you watch messages in real time
+4. **Send test commands** — Use the Python or Node.js scripts above to publish commands to your device's topic
+5. **Check the Monitor app** — If your device is registered in Firestore, its connection status appears in the DEJA Monitor dashboard
+
+---
+
+## 📚 Next Steps
+
+- 📖 **[IO Devices & Firmware Overview](/docs/io/overview)** — Learn about the stock Arduino and Pico W firmware
+- 🌐 **[WebSocket Integration](/docs/io/websocket-integration)** — Connect scripts directly to the DEJA server via WebSocket instead of MQTT
+- 🔥 **[DEJA Cloud](https://cloud.dejajs.com)** — Register devices and manage your layout configuration

@@ -54,6 +54,7 @@ async function handleEfx () {
     density="compact"
   >
     <v-card-title class="flex flex-nowrap items-center gap-3 !overflow-visible">
+      <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100" size="small">mdi-drag</v-icon>
       <router-link :to="{ name: 'Edit Effect', params: { effectId: efxId } }" class="flex items-center gap-3 min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
         <v-tooltip :text="efxId" location="top">
           <template #activator="{ props: tooltipProps }">

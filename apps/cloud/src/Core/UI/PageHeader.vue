@@ -62,7 +62,7 @@ const textClass = TEXT_CLASSES[resolvedColor] ?? TEXT_CLASSES.sky
         <slot></slot>
       </div>
     </div>
-    <div v-if="subtitle || $slots.subtitle" class="text-sm text-slate-400 mt-1">
+    <div v-if="subtitle || $slots.subtitle" class="text-sm opacity-60 mt-1">
       <slot name="subtitle">{{ subtitle }}</slot>
     </div>
   </div>

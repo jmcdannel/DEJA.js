@@ -24,7 +24,7 @@ function toggle(item: { name: string; isFavorite: boolean }) {
       </v-icon>
     </button>
   </div>
-  <p v-if="!menuConfig?.length" class="text-sm text-slate-500 text-center py-4">No menu items available</p>
+  <p v-if="!menuConfig?.length" class="text-sm opacity-40 text-center py-4">No menu items available</p>
 </template>
 
 <style scoped>
@@ -40,35 +40,35 @@ function toggle(item: { name: string; isFavorite: boolean }) {
   gap: 8px;
   padding: 10px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  background: rgba(2, 6, 23, 0.3);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  background: rgba(var(--v-theme-surface), 0.3);
   cursor: pointer;
   transition: border-color 150ms ease, background 150ms ease;
   text-align: left;
 }
 
 .favorite-item:hover {
-  border-color: rgba(148, 163, 184, 0.25);
-  background: rgba(56, 189, 248, 0.05);
+  border-color: rgba(var(--v-theme-on-surface), 0.25);
+  background: rgba(var(--v-theme-primary), 0.05);
 }
 
 .favorite-item--active {
-  border-color: rgba(56, 189, 248, 0.3);
-  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(var(--v-theme-primary), 0.3);
+  background: rgba(var(--v-theme-primary), 0.08);
 }
 
 .favorite-item__label {
   flex: 1;
   font-size: 0.8rem;
   font-weight: 500;
-  color: #cbd5e1;
+  color: rgba(var(--v-theme-on-surface), 0.8);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .favorite-item__star {
-  color: rgba(148, 163, 184, 0.4);
+  color: rgba(var(--v-theme-on-surface), 0.3);
   flex-shrink: 0;
 }
 

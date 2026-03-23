@@ -53,7 +53,7 @@ function handleRequestAccess() {
     <template v-else-if="!user">
       <div class="flex gap-4 flex-col md:flex-row w-full">
         <v-card
-          class="mx-auto bg-slate-900 bg-opacity-70 rounded-lg basis-full md:basis-1/2 w-full"
+          class="mx-auto rounded-lg basis-full md:basis-1/2 w-full"
           title="Login"
           color="primary"
           variant="outlined"
@@ -63,7 +63,7 @@ function handleRequestAccess() {
           </v-card-text>
         </v-card>
         <v-card
-          class="mx-auto bg-slate-900 bg-opacity-70 rounded-lg basis-full md:basis-1/2 w-full"
+          class="mx-auto rounded-lg basis-full md:basis-1/2 w-full"
           title="Sign up"
           color="primary"
           variant="outlined"
@@ -79,10 +79,10 @@ function handleRequestAccess() {
               </div>
 
               <div class="flex items-center justify-between">
-                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded">Request Acceess</button>
+                <button type="submit" class="px-4 py-2 bg-indigo-600 rounded">Request Acceess</button>
                 <button
                   type="button"
-                  class="text-sm text-gray-500 underline"
+                  class="text-sm opacity-50 underline"
                   @click="router.push('/guest')">
                   Continue as guest
                 </button>

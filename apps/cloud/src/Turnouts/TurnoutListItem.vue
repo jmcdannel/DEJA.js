@@ -18,27 +18,18 @@ const props = defineProps<{
 const internalState = ref(props.state !== undefined ? props.state : props.turnout?.state)
 
 async function handleSwitch() {
-  
   await setTurnout(props.turnoutId, {...props.turnout, id: props.turnoutId, state: internalState.value })
-  // if (props.turnout?.effectId) {
-  //   const effectId = props.turnout.effectId
-  //   useTimeoutFn(async () => {
-  //     const effect = await getEffect(effectId)
-  //     if (effect) {
-  //       await runEffect({...effect, type: effect.type || '', state: props.state })
-  //     }
-  //   }, 2000)
-  // }
 }
 
 </script>
-<template> 
+<template>
   <v-card
     class="mx-auto w-full h-full justify-between flex flex-col"
     density="compact"
   >
     <v-card-item>
       <v-card-title class="font-weight-black flex flex-nowrap items-center gap-3 !overflow-visible">
+        <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 flex-shrink-0" size="small">mdi-drag</v-icon>
         <router-link :to="{ name: 'Edit Turnout', params: { turnoutId } }" class="flex items-center gap-3 min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
           <v-icon
             :icon="turnout?.type === 'servo' ? 'mdi-call-split' : 'mdi-directions-fork'"
@@ -57,7 +48,7 @@ async function handleSwitch() {
           class="flex-shrink-0"
         />
       </v-card-title>
-      <v-card-subtitle class="text-md">
+      <v-card-subtitle v-if="turnout?.desc" class="text-md">
         {{ turnout?.desc }}
       </v-card-subtitle>
     </v-card-item>
@@ -76,12 +67,6 @@ async function handleSwitch() {
           >
             {{ tag }}
           </v-chip>
-          <v-label
-            v-if="turnout?.effectId"
-            class="text-xs"
-          >
-            {{ turnout?.effectId }}
-          </v-label>
         </v-chip-group>
         <v-btn
           v-if="turnout?.device"

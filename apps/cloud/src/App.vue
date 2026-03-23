@@ -55,11 +55,11 @@ watch(() => route.fullPath, () => {
   if (!routeReady.value && !isNavigating.value) {
     routeReady.value = true
   }
-})
+}, { immediate: true })
 // Also mark ready when navigation finishes
 watch(isNavigating, (navigating) => {
   if (!navigating) routeReady.value = true
-})
+}, { immediate: true })
 
 const isFullscreen = computed(() => {
   // Before initial route resolves, hide chrome to prevent flash
@@ -80,8 +80,8 @@ const { isTrialing, trialDaysLeft, plan } = useSubscription()
 const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
 </script>
 <template>
-  <v-responsive class="border rounded min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
-      <v-app :theme="themePreference" class="!bg-transparent">
+  <v-app :theme="themePreference">
+    <div class="app-bg min-h-screen">
         <PageBackground
           app-name="cloud"
           :background-id="isFullscreen ? 'stars' : undefined"
@@ -166,11 +166,15 @@ const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
       </v-main>
       <NotificationContainer />
       </PageBackground>
-    </v-app>
-  </v-responsive>
+    </div>
+  </v-app>
 </template>
 
 <style scoped>
+.app-bg {
+  background: rgb(var(--v-theme-background));
+}
+
 .fullscreen-header {
   position: fixed;
   top: 0;

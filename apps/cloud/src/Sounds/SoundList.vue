@@ -80,14 +80,14 @@ function handleStop() {
       color="primary"
       bg-color="surface"
     />
-    <div v-if="searchQuery && !loading" class="text-xs text-slate-400 mt-1">
+    <div v-if="searchQuery && !loading" class="text-xs opacity-60 mt-1">
       {{ filteredSoundFiles.length }} of {{ soundFiles.length }} sounds
     </div>
   </div>
 
   <div v-if="loading" class="text-center py-8">
     <v-progress-circular indeterminate color="primary" size="32" class="mb-3" />
-    <p class="text-slate-400 text-sm">Loading sounds...</p>
+    <p class="opacity-60 text-sm">Loading sounds...</p>
   </div>
 
   <div v-else-if="error" class="text-center py-10">

@@ -6,6 +6,7 @@ import { useStorage } from '@vueuse/core'
 import { collection, query, where } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { useLocos } from '@repo/modules/locos'
+import { useServerStatus } from '@repo/modules'
 import { Signout } from '@repo/auth'
 import { QuickStart } from '@repo/ui'
 
@@ -13,6 +14,7 @@ const router = useRouter()
 const user = useCurrentUser()
 const layoutId = useStorage('@DEJA/layoutId', '')
 const { createLoco } = useLocos()
+const { serverStatus } = useServerStatus()
 
 const userLayouts = useCollection(
   computed(() =>
@@ -22,6 +24,12 @@ const userLayouts = useCollection(
   ),
 )
 const primaryLayoutId = computed(() => userLayouts.value?.[0]?.id || layoutId.value)
+
+const quickStartCompleted = computed(() => {
+  const steps: number[] = [1] // Always registered on this page
+  if (serverStatus.value?.online) steps.push(2)
+  return steps
+})
 
 // Quick-add loco
 const locoAddress = ref<string>('')
@@ -54,6 +62,12 @@ function addAnother() {
   locoAdded.value = false
 }
 
+async function handleQuickStartAddLoco(address: number, name: string) {
+  locoAddress.value = String(address)
+  locoName.value = name
+  await handleAddLoco()
+}
+
 function goToDashboard() {
   router.push({ name: 'home' })
 }
@@ -68,7 +82,7 @@ function goToDashboard() {
           <v-icon color="success" size="40">mdi-check-circle</v-icon>
         </div>
         <h1 class="font-display text-4xl text-sky-100 mb-2">You're All Set!</h1>
-        <p class="text-slate-400 text-sm">
+        <p class="opacity-60 text-sm">
           Welcome{{ user?.displayName ? `, ${user.displayName}` : '' }}! Your layout
           <strong class="text-sky-300">{{ primaryLayoutId }}</strong> is ready to go.
         </p>
@@ -80,7 +94,7 @@ function goToDashboard() {
           <v-icon color="pink" size="28">mdi-train</v-icon>
           <h2 class="text-lg font-semibold text-sky-100">Add Your First Locomotive</h2>
         </div>
-        <p class="text-slate-400 text-sm mb-4">
+        <p class="opacity-60 text-sm mb-4">
           Enter the DCC address programmed into your locomotive decoder to get running right away.
         </p>
 
@@ -145,7 +159,13 @@ function goToDashboard() {
 
       <!-- Install Server -->
       <div class="glass-card mb-6">
-        <QuickStart :completed="[1]" :uid="user?.uid" :layout-id="primaryLayoutId" />
+        <QuickStart
+          :completed="quickStartCompleted"
+          :uid="user?.uid"
+          :layout-id="primaryLayoutId"
+          :server-online="serverStatus?.online ?? false"
+          @add-loco="handleQuickStartAddLoco"
+        />
       </div>
 
       <!-- Explore More -->
@@ -154,7 +174,7 @@ function goToDashboard() {
           <v-icon color="primary" size="28">mdi-compass-outline</v-icon>
           <h2 class="text-lg font-semibold text-sky-100">Explore More</h2>
         </div>
-        <p class="text-slate-400 text-sm mb-4">
+        <p class="opacity-60 text-sm mb-4">
           Ready to dig deeper? Here are some next steps.
         </p>
         <div class="flex flex-col gap-2">

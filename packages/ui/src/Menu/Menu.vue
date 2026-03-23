@@ -75,7 +75,7 @@ const DEJA_SUITE_APPS = [
     :mobile="mobile"
     mobile-breakpoint="md"
     :temporary="temporary || mobile"
-    class="bg-slate-900/95 backdrop-blur-sm"
+    class="menu-drawer backdrop-blur-sm"
   >
     <div class="flex flex-col h-full">
       <v-list density="compact" class="py-1">
@@ -90,8 +90,8 @@ const DEJA_SUITE_APPS = [
             :key="item.name"
             :active="false"
             :class="[
-              'py-0.5 min-h-8 transition-colors duration-150',
-              isActive(item) ? '!bg-white/10' : 'hover:!bg-white/5',
+              'py-0.5 min-h-8 transition-colors duration-150 menu-item',
+              isActive(item) ? 'menu-item--active' : '',
             ]"
             link
             @click="onHandleMenu(item)"
@@ -104,7 +104,7 @@ const DEJA_SUITE_APPS = [
                 {{ item.icon }}
               </v-icon>
             </template>
-            <v-list-item-title :class="isActive(item) ? 'text-white' : ''">
+            <v-list-item-title :class="isActive(item) ? 'menu-item__title--active' : ''">
               {{ item.label }}
             </v-list-item-title>
           </v-list-item>
@@ -138,7 +138,7 @@ const DEJA_SUITE_APPS = [
 
       <!-- Pinned app switcher footer -->
       <div>
-        <v-divider class="border-slate-700" />
+        <v-divider class="menu-divider" />
         <div class="flex justify-around px-2 py-2">
           <v-tooltip
             v-for="app in DEJA_SUITE_APPS"
@@ -166,12 +166,66 @@ const DEJA_SUITE_APPS = [
 </template>
 
 <style scoped>
-/* Neutralize Vuetify's built-in hover and active overlays for grouped items.
-   We apply our own Tailwind-based hover/active backgrounds instead. */
+/* Neutralize Vuetify's built-in hover and active overlays for grouped items. */
 :deep(.v-list-item:hover > .v-list-item__overlay) {
   opacity: 0;
 }
 :deep(.v-list-item--active > .v-list-item__overlay) {
   opacity: 0;
+}
+
+/* ═══════ Dark mode (default) ═══════ */
+.menu-drawer {
+  background: rgba(15, 23, 42, 0.95);
+}
+.menu-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.menu-item--active {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+.menu-item__title--active {
+  color: #FFFFFF;
+}
+.menu-divider {
+  border-color: rgb(51, 65, 85);
+}
+
+/* ═══════ 🌞 Light mode ═══════ */
+:root:not(.dark) .menu-drawer {
+  background: rgba(255, 255, 255, 0.97);
+}
+:root:not(.dark) .menu-item:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+:root:not(.dark) .menu-item--active {
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+:root:not(.dark) .menu-item__title--active {
+  color: #1E293B;
+  font-weight: 600;
+}
+:root:not(.dark) .menu-divider {
+  border-color: rgb(226, 232, 240);
+}
+
+/* ═══════ ⬛⬜ High-contrast ═══════ */
+.high-contrast .menu-drawer {
+  background: #000000;
+  border-right: 2px solid #FFFFFF;
+}
+.high-contrast .menu-item:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+.high-contrast .menu-item--active {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-left: 3px solid #FFFFFF;
+}
+.high-contrast .menu-item__title--active {
+  color: #FFFFFF;
+  font-weight: 700;
+}
+.high-contrast .menu-divider {
+  border-color: #FFFFFF;
 }
 </style>

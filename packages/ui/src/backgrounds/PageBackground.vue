@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
+import { useTheme as useVuetifyTheme } from 'vuetify'
 import { useUserPreferences } from '@repo/modules'
 import { getBackgroundById } from './registry'
 import type { AppBackgroundPrefs } from '@repo/modules'
@@ -20,9 +21,19 @@ const props = withDefaults(
 )
 
 const route = useRoute()
+const vuetifyTheme = useVuetifyTheme()
 const { getBackground } = useUserPreferences()
 
+/** 🎨 Backgrounds are disabled in light & high-contrast modes */
+const isBackgroundDisabled = computed(() => {
+  const mode = vuetifyTheme.global.name.value
+  return mode === 'light' || mode === 'high-contrast'
+})
+
 const resolvedId = computed(() => {
+  // Backgrounds disabled in light/high-contrast mode
+  if (isBackgroundDisabled.value) return 'none'
+
   // Explicit prop override takes priority
   if (props.backgroundId) return props.backgroundId
 
@@ -65,14 +76,14 @@ const imageStyle = computed(() => {
 
 <template>
   <div class="relative min-h-screen">
-    <!-- Image background layer -->
+    <!-- Image background layer (dark mode only) -->
     <div
       v-if="bgDef?.type === 'image'"
       class="fixed inset-0 z-0"
       :style="imageStyle"
     />
 
-    <!-- Effect background layer -->
+    <!-- Effect background layer (dark mode only) -->
     <component
       :is="effectComponent"
       v-if="bgDef?.type === 'effect' && effectComponent"

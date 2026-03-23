@@ -51,6 +51,7 @@ function getTurnoutState(tId: string) {
     density="compact"
   >
     <v-card-title class="flex flex-nowrap items-center gap-3 !overflow-visible">
+      <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 flex-shrink-0" size="small">mdi-drag</v-icon>
       <router-link :to="{ name: 'Edit Route', params: { routeId } }" class="flex items-center gap-3 min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
         <v-icon :icon="routeType.icon" :color="color" class="flex-shrink-0" />
         <span class="truncate">{{ route?.name }}</span>
@@ -66,7 +67,7 @@ function getTurnoutState(tId: string) {
         @click="handleRun"
       >Run</v-btn>
     </v-card-title>
-    <v-card-text 
+    <v-card-text
       class="min-h-8 flex py-2 justify-space-between">
       <v-stepper>
         <v-stepper-header>

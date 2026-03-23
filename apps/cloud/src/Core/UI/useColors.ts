@@ -5,7 +5,7 @@ export function useColors() {
       value: 'slate',
       label: 'slate',
       color: 'slate',
-      text: 'text-slate-500 dard:text-slate-400',
+      text: 'text-slate-500 dark:text-slate-400',
       border: 'border-slate-500 dark:border-slate-400',
       bg: 'bg-slate-500 dark:bg-slate-400',
     },

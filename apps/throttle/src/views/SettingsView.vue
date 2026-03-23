@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useCurrentUser } from 'vuefire'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
@@ -11,11 +11,16 @@ import SelectFavorites from '@/core/Menu/SelectFavorites.vue'
 import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
+import { wiThrottleService } from '@/services/WiThrottleService'
+import { useServerDiscovery } from '@/composables/useServerDiscovery'
 
 const user = useCurrentUser()
 const { plan, status, isTrialing, trialDaysLeft, subscription } = useSubscription()
 const { themePreference, setTheme } = useThemeSwitcher()
 const { mdAndUp } = useDisplay()
+
+const { isScanning, discoveredServers, startScan, isAvailable, checkAvailability } = useServerDiscovery()
+onMounted(() => { checkAvailability() })
 
 const planName = computed(() => PLAN_DISPLAY[plan.value].name)
 const planPrice = computed(() => {
@@ -107,6 +112,9 @@ async function saveLayoutConnectionSettings() {
     await setDoc(doc(db, 'layouts', layoutId), {
       throttleConnection: { type: connectionType.value, host: connectionHost.value, port: connectionPort.value }
     }, { merge: true })
+    // Reconnect with new settings
+    await wiThrottleService.disconnect()
+    await wiThrottleService.connect()
   } catch (e) {
     console.error('Error saving throttle connection:', e)
   }
@@ -129,6 +137,7 @@ const sections = [
   { id: 'connection', label: 'Connection', icon: 'mdi-server-network' },
   { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'favorites', label: 'Favorites', icon: 'mdi-star-outline' },
+  { id: 'backgrounds', label: 'Backgrounds', icon: 'mdi-image-outline' },
 ]
 
 function scrollTo(id: string) {
@@ -162,11 +171,11 @@ const backgroundPages = [
           </div>
           <div class="settings-row">
             <div class="settings-row__label"><span class="settings-row__name">Email</span></div>
-            <div class="settings-row__value text-slate-300">{{ user?.email }}</div>
+            <div class="settings-row__value opacity-60">{{ user?.email }}</div>
           </div>
           <div class="settings-row">
             <div class="settings-row__label"><span class="settings-row__name">Display Name</span></div>
-            <div class="settings-row__value text-slate-300">{{ user?.displayName || '—' }}</div>
+            <div class="settings-row__value opacity-60">{{ user?.displayName || '—' }}</div>
           </div>
         </div>
 
@@ -182,8 +191,8 @@ const backgroundPages = [
               <span class="settings-row__desc">{{ nextDateLabel }}</span>
             </div>
             <div class="settings-row__value flex items-center gap-3">
-              <span class="text-sky-100 font-semibold">{{ planName }}</span>
-              <span class="text-slate-400 text-sm">{{ planPrice }}</span>
+              <span class="font-semibold">{{ planName }}</span>
+              <span class="opacity-50 text-sm">{{ planPrice }}</span>
               <v-chip :color="statusColor" size="x-small" variant="tonal" class="uppercase tracking-wider">{{ status }}</v-chip>
             </div>
           </div>
@@ -224,13 +233,6 @@ const backgroundPages = [
                 </v-btn>
               </v-btn-toggle>
             </div>
-          </div>
-          <div class="settings-row settings-row--block">
-            <div class="settings-row__label mb-3">
-              <span class="settings-row__name">Backgrounds</span>
-              <span class="settings-row__desc">Customize page backgrounds</span>
-            </div>
-            <BackgroundSettings app-name="throttle" :pages="backgroundPages" />
           </div>
         </div>
 
@@ -291,14 +293,49 @@ const backgroundPages = [
                 @click="connectionType = opt.value as 'deja-server' | 'withrottle'"
               >
                 <v-icon size="24" :color="connectionType === opt.value ? 'primary' : undefined" class="mb-2">{{ opt.icon }}</v-icon>
-                <div class="font-medium text-sm text-sky-100">{{ opt.label }}</div>
-                <div class="text-xs text-slate-400 mt-1">{{ opt.desc }}</div>
+                <div class="font-medium text-sm">{{ opt.label }}</div>
+                <div class="text-xs opacity-50 mt-1">{{ opt.desc }}</div>
               </div>
             </div>
             <template v-if="connectionType === 'withrottle'">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                 <v-text-field v-model="connectionHost" label="Host IP" placeholder="192.168.1.50" density="compact" variant="outlined" hide-details="auto" />
                 <v-text-field v-model.number="connectionPort" label="Port" type="number" placeholder="44444" density="compact" variant="outlined" hide-details="auto" />
+              </div>
+              <!-- mDNS server discovery -->
+              <div class="mb-3">
+                <v-btn
+                  v-if="isAvailable !== false"
+                  size="small"
+                  variant="tonal"
+                  color="cyan"
+                  :loading="isScanning"
+                  prepend-icon="mdi-magnify"
+                  class="text-none mb-2"
+                  @click="startScan"
+                >
+                  {{ isScanning ? 'Scanning...' : 'Scan for WiThrottle Servers' }}
+                </v-btn>
+                <p v-else class="text-xs text-slate-400 mb-2">
+                  Server discovery requires the native app (iOS/Android).
+                </p>
+                <div v-if="discoveredServers.length > 0" class="flex flex-col gap-2 mt-2">
+                  <div
+                    v-for="server in discoveredServers"
+                    :key="`${server.host}:${server.port}`"
+                    class="flex items-center justify-between p-2 rounded border border-cyan-500/30 bg-cyan-500/5 cursor-pointer hover:bg-cyan-500/10 transition-colors"
+                    @click="connectionHost = server.host; connectionPort = server.port"
+                  >
+                    <div>
+                      <div class="text-sm font-medium text-cyan-300">{{ server.name }}</div>
+                      <div class="text-xs text-slate-400">{{ server.host }}:{{ server.port }}</div>
+                    </div>
+                    <v-icon size="18" color="cyan">mdi-arrow-right-circle</v-icon>
+                  </div>
+                </div>
+                <p v-else-if="!isScanning && isAvailable === true" class="text-xs text-slate-400">
+                  No servers found yet. Make sure JMRI or DCC-EX WiThrottle is running.
+                </p>
               </div>
             </template>
             <v-btn color="primary" variant="tonal" size="small" :loading="isLayoutSaving" prepend-icon="mdi-content-save" class="text-none" @click="saveLayoutConnectionSettings">
@@ -327,6 +364,17 @@ const backgroundPages = [
           </div>
         </div>
 
+        <!-- Backgrounds -->
+        <div id="backgrounds" class="settings-section">
+          <div class="settings-section__header">
+            <v-icon size="20" class="settings-section__icon">mdi-image-outline</v-icon>
+            <h2 class="settings-section__title">Backgrounds</h2>
+          </div>
+          <div class="settings-row settings-row--block">
+            <BackgroundSettings app-name="throttle" :pages="backgroundPages" />
+          </div>
+        </div>
+
         <!-- Version -->
         <p class="settings-version">DEJA.js Throttle v{{ appVersion }}</p>
       </div>
@@ -334,7 +382,7 @@ const backgroundPages = [
       <!-- Jump-to nav (desktop only, right side) -->
       <nav v-if="mdAndUp" class="settings-nav">
         <div class="settings-nav__inner">
-          <p class="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Settings</p>
+          <p class="text-xs opacity-40 uppercase tracking-widest font-medium mb-3">Settings</p>
           <button
             v-for="s in sections"
             :key="s.id"
@@ -377,7 +425,7 @@ const backgroundPages = [
   padding: 8px 12px;
   border: none;
   background: none;
-  color: rgba(148, 163, 184, 0.7);
+  color: rgba(var(--v-theme-on-surface), 0.5);
   font-size: 0.8rem;
   font-weight: 500;
   text-align: left;
@@ -387,8 +435,8 @@ const backgroundPages = [
 }
 
 .settings-nav__item:hover {
-  color: #e0f2fe;
-  background: rgba(56, 189, 248, 0.08);
+  color: rgb(var(--v-theme-on-surface));
+  background: rgba(var(--v-theme-primary), 0.08);
 }
 
 .settings-content {
@@ -397,8 +445,8 @@ const backgroundPages = [
 }
 
 .settings-section {
-  background: rgba(15, 23, 42, 0.45);
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  background: rgba(var(--v-theme-surface), 0.45);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
   border-radius: 12px;
   margin-bottom: 20px;
   overflow: clip;
@@ -409,15 +457,15 @@ const backgroundPages = [
   align-items: center;
   gap: 10px;
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 }
 
-.settings-section__icon { color: #38bdf8; }
+.settings-section__icon { color: rgb(var(--v-theme-primary)); }
 
 .settings-section__title {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #e0f2fe;
+  color: rgb(var(--v-theme-on-surface));
 }
 
 .settings-row {
@@ -425,7 +473,7 @@ const backgroundPages = [
   align-items: center;
   justify-content: space-between;
   padding: 14px 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06);
   gap: 16px;
 }
 .settings-row:last-child { border-bottom: none; }
@@ -433,34 +481,34 @@ const backgroundPages = [
 .settings-row--actions { padding: 12px 20px 16px; }
 
 .settings-row__label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.settings-row__name { font-size: 0.875rem; font-weight: 500; color: #cbd5e1; }
-.settings-row__desc { font-size: 0.75rem; color: rgba(148, 163, 184, 0.6); }
+.settings-row__name { font-size: 0.875rem; font-weight: 500; color: rgba(var(--v-theme-on-surface), 0.8); }
+.settings-row__desc { font-size: 0.75rem; color: rgba(var(--v-theme-on-surface), 0.45); }
 .settings-row__value { flex-shrink: 0; }
 
 .server-option {
   flex: 1;
   padding: 16px;
   border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  background: rgba(2, 6, 23, 0.4);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.15);
+  background: rgba(var(--v-theme-surface), 0.4);
   cursor: pointer;
   transition: border-color 150ms ease, background 150ms ease;
   text-align: center;
 }
 .server-option:hover {
-  border-color: rgba(56, 189, 248, 0.3);
-  background: rgba(56, 189, 248, 0.05);
+  border-color: rgba(var(--v-theme-primary), 0.3);
+  background: rgba(var(--v-theme-primary), 0.05);
 }
 .server-option--selected {
-  border-color: rgba(56, 189, 248, 0.5);
-  background: rgba(56, 189, 248, 0.08);
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.1);
+  border-color: rgba(var(--v-theme-primary), 0.5);
+  background: rgba(var(--v-theme-primary), 0.08);
+  box-shadow: 0 0 12px rgba(var(--v-theme-primary), 0.1);
 }
 
 .settings-version {
   text-align: center;
   font-size: 0.7rem;
-  color: rgba(148, 163, 184, 0.4);
+  color: rgba(var(--v-theme-on-surface), 0.3);
   padding: 16px 0 8px;
 }
 </style>
