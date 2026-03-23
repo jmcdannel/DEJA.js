@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 
 </script>
 <template>
-  <PageHeader menu="Signals" />
+  <PageHeader title="Signals" icon="mdi-traffic-light" color="emerald" />
   <div
   class="border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 h-96 mb-4"
   ></div>

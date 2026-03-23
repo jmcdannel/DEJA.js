@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import SensorForm from '@/Sensors/SensorForm.vue'
 import type { Sensor } from '@repo/modules/sensors'
 
@@ -35,6 +35,6 @@ function handleClose() {
 }
 </script>
 <template>
-  <PageHeader menu="Sensors" />
+  <PageHeader title="Sensors" icon="mdi-access-point" color="teal" />
   <SensorForm :sensor="defaultSensor" @close="handleClose" />
 </template>

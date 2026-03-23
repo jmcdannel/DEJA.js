@@ -7,7 +7,7 @@ import { rtdb } from '@repo/firebase-config'
 import type { Loco } from '@repo/modules/locos'
 import { useLocos } from '@repo/modules/locos'
 import { useDcc } from '@repo/dccex'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import RosterList from '@/Roster/RosterList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 import { ThrottleLaunchQR } from '@repo/ui'
@@ -81,32 +81,32 @@ async function importFromCS() {
 </script>
 
 <template>
-  <PageHeader menu="Roster" />
-
-  <div class="flex gap-2 px-4 mb-4">
-    <v-btn
-      :loading="rosterSyncStatus?.status === 'syncing'"
-      :disabled="isSyncing"
-      prepend-icon="mdi-sync"
-      variant="tonal"
-      color="primary"
-      size="small"
-      @click="syncToCS"
-    >
-      Sync to DCC-EX
-    </v-btn>
-    <v-btn
-      :loading="rosterSyncStatus?.status === 'importing'"
-      :disabled="isSyncing"
-      prepend-icon="mdi-download"
-      variant="tonal"
-      color="secondary"
-      size="small"
-      @click="importFromCS"
-    >
-      Import from DCC-EX
-    </v-btn>
-  </div>
+  <PageHeader title="Roster" icon="mdi-train" color="pink">
+    <template #actions>
+      <v-btn
+        :loading="rosterSyncStatus?.status === 'syncing'"
+        :disabled="isSyncing"
+        prepend-icon="mdi-sync"
+        variant="tonal"
+        color="primary"
+        size="small"
+        @click="syncToCS"
+      >
+        Sync to DCC-EX
+      </v-btn>
+      <v-btn
+        :loading="rosterSyncStatus?.status === 'importing'"
+        :disabled="isSyncing"
+        prepend-icon="mdi-download"
+        variant="tonal"
+        color="secondary"
+        size="small"
+        @click="importFromCS"
+      >
+        Import from DCC-EX
+      </v-btn>
+    </template>
+  </PageHeader>
 
   <RosterList @edit="handleEditLoco">
     <template #prepend>

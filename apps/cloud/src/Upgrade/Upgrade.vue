@@ -5,7 +5,7 @@ import { useCurrentUser } from 'vuefire'
 import { getIdToken } from 'firebase/auth'
 import { useSubscription, PLAN_DISPLAY, TIER_ORDER } from '@repo/modules'
 import type { PlanTier, BillingCycle } from '@repo/modules'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 
 const router = useRouter()
 const user = useCurrentUser()
@@ -360,10 +360,12 @@ function cancelPayment() {
 
 <template>
   <div class="animate-fade-in-up space-y-6">
-    <PageHeader label="Upgrade" icon="mdi-arrow-up-bold-circle" color="amber">
-      <v-btn variant="text" size="small" prepend-icon="mdi-arrow-left" class="text-none" @click="router.back()">
-        Back
-      </v-btn>
+    <PageHeader title="Upgrade" icon="mdi-arrow-up-bold-circle" color="amber">
+      <template #actions>
+        <v-btn variant="text" size="small" prepend-icon="mdi-arrow-left" class="text-none" @click="router.back()">
+          Back
+        </v-btn>
+      </template>
     </PageHeader>
 
     <!-- Success State -->

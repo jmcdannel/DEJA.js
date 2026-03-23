@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createLogger } from '@repo/utils'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import RouteForm from '@/Routes/RouteForm.vue'
 import { type Route } from '@repo/modules/index.ts'
 import { useRoutes } from '@repo/modules/routes/useRoutes'
@@ -42,7 +42,7 @@ function handleClose() {
 onMounted(loadRoute)
 </script>
 <template>
-  <PageHeader menu="Routes" />
+  <PageHeader title="Routes" icon="mdi-map" color="purple" />
   <div v-if="loading" class="p-6 flex justify-center">
     <v-progress-circular indeterminate color="purple" />
   </div>

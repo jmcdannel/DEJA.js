@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import type { Effect } from '@repo/modules'
 import { useRouter } from 'vue-router'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import EffectsList from '@/Effects/EffectsList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
-import { ListMenu } from '@repo/ui'
 
 const router = useRouter()
 
@@ -18,9 +17,7 @@ function handleAdd() {
 
 </script>
 <template>
-  <PageHeader menu="Effects">
-    <ListMenu :disabledMenus="['view']" :module-name="'effects'" />
-  </PageHeader>
+  <PageHeader title="Effects" icon="mdi-rocket-launch" color="indigo" />
 
   <EffectsList @edit="handleEdit">
     <template #prepend>

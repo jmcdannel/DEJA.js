@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Signal } from '@repo/modules/signals'
 import { useRouter } from 'vue-router'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import SignalList from '@/Signals/SignalsList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 
@@ -17,7 +17,7 @@ function handleAdd() {
 
 </script>
 <template>
-  <PageHeader menu="Signals" />
+  <PageHeader title="Signals" icon="mdi-traffic-light" color="emerald" />
   <SignalList @edit="handleEdit">
     <template #prepend>
       <AddTile @click="handleAdd" color="emerald" />
