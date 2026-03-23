@@ -1,5 +1,8 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import CopyButton from '../home/CopyButton';
+import { mdiCellphoneLink, mdiLaptop, mdiUsb } from '@mdi/js';
+import ThrottleLaunchQR from '../home/ThrottleLaunchQR';
 
 function Step({ number, title, children }: { number: number; title: string; children: React.ReactNode }) {
   return (
@@ -40,30 +43,50 @@ function Callout({ emoji, children }: { emoji: string; children: React.ReactNode
   );
 }
 
+function MdiIcon({ path, className = '' }: { path: string; className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className}>
+      <path d={path} fill="currentColor" />
+    </svg>
+  );
+}
+
+function AppIcon({ src, alt, bgColor, borderColor }: { src: string; alt: string; bgColor: string; borderColor: string }) {
+  return (
+    <div className={`w-14 h-14 rounded-xl ${bgColor} ${borderColor} border flex items-center justify-center overflow-hidden`}>
+      <Image src={src} alt={alt} width={40} height={40} className="w-10 h-10 rounded-lg" />
+    </div>
+  );
+}
+
 function ArchitectureDiagram() {
   return (
     <div className="my-6 p-6 rounded-xl border border-gray-800 bg-gray-900/50">
       <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 text-center">
         <div className="flex flex-col items-center gap-2">
-          <div className="w-14 h-14 rounded-xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-2xl">📱</div>
+          <div className="w-14 h-14 rounded-xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center">
+            <MdiIcon path={mdiCellphoneLink} className="w-7 h-7 text-pink-400" />
+          </div>
           <p className="text-white font-semibold text-sm">Your Devices</p>
           <p className="text-gray-500 text-xs">Phone, tablet, laptop</p>
         </div>
         <div className="text-gray-600 text-xl md:rotate-0 rotate-90">⟷</div>
         <div className="flex flex-col items-center gap-2">
-          <div className="w-14 h-14 rounded-xl bg-deja-cyan/10 border border-deja-cyan/30 flex items-center justify-center text-2xl">☁️</div>
+          <AppIcon src="/cloud/icon-512.png" alt="DEJA Cloud" bgColor="bg-deja-cyan/10" borderColor="border-deja-cyan/30" />
           <p className="text-white font-semibold text-sm">DEJA Cloud</p>
           <p className="text-gray-500 text-xs">Real-time sync</p>
         </div>
         <div className="text-gray-600 text-xl md:rotate-0 rotate-90">⟷</div>
         <div className="flex flex-col items-center gap-2">
-          <div className="w-14 h-14 rounded-xl bg-deja-lime/10 border border-deja-lime/30 flex items-center justify-center text-2xl">🖥️</div>
+          <div className="w-14 h-14 rounded-xl bg-deja-lime/10 border border-deja-lime/30 flex items-center justify-center">
+            <MdiIcon path={mdiLaptop} className="w-7 h-7 text-deja-lime" />
+          </div>
           <p className="text-white font-semibold text-sm">DEJA Server</p>
           <p className="text-gray-500 text-xs">Your Pi or computer</p>
         </div>
         <div className="text-gray-600 text-xl md:rotate-0 rotate-90">⟷</div>
         <div className="flex flex-col items-center gap-2">
-          <div className="w-14 h-14 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-2xl">🚂</div>
+          <AppIcon src="/dcc-ex/android-chrome-512x512.png" alt="DCC-EX CommandStation" bgColor="bg-amber-500/10" borderColor="border-amber-500/30" />
           <p className="text-white font-semibold text-sm">CommandStation</p>
           <p className="text-gray-500 text-xs">DCC-EX via USB</p>
         </div>
@@ -95,17 +118,26 @@ export default function GettingStartedGuide() {
         </p>
         <ArchitectureDiagram />
         <div className="grid sm:grid-cols-3 gap-3 text-sm">
-          <div className="p-3 rounded-lg bg-gray-900/50 border border-gray-800">
-            <p className="text-white font-semibold mb-1">🚂 CommandStation</p>
-            <p className="text-gray-500">The DCC-EX hardware you already have — Arduino Mega + Motor Shield</p>
+          <div className="p-3 rounded-lg bg-gray-900/50 border border-gray-800 flex items-start gap-3">
+            <Image src="/dcc-ex/android-chrome-512x512.png" alt="DCC-EX" width={24} height={24} className="w-6 h-6 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-white font-semibold mb-1">CommandStation</p>
+              <p className="text-gray-500">The DCC-EX hardware you already have — Arduino Mega + Motor Shield</p>
+            </div>
           </div>
-          <div className="p-3 rounded-lg bg-gray-900/50 border border-gray-800">
-            <p className="text-white font-semibold mb-1">🖥️ DEJA Server</p>
-            <p className="text-gray-500">Runs on the machine connected to your CommandStation via USB</p>
+          <div className="p-3 rounded-lg bg-gray-900/50 border border-gray-800 flex items-start gap-3">
+            <MdiIcon path={mdiLaptop} className="w-6 h-6 mt-0.5 shrink-0 text-deja-lime" />
+            <div>
+              <p className="text-white font-semibold mb-1">DEJA Server</p>
+              <p className="text-gray-500">Runs on the machine connected to your CommandStation via USB</p>
+            </div>
           </div>
-          <div className="p-3 rounded-lg bg-gray-900/50 border border-gray-800">
-            <p className="text-white font-semibold mb-1">📱 DEJA Apps</p>
-            <p className="text-gray-500">Open in any browser — phone, tablet, laptop. All stay in sync.</p>
+          <div className="p-3 rounded-lg bg-gray-900/50 border border-gray-800 flex items-start gap-3">
+            <MdiIcon path={mdiCellphoneLink} className="w-6 h-6 mt-0.5 shrink-0 text-pink-400" />
+            <div>
+              <p className="text-white font-semibold mb-1">DEJA Apps</p>
+              <p className="text-gray-500">Open in any browser — phone, tablet, laptop. All stay in sync.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -113,22 +145,22 @@ export default function GettingStartedGuide() {
       {/* Requirements */}
       <section className="mb-12 p-5 rounded-xl border border-gray-800 bg-gray-900/50">
         <h2 className="text-white font-semibold mb-3">What You&apos;ll Need</h2>
-        <ul className="space-y-2 text-sm text-gray-300">
-          <li className="flex items-start gap-2">
-            <span className="text-deja-cyan mt-0.5">✓</span>
+        <ul className="space-y-3 text-sm text-gray-300">
+          <li className="flex items-center gap-3">
+            <Image src="/dcc-ex/android-chrome-512x512.png" alt="DCC-EX" width={20} height={20} className="w-5 h-5 shrink-0" />
             <span>A <strong className="text-white">DCC-EX CommandStation</strong> (Arduino Mega + Motor Shield)</span>
           </li>
-          <li className="flex items-start gap-2">
-            <span className="text-deja-cyan mt-0.5">✓</span>
+          <li className="flex items-center gap-3">
+            <MdiIcon path={mdiLaptop} className="w-5 h-5 shrink-0 text-deja-lime" />
             <span>A <strong className="text-white">computer</strong> to run the server — Raspberry Pi, Mac, or Linux</span>
           </li>
-          <li className="flex items-start gap-2">
-            <span className="text-deja-cyan mt-0.5">✓</span>
+          <li className="flex items-center gap-3">
+            <MdiIcon path={mdiCellphoneLink} className="w-5 h-5 shrink-0 text-pink-400" />
             <span>A <strong className="text-white">phone, tablet, or laptop</strong> to control your trains</span>
           </li>
-          <li className="flex items-start gap-2">
-            <span className="text-deja-cyan mt-0.5">✓</span>
-            <span>About <strong className="text-white">5 minutes</strong></span>
+          <li className="flex items-center gap-3">
+            <MdiIcon path={mdiUsb} className="w-5 h-5 shrink-0 text-amber-400" />
+            <span>A <strong className="text-white">USB cable</strong> connecting the CommandStation to your computer</span>
           </li>
         </ul>
       </section>
@@ -230,12 +262,15 @@ export default function GettingStartedGuide() {
           <p>
             Once the server connects, open{' '}
             <a href="https://throttle.dejajs.com" target="_blank" rel="noopener noreferrer" className="text-deja-cyan hover:underline">throttle.dejajs.com</a>
-            {' '}on any device — your phone, a tablet, your laptop. Select your locomotive,
-            turn on track power, and drive. 🚂
+            {' '}on any device — your phone, a tablet, your laptop. Or scan the QR code:
           </p>
+          <div className="flex justify-center my-4">
+            <ThrottleLaunchQR size={140} label="Scan to open DEJA Throttle" />
+          </div>
           <p>
-            Everything syncs in real time. Open the throttle on multiple devices and they all
-            stay in perfect sync — change the speed on your phone, see it update on your tablet instantly.
+            Select your locomotive, turn on track power, and drive. 🚂
+            Everything syncs in real time — open the throttle on multiple devices and they all
+            stay in perfect sync.
           </p>
         </Step>
       </div>
