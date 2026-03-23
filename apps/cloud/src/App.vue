@@ -7,7 +7,10 @@ import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import { createLogger } from '@repo/utils'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { useMenu } from '@/Core/Menu/useMenu'
-import { useSubscription, PLAN_DISPLAY, useOnboarding, useLocos, usePromotions, PROMO_SLOTS } from '@repo/modules'
+import { useSubscription, PLAN_DISPLAY, useOnboarding, usePromotions, PROMO_SLOTS } from '@repo/modules'
+import { collection, query } from 'firebase/firestore'
+import { db } from '@repo/firebase-config'
+import { useCollection } from 'vuefire'
 import { Signout } from '@repo/auth'
 import { isNavigating } from '@/router'
 import { useFeedbackUser } from '@repo/modules/feedback'
@@ -80,8 +83,11 @@ const { isTrialing, trialDaysLeft, plan } = useSubscription()
 const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
 
 const { state: onboardingState, isComplete: onboardingComplete } = useOnboarding()
-const { getLocos } = useLocos()
-const locos = getLocos()
+// Loco count for onboarding banner — guarded to avoid invalid Firestore path when layoutId is empty
+const locosQuery = computed(() =>
+  layoutId.value ? query(collection(db, `layouts/${layoutId.value}/locos`)) : null
+)
+const locos = useCollection(locosQuery)
 const locoCount = computed(() => locos.value?.length ?? 0)
 const dismissedOnboarding = useStorage('@DEJA/dismissedOnboardingBanner', false)
 
