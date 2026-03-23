@@ -75,13 +75,13 @@ function handleSelect(newAddress: number) {
 </script>
 
 <template>
-  <div class="@container flex-grow flex flex-col relative overflow-hidden w-full h-full flex-1" ref="throttleNavRef">
+  <div class="@container flex-grow flex flex-col relative overflow-hidden w-full h-full flex-1 min-h-0" ref="throttleNavRef">
     <div class="absolute inset-0 overflow-hidden">
       <div class="absolute w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[100px] -top-[200px] -left-[300px]"></div>
       <div class="absolute w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[80px] -bottom-[100px] -right-[200px]"></div>
       <div class="absolute w-[400px] h-[400px] rounded-full bg-violet-500/10 blur-[90px] top-[30%] left-[40%]"></div>
     </div>
-    <component :is="variantComponent" :address="routeAddr" v-bind="settingsProps" />
+    <component :is="variantComponent" :address="routeAddr" v-bind="settingsProps" class="flex-1 min-h-0" />
     <v-slide-group
       
       selected-class="bg-success"

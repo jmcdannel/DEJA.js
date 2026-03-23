@@ -64,7 +64,7 @@ async function clearLoco() {
     <section class="w-full h-full flex flex-col sm:flex-row justify-around flex-grow relative z-10">
       <!-- Left: Speedometer (desktop) -->
       <section v-if="showSpeedometer" class="hidden sm:flex flex-col items-center justify-center flex-1">
-        <Speedometer :speed="currentSpeed" :address="address" :size="180" />
+        <Speedometer :speed="currentSpeed" :address="address" :size="180" :show-label="false" />
         <Consist v-if="showConsist && loco" :loco="loco" class="mt-4" />
       </section>
 

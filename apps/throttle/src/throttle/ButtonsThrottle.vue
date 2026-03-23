@@ -58,14 +58,16 @@ async function clearLoco() {
     </ThrottleHeader>
 
     <section class="w-full h-full flex flex-col sm:flex-row justify-around flex-grow relative z-10">
-      <!-- Left column: Speedometer + loco info (desktop) -->
-      <section v-if="loco" class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-between flex-1">
-        <Speedometer v-if="showSpeedometer" :speed="currentSpeed" :address="address" :size="160" />
+      <!-- Left column: Speedometer + Consist + Logo (desktop) -->
+      <section v-if="loco" class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-center flex-1 overflow-visible">
+        <Speedometer v-if="showSpeedometer" :speed="currentSpeed" :address="address" :size="200" :show-label="false" />
         <Consist v-if="showConsist" :loco="loco" />
-        <v-spacer />
         <RoadnameLogo :roadname="loco.meta?.roadname" size="xl" />
-        <v-spacer />
-        <FunctionsSpeedDial v-if="showFunctions" :loco="loco" />
+      </section>
+
+      <!-- Center column: Functions (desktop) -->
+      <section v-if="loco && showFunctions" class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-center flex-1">
+        <FunctionsSpeedDial :loco="loco" />
       </section>
 
       <!-- Right column: Speed display + buttons -->
