@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import AnimateIn from '../home/AnimateIn';
+import DocLink from '../DocLink';
 import TerminalMockup from './TerminalMockup';
 
 export default function ServerSection() {
@@ -37,9 +38,7 @@ export default function ServerSection() {
             <Link href="/server" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-deja-cyan/10 border border-deja-cyan/30 text-deja-cyan font-semibold text-sm hover:bg-deja-cyan/20 transition-colors">
               Explore Server
             </Link>
-            <Link href="/docs/server" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-700 text-gray-300 text-sm hover:border-gray-500 hover:text-white transition-colors">
-              Server Docs →
-            </Link>
+            <DocLink href="/docs/server">Server</DocLink>
           </div>
         </AnimateIn>
       </div>

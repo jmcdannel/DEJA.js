@@ -59,6 +59,7 @@ export { default as Menu } from './Menu/Menu.vue'
 export { default as NotificationContainer } from './Notifications/NotificationContainer.vue'
 export { useNotification, provideNotifications } from './Notifications/useNotification'
 export type { Notification, NotificationType, NotifyMethods } from './Notifications/useNotification'
+export { default as PromoBanner } from './Promotions/PromoBanner.vue'
 export { default as SensorList } from './Sensors/SensorList.vue'
 export { default as SensorItem } from './Sensors/SensorItem.vue'
 export { default as SensorCard } from './Sensors/SensorCard.vue'
@@ -71,6 +72,9 @@ export type { AppIconName } from './assets/icons'
 // Themes
 export { createVuetifyThemes, THEME_MODES, THEME_MODE_DEFINITIONS } from './themes'
 export type { AppThemeConfig, ThemeMode, ThemeOverrides, ThemeVariables, ThemeModeDefinition } from './themes'
+// 🎨 A11y color utilities
+export { ensureContrast, ensureUIContrast, ensureAllContrast, meetsContrast, contrastReport, isBadContrast, WCAG } from './themes'
+export type { WcagLevel } from './themes'
 
 // Composables
 export { useThemeSwitcher } from './composables/useThemeSwitcher'

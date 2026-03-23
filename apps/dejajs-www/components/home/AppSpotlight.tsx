@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import AnimateIn from './AnimateIn';
 import SectionLabel from './SectionLabel';
+import DocLink from '../DocLink';
 
 export interface SpotlightFeature {
   icon: string;
@@ -108,12 +109,7 @@ export default function AppSpotlight({
         >
           {ctaLabel}
         </a>
-        <a
-          href={docsHref}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-500 hover:text-white transition-colors"
-        >
-          {docsLabel}
-        </a>
+        <DocLink href={docsHref}>{docsLabel === 'View Docs' ? appName : docsLabel}</DocLink>
       </div>
     </AnimateIn>
   );

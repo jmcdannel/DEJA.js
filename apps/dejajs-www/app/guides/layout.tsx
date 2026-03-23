@@ -12,7 +12,7 @@ export default function GuidesLayout({ children }: { children: React.ReactNode }
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-8 min-h-[60vh]">
       <aside className="lg:w-64 flex-shrink-0">
-        <div className="p-4 bg-white/60 dark:bg-slate-900/60 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto p-4 bg-white/60 dark:bg-slate-900/60 rounded-xl border border-gray-200 dark:border-gray-700">
           <GuidesSidebar />
         </div>
       </aside>

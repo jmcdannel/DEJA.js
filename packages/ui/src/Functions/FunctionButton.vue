@@ -144,7 +144,7 @@
       'rounded-full',
       'border',
       'border-cyan-400/60',
-      'bg-slate-900/80',
+      'fn-btn-bg',
       'relative',
       'p-2',
       'transition-all',
@@ -228,5 +228,11 @@
     :icon="icon"
     :class="[buttonClasses, 'w-12 h-12']"
   />
-    
+
 </template>
+
+<style scoped>
+.fn-btn-bg {
+  background: rgba(var(--v-theme-surface), 0.8);
+}
+</style>

@@ -21,7 +21,7 @@ function handleSignOut() {
 </script>
 <template>
   <button
-    class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+    class="block py-2 px-4 text-sm opacity-80 hover:opacity-100"
     @click="handleSignOut" 
     :disabled="!user">Sign out
   </button>

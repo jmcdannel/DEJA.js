@@ -225,7 +225,7 @@ function handleBack() {
           </v-expansion-panel-title>
           <v-expansion-panel-text>
             <!-- 🔧 Arduino config.h preview -->
-            <div v-if="isArduino" class="mb-4 relative bg-black/40 p-3 ring-1 ring-white/10 rounded-md shadow-inner">
+            <div v-if="isArduino" class="mb-4 relative bg-surface-variant p-3 ring-1 ring-current/10 rounded-md shadow-inner">
               <h4 class="text-body-2 mb-2 text-green-lighten-2 font-mono">config.h</h4>
               <pre class="overflow-x-auto text-caption font-mono text-grey-lighten-1">{{ arduinoConfigH }}</pre>
             </div>

@@ -161,7 +161,7 @@ async function handleFactoryReset() {
           <td class="font-mono">{{ item.cv }}</td>
           <td>
             <div>{{ item.name }}</div>
-            <div class="text-xs text-slate-400">{{ item.description }}</div>
+            <div class="text-xs opacity-50">{{ item.description }}</div>
           </td>
           <td>
             <template v-if="editingCv === item.cv">
@@ -196,7 +196,7 @@ async function handleFactoryReset() {
               >
                 {{ item.value }}
               </span>
-              <span v-else class="text-slate-500">—</span>
+              <span v-else class="opacity-40">—</span>
             </template>
           </td>
           <td>

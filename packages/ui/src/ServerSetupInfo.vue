@@ -45,30 +45,30 @@ async function copyToClipboard(text: string) {
   align-items: center;
   justify-content: space-between;
   padding: 14px 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06);
   gap: 16px;
 }
 .setup-row:last-child { border-bottom: none; }
 .setup-row--block { flex-direction: column; align-items: stretch; }
 
 .setup-row__label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.setup-row__name { font-size: 0.875rem; font-weight: 500; color: #cbd5e1; }
-.setup-row__desc { font-size: 0.75rem; color: rgba(148, 163, 184, 0.6); }
+.setup-row__name { font-size: 0.875rem; font-weight: 500; color: rgba(var(--v-theme-on-surface), 0.8); }
+.setup-row__desc { font-size: 0.75rem; color: rgba(var(--v-theme-on-surface), 0.5); }
 .setup-install {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(2, 6, 23, 0.6);
+  background: rgba(var(--v-theme-surface-variant), 0.6);
   padding: 10px 14px;
   border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
 }
 
 .setup-install__text {
   flex: 1;
   font-family: 'Roboto Mono', 'Fira Code', monospace;
   font-size: 0.8rem;
-  color: #22d3ee;
+  color: rgb(var(--v-theme-primary));
   word-break: break-all;
   user-select: all;
 }

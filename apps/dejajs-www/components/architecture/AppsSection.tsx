@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import AnimateIn from '../home/AnimateIn';
+import DocLink from '../DocLink';
 import PhoneMockup from './PhoneMockup';
 
 const apps = [
@@ -28,7 +29,7 @@ export default function AppsSection() {
                   {' — '}
                   {app.desc}
                   {' '}
-                  <Link href={app.docsHref} className="text-deja-cyan/60 hover:text-deja-cyan text-xs font-mono transition-colors">docs →</Link>
+                  <DocLink href={app.docsHref}>{app.label}</DocLink>
                 </span>
               </div>
             ))}

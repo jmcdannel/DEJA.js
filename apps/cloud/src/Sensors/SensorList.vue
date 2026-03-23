@@ -58,74 +58,83 @@ function getInputTypeLabel(inputType: string): string {
         <div>
           <v-card
             class="mx-auto w-full h-full justify-between flex flex-col"
-            :color="color"
-            variant="tonal"
             density="compact">
-            <v-card-title class="flex items-center justify-between text-sm py-1">
-              <div class="flex items-center gap-1">
-                <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100" size="small">mdi-drag</v-icon>
-                <span>{{ item.name || item.id }}</span>
-              </div>
+            <v-card-title class="flex flex-nowrap items-center gap-2">
+              <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 flex-shrink-0" size="small">mdi-drag</v-icon>
+              <router-link :to="{ name: 'Edit Sensor', params: { sensorId: item.id } }" class="flex items-center gap-2 min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
+                <v-icon :icon="getTypeIcon(item.type)" :color="color" class="flex-shrink-0" />
+                <span class="truncate">{{ item.name || item.id }}</span>
+              </router-link>
+              <v-spacer />
               <v-icon
-                :color="item.state ? 'green' : 'red'"
-                size="x-small"
-              >mdi-circle</v-icon>
+                :icon="item.state ? 'mdi-circle' : 'mdi-circle-outline'"
+                :color="item.state ? 'green' : 'grey'"
+                size="small"
+                class="flex-shrink-0"
+              />
             </v-card-title>
-            <v-card-text class="py-1">
-              <div class="flex flex-wrap gap-1 items-center mb-2">
-                <v-chip variant="tonal" :color="color" size="x-small" :prepend-icon="getTypeIcon(item.type)">
-                  {{ getTypeLabel(item.type) }}
-                </v-chip>
-                <v-chip variant="tonal" color="blue-grey" size="x-small">
-                  {{ getInputTypeLabel(item.inputType ?? '') }}
-                </v-chip>
-              </div>
-              <div class="flex flex-wrap gap-3 text-xs">
-                <div v-if="item.device">
-                  <span class="opacity-70">Device:</span> {{ item.device }}
-                </div>
-                <div v-if="item.pin !== undefined">
-                  <span class="opacity-70">Pin:</span> {{ item.pin }}
-                </div>
-                <div v-if="item.index !== undefined">
-                  <span class="opacity-70">Index:</span> {{ item.index }}
-                </div>
+            <v-card-text>
+              <div class="flex justify-between w-full items-start">
+                <v-chip-group column>
+                  <v-chip variant="outlined" :prepend-icon="getTypeIcon(item.type)">
+                    {{ getTypeLabel(item.type) }}
+                  </v-chip>
+                  <v-chip variant="outlined">
+                    {{ getInputTypeLabel(item.inputType ?? '') }}
+                  </v-chip>
+                  <v-chip v-if="item.pin !== undefined" size="small" variant="outlined">
+                    Pin {{ item.pin }}
+                  </v-chip>
+                  <v-chip v-if="item.index !== undefined" size="small" variant="outlined">
+                    Index {{ item.index }}
+                  </v-chip>
+                </v-chip-group>
+                <v-btn
+                  v-if="item.device"
+                  size="small"
+                  variant="outlined"
+                  :color="color"
+                  prepend-icon="mdi-memory"
+                >
+                  {{ item.device }}
+                </v-btn>
               </div>
             </v-card-text>
-            <v-card-actions class="py-1">
+            <v-divider />
+            <div class="flex items-center pa-1" style="background: rgba(var(--v-theme-on-surface), 0.04)">
               <template v-if="confirmDelete === item?.id">
                 <v-btn
-                  class="ma-1"
                   text="Cancel"
                   variant="outlined"
-                  size="x-small"
-                  @click="confirmDelete = ''" />
+                  size="small"
+                  @click="confirmDelete = ''"
+                />
                 <v-btn
-                  class="ma-1"
                   text="Confirm"
                   variant="tonal"
-                  size="x-small"
+                  color="error"
+                  size="small"
                   prepend-icon="mdi-delete"
-                  @click="deleteSensor(item?.id)" />
+                  @click="deleteSensor(item?.id)"
+                />
               </template>
               <v-btn
                 v-else
-                class="ma-1"
-                icon="mdi-delete"
-                variant="tonal"
-                size="x-small"
+                icon="mdi-delete-outline"
+                variant="text"
+                color="error"
+                size="small"
                 @click="confirmDelete = item?.id"
-              ></v-btn>
-              <v-spacer></v-spacer>
-
+              />
+              <v-spacer />
               <v-btn
-                text="Edit"
-                variant="tonal"
-                prepend-icon="mdi-pencil"
-                size="x-small"
+                icon="mdi-pencil-outline"
+                variant="text"
+                :color="color"
+                size="small"
                 @click="$emit('edit', item)"
-              ></v-btn>
-            </v-card-actions>
+              />
+            </div>
           </v-card>
         </div>
       </template>
