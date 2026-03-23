@@ -29,7 +29,9 @@ export interface UserSubscription {
 export interface UserDocument {
   email: string
   displayName: string | null
+  photoURL?: string | null
   createdAt: Timestamp
+  lastLoginAt?: Timestamp
   subscription: UserSubscription
 }
 
