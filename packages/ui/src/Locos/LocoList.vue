@@ -2,8 +2,11 @@
 import { computed } from 'vue'
 import { useLocos, type Loco } from '@repo/modules/locos'
 import List from '../ModuleList/List.vue'
+import PageHeader from '../PageHeader/PageHeader.vue'
+import ListControlBar from '../ListControls/ListControlBar.vue'
+import { useListControls } from '../composables/useListControls'
+import type { ListFilter } from '../ListControls/types'
 import LocoAvatar from '../LocoAvatar.vue'
-import { type ListFilter } from '../ModuleList/types'
 
 const { getLocos } = useLocos()
 const locos = getLocos()
@@ -29,6 +32,27 @@ const filters = computed<ListFilter[]>(() => [
   },
 ])
 
+const viewOptions = [
+  { value: 'avatar', icon: 'mdi-account-circle-outline', label: 'Avatar' },
+  { value: 'card', icon: 'mdi-view-grid-outline', label: 'Card' },
+  { value: 'table', icon: 'mdi-table', label: 'Table' },
+  { value: 'raw', icon: 'mdi-code-json', label: 'Raw' },
+]
+
+const sortOptions = [
+  { value: 'order', label: 'Default' },
+  { value: 'name', label: 'Name' },
+  { value: 'address', label: 'Address' },
+]
+
+const controls = useListControls('roster', {
+  list: locosList,
+  filters: filters.value,
+  viewOptions,
+  sortOptions,
+  defaultView: 'avatar',
+})
+
 function getLocoFromItem(item: Record<string, unknown>): Loco {
   const loco = locos.value?.find((l) => l.id === item.id)
   return (loco || item) as Loco
@@ -36,27 +60,24 @@ function getLocoFromItem(item: Record<string, unknown>): Loco {
 </script>
 
 <template>
+  <PageHeader title="Roster" icon="mdi-train" color="pink">
+    <template #controls>
+      <ListControlBar
+        :controls="controls"
+        color="pink"
+        :view-options="viewOptions"
+        :sort-options="sortOptions"
+        :filters="filters"
+        search-placeholder="Search roster..."
+      />
+    </template>
+  </PageHeader>
   <List
-    module-name="locos"
-    color="purple-darken-4"
-    title="Loco Roster"
-    icon="mdi-train"
-    :list="locosList"
-    :filters="filters"
+    :list="controls.filteredList.value"
+    :view-as="controls.viewAs.value"
     empty-icon="mdi-train"
     empty-title="No locomotives"
     empty-description="Add locomotives to your roster to get started"
-    :view-options="[
-      { label: 'Avatar', value: 'avatar' },
-      { label: 'Card', value: 'card' },
-      { label: 'Table', value: 'table' },
-      { label: 'Raw', value: 'raw' },
-    ]"
-    :sort-options="[
-      { label: 'Default', value: 'order' },
-      { label: 'Name', value: 'name' },
-      { label: 'Address', value: 'address' },
-    ]"
   >
     <template #item="{ item }">
       <LocoAvatar :loco="getLocoFromItem(item)" :size="48" />
