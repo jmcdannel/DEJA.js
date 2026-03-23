@@ -41,8 +41,8 @@ const showFilterSheet = ref(false)
 </script>
 
 <template>
-  <!-- Desktop: inline controls -->
-  <div v-if="mdAndUp" class="flex items-center gap-4 w-full">
+  <!-- Desktop: inline controls bar -->
+  <div v-if="mdAndUp" class="lcb-bar">
     <ListFilters
       v-if="showFilters && filters.length"
       :model-value="controls.activeFilters.value"
@@ -58,7 +58,7 @@ const showFilterSheet = ref(false)
       :color="color"
     />
 
-    <v-spacer />
+    <div class="flex-grow" />
 
     <ListSort
       v-if="showSort && sortOptions.length"
@@ -77,7 +77,7 @@ const showFilterSheet = ref(false)
   </div>
 
   <!-- Mobile: search bar + icon buttons -->
-  <div v-else>
+  <div v-else class="px-2 py-2">
     <div class="flex items-center gap-2">
       <ListSearch
         v-if="showSearch"
@@ -87,29 +87,25 @@ const showFilterSheet = ref(false)
         :collapsible="false"
       />
 
-      <!-- View icon button -->
       <v-btn
         v-if="showView && viewOptions.length"
         icon="mdi-view-grid-outline"
         size="small"
         variant="flat"
-        class="bg-slate-800 border border-slate-700"
+        class="lcb-mobile-btn"
         @click="showViewSheet = true"
       />
 
-      <!-- Sort icon button -->
       <v-btn
         v-if="showSort && sortOptions.length"
         icon="mdi-sort-variant"
         size="small"
         variant="flat"
-        :class="controls.isNonDefaultSort.value
-          ? `bg-${color}-500/20 border border-${color}-500`
-          : 'bg-slate-800 border border-slate-700'"
+        class="lcb-mobile-btn"
+        :class="{ 'lcb-mobile-btn--active': controls.isNonDefaultSort.value }"
         @click="showSortSheet = true"
       />
 
-      <!-- Filter icon button -->
       <v-badge
         v-if="showFilters && filters.length"
         :content="controls.activeFilterCount.value"
@@ -121,15 +117,14 @@ const showFilterSheet = ref(false)
           icon="mdi-filter-variant"
           size="small"
           variant="flat"
-          :class="controls.hasActiveFilters.value
-            ? `bg-${color}-500/20 border border-${color}-500`
-            : 'bg-slate-800 border border-slate-700'"
+          class="lcb-mobile-btn"
+          :class="{ 'lcb-mobile-btn--active': controls.hasActiveFilters.value }"
           @click="showFilterSheet = true"
         />
       </v-badge>
     </div>
 
-    <!-- Active filter chips (below search bar) -->
+    <!-- Active filter chips -->
     <div v-if="controls.hasActiveFilters.value" class="flex flex-wrap gap-1 mt-2">
       <template v-for="filter in filters" :key="filter.type">
         <v-chip
@@ -173,3 +168,152 @@ const showFilterSheet = ref(false)
     />
   </div>
 </template>
+
+<style>
+/* ─── Shared control bar styles ─── */
+
+.lcb-bar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 10px 20px;
+  border-top: 1px solid rgb(30 41 59);
+  border-bottom: 1px solid rgb(30 41 59);
+  background: rgb(15 23 42 / 0.6);
+}
+
+/* Section labels: FILTER: VIEW: SORT: */
+.lcb-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgb(100 116 139);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Filter dropdown chips */
+.lcb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 12px;
+  background: rgb(30 41 59);
+  border: 1px solid rgb(51 65 85);
+  border-radius: 6px;
+  color: rgb(203 213 225);
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, background 0.15s;
+  line-height: 1.4;
+}
+.lcb-chip:hover {
+  border-color: rgb(71 85 105);
+  background: rgb(30 41 59 / 0.9);
+}
+
+/* Sort button (text + chevron, no bg) */
+.lcb-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 0;
+  background: none;
+  border: none;
+  color: rgb(203 213 225);
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.lcb-sort-btn:hover {
+  color: rgb(226 232 240);
+}
+
+/* View toggle group */
+.lcb-view-group {
+  display: inline-flex;
+  border: 1px solid rgb(51 65 85);
+  border-radius: 6px;
+  overflow: hidden;
+  background: rgb(15 23 42);
+}
+.lcb-view-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  color: rgb(100 116 139);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.lcb-view-btn:not(:last-child) {
+  border-right: 1px solid rgb(51 65 85);
+}
+.lcb-view-btn:hover {
+  background: rgb(30 41 59);
+  color: rgb(148 163 184);
+}
+.lcb-view-btn--active {
+  background: rgb(51 65 85);
+  color: rgb(226 232 240);
+}
+
+/* Desktop search field */
+.lcb-search-desktop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgb(30 41 59);
+  border: 1px solid rgb(51 65 85);
+  border-radius: 20px;
+  min-width: 200px;
+  max-width: 280px;
+  transition: border-color 0.15s;
+}
+.lcb-search-desktop:focus-within {
+  border-color: rgb(71 85 105);
+}
+.lcb-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: rgb(203 213 225);
+  font-size: 13px;
+}
+.lcb-search-input::placeholder {
+  color: rgb(71 85 105);
+}
+.lcb-search-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 32px;
+  background: rgb(30 41 59);
+  border: 1px solid rgb(51 65 85);
+  border-radius: 20px;
+  color: rgb(100 116 139);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.lcb-search-icon:hover {
+  border-color: rgb(71 85 105);
+}
+
+/* Mobile icon buttons */
+.lcb-mobile-btn {
+  background: rgb(30 41 59) !important;
+  border: 1px solid rgb(51 65 85) !important;
+  border-radius: 8px !important;
+}
+.lcb-mobile-btn--active {
+  border-color: rgb(99 102 241) !important;
+  background: rgb(99 102 241 / 0.15) !important;
+}
+</style>

@@ -15,24 +15,19 @@ const emit = defineEmits<{
 const { mdAndUp } = useDisplay()
 
 const currentLabel = computed(() =>
-  props.options.find(o => o.value === props.modelValue)?.label ?? 'Sort'
+  props.options.find(o => o.value === props.modelValue)?.label ?? 'Default'
 )
 </script>
 
 <template>
-  <div v-if="mdAndUp" class="flex items-center gap-2">
-    <span class="text-xs tracking-wider text-slate-500 uppercase font-semibold">Sort:</span>
+  <div v-if="mdAndUp" class="flex items-center gap-3">
+    <span class="lcb-label">Sort:</span>
     <v-menu>
       <template #activator="{ props: menuProps }">
-        <v-chip
-          v-bind="menuProps"
-          size="small"
-          variant="flat"
-          class="bg-slate-800 border border-slate-700"
-          append-icon="mdi-chevron-down"
-        >
+        <button v-bind="menuProps" class="lcb-sort-btn">
           {{ currentLabel }}
-        </v-chip>
+          <v-icon icon="mdi-chevron-down" size="14" class="ml-2 opacity-50" />
+        </button>
       </template>
       <v-list
         density="compact"

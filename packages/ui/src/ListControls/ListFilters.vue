@@ -22,7 +22,7 @@ function getChipLabel(filter: ListFilter): string {
     const opt = filter.options.find(o => o.value === selected[0])
     return opt?.label ?? selected[0]
   }
-  return `${filter.label}: ${selected.length} selected`
+  return `${selected.length} selected`
 }
 
 function toggleFilterValue(filterType: string, value: string) {
@@ -32,32 +32,19 @@ function toggleFilterValue(filterType: string, value: string) {
     : [...current, value]
   emit('update:modelValue', { ...props.modelValue, [filterType]: updated })
 }
-
-function removeFilter(filterType: string, value: string) {
-  const current = props.modelValue[filterType] ?? []
-  emit('update:modelValue', {
-    ...props.modelValue,
-    [filterType]: current.filter(v => v !== value),
-  })
-}
 </script>
 
 <template>
-  <div v-if="mdAndUp" class="flex items-center gap-2 flex-wrap">
-    <span class="text-xs tracking-wider text-slate-500 uppercase font-semibold">Filter:</span>
+  <div v-if="mdAndUp" class="flex items-center gap-3">
+    <span class="lcb-label">Filter:</span>
 
     <template v-for="(filter, idx) in filters" :key="filter.type">
       <v-menu v-if="idx < MAX_VISIBLE_FILTERS">
         <template #activator="{ props: menuProps }">
-          <v-chip
-            v-bind="menuProps"
-            size="small"
-            variant="flat"
-            class="bg-slate-800 border border-slate-700"
-            append-icon="mdi-chevron-down"
-          >
+          <button v-bind="menuProps" class="lcb-chip">
             {{ getChipLabel(filter) }}
-          </v-chip>
+            <v-icon icon="mdi-chevron-down" size="14" class="ml-1 opacity-50" />
+          </button>
         </template>
         <v-list
           density="compact"
@@ -75,18 +62,12 @@ function removeFilter(filterType: string, value: string) {
       </v-menu>
     </template>
 
-    <!-- Overflow "More" dropdown -->
     <v-menu v-if="filters.length > MAX_VISIBLE_FILTERS">
       <template #activator="{ props: menuProps }">
-        <v-chip
-          v-bind="menuProps"
-          size="small"
-          variant="flat"
-          class="bg-slate-800 border border-slate-700"
-          prepend-icon="mdi-dots-horizontal"
-        >
+        <button v-bind="menuProps" class="lcb-chip">
           More
-        </v-chip>
+          <v-icon icon="mdi-chevron-down" size="14" class="ml-1 opacity-50" />
+        </button>
       </template>
       <v-list density="compact">
         <template v-for="filter in filters.slice(MAX_VISIBLE_FILTERS)" :key="filter.type">
@@ -102,20 +83,5 @@ function removeFilter(filterType: string, value: string) {
         </template>
       </v-list>
     </v-menu>
-
-    <!-- Active filter removal chips -->
-    <template v-for="filter in filters" :key="`active-${filter.type}`">
-      <v-chip
-        v-for="val in (modelValue[filter.type] ?? [])"
-        :key="val"
-        size="small"
-        variant="flat"
-        closable
-        class="bg-slate-700"
-        @click:close="removeFilter(filter.type, val)"
-      >
-        {{ filter.options.find(o => o.value === val)?.label ?? val }}
-      </v-chip>
-    </template>
   </div>
 </template>

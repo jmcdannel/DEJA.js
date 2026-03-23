@@ -68,11 +68,8 @@ const textClass = TEXT_CLASSES[resolvedColor] ?? TEXT_CLASSES.sky
       </div>
     </div>
 
-    <!-- Controls Row -->
-    <div
-      v-if="hasControls()"
-      class="bg-slate-900/70 border-t border-slate-800 px-4 py-2"
-    >
+    <!-- Controls Row (styling handled by ListControlBar's .lcb-bar class) -->
+    <div v-if="hasControls()">
       <slot name="controls" />
     </div>
   </div>

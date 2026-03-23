@@ -43,32 +43,40 @@ function collapse() {
     hide-details
     clearable
     prepend-inner-icon="mdi-magnify"
-    class="flex-grow"
+    class="flex-grow lcb-search-mobile"
   />
 
-  <!-- Desktop collapsible -->
+  <!-- Desktop -->
   <template v-else>
-    <v-text-field
+    <div
       v-if="!collapsible || expanded || modelValue"
-      ref="searchInput"
-      :model-value="modelValue"
-      @update:model-value="emit('update:modelValue', $event)"
-      :placeholder="placeholder"
-      density="compact"
-      variant="outlined"
-      hide-details
-      clearable
-      prepend-inner-icon="mdi-magnify"
-      style="max-width: 220px;"
-      @blur="collapse"
-      @click:clear="emit('update:modelValue', ''); collapse()"
-    />
-    <v-btn
+      class="lcb-search-desktop"
+    >
+      <v-icon icon="mdi-magnify" size="16" class="opacity-40" />
+      <input
+        ref="searchInput"
+        type="text"
+        :value="modelValue"
+        @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+        :placeholder="placeholder"
+        class="lcb-search-input"
+        @blur="collapse"
+      />
+      <v-btn
+        v-if="modelValue"
+        icon="mdi-close"
+        size="x-small"
+        variant="text"
+        density="compact"
+        @click="emit('update:modelValue', ''); collapse()"
+      />
+    </div>
+    <button
       v-else
-      icon="mdi-magnify"
-      size="small"
-      variant="text"
+      class="lcb-search-icon"
       @click="expand"
-    />
+    >
+      <v-icon icon="mdi-magnify" size="18" />
+    </button>
   </template>
 </template>
