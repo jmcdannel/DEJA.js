@@ -67,7 +67,7 @@ function handleAdd() {
     </template>
   </PageHeader>
 
-  <TurnoutsList @edit="handleEdit" :viewAs="controls.viewAs.value">
+  <TurnoutsList :filtered-list="controls.filteredList.value" :viewAs="controls.viewAs.value" @edit="handleEdit">
     <template #prepend>
       <Addtile @click="handleAdd" color="yellow" />
     </template>

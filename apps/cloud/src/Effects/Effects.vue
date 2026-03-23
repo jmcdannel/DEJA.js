@@ -73,7 +73,7 @@ function handleAdd() {
     </template>
   </PageHeader>
 
-  <EffectsList @edit="handleEdit">
+  <EffectsList :filtered-list="controls.filteredList.value" @edit="handleEdit">
     <template #prepend>
       <AddTile @click="handleAdd" color="purple" />
     </template>

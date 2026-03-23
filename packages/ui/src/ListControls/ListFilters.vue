@@ -36,7 +36,7 @@ function toggleFilterValue(filterType: string, value: string) {
 
 <template>
   <div v-if="mdAndUp" class="flex items-center gap-3">
-    <span class="lcb-label">Filter:</span>
+    <span class="lcb-label"><v-icon icon="mdi-filter-variant" size="14" class="mr-1" />Filter:</span>
 
     <template v-for="(filter, idx) in filters" :key="filter.type">
       <v-menu v-if="idx < MAX_VISIBLE_FILTERS">

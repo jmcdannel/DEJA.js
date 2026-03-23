@@ -67,7 +67,7 @@ function handleAdd() {
       />
     </template>
   </PageHeader>
-  <SignalList @edit="handleEdit">
+  <SignalList :filtered-list="controls.filteredList.value" @edit="handleEdit">
     <template #prepend>
       <AddTile @click="handleAdd" color="emerald" />
     </template>

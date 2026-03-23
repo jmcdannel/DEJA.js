@@ -17,7 +17,7 @@ const { mdAndUp } = useDisplay()
 
 <template>
   <div v-if="mdAndUp" class="flex items-center gap-3">
-    <span class="lcb-label">View:</span>
+    <span class="lcb-label"><v-icon icon="mdi-view-grid-outline" size="14" class="mr-1" />View:</span>
     <div class="lcb-view-group">
       <button
         v-for="opt in options"

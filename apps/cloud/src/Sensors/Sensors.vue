@@ -67,7 +67,7 @@ function handleAdd() {
       />
     </template>
   </PageHeader>
-  <SensorList @edit="handleEdit">
+  <SensorList :filtered-list="controls.filteredList.value" @edit="handleEdit">
     <template #prepend>
       <AddTile @click="handleAdd" color="teal" />
     </template>

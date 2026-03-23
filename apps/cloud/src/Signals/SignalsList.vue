@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, type PropType } from 'vue'
 import draggable from 'vuedraggable'
 import { useSignals, type Signal, type SignalAspect } from '@repo/modules/signals'
 import { useSortableList } from '@/Core/composables/useSortableList'
 import EmptyState from '@/Core/UI/EmptyState.vue'
 
 defineEmits(['edit'])
+const props = defineProps({
+  filteredList: { type: Array as PropType<Signal[]>, default: undefined },
+})
 
 const { getSignals, setSignalAspect, setSignal, deleteSignal } = useSignals()
 const signals = getSignals()
@@ -18,7 +21,9 @@ const aspectLabels: Record<Exclude<SignalAspect, null>, string> = {
   green: 'Green',
 }
 
-const { list, onDragStart, onDragEnd } = useSortableList<Signal>(signals as any, (id, data) => setSignal(id, data as any))
+const { list: sortableList, onDragStart, onDragEnd } = useSortableList<Signal>(signals as any, (id, data) => setSignal(id, data as any))
+
+const list = computed(() => props.filteredList ?? sortableList.value)
 
 function canToggle(signal: Signal, aspect: Exclude<SignalAspect, null>): boolean {
   const pinMap: Record<Exclude<SignalAspect, null>, number | undefined> = {

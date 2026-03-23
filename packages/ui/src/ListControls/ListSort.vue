@@ -21,7 +21,7 @@ const currentLabel = computed(() =>
 
 <template>
   <div v-if="mdAndUp" class="flex items-center gap-3">
-    <span class="lcb-label">Sort:</span>
+    <span class="lcb-label"><v-icon icon="mdi-sort-variant" size="14" class="mr-1" />Sort:</span>
     <v-menu>
       <template #activator="{ props: menuProps }">
         <button v-bind="menuProps" class="lcb-sort-btn">
