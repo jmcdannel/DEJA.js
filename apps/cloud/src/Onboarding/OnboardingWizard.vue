@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCurrentUser, useCollection } from 'vuefire'
 import { doc, setDoc, serverTimestamp, collection, query, where } from 'firebase/firestore'
@@ -9,13 +9,14 @@ import PlanStep from './steps/PlanStep.vue'
 import PaymentStep from './steps/PaymentStep.vue'
 import LayoutStep from './steps/LayoutStep.vue'
 import InstallStep from './steps/InstallStep.vue'
-import { TIER_ORDER } from '@repo/modules'
+import { TIER_ORDER, useOnboarding } from '@repo/modules'
 import type { PlanTier, BillingCycle } from '@repo/modules'
 
 const router = useRouter()
 const route = useRoute()
 const user = useCurrentUser()
 const currentStep = ref(1)
+const { setPlanSelected, setLayoutCreated, setInstallStarted } = useOnboarding()
 
 const userLayouts = useCollection(
   computed(() =>
@@ -59,16 +60,26 @@ onMounted(async () => {
           },
         }, { merge: true })
       }
+      setPlanSelected() // 🔥 fire-and-forget — persist onboarding progress
       currentStep.value = 3
     } else {
+      setPlanSelected() // 🔥 fire-and-forget — persist onboarding progress
       currentStep.value = 2
     }
+  }
+})
+
+// 🚀 Mark install step started when user reaches step 4
+watch(currentStep, (step) => {
+  if (step === 4) {
+    setInstallStarted() // 🔥 fire-and-forget — persist onboarding progress
   }
 })
 
 function handlePlanComplete(payload: { plan: PlanTier; billingCycle: BillingCycle | null }) {
   selectedPlan.value = payload.plan
   selectedBillingCycle.value = payload.billingCycle ?? 'monthly'
+  setPlanSelected() // 🔥 fire-and-forget — persist onboarding progress
 
   if (payload.plan === 'hobbyist') {
     currentStep.value = 3
@@ -82,6 +93,7 @@ function handlePaymentComplete() {
 }
 
 function handleLayoutComplete() {
+  setLayoutCreated() // 🔥 fire-and-forget — persist onboarding progress
   currentStep.value = 4
 }
 
