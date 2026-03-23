@@ -21,6 +21,11 @@ import * as Sentry from '@sentry/vue'
 
 provideNotifications()
 const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
+console.log('activePromos', activePromos.value)
+watch(activePromos, (val) => {
+  console.log('🚀 activePromos changed:', val, 'length:', val.length)
+}, { immediate: true })
+
 const { feedbackUser } = useFeedbackUser()
 watch(feedbackUser, (u) => Sentry.setUser(u), { immediate: true })
 const drawer = ref(false)
@@ -135,13 +140,13 @@ const throttleDefaults: AppBackgroundPrefs = {
           :show-user-profile="true"
           @drawer-toggle="drawer = !drawer"
         />
-        <PromoBanner
-          v-for="promo in activePromos"
-          :key="promo.id"
-          :promotion="promo"
-        />
         <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="menuConfig" @handle-menu="handleMenu" />
         <v-main>
+          <PromoBanner
+            v-for="promo in activePromos"
+            :key="promo.id"
+            :promotion="promo"
+          />
           <!-- Normal (non-fullscreen) layout -->
           <v-container v-if="!isFullscreen" ref="mainContentRef" class="p-0 min-h-full flex flex-col" fluid>
             <RouterView v-slot="{ Component }">
