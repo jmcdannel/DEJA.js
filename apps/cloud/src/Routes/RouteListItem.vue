@@ -48,20 +48,26 @@ function getTurnoutState(tId: string) {
 <template>
   <v-card
     class="mx-auto w-full h-full justify-between flex flex-col"
-    :color="color"
-    variant="tonal"
     density="compact"
   >
-    <template #title>
-      <span class="text-sm">{{ route?.name }}</span>
-    </template>
-    <template #prepend>
-      <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 mr-1" size="small">mdi-drag</v-icon>
-      <v-icon
-        :icon="routeType.icon"
-        class="text-xl m-1"></v-icon>
-    </template>
-    <v-card-text 
+    <v-card-title class="flex flex-nowrap items-center gap-3 !overflow-visible">
+      <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 flex-shrink-0" size="small">mdi-drag</v-icon>
+      <router-link :to="{ name: 'Edit Route', params: { routeId } }" class="flex items-center gap-3 min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
+        <v-icon :icon="routeType.icon" :color="color" class="flex-shrink-0" />
+        <span class="truncate">{{ route?.name }}</span>
+      </router-link>
+      <v-spacer />
+      <v-btn
+        variant="tonal"
+        :color="color"
+        prepend-icon="mdi-play"
+        size="small"
+        :loading="running"
+        class="flex-shrink-0"
+        @click="handleRun"
+      >Run</v-btn>
+    </v-card-title>
+    <v-card-text
       class="min-h-8 flex py-2 justify-space-between">
       <v-stepper>
         <v-stepper-header>
@@ -102,47 +108,41 @@ function getTurnoutState(tId: string) {
         </v-stepper-header>
       </v-stepper>
     </v-card-text>
-    <v-spacer></v-spacer>
-    <v-card-actions class="py-1">
+    <v-spacer />
+    <v-divider />
+    <div class="flex items-center pa-1" style="background: rgba(var(--v-theme-on-surface), 0.04)">
       <v-btn
         v-if="!confirmDelete"
-        class="ma-1"
-        icon="mdi-delete"
-        variant="tonal"
-        size="x-small"
+        icon="mdi-delete-outline"
+        variant="text"
+        color="error"
+        size="small"
         @click="confirmDelete = true"
-      ></v-btn>
+      />
       <template v-else>
         <v-btn
-          class="ma-1"
           text="Cancel"
           variant="outlined"
-          size="x-small"
-          @click="confirmDelete = false" />
+          size="small"
+          @click="confirmDelete = false"
+        />
         <v-btn
-          class="ma-1"
           text="Confirm"
           variant="tonal"
-          size="x-small"
+          color="error"
+          size="small"
           prepend-icon="mdi-delete"
-          @click="handleDelete" />
+          @click="handleDelete"
+        />
       </template>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <v-btn
-        text="Edit"
-        variant="tonal"
-        prepend-icon="mdi-pencil"
-        size="x-small"
+        icon="mdi-pencil-outline"
+        variant="text"
+        :color="color"
+        size="small"
         @click="$emit('edit', route)"
-      ></v-btn>
-      <v-btn
-        text="Run"
-        variant="tonal"
-        prepend-icon="mdi-play"
-        size="x-small"
-        :loading="running"
-        @click="handleRun"
-      ></v-btn>
-    </v-card-actions>
+      />
+    </div>
   </v-card>
 </template>

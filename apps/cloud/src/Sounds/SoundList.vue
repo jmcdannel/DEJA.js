@@ -114,16 +114,15 @@ function handleStop() {
 
   <template v-else>
     <v-row>
-      <v-col cols="6" sm="4" md="3" lg="2">
+      <v-col cols="12" sm="6" lg="4">
         <slot name="prepend" />
       </v-col>
       <v-col
         v-for="sound in filteredSoundFiles"
         :key="sound.url"
-        cols="6"
-        sm="4"
-        md="3"
-        lg="2"
+        cols="12"
+        sm="6"
+        lg="4"
       >
         <SoundListItem
           :sound="sound"

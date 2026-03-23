@@ -15,7 +15,7 @@ const props = defineProps({
 })
 
 const confirmDelete = ref(false)
-
+const internalState = ref(props.efx?.state ?? false)
 
 const efxType = computed(() => efxTypes.find((type) => type.value === props?.efx?.type))
 const color = ref(props.efx?.color || efxType.value?.color || DEFAULT_COLOR)
@@ -37,13 +37,13 @@ function formatDuration(seconds: number): string {
   return parts.join('')
 }
 
-async function handleEfx (event: Event) {
-  log.debug('handleEfx', props.efx, props.efx?.id, event, (event.target as HTMLInputElement)?.checked)
+async function handleEfx () {
+  log.debug('handleEfx', props.efx, props.efx?.id, internalState.value)
   props?.efx && props?.efxId && await runEffect({
       ...props.efx,
       id: props.efxId,
       type: props.efx.type || '',
-      state: (event.target as HTMLInputElement)?.checked
+      state: internalState.value
   })
 }
 
@@ -51,97 +51,98 @@ async function handleEfx (event: Event) {
 <template>
   <v-card
     class="mx-auto w-full h-full justify-between flex flex-col"
-    :color="color"
-    variant="tonal"
     density="compact"
   >
-    <template #title>
-      <span class="text-sm">{{efx?.name}}</span>
-    </template>
-    <template #prepend>
-      <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 mr-1" size="small">mdi-drag</v-icon>
-    </template>
-    <template #append>
-      <v-avatar
+    <v-card-title class="flex flex-nowrap items-center gap-3 !overflow-visible">
+      <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100" size="small">mdi-drag</v-icon>
+      <router-link :to="{ name: 'Edit Effect', params: { effectId: efxId } }" class="flex items-center gap-3 min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
+        <v-tooltip :text="efxId" location="top">
+          <template #activator="{ props: tooltipProps }">
+            <v-icon :icon="efxType?.icon || 'mdi-help'" :color="color" v-bind="tooltipProps" class="flex-shrink-0" />
+          </template>
+        </v-tooltip>
+        <span class="truncate">{{ efx?.name }}</span>
+      </router-link>
+      <v-spacer />
+      <v-icon
+        v-if="efx?.allowGuest"
+        icon="mdi-account-check"
+        color="success"
         size="small"
+        class="flex-shrink-0"
+      />
+      <v-switch
+        v-model="internalState"
+        hide-details
+        density="compact"
         :color="color"
-      >{{ efx?.pin }}</v-avatar>
-    </template>
-    <v-card-text
-      class="min-h-6 flex border-t-2 py-1 justify-space-between"
-      variant="flat">
-      <div class="grid grid-cols-2 gap-1">
+        @change="handleEfx"
+        class="flex-shrink-0"
+      />
+    </v-card-title>
+    <v-card-text class="min-h-8 flex py-2">
+      <div class="flex justify-between w-full items-start">
         <v-chip-group column>
-          <v-label class="text-xs">{{ efxId }}</v-label>
           <v-chip
-            size="x-small"
-            :color="color"
+            size="small"
+            variant="outlined"
           >{{ efxType?.label || 'Effect' }}</v-chip>
 
           <v-chip
-            size="x-small"
-            :color="color"
-            prepend-icon="mdi-memory"
+            v-if="efx?.duration"
+            size="small"
+            variant="outlined"
+            prepend-icon="mdi-timer-outline"
           >
-            {{ efx?.device }}
+            {{ formatDuration(efx.duration) }}
           </v-chip>
-
-          <v-chip
-            v-if="efx?.allowGuest"
-            size="x-small"
-            color="success"
-            prepend-icon="mdi-account-check"
-          >
-            Guest
-          </v-chip>
-
         </v-chip-group>
-        <div class="flex flex-col items-center justify-center">
-          <v-icon
-            :icon="efxType?.icon || 'mdi-help'"
-            class="text-3xl m-1"></v-icon>
-          <v-switch
-            hide-details
-            :color="color"
-            density="compact"
-            @click="handleEfx"
-          ></v-switch>
-        </div>
+        <v-btn
+          v-if="efx?.device"
+          size="small"
+          variant="outlined"
+          :color="color"
+          prepend-icon="mdi-memory"
+        >
+          {{ efx?.device }}
+        </v-btn>
       </div>
     </v-card-text>
-    <v-card-actions class="py-1">
+    <v-spacer />
+    <v-divider />
+    <div class="flex items-center pa-1" style="background: rgba(var(--v-theme-on-surface), 0.04)">
       <v-btn
         v-if="!confirmDelete"
-        class="ma-1"
-        icon="mdi-delete"
-        variant="tonal"
-        size="x-small"
+        icon="mdi-delete-outline"
+        variant="text"
+        color="error"
+        size="small"
         @click="confirmDelete = true"
-      ></v-btn>
+      />
       <template v-else>
         <v-btn
-          class="ma-1"
           text="Cancel"
           variant="outlined"
-          size="x-small"
-          @click="confirmDelete = false" />
+          size="small"
+          @click="confirmDelete = false"
+        />
         <v-btn
-          class="ma-1"
           text="Confirm"
           variant="tonal"
-          size="x-small"
+          color="error"
+          size="small"
           prepend-icon="mdi-delete"
-          @click="deleteEfx(efx?.id)" />
+          @click="deleteEfx(efx?.id)"
+        />
       </template>
-      <v-spacer></v-spacer>
-
+      <v-spacer />
       <v-btn
-        text="Edit"
-        variant="tonal"
-        prepend-icon="mdi-pencil"
-        size="x-small"
+        icon="mdi-pencil-outline"
+        variant="text"
+        :color="color"
+        size="small"
         @click="$emit('edit', efx)"
-      ></v-btn>
-    </v-card-actions>
+      />
+    </div>
   </v-card>
 </template>
