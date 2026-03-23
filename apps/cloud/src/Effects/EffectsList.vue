@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, type PropType } from 'vue'
 import draggable from 'vuedraggable'
 import { useEfx, type Effect } from '@repo/modules'
 import { createLogger } from '@repo/utils'
@@ -8,12 +9,18 @@ import EmptyState from '@/Core/UI/EmptyState.vue'
 
 const log = createLogger('EffectsList')
 
+const props = defineProps({
+  filteredList: { type: Array as PropType<Effect[]>, default: undefined },
+})
 const emit = defineEmits(['edit'])
 
 log.debug('EffectsList.vue loaded')
 const { getEffects, setEfx } = useEfx()
 const rawList = getEffects()
-const { list, onDragStart, onDragEnd } = useSortableList<Effect>(rawList as any, (id, data) => setEfx(id, data as any))
+const { list: sortableList, onDragStart, onDragEnd } = useSortableList<Effect>(rawList as any, (id, data) => setEfx(id, data as any))
+
+// Use filtered list from parent if provided, otherwise use the raw sortable list
+const list = computed(() => props.filteredList ?? sortableList.value)
 
 function handleEdit(item: Effect) {
   log.debug('handleEdit', item)

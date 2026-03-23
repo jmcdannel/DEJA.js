@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import draggable from 'vuedraggable'
 import { useLayout, type Device } from '@repo/modules'
 import { useSortableList } from '@/Core/composables/useSortableList'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import DeviceListItem from '@/Layout/Devices/DeviceListItem.vue'
 import AddDeviceItem from '@/Layout/Devices/AddDeviceItem.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
@@ -18,7 +18,7 @@ const showAdd = ref(false)
 </script>
 <template>
   <div class="animate-fade-in-up space-y-4">
-    <PageHeader menu="Devices" :subtitle="layout?.name" />
+    <PageHeader title="Devices" icon="mdi-developer-board" color="cyan" :subtitle="layout?.name" />
 
     <draggable
       :list="devices"

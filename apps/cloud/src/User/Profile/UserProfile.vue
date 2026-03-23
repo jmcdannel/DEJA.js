@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 
 </script>
 <template>
-  <PageHeader label="User Profile" color="red" icon="mdi-lightning-bolt" />
+  <PageHeader title="User Profile" color="red" icon="mdi-lightning-bolt" />
 </template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, type PropType } from 'vue'
 import draggable from 'vuedraggable'
 import { useTurnouts, type Turnout } from '@repo/modules'
 import { useSortableList } from '@/Core/composables/useSortableList'
@@ -8,13 +9,16 @@ import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 import EmptyState from '@/Core/UI/EmptyState.vue'
 
 defineEmits(['edit'])
-defineProps<{
-  viewAs: string
-}>()
+const props = defineProps({
+  viewAs: { type: String, default: 'card' },
+  filteredList: { type: Array as PropType<Turnout[]>, default: undefined },
+})
 
 const { getTurnouts, setTurnout } = useTurnouts()
 const rawList = getTurnouts()
-const { list, dragging, onDragStart, onDragEnd } = useSortableList<Turnout>(rawList as any, (id, data) => setTurnout(id, data))
+const { list: sortableList, dragging, onDragStart, onDragEnd } = useSortableList<Turnout>(rawList as any, (id, data) => setTurnout(id, data))
+
+const list = computed(() => props.filteredList ?? sortableList.value)
 </script>
 <template>
   <v-container v-if="list?.length">

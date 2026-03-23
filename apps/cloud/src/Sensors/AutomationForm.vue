@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSensors, useAutomations, sensorActionTypes, type SensorAutomation, type SensorAction } from '@repo/modules/sensors'
 import { createLogger } from '@repo/utils'
 import { useNotification } from '@repo/ui'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 
 const log = createLogger('AutomationForm')
 
@@ -137,7 +137,7 @@ onMounted(loadAutomation)
 </script>
 
 <template>
-  <PageHeader menu="Sensors" />
+  <PageHeader title="Sensors" icon="mdi-access-point" color="teal" />
   <div v-if="loadingData" class="p-6 flex justify-center">
     <v-progress-circular indeterminate color="teal" />
   </div>

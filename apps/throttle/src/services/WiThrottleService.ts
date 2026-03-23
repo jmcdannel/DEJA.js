@@ -304,7 +304,7 @@ export class WiThrottleService {
     }
 
     // Parse function state updates: M<t>A<addr><;>F<state><num>
-    const fnStateMatch = cmd.match(/^M[0-9TGS]A(.+)<;>F([01])(\d+)$/)
+    const fnStateMatch = /^M[0-9TGS]A(.+)<;>F([01])(\d+)$/.exec(cmd)
     if (fnStateMatch) {
       const addrStr = fnStateMatch[1] // e.g. 'S3' or 'L341'
       const state = fnStateMatch[2] === '1'
@@ -318,7 +318,7 @@ export class WiThrottleService {
     }
 
     // Parse function label lists: M<t>L<addr><;>]\[label1]\[label2...
-    const fnLabelMatch = cmd.match(/^M[0-9TGS]L(.+)<;>(.*)$/)
+    const fnLabelMatch = /^M[0-9TGS]L(.+)<;>(.*)$/.exec(cmd)
     if (fnLabelMatch) {
       const addrStr = fnLabelMatch[1]
       const labelsRaw = fnLabelMatch[2]

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import DccExConsole from '@/DCCEX/DccExConsole.vue'
 </script>
 
 <template>
-  <PageHeader menu="DCC-EX" />
+  <PageHeader title="DCC-EX" icon="mdi-cpu-64-bit" color="lime" />
   <DccExConsole />
 </template>

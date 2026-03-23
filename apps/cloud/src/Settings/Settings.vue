@@ -7,7 +7,7 @@ import { useSubscription, PLAN_DISPLAY, useLayout } from '@repo/modules'
 import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import LayoutTags from '@/Layout/LayoutTags.vue'
 import PortList from '@/Layout/PortList.vue'
 
@@ -136,7 +136,7 @@ function scrollTo(id: string) {
 
 <template>
   <div class="animate-fade-in-up space-y-6">
-    <PageHeader menu="Settings" :subtitle="layout?.name" />
+    <PageHeader title="Settings" icon="mdi-cog" color="blue" :subtitle="layout?.name" />
 
     <div class="settings-layout">
       <!-- Content -->

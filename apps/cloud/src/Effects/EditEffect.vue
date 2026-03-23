@@ -2,11 +2,10 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createLogger } from '@repo/utils'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import EffectForm from '@/Effects/EffectForm.vue'
 import type { Effect } from '@repo/modules'
 import { useEfx } from '@repo/modules'
-import { ListMenu } from '@repo/ui'
 
 const log = createLogger('EditEffect')
 
@@ -43,9 +42,7 @@ function handleClose() {
 onMounted(loadEffect)
 </script>
 <template>
-  <PageHeader menu="Effects">
-    <ListMenu :disabledMenus="['view']" :module-name="'effects'" />
-  </PageHeader>
+  <PageHeader title="Effects" icon="mdi-rocket-launch" color="indigo" />
   <div v-if="loading" class="p-6 flex justify-center">
     <v-progress-circular indeterminate color="purple" />
   </div>
