@@ -4,7 +4,10 @@ import { useStorage, useSwipe, type UseSwipeDirection } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
 import { useLocos } from '@repo/modules/locos'
 import ThrottleNavItem from '@/throttle/ThrottleNavItem.vue'
-import Throttle from '@/throttle/Throttle.vue'
+import ButtonsThrottle from '@/throttle/ButtonsThrottle.vue'
+import SliderThrottle from '@/throttle/SliderThrottle.vue'
+import ProtoThrottle from '@/throttle/ProtoThrottle.vue'
+import { useThrottleSettings } from '@/throttle/useThrottleSettings'
 
 const route = useRoute()
 const router = useRouter()
@@ -44,6 +47,22 @@ useSwipe(throttleNavRef, {
     },
   },)
 
+const { variant, showFunctions, showSpeedometer, showConsist } = useThrottleSettings()
+
+const variantMap = {
+  buttons: ButtonsThrottle,
+  slider: SliderThrottle,
+  protothrottle: ProtoThrottle,
+} as const
+
+const variantComponent = computed(() => variantMap[variant.value] ?? ButtonsThrottle)
+
+const settingsProps = computed(() => ({
+  showFunctions: showFunctions.value,
+  showSpeedometer: showSpeedometer.value,
+  showConsist: showConsist.value,
+}))
+
 watch(() => route.params.address, (newVal) => {
   lastThrottleAddress.value = parseInt(newVal?.toString())
 })
@@ -62,7 +81,7 @@ function handleSelect(newAddress: number) {
       <div class="absolute w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[80px] -bottom-[100px] -right-[200px]"></div>
       <div class="absolute w-[400px] h-[400px] rounded-full bg-violet-500/10 blur-[90px] top-[30%] left-[40%]"></div>
     </div>
-    <Throttle :address="routeAddr" />
+    <component :is="variantComponent" :address="routeAddr" v-bind="settingsProps" />
     <v-slide-group
       
       selected-class="bg-success"
