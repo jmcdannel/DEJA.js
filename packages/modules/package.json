@@ -17,6 +17,7 @@
     "./types": "./types.ts",
     "./plans/types": "./plans/types.ts",
     "./feedback": "./feedback/index.ts",
+    "./sensors": "./sensors/index.ts",
     "./features": "./features/index.ts"
   },
   "scripts": {

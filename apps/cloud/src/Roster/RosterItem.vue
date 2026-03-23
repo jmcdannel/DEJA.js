@@ -46,10 +46,13 @@ const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
     variant="tonal"
     density="compact"
   >
-    <template #append>
-      <v-avatar size="large" :color="props?.loco?.meta?.color || color.value">{{ loco?.address }}</v-avatar>
+    <template #prepend>
+      <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 mr-1" size="small">mdi-drag</v-icon>
     </template>
-    <v-card-text class="min-h-16 flex flex-wrap">
+    <template #append>
+      <v-avatar size="small" :color="props?.loco?.meta?.color || color.value">{{ loco?.address }}</v-avatar>
+    </template>
+    <v-card-text class="min-h-10 flex flex-wrap py-1">
         <v-badge
           class="m-2"
           :color="props?.loco?.meta?.color || color.value || 'primary'"
@@ -77,17 +80,19 @@ const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
         </v-badge>
     </v-card-text>
     <v-spacer></v-spacer>
-    <v-card-actions>
+    <v-card-actions class="py-1">
       <v-btn
         :color="props?.loco?.meta?.color || color.value || 'primary'"
         text="Edit"
         variant="tonal"
+        size="x-small"
        @click="$emit('edit', loco)"
       ></v-btn>
       <v-spacer></v-spacer>
       <v-btn
         icon="mdi-delete"
         variant="tonal"
+        size="x-small"
         @click="confirmDelete = true"></v-btn>
     </v-card-actions>
   </v-card>

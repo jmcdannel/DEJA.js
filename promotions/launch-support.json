@@ -1,0 +1,23 @@
+{
+  "slug": "launch-support",
+  "title": "Free Installation Support",
+  "body": "We encourage DIY — our docs will get you there. But if you get stuck, we're here to help during our launch period.",
+  "icon": "🚀",
+  "variant": "launch",
+  "active": true,
+  "startDate": null,
+  "endDate": null,
+  "slots": ["hero-section", "banner-top"],
+  "ctas": [
+    {
+      "label": "Join Discord",
+      "url": "https://discord.gg/REPLACE_ME",
+      "style": "primary"
+    },
+    {
+      "label": "Email Support",
+      "url": "mailto:support@dejajs.com",
+      "style": "secondary"
+    }
+  ]
+}

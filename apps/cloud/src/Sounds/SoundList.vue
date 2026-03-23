@@ -80,14 +80,14 @@ function handleStop() {
       color="primary"
       bg-color="surface"
     />
-    <div v-if="searchQuery && !loading" class="text-xs text-slate-400 mt-1">
+    <div v-if="searchQuery && !loading" class="text-xs opacity-60 mt-1">
       {{ filteredSoundFiles.length }} of {{ soundFiles.length }} sounds
     </div>
   </div>
 
   <div v-if="loading" class="text-center py-8">
     <v-progress-circular indeterminate color="primary" size="32" class="mb-3" />
-    <p class="text-slate-400 text-sm">Loading sounds...</p>
+    <p class="opacity-60 text-sm">Loading sounds...</p>
   </div>
 
   <div v-else-if="error" class="text-center py-10">
@@ -114,16 +114,15 @@ function handleStop() {
 
   <template v-else>
     <v-row>
-      <v-col cols="6" sm="4" md="3" lg="2">
+      <v-col cols="12" sm="6" lg="4">
         <slot name="prepend" />
       </v-col>
       <v-col
         v-for="sound in filteredSoundFiles"
         :key="sound.url"
-        cols="6"
-        sm="4"
-        md="3"
-        lg="2"
+        cols="12"
+        sm="6"
+        lg="4"
       >
         <SoundListItem
           :sound="sound"

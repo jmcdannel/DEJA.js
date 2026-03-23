@@ -1,11 +1,41 @@
 ---
 title: Dashboard
-description: The Cloud app home screen — system overview with device status, layout summary, and quick access to all configuration sections.
+description: The Cloud app home screen — device status overview, layout summary, and quick navigation to all configuration sections.
 order: 2
 ---
 
-# Dashboard
+# Cloud Dashboard
 
-The Dashboard (`/`) is the Cloud app's home screen. It provides a system overview showing connected device status, layout summary statistics, and quick-access tiles for each configuration section (Roster, Turnouts, Routes, Effects, Signals, Sensors, and DCC-EX).
+The Dashboard is the first thing you see when you open the Cloud app. It provides a quick overview of your layout's status and fast access to every configuration section.
 
-The dashboard requires authentication, a completed onboarding flow, admin approval, and a selected layout.
+## Device Status
+
+If you have a DCC-EX CommandStation configured, the dashboard shows live device status tiles for each connected device:
+
+- **Connection state** — Whether the device is online and communicating
+- **Port assignment** — Which serial port the device is connected to
+- **Health indicators** — Quick visual status for each device
+
+## Getting Started
+
+If you haven't set up a CommandStation yet, the dashboard shows an onboarding prompt titled **"Set Up Your Command Station"** with quick links to get started. This guides you through:
+
+- Connecting to your layout
+- Registering your CommandStation device
+- Verifying the serial connection
+
+## Quick Navigation
+
+From the dashboard, you can jump directly to any configuration section:
+
+| Section | What you'll do |
+|---------|---------------|
+| **[Roster](/docs/cloud/roster)** | Add and manage your locomotives |
+| **[Turnouts](/docs/cloud/turnouts)** | Configure track switches |
+| **[Routes](/docs/cloud/routes)** | Set up automated turnout sequences |
+| **[Effects](/docs/cloud/effects)** | Configure lights, sounds, and animations |
+| **[Signals](/docs/cloud/signals)** | Wire three-aspect signal heads |
+| **[DCC-EX Console](/docs/cloud/dcc-ex)** | Send raw commands to your CommandStation |
+| **Layout** | Manage devices and layout metadata |
+
+![Cloud dashboard](/screenshots/cloud_desktop_dashboard.png)

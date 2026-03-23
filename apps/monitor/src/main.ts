@@ -7,10 +7,6 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
-// Vuetify components
-import { VBtn } from 'vuetify/components/VBtn'
-import { VCard } from 'vuetify/components/VCard'
-
 // VueFire
 import { VueFire, VueFireAuth } from 'vuefire'
 // Firebase
@@ -49,7 +45,7 @@ const vuetify = createVuetify({
       padding: 0,
       rounded: 'lg',
     },
-    VCardIten: {
+    VCardItem: {
       padding: 0,
     },
     VTextField: {
@@ -104,17 +100,20 @@ const vuetify = createVuetify({
 })
 const app = createApp(App)
 
-Sentry.init({
-  app,
-  dsn: import.meta.env.VITE_SENTRY_DSN,
-  integrations: [
-    Sentry.browserTracingIntegration({ router }),
-    Sentry.replayIntegration(),
-  ],
-  tracesSampleRate: 1.0,
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
-})
+if (import.meta.env.PROD) {
+  Sentry.init({
+    app,
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    environment: 'production',
+    integrations: [
+      Sentry.browserTracingIntegration({ router }),
+      Sentry.replayIntegration(),
+    ],
+    tracesSampleRate: 0.2,
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+  })
+}
 
 app.use(createPinia())
 app.use(VueFire, {

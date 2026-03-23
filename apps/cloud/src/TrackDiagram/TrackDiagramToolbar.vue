@@ -5,7 +5,7 @@ import { TOOL_OPTIONS } from './constants'
 const { toolMode, setToolMode } = useTrackDiagramEditor()
 </script>
 <template>
-  <div class="flex gap-1 p-2 bg-gray-900 rounded-lg">
+  <div class="flex gap-1 p-2 bg-surface-variant rounded-lg">
     <v-btn
       v-for="tool in TOOL_OPTIONS"
       :key="tool.mode"

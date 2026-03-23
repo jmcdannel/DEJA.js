@@ -47,7 +47,7 @@ export default async function MonitorPage() {
   const ctaHref = product?.cta?.href || '/docs/monitor';
 
   return (
-    <div className="space-y-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
       <section className="text-center space-y-6 flex flex-col items-center">
         <div className="flex justify-center mb-4">
           <Image src="/monitor/icon-512.png" alt="DEJA.js Monitor Logo" width={128} height={128} className="h-32 w-32 drop-shadow-lg" />

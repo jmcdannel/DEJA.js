@@ -6,15 +6,16 @@ import SensorForm from '@/Sensors/SensorForm.vue'
 import type { Sensor } from '@repo/modules/sensors'
 
 const router = useRouter()
-const defaultSensor = computed<Sensor>(() => ({
+const defaultSensor = computed(() => ({
   id: '',
   name: '',
   device: '',
-  index: undefined,
+  index: 0,
   pin: undefined,
-  type: 'digital',
-  inputType: 'normally-open',
+  type: 'digital' as const,
+  inputType: 'ir' as const,
   state: false,
+  enabled: true,
   invertState: false,
   pullup: false,
   debounceMs: undefined,
@@ -25,9 +26,9 @@ const defaultSensor = computed<Sensor>(() => ({
   effectId: '',
   automationId: '',
   description: '',
-  tags: [],
+  tags: [] as string[],
   color: 'teal',
-}))
+} satisfies Sensor & { color: string }))
 
 function handleClose() {
   router.push({ name: 'Sensors' })

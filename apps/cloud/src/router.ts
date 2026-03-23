@@ -3,9 +3,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteLocationNormalized, RouteLocationRaw } from 'vue-router'
 import { getCurrentUser } from 'vuefire'
 import type { User } from 'firebase/auth'
-import { useStorage } from '@vueuse/core'
 import { collection, query, where, getDocs, getDoc, doc } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
+import { requireLayout } from '@repo/auth'
 import { createLogger } from '@repo/utils'
 import { checkRequireFeature } from '@repo/auth'
 import type { FeatureName, UserRole } from '@repo/modules'
@@ -92,7 +92,7 @@ const router = createRouter({
       path: '/select-layout',
       name: 'Select Layout',
       component: () => import('./Layout/SelectLayout.vue'),
-      meta: { requireAuth: true },
+      meta: { requireAuth: true, fullscreen: true },
     },
     {
       path: '/locos',
@@ -345,19 +345,6 @@ function checkRequireOnboarding(
   }
 }
 
-function checkRequireLayout(
-  to: RouteLocationNormalized,
-): RouteLocationRaw | undefined {
-  const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
-
-  if (!layoutId.value || layoutId.value === '') {
-    return {
-      path: '/select-layout',
-      query: { redirect: to.fullPath },
-    }
-  }
-}
-
 function checkRequireDccEx(): RouteLocationRaw | undefined {
   // DCC-EX guard is currently informational only (the check is commented
   // out in the original code). Kept as a no-op placeholder so the meta
@@ -388,7 +375,7 @@ router.beforeEach(async (to) => {
 
     // 1. Redirect-if-authenticated (login / signup pages)
     if (meta.redirectIfAuthenticated) {
-      const redirect = checkRedirectIfAuthenticated(currentUser)
+      const redirect = checkRedirectIfAuthenticated(currentUser ?? null)
       if (redirect) {
         log.debug('redirectIfAuthenticated → redirecting', redirect)
         return redirect
@@ -397,7 +384,7 @@ router.beforeEach(async (to) => {
 
     // 2. Require authentication
     if (meta.requireAuth) {
-      const redirect = checkRequireAuth(currentUser, to)
+      const redirect = checkRequireAuth(currentUser ?? null, to)
       if (redirect) {
         log.debug('requireAuth → redirecting to login')
         return redirect
@@ -420,11 +407,11 @@ router.beforeEach(async (to) => {
       }
     }
 
-    // 4. Require a selected layout in localStorage
+    // 4. Require a selected layout (auto-selects single layout)
     if (meta.requireLayout) {
-      const redirect = checkRequireLayout(to)
+      const redirect = await requireLayout(user.email!, to)
       if (redirect) {
-        log.debug('requireLayout → redirecting to select-layout')
+        log.debug('requireLayout → redirecting')
         return redirect
       }
     }

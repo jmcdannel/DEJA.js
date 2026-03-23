@@ -147,7 +147,7 @@ export const useEfx = () => {
       await setDoc(doc(db, `layouts/${layoutId.value}/effects`, id), {
         ...efx,
         timestamp: serverTimestamp(),
-      })
+      }, { merge: true })
       return true
     } catch (e) {
       log.error('Error setting effect: ', e)

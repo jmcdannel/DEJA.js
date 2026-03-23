@@ -121,11 +121,10 @@ function handleSelectCustomColor() {
     </v-card-text>
     <v-card-actions>
       <v-btn
-        class="text-white"
         prepend-icon="mdi-cancel"
         variant="plain"
         @click="$emit('cancel')">
-        Cacnel
+        Cancel
       </v-btn>
       <v-btn
         prepend-icon="mdi-check"

@@ -239,14 +239,8 @@ async function changePlan(newPlan: PlanTier) {
 
   try {
     const token = await getIdToken(user.value)
-    const billingApiUrl = import.meta.env.VITE_BILLING_API_URL
 
-    if (!billingApiUrl) {
-      error.value = 'Billing service is not configured.'
-      return
-    }
-
-    const res = await fetch(`${billingApiUrl}/api/change-plan`, {
+    const res = await fetch('/api/change-plan', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -293,14 +287,8 @@ async function handleNewSubscription() {
     }
 
     const token = await getIdToken(user.value)
-    const billingApiUrl = import.meta.env.VITE_BILLING_API_URL
 
-    if (!billingApiUrl) {
-      error.value = 'Billing service is not configured.'
-      return
-    }
-
-    const response = await fetch(`${billingApiUrl}/api/subscribe`, {
+    const response = await fetch('/api/subscribe', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -343,8 +331,7 @@ async function openBillingPortal() {
   portalLoading.value = true
   try {
     const token = await getIdToken(user.value)
-    const billingApiUrl = import.meta.env.VITE_BILLING_API_URL
-    const res = await fetch(`${billingApiUrl}/api/billing-portal`, {
+    const res = await fetch('/api/billing-portal', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -384,7 +371,7 @@ function cancelPayment() {
       <div class="success-card">
         <v-icon size="64" color="success" class="mb-4">mdi-check-circle</v-icon>
         <h2 class="text-2xl font-bold text-sky-100 mb-2">Plan Updated!</h2>
-        <p class="text-slate-400 mb-6">
+        <p class="opacity-60 mb-6">
           Your subscription has been updated. Changes take effect immediately.
         </p>
         <v-btn color="primary" variant="tonal" class="text-none" @click="router.push({ name: 'Settings' })">
@@ -404,11 +391,11 @@ function cancelPayment() {
 
         <!-- Order Summary -->
         <div class="summary-card mb-6">
-          <h3 class="text-xs text-slate-500 uppercase tracking-widest mb-3 font-medium">Order Summary</h3>
+          <h3 class="text-xs opacity-50 uppercase tracking-widest mb-3 font-medium">Order Summary</h3>
           <div class="flex justify-between items-start mb-2">
             <div>
               <p class="text-lg font-semibold text-sky-100">{{ PLAN_DISPLAY[selectedPlan].name }} Plan</p>
-              <p class="text-sm text-slate-400">{{ billingCycle === 'annual' ? 'Annual' : 'Monthly' }} billing</p>
+              <p class="text-sm opacity-60">{{ billingCycle === 'annual' ? 'Annual' : 'Monthly' }} billing</p>
             </div>
             <div class="text-right">
               <p class="text-xl font-bold text-sky-100">
@@ -418,7 +405,7 @@ function cancelPayment() {
           </div>
           <div class="divider-line my-4" />
           <ul class="space-y-2">
-            <li v-for="feature in PLAN_DISPLAY[selectedPlan].features" :key="feature" class="flex items-start gap-2 text-sm text-slate-400">
+            <li v-for="feature in PLAN_DISPLAY[selectedPlan].features" :key="feature" class="flex items-start gap-2 text-sm opacity-60">
               <v-icon size="16" color="primary" class="mt-0.5 flex-shrink-0">mdi-check</v-icon>
               {{ feature }}
             </li>
@@ -441,12 +428,12 @@ function cancelPayment() {
           <template v-if="stripeLoading">
             <div class="card-element-container mb-5 flex items-center justify-center gap-3">
               <v-progress-circular size="20" width="2" indeterminate color="primary" />
-              <span class="text-sm text-slate-400">Loading payment form...</span>
+              <span class="text-sm opacity-60">Loading payment form...</span>
             </div>
           </template>
 
           <template v-else-if="stripeReady">
-            <p class="text-xs text-slate-500 uppercase tracking-widest mb-2 font-medium">Card Information</p>
+            <p class="text-xs opacity-50 uppercase tracking-widest mb-2 font-medium">Card Information</p>
             <div ref="cardElementRef" class="card-element-container mb-5" />
           </template>
 
@@ -474,8 +461,8 @@ function cancelPayment() {
           </v-btn>
 
           <div class="flex items-center justify-center gap-2 mt-4">
-            <v-icon size="14" class="text-slate-500">mdi-shield-check</v-icon>
-            <span class="text-xs text-slate-500">Secured by Stripe. Cancel anytime.</span>
+            <v-icon size="14" class="opacity-50">mdi-shield-check</v-icon>
+            <span class="text-xs opacity-50">Secured by Stripe. Cancel anytime.</span>
           </div>
         </div>
       </div>
@@ -496,7 +483,7 @@ function cancelPayment() {
             </span>
           </div>
         </div>
-        <v-btn v-if="hasStripeSubscription" variant="text" size="small" prepend-icon="mdi-open-in-new" :loading="portalLoading" class="text-none text-slate-400" @click="openBillingPortal">
+        <v-btn v-if="hasStripeSubscription" variant="text" size="small" prepend-icon="mdi-open-in-new" :loading="portalLoading" class="text-none opacity-60" @click="openBillingPortal">
           Manage Billing
         </v-btn>
       </div>
@@ -596,11 +583,11 @@ function cancelPayment() {
 
       <!-- Comparison Modal -->
       <v-dialog v-model="showCompare" max-width="900" scrollable>
-        <v-card class="bg-[#0f172a] border border-white/10">
+        <v-card color="surface" class="border border-opacity-10">
           <v-card-title class="font-display text-2xl text-sky-100 pa-6 pb-0">
             Full Feature Breakdown
           </v-card-title>
-          <v-card-subtitle class="px-6 text-slate-400">
+          <v-card-subtitle class="px-6 opacity-60">
             Everything you get, spelled out clearly.
           </v-card-subtitle>
           <v-card-text class="pa-6">

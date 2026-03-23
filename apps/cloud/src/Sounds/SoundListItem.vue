@@ -63,68 +63,72 @@ function formatFileSize(bytes: number): string {
 </script>
 <template>
   <v-card
-    variant="tonal"
-    color="surface-variant"
     class="h-100 transition-all hover:shadow-md"
+    density="compact"
   >
-    <v-card-text class="pa-3 d-flex flex-column h-100">
-      <!-- Header -->
-      <div class="d-flex align-center mb-2">
-        <v-icon size="20" class="mr-2 text-sky-400">mdi-music-note</v-icon>
-        <h4 class="text-sm font-weight-medium flex-1 line-clamp-2">
-          {{ sound.name }}
-        </h4>
+    <v-card-title class="flex flex-nowrap items-center gap-3 !overflow-visible">
+      <div class="flex items-center gap-3 min-w-0 cursor-pointer hover:opacity-80 transition-opacity" @click="emit('edit')">
+        <v-icon icon="mdi-music-note" color="sky" class="flex-shrink-0" />
+        <span class="text-sm font-weight-medium">{{ sound.name }}</span>
       </div>
-
-      <!-- Metadata chips -->
-      <div class="d-flex flex-wrap gap-1 mb-3">
-        <v-chip
-          v-if="duration || sound.duration"
-          size="x-small"
-          variant="outlined"
-          color="info"
-        >
-          {{ formatDuration(duration || sound.duration || 0) }}
-        </v-chip>
-        <v-chip
-          v-if="sound.size"
-          size="x-small"
-          variant="outlined"
-          color="secondary"
-        >
-          {{ formatFileSize(sound.size) }}
-        </v-chip>
-      </div>
-
       <v-spacer />
-
-      <!-- Play button -->
-      <div class="d-flex align-center gap-2 mt-auto">
-        <v-btn
-          :icon="isPlaying ? 'mdi-stop' : 'mdi-play'"
-          size="small"
-          variant="tonal"
-          color="sky"
-          @click="togglePlay"
-        />
-        <v-btn
-          icon="mdi-delete"
-          size="small"
-          variant="text"
-          color="error"
-          @click="confirmDelete"
-        />
-      </div>
-
-      <!-- Hidden audio element -->
-      <audio
-        ref="audioEl"
-        :src="sound.url"
-        preload="metadata"
-        @loadedmetadata="onMetadataLoaded"
-        @ended="onEnded"
+      <v-btn
+        :icon="isPlaying ? 'mdi-stop' : 'mdi-play'"
+        size="small"
+        variant="tonal"
+        color="sky"
+        class="flex-shrink-0"
+        @click="togglePlay"
       />
+    </v-card-title>
+    <v-card-text class="py-2">
+      <div class="flex justify-between w-full items-start">
+        <v-chip-group>
+          <v-chip
+            v-if="duration || sound.duration"
+            size="x-small"
+            variant="outlined"
+            prepend-icon="mdi-timer-outline"
+          >
+            {{ formatDuration(duration || sound.duration || 0) }}
+          </v-chip>
+          <v-chip
+            v-if="sound.size"
+            size="x-small"
+            variant="outlined"
+            prepend-icon="mdi-file-outline"
+          >
+            {{ formatFileSize(sound.size) }}
+          </v-chip>
+        </v-chip-group>
+      </div>
     </v-card-text>
+    <v-divider />
+    <div class="flex justify-between pa-1" style="background: rgba(var(--v-theme-on-surface), 0.04)">
+      <v-btn
+        icon="mdi-delete-outline"
+        variant="text"
+        color="error"
+        size="small"
+        @click="confirmDelete"
+      />
+      <v-btn
+        icon="mdi-pencil-outline"
+        variant="text"
+        color="sky"
+        size="small"
+        @click="emit('edit')"
+      />
+    </div>
+
+    <!-- Hidden audio element -->
+    <audio
+      ref="audioEl"
+      :src="sound.url"
+      preload="metadata"
+      @loadedmetadata="onMetadataLoaded"
+      @ended="onEnded"
+    />
   </v-card>
 
   <!-- Delete confirmation dialog -->

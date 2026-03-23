@@ -24,15 +24,15 @@ const efxType = computed(() => efxTypes.find((type) => type.value === props?.eff
     :color="effect?.color || 'primary'"
   >
     <v-card-title 
-      class="flex flex-row items-center gap-4 justify-between rounded-full px-2 bg-gray-900 bg-opacity-75"
-      :class="isRunning ? 'shadow-inner shadow-pink-500 bg-opacity-80' : 'bg-opacity-95'"
+      class="flex flex-row items-center gap-4 justify-between rounded-full px-2 efx-switch-inner"
+      :class="isRunning ? 'shadow-inner shadow-pink-500' : ''"
 >
-      <v-icon 
+      <v-icon
         :icon="efxType?.icon || 'mdi-help'"
         class="text-5xl m-3"></v-icon>
-      <h4 class="text-md font-bold mr-2 text-white">
+      <h4 class="text-md font-bold mr-2">
         {{effect?.name}}
-        <span class="hidden md:inline text-sm font-normal ml-2 text-gray-300">
+        <span class="hidden md:inline text-sm font-normal ml-2 opacity-60">
           <br />
           <v-chip 
             v-if="effect?.device" 
@@ -54,3 +54,9 @@ const efxType = computed(() => efxTypes.find((type) => type.value === props?.eff
     </v-card-title>
   </v-card>
 </template>
+
+<style scoped>
+.efx-switch-inner {
+  background: rgba(var(--v-theme-surface), 0.85);
+}
+</style>

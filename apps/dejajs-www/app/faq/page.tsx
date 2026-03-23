@@ -76,7 +76,7 @@ export default async function FAQPage() {
   const sections = faq?.sections?.length ? faq.sections : defaultSections;
 
   return (
-    <div className="space-y-16 max-w-4xl mx-auto">
+    <div className="space-y-16 max-w-4xl mx-auto px-4 sm:px-6 py-12">
       <section className="text-center space-y-6 flex flex-col items-center">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">
           {pageTitle}

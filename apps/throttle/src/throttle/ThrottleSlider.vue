@@ -34,7 +34,7 @@ function handleSlider(val: number) {
 
 </script>
 <template>
-  <div class="text-xs text-gray-500 mb-2">
+  <div class="text-xs opacity-50 mb-2">
     <div>Slider: {{ sliderVal }}</div>
     <div>Speed: {{ speed }}</div>
   </div>

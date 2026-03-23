@@ -1,0 +1,344 @@
+---
+title: WebSocket Integration
+description: How to connect custom scripts and applications to the DEJA.js server via WebSocket for real-time command and status monitoring.
+section: io
+order: 10
+---
+
+# 🌐 WebSocket Integration
+
+The DEJA.js server exposes a **WebSocket interface** for real-time bidirectional communication. This is the same protocol used by the Monitor, Throttle, and Cloud apps — so your custom scripts get the same live data stream as the official DEJA.js frontends.
+
+Use WebSocket integration when you want to:
+- 🖥️ Build custom dashboards or control panels
+- 📊 Log DCC commands and device data to a file or database
+- 🤖 Write automation scripts that react to layout events in real time
+- 🔌 Bridge DEJA.js with other home automation or IoT platforms
+
+---
+
+## 🔗 Connection
+
+Connect to the DEJA.js WebSocket server at:
+
+```
+ws://host:8082
+```
+
+| Parameter | Default | Env Variable |
+|-----------|---------|--------------|
+| Host | `localhost` | — |
+| Port | `8082` | `VITE_WS_PORT` |
+
+If the server is behind a **Cloudflare Tunnel** or served over HTTPS, use `wss://` instead:
+
+```
+wss://your-tunnel.example.com
+```
+
+> 💡 The WebSocket server must be enabled on the DEJA server with `ENABLE_WS=true` (this is the default).
+
+---
+
+## 🤝 Connection Handshake
+
+When you connect, the server sends two messages automatically — no request needed:
+
+### 1️⃣ `ack` — Connection Acknowledgment
+
+Sent immediately on connect. Confirms the server identity and which layout it's managing.
+
+```json
+{
+  "action": "ack",
+  "payload": {
+    "layoutId": "tamarack",
+    "serverId": "DEJA.js"
+  }
+}
+```
+
+### 2️⃣ `wsconnected` — Client Identification
+
+Sent right after `ack`. Contains your client's IP address as seen by the server.
+
+```json
+{
+  "action": "wsconnected",
+  "payload": {
+    "ip": "192.168.1.42",
+    "serverId": "DEJA.js"
+  }
+}
+```
+
+Once you receive both messages, the connection is fully established and you can send commands or listen for broadcasts.
+
+---
+
+## 📤 Sending Commands
+
+Send JSON messages to the server with an `action` and `payload`:
+
+```json
+{
+  "action": "string",
+  "payload": {}
+}
+```
+
+### Common Client-to-Server Actions
+
+| Action | Payload | Description |
+|--------|---------|-------------|
+| `listPorts` | `{}` | Request a list of available serial ports |
+| `getStatus` | `{}` | Request current server status |
+| `ping` | `{}` | Ping the server (returns `status`) |
+| `subscribe-device` | `{ "deviceId": "device-name" }` | Subscribe to serial data for a specific device |
+| `unsubscribe-device` | `{ "deviceId": "device-name" }` | Unsubscribe from a device's serial data |
+
+---
+
+## 📥 Broadcast Messages from Server
+
+These messages are broadcast to **all** connected WebSocket clients:
+
+### `dcc` — DCC Command Log
+
+Every DCC-EX command sent to the serial port is broadcast. Great for building a live command monitor.
+
+```json
+{
+  "action": "dcc",
+  "payload": "t 3 50 1"
+}
+```
+
+### `connected` — Serial Port Connected
+
+Broadcast when the server establishes a serial connection to a DCC-EX CommandStation.
+
+```json
+{
+  "action": "connected",
+  "payload": {
+    "baudRate": 115200,
+    "device": "CommandStation",
+    "path": "/dev/tty.usbmodem1101"
+  }
+}
+```
+
+### `portList` — Available Serial Ports
+
+Broadcast in response to a `listPorts` command.
+
+```json
+{
+  "action": "portList",
+  "payload": [
+    "/dev/tty.usbmodem1101",
+    "/dev/tty.usbserial-110"
+  ]
+}
+```
+
+### `status` — Server Status
+
+Broadcast in response to `getStatus`, `status`, or `ping`.
+
+```json
+{
+  "action": "status",
+  "payload": {
+    "client": "dejaJS",
+    "isConnected": true
+  }
+}
+```
+
+### `serial-data` — Device Serial I/O
+
+Sent **only** to clients subscribed to a specific device (see below).
+
+```json
+{
+  "action": "serial-data",
+  "payload": {
+    "deviceId": "tj-eagle-nest-pico",
+    "data": "<p1>",
+    "timestamp": "2025-01-15T14:30:22.123Z",
+    "direction": "incoming"
+  }
+}
+```
+
+The `direction` field is either `"incoming"` (device → server) or `"outgoing"` (server → device).
+
+---
+
+## 🔍 Device Serial Monitoring
+
+You can subscribe to a specific hardware device's serial I/O stream. This is useful for debugging, logging, or building device-specific dashboards.
+
+### Subscribe to a Device
+
+```json
+{
+  "action": "subscribe-device",
+  "deviceId": "tj-eagle-nest-pico"
+}
+```
+
+✅ **Server response:**
+
+```json
+{
+  "action": "device-subscribed",
+  "payload": {
+    "deviceId": "tj-eagle-nest-pico",
+    "success": true
+  }
+}
+```
+
+### Unsubscribe from a Device
+
+```json
+{
+  "action": "unsubscribe-device",
+  "deviceId": "tj-eagle-nest-pico"
+}
+```
+
+✅ **Server response:**
+
+```json
+{
+  "action": "device-unsubscribed",
+  "payload": {
+    "deviceId": "tj-eagle-nest-pico",
+    "success": true
+  }
+}
+```
+
+> 💡 You can subscribe to **multiple devices** simultaneously. When you disconnect, the server automatically cleans up all your subscriptions.
+
+---
+
+## 🚀 Example: JavaScript WebSocket Client
+
+Here's a complete example that connects to the DEJA server, listens for DCC commands, and subscribes to a device's serial stream.
+
+### Browser
+
+```javascript
+const ws = new WebSocket('ws://localhost:8082')
+
+ws.onopen = () => {
+  console.log('🔗 Connected to DEJA server')
+
+  // Subscribe to a device's serial data
+  ws.send(JSON.stringify({
+    action: 'subscribe-device',
+    deviceId: 'tj-thunder-city-pico'
+  }))
+}
+
+ws.onmessage = (event) => {
+  const msg = JSON.parse(event.data)
+
+  switch (msg.action) {
+    case 'ack':
+      console.log(`🤝 Server ack — layout: ${msg.payload.layoutId}`)
+      break
+
+    case 'wsconnected':
+      console.log(`🌐 Connected as ${msg.payload.ip}`)
+      break
+
+    case 'dcc':
+      console.log(`🚂 DCC command: ${msg.payload}`)
+      break
+
+    case 'device-subscribed':
+      console.log(`📡 Subscribed to ${msg.payload.deviceId}`)
+      break
+
+    case 'serial-data':
+      const { deviceId, data, direction } = msg.payload
+      const arrow = direction === 'incoming' ? '⬅️' : '➡️'
+      console.log(`${arrow} ${deviceId}: ${data}`)
+      break
+
+    case 'connected':
+      console.log(`🔌 Serial connected: ${msg.payload.path}`)
+      break
+
+    case 'status':
+      console.log(`📊 Status: connected=${msg.payload.isConnected}`)
+      break
+
+    default:
+      console.log(`📨 ${msg.action}:`, msg.payload)
+  }
+}
+
+ws.onclose = () => console.log('❌ Disconnected from DEJA server')
+ws.onerror = (err) => console.error('⚠️ WebSocket error:', err)
+```
+
+### Node.js
+
+```bash
+npm install ws
+```
+
+```javascript
+import { WebSocket } from 'ws'
+
+const ws = new WebSocket('ws://localhost:8082')
+
+ws.on('open', () => {
+  console.log('🔗 Connected to DEJA server')
+
+  // Request server status
+  ws.send(JSON.stringify({ action: 'getStatus', payload: {} }))
+
+  // Subscribe to a device
+  ws.send(JSON.stringify({
+    action: 'subscribe-device',
+    deviceId: 'tj-eagle-nest-pico'
+  }))
+})
+
+ws.on('message', (raw) => {
+  const msg = JSON.parse(raw.toString())
+  console.log(`[${msg.action}]`, JSON.stringify(msg.payload))
+})
+
+ws.on('close', () => console.log('Disconnected'))
+ws.on('error', (err) => console.error('Error:', err.message))
+```
+
+---
+
+## 🧪 Testing Your Integration
+
+1. **Start the DEJA server** — Make sure `ENABLE_WS=true` (default)
+2. **Open a WebSocket connection** — Use the examples above or a tool like [websocat](https://github.com/vi/websocat):
+   ```bash
+   websocat ws://localhost:8082
+   ```
+3. **Watch the handshake** — You should immediately see `ack` and `wsconnected` messages
+4. **Send a ping** — Type `{"action":"ping","payload":{}}` and confirm you get a `status` response
+5. **Subscribe to a device** — Send a `subscribe-device` message and watch for `serial-data` events
+
+---
+
+## 📚 Next Steps
+
+- 🔧 **[Building Custom Devices](/docs/io/custom-devices)** — Build MQTT hardware devices that the server can control
+- 📖 **[IO Devices & Firmware Overview](/docs/io/overview)** — Learn about the stock Arduino and Pico W firmware
+- 📡 **[WebSocket Protocol (Developer Reference)](/docs/dev/websocket-protocol)** — Full protocol specification with all message types and connection management details

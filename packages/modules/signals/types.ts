@@ -12,6 +12,7 @@ export interface Signal {
   aspect?: SignalAspect
   commonAnode?: boolean
   description?: string
+  order?: number
   tags?: string[]
   timestamp?: Timestamp | null
 }

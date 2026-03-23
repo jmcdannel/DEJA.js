@@ -61,7 +61,7 @@ const {
   </main>
   <main v-else>
     <div class="flex items-center justify-center h-full">
-      <p class="text-gray-500">Loading throttle...</p>
+      <p class="opacity-50">Loading throttle...</p>
       {{address}}
       {{throttle}}
     </div>
