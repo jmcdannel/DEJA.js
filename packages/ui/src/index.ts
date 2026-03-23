@@ -69,6 +69,8 @@ export * from './animations'
 export { appIcons } from './assets/icons'
 export type { AppIconName } from './assets/icons'
 
+export { default as FeatureGate } from './FeatureGate.vue'
+
 // Themes
 export { createVuetifyThemes, THEME_MODES, THEME_MODE_DEFINITIONS } from './themes'
 export type { AppThemeConfig, ThemeMode, ThemeOverrides, ThemeVariables, ThemeModeDefinition } from './themes'

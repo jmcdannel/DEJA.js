@@ -16,6 +16,7 @@ const dismissed = ref(false)
     lines="one"
     :color="VARIANT_COLORS[promotion.variant] ?? 'info'"
     density="compact"
+    :sticky="false"
     class="text-body-2"
   >
     <template #prepend>
