@@ -7,7 +7,7 @@ import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import { createLogger } from '@repo/utils'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { useMenu } from '@/Core/Menu/useMenu'
-import { useSubscription, PLAN_DISPLAY } from '@repo/modules'
+import { useSubscription, PLAN_DISPLAY, useOnboarding, useLocos } from '@repo/modules'
 import { Signout } from '@repo/auth'
 import { isNavigating } from '@/router'
 import { useFeedbackUser } from '@repo/modules/feedback'
@@ -18,7 +18,7 @@ const { feedbackUser } = useFeedbackUser()
 watch(feedbackUser, (u) => Sentry.setUser(u), { immediate: true })
 
 // Components
-import { AppHeader, NotificationContainer, provideNotifications, PageBackground } from '@repo/ui'
+import { AppHeader, NotificationContainer, provideNotifications, PageBackground, OnboardingBanner } from '@repo/ui'
 
 provideNotifications()
 const drawer = ref(true)
@@ -78,6 +78,16 @@ function handleLogoClick() {
 
 const { isTrialing, trialDaysLeft, plan } = useSubscription()
 const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
+
+const { state: onboardingState, isComplete: onboardingComplete } = useOnboarding()
+const { getLocos } = useLocos()
+const locos = getLocos()
+const locoCount = computed(() => locos.value?.length ?? 0)
+const dismissedOnboarding = useStorage('@DEJA/dismissedOnboardingBanner', false)
+
+function openThrottle() {
+  window.open('https://throttle.dejajs.com', '_blank')
+}
 </script>
 <template>
   <v-responsive class="border rounded min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
@@ -119,6 +129,15 @@ const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
             <v-btn variant="text" size="small" :to="{ name: 'Settings' }">Manage subscription</v-btn>
           </template>
         </v-banner>
+        <OnboardingBanner
+          v-if="!isFullscreen && !onboardingComplete && !dismissedOnboarding"
+          :state="onboardingState"
+          :loco-count="locoCount"
+          variant="cloud"
+          @add-loco="router.push({ name: 'Roster' })"
+          @open-throttle="openThrottle"
+          @dismiss="dismissedOnboarding = true"
+        />
         <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
       <v-main>
         <v-progress-linear
