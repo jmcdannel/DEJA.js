@@ -7,7 +7,7 @@ import { rtdb } from '@repo/firebase-config'
 import type { Loco } from '@repo/modules/locos'
 import { useLocos } from '@repo/modules/locos'
 import { useDcc } from '@repo/dccex'
-import { PageHeader } from '@repo/ui'
+import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
 import RosterList from '@/Roster/RosterList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 import { ThrottleLaunchQR } from '@repo/ui'
@@ -18,6 +18,11 @@ const { getLocos } = useLocos()
 const { syncAllRoster, importRoster } = useDcc()
 
 const locos = getLocos()
+
+const rosterList = computed(() =>
+  locos?.value ? locos.value.map((l) => ({ ...l, id: l.address })) : []
+)
+const rosterControls = useListControls('cloud-roster', { list: rosterList })
 
 interface RosterSyncStatus {
   status: 'syncing' | 'success' | 'error' | 'importing'
@@ -82,6 +87,16 @@ async function importFromCS() {
 
 <template>
   <PageHeader title="Roster" icon="mdi-train" color="pink">
+    <template #controls>
+      <ListControlBar
+        :controls="rosterControls"
+        color="pink"
+        :show-filters="false"
+        :show-view="false"
+        :show-sort="false"
+        search-placeholder="Search roster..."
+      />
+    </template>
     <template #actions>
       <v-btn
         :loading="rosterSyncStatus?.status === 'syncing'"
