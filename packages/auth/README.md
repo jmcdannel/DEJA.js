@@ -17,7 +17,7 @@ import { requireAuth, requireLayout, Login } from '@repo/auth'
 | `requireAuth` | 🔒 Redirects to login if the user is not authenticated |
 | `requireDccEx` | ⚡ Ensures a DCC-EX connection is available |
 | `requireLayout` | 🗺️ Requires a layout to be selected |
-| `requireApproval` | ✅ Checks that the user's account is approved |
+| `checkRequireFeature` | 🚩 Checks that a feature flag is enabled for the current user |
 | `requireOnboarding` | 📋 Redirects to onboarding if not completed |
 | `redirectIfAuthenticated` | ↩️ Redirects away from login if already authenticated |
 

@@ -86,12 +86,6 @@ service cloud.firestore {
       allow read, write: if isAuth() && request.auth.uid == userId;
     }
 
-    // Approval requests — authenticated users can create/read their own
-    match /approvalRequests/{layoutId} {
-      allow read: if isAuth();
-      allow create, update: if isAuth();
-    }
-
     // Test effects collection (for sound testing)
     match /testEffects/{docId} {
       allow read, write: if isAuth();
