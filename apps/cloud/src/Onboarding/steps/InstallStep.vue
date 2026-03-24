@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { db } from '@repo/firebase-config'
+import { useStorage } from '@vueuse/core'
 import { QuickStart } from '@repo/ui'
-import { useLocos } from '@repo/modules/locos'
 import { useOnboarding, INSTALL_TIPS } from '@repo/modules'
 
 const props = defineProps<{
@@ -14,7 +16,7 @@ const emit = defineEmits<{
 }>()
 
 const { state: onboardingState } = useOnboarding()
-const { createLoco } = useLocos()
+const storedLayoutId = useStorage('@DEJA/layoutId', '')
 
 // Server detection
 const serverConnected = computed(() => onboardingState.value.serverStarted)
@@ -70,11 +72,22 @@ async function handleAddLoco() {
     locoError.value = 'Enter a valid DCC address (1–9999)'
     return
   }
+  const lid = props.layoutId || storedLayoutId.value
+  if (!lid) {
+    locoError.value = 'No layout selected'
+    return
+  }
   locoLoading.value = true
   locoError.value = null
   try {
     const name = locoName.value || `Loco ${address}`
-    await createLoco(address, name, undefined, true)
+    await setDoc(doc(collection(db, `layouts/${lid}/locos`), address.toString()), {
+      address,
+      name,
+      hasSound: true,
+      meta: {},
+      timestamp: serverTimestamp(),
+    })
     addedLocos.value.push({ address, name })
     locoAddress.value = ''
     locoName.value = ''
@@ -146,38 +159,33 @@ function handleComplete() {
     <!-- ⏳ Waiting for Server — Productive Wait State -->
     <template v-else>
 
-      <!-- 🍕 Pizza Tracker Progress Bar -->
+      <!-- 🍕 Pizza Tracker — Domino's-style progress bar -->
       <div class="pizza-tracker mb-6">
-        <div class="pizza-tracker__steps">
-          <div class="pizza-tracker__step pizza-tracker__step--complete">
-            <div class="pizza-tracker__dot"><v-icon size="12">mdi-check</v-icon></div>
-            <span class="pizza-tracker__label hidden sm:inline">Account</span>
+        <div class="pizza-bar">
+          <div class="pizza-bar__segment pizza-bar__segment--complete">
+            <span class="pizza-bar__number">1</span>
+            <span class="pizza-bar__label">Account</span>
           </div>
-          <div class="pizza-tracker__connector pizza-tracker__connector--complete" />
-          <div class="pizza-tracker__step pizza-tracker__step--complete">
-            <div class="pizza-tracker__dot"><v-icon size="12">mdi-check</v-icon></div>
-            <span class="pizza-tracker__label hidden sm:inline">Plan</span>
+          <div class="pizza-bar__segment pizza-bar__segment--complete">
+            <span class="pizza-bar__number">2</span>
+            <span class="pizza-bar__label">Plan</span>
           </div>
-          <div class="pizza-tracker__connector pizza-tracker__connector--complete" />
-          <div class="pizza-tracker__step pizza-tracker__step--complete">
-            <div class="pizza-tracker__dot"><v-icon size="12">mdi-check</v-icon></div>
-            <span class="pizza-tracker__label hidden sm:inline">Layout</span>
+          <div class="pizza-bar__segment pizza-bar__segment--complete">
+            <span class="pizza-bar__number">3</span>
+            <span class="pizza-bar__label">Layout</span>
           </div>
-          <div class="pizza-tracker__connector pizza-tracker__connector--active" />
-          <div class="pizza-tracker__step pizza-tracker__step--active">
-            <div class="pizza-tracker__dot pizza-tracker__dot--spinner">
-              <v-progress-circular indeterminate color="cyan" size="14" width="2" />
-            </div>
-            <span class="pizza-tracker__label">Install</span>
+          <div class="pizza-bar__segment pizza-bar__segment--active">
+            <span class="pizza-bar__number">4</span>
+            <span class="pizza-bar__label">Install</span>
+            <div class="pizza-bar__shimmer" />
           </div>
-          <div class="pizza-tracker__connector" />
-          <div class="pizza-tracker__step pizza-tracker__step--pending">
-            <div class="pizza-tracker__dot"><v-icon size="12">mdi-train</v-icon></div>
-            <span class="pizza-tracker__label hidden sm:inline">Drive!</span>
+          <div class="pizza-bar__segment pizza-bar__segment--pending">
+            <span class="pizza-bar__number">5</span>
+            <span class="pizza-bar__label">Drive!</span>
           </div>
         </div>
 
-        <!-- Animated status text — cycles through phrases -->
+        <!-- Animated status text -->
         <div class="pizza-tracker__status">
           <div class="pizza-tracker__glow" />
           <Transition name="phrase-slide" mode="out-in">
@@ -403,92 +411,119 @@ function handleComplete() {
   opacity: 0;
 }
 
-/* Pizza Tracker */
+/* 🍕 Pizza Tracker — Domino's-style continuous bar */
 .pizza-tracker {
-  padding: 16px 20px;
+  padding: 16px 20px 12px;
   border-radius: 16px;
-  background: rgba(15, 23, 42, 0.65);
+  background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(56, 189, 248, 0.15);
 }
-.pizza-tracker__steps {
+.pizza-bar {
+  display: flex;
+  border-radius: 12px;
+  overflow: hidden;
+  height: 48px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  background: rgba(2, 6, 23, 0.6);
+}
+.pizza-bar__segment {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  border-right: 1px solid rgba(148, 163, 184, 0.1);
 }
-.pizza-tracker__step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+.pizza-bar__segment:last-child {
+  border-right: none;
 }
-.pizza-tracker__dot {
-  width: 28px;
-  height: 28px;
+.pizza-bar__number {
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid rgba(148, 163, 184, 0.2);
-  background: rgba(15, 23, 42, 0.6);
-  color: rgba(148, 163, 184, 0.4);
-  transition: all 0.3s ease;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: monospace;
+  flex-shrink: 0;
 }
-.pizza-tracker__label {
-  font-size: 0.65rem;
-  font-weight: 500;
-  color: rgba(148, 163, 184, 0.4);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.pizza-tracker__connector {
-  flex: 1;
-  height: 2px;
-  min-width: 20px;
-  max-width: 60px;
-  background: rgba(148, 163, 184, 0.15);
-  margin: 0 4px;
-  margin-bottom: 18px;
-  border-radius: 1px;
-}
-.pizza-tracker__connector--complete {
-  background: linear-gradient(90deg, #22d3ee, #38bdf8);
-  box-shadow: 0 0 6px rgba(34, 211, 238, 0.3);
-}
-.pizza-tracker__connector--active {
-  background: linear-gradient(90deg, #38bdf8, rgba(148, 163, 184, 0.3));
-}
-.pizza-tracker__step--complete .pizza-tracker__dot {
-  border-color: #22d3ee;
-  background: rgba(34, 211, 238, 0.15);
-  color: #22d3ee;
-  box-shadow: 0 0 8px rgba(34, 211, 238, 0.3);
-}
-.pizza-tracker__step--complete .pizza-tracker__label {
-  color: #22d3ee;
-}
-.pizza-tracker__step--active .pizza-tracker__dot {
-  border-color: #38bdf8;
-  background: rgba(56, 189, 248, 0.2);
-  color: #e0f2fe;
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.4);
-  animation: pizza-pulse 2s ease-in-out infinite;
-}
-.pizza-tracker__step--active .pizza-tracker__label {
-  color: #e0f2fe;
+.pizza-bar__label {
+  font-size: 0.7rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
 }
-.pizza-tracker__step--pending .pizza-tracker__dot {
-  border-color: rgba(148, 163, 184, 0.15);
-  background: rgba(15, 23, 42, 0.4);
+@media (max-width: 480px) {
+  .pizza-bar__label { display: none; }
+  .pizza-bar { height: 40px; }
+}
+
+/* Complete segments — filled cyan gradient */
+.pizza-bar__segment--complete {
+  background: linear-gradient(135deg, #0891b2, #06b6d4, #22d3ee);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.pizza-bar__segment--complete .pizza-bar__number {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+.pizza-bar__segment--complete .pizza-bar__label {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Active segment — glowing, pulsating */
+.pizza-bar__segment--active {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.3), rgba(34, 211, 238, 0.15));
+  animation: segment-pulse 2s ease-in-out infinite;
+}
+.pizza-bar__segment--active .pizza-bar__number {
+  background: rgba(56, 189, 248, 0.3);
+  color: #7dd3fc;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+  animation: number-glow 2s ease-in-out infinite;
+}
+.pizza-bar__segment--active .pizza-bar__label {
+  color: #7dd3fc;
+}
+
+/* Shimmer sweep on active segment */
+.pizza-bar__shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(56, 189, 248, 0.15),
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+  animation: shimmer-sweep 3s ease-in-out infinite;
+}
+
+/* Pending segments — dim */
+.pizza-bar__segment--pending {
+  background: rgba(2, 6, 23, 0.4);
+}
+.pizza-bar__segment--pending .pizza-bar__number {
+  background: rgba(148, 163, 184, 0.1);
   color: rgba(148, 163, 184, 0.3);
 }
-.pizza-tracker__dot--spinner {
-  border: none;
-  background: transparent;
-  box-shadow: none;
+.pizza-bar__segment--pending .pizza-bar__label {
+  color: rgba(148, 163, 184, 0.3);
 }
+
+/* Status text below bar */
 .pizza-tracker__status {
   position: relative;
   text-align: center;
@@ -516,7 +551,7 @@ function handleComplete() {
   z-index: 1;
 }
 
-/* Phrase slide transition */
+/* Animations */
 .phrase-slide-enter-active {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -532,9 +567,24 @@ function handleComplete() {
   transform: translateY(-8px);
 }
 
-@keyframes pizza-pulse {
-  0%, 100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.5); }
+@keyframes segment-pulse {
+  0%, 100% {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(34, 211, 238, 0.1));
+    box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.1);
+  }
+  50% {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.4), rgba(34, 211, 238, 0.25));
+    box-shadow: inset 0 0 30px rgba(56, 189, 248, 0.2);
+  }
+}
+@keyframes number-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(56, 189, 248, 0.3); }
+  50% { box-shadow: 0 0 16px rgba(56, 189, 248, 0.6); }
+}
+@keyframes shimmer-sweep {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
 }
 @keyframes glow-breathe {
   0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
