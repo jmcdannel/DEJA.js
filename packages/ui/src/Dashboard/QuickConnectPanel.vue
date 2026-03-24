@@ -63,6 +63,15 @@ function isUsbDevice(device: Device) {
   )
 }
 
+function getSubtitle(device: Device) {
+  const config = getDeviceConfig(device.type)
+  if (device.type === 'dcc-ex') return 'DCC Command Station'
+  if (device.type === 'deja-arduino') return 'USB Serial Interface'
+  if (device.type === 'deja-arduino-led') return 'Lighting Controller'
+  if (device.type === 'deja-mqtt') return 'Wireless Control Node'
+  return config?.label ?? 'Device'
+}
+
 function handleConnect(device: Device) {
   const value = selections.value[device.id]
   if (isUsbDevice(device)) {
@@ -74,141 +83,224 @@ function handleConnect(device: Device) {
 </script>
 
 <template>
-  <v-card variant="flat" class="quick-connect-panel mb-3">
-    <v-card-text class="pa-4">
-      <!-- All connected state -->
-      <div v-if="allConnected" class="d-flex align-center justify-center ga-3 pa-3">
-        <StatusPulse status="connected" size="sm" />
+  <div class="qc">
+    <!-- Header -->
+    <div class="qc__header">
+      <span class="qc__title">Quick Connect</span>
+      <v-chip
+        v-if="allConnected"
+        size="x-small"
+        color="success"
+        variant="tonal"
+        prepend-icon="mdi-check-circle"
+      >
+        All online
+      </v-chip>
+      <v-chip
+        v-else-if="disconnectedDevices.length > 0"
+        size="x-small"
+        color="error"
+        variant="tonal"
+      >
+        {{ disconnectedDevices.length }} offline
+      </v-chip>
+    </div>
+
+    <!-- All connected state -->
+    <div v-if="allConnected" class="qc__connected">
+      <StatusPulse status="connected" size="md" />
+      <div>
+        <div class="text-success font-weight-bold text-sm">All devices connected</div>
+        <div class="text-xs opacity-50">{{ connectedCount }} of {{ devices.length }} online</div>
+      </div>
+    </div>
+
+    <!-- Device cards -->
+    <div
+      v-for="device in disconnectedDevices"
+      :key="device.id"
+      class="qc__device"
+    >
+      <!-- Device info row -->
+      <div class="qc__device-info" @click="emit('navigate', device.id)">
+        <v-avatar
+          :color="getDeviceConfig(device.type)?.color ?? 'grey'"
+          variant="tonal"
+          size="40"
+          rounded="lg"
+        >
+          <v-icon :icon="getDeviceConfig(device.type)?.icon ?? 'mdi-devices'" size="22" />
+        </v-avatar>
         <div>
-          <div class="quick-connect-panel__label text-success font-weight-bold">All devices connected</div>
-          <div class="quick-connect-panel__sublabel">
-            {{ connectedCount }} of {{ devices.length }} online
+          <div class="qc__device-name">
+            {{ device.name || getDeviceConfig(device.type)?.label }}
           </div>
+          <div class="qc__device-subtitle">{{ getSubtitle(device) }}</div>
         </div>
       </div>
 
-      <!-- Has disconnected devices -->
-      <template v-else-if="disconnectedDevices.length > 0">
-        <div class="d-flex align-center justify-space-between mb-3">
-          <div class="text-overline text-medium-emphasis" style="font-size: 0.625rem">Quick Connect</div>
-          <v-chip size="x-small" color="error" variant="tonal">
-            {{ disconnectedDevices.length }} offline
-          </v-chip>
-        </div>
-
-        <div
-          v-for="device in disconnectedDevices"
-          :key="device.id"
-          class="quick-connect-panel__row"
+      <!-- Port/topic selector + Link button -->
+      <div class="qc__device-actions">
+        <v-select
+          v-if="isUsbDevice(device)"
+          v-model="selections[device.id]"
+          :items="availablePorts"
+          :placeholder="device.port || 'Select port...'"
+          density="compact"
+          variant="solo-filled"
+          hide-details
+          flat
+          class="qc__input"
+          no-data-text="No ports detected"
+        />
+        <v-text-field
+          v-else
+          v-model="selections[device.id]"
+          :placeholder="device.topic || 'topic/subscribe'"
+          density="compact"
+          variant="solo-filled"
+          hide-details
+          flat
+          class="qc__input"
+        />
+        <v-btn
+          size="small"
+          color="cyan"
+          variant="flat"
+          class="qc__link-btn"
+          :disabled="isUsbDevice(device) ? !selections[device.id] : false"
+          @click="handleConnect(device)"
         >
-          <div
-            class="d-flex align-center ga-2 mb-2 quick-connect-panel__device-link"
-            @click="emit('navigate', device.id)"
-          >
-            <v-avatar
-              :color="getDeviceConfig(device.type)?.color ?? 'grey'"
-              variant="tonal"
-              size="22"
-              rounded="lg"
-            >
-              <v-icon :icon="getDeviceConfig(device.type)?.icon ?? 'mdi-devices'" size="12" />
-            </v-avatar>
-            <span
-              class="quick-connect-panel__device-name"
-              :class="`text-${getDeviceConfig(device.type)?.color ?? 'grey'}`"
-            >
-              {{ device.name || getDeviceConfig(device.type)?.label }}
-            </span>
-          </div>
-          <div class="d-flex align-center ga-2">
-            <v-select
-              v-if="isUsbDevice(device)"
-              v-model="selections[device.id]"
-              :items="availablePorts"
-              label="Port"
-              density="compact"
-              variant="outlined"
-              hide-details
-              class="flex-grow-1 quick-connect-panel__input"
-              no-data-text="No ports"
-            />
-            <v-text-field
-              v-else
-              v-model="selections[device.id]"
-              :placeholder="device.topic || 'MQTT topic...'"
-              label="Topic"
-              density="compact"
-              variant="outlined"
-              hide-details
-              class="flex-grow-1 quick-connect-panel__input"
-            />
-            <v-btn
-              size="x-small"
-              color="success"
-              variant="flat"
-              :disabled="isUsbDevice(device) ? !selections[device.id] : false"
-              @click="handleConnect(device)"
-            >
-              Connect
-            </v-btn>
-          </div>
-        </div>
-      </template>
-    </v-card-text>
-  </v-card>
+          Link
+        </v-btn>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.quick-connect-panel {
-  background: rgba(var(--v-theme-surface), 0.6) !important;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
-  border-radius: 10px;
-  backdrop-filter: blur(8px);
+.qc {
+  background: rgba(10, 18, 36, 0.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.1);
+  border-radius: 16px;
+  padding: 20px;
 }
 
-.quick-connect-panel__label {
-  font-size: 0.75rem;
+/* Header */
+.qc__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
 }
 
-.quick-connect-panel__sublabel {
-  font-size: 0.6875rem;
-  opacity: 0.5;
+.qc__title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  color: rgba(148, 163, 184, 0.5);
 }
 
-.quick-connect-panel__device-name {
-  font-size: 0.6875rem;
+/* All connected */
+.qc__connected {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(34, 197, 94, 0.06);
+  border: 1px solid rgba(34, 197, 94, 0.15);
+}
+
+/* Device cards */
+.qc__device {
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  transition: border-color 0.2s ease;
+}
+
+.qc__device:hover {
+  border-color: rgba(148, 163, 184, 0.15);
+}
+
+.qc__device + .qc__device {
+  margin-top: 10px;
+}
+
+.qc__device-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.qc__device-info:hover {
+  opacity: 0.8;
+}
+
+.qc__device-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  line-height: 1.2;
+}
+
+.qc__device-subtitle {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(148, 163, 184, 0.5);
   font-weight: 600;
 }
 
-.quick-connect-panel__row {
-  padding: 10px 0;
+/* Actions row */
+.qc__device-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.quick-connect-panel__row + .quick-connect-panel__row {
-  border-top: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+.qc__input {
+  flex: 1;
 }
 
-.quick-connect-panel__device-link {
-  cursor: pointer;
-  transition: opacity 0.15s ease;
+.qc__input :deep(.v-field) {
+  font-size: 0.8rem;
+  background: rgba(15, 23, 42, 0.6) !important;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 8px !important;
+  min-height: 36px;
 }
 
-.quick-connect-panel__device-link:hover {
-  opacity: 0.75;
+.qc__input :deep(.v-field__input) {
+  font-size: 0.8rem;
+  min-height: 36px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  color: #94a3b8;
 }
 
-.quick-connect-panel__input :deep(.v-field) {
+.qc__input :deep(.v-field__input::placeholder) {
+  color: rgba(148, 163, 184, 0.4);
+}
+
+.qc__input :deep(.v-label) {
+  font-size: 0.8rem;
+}
+
+/* Link button */
+.qc__link-btn {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   font-size: 0.75rem;
-}
-
-.quick-connect-panel__input :deep(.v-field__input) {
-  font-size: 0.75rem;
-  min-height: 32px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-.quick-connect-panel__input :deep(.v-label) {
-  font-size: 0.75rem;
+  border-radius: 8px;
+  min-width: 64px;
+  height: 36px;
 }
 </style>

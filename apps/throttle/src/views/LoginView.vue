@@ -9,11 +9,11 @@ function handleAuth() {
 }
 
 function handleNavigateSignup() {
-  router.push({ name: 'home' })
+  router.push({ name: 'signup' })
 }
 
 function handleNavigateForgotPassword() {
-  router.push({ name: 'login' })
+  router.push({ name: 'forgot-password' })
 }
 </script>
 
