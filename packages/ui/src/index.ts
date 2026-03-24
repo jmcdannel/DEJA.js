@@ -61,6 +61,7 @@ export { default as NotificationContainer } from './Notifications/NotificationCo
 export { useNotification, provideNotifications } from './Notifications/useNotification'
 export type { Notification, NotificationType, NotifyMethods } from './Notifications/useNotification'
 export { OnboardingBanner } from './OnboardingBanner/index'
+export { PizzaTracker } from './PizzaTracker/index'
 export { default as PromoBanner } from './Promotions/PromoBanner.vue'
 export { default as SensorList } from './Sensors/SensorList.vue'
 export { default as SensorItem } from './Sensors/SensorItem.vue'
