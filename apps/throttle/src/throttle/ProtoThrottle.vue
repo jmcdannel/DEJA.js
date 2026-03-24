@@ -367,13 +367,13 @@ onBeforeUnmount(() => clearInterval(ledInterval))
         <div class="headlight-knobs">
           <div class="knob-group">
             <span class="knob-label">REAR</span>
-            <button class="headlight-knob" @click="cycleRearHeadlight">
+            <button class="headlight-knob" :class="{ 'knob-on': rearHeadlight !== 'OFF' }" @click="cycleRearHeadlight">
               <v-icon size="16" class="knob-value">{{ headlightIcon(rearHeadlight) }}</v-icon>
             </button>
           </div>
           <div class="knob-group">
             <span class="knob-label">FRONT</span>
-            <button class="headlight-knob" @click="cycleFrontHeadlight">
+            <button class="headlight-knob" :class="{ 'knob-on': frontHeadlight !== 'OFF' }" @click="cycleFrontHeadlight">
               <v-icon size="16" class="knob-value">{{ headlightIcon(frontHeadlight) }}</v-icon>
             </button>
           </div>
@@ -854,6 +854,18 @@ onBeforeUnmount(() => clearInterval(ledInterval))
   box-shadow:
     0 1px 4px rgba(0,0,0,0.4),
     inset 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.headlight-knob.knob-on {
+  border-color: #d97706;
+  box-shadow:
+    0 0 10px 2px rgba(217, 119, 6, 0.3),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.headlight-knob.knob-on .knob-value {
+  color: #fbbf24;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
 }
 
 .knob-value {
