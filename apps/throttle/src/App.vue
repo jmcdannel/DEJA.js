@@ -36,10 +36,11 @@ const route = useRoute()
 
 // Prevent flash of nav chrome before initial route resolves (mirrors cloud pattern)
 const routeReady = ref(false)
-const stopRouteWatch = watch(() => route.fullPath, () => {
+let stopRouteWatch: (() => void) | undefined
+stopRouteWatch = watch(() => route.fullPath, () => {
   routeReady.value = true
-  stopRouteWatch()
-})
+  stopRouteWatch?.()
+}, { immediate: true })
 
 const isFullscreen = computed(() => {
   if (!routeReady.value) return true  // hide chrome until route resolves
@@ -148,7 +149,7 @@ const throttleDefaults: AppBackgroundPrefs = {
             :promotion="promo"
           />
           <!-- Normal (non-fullscreen) layout -->
-          <v-container v-if="!isFullscreen" ref="mainContentRef" class="p-0 min-h-full flex flex-col" fluid>
+          <v-container v-if="!isFullscreen" ref="mainContentRef" class="p-0 flex flex-col flex-1 h-full" fluid>
             <RouterView v-slot="{ Component }">
               <TransitionFade>
                 <component :is="Component" />

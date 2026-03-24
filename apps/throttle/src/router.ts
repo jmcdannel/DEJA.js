@@ -36,12 +36,25 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: { requireAuth: true, requireLayout: true },
     },
     {
       path: '/login',
       name: 'login',
       component: LoginView,
       meta: { redirectIfAuthenticated: true, fullscreen: true },
+    },
+    {
+      path: '/signup',
+      name: 'signup',
+      component: () => import('./views/SignupView.vue'),
+      meta: { redirectIfAuthenticated: true, fullscreen: true },
+    },
+    {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: () => import('./views/ForgotPasswordView.vue'),
+      meta: { fullscreen: true },
     },
     {
       path: '/connect',
