@@ -53,6 +53,9 @@ export { DeviceConnectionCard, DeviceConnectionList } from './DeviceConnection'
 
 // Dashboard widgets
 export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart, DeviceTile, QuickConnectPanel, LayoutInfoCard, DashboardEmptyState } from './Dashboard'
+
+// DejaTracker — SVG railroad progress tracker
+export { DejaTracker } from './DejaTracker'
 export { default as EmptyState } from './EmptyState/EmptyState.vue'
 export { default as ModuleList } from './ModuleList/List.vue'
 export { default as LocoList } from './Locos/LocoList.vue'
