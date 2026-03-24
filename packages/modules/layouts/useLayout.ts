@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, type Ref, type ComputedRef, isRef } from 'vue'
 import {
   doc,
   collection,
@@ -73,7 +73,16 @@ export const useLayout = () => {
     return layout
   }
 
-  function getLayouts(email: string | null = null) {
+  function getLayouts(email: string | null | Ref<string | null> | ComputedRef<string | null> = null) {
+    // Support reactive email refs so the query re-runs when auth resolves
+    if (isRef(email)) {
+      const queryRef = computed(() =>
+        email.value
+          ? query(collection(db, 'layouts'), where('owner', '==', email.value))
+          : null
+      )
+      return useCollection(queryRef, { ssrKey: 'layouts' })
+    }
     return email
       ? useCollection(query(collection(db, 'layouts'), where('owner', '==', email)), { ssrKey: 'layouts' })
       : null

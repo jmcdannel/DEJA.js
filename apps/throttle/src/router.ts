@@ -5,6 +5,7 @@ import { requireLayout } from '@repo/auth'
 import { createLogger } from '@repo/utils'
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
+import { LogoutView } from '@repo/auth'
 
 const log = createLogger('Router')
 
@@ -54,6 +55,12 @@ const router = createRouter({
       path: '/forgot-password',
       name: 'forgot-password',
       component: () => import('./views/ForgotPasswordView.vue'),
+      meta: { fullscreen: true },
+    },
+    {
+      path: '/logout',
+      name: 'logout',
+      component: LogoutView,
       meta: { fullscreen: true },
     },
     {
