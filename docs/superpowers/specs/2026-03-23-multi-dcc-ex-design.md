@@ -43,12 +43,23 @@ type TrackMode =
   | 'BOOST' | 'BOOST_INV' | 'BOOST_AUTO'
   | 'NONE'
 
+type TrackOutputLetter = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H'
+
 interface TrackOutput {
-  output: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H'
   mode: TrackMode
-  cabAddress?: number   // Required for DC/DCX (1-10239)
-  power: boolean        // On/off state
+  cabAddress?: number       // Required for DC/DCX (1-10239)
+  power: boolean | null     // true=on, false=off, null=unknown (not yet synced from hardware)
 }
+```
+
+The `output` letter is **not stored inside `TrackOutput`** — it is the key of the `Record<string, TrackOutput>` on the device document. This eliminates redundancy between the key and a field value.
+
+```typescript
+// Example Firestore document:
+// layouts/{layoutId}/devices/{deviceId}.trackOutputs = {
+//   "A": { mode: "MAIN", power: null },
+//   "B": { mode: "PROG", power: null }
+// }
 ```
 
 ### Device extension
@@ -113,7 +124,7 @@ Add rules for the new `powerDistricts` subcollection in `firestore.rules`:
 ```
 match /layouts/{layoutId}/powerDistricts/{districtId} {
   allow read: if request.auth != null;
-  allow write: if isOwner(layoutId);
+  allow write: if isLayoutOwner(layoutId);
 }
 ```
 
@@ -146,7 +157,15 @@ This follows the same pattern as other layout subcollections (locos, turnouts, e
 
 4. **Fan-out happens in `dcc.ts`.** The `handleMessage` switch cases for `throttle`, `function`, `turnout`, `output` call `broadcastToAll()`. The new `trackPower` action calls `sendToDevice()`.
 
-5. **`handleSerialMessage` in `layout.ts`** already receives the `device` parameter. It now writes track state to `device.trackOutputs` in Firestore (per-device) instead of `layout.dccEx.trackA/trackB`.
+5. **`handleSerialMessage` in `layout.ts`** already receives the `device` parameter. It now writes track state to `device.trackOutputs` in Firestore (per-device) instead of `layout.dccEx.trackA/trackB`. The existing track regex `/^=\s([AB])\s(.+)$/` is expanded to `/^=\s([A-H])\s(.+)$/` to match all 8 outputs.
+
+6. **`connect()` in `dcc.ts` is deprecated.** The existing `connect` action in `handleMessage` created a single serial connection via `dcc.connect()`. All connections now go through `layout.ts` → `connectUsbDevice()` → `dcc.registerDevice()`. The `connect` case in `handleMessage` and the `connect()` function are removed. The RTDB `dejaCommands` path (handled by `deja.ts`) continues to handle device connect/disconnect requests as before.
+
+7. **`rosterModule` adapts to multi-port.** The `createRosterModule` is initialized with `broadcastToAll` (for `syncRoster` which sends roster data to all CS units) and a `getIsConnected()` that returns `dccDevices.size > 0`. Roster import (`importRoster`) uses `sendToDevice(device1Id)` since it requires PROG track access.
+
+8. **`broadcastToAll()` uses per-device try-catch.** Each port write is wrapped individually — a broken serial connection on one device does not prevent commands from reaching other devices. Errors are logged per device.
+
+9. **Global power responses (`<p1>` / `<p0>`) update all outputs.** When `handleSerialMessage` receives a global `<p1>` or `<p0>` from a device, it sets `power: true` or `power: false` on all configured `trackOutputs` for that device in Firestore.
 
 ### RTDB command format for device-targeted commands
 
@@ -247,7 +266,7 @@ Track output configuration is **not applied live**. When the user changes track 
 
 ### Updated CommandStationTracks.vue
 
-Evolve the existing component to show **all outputs across all connected devices** instead of hardcoded Track A/B. Each output displays its mode and power state.
+Evolve the existing component to show **all outputs across all connected devices** instead of hardcoded Track A/B. Each output displays its mode and power state. **Note:** Fix pre-existing bug where both rows display "A" avatar — Track B row should show "B".
 
 ---
 
@@ -312,7 +331,7 @@ Evolve the existing component to show **all outputs across all connected devices
 | Device has no `trackOutputs` | Server skips track config, uses DCC-EX defaults |
 | Invalid cabAddress (0 or >10239) | Server logs warning, skips that output |
 | PROG set on wrong output | Server skips, logs warning |
-| Device disconnects | Config retained in Firestore, power state cleared/stale |
+| Device disconnects | Config retained in Firestore, all `trackOutputs.*.power` set to `null` (unknown) |
 | Device reconnects | Startup routine re-sends all track config |
 | DC output mode changed | Auto-created loco stays in roster (`isDcTrack: true`) |
 | `<=>` response doesn't match config | Log mismatch warning, trust the hardware response |
