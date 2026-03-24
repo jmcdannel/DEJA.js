@@ -3,7 +3,6 @@ import { SignalList } from '@repo/ui'
 </script>
 <template>
   <main class="@container min-h-screen overflow-auto p-2 md:p-4">
-    <h1 class="text-2xl font-bold mb-3">Signals</h1>
     <SignalList />
   </main>
 

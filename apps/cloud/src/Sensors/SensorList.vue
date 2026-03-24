@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, type PropType } from 'vue'
 import draggable from 'vuedraggable'
 import { useSensors, type Sensor, sensorTypes, sensorInputTypes } from '@repo/modules/sensors'
 import { useSortableList } from '@/Core/composables/useSortableList'
 import EmptyState from '@/Core/UI/EmptyState.vue'
 
 defineEmits(['edit'])
+const props = defineProps({
+  filteredList: { type: Array as PropType<Sensor[]>, default: undefined },
+})
 
 const { getSensors, setSensor, deleteSensor } = useSensors()
 const sensors = getSensors()
@@ -13,7 +16,9 @@ const sensors = getSensors()
 const color = ref('teal')
 const confirmDelete = ref('')
 
-const { list, onDragStart, onDragEnd } = useSortableList<Sensor>(sensors as any, (id, data) => setSensor(id, data as any))
+const { list: sortableList, onDragStart, onDragEnd } = useSortableList<Sensor>(sensors as any, (id, data) => setSensor(id, data as any))
+
+const list = computed(() => props.filteredList ?? sortableList.value)
 
 function getTypeLabel(type: string): string {
   const found = sensorTypes.find((t) => t.value === type)
