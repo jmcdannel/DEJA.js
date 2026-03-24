@@ -19,6 +19,7 @@ const props = defineProps({
 
 const address = toRef(props, 'address')
 const {
+  adjustSpeed,
   currentSpeed,
   setSpeed,
   loco,
@@ -59,7 +60,7 @@ const headlightIcon = (state: string) => {
 
 const brakeGradient = computed(() => {
   const pct = (brakeLevel.value / 10) * 100
-  return `linear-gradient(90deg, #eab308 0%, #ef4444 ${pct}%, #1a202c ${pct}%, #1a202c 100%)`
+  return `linear-gradient(90deg, #eab308 0%, #ef4444 ${pct}%, #374151 ${pct}%, #374151 100%)`
 })
 
 // Sync localNotch from external speed changes
@@ -105,14 +106,13 @@ function setNotch(notch: number) {
 }
 
 // ⬆️⬇️ Direction reverser
-function toggleDirection() {
-  // Only allow direction change when speed is 0
+function toggleDirection(val: any) {
   if (currentSpeed.value !== 0) {
     vibrate('heavy')
     return
   }
   vibrate('medium')
-  localDirection.value = localDirection.value === 'FWD' ? 'REV' : 'FWD'
+  localDirection.value = val ? 'FWD' : 'REV'
 }
 
 // 📯 Horn — press and hold (F2)
@@ -158,27 +158,29 @@ function cycleRearHeadlight() {
   // TODO: trigger rear headlight function
 }
 
-// 🅱️ Menu / Select / Up / Down buttons
-function handleMenuBtn() {
-  pressedButton.value = 'menu'
+// ⬆️⬇️ Speed adjustment buttons (+5, +1, -1, -5)
+function handleUp5Btn() {
+  pressedButton.value = 'up5'
   vibrate('light')
-  setTimeout(() => { pressedButton.value = null }, 150)
-}
-function handleSelectBtn() {
-  pressedButton.value = 'select'
-  vibrate('light')
+  adjustSpeed(5)
   setTimeout(() => { pressedButton.value = null }, 150)
 }
 function handleUpBtn() {
   pressedButton.value = 'up'
   vibrate('light')
-  if (localNotch.value < 8) setNotch(localNotch.value + 1)
+  adjustSpeed(1)
   setTimeout(() => { pressedButton.value = null }, 150)
 }
 function handleDownBtn() {
   pressedButton.value = 'down'
   vibrate('light')
-  if (localNotch.value > 0) setNotch(localNotch.value - 1)
+  adjustSpeed(-1)
+  setTimeout(() => { pressedButton.value = null }, 150)
+}
+function handleDown5Btn() {
+  pressedButton.value = 'down5'
+  vibrate('light')
+  adjustSpeed(-5)
   setTimeout(() => { pressedButton.value = null }, 150)
 }
 
@@ -201,7 +203,7 @@ onBeforeUnmount(() => clearInterval(ledInterval))
     <!-- Header (consistent with other variants) -->
     <ThrottleHeader class="bg-gradient-to-r from-slate-700/20 to-blue-900/20">
       <template v-slot:left>
-        <div class="flex flex-row items-center justify-center gap-1 px-4 bg-gray-900">
+        <div class="flex flex-row items-center justify-center gap-1 px-4" style="background: rgba(var(--v-theme-surface), 0.6)">
           <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" variant="flat" />
           <MiniConsist v-if="loco" :loco="loco" />
           <v-spacer class="w-2 md:w-6" />
@@ -215,7 +217,7 @@ onBeforeUnmount(() => clearInterval(ledInterval))
       </template>
     </ThrottleHeader>
 
-    <section class="w-full h-full flex flex-col sm:flex-row justify-center items-start gap-4 flex-grow relative z-10">
+    <section class="w-full h-full flex flex-col sm:flex-row justify-center sm:items-center gap-4 flex-grow relative z-10">
       <!-- Left: Speedometer + Logo (desktop only) -->
       <section v-if="loco" class="hidden sm:flex flex-col gap-4 items-center justify-center flex-1">
         <Speedometer v-if="showSpeedometer" :speed="currentSpeed" :address="address" :size="200" :show-label="false" />
@@ -230,17 +232,19 @@ onBeforeUnmount(() => clearInterval(ledInterval))
         <div class="device-top-row w-full flex items-center justify-between px-4 py-2">
           <!-- Status LED -->
           <div class="status-led" :class="{ 'led-on': statusLedOn }"></div>
-          <!-- Horn handle -->
-          <button
-            class="horn-handle select-none"
-            :class="{ 'horn-pressed': hornActive }"
-            @pointerdown="hornDown"
-            @pointerup="hornUp"
-            @pointercancel="(e) => hornUp(e as PointerEvent)"
-            @pointerleave="(e) => hornUp(e as PointerEvent)"
-          >
-            <v-icon size="14" color="#94a3b8">mdi-bugle</v-icon>
-          </button>
+          <!-- Horn icon -->
+          <div class="horn-container">
+            <v-icon
+              size="32"
+              class="horn-icon select-none"
+              :class="{ 'horn-active': hornActive }"
+              @pointerdown="hornDown"
+              @pointerup="hornUp"
+              @pointercancel="(e) => hornUp(e as PointerEvent)"
+              @pointerleave="(e) => hornUp(e as PointerEvent)"
+              style="cursor: pointer; touch-action: none;"
+            >mdi-bugle</v-icon>
+          </div>
         </div>
 
         <!-- 2. LCD Screen -->
@@ -266,37 +270,37 @@ onBeforeUnmount(() => clearInterval(ledInterval))
           </div>
         </div>
 
-        <!-- 3. Navigation Buttons (Menu, Select, Up, Down) -->
+        <!-- 3. Speed Buttons: Row 1: -5, +5 | Row 2: -1, +1 -->
         <div class="nav-buttons-grid">
           <button
-            class="nav-btn nav-btn-menu"
-            :class="{ 'nav-btn-active': pressedButton === 'menu' }"
-            @click="handleMenuBtn"
-          >MENU</button>
+            class="nav-btn"
+            :class="{ 'nav-btn-active': pressedButton === 'down5' }"
+            @click="handleDown5Btn"
+          >-5</button>
           <button
-            class="nav-btn nav-btn-up"
-            :class="{ 'nav-btn-active': pressedButton === 'up' }"
-            @click="handleUpBtn"
-          >▲</button>
+            class="nav-btn"
+            :class="{ 'nav-btn-active': pressedButton === 'up5' }"
+            @click="handleUp5Btn"
+          >+5</button>
           <button
-            class="nav-btn nav-btn-select"
-            :class="{ 'nav-btn-active': pressedButton === 'select' }"
-            @click="handleSelectBtn"
-          >SEL</button>
-          <button
-            class="nav-btn nav-btn-down"
+            class="nav-btn"
             :class="{ 'nav-btn-active': pressedButton === 'down' }"
             @click="handleDownBtn"
-          >▼</button>
+          >-1</button>
+          <button
+            class="nav-btn"
+            :class="{ 'nav-btn-active': pressedButton === 'up' }"
+            @click="handleUpBtn"
+          >+1</button>
         </div>
 
         <!-- 4. Notch Markings -->
         <div class="notch-markings">
           <span
-            v-for="(label, i) in [...NOTCH_LABELS].reverse()"
+            v-for="(label, i) in NOTCH_LABELS"
             :key="label"
             class="notch-label"
-            :class="{ 'notch-active': localNotch === (8 - i) }"
+            :class="{ 'notch-active': i <= localNotch && i > 0, 'notch-current': localNotch === i }"
           >{{ label }}</span>
         </div>
 
@@ -317,26 +321,31 @@ onBeforeUnmount(() => clearInterval(ledInterval))
 
         <!-- 6. Reverser -->
         <div class="reverser-area">
-          <span class="reverser-label">REVERSER</span>
-          <button
-            class="reverser-handle"
-            :class="{ 'reverser-fwd': localDirection === 'FWD', 'reverser-rev': localDirection === 'REV', 'reverser-locked': currentSpeed !== 0 }"
-            @click="toggleDirection"
-          >
-            <span class="reverser-text">{{ localDirection }}</span>
-          </button>
+          <span class="reverser-end-label" :class="localDirection === 'REV' ? 'text-red-400' : 'opacity-40'">REV</span>
+          <v-switch
+            :model-value="localDirection === 'FWD'"
+            @update:model-value="toggleDirection"
+            :disabled="currentSpeed !== 0"
+            color="blue"
+            hide-details
+            density="compact"
+            inset
+            class="reverser-switch"
+          />
+          <span class="reverser-end-label" :class="localDirection === 'FWD' ? 'text-green-400' : 'opacity-40'">FWD</span>
         </div>
 
-        <!-- 7. Bell Button -->
+        <!-- 7. Bell Icon -->
         <div class="bell-area">
-          <button
-            class="bell-btn"
-            :class="{ 'bell-active': bellActive }"
-            @click="toggleBell"
-          >
-            <v-icon size="20" class="mr-1">mdi-bell</v-icon>
-            B E L L
-          </button>
+          <div class="bell-container">
+            <v-icon
+              size="32"
+              class="bell-icon select-none"
+              :class="{ 'bell-icon-active': bellActive }"
+              @click="toggleBell"
+              style="cursor: pointer;"
+            >mdi-bell</v-icon>
+          </div>
         </div>
 
         <!-- 8. Brake Slider -->
@@ -358,13 +367,13 @@ onBeforeUnmount(() => clearInterval(ledInterval))
         <div class="headlight-knobs">
           <div class="knob-group">
             <span class="knob-label">REAR</span>
-            <button class="headlight-knob" @click="cycleRearHeadlight">
+            <button class="headlight-knob" :class="{ 'knob-on': rearHeadlight !== 'OFF' }" @click="cycleRearHeadlight">
               <v-icon size="16" class="knob-value">{{ headlightIcon(rearHeadlight) }}</v-icon>
             </button>
           </div>
           <div class="knob-group">
             <span class="knob-label">FRONT</span>
-            <button class="headlight-knob" @click="cycleFrontHeadlight">
+            <button class="headlight-knob" :class="{ 'knob-on': frontHeadlight !== 'OFF' }" @click="cycleFrontHeadlight">
               <v-icon size="16" class="knob-value">{{ headlightIcon(frontHeadlight) }}</v-icon>
             </button>
           </div>
@@ -451,42 +460,16 @@ onBeforeUnmount(() => clearInterval(ledInterval))
     inset 0 0 2px rgba(255,255,255,0.3);
 }
 
-/* ── Horn Handle ──────────────────────────────────────────── */
-.horn-handle {
-  width: 48px;
-  height: 64px;
-  background: linear-gradient(180deg, #4a5568 0%, #2d3748 50%, #1a202c 100%);
-  border-radius: 6px 6px 4px 4px;
-  border: 1px solid #5a6a80;
-  box-shadow:
-    0 3px 8px rgba(0,0,0,0.4),
-    inset 0 1px 0 rgba(255,255,255,0.1);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 6px;
-  cursor: pointer;
-  transition: all 0.1s ease;
-  -webkit-user-select: none;
-  user-select: none;
-  touch-action: none;
+/* ── Horn Icon ────────────────────────────────────────────── */
+.horn-icon {
+  color: #d97706;
+  filter: drop-shadow(0 0 3px rgba(217, 119, 6, 0.3));
+  transition: all 0.15s ease;
 }
-
-.horn-handle:active,
-.horn-handle.horn-pressed {
-  transform: translateY(3px);
-  box-shadow:
-    0 1px 3px rgba(0,0,0,0.4),
-    inset 0 2px 4px rgba(0,0,0,0.3);
-  background: linear-gradient(180deg, #3a4558 0%, #252f3e 50%, #151a24 100%);
-}
-
-.horn-label {
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #94a3b8;
-  text-transform: uppercase;
+.horn-icon.horn-active {
+  color: #fbbf24;
+  filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.6));
+  animation: shake 0.3s ease-in-out infinite;
 }
 
 /* ── LCD Screen ───────────────────────────────────────────── */
@@ -645,7 +628,12 @@ onBeforeUnmount(() => clearInterval(ledInterval))
 
 .notch-label.notch-active {
   color: #4ade80;
-  text-shadow: 0 0 4px rgba(74, 222, 128, 0.4);
+}
+
+.notch-label.notch-current {
+  color: #4ade80;
+  text-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+  font-size: 12px;
 }
 
 /* ── Throttle Slider ──────────────────────────────────────── */
@@ -711,59 +699,21 @@ onBeforeUnmount(() => clearInterval(ledInterval))
 .reverser-area {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 24px;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
   width: 100%;
 }
 
-.reverser-label {
-  font-size: 9px;
-  font-weight: 700;
-  color: #64748b;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  min-width: 60px;
-}
-
-.reverser-handle {
-  flex: 1;
-  height: 32px;
-  border-radius: 16px;
-  border: 2px solid #4a5f7a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 12px;
+.reverser-end-label {
+  font-size: 14px;
   font-weight: 800;
-  letter-spacing: 2px;
-  transition: all 0.2s ease;
-  -webkit-user-select: none;
-  user-select: none;
+  color: #475569;
+  letter-spacing: 1px;
+  transition: color 0.2s ease;
 }
 
-.reverser-handle.reverser-fwd {
-  background: linear-gradient(90deg, #1e293b 0%, #2a3a52 50%, #3b82f6 100%);
-  color: #93c5fd;
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
-}
-
-.reverser-handle.reverser-rev {
-  background: linear-gradient(90deg, #ef4444 0%, #2a3a52 50%, #1e293b 100%);
-  color: #fca5a5;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
-}
-
-.reverser-handle.reverser-locked {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.reverser-text {
-  pointer-events: none;
-}
-
-/* ── Bell Button ──────────────────────────────────────────── */
+/* ── Bell Icon ────────────────────────────────────────────── */
 .bell-area {
   padding: 6px 24px;
   width: 100%;
@@ -771,37 +721,15 @@ onBeforeUnmount(() => clearInterval(ledInterval))
   justify-content: center;
 }
 
-.bell-btn {
-  width: 100%;
-  max-width: 200px;
-  height: 40px;
-  border-radius: 8px;
-  background: linear-gradient(180deg, #4a4a2a 0%, #3a3a20 100%);
-  border: 2px solid #6b6b3a;
-  color: #d4d4a0;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 3px;
-  cursor: pointer;
-  box-shadow:
-    0 2px 4px rgba(0,0,0,0.3),
-    inset 0 1px 0 rgba(255,255,255,0.08);
+.bell-icon {
+  color: #d97706;
+  filter: drop-shadow(0 0 3px rgba(217, 119, 6, 0.3));
   transition: all 0.15s ease;
-  -webkit-user-select: none;
-  user-select: none;
 }
-
-.bell-btn:active {
-  transform: translateY(1px);
-}
-
-.bell-btn.bell-active {
-  background: linear-gradient(180deg, #6b6b2a 0%, #5a5a18 100%);
-  border-color: #a3a340;
-  color: #fef08a;
-  box-shadow:
-    0 0 8px 2px rgba(250, 204, 21, 0.25),
-    inset 0 1px 0 rgba(255,255,255,0.1);
+.bell-icon.bell-icon-active {
+  color: #fbbf24;
+  filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.6));
+  animation: shake 0.3s ease-in-out infinite;
 }
 
 /* ── Brake Slider ─────────────────────────────────────────── */
@@ -928,6 +856,18 @@ onBeforeUnmount(() => clearInterval(ledInterval))
     inset 0 2px 4px rgba(0,0,0,0.3);
 }
 
+.headlight-knob.knob-on {
+  border-color: #d97706;
+  box-shadow:
+    0 0 10px 2px rgba(217, 119, 6, 0.3),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.headlight-knob.knob-on .knob-value {
+  color: #fbbf24;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
+}
+
 .knob-value {
   font-size: 8px;
   font-weight: 700;
@@ -943,5 +883,41 @@ onBeforeUnmount(() => clearInterval(ledInterval))
   background: linear-gradient(180deg, #374151 0%, #1f2937 100%);
   border-radius: 0 0 12px 12px;
   margin: 4px auto 0;
+}
+
+/* ── Fixed-size icon containers (prevent shake layout jumps) */
+.horn-container,
+.bell-container {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Shake animation for bell/horn ───────────────────────── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+/* ── Reverser switch lever styling ───────────────────────── */
+.reverser-switch :deep(.v-switch__track) {
+  height: 40px;
+  width: 80px;
+  border-radius: 20px;
+  opacity: 1;
+  background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+  border: 2px solid #475569;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+}
+.reverser-switch :deep(.v-switch__thumb) {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 </style>

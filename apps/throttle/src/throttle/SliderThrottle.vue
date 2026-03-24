@@ -47,8 +47,8 @@ watch(debouncedSpeed, (speed) => {
   setSpeed(signedSpeed)
 })
 
-function toggleDirection() {
-  isForward.value = !isForward.value
+function toggleDirection(val: any) {
+  isForward.value = !!val
   if (sliderVal.value !== 0) {
     const signedSpeed = isForward.value ? sliderVal.value : -sliderVal.value
     setSpeed(signedSpeed)
@@ -66,7 +66,7 @@ async function clearLoco() {
   <main v-if="throttle" class="flex flex-col gap-2 p-2 overflow-hidden w-full h-full flex-1 shadow-xl relative">
     <ThrottleHeader class="bg-gradient-to-r from-purple-300/10 to-pink-600/10 text-purple-400/10">
       <template v-slot:left>
-        <div class="flex flex-row items-center justify-center gap-1 px-4 bg-gray-900">
+        <div class="flex flex-row items-center justify-center gap-1 px-4" style="background: rgba(var(--v-theme-surface), 0.6)">
           <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" variant="flat" />
           <MiniConsist v-if="loco" :loco="loco" />
           <v-spacer class="w-2 md:w-6" />
@@ -78,51 +78,53 @@ async function clearLoco() {
         </div>
       </template>
       <template v-slot:right>
+        <v-btn color="red" variant="tonal" size="small" class="text-none mr-2" prepend-icon="mdi-alert-octagon" @click="handleStop">E-Stop</v-btn>
         <ThrottleActionMenu @park="clearLoco" />
       </template>
     </ThrottleHeader>
 
-    <section class="w-full h-full flex flex-col sm:flex-row justify-around flex-grow relative z-10">
-      <!-- Left: Speedometer (desktop) -->
-      <section v-if="showSpeedometer" class="hidden sm:flex flex-col items-center justify-center flex-1">
-        <Speedometer :speed="currentSpeed" :address="address" :size="180" :show-label="false" />
-        <Consist v-if="showConsist && loco" :loco="loco" class="mt-4" />
+    <section class="w-full h-full flex flex-col sm:flex-row sm:items-center justify-around flex-grow relative z-10">
+      <!-- Column 1: Speedometer + Consist + Logo (desktop) -->
+      <section v-if="loco" class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-center flex-1 overflow-visible">
+        <Speedometer v-if="showSpeedometer" :speed="currentSpeed" :address="address" :size="200" :show-label="false" />
+        <Consist v-if="showConsist" :loco="loco" />
+        <RoadnameLogo :roadname="loco.meta?.roadname" size="xl" />
       </section>
 
-      <!-- Center: Vertical slider + direction toggle -->
-      <section class="flex flex-col items-center justify-center flex-1 h-full py-4">
+      <!-- Column 2: Functions (desktop) -->
+      <section v-if="loco && showFunctions" class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-center flex-1">
+        <FunctionsSpeedDial :loco="loco" />
+      </section>
+
+      <!-- Column 3: Vertical slider + direction toggle -->
+      <section class="flex flex-col items-center justify-center flex-1 py-2" style="height: 100%; min-height: 0;">
         <v-slider
           v-model="sliderVal"
           direction="vertical"
           step="1"
           max="126"
           thumb-label="always"
-          show-ticks
           track-size="40"
           thumb-size="28"
           color="purple"
           track-color="purple-darken-4"
           track-fill-color="purple-darken-2"
           thumb-color="purple"
-          class="h-full"
+          style="flex: 1; min-height: 0; width: 80px;"
         />
-        <v-btn
-          :color="isForward ? 'purple' : 'pink'"
-          variant="tonal"
-          size="large"
-          class="mt-2"
-          @click="toggleDirection"
-        >
-          {{ isForward ? 'FWD' : 'REV' }}
-        </v-btn>
-      </section>
-
-      <!-- Right: Loco info + functions (desktop) -->
-      <section v-if="loco" class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-between flex-1">
-        <v-spacer />
-        <RoadnameLogo :roadname="loco.meta?.roadname" size="xl" />
-        <v-spacer />
-        <FunctionsSpeedDial v-if="showFunctions" :loco="loco" />
+        <div class="flex items-center gap-2 mt-2">
+          <span class="text-xs font-bold" :class="isForward ? 'opacity-40' : 'text-red-400'">REV</span>
+          <v-switch
+            :model-value="isForward"
+            @update:model-value="toggleDirection"
+            color="purple"
+            hide-details
+            density="compact"
+            inset
+            class="lever-switch"
+          />
+          <span class="text-xs font-bold" :class="isForward ? 'text-green-400' : 'opacity-40'">FWD</span>
+        </div>
       </section>
 
       <!-- Mobile-only optional sections -->
@@ -141,3 +143,21 @@ async function clearLoco() {
     </div>
   </main>
 </template>
+
+<style scoped>
+.lever-switch :deep(.v-switch__track) {
+  height: 28px;
+  border-radius: 14px;
+  opacity: 1;
+  background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+  border: 2px solid #475569;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+}
+.lever-switch :deep(.v-switch__thumb) {
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+</style>
