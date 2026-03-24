@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import { useCurrentUser } from 'vuefire'
 import { useLayout } from '@repo/modules'
 
