@@ -72,7 +72,7 @@ async function clearLoco() {
       </section>
 
       <!-- Column 3: Speed display + buttons -->
-      <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1">
+      <section class="flex flex-col gap-2 mb-2 items-center justify-center flex-1" style="max-height: 60vh;">
         <CurrentSpeed :speed="currentSpeed" />
         <ThrottleButtonControls @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" />
       </section>

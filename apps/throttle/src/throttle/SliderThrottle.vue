@@ -113,7 +113,7 @@ async function clearLoco() {
           style="flex: 1; min-height: 0; width: 80px;"
         />
         <div class="flex items-center gap-2 mt-2">
-          <span class="text-xs font-bold" :class="isForward ? 'opacity-40' : 'text-pink-400'">REV</span>
+          <span class="text-xs font-bold" :class="isForward ? 'opacity-40' : 'text-red-400'">REV</span>
           <v-switch
             :model-value="isForward"
             @update:model-value="toggleDirection"
@@ -123,7 +123,7 @@ async function clearLoco() {
             inset
             class="lever-switch"
           />
-          <span class="text-xs font-bold" :class="isForward ? 'text-purple-400' : 'opacity-40'">FWD</span>
+          <span class="text-xs font-bold" :class="isForward ? 'text-green-400' : 'opacity-40'">FWD</span>
         </div>
       </section>
 
