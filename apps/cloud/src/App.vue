@@ -36,10 +36,6 @@ async function handleLayoutPowerToggle(newState: boolean) {
 async function handleEmergencyStop() {
 }
 
-function handleDeviceSelect(deviceId: string) {
-  log.debug('Device selected:', deviceId)
-}
-
 
 const user = useCurrentUser()
 const router = useRouter()
@@ -100,13 +96,10 @@ watch(activePromos, (val) => {
           color="blue"
           :show-layout-power="true"
           :show-emergency-stop="true"
-          :show-device-status="true"
-          :show-device-status-label="true"
           :show-user-profile="true"
           @track-power-toggle="handleTrackPowerToggle"
           @layout-power-toggle="handleLayoutPowerToggle"
           @emergency-stop="handleEmergencyStop"
-          @device-select="handleDeviceSelect"
           @logo-click="handleLogoClick"
           @drawer-toggle="drawer = !drawer"
         />
