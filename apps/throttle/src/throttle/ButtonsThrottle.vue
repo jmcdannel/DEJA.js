@@ -60,9 +60,9 @@ async function clearLoco() {
 
     <section class="w-full h-full flex flex-col sm:flex-row sm:items-center justify-around flex-grow relative z-10">
       <!-- Column 1: Speedometer + Consist + Logo (desktop) -->
-      <section v-if="loco" class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-center flex-1 overflow-visible">
+      <section v-if="loco" class="hidden sm:flex flex-col gap-4 mb-2 items-center justify-center flex-1 overflow-visible px-4">
         <Speedometer v-if="showSpeedometer" :speed="currentSpeed" :address="address" :size="200" :show-label="false" />
-        <Consist v-if="showConsist" :loco="loco" />
+        <Consist v-if="showConsist" :loco="loco" class="my-2" />
         <RoadnameLogo :roadname="loco.meta?.roadname" size="xl" />
       </section>
 
