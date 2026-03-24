@@ -53,11 +53,12 @@ async function clearLoco() {
         </div>
       </template>
       <template v-slot:right>
+        <v-btn color="red" variant="tonal" size="small" class="text-none mr-2" prepend-icon="mdi-alert-octagon" @click="handleStop">E-Stop</v-btn>
         <ThrottleActionMenu @park="clearLoco" />
       </template>
     </ThrottleHeader>
 
-    <section class="w-full h-full flex flex-col sm:flex-row justify-around flex-grow relative z-10">
+    <section class="w-full h-full flex flex-col sm:flex-row sm:items-center justify-around flex-grow relative z-10">
       <!-- Column 1: Speedometer + Consist + Logo (desktop) -->
       <section v-if="loco" class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-center flex-1 overflow-visible">
         <Speedometer v-if="showSpeedometer" :speed="currentSpeed" :address="address" :size="200" :show-label="false" />

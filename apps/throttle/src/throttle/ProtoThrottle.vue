@@ -217,7 +217,7 @@ onBeforeUnmount(() => clearInterval(ledInterval))
       </template>
     </ThrottleHeader>
 
-    <section class="w-full h-full flex flex-col sm:flex-row justify-center items-start gap-4 flex-grow relative z-10">
+    <section class="w-full h-full flex flex-col sm:flex-row justify-center sm:items-center gap-4 flex-grow relative z-10">
       <!-- Left: Speedometer + Logo (desktop only) -->
       <section v-if="loco" class="hidden sm:flex flex-col gap-4 items-center justify-center flex-1">
         <Speedometer v-if="showSpeedometer" :speed="currentSpeed" :address="address" :size="200" :show-label="false" />
@@ -268,8 +268,13 @@ onBeforeUnmount(() => clearInterval(ledInterval))
           </div>
         </div>
 
-        <!-- 3. Speed Buttons (+5, +1, -1, -5) -->
+        <!-- 3. Speed Buttons: Row 1: -5, +5 | Row 2: -1, +1 -->
         <div class="nav-buttons-grid">
+          <button
+            class="nav-btn"
+            :class="{ 'nav-btn-active': pressedButton === 'down5' }"
+            @click="handleDown5Btn"
+          >-5</button>
           <button
             class="nav-btn"
             :class="{ 'nav-btn-active': pressedButton === 'up5' }"
@@ -277,19 +282,14 @@ onBeforeUnmount(() => clearInterval(ledInterval))
           >+5</button>
           <button
             class="nav-btn"
-            :class="{ 'nav-btn-active': pressedButton === 'up' }"
-            @click="handleUpBtn"
-          >+1</button>
-          <button
-            class="nav-btn"
             :class="{ 'nav-btn-active': pressedButton === 'down' }"
             @click="handleDownBtn"
           >-1</button>
           <button
             class="nav-btn"
-            :class="{ 'nav-btn-active': pressedButton === 'down5' }"
-            @click="handleDown5Btn"
-          >-5</button>
+            :class="{ 'nav-btn-active': pressedButton === 'up' }"
+            @click="handleUpBtn"
+          >+1</button>
         </div>
 
         <!-- 4. Notch Markings -->
@@ -327,6 +327,7 @@ onBeforeUnmount(() => clearInterval(ledInterval))
             color="blue"
             hide-details
             density="compact"
+            inset
             class="reverser-switch"
           />
           <span class="reverser-end-label" :class="{ 'reverser-active-label': localDirection === 'FWD' }">FWD</span>
@@ -457,12 +458,14 @@ onBeforeUnmount(() => clearInterval(ledInterval))
 
 /* ── Horn Icon ────────────────────────────────────────────── */
 .horn-icon {
-  color: #64748b;
+  color: #d97706;
+  filter: drop-shadow(0 0 3px rgba(217, 119, 6, 0.3));
   transition: all 0.15s ease;
 }
 .horn-icon.horn-active {
   color: #fbbf24;
-  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+  filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.6));
+  animation: shake 0.3s ease-in-out infinite;
 }
 
 /* ── LCD Screen ───────────────────────────────────────────── */
@@ -714,12 +717,14 @@ onBeforeUnmount(() => clearInterval(ledInterval))
 }
 
 .bell-icon {
-  color: #64748b;
+  color: #d97706;
+  filter: drop-shadow(0 0 3px rgba(217, 119, 6, 0.3));
   transition: all 0.15s ease;
 }
 .bell-icon.bell-icon-active {
   color: #fbbf24;
-  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+  filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.6));
+  animation: shake 0.3s ease-in-out infinite;
 }
 
 /* ── Brake Slider ─────────────────────────────────────────── */
@@ -861,5 +866,29 @@ onBeforeUnmount(() => clearInterval(ledInterval))
   background: linear-gradient(180deg, #374151 0%, #1f2937 100%);
   border-radius: 0 0 12px 12px;
   margin: 4px auto 0;
+}
+
+/* ── Shake animation for bell/horn ───────────────────────── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+/* ── Reverser switch lever styling ───────────────────────── */
+.reverser-switch :deep(.v-switch__track) {
+  height: 28px;
+  border-radius: 14px;
+  opacity: 1;
+  background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+  border: 2px solid #475569;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+}
+.reverser-switch :deep(.v-switch__thumb) {
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 </style>
