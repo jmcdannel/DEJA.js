@@ -148,7 +148,7 @@ const throttleDefaults: AppBackgroundPrefs = {
             :promotion="promo"
           />
           <!-- Normal (non-fullscreen) layout -->
-          <v-container v-if="!isFullscreen" ref="mainContentRef" class="p-0 min-h-full flex flex-col" fluid>
+          <v-container v-if="!isFullscreen" ref="mainContentRef" class="p-0 flex flex-col flex-1" style="min-height: calc(100vh - var(--v-layout-top, 64px) - var(--v-layout-bottom, 56px))" fluid>
             <RouterView v-slot="{ Component }">
               <TransitionFade>
                 <component :is="Component" />
