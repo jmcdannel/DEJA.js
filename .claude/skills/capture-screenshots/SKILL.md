@@ -12,7 +12,7 @@ Capture screenshots of DEJA.js app views using Playwright MCP (headless browser)
 
 - `.claude/launch.json` must exist (dev server configs)
 - `.env` must be available in the working directory (symlink if in worktree)
-- `VITE_DEV_AUTO_LOGIN=true` should be set in `.env` for auth bypass, OR `CLAUDE_TEST_EMAIL` and `CLAUDE_TEST_PASSWORD` for real login
+- `VITE_DEMO_MODE=true` should be set in `.env` for auth bypass, OR `VITE_DEMO_EMAIL` and `VITE_DEMO_PASSWORD` for real login
 - Playwright MCP server must be configured (`claude mcp add playwright -- npx @playwright/mcp@latest --headless`)
 
 ## Usage
@@ -66,7 +66,7 @@ Then set localStorage values using `mcp__playwright__browser_evaluate`:
 mcp__playwright__browser_evaluate({ function: "() => { localStorage.setItem('@DEJA/layoutId', '<layout-id>') }" })
 ```
 
-If using email/password login (not DEV_AUTO_LOGIN):
+If using email/password login (not DEMO_MODE):
 1. Navigate to `/login`
 2. Use `mcp__playwright__browser_snapshot` to get form field refs
 3. Use `mcp__playwright__browser_fill_form` to enter credentials
@@ -219,6 +219,6 @@ After capturing, report:
 - PNG format via Playwright MCP `browser_take_screenshot`
 - Desktop viewport: 1280x800, Mobile viewport: 375x812
 - Allow 2-3 seconds after navigation for Vue components to render
-- Some views require `requireDccEx` or `requireLayout` guards -- DEV_AUTO_LOGIN bypasses all guards
+- Some views require `requireDccEx` or `requireLayout` guards -- DEMO_MODE bypasses all guards
 - Monitor dashboard requires `window.__DEJA_MOCK__.seedAll()` call before capture (dev mode only)
 - Dev server must be started via Bash before using Playwright tools (Playwright navigates to the running server)

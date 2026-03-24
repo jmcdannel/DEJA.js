@@ -251,7 +251,7 @@ Expected: exits 0, no errors.
 pnpm --filter=deja-cloud dev
 ```
 
-Open the app in a browser. A "Feedback" button should appear in the bottom-right corner. Click it — the form should open with a dark theme and no Sentry branding. Log in (or use `VITE_DEV_AUTO_LOGIN=true` in `.env`) and submit a test feedback item. Check `https://track-and-trestle-technology-l.sentry.io` → User Feedback section for the submission.
+Open the app in a browser. A "Feedback" button should appear in the bottom-right corner. Click it — the form should open with a dark theme and no Sentry branding. Log in (or use `VITE_DEMO_MODE=true` in `.env`) and submit a test feedback item. Check `https://track-and-trestle-technology-l.sentry.io` → User Feedback section for the submission.
 
 - [ ] **Step 3.5: Commit**
 
