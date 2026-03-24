@@ -73,17 +73,15 @@ export function useTrainAnimation(
       const eased = easeInOutCubic(progress)
       const frac =
         startFraction + (targetFraction - startFraction) * eased
+      currentFraction = frac // track visual position for mid-animation restarts
       positionTrain(path!, totalLen, frac)
       if (progress < 1) {
         animFrame = requestAnimationFrame(tick)
       } else {
-        currentFraction = targetFraction
         animFrame = null
       }
     }
     animFrame = requestAnimationFrame(tick)
-    // Note: currentFraction is updated inside the tick loop when progress === 1,
-    // NOT here — so mid-animation restarts use the actual interpolated position.
   }
 
   onMounted(() => {

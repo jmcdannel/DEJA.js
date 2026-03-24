@@ -94,3 +94,7 @@ export { default as ListViewSheet } from './ListControls/ListViewSheet.vue'
 export { default as ListSortSheet } from './ListControls/ListSortSheet.vue'
 export { default as ListFilterSheet } from './ListControls/ListFilterSheet.vue'
 export type { ViewOption, SortOption, FilterOption, ListFilter, ListControlsReturn } from './ListControls/types'
+
+// Onboarding
+export { default as OnboardingProgress } from './onboarding/OnboardingProgress.vue'
+export type { OnboardingStep } from './onboarding/trackPath'
