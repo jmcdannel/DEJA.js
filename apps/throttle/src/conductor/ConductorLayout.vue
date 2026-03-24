@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useLocos } from '@repo/modules'
-import SimpleThrottle from '@/throttle/SimpleThrottle.vue'
+import ButtonsThrottle from '@/throttle/ButtonsThrottle.vue'
 import ThrottleList from '@/throttle/ThrottleList.vue'
 import { TurnoutList } from '@repo/ui'
 
@@ -25,7 +25,7 @@ const throttles = getThrottles()
           <!-- Column 2 content goes here -->
            <v-carousel v-if="throttles && throttles.length > 0" height="100%" class="min-h-90vh" hideDelimiters>
             <v-carousel-item v-for="(item) in throttles" :key="item.address" draggable>
-              <SimpleThrottle :address="item.address" />
+              <ButtonsThrottle :address="item.address" />
             </v-carousel-item>
           </v-carousel>
         </div>

@@ -24,6 +24,7 @@ export function useMenu() {
     // Hardware
     { color: 'teal',    icon: 'mdi-access-point',    label: 'Sensors',        name: 'sensors',        section: 'hardware', feature: 'sensors' },
     { color: 'cyan',    icon: 'mdi-developer-board', label: 'Devices',        name: 'devices',        section: 'hardware' },
+    { color: 'yellow',  icon: 'mdi-lightning-bolt',   label: 'Power Districts', name: 'power-districts', section: 'hardware' },
     { color: 'lime',    icon: 'mdi-cpu-64-bit',      label: 'DCC-EX',         name: 'dcc-ex',         section: 'hardware' },
 
     // System

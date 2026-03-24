@@ -143,6 +143,39 @@ When the `preview` branch has been tested on staging and is ready to ship:
 4. CI runs `changeset-check` + `docs-check` + `claude-code-review` — all must pass
 5. Merge → production Vercel deploy + changelog bot processes all accumulated changesets
 
+### Worktree & Branch Cleanup
+
+After completing work, keep worktrees and branches tidy. **Remove merged worktrees and branches, except those merged in the last 3 days** (to allow for quick reverts).
+
+```bash
+# From the main worktree, list merged branches with merge dates:
+cd /Users/jmcdannel/TTT/worktrees/main
+git fetch origin
+for d in /Users/jmcdannel/TTT/worktrees/*/; do
+  name=$(basename "$d")
+  [[ "$name" == "main" || "$name" == "preview" ]] && continue
+  branch=$(git -C "$d" branch --show-current 2>/dev/null)
+  [[ -z "$branch" ]] && continue
+  merged=$(git branch -a --merged origin/preview 2>/dev/null | grep -F "$branch")
+  if [[ -n "$merged" ]]; then
+    date=$(git log --format="%ai" -1 "origin/$branch" 2>/dev/null | cut -d' ' -f1)
+    echo "MERGED|$name|$branch|$date"
+  fi
+done
+
+# Remove a worktree + branch:
+git worktree remove /Users/jmcdannel/TTT/worktrees/<name> --force
+git branch -D <branch-name>
+git worktree prune
+```
+
+**Rules:**
+- Always keep `main` and `preview` worktrees
+- Keep unmerged/open branches (active work)
+- Keep merged branches from the last 3 days (safety window)
+- Remove everything else to keep disk usage low
+- Run `git worktree prune` after bulk removals
+
 ### After merging preview → main — sync back
 
 After each merge to `main` (including the changelog bot's automated commit), sync `main` back into `preview`:
