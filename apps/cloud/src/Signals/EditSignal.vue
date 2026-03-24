@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createLogger } from '@repo/utils'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import SignalForm from '@/Signals/SignalForm.vue'
 import type { Signal } from '@repo/modules/signals'
 import { useSignals } from '@repo/modules/signals'
@@ -45,7 +45,7 @@ function handleClose() {
 onMounted(loadSignal)
 </script>
 <template>
-  <PageHeader menu="Signals" />
+  <PageHeader title="Signals" icon="mdi-traffic-light" color="emerald" />
   <div v-if="loading" class="p-6 flex justify-center">
     <v-progress-circular indeterminate color="cyan" />
   </div>

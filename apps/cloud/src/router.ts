@@ -3,14 +3,19 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteLocationNormalized, RouteLocationRaw } from 'vue-router'
 import { getCurrentUser } from 'vuefire'
 import type { User } from 'firebase/auth'
-import { useStorage } from '@vueuse/core'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { collection, query, where, getDocs, getDoc, doc } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
+import { requireLayout } from '@repo/auth'
 import { createLogger } from '@repo/utils'
+import { checkRequireFeature } from '@repo/auth'
+import type { FeatureName, UserRole } from '@repo/modules'
 import Dashboard from './Dashboard/Dashboard.vue'
 import Login from './views/Login.vue'
 
 const log = createLogger('Router')
+
+let cachedUserRole: UserRole | null = null
+let cachedUserId: string | null = null
 
 // ---------------------------------------------------------------------------
 // Route meta types – each boolean flag declares a guard requirement.
@@ -30,6 +35,8 @@ declare module 'vue-router' {
     requireLayout?: boolean
     /** Require a DCC-EX device on the selected layout */
     requireDccEx?: boolean
+    /** Require a feature flag to be enabled for the current user */
+    requireFeature?: FeatureName
   }
 }
 
@@ -85,7 +92,7 @@ const router = createRouter({
       path: '/select-layout',
       name: 'Select Layout',
       component: () => import('./Layout/SelectLayout.vue'),
-      meta: { requireAuth: true },
+      meta: { requireAuth: true, fullscreen: true },
     },
     {
       path: '/locos',
@@ -109,13 +116,13 @@ const router = createRouter({
       path: '/sounds',
       name: 'Sounds',
       component: () => import('./Sounds/Sounds.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'sounds' },
     },
     {
       path: '/sounds/new',
       name: 'Add Sound',
       component: () => import('./Sounds/AddSound.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'sounds' },
     },
     {
       path: '/effects',
@@ -139,19 +146,19 @@ const router = createRouter({
       path: '/routes',
       name: 'Routes',
       component: () => import('./Routes/Routes.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'routes' },
     },
     {
       path: '/routes/new',
       name: 'Add Route',
       component: () => import('./Routes/AddRoute.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'routes' },
     },
     {
       path: '/routes/:routeId',
       name: 'Edit Route',
       component: () => import('./Routes/EditRoute.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'routes' },
     },
     {
       path: '/signals',
@@ -175,37 +182,37 @@ const router = createRouter({
       path: '/sensors',
       name: 'Sensors',
       component: () => import('./Sensors/Sensors.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'sensors' },
     },
     {
       path: '/sensors/new',
       name: 'Add Sensor',
       component: () => import('./Sensors/AddSensor.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'sensors' },
     },
     {
       path: '/sensors/automations',
       name: 'Automations',
       component: () => import('./Sensors/Automations.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'sensors' },
     },
     {
       path: '/sensors/automations/new',
       name: 'Add Automation',
       component: () => import('./Sensors/AutomationForm.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'sensors' },
     },
     {
       path: '/sensors/automations/:automationId',
       name: 'Edit Automation',
       component: () => import('./Sensors/AutomationForm.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'sensors' },
     },
     {
       path: '/sensors/:sensorId',
       name: 'Edit Sensor',
       component: () => import('./Sensors/EditSensor.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'sensors' },
     },
     {
       path: '/turnouts',
@@ -235,19 +242,19 @@ const router = createRouter({
       path: '/track-diagrams',
       name: 'Track Diagrams',
       component: () => import('./TrackDiagram/TrackDiagram.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'trackDiagrams' },
     },
     {
       path: '/track-diagrams/new',
       name: 'Add Track Diagram',
       component: () => import('./TrackDiagram/AddTrackDiagram.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'trackDiagrams' },
     },
     {
       path: '/track-diagrams/:diagramId',
       name: 'Edit Track Diagram',
       component: () => import('./TrackDiagram/EditTrackDiagram.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'trackDiagrams' },
     },
     {
       path: '/dccex',
@@ -271,7 +278,7 @@ const router = createRouter({
       path: '/upgrade',
       name: 'Upgrade',
       component: () => import('./Upgrade/Upgrade.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireApproval: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/devices/:deviceId',
@@ -317,7 +324,7 @@ function checkRequireAuth(
   }
 }
 
-/** Fetch the user's layouts once — shared by onboarding & approval guards. */
+/** Fetch the user's layouts once for the onboarding guard. */
 async function getUserLayouts(user: User) {
   const layoutsQuery = query(
     collection(db, 'layouts'),
@@ -333,19 +340,6 @@ function checkRequireOnboarding(
   if (layoutsSnap.empty) {
     return {
       path: '/onboarding',
-      query: { redirect: to.fullPath },
-    }
-  }
-}
-
-function checkRequireLayout(
-  to: RouteLocationNormalized,
-): RouteLocationRaw | undefined {
-  const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
-
-  if (!layoutId.value || layoutId.value === '') {
-    return {
-      path: '/select-layout',
       query: { redirect: to.fullPath },
     }
   }
@@ -381,7 +375,7 @@ router.beforeEach(async (to) => {
 
     // 1. Redirect-if-authenticated (login / signup pages)
     if (meta.redirectIfAuthenticated) {
-      const redirect = checkRedirectIfAuthenticated(currentUser)
+      const redirect = checkRedirectIfAuthenticated(currentUser ?? null)
       if (redirect) {
         log.debug('redirectIfAuthenticated → redirecting', redirect)
         return redirect
@@ -390,7 +384,7 @@ router.beforeEach(async (to) => {
 
     // 2. Require authentication
     if (meta.requireAuth) {
-      const redirect = checkRequireAuth(currentUser, to)
+      const redirect = checkRequireAuth(currentUser ?? null, to)
       if (redirect) {
         log.debug('requireAuth → redirecting to login')
         return redirect
@@ -413,11 +407,11 @@ router.beforeEach(async (to) => {
       }
     }
 
-    // 4. Require a selected layout in localStorage
+    // 4. Require a selected layout (auto-selects single layout)
     if (meta.requireLayout) {
-      const redirect = checkRequireLayout(to)
+      const redirect = await requireLayout(user.email!, to)
       if (redirect) {
-        log.debug('requireLayout → redirecting to select-layout')
+        log.debug('requireLayout → redirecting')
         return redirect
       }
     }
@@ -427,6 +421,21 @@ router.beforeEach(async (to) => {
       const redirect = checkRequireDccEx()
       if (redirect) {
         log.debug('requireDccEx → redirecting')
+        return redirect
+      }
+    }
+
+    // 6. Require feature flag
+    if (meta.requireFeature) {
+      if (!cachedUserRole || cachedUserId !== user.uid) {
+        const userSnap = await getDoc(doc(db, 'users', user.uid))
+        cachedUserRole = (userSnap.data()?.role as UserRole) ?? 'user'
+        cachedUserId = user.uid
+      }
+      const devFeaturesEnv = import.meta.env.VITE_DEV_FEATURES === 'true'
+      const redirect = checkRequireFeature(meta.requireFeature, cachedUserRole, devFeaturesEnv)
+      if (redirect) {
+        log.debug('requireFeature → redirecting (feature not enabled)')
         return redirect
       }
     }

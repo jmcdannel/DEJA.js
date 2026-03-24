@@ -1,8 +1,9 @@
 <script setup lang="ts">
-  import { computed, onBeforeUnmount, ref, watch } from 'vue'
+  import { computed, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue'
   import { useDisplay } from 'vuetify'
   import { useDcc } from '@repo/dccex'
   import { useFunctionIcon } from '@repo/modules/locos'
+  import { WI_THROTTLE_EVENTS } from '../constants/wiThrottleEvents'
 
   const props = defineProps({
     func: {
@@ -40,11 +41,24 @@
     }
   )
 
+  function handleWiThrottleFunctionState(event: Event) {
+    const { address, func, state } = (event as CustomEvent<{ address: number; func: number; state: boolean }>).detail
+    if (address === props.address && func === props.func?.id) {
+      func1State.value = state
+    }
+  }
+
   function sendFunctionState(state: boolean) {
     if (props.address == null || props.func?.id == null) {
       return
     }
     setFunction(props.address, props.func.id, state)
+    // Bridge to WiThrottle if connected
+    if ((window as any).__WI_THROTTLE_CONNECTED__) {
+      window.dispatchEvent(new CustomEvent(WI_THROTTLE_EVENTS.FUNCTION, {
+        detail: { address: props.address, func: props.func.id, state },
+      }))
+    }
   }
 
   function activateMomentary() {
@@ -130,7 +144,7 @@
       'rounded-full',
       'border',
       'border-cyan-400/60',
-      'bg-slate-900/80',
+      'fn-btn-bg',
       'relative',
       'p-2',
       'transition-all',
@@ -156,6 +170,14 @@
       }
     }
     return classes.join(' ')
+  })
+
+  onMounted(() => {
+    window.addEventListener(WI_THROTTLE_EVENTS.FUNCTION_STATE, handleWiThrottleFunctionState)
+  })
+
+  onUnmounted(() => {
+    window.removeEventListener(WI_THROTTLE_EVENTS.FUNCTION_STATE, handleWiThrottleFunctionState)
   })
 
   onBeforeUnmount(() => {
@@ -206,5 +228,11 @@
     :icon="icon"
     :class="[buttonClasses, 'w-12 h-12']"
   />
-    
+
 </template>
+
+<style scoped>
+.fn-btn-bg {
+  background: rgba(var(--v-theme-surface), 0.8);
+}
+</style>

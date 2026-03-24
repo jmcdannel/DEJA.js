@@ -10,56 +10,66 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const emit = defineEmits<{
+  edit: [effect: Effect]
+  delete: [effect: Effect]
+}>()
 const state = defineModel('state', {
   type: Boolean
 })
 const efxType = computed(() => efxTypes.find((type) => type.value === props?.effect?.type))
+const deviceColor = computed(() => props.effect?.color || 'primary')
 
 </script>
 
 <template>
-  <v-card 
+  <v-card
     class="m-1 shadow-xl"
-    :color="effect?.color || 'primary'"
     :disabled="isRunning"
     :loading="isRunning"
-    variant="tonal"
   >
     <v-card-title class="flex flex-row items-center gap-4">
-      <v-icon :icon="efxType?.icon || 'mdi-help'"></v-icon>
-      <h4 class="text-md font-bold">{{effect?.name}}</h4>
+      <v-icon :icon="efxType?.icon || 'mdi-help'" :color="deviceColor" />
+      <h4 class="text-md font-bold">{{ effect?.name }}</h4>
+      <v-spacer />
+      <v-icon
+        :icon="state ? 'mdi-circle' : 'mdi-circle-outline'"
+        :color="state ? 'green' : 'grey'"
+        size="small"
+      />
     </v-card-title>
     <v-card-text class="text-sm">
-      <p class="my-4">{{effect?.name}}</p>
+      <p class="my-4">{{ effect?.name }}</p>
       <div class="flex flex-wrap gap-2">
-        <v-chip 
-          v-if="effect?.device" 
-          class="ml-2 text-xs"
-          prepend-icon="mdi-memory"
+        <v-btn
+          v-if="effect?.device"
+          size="small"
           variant="outlined"
+          :color="deviceColor"
+          prepend-icon="mdi-memory"
         >
-          {{effect?.device}}
-        </v-chip>
-        <v-chip 
-          v-if="effect?.type" 
-          class="ml-2 text-xs"
+          {{ effect?.device }}
+        </v-btn>
+        <v-chip
+          v-if="effect?.type"
+          class="text-xs"
           prepend-icon="mdi-electric-switch"
           variant="outlined"
         >
-          {{effect?.type}}
+          {{ effect?.type }}
         </v-chip>
-        <v-chip 
-          v-for="tag in effect?.tags" 
-          :key="tag" 
-          class="ml-2 text-xs"
+        <v-chip
+          v-for="tag in effect?.tags"
+          :key="tag"
+          class="text-xs"
           prepend-icon="mdi-tag"
           variant="outlined"
         >
-          {{tag}}
+          {{ tag }}
         </v-chip>
-        <v-chip 
-          v-if="effect?.allowGuest" 
-          class="ml-2 text-xs"
+        <v-chip
+          v-if="effect?.allowGuest"
+          class="text-xs"
           prepend-icon="mdi-account-check"
           variant="outlined"
           color="success"
@@ -69,13 +79,30 @@ const efxType = computed(() => efxTypes.find((type) => type.value === props?.eff
       </div>
     </v-card-text>
     <v-card-actions class="flex justify-end">
-      <v-switch 
-        v-model="state" 
-        :color="effect?.color || 'primary'" 
-        :disabled="isRunning" 
-        :loading="isRunning" 
-        hide-details 
-      />    
+      <v-switch
+        v-model="state"
+        :color="deviceColor"
+        :disabled="isRunning"
+        :loading="isRunning"
+        hide-details
+      />
     </v-card-actions>
+    <v-divider />
+    <div class="flex justify-between pa-1" style="background: rgba(var(--v-theme-on-surface), 0.04)">
+      <v-btn
+        icon="mdi-delete-outline"
+        variant="text"
+        color="error"
+        size="small"
+        @click="emit('delete', effect)"
+      />
+      <v-btn
+        icon="mdi-pencil-outline"
+        variant="text"
+        :color="deviceColor"
+        size="small"
+        @click="emit('edit', effect)"
+      />
+    </div>
   </v-card>
 </template>

@@ -167,7 +167,7 @@ function toggleBit(bit: number) {
           <div class="text-sm font-semibold">
             {{ lastResult.success ? 'Success' : 'Failed' }}
           </div>
-          <div v-if="lastResult.success && lastResult.value !== undefined" class="text-sm text-slate-400">
+          <div v-if="lastResult.success && lastResult.value !== undefined" class="text-sm opacity-50">
             CV {{ lastResult.cv }} = {{ lastResult.value }} (0x{{ lastResult.value.toString(16).toUpperCase().padStart(2, '0') }})
           </div>
           <div v-if="lastResult.error" class="text-sm text-red-400">
@@ -181,11 +181,11 @@ function toggleBit(bit: number) {
     <v-card variant="outlined" class="pa-4">
       <div class="text-sm font-semibold mb-3">Binary Breakdown</div>
       <div class="flex items-center gap-2 mb-3">
-        <span class="text-xs text-slate-400">Decimal:</span>
+        <span class="text-xs opacity-50">Decimal:</span>
         <span class="font-mono text-sm">{{ cvValue }}</span>
-        <span class="text-xs text-slate-400 ml-2">Hex:</span>
+        <span class="text-xs opacity-50 ml-2">Hex:</span>
         <span class="font-mono text-sm">0x{{ cvValue.toString(16).toUpperCase().padStart(2, '0') }}</span>
-        <span class="text-xs text-slate-400 ml-2">Binary:</span>
+        <span class="text-xs opacity-50 ml-2">Binary:</span>
         <span class="font-mono text-sm">{{ binaryDisplay }}</span>
       </div>
       <div class="flex flex-wrap gap-2">

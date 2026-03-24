@@ -11,7 +11,7 @@ const throttles = getThrottles()
   <template>
     <main class="@container relative">
       <div class="conductor-layout grid grid-cols-1 @[960px]:grid-cols-3 gap-2 w-full">
-      <div class=" bg-slate-700 bg-opacity-20 rounded border-1 border-green-500 border-opacity-50 order-2 @[960px]:!order-1 overflow-hidden">
+      <div class="rounded border-1 border-green-500 border-opacity-50 order-2 @[960px]:!order-1 overflow-hidden" style="background: rgba(var(--v-theme-surface), 0.2)">
         <div class="@container h-full overflow-y-auto p-4">
           <!-- Column 1 content goes here -->
           <div v-if="throttles?.length" class="flex-grow flex flex-row flex-wrap gap-1 relative overflow-auto items-end content-end">
@@ -20,7 +20,7 @@ const throttles = getThrottles()
           </div>
         </div>
       </div>
-      <div class=" bg-slate-700 bg-opacity-20 order-1 @[960px]:!order-2 overflow-hidden">
+      <div class="order-1 @[960px]:!order-2 overflow-hidden" style="background: rgba(var(--v-theme-surface), 0.2)">
         <div class="@containermin-h-[500px] h-full overflow-y-auto p-4">
           <!-- Column 2 content goes here -->
            <v-carousel v-if="throttles && throttles.length > 0" height="100%" class="min-h-90vh" hideDelimiters>
@@ -30,7 +30,7 @@ const throttles = getThrottles()
           </v-carousel>
         </div>
       </div>
-      <div class=" bg-slate-700 bg-opacity-20 order-3 overflow-hidden">
+      <div class="order-3 overflow-hidden" style="background: rgba(var(--v-theme-surface), 0.2)">
         <div class="@container h-full overflow-y-auto p-4">
           <TurnoutList />
         </div>

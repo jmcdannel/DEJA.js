@@ -22,7 +22,7 @@ export default function GlobalError({
           <div className="fixed w-[500px] h-[500px] rounded-full bg-fuchsia-500/10 blur-[80px] -bottom-[-10%] -right-[200px]"></div>
           <div className="fixed w-[400px] h-[400px] rounded-full bg-lime-500/10 blur-[90px] top-[50%] left-[20%]"></div>
         </div>
-        <main className="max-w-5xl mx-auto px-6 py-10 flex flex-col items-center justify-center min-h-screen text-center space-y-6">
+        <main className="max-w-7xl mx-auto px-6 py-10 flex flex-col items-center justify-center min-h-screen text-center space-y-6">
           <h1 className="text-8xl font-extrabold bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
             Error
           </h1>

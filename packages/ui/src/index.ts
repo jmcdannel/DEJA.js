@@ -1,4 +1,5 @@
 export { default as AppHeader } from './AppHeader.vue'
+export { default as ThrottleLaunchQR } from './ThrottleLaunchQR.vue'
 export { default as Logo } from './Logo.vue'
 export { default as SplashPage } from './SplashPage.vue'
 export { default as NotFoundPage } from './NotFoundPage.vue'
@@ -12,7 +13,6 @@ export { default as FunctionsSpeedDial } from './Functions/SpeedDial.vue'
 export { default as SignOut } from './Signout.vue'
 export { default as UserProfile } from './UserProfile.vue'
 export { default as ViewJson } from './ViewJson.vue'
-export { default as ListMenu } from './ListMenu/ListMenu.vue'
 export { default as SelectLayout } from './SelectLayout.vue'
 export { default as LayoutChip } from './LayoutChip.vue'
 export { default as TurnoutList } from './Turnouts/TurnoutList.vue'
@@ -51,7 +51,7 @@ export { default as DeviceStatusList } from './DeviceStatus/DeviceStatusList.vue
 export { DeviceConnectionCard, DeviceConnectionList } from './DeviceConnection'
 
 // Dashboard widgets
-export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart } from './Dashboard'
+export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart, DeviceTile, QuickConnectPanel, LayoutInfoCard, DashboardEmptyState } from './Dashboard'
 export { default as EmptyState } from './EmptyState/EmptyState.vue'
 export { default as ModuleList } from './ModuleList/List.vue'
 export { default as LocoList } from './Locos/LocoList.vue'
@@ -59,6 +59,7 @@ export { default as Menu } from './Menu/Menu.vue'
 export { default as NotificationContainer } from './Notifications/NotificationContainer.vue'
 export { useNotification, provideNotifications } from './Notifications/useNotification'
 export type { Notification, NotificationType, NotifyMethods } from './Notifications/useNotification'
+export { default as PromoBanner } from './Promotions/PromoBanner.vue'
 export { default as SensorList } from './Sensors/SensorList.vue'
 export { default as SensorItem } from './Sensors/SensorItem.vue'
 export { default as SensorCard } from './Sensors/SensorCard.vue'
@@ -68,9 +69,29 @@ export * from './animations'
 export { appIcons } from './assets/icons'
 export type { AppIconName } from './assets/icons'
 
+export { default as FeatureGate } from './FeatureGate.vue'
+
 // Themes
 export { createVuetifyThemes, THEME_MODES, THEME_MODE_DEFINITIONS } from './themes'
 export type { AppThemeConfig, ThemeMode, ThemeOverrides, ThemeVariables, ThemeModeDefinition } from './themes'
+// 🎨 A11y color utilities
+export { ensureContrast, ensureUIContrast, ensureAllContrast, meetsContrast, contrastReport, isBadContrast, WCAG } from './themes'
+export type { WcagLevel } from './themes'
 
 // Composables
 export { useThemeSwitcher } from './composables/useThemeSwitcher'
+export { useListControls } from './composables/useListControls'
+
+// PageHeader
+export { default as PageHeader } from './PageHeader/PageHeader.vue'
+
+// List Controls
+export { default as ListControlBar } from './ListControls/ListControlBar.vue'
+export { default as ListSearch } from './ListControls/ListSearch.vue'
+export { default as ListViewToggle } from './ListControls/ListViewToggle.vue'
+export { default as ListSort } from './ListControls/ListSort.vue'
+export { default as ListFilters } from './ListControls/ListFilters.vue'
+export { default as ListViewSheet } from './ListControls/ListViewSheet.vue'
+export { default as ListSortSheet } from './ListControls/ListSortSheet.vue'
+export { default as ListFilterSheet } from './ListControls/ListFilterSheet.vue'
+export type { ViewOption, SortOption, FilterOption, ListFilter, ListControlsReturn } from './ListControls/types'

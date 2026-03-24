@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import RouteForm from '@/Routes/RouteForm.vue'
 import { routeType, type Route } from '@repo/modules'
 
@@ -21,6 +21,6 @@ function handleClose() {
 }
 </script>
 <template>
-  <PageHeader menu="Routes" />
+  <PageHeader title="Routes" icon="mdi-map" color="purple" />
   <RouteForm :route="defaultRoute" @close="handleClose" />
 </template>

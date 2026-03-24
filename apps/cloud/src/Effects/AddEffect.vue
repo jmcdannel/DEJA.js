@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import EffectForm from '@/Effects/EffectForm.vue'
 import type { Effect } from '@repo/modules'
-import { ListMenu } from '@repo/ui'
 
 const router = useRouter()
 const defaultEffect = computed<Effect>(() => ({
@@ -22,8 +21,6 @@ function handleClose() {
 }
 </script>
 <template>
-  <PageHeader menu="Effects">
-    <ListMenu :disabledMenus="['view']" :module-name="'effects'" />
-  </PageHeader>
+  <PageHeader title="Effects" icon="mdi-rocket-launch" color="indigo" />
   <EffectForm :efx="defaultEffect" @close="handleClose" />
 </template>

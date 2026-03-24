@@ -9,7 +9,7 @@ order: 5
 
 The Tour app is a guest-facing interactive experience designed for layout visitors. It runs on tablets or phones at your layout and lets guests explore different areas, trigger sound and lighting effects, watch videos, and learn about the technical implementation -- all without needing operator-level access.
 
-![Tour app home screen with tour cards](/images/docs/tour/home-screen.png)
+![Tour app home screen with tour cards](/screenshots/tour_desktop_welcome.png)
 
 {/* VIDEO: Full walkthrough of the Tour app showing the home hub, welcome page, effects control, and area exploration */}
 
@@ -62,7 +62,7 @@ The Welcome page provides the starting point for first-time visitors. It is divi
   - Interactive Effects: 12 available
   - Layout Areas: 8 sections
 
-![Welcome page with video and area navigation](/images/docs/tour/welcome-page.png)
+![Welcome page with video and area navigation](/screenshots/tour_desktop_welcome.png)
 
 ## Effects Control
 
@@ -72,7 +72,7 @@ Effects are loaded from Firestore using the `useEfx().getGuestEffects()` composa
 
 The grid uses auto-animate transitions for smooth entry and exit when the effect list changes. Effects are categorized by type (lighting, sound, animation, relay) and some have auto-timeout behavior -- for example, the Grade Crossing Bell automatically deactivates after 10 seconds, and the Mountain Echo Horn after 8 seconds.
 
-![Effects control grid with toggle buttons](/images/docs/tour/effects-control.png)
+![Effects control grid with toggle buttons](/screenshots/tour_desktop_effects.png)
 
 ## Media Library
 
@@ -101,7 +101,7 @@ The filtered results display as a responsive grid of media cards. Each card show
 
 Clicking a play button opens a modal dialog with the media player. The dialog supports both video and audio playback with standard controls. URL query parameters (e.g., `/media?filter=technical`) allow the page to pre-filter content on load, so the Technical Details tour card on the home page jumps directly to technical content.
 
-![Media library with filters and media cards](/images/docs/tour/media-library.png)
+![Media library with filters and media cards](/screenshots/tour_desktop_media.png)
 
 ## Explore Sections
 
@@ -121,7 +121,7 @@ The default sections are:
 - **Payette Subdivision** -- Rural mainline with crossings, bridges, and long scenic runs.
 - **Roseberry Yard and Industrial Auto Park** -- Busy freight yard and switching operations.
 
-![Explore sections grid with preview thumbnails](/images/docs/tour/explore-sections.png)
+![Explore sections grid with preview thumbnails](/screenshots/tour_desktop_sections.png)
 
 ## Area Detail
 
@@ -149,14 +149,4 @@ The Tour app supports two authentication modes:
 - **Guest Auth** -- Lightweight guest access using the `requireGuestOrAuth` route guard. Guests do not need an account; the `useGuestStore` Pinia store tracks their session.
 - **Demo Mode** -- When `VITE_DEMO_MODE=true` is set, authentication guards are bypassed entirely, allowing unrestricted access for demonstrations.
 
-The login page (`/login`) is rendered by the `TourLogin` component and supports both authentication paths.
-
-## Running the Tour App
-
-Start the Tour app in development mode:
-
-```bash
-pnpm --filter=deja-tour dev
-```
-
-The app runs on its default Vite port (3031) and requires a Firebase connection for effects data and layout information.
+The login page supports both authentication paths — full sign-in for registered users and quick guest access for visitors.

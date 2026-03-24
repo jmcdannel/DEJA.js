@@ -1,42 +1,59 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { vAutoAnimate } from '@formkit/auto-animate/vue'
+import { computed, type PropType } from 'vue'
+import draggable from 'vuedraggable'
 import { useTurnouts, type Turnout } from '@repo/modules'
+import { useSortableList } from '@/Core/composables/useSortableList'
 import TurnoutListItem from '@/Turnouts/TurnoutListItem.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 import EmptyState from '@/Core/UI/EmptyState.vue'
 
 defineEmits(['edit'])
-defineProps<{
-  viewAs: string
-}>()
+const props = defineProps({
+  viewAs: { type: String, default: 'card' },
+  filteredList: { type: Array as PropType<Turnout[]>, default: undefined },
+})
 
-const { getTurnouts } = useTurnouts()
-const list = getTurnouts()
+const { getTurnouts, setTurnout } = useTurnouts()
+const rawList = getTurnouts()
+const { list: sortableList, dragging, onDragStart, onDragEnd } = useSortableList<Turnout>(rawList as any, (id, data) => setTurnout(id, data))
+
+const list = computed(() => props.filteredList ?? sortableList.value)
 </script>
 <template>
   <v-container v-if="list?.length">
       <template v-if="viewAs === 'card'">
-        <v-row v-auto-animate>
-          <v-col cols="12" xs="12" sm="6" lg="4">
-            <slot name="prepend"></slot>
-          </v-col>
-            <v-col v-for="item in list" :key="item.id" cols="12" xs="12"  sm="6" lg="4">
-              <TurnoutListItem 
-                :state="item.state"
-                :turnout="item as Turnout" 
-                :turnoutId="item.id" 
-                @edit="$emit('edit', item)" 
+        <draggable
+          :list="list"
+          item-key="id"
+          handle=".drag-handle"
+          ghost-class="ghost"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+          @start="onDragStart"
+          @end="onDragEnd"
+        >
+          <template #header>
+            <div>
+              <slot name="prepend"></slot>
+            </div>
+          </template>
+          <template #item="{ element }">
+            <div>
+              <TurnoutListItem
+                :state="element.state"
+                :turnout="element as Turnout"
+                :turnoutId="element.id"
+                @edit="$emit('edit', element)"
               />
-            </v-col>
-        </v-row>
+            </div>
+          </template>
+        </draggable>
       </template>
       <template v-else-if="viewAs === 'device'">
 
       </template>
       <template v-else>
-        <LcdDisplay 
+        <LcdDisplay
           :content="list.map(item => `${item.name}: ${item.state} (${item.straight}, ${item.divergent})`)"
           title="TURNOUTS LIST"
           color="green"
@@ -57,3 +74,8 @@ const list = getTurnouts()
     action-to="/turnouts/new"
   />
 </template>
+<style scoped>
+.ghost {
+  opacity: 0.5;
+}
+</style>

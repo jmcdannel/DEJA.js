@@ -7,7 +7,7 @@ import { useSubscription, PLAN_DISPLAY, useLayout } from '@repo/modules'
 import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import LayoutTags from '@/Layout/LayoutTags.vue'
 import PortList from '@/Layout/PortList.vue'
 
@@ -54,8 +54,9 @@ const serverSaving = ref(false)
 const serverSaved = ref(false)
 
 watch(() => layout, (l) => {
-  if (l?.throttleConnection?.type) {
-    serverType.value = l.throttleConnection.type
+  const layoutData = l as { throttleConnection?: { type: 'deja-server' | 'withrottle' } } | undefined
+  if (layoutData?.throttleConnection?.type) {
+    serverType.value = layoutData.throttleConnection.type
   }
 }, { immediate: true })
 
@@ -82,8 +83,7 @@ async function openBillingPortal() {
   portalLoading.value = true
   try {
     const token = await getIdToken(user.value)
-    const billingApiUrl = import.meta.env.VITE_BILLING_API_URL
-    const res = await fetch(`${billingApiUrl}/api/billing-portal`, {
+    const res = await fetch('/api/billing-portal', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -126,6 +126,7 @@ const sections = [
   { id: 'connection', label: 'Connection', icon: 'mdi-server-network' },
   { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'layout', label: 'Layout', icon: 'mdi-floor-plan' },
+  { id: 'backgrounds', label: 'Backgrounds', icon: 'mdi-image-outline' },
 ]
 
 function scrollTo(id: string) {
@@ -135,7 +136,7 @@ function scrollTo(id: string) {
 
 <template>
   <div class="animate-fade-in-up space-y-6">
-    <PageHeader menu="Settings" :subtitle="layout?.name" />
+    <PageHeader title="Settings" icon="mdi-cog" color="blue" :subtitle="layout?.name" />
 
     <div class="settings-layout">
       <!-- Content -->
@@ -148,11 +149,11 @@ function scrollTo(id: string) {
           </div>
           <div class="settings-row">
             <div class="settings-row__label"><span class="settings-row__name">Email</span></div>
-            <div class="settings-row__value text-slate-300">{{ user?.email }}</div>
+            <div class="settings-row__value">{{ user?.email }}</div>
           </div>
           <div class="settings-row">
             <div class="settings-row__label"><span class="settings-row__name">Display Name</span></div>
-            <div class="settings-row__value text-slate-300">{{ user?.displayName || '—' }}</div>
+            <div class="settings-row__value">{{ user?.displayName || '—' }}</div>
           </div>
         </div>
 
@@ -168,8 +169,8 @@ function scrollTo(id: string) {
               <span class="settings-row__desc">{{ nextDateLabel }}</span>
             </div>
             <div class="settings-row__value flex items-center gap-3">
-              <span class="text-sky-100 font-semibold">{{ planName }}</span>
-              <span class="text-slate-400 text-sm">{{ planPrice }}</span>
+              <span class="font-semibold">{{ planName }}</span>
+              <span class="text-sm opacity-60">{{ planPrice }}</span>
               <v-chip :color="statusColor" size="x-small" variant="tonal" class="uppercase tracking-wider">{{ status }}</v-chip>
             </div>
           </div>
@@ -211,13 +212,6 @@ function scrollTo(id: string) {
               </v-btn-toggle>
             </div>
           </div>
-          <div class="settings-row settings-row--block">
-            <div class="settings-row__label mb-3">
-              <span class="settings-row__name">Backgrounds</span>
-              <span class="settings-row__desc">Customize page backgrounds</span>
-            </div>
-            <BackgroundSettings app-name="cloud" :pages="backgroundPages" />
-          </div>
         </div>
 
         <!-- Server Connection -->
@@ -243,8 +237,8 @@ function scrollTo(id: string) {
                 @click="serverType = opt.value as 'deja-server' | 'withrottle'"
               >
                 <v-icon size="24" :color="serverType === opt.value ? 'primary' : undefined" class="mb-2">{{ opt.icon }}</v-icon>
-                <div class="font-medium text-sm text-sky-100">{{ opt.label }}</div>
-                <div class="text-xs text-slate-400 mt-1">{{ opt.desc }}</div>
+                <div class="font-medium text-sm">{{ opt.label }}</div>
+                <div class="text-xs opacity-60 mt-1">{{ opt.desc }}</div>
               </div>
             </div>
             <v-btn color="primary" variant="tonal" size="small" :loading="serverSaving" :prepend-icon="serverSaved ? 'mdi-check' : 'mdi-content-save'" class="text-none" @click="saveServerType">
@@ -284,6 +278,17 @@ function scrollTo(id: string) {
           </div>
         </div>
 
+        <!-- Backgrounds -->
+        <div id="backgrounds" class="settings-section">
+          <div class="settings-section__header">
+            <v-icon size="20" class="settings-section__icon">mdi-image-outline</v-icon>
+            <h2 class="settings-section__title">Backgrounds</h2>
+          </div>
+          <div class="settings-row settings-row--block">
+            <BackgroundSettings app-name="cloud" :pages="backgroundPages" />
+          </div>
+        </div>
+
         <!-- Version -->
         <p class="settings-version">DEJA.js Cloud v{{ appVersion }}</p>
       </div>
@@ -291,7 +296,7 @@ function scrollTo(id: string) {
       <!-- Jump-to nav (desktop only, right side) -->
       <nav v-if="mdAndUp" class="settings-nav">
         <div class="settings-nav__inner">
-          <p class="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Settings</p>
+          <p class="text-xs uppercase tracking-widest font-medium mb-3 opacity-50">Settings</p>
           <button
             v-for="s in sections"
             :key="s.id"
@@ -335,7 +340,7 @@ function scrollTo(id: string) {
   padding: 8px 12px;
   border: none;
   background: none;
-  color: rgba(148, 163, 184, 0.7);
+  color: rgba(var(--v-theme-on-surface), 0.5);
   font-size: 0.8rem;
   font-weight: 500;
   text-align: left;
@@ -345,8 +350,8 @@ function scrollTo(id: string) {
 }
 
 .settings-nav__item:hover {
-  color: #e0f2fe;
-  background: rgba(56, 189, 248, 0.08);
+  color: rgba(var(--v-theme-on-surface), 0.85);
+  background: rgba(var(--v-theme-primary), 0.08);
 }
 
 .settings-content {
@@ -355,8 +360,8 @@ function scrollTo(id: string) {
 }
 
 .settings-section {
-  background: rgba(15, 23, 42, 0.45);
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  background: rgba(var(--v-theme-surface), 0.7);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
   border-radius: 12px;
   margin-bottom: 20px;
   overflow: clip;
@@ -367,15 +372,15 @@ function scrollTo(id: string) {
   align-items: center;
   gap: 10px;
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 }
 
-.settings-section__icon { color: #38bdf8; }
+.settings-section__icon { color: rgb(var(--v-theme-primary)); }
 
 .settings-section__title {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #e0f2fe;
+  color: rgba(var(--v-theme-on-surface), 0.9);
   letter-spacing: 0.01em;
 }
 
@@ -384,7 +389,7 @@ function scrollTo(id: string) {
   align-items: center;
   justify-content: space-between;
   padding: 14px 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06);
   gap: 16px;
 }
 .settings-row:last-child { border-bottom: none; }
@@ -392,34 +397,34 @@ function scrollTo(id: string) {
 .settings-row--actions { padding: 12px 20px 16px; }
 
 .settings-row__label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.settings-row__name { font-size: 0.875rem; font-weight: 500; color: #cbd5e1; }
-.settings-row__desc { font-size: 0.75rem; color: rgba(148, 163, 184, 0.6); }
+.settings-row__name { font-size: 0.875rem; font-weight: 500; color: rgba(var(--v-theme-on-surface), 0.8); }
+.settings-row__desc { font-size: 0.75rem; color: rgba(var(--v-theme-on-surface), 0.45); }
 .settings-row__value { flex-shrink: 0; }
 
 .server-option {
   flex: 1;
   padding: 16px;
   border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  background: rgba(2, 6, 23, 0.4);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  background: rgba(var(--v-theme-surface-variant), 0.3);
   cursor: pointer;
   transition: border-color 150ms ease, background 150ms ease;
   text-align: center;
 }
 .server-option:hover {
-  border-color: rgba(56, 189, 248, 0.3);
-  background: rgba(56, 189, 248, 0.05);
+  border-color: rgba(var(--v-theme-primary), 0.3);
+  background: rgba(var(--v-theme-primary), 0.05);
 }
 .server-option--selected {
-  border-color: rgba(56, 189, 248, 0.5);
-  background: rgba(56, 189, 248, 0.08);
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.1);
+  border-color: rgba(var(--v-theme-primary), 0.5);
+  background: rgba(var(--v-theme-primary), 0.08);
+  box-shadow: 0 0 12px rgba(var(--v-theme-primary), 0.1);
 }
 
 .settings-version {
   text-align: center;
   font-size: 0.7rem;
-  color: rgba(148, 163, 184, 0.4);
+  color: rgba(var(--v-theme-on-surface), 0.3);
   padding: 16px 0 8px;
 }
 </style>

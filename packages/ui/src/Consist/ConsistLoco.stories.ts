@@ -5,7 +5,8 @@ import { createConsistLoco } from '../../.storybook/mocks/data'
 
 // No vi.mock needed — @repo/modules is aliased to the mock via Vite in main.ts
 
-const meta: Meta<typeof ConsistLoco> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Storybook Meta args include event handlers not in component type
+const meta: Meta<any> = {
   title: 'Consist/ConsistLoco',
   component: ConsistLoco,
   tags: ['autodocs'],

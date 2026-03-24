@@ -50,6 +50,9 @@ export * from './trackDiagrams/index.js'
 // Plans
 export * from './plans'
 
+// Promotions
+export * from './promotions'
+
 // CV module
 export * from './cv/types'
 export * from './cv/constants'
@@ -58,3 +61,6 @@ export * from './cv/constants'
 export { default as useFeedbackUser } from './feedback/useFeedbackUser'
 export * from './feedback/types'
 export * from './feedback/config'
+
+// Features
+export * from './features'

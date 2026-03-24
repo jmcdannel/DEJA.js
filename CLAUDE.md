@@ -66,6 +66,8 @@ DEJA.js/
 
 ## Key Commands
 
+> **In a Claude worktree?** Run `/worktree-dev-setup [app]` first — it symlinks `.env` and `node_modules/` from the main repo, then starts the server.
+
 ```bash
 # Run all at once
 pnpm dev              # Start all apps in development mode
@@ -141,6 +143,39 @@ When the `preview` branch has been tested on staging and is ready to ship:
 4. CI runs `changeset-check` + `docs-check` + `claude-code-review` — all must pass
 5. Merge → production Vercel deploy + changelog bot processes all accumulated changesets
 
+### Worktree & Branch Cleanup
+
+After completing work, keep worktrees and branches tidy. **Remove merged worktrees and branches, except those merged in the last 3 days** (to allow for quick reverts).
+
+```bash
+# From the main worktree, list merged branches with merge dates:
+cd /Users/jmcdannel/TTT/worktrees/main
+git fetch origin
+for d in /Users/jmcdannel/TTT/worktrees/*/; do
+  name=$(basename "$d")
+  [[ "$name" == "main" || "$name" == "preview" ]] && continue
+  branch=$(git -C "$d" branch --show-current 2>/dev/null)
+  [[ -z "$branch" ]] && continue
+  merged=$(git branch -a --merged origin/preview 2>/dev/null | grep -F "$branch")
+  if [[ -n "$merged" ]]; then
+    date=$(git log --format="%ai" -1 "origin/$branch" 2>/dev/null | cut -d' ' -f1)
+    echo "MERGED|$name|$branch|$date"
+  fi
+done
+
+# Remove a worktree + branch:
+git worktree remove /Users/jmcdannel/TTT/worktrees/<name> --force
+git branch -D <branch-name>
+git worktree prune
+```
+
+**Rules:**
+- Always keep `main` and `preview` worktrees
+- Keep unmerged/open branches (active work)
+- Keep merged branches from the last 3 days (safety window)
+- Remove everything else to keep disk usage low
+- Run `git worktree prune` after bulk removals
+
 ### After merging preview → main — sync back
 
 After each merge to `main` (including the changelog bot's automated commit), sync `main` back into `preview`:
@@ -195,7 +230,7 @@ When UI changes are made, update screenshots and MDX docs **before the `preview 
 
 **Test user login:** Alternatively, set `CLAUDE_TEST_EMAIL` and `CLAUDE_TEST_PASSWORD` in `.env` for realistic email/password login during automated testing.
 
-**Worktree env setup:** Git worktrees don't inherit `.env`. Symlink it: `ln -sf /path/to/DEJA.js/.env .env`
+**Worktree dev setup:** Git worktrees don't inherit `.env` or `node_modules/`. Run `/worktree-dev-setup [app]` before starting any dev server in a worktree — it symlinks both automatically and starts the server. **Note:** Vite reads `.env` from the **app directory** (e.g., `apps/cloud/`), not the monorepo root — the setup script handles this.
 
 ---
 
@@ -303,6 +338,8 @@ Internal packages use the `@repo/` scope (e.g. `@repo/modules`, `@repo/ui`). The
 ---
 
 ## Key Commands
+
+> **In a Claude worktree?** Run `/worktree-dev-setup [app]` first — it symlinks `.env` and `node_modules/` from the main repo, then starts the server.
 
 Run from the repo root using `turbo` (or `pnpm`):
 
@@ -728,10 +765,19 @@ Frontend apps (throttle, cloud) are deployed to **Vercel** (see `vercel.json` in
 
 | File | Purpose |
 |---|---|
-| `README.md` | Project overview, setup, quick start |
-| `API_DOCUMENTATION.md` | Public APIs, composables, types, usage examples |
+| `README.md` | Project overview, monorepo structure, dev setup |
+| `ARCHITECTURE.md` | System architecture, communication layers, data flow |
+| `CONTRIBUTING.md` | Development setup, coding conventions, workflow |
 | `CHANGELOG.md` | Version history (Keep a Changelog format) |
 | `ROADMAP.md` | Planned features |
 | `TODO.md` | Short-term task list |
 | `apps/server/WEBSOCKET_PROTOCOL.md` | WebSocket message format & device subscription protocol |
 | `apps/*/README.md` | Per-app documentation |
+| `packages/modules/README.md` | Core business logic composables and types |
+| `packages/dccex/README.md` | DCC-EX command protocol and useDcc() API |
+| `packages/deja/README.md` | Core DEJA composable (useDejaJS) |
+| `packages/ui/README.md` | Shared Vue component library |
+| `packages/auth/README.md` | Firebase auth guards and components |
+| `packages/firebase-config/README.md` | Firebase client and admin SDK initialization |
+| `packages/utils/README.md` | Common utility functions |
+| `io/README.md` | Arduino and Pico W firmware documentation |

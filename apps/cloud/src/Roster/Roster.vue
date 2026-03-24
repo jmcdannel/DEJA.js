@@ -7,9 +7,10 @@ import { rtdb } from '@repo/firebase-config'
 import type { Loco } from '@repo/modules/locos'
 import { useLocos } from '@repo/modules/locos'
 import { useDcc } from '@repo/dccex'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
 import RosterList from '@/Roster/RosterList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
+import { ThrottleLaunchQR } from '@repo/ui'
 
 const router = useRouter()
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -17,6 +18,11 @@ const { getLocos } = useLocos()
 const { syncAllRoster, importRoster } = useDcc()
 
 const locos = getLocos()
+
+const rosterList = computed(() =>
+  locos?.value ? locos.value.map((l) => ({ ...l, id: l.address })) : []
+)
+const rosterControls = useListControls('cloud-roster', { list: rosterList })
 
 interface RosterSyncStatus {
   status: 'syncing' | 'success' | 'error' | 'importing'
@@ -80,36 +86,51 @@ async function importFromCS() {
 </script>
 
 <template>
-  <PageHeader menu="Roster" />
-
-  <div class="flex gap-2 px-4 mb-4">
-    <v-btn
-      :loading="rosterSyncStatus?.status === 'syncing'"
-      :disabled="isSyncing"
-      prepend-icon="mdi-sync"
-      variant="tonal"
-      color="primary"
-      size="small"
-      @click="syncToCS"
-    >
-      Sync to DCC-EX
-    </v-btn>
-    <v-btn
-      :loading="rosterSyncStatus?.status === 'importing'"
-      :disabled="isSyncing"
-      prepend-icon="mdi-download"
-      variant="tonal"
-      color="secondary"
-      size="small"
-      @click="importFromCS"
-    >
-      Import from DCC-EX
-    </v-btn>
-  </div>
+  <PageHeader title="Roster" icon="mdi-train" color="pink">
+    <template #controls>
+      <ListControlBar
+        :controls="rosterControls"
+        color="pink"
+        :show-filters="false"
+        :show-view="false"
+        :show-sort="false"
+        search-placeholder="Search roster..."
+      />
+    </template>
+    <template #actions>
+      <v-btn
+        :loading="rosterSyncStatus?.status === 'syncing'"
+        :disabled="isSyncing"
+        prepend-icon="mdi-sync"
+        variant="tonal"
+        color="primary"
+        size="small"
+        @click="syncToCS"
+      >
+        Sync to DCC-EX
+      </v-btn>
+      <v-btn
+        :loading="rosterSyncStatus?.status === 'importing'"
+        :disabled="isSyncing"
+        prepend-icon="mdi-download"
+        variant="tonal"
+        color="secondary"
+        size="small"
+        @click="importFromCS"
+      >
+        Import from DCC-EX
+      </v-btn>
+    </template>
+  </PageHeader>
 
   <RosterList @edit="handleEditLoco">
     <template #prepend>
       <AddTile @click="handleAddLoco" />
+    </template>
+    <template #append>
+      <v-card variant="outlined" class="d-flex flex-column align-center justify-center pa-4 text-center" min-height="120">
+        <ThrottleLaunchQR :size="100" label="Open Throttle on phone" />
+      </v-card>
     </template>
   </RosterList>
 

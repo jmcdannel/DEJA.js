@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useWebSocket } from '@vueuse/core'
 import { useLayout, useLocos, useTurnouts, useEfx, useSignals } from '@repo/modules'
 import { useLayoutLogListeners } from '../composables/useLayoutLogListeners'
 import { usePaneManager, PANE_COLORS, type PaneColorKey } from '../composables/usePaneManager'
 import { useWsConnection } from '../composables/useWsConnection'
+import { ThrottleLaunchQR } from '@repo/ui'
 import MonitorPane from './components/MonitorPane.vue'
 import DccLogPane from './components/DccLogPane.vue'
 import DeviceSerialPaneContent from './components/DeviceSerialPaneContent.vue'
@@ -108,6 +109,25 @@ function handleClear(id: string) {
 // Extract device ID from pane ID
 function deviceIdFromPaneId(paneId: string): string {
   return paneId.replace('device-', '')
+}
+
+// Dev-only: expose mock data injection for screenshot automation
+// Wrapped in onMounted so dccLogRef is populated before seedAll can be called
+if (import.meta.env.DEV) {
+  onMounted(() => {
+    import('../dev/mock-data').then((mockData) => {
+      ;(window as any).__DEJA_MOCK__ = {
+        seedAll: () => {
+          // Seed log panes (turnout/effect/sensor are props-driven from these refs)
+          turnoutChanges.value.push(...mockData.mockTurnoutChanges)
+          effectChanges.value.push(...mockData.mockEffectChanges)
+          sensorChanges.value.push(...mockData.mockSensorChanges)
+          // Seed DCC log via the pane's seed method
+          dccLogRef.value?.seed(mockData.mockDccLog)
+        },
+      }
+    })
+  })
 }
 </script>
 
@@ -237,6 +257,11 @@ function deviceIdFromPaneId(paneId: string): string {
           />
         </div>
       </div>
+    </div>
+
+    <!-- Quick Throttle Launch -->
+    <div class="fixed bottom-6 right-6 z-50">
+      <ThrottleLaunchQR :size="80" label="Open Throttle" />
     </div>
   </div>
 </template>

@@ -21,13 +21,14 @@ const state = defineModel('state', {
     :color="turnout?.color || 'primary'"
   >
     <v-card-title 
-      class="flex flex-row items-center gap-2 justify-between rounded-full pl-2 pr-8 bg-gray-900 bg-opacity-75"
-      :class="isRunning ? 'shadow-inner shadow-pink-500 bg-opacity-80' : 'bg-opacity-95'"
+      class="flex flex-row items-center gap-2 justify-between rounded-full pl-2 pr-8"
+      style="background: rgba(var(--v-theme-surface), 0.75)"
+      :class="isRunning ? 'shadow-inner shadow-pink-500' : ''"
     >
       <v-icon :icon="turnout?.type === 'servo' ? 'mdi-call-split' : 'mdi-electric-switch'" class="w-6 h-6" />
-      <h4 class="text-md font-bold mr-2 text-white fill-white dark:text-white! dark:fill-white text-center ">
+      <h4 class="text-md font-bold mr-2 text-center">
         {{turnout?.name}}
-        <span class="hidden md:inline text-sm font-normal ml-2 text-gray-300">
+        <span class="hidden md:inline text-sm font-normal ml-2 opacity-60">
           <br />
           <v-chip 
           v-if="turnout?.device" 

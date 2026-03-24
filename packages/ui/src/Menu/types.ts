@@ -1,3 +1,5 @@
+import type { FeatureName } from '@repo/modules'
+
 export interface MenuItem {
   color: string;
   icon: string;
@@ -5,6 +7,7 @@ export interface MenuItem {
   name: string;
   section?: 'modules' | 'hardware' | 'system';
   isFavorite?: boolean;
+  feature?: FeatureName;
 }
 
 export interface SuiteApp {
