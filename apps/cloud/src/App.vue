@@ -21,7 +21,7 @@ const { feedbackUser } = useFeedbackUser()
 watch(feedbackUser, (u) => Sentry.setUser(u), { immediate: true })
 
 // Components
-import { AppHeader, NotificationContainer, provideNotifications, PageBackground, OnboardingBanner, PizzaTracker, PromoBanner } from '@repo/ui'
+import { AppHeader, NotificationContainer, provideNotifications, PageBackground, DejaTracker, PromoBanner } from '@repo/ui'
 
 provideNotifications()
 const drawer = ref(true)
@@ -151,10 +151,10 @@ watch(activePromos, (val) => {
           class="position-fixed top-0 left-0 right-0"
           style="z-index: 9999;"
         />
-        <PizzaTracker
+        <DejaTracker
           v-if="!isFullscreen && !onboardingComplete && !dismissedOnboarding"
           :active-step="onboardingState.serverStarted ? 4 : 3"
-          :show-status="!onboardingState.serverStarted"
+          :show-status="false"
           compact
         />
         <PromoBanner
