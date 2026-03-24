@@ -257,6 +257,12 @@ const router = createRouter({
       meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'trackDiagrams' },
     },
     {
+      path: '/power-districts',
+      name: 'Power Districts',
+      component: () => import('./PowerDistricts/PowerDistricts.vue'),
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
+    },
+    {
       path: '/dccex',
       name: 'DCC-EX',
       component: () => import('./DCCEX/DCCEX.vue'),

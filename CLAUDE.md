@@ -66,7 +66,7 @@ DEJA.js/
 
 ## Key Commands
 
-> **In a Claude worktree?** Run `/worktree-dev-setup [app]` first — it copies `.env` and installs `node_modules/`, then starts the server.
+> **In a Claude worktree?** Run `/worktree-dev-setup [app]` first — it copies `.env` and symlinks `node_modules/` from the preview worktree, then starts the server.
 
 ```bash
 # Run all at once
@@ -143,6 +143,39 @@ When the `preview` branch has been tested on staging and is ready to ship:
 4. CI runs `changeset-check` + `docs-check` + `claude-code-review` — all must pass
 5. Merge → production Vercel deploy + changelog bot processes all accumulated changesets
 
+### Worktree & Branch Cleanup
+
+After completing work, keep worktrees and branches tidy. **Remove merged worktrees and branches, except those merged in the last 3 days** (to allow for quick reverts).
+
+```bash
+# From the main worktree, list merged branches with merge dates:
+cd /Users/jmcdannel/TTT/worktrees/main
+git fetch origin
+for d in /Users/jmcdannel/TTT/worktrees/*/; do
+  name=$(basename "$d")
+  [[ "$name" == "main" || "$name" == "preview" ]] && continue
+  branch=$(git -C "$d" branch --show-current 2>/dev/null)
+  [[ -z "$branch" ]] && continue
+  merged=$(git branch -a --merged origin/preview 2>/dev/null | grep -F "$branch")
+  if [[ -n "$merged" ]]; then
+    date=$(git log --format="%ai" -1 "origin/$branch" 2>/dev/null | cut -d' ' -f1)
+    echo "MERGED|$name|$branch|$date"
+  fi
+done
+
+# Remove a worktree + branch:
+git worktree remove /Users/jmcdannel/TTT/worktrees/<name> --force
+git branch -D <branch-name>
+git worktree prune
+```
+
+**Rules:**
+- Always keep `main` and `preview` worktrees
+- Keep unmerged/open branches (active work)
+- Keep merged branches from the last 3 days (safety window)
+- Remove everything else to keep disk usage low
+- Run `git worktree prune` after bulk removals
+
 ### After merging preview → main — sync back
 
 After each merge to `main` (including the changelog bot's automated commit), sync `main` back into `preview`:
@@ -197,7 +230,7 @@ When UI changes are made, update screenshots and MDX docs **before the `preview 
 
 **Test user login:** Alternatively, set `CLAUDE_TEST_EMAIL` and `CLAUDE_TEST_PASSWORD` in `.env` for realistic email/password login during automated testing.
 
-**Worktree dev setup:** Git worktrees don't inherit `.env` or `node_modules/`. Run `/worktree-dev-setup [app]` before starting any dev server in a worktree — it **copies** `.env` (symlinks don't load reliably) and runs `pnpm install` (symlinked node_modules don't work with pnpm's per-package virtual store). **Note:** Vite reads `.env` from the **app directory** (e.g., `apps/cloud/`), not the monorepo root — the setup script handles this.
+**Worktree dev setup:** Git worktrees don't inherit `.env` or `node_modules/`. Run `/worktree-dev-setup [app]` before starting any dev server in a worktree — it symlinks `node_modules/` and **copies** `.env` into each app directory, then starts the server. **Important:** `.env` must be **copied** (not symlinked) — symlinks fail to load reliably in some environments. Vite reads `.env` from the **app directory** (e.g., `apps/cloud/`), not the monorepo root. The canonical `.env` lives in the `preview` worktree. If you change `.env`, restart the dev server (Vite doesn't hot-reload env vars).
 
 ---
 
@@ -306,7 +339,7 @@ Internal packages use the `@repo/` scope (e.g. `@repo/modules`, `@repo/ui`). The
 
 ## Key Commands
 
-> **In a Claude worktree?** Run `/worktree-dev-setup [app]` first — it copies `.env` and installs `node_modules/`, then starts the server.
+> **In a Claude worktree?** Run `/worktree-dev-setup [app]` first — it copies `.env` and symlinks `node_modules/` from the preview worktree, then starts the server.
 
 Run from the repo root using `turbo` (or `pnpm`):
 

@@ -70,12 +70,14 @@ export interface Device {
   id: string
   isConnected?: boolean
   lastConnected?: Date
+  maxOutputs?: number
   name: string
   port?: string
   strips?: number[]
   tags?: Tag[]
   timestamp?: Date
   topic?: string
+  trackOutputs?: Record<string, import('@repo/dccex').TrackOutput>
   type: 'dcc-ex' | 'deja-arduino' | 'deja-arduino-led' | 'deja-mqtt' | 'deja-server'
   order?: number
 }

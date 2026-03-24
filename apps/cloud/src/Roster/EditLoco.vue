@@ -5,7 +5,7 @@ import { useLocos, ROADNAMES, type Loco, type RoadName } from '@repo/modules/loc
 import { useDcc } from '@repo/dccex'
 import { createLogger } from '@repo/utils'
 import ViewJson from '@/Core/UI/ViewJson.vue'
-import EditConsist from '@repo/ui/src/Consist/EditConsist.vue'
+import EditConsist from '@repo/ui/src/Consist/ConsistEditor.vue'
 import Functions from '@/Roster/Functions/Functions.vue'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
 
@@ -221,7 +221,7 @@ async function submit () {
     min-width="420"
     max-width="80vw">
     <template v-slot:default>
-      <EditConsist :loco="loco" :color="color" @close="settingsDialogOpen = false" />
+      <EditConsist :loco="loco" @close="settingsDialogOpen = false" />
     </template>
   </v-dialog>
 

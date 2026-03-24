@@ -1,45 +1,36 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { collection, query, where } from 'firebase/firestore'
 import { useRouter } from 'vue-router'
-import { useCollection, useCurrentUser } from 'vuefire'
+import { useCurrentUser } from 'vuefire'
 import { useStorage } from '@vueuse/core'
-import { db, rtdb } from '@repo/firebase-config'
+import { rtdb } from '@repo/firebase-config'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
-import { createLogger, formatUptime } from '@repo/utils'
 import { useLayout, useServerStatus, type Device } from '@repo/modules'
-import { DeviceConnectionList, DeviceStatusItem, StatusPulse } from '@repo/ui'
-
-const log = createLogger('Connect')
+import { DeviceConnectionList, DeviceStatusItem, StatusPulse, SelectLayout } from '@repo/ui'
+import { useDisplay } from 'vuetify'
 
 const user = useCurrentUser()
 const router = useRouter()
+const { mdAndUp } = useDisplay()
 
-const layoutsQuery = computed(() => {
-  if (!user.value?.email) return null
-  return query(collection(db, 'layouts'), where('owner', '==', user.value.email))
-})
-
-const layouts = useCollection(layoutsQuery)
 const layoutId = useStorage('@DEJA/layoutId', '')
 
 function handleLayoutSelect(selectedLayoutId: string) {
-  log.debug('Selected layout ID:', selectedLayoutId)
   if (selectedLayoutId) {
     layoutId.value = selectedLayoutId
     router.push({ name: 'home' })
   }
 }
 
-function handleLayoutDisconnect() {
-  layoutId.value = ''
-}
-
 // Server status
 const { serverStatus } = useServerStatus()
 const serverUptime = computed(() => {
   if (!serverStatus.value?.online || !serverStatus.value?.lastSeen) return ''
-  return formatUptime(serverStatus.value.lastSeen)
+  const elapsed = Date.now() - serverStatus.value.lastSeen
+  const mins = Math.floor(elapsed / 60000)
+  const hrs = Math.floor(mins / 60)
+  if (hrs > 0) return `${hrs}h ${mins % 60}m`
+  return `${mins}m`
 })
 
 // Device connection management
@@ -85,113 +76,113 @@ const selectedDevice = computed(() => {
   if (!selectedDeviceId.value || !devices.value) return null
   return devices.value.find((d: Device) => d.id === selectedDeviceId.value) ?? null
 })
+
+// Jump-to sections
+const sections = computed(() => {
+  const items = [
+    { id: 'layout', label: 'Layout', icon: 'mdi-home-city-outline' },
+  ]
+  if (layoutId.value) {
+    items.push(
+      { id: 'server', label: 'Server', icon: 'mdi-server-network' },
+      { id: 'devices', label: 'Devices', icon: 'mdi-devices' },
+    )
+  }
+  return items
+})
+
+function scrollTo(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 </script>
 
 <template>
   <v-container class="py-6">
-    <div class="connect-layout">
-      <div class="connect-content">
+    <div class="settings-layout">
+      <!-- Content -->
+      <div class="settings-content">
         <!-- Layout Selection -->
-        <div class="connect-section">
-          <div class="connect-section__header">
-            <v-icon size="20" class="connect-section__icon">mdi-home-outline</v-icon>
-            <h2 class="connect-section__title">Your Layouts</h2>
+        <div id="layout" class="settings-section">
+          <div class="settings-section__header">
+            <v-icon size="20" class="settings-section__icon">mdi-home-city-outline</v-icon>
+            <h2 class="settings-section__title">Layout</h2>
           </div>
-          <div
-            v-for="layout in layouts"
-            :key="layout.id"
-            class="connect-row cursor-pointer"
-            :class="{ 'connect-row--active': layout.id === layoutId }"
-            @click="handleLayoutSelect(layout.id)"
-          >
-            <div class="flex items-center gap-3">
-              <v-avatar
-                :color="layout.id === layoutId ? 'success' : 'grey'"
-                variant="tonal"
-                size="36"
-                rounded="lg"
-              >
-                <v-icon size="20" icon="mdi-train" />
-              </v-avatar>
-              <div>
-                <div class="connect-row__name">{{ layout.name }}</div>
-                <div v-if="layout.description" class="connect-row__desc">{{ layout.description }}</div>
-              </div>
-            </div>
-            <v-icon v-if="layout.id === layoutId" color="success" size="20">mdi-check-circle</v-icon>
-          </div>
-          <div v-if="layoutId" class="connect-row connect-row--actions">
-            <v-btn
-              size="small"
-              variant="outlined"
-              color="error"
-              prepend-icon="mdi-power"
-              class="text-none"
-              @click="handleLayoutDisconnect"
-            >
-              Disconnect Layout
-            </v-btn>
+          <div class="settings-row settings-row--block">
+            <SelectLayout
+              variant="compact"
+              :layout-id="layoutId"
+              @selected="handleLayoutSelect"
+            />
           </div>
         </div>
 
         <!-- Server Status -->
-        <div v-if="layoutId" class="connect-section">
-          <div class="connect-section__header">
-            <v-icon size="20" class="connect-section__icon">mdi-server-network</v-icon>
-            <h2 class="connect-section__title">DEJA Server</h2>
-          </div>
-          <div class="connect-row">
-            <div class="flex items-center gap-3">
-              <v-avatar
-                :color="serverStatus?.online ? 'success' : 'error'"
-                variant="tonal"
-                size="36"
-                rounded="lg"
-              >
-                <v-icon size="20" icon="mdi-server-network" />
-              </v-avatar>
-              <div>
-                <div class="connect-row__name" :class="serverStatus?.online ? 'text-green-400' : 'text-red-400'">
+        <template v-if="layoutId">
+          <div id="server" class="settings-section">
+            <div class="settings-section__header">
+              <v-icon size="20" class="settings-section__icon">mdi-server-network</v-icon>
+              <h2 class="settings-section__title">DEJA Server</h2>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row__label">
+                <span class="settings-row__name">Status</span>
+                <span v-if="serverStatus?.version" class="settings-row__desc">v{{ serverStatus.version }}</span>
+              </div>
+              <div class="settings-row__value flex items-center gap-3">
+                <StatusPulse :status="serverStatus?.online ? 'connected' : 'disconnected'" size="sm" />
+                <v-chip
+                  :color="serverStatus?.online ? 'success' : 'error'"
+                  size="small"
+                  variant="tonal"
+                >
                   {{ serverStatus?.online ? 'Online' : 'Offline' }}
-                </div>
-                <div v-if="serverStatus?.version" class="connect-row__desc">v{{ serverStatus.version }}</div>
+                </v-chip>
               </div>
             </div>
-            <div class="flex items-center gap-2">
-              <StatusPulse :status="serverStatus?.online ? 'connected' : 'disconnected'" size="sm" />
-              <span v-if="serverUptime" class="text-xs opacity-40">{{ serverUptime }}</span>
+            <div v-if="serverUptime" class="settings-row">
+              <div class="settings-row__label">
+                <span class="settings-row__name">Uptime</span>
+              </div>
+              <div class="settings-row__value opacity-60">{{ serverUptime }}</div>
             </div>
           </div>
-        </div>
 
-        <!-- Devices -->
-        <div v-if="layoutId" class="connect-section">
-          <div class="connect-section__header">
-            <v-icon size="20" class="connect-section__icon">mdi-devices</v-icon>
-            <h2 class="connect-section__title">Devices</h2>
-            <v-spacer />
-            <v-chip
-              v-if="devices?.length"
-              size="x-small"
-              :color="devices.every((d: Device) => d.isConnected || d.type === 'deja-server') ? 'success' : 'warning'"
-              variant="tonal"
-            >
-              {{ devices.filter((d: Device) => d.isConnected).length }}/{{ devices.length }} connected
-            </v-chip>
+          <!-- Devices -->
+          <div id="devices" class="settings-section">
+            <div class="settings-section__header">
+              <v-icon size="20" class="settings-section__icon">mdi-devices</v-icon>
+              <h2 class="settings-section__title">Devices</h2>
+            </div>
+            <div class="settings-row settings-row--block">
+              <DeviceConnectionList
+                :devices="devices ?? []"
+                :available-ports="ports"
+                link-mode="modal"
+                :show-header="false"
+                @connect="handleConnect"
+                @disconnect="handleDisconnect"
+                @navigate="openDeviceModal"
+              />
+            </div>
           </div>
-          <div class="connect-row connect-row--block">
-            <DeviceConnectionList
-              :devices="devices ?? []"
-              :available-ports="ports"
-              link-mode="modal"
-              :show-header="false"
-              @connect="handleConnect"
-              @disconnect="handleDisconnect"
-              @navigate="openDeviceModal"
-            />
-          </div>
-        </div>
+        </template>
       </div>
+
+      <!-- Jump-to nav (desktop only) -->
+      <nav v-if="mdAndUp" class="settings-nav">
+        <div class="settings-nav__inner">
+          <p class="text-xs opacity-40 uppercase tracking-widest font-medium mb-3">Connect</p>
+          <button
+            v-for="s in sections"
+            :key="s.id"
+            class="settings-nav__item"
+            @click="scrollTo(s.id)"
+          >
+            <v-icon size="16">{{ s.icon }}</v-icon>
+            {{ s.label }}
+          </button>
+        </div>
+      </nav>
     </div>
 
     <!-- Device Detail Modal -->
@@ -211,25 +202,60 @@ const selectedDevice = computed(() => {
 </template>
 
 <style scoped>
-.connect-layout {
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.connect-content {
+.settings-layout {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  gap: 32px;
+  max-width: 1100px;
 }
 
-.connect-section {
+.settings-nav {
+  flex-shrink: 0;
+  width: 180px;
+  position: sticky;
+  top: 80px;
+  align-self: flex-start;
+}
+
+.settings-nav__inner {
+  padding: 16px 0;
+}
+
+.settings-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: rgba(var(--v-theme-on-surface), 0.5);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: left;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.settings-nav__item:hover {
+  color: rgb(var(--v-theme-on-surface));
+  background: rgba(var(--v-theme-primary), 0.08);
+}
+
+.settings-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-section {
   background: rgba(var(--v-theme-surface), 0.45);
   border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
   border-radius: 12px;
+  margin-bottom: 20px;
   overflow: clip;
 }
 
-.connect-section__header {
+.settings-section__header {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -237,57 +263,27 @@ const selectedDevice = computed(() => {
   border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 }
 
-.connect-section__icon {
-  color: rgb(var(--v-theme-primary));
-}
+.settings-section__icon { color: rgb(var(--v-theme-primary)); }
 
-.connect-section__title {
+.settings-section__title {
   font-size: 0.95rem;
   font-weight: 600;
   color: rgb(var(--v-theme-on-surface));
 }
 
-.connect-row {
+.settings-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 14px 20px;
   border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06);
   gap: 16px;
-  transition: background 150ms ease;
 }
+.settings-row:last-child { border-bottom: none; }
+.settings-row--block { flex-direction: column; align-items: stretch; }
 
-.connect-row:last-child {
-  border-bottom: none;
-}
-
-.connect-row.cursor-pointer:hover {
-  background: rgba(var(--v-theme-primary), 0.05);
-}
-
-.connect-row--active {
-  background: rgba(var(--v-theme-success), 0.06);
-  border-left: 3px solid rgb(var(--v-theme-success));
-}
-
-.connect-row--block {
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.connect-row--actions {
-  padding: 12px 20px 16px;
-  justify-content: flex-end;
-}
-
-.connect-row__name {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: rgba(var(--v-theme-on-surface), 0.8);
-}
-
-.connect-row__desc {
-  font-size: 0.75rem;
-  color: rgba(var(--v-theme-on-surface), 0.45);
-}
+.settings-row__label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.settings-row__name { font-size: 0.875rem; font-weight: 500; color: rgba(var(--v-theme-on-surface), 0.8); }
+.settings-row__desc { font-size: 0.75rem; color: rgba(var(--v-theme-on-surface), 0.45); }
+.settings-row__value { flex-shrink: 0; }
 </style>
