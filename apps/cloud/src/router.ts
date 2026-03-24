@@ -59,6 +59,12 @@ const router = createRouter({
       meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
+      path: '/tracker-prototypes',
+      name: 'TrackerPrototypes',
+      component: () => import('./views/TrackerPrototypes.vue'),
+      meta: { requireAuth: true },
+    },
+    {
       path: '/login',
       name: 'login',
       component: Login,
