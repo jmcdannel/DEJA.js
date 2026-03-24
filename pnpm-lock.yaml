@@ -24,6 +24,9 @@ importers:
       '@sanity/client':
         specifier: '6'
         version: 6.29.1(debug@4.4.3)
+      dotenv:
+        specifier: ^16.3.1
+        version: 16.6.1
       firebase-admin:
         specifier: ^13.4.0
         version: 13.5.0
