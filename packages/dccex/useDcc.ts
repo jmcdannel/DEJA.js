@@ -2,6 +2,7 @@ import { useStorage } from '@vueuse/core'
 import { ref, push, set, serverTimestamp } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
 import { createLogger } from '@repo/utils'
+import { createMockResponder } from './mockResponses'
 
 const log = createLogger('DCC')
 
@@ -19,6 +20,8 @@ export const useDcc = (options?: DccWriteOptions) => {
   const layoutId = useStorage('@DEJA/layoutId', '')
   const isEmulated = useStorage('@DEJA/isEmulated', false)
   const isSerial = useStorage('@DEJA/layoutId', false)
+  const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
+  const mockResponder = isDemoMode ? createMockResponder() : null
 
   const wrappedWrite = options?.enqueue ?? ((execute: () => Promise<void>) => execute())
 
@@ -72,7 +75,11 @@ export const useDcc = (options?: DccWriteOptions) => {
   }
 
   async function send(action: string, payload?: object): Promise<void> {
-    if (isEmulated.value) {
+    if (isDemoMode && mockResponder) {
+      log.debug('[DEJA DEMO] send', action, payload)
+      await mockResponder.handleCommand(action, payload)
+      return
+    } else if (isEmulated.value) {
       log.debug('[DEJA EMULATOR] send', action, payload)
       return
     } else if (isSerial.value) {
