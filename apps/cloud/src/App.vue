@@ -141,6 +141,16 @@ watch(activePromos, (val) => {
             <v-btn variant="text" size="small" :to="{ name: 'Settings' }">Manage subscription</v-btn>
           </template>
         </v-banner>
+        <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
+      <v-main>
+        <v-progress-linear
+          :active="isNavigating"
+          indeterminate
+          color="primary"
+          height="3"
+          class="position-fixed top-0 left-0 right-0"
+          style="z-index: 9999;"
+        />
         <OnboardingBanner
           v-if="!isFullscreen && !onboardingComplete && !dismissedOnboarding"
           :state="onboardingState"
@@ -155,16 +165,6 @@ watch(activePromos, (val) => {
           v-for="promo in activePromos"
           :key="promo.id"
           :promotion="promo"
-        />
-        <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
-      <v-main>
-        <v-progress-linear
-          :active="isNavigating"
-          indeterminate
-          color="primary"
-          height="3"
-          class="position-fixed top-0 left-0 right-0"
-          style="z-index: 9999;"
         />
         <v-container v-if="!isFullscreen" class="pa-6 pa-md-12 max-w-7xl mx-auto">
           <RouterView v-slot="{ Component, route: r }">

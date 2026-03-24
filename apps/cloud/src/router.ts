@@ -98,7 +98,7 @@ const router = createRouter({
       path: '/locos',
       name: 'Roster',
       component: () => import('./Roster/Roster.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireDccEx: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/locos/new',
