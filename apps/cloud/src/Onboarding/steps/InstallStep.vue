@@ -30,11 +30,32 @@ watch(serverConnected, (connected) => {
 const currentTipIndex = ref(0)
 let tipInterval: ReturnType<typeof setInterval> | null = null
 
+// Status text cycling — Claude-style animated adjectives
+const STATUS_PHRASES = [
+  'Downloading server...',
+  'Configuring your railroad...',
+  'Detecting CommandStation...',
+  'Setting up cloud sync...',
+  'Preparing your throttle...',
+  'Almost there...',
+  'Connecting the dots...',
+  'Wiring up the magic...',
+  'Laying digital track...',
+  'Tuning the signals...',
+]
+const currentPhraseIndex = ref(0)
+let phraseInterval: ReturnType<typeof setInterval> | null = null
+
 onMounted(() => {
   tipInterval = setInterval(() => {
     currentTipIndex.value = (currentTipIndex.value + 1) % INSTALL_TIPS.length
   }, 6000)
+  phraseInterval = setInterval(() => {
+    currentPhraseIndex.value = (currentPhraseIndex.value + 1) % STATUS_PHRASES.length
+  }, 3000)
 })
+
+const currentPhrase = computed(() => STATUS_PHRASES[currentPhraseIndex.value])
 
 // Loco form
 const locoAddress = ref<string>('')
@@ -66,6 +87,7 @@ async function handleAddLoco() {
 
 function handleComplete() {
   if (tipInterval) clearInterval(tipInterval)
+  if (phraseInterval) clearInterval(phraseInterval)
   emit('complete')
 }
 </script>
@@ -123,6 +145,49 @@ function handleComplete() {
 
     <!-- ⏳ Waiting for Server — Productive Wait State -->
     <template v-else>
+
+      <!-- 🍕 Pizza Tracker Progress Bar -->
+      <div class="pizza-tracker mb-6">
+        <div class="pizza-tracker__steps">
+          <div class="pizza-tracker__step pizza-tracker__step--complete">
+            <div class="pizza-tracker__dot"><v-icon size="12">mdi-check</v-icon></div>
+            <span class="pizza-tracker__label hidden sm:inline">Account</span>
+          </div>
+          <div class="pizza-tracker__connector pizza-tracker__connector--complete" />
+          <div class="pizza-tracker__step pizza-tracker__step--complete">
+            <div class="pizza-tracker__dot"><v-icon size="12">mdi-check</v-icon></div>
+            <span class="pizza-tracker__label hidden sm:inline">Plan</span>
+          </div>
+          <div class="pizza-tracker__connector pizza-tracker__connector--complete" />
+          <div class="pizza-tracker__step pizza-tracker__step--complete">
+            <div class="pizza-tracker__dot"><v-icon size="12">mdi-check</v-icon></div>
+            <span class="pizza-tracker__label hidden sm:inline">Layout</span>
+          </div>
+          <div class="pizza-tracker__connector pizza-tracker__connector--active" />
+          <div class="pizza-tracker__step pizza-tracker__step--active">
+            <div class="pizza-tracker__dot pizza-tracker__dot--spinner">
+              <v-progress-circular indeterminate color="cyan" size="14" width="2" />
+            </div>
+            <span class="pizza-tracker__label">Install</span>
+          </div>
+          <div class="pizza-tracker__connector" />
+          <div class="pizza-tracker__step pizza-tracker__step--pending">
+            <div class="pizza-tracker__dot"><v-icon size="12">mdi-train</v-icon></div>
+            <span class="pizza-tracker__label hidden sm:inline">Drive!</span>
+          </div>
+        </div>
+
+        <!-- Animated status text — cycles through phrases -->
+        <div class="pizza-tracker__status">
+          <div class="pizza-tracker__glow" />
+          <Transition name="phrase-slide" mode="out-in">
+            <p :key="currentPhraseIndex" class="pizza-tracker__phrase">
+              {{ currentPhrase }}
+            </p>
+          </Transition>
+        </div>
+      </div>
+
       <div class="mb-6">
         <h2 class="text-xl font-semibold text-sky-100 mb-2">Install the DEJA Server</h2>
         <p class="opacity-60 text-sm">
@@ -134,22 +199,6 @@ function handleComplete() {
       <!-- Install Command -->
       <div class="glass-card mb-6">
         <QuickStart :completed="[1]" :uid="uid" :layout-id="layoutId" />
-      </div>
-
-      <!-- Server Status Indicator -->
-      <div class="glass-card mb-6">
-        <div class="flex items-center gap-3">
-          <v-progress-circular
-            indeterminate
-            color="cyan"
-            size="24"
-            width="2"
-          />
-          <div>
-            <p class="text-sky-200 text-sm font-medium">Waiting for your server to connect...</p>
-            <p class="opacity-50 text-xs">This page updates automatically — no need to refresh.</p>
-          </div>
-        </div>
       </div>
 
       <!-- Add Locomotives — Productive Wait -->
@@ -352,6 +401,144 @@ function handleComplete() {
 .tip-fade-enter-from,
 .tip-fade-leave-to {
   opacity: 0;
+}
+
+/* Pizza Tracker */
+.pizza-tracker {
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+}
+.pizza-tracker__steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+.pizza-tracker__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.pizza-tracker__dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.6);
+  color: rgba(148, 163, 184, 0.4);
+  transition: all 0.3s ease;
+}
+.pizza-tracker__label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: rgba(148, 163, 184, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.pizza-tracker__connector {
+  flex: 1;
+  height: 2px;
+  min-width: 20px;
+  max-width: 60px;
+  background: rgba(148, 163, 184, 0.15);
+  margin: 0 4px;
+  margin-bottom: 18px;
+  border-radius: 1px;
+}
+.pizza-tracker__connector--complete {
+  background: linear-gradient(90deg, #22d3ee, #38bdf8);
+  box-shadow: 0 0 6px rgba(34, 211, 238, 0.3);
+}
+.pizza-tracker__connector--active {
+  background: linear-gradient(90deg, #38bdf8, rgba(148, 163, 184, 0.3));
+}
+.pizza-tracker__step--complete .pizza-tracker__dot {
+  border-color: #22d3ee;
+  background: rgba(34, 211, 238, 0.15);
+  color: #22d3ee;
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.3);
+}
+.pizza-tracker__step--complete .pizza-tracker__label {
+  color: #22d3ee;
+}
+.pizza-tracker__step--active .pizza-tracker__dot {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.2);
+  color: #e0f2fe;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.4);
+  animation: pizza-pulse 2s ease-in-out infinite;
+}
+.pizza-tracker__step--active .pizza-tracker__label {
+  color: #e0f2fe;
+  font-weight: 600;
+}
+.pizza-tracker__step--pending .pizza-tracker__dot {
+  border-color: rgba(148, 163, 184, 0.15);
+  background: rgba(15, 23, 42, 0.4);
+  color: rgba(148, 163, 184, 0.3);
+}
+.pizza-tracker__dot--spinner {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+.pizza-tracker__status {
+  position: relative;
+  text-align: center;
+  margin-top: 12px;
+  overflow: hidden;
+  height: 24px;
+}
+.pizza-tracker__glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 30px;
+  background: radial-gradient(ellipse, rgba(56, 189, 248, 0.15), transparent 70%);
+  animation: glow-breathe 3s ease-in-out infinite;
+  pointer-events: none;
+}
+.pizza-tracker__phrase {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #7dd3fc;
+  letter-spacing: 0.02em;
+  position: relative;
+  z-index: 1;
+}
+
+/* Phrase slide transition */
+.phrase-slide-enter-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.phrase-slide-leave-active {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.phrase-slide-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.phrase-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+@keyframes pizza-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.5); }
+}
+@keyframes glow-breathe {
+  0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
 }
 
 /* Tip dots */
