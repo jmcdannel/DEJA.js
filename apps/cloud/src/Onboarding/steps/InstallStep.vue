@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { QuickStart } from '@repo/ui'
 import { useLocos } from '@repo/modules/locos'
+import { useOnboarding, INSTALL_TIPS } from '@repo/modules'
 
-defineProps<{
+const props = defineProps<{
   uid?: string | null
   layoutId?: string
 }>()
@@ -12,12 +13,34 @@ const emit = defineEmits<{
   complete: []
 }>()
 
+const { state: onboardingState } = useOnboarding()
 const { createLoco } = useLocos()
 
+// Server detection
+const serverConnected = computed(() => onboardingState.value.serverStarted)
+const showCelebration = ref(false)
+
+watch(serverConnected, (connected) => {
+  if (connected) {
+    showCelebration.value = true
+  }
+})
+
+// Tips rotation
+const currentTipIndex = ref(0)
+let tipInterval: ReturnType<typeof setInterval> | null = null
+
+onMounted(() => {
+  tipInterval = setInterval(() => {
+    currentTipIndex.value = (currentTipIndex.value + 1) % INSTALL_TIPS.length
+  }, 6000)
+})
+
+// Loco form
 const locoAddress = ref<string>('')
 const locoName = ref('')
 const locoLoading = ref(false)
-const locoAdded = ref(false)
+const addedLocos = ref<Array<{ address: number; name: string }>>([])
 const locoError = ref<string | null>(null)
 
 async function handleAddLoco() {
@@ -29,8 +52,11 @@ async function handleAddLoco() {
   locoLoading.value = true
   locoError.value = null
   try {
-    await createLoco(address, locoName.value || `Loco ${address}`, undefined, true)
-    locoAdded.value = true
+    const name = locoName.value || `Loco ${address}`
+    await createLoco(address, name, undefined, true)
+    addedLocos.value.push({ address, name })
+    locoAddress.value = ''
+    locoName.value = ''
   } catch {
     locoError.value = 'Failed to add locomotive'
   } finally {
@@ -38,42 +64,125 @@ async function handleAddLoco() {
   }
 }
 
-function addAnother() {
-  locoAddress.value = ''
-  locoName.value = ''
-  locoAdded.value = false
+function handleComplete() {
+  if (tipInterval) clearInterval(tipInterval)
+  emit('complete')
 }
 </script>
 
 <template>
   <div class="install-step">
-    <div class="mb-6">
-      <h2 class="text-xl font-semibold text-sky-100 mb-2">Install the DEJA Server</h2>
-      <p class="opacity-60 text-sm">
-        Run the installer on the machine connected to your DCC-EX Command Station — a Raspberry Pi,
-        Mac, or Linux box. Your account and layout are linked automatically via the URL below.
-      </p>
-    </div>
+    <!-- 🎉 Server Connected — Celebration State -->
+    <template v-if="showCelebration">
+      <div class="glass-card celebration-card mb-6 text-center">
+        <div class="celebration-icon mb-4">🎉</div>
+        <h2 class="text-2xl font-bold text-sky-100 mb-2">Your Railroad is Connected!</h2>
+        <p class="opacity-70 text-sm mb-6">
+          The DEJA Server is running and linked to your layout. You're ready to drive trains.
+        </p>
 
-    <div class="glass-card mb-6">
-      <QuickStart :completed="[1]" :uid="uid" :layout-id="layoutId" />
-    </div>
+        <div v-if="addedLocos.length > 0" class="mb-6">
+          <p class="text-xs uppercase tracking-wider opacity-50 mb-3">Your Roster</p>
+          <div class="flex flex-wrap gap-2 justify-center">
+            <v-chip
+              v-for="loco in addedLocos"
+              :key="loco.address"
+              color="pink"
+              variant="tonal"
+              size="small"
+              prepend-icon="mdi-train"
+            >
+              {{ loco.name }} (#{{ loco.address }})
+            </v-chip>
+          </div>
+        </div>
 
-    <!-- Add First Locomotive -->
-    <div class="glass-card mb-6">
-      <div class="flex items-center gap-3 mb-4">
-        <v-icon color="pink" size="28">mdi-train</v-icon>
-        <h2 class="text-lg font-semibold text-sky-100">Add Your First Locomotive</h2>
+        <v-btn
+          color="pink"
+          size="large"
+          block
+          class="text-none font-weight-bold mb-3"
+          prepend-icon="mdi-speedometer"
+          href="https://throttle.dejajs.com"
+          target="_blank"
+        >
+          🚂 Open Throttle
+        </v-btn>
+        <v-btn
+          variant="tonal"
+          size="large"
+          block
+          class="text-none"
+          prepend-icon="mdi-view-dashboard-outline"
+          @click="handleComplete"
+        >
+          Explore Cloud Dashboard
+        </v-btn>
       </div>
-      <p class="opacity-60 text-sm mb-4">
-        Enter the DCC address programmed into your locomotive decoder to get running right away.
-      </p>
+    </template>
 
-      <v-alert v-if="locoError" type="error" variant="tonal" density="compact" class="mb-4" closable @click:close="locoError = null">
-        {{ locoError }}
-      </v-alert>
+    <!-- ⏳ Waiting for Server — Productive Wait State -->
+    <template v-else>
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold text-sky-100 mb-2">Install the DEJA Server</h2>
+        <p class="opacity-60 text-sm">
+          Run the installer on the machine connected to your DCC-EX CommandStation — a Raspberry Pi,
+          Mac, or Linux box. Your account and layout are linked automatically.
+        </p>
+      </div>
 
-      <div v-if="!locoAdded">
+      <!-- Install Command -->
+      <div class="glass-card mb-6">
+        <QuickStart :completed="[1]" :uid="uid" :layout-id="layoutId" />
+      </div>
+
+      <!-- Server Status Indicator -->
+      <div class="glass-card mb-6">
+        <div class="flex items-center gap-3">
+          <v-progress-circular
+            indeterminate
+            color="cyan"
+            size="24"
+            width="2"
+          />
+          <div>
+            <p class="text-sky-200 text-sm font-medium">Waiting for your server to connect...</p>
+            <p class="opacity-50 text-xs">This page updates automatically — no need to refresh.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Locomotives — Productive Wait -->
+      <div class="glass-card mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <v-icon color="pink" size="28">mdi-train</v-icon>
+          <div>
+            <h2 class="text-lg font-semibold text-sky-100">Set Up Your Roster</h2>
+            <p class="opacity-50 text-xs">Add locos while the server installs — they'll be ready when it connects.</p>
+          </div>
+        </div>
+
+        <v-alert v-if="locoError" type="error" variant="tonal" density="compact" class="mb-4" closable @click:close="locoError = null">
+          {{ locoError }}
+        </v-alert>
+
+        <!-- Added locos list -->
+        <div v-if="addedLocos.length > 0" class="mb-4">
+          <div class="flex flex-wrap gap-2">
+            <v-chip
+              v-for="loco in addedLocos"
+              :key="loco.address"
+              color="pink"
+              variant="tonal"
+              size="small"
+              prepend-icon="mdi-train"
+            >
+              {{ loco.name }} (#{{ loco.address }})
+            </v-chip>
+          </div>
+        </div>
+
+        <!-- Add loco form -->
         <div class="flex gap-3 mb-3">
           <v-text-field
             v-model="locoAddress"
@@ -107,70 +216,59 @@ function addAnother() {
           class="text-none"
           @click="handleAddLoco"
         >
-          Add Locomotive
+          {{ addedLocos.length > 0 ? 'Add Another' : 'Add Locomotive' }}
         </v-btn>
       </div>
 
-      <div v-else>
-        <v-alert type="success" variant="tonal" density="compact" class="mb-4">
-          Locomotive {{ locoAddress }} added to your roster!
-        </v-alert>
-        <div class="flex gap-3">
-          <v-btn
-            variant="tonal"
-            prepend-icon="mdi-plus"
-            class="text-none"
-            @click="addAnother"
-          >
-            Add Another
-          </v-btn>
+      <!-- Tips & Tricks -->
+      <div class="glass-card mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <v-icon color="amber" size="28">mdi-lightbulb-on-outline</v-icon>
+          <h2 class="text-lg font-semibold text-sky-100">Tips & Tricks</h2>
+        </div>
+
+        <div class="tip-carousel">
+          <TransitionGroup name="tip-fade">
+            <div
+              v-for="(tip, index) in INSTALL_TIPS"
+              v-show="index === currentTipIndex"
+              :key="tip.title"
+              class="tip-item"
+            >
+              <div class="flex items-start gap-3">
+                <v-icon :color="'amber'" size="20" class="mt-0.5 shrink-0">{{ tip.icon }}</v-icon>
+                <div>
+                  <p class="text-sky-100 font-medium text-sm mb-1">{{ tip.title }}</p>
+                  <p class="opacity-60 text-xs leading-relaxed">{{ tip.text }}</p>
+                </div>
+              </div>
+            </div>
+          </TransitionGroup>
+        </div>
+
+        <!-- Tip dots -->
+        <div class="flex justify-center gap-1.5 mt-4">
+          <button
+            v-for="(_, index) in INSTALL_TIPS"
+            :key="index"
+            class="tip-dot"
+            :class="{ 'tip-dot--active': index === currentTipIndex }"
+            @click="currentTipIndex = index"
+          />
         </div>
       </div>
-    </div>
 
-    <!-- Explore More -->
-    <div class="glass-card mb-6">
-      <div class="flex items-center gap-3 mb-4">
-        <v-icon color="primary" size="28">mdi-compass-outline</v-icon>
-        <h2 class="text-lg font-semibold text-sky-100">Explore More</h2>
-      </div>
-      <p class="opacity-60 text-sm mb-4">
-        Ready to dig deeper? Here are some next steps.
-      </p>
-      <div class="flex flex-col gap-2">
-        <a href="https://dejajs.com/docs/install" target="_blank" rel="noopener noreferrer" class="explore-link">
-          <v-icon size="18" class="mr-2">mdi-book-open-page-variant-outline</v-icon>
-          Installation Guide
-          <v-icon size="14" class="ml-auto opacity-40">mdi-open-in-new</v-icon>
-        </a>
-        <a href="https://dejajs.com/docs/roster" target="_blank" rel="noopener noreferrer" class="explore-link">
-          <v-icon size="18" class="mr-2">mdi-train</v-icon>
-          Managing Your Roster
-          <v-icon size="14" class="ml-auto opacity-40">mdi-open-in-new</v-icon>
-        </a>
-        <a href="https://dejajs.com/docs/turnouts" target="_blank" rel="noopener noreferrer" class="explore-link">
-          <v-icon size="18" class="mr-2">mdi-call-split</v-icon>
-          Turnouts &amp; Routes
-          <v-icon size="14" class="ml-auto opacity-40">mdi-open-in-new</v-icon>
-        </a>
-        <a href="https://dejajs.com/docs/effects" target="_blank" rel="noopener noreferrer" class="explore-link">
-          <v-icon size="18" class="mr-2">mdi-lightbulb-outline</v-icon>
-          Effects &amp; Automation
-          <v-icon size="14" class="ml-auto opacity-40">mdi-open-in-new</v-icon>
-        </a>
-      </div>
-    </div>
-
-    <v-btn
-      color="primary"
-      size="large"
-      block
-      class="text-none font-weight-bold"
-      prepend-icon="mdi-view-dashboard-outline"
-      @click="emit('complete')"
-    >
-      Go to Dashboard
-    </v-btn>
+      <!-- Skip to Dashboard -->
+      <v-btn
+        variant="text"
+        size="small"
+        class="text-none opacity-50"
+        prepend-icon="mdi-arrow-right"
+        @click="handleComplete"
+      >
+        Skip — go to dashboard
+      </v-btn>
+    </template>
   </div>
 </template>
 
@@ -201,6 +299,20 @@ function addAnother() {
   padding: 1px;
 }
 
+/* Celebration card — golden glow */
+.celebration-card::before {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.4), rgba(236, 72, 153, 0.3) 40%, rgba(56, 189, 248, 0.3));
+}
+.celebration-icon {
+  font-size: 3rem;
+  animation: celebration-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+@keyframes celebration-bounce {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.3); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 .setup-input :deep(.v-field) {
   background: rgba(2, 6, 23, 0.9);
   border: 1px solid rgba(148, 163, 184, 0.2);
@@ -222,22 +334,40 @@ function addAnother() {
   color: rgba(148, 163, 184, 0.5);
 }
 
-.explore-link {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  border-radius: 10px;
-  background: rgba(2, 6, 23, 0.4);
-  border: 1px solid rgba(148, 163, 184, 0.08);
-  color: #cbd5e1;
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 150ms ease;
+/* Tip carousel */
+.tip-carousel {
+  position: relative;
+  min-height: 70px;
 }
-.explore-link:hover {
-  background: rgba(56, 189, 248, 0.08);
-  border-color: rgba(56, 189, 248, 0.2);
-  color: #38bdf8;
+.tip-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+.tip-fade-enter-active,
+.tip-fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+.tip-fade-enter-from,
+.tip-fade-leave-to {
+  opacity: 0;
+}
+
+/* Tip dots */
+.tip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.3);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.tip-dot--active {
+  background: #fbbf24;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+  transform: scale(1.3);
 }
 </style>
