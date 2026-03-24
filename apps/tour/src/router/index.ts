@@ -4,6 +4,7 @@ import { getDoc, doc } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { isFeatureAccessible } from '@repo/modules'
 import type { UserRole } from '@repo/modules'
+import { useDemoAuth } from '@repo/auth'
 import { requireGuestOrAuth } from '../auth/guest-auth'
 import Home from '../views/Home.vue'
 import Welcome from '../views/Welcome.vue'
@@ -67,6 +68,16 @@ const router = createRouter({
       path: '/not-available',
       name: 'not-available',
       component: () => import('../views/NotAvailable.vue'),
+    },
+    {
+      path: '/try-demo',
+      name: 'try-demo',
+      beforeEnter: async () => {
+        const { signInAsDemo } = useDemoAuth()
+        await signInAsDemo()
+        return { path: '/' }
+      },
+      component: TourLogin,
     },
     {
       path: '/:pathMatch(.*)*',
