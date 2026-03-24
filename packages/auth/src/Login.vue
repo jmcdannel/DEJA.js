@@ -12,6 +12,7 @@ import {
 import { useFirebaseAuth, useCurrentUser } from 'vuefire'
 import { createLogger } from '@repo/utils'
 import { Logo } from '@repo/ui'
+import { useDemoAuth } from './useDemoAuth'
 
 const googleAuthProvider = new GoogleAuthProvider()
 const githubAuthProvider = new GithubAuthProvider()
@@ -49,6 +50,17 @@ const emailRules = [
 ]
 
 const passwordRules = [(v: string) => !!v || 'Password is required']
+
+const { signInAsDemo, isLoading: isDemoLoading, error: demoError } = useDemoAuth()
+const demoEmail = import.meta.env.VITE_DEMO_EMAIL
+const showDemoButton = !!demoEmail
+
+async function handleDemoLogin() {
+  const success = await signInAsDemo()
+  if (success) {
+    emit('auth')
+  }
+}
 
 async function handleGoogleSignin() {
   if (!auth) return
@@ -279,6 +291,28 @@ onMounted(() => {
               </v-btn>
             </v-form>
           </template>
+
+          <!-- Try Demo -->
+          <v-divider v-if="showDemoButton" class="my-4" />
+          <v-btn
+            v-if="showDemoButton"
+            variant="outlined"
+            color="secondary"
+            size="large"
+            block
+            :loading="isDemoLoading"
+            @click="handleDemoLogin"
+          >
+            🚂 Try Demo
+          </v-btn>
+          <v-alert
+            v-if="demoError"
+            type="error"
+            density="compact"
+            class="mt-2"
+          >
+            {{ demoError }}
+          </v-alert>
         </template>
 
       </div>
