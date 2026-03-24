@@ -3,7 +3,7 @@ import { useCurrentUser } from 'vuefire'
 import { useRouter } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import DeviceStatusList from '@repo/ui/src/DeviceStatus/DeviceStatusList.vue'
-import { ThrottleLaunchQR } from '@repo/ui'
+
 import { Login } from '@repo/auth'
 import Speedometer from '@/throttle/Speedometer.vue'
 
@@ -32,10 +32,6 @@ function handleRequestAccess() {
       </h2>
     </header>
     
-    <div v-if="user && layoutId" class="flex justify-end mb-6">
-      <ThrottleLaunchQR :size="100" label="Share throttle link" />
-    </div>
-
     <DeviceStatusList v-if="user && layoutId"
       :show-throttles="true"
       @disconnect="router.push('/connect')"

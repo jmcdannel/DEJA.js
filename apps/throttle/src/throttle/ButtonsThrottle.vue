@@ -8,7 +8,7 @@ import Speedometer from '@/throttle/Speedometer.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
 import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
-import { Consist, LocoAvatar, MiniConsist, FunctionsSpeedDial } from '@repo/ui'
+import { ConsistIndicator, LocoAvatar, FunctionsSpeedDial } from '@repo/ui'
 import { useThrottle } from '@/throttle/useThrottle'
 
 const props = defineProps({
@@ -42,8 +42,7 @@ async function clearLoco() {
     <ThrottleHeader class="bg-gradient-to-r from-purple-300/10 to-pink-600/10 text-purple-400/10">
       <template v-slot:left>
         <div class="flex flex-row items-center justify-center gap-1 px-4" style="background: rgba(var(--v-theme-surface), 0.6)">
-          <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" variant="flat" />
-          <MiniConsist v-if="loco" :loco="loco" />
+          <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" :variant="'flat'" />
           <v-spacer class="w-2 md:w-6" />
           <h1 class="text-xl md:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600 drop-shadow-lg">
             {{ loco?.name }}
@@ -64,9 +63,11 @@ async function clearLoco() {
         <Consist v-if="showConsist" :loco="loco" />
         <RoadnameLogo :roadname="loco.meta?.roadname" size="xl" />
       </section>
-
-      <!-- Column 2: Functions (desktop) -->
-      <section v-if="loco && showFunctions" class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-center flex-1">
+      <section v-if="loco" class="flex flex-col gap-2 mb-2 items-center justify-between flex-1/2 sm:flex-1">
+        <ConsistIndicator v-if="loco" :loco="loco" />
+        <v-spacer />
+        <RoadnameLogo v-if="loco" :roadname="loco.meta?.roadname" :size="'xl'" />
+        <v-spacer />
         <FunctionsSpeedDial :loco="loco" />
       </section>
 

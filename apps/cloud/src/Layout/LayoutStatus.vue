@@ -3,7 +3,7 @@ import { useStorage } from '@vueuse/core'
 import { StatusPulse } from '@repo/ui'
 import { createLogger } from '@repo/utils'
 import AddLayout from '@/Layout/AddLayout.vue'
-import SelectLayout from '@/Layout/SelectLayout.vue'
+import { SelectLayout } from '@repo/ui'
 
 const log = createLogger('LayoutStatus')
 
@@ -17,10 +17,10 @@ function handleSelect(_layoutId: string) {
 
 </script>
 <template>
-  <v-dialog>
+  <v-dialog max-width="520">
     <template v-slot:activator="{ props: activatorProps}">
       <v-sheet class="p-1" color="background">
-        <v-chip  v-bind="activatorProps" size="small" class="ma-1" 
+        <v-chip  v-bind="activatorProps" size="small" class="ma-1"
           prepend-icon="mdi-home" :color="layoutId ? 'green' : 'red'">
           <template #append>
             <span class="ml-2">
@@ -34,17 +34,20 @@ function handleSelect(_layoutId: string) {
       </v-sheet>
     </template>
     <template v-slot:default="{ isActive }">
-      <v-sheet class="p-4 relative">
-        <SelectLayout :layoutId="layoutId" @selected="handleSelect" />
-        <v-divider class="my-4" />
-        <AddLayout />
-        <v-btn
-          icon="mdi-close"
-          color="red"
-          class="absolute top-2 right-2"
-          @click="isActive.value = false"
-        ></v-btn>
-      </v-sheet>
+      <v-card class="rounded-xl">
+        <v-card-title class="d-flex align-center ga-2 pa-4">
+          <v-icon size="20" color="primary">mdi-home-city-outline</v-icon>
+          <span class="text-subtitle-1 font-weight-bold">Select Layout</span>
+          <v-spacer />
+          <v-btn icon="mdi-close" variant="text" size="small" @click="isActive.value = false" />
+        </v-card-title>
+        <v-divider />
+        <v-card-text class="pa-4">
+          <SelectLayout variant="compact" :layout-id="layoutId" @selected="handleSelect" />
+          <v-divider class="my-4" />
+          <AddLayout />
+        </v-card-text>
+      </v-card>
     </template>
   </v-dialog>
 </template>
