@@ -8,13 +8,8 @@ import ThrottleList from '@/throttle/ThrottleList.vue'
 </template>
 <style scoped>
 .throttle-list-page {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  height: 100%;
-  overflow: hidden;
   position: absolute;
   inset: 0;
+  overflow: hidden;
 }
 </style>
