@@ -23,6 +23,9 @@ Support configuring DCC-EX track outputs (MAIN, PROG, DC, DCX, BOOST, etc.) acro
 - Live track reconfiguration (restart required)
 - CV programming integration (PROG track just gets configured)
 - Historical current graphs
+- Throttle app changes (multi-output awareness deferred)
+- Monitor app changes (track output state in monitoring dashboard deferred)
+- Firestore composite indexes for `powerDistricts` queries (simple collection reads only)
 
 ---
 
@@ -72,42 +75,128 @@ interface PowerDistrict {
 }
 ```
 
+### Loco type extension
+
+```typescript
+interface Loco {
+  // ... existing fields (address, name, id, consist, functions, etc.)
+  isDcTrack?: boolean   // True for auto-created DC track locos
+}
+```
+
+Auto-created DC locos display normally in the Throttle app roster. The `isDcTrack` flag is informational — no special UI treatment in this phase.
+
+### "Device 1" definition
+
+"Device 1" means the **first `dcc-ex` type device by document ID** when devices are loaded from Firestore (`layouts/{layoutId}/devices/` sorted by ID). This is deterministic and doesn't depend on `order` or creation time. The Cloud UI should display which device is considered "Device 1" in the track output config.
+
 ### Constraints
 
-- **PROG restriction:** Only Device 1, Output B can be set to `PROG` mode. UI disables the PROG option on all other outputs with a note: *"Programming track is only supported on the first command station's second output (B)"*
+- **PROG restriction:** Only Device 1 (first DCC-EX device by document ID), Output B can be set to `PROG` mode. UI disables the PROG option on all other outputs with a note: *"Programming track is only supported on the first command station's second output (B)"*
 - **DC/DCX requires cabAddress:** Must be 1-10239. Server skips output if address is 0 or out of range.
 - **BOOST modes are ESP32-only:** UI can note this. Could be gated by `device.config.platform` in the future.
 - **One PROG max:** Only one output across the entire layout can be PROG.
+
+### Migration from `layout.dccEx`
+
+The existing `Layout.dccEx` fields (`trackA`, `trackB`, `power`, `isConnected`, `lastConnected`) are **deprecated** but retained for backward compatibility during the transition:
+
+- **Server writes:** New track output state goes to `device.trackOutputs`. The server also continues writing to `layout.dccEx.power` for the global power state so existing UI components don't break.
+- **Server reads:** Track config is read from `device.trackOutputs` only. The old `layout.dccEx.trackA/trackB` fields are no longer read.
+- **UI migration:** `CommandStationTracks.vue` switches from reading `layout.dccEx.trackA/trackB` to reading `device.trackOutputs` across all devices. Old fields are left in Firestore but ignored.
+- **Cleanup:** A future PR removes the deprecated `layout.dccEx.trackA/trackB` fields and the server code that writes to them.
+
+### Firestore security rules
+
+Add rules for the new `powerDistricts` subcollection in `firestore.rules`:
+
+```
+match /layouts/{layoutId}/powerDistricts/{districtId} {
+  allow read: if request.auth != null;
+  allow write: if isOwner(layoutId);
+}
+```
+
+This follows the same pattern as other layout subcollections (locos, turnouts, etc.).
 
 ---
 
 ## Server: Startup Config + Unified Dispatch
 
+### Architecture: Single-port to multi-port refactor
+
+**Current state:** `dcc.ts` manages a single `com: SerialCom` variable. All commands (`sendSpeed`, `sendTurnout`, etc.) go through this one port. `layout.ts` has `_connections` which already tracks multiple devices, but `dcc.setConnection(port)` only stores one port.
+
+**New architecture:**
+
+1. **`dcc.ts` becomes a multi-port broadcaster.** Replace the single `com` variable with a `Map<string, SerialCom>` keyed by device ID:
+   ```typescript
+   const dccDevices: Map<string, SerialCom> = new Map()
+
+   // Called from layout.ts connectUsbDevice() for each dcc-ex device
+   function registerDevice(deviceId: string, port: SerialPort): void
+   function unregisterDevice(deviceId: string): void
+   ```
+
+2. **`send()` becomes `broadcastToAll()` + `sendToDevice()`.** The existing `send()` function is refactored:
+   - `broadcastToAll(cmd)` — iterates all entries in `dccDevices` and writes to each port. Used for throttle, function, turnout, accessory commands.
+   - `sendToDevice(deviceId, cmd)` — writes to a specific device's port. Used for track config (`<=`), per-output power (`<1 A>`), and PROG commands.
+
+3. **`layout.ts` connectUsbDevice()** calls `dcc.registerDevice(deviceId, port)` instead of `dcc.setConnection(port)` for `dcc-ex` type devices. The old `setConnection` is removed.
+
+4. **Fan-out happens in `dcc.ts`.** The `handleMessage` switch cases for `throttle`, `function`, `turnout`, `output` call `broadcastToAll()`. The new `trackPower` action calls `sendToDevice()`.
+
+5. **`handleSerialMessage` in `layout.ts`** already receives the `device` parameter. It now writes track state to `device.trackOutputs` in Firestore (per-device) instead of `layout.dccEx.trackA/trackB`.
+
+### RTDB command format for device-targeted commands
+
+The existing RTDB command format `{ action, payload }` is extended. For device-targeted commands, the payload includes a `deviceId` field:
+
+```typescript
+// Existing broadcast commands (no change)
+{ action: 'throttle', payload: '{"address":3,"speed":50}' }
+{ action: 'power', payload: '"1"' }           // Global power — broadcast to all
+
+// New device-targeted commands
+{ action: 'trackPower', payload: '{"deviceId":"cs1","output":"A","power":true}' }
+```
+
+The `handleMessage` switch in `dcc.ts` gets a new `trackPower` case that extracts `deviceId` from the payload and calls `sendToDevice()`.
+
+**`isPowerCommand` and `writePowerToFirestore`** are updated:
+- `isPowerCommand` regex extended to match `1 A`, `0 B` etc. (per-output form)
+- `writePowerToFirestore` updated to write per-device per-output power state to `device.trackOutputs.{output}.power` instead of `layout.dccEx.power`
+- Global power commands (`<1>`, `<0>`) still write to `layout.dccEx.power` for backward compat
+
 ### Startup routine
 
-When the server connects to a DCC-EX device:
+Track configuration runs **on each device connect** (inside `connectUsbDevice` in `layout.ts`), not on a separate server-start event. The flow for each DCC-EX device:
 
-1. Read `device.trackOutputs` from Firestore
-2. For each configured output, send `<= {output} {mode}>` (e.g., `<= A MAIN>`, `<= B DC 45>`)
-3. Send `<=>` to query and verify the configuration
-4. Parse responses and sync confirmed state back to Firestore
-5. If a DC/DCX output exists, check/create the auto-loco (see below)
+1. Serial port connects successfully
+2. `dcc.registerDevice(deviceId, port)` stores the port
+3. Read `device.trackOutputs` from Firestore (via Admin SDK)
+4. For each configured output, call `dcc.sendToDevice(deviceId, '= A MAIN')` etc.
+5. Send `<=>` to query config — **best-effort verification** (DCC-EX serial is async with no request/response pairing; the server parses whatever comes back via `handleSerialMessage` and syncs to Firestore, but does not block waiting for responses)
+6. Check/create auto-locos for DC/DCX outputs
 
 If a device has no `trackOutputs` configured, the server skips track configuration and DCC-EX uses its defaults (typically A=MAIN, B=PROG).
 
 ### Unified throttle broadcasting
 
-| Command type | Routing |
-|-------------|---------|
-| Throttle (speed/direction) | **All** connected DCC-EX devices |
-| Function (F0-F28) | **All** connected DCC-EX devices |
-| Accessory/turnout | **All** connected DCC-EX devices |
-| Track power (`<1 A>` / `<0 A>`) | **Specific device** that owns the output |
-| PROG commands (CV read/write) | **Device 1 only** |
+| Command type | Routing | Method |
+|-------------|---------|--------|
+| Throttle (speed/direction) | **All** connected DCC-EX devices | `broadcastToAll()` |
+| Function (F0-F28) | **All** connected DCC-EX devices | `broadcastToAll()` |
+| Accessory/turnout | **All** connected DCC-EX devices | `broadcastToAll()` |
+| Global power (`<1>` / `<0>`) | **All** connected DCC-EX devices | `broadcastToAll()` |
+| Track power (`<1 A>` / `<0 A>`) | **Specific device** | `sendToDevice(deviceId)` |
+| PROG commands (CV read/write) | **Device 1 only** | `sendToDevice(device1Id)` |
 
 ### Power state sync
 
-Server parses `<p1 A>` / `<p0 A>` responses from each device and writes `trackOutput.power` back to Firestore. This keeps the UI in sync with actual hardware state during operation.
+Server parses `<p1 A>` / `<p0 A>` responses from each device in `handleSerialMessage` (which receives the `device` parameter) and writes `device.trackOutputs.{output}.power` back to Firestore via Admin SDK.
+
+**`<p2>` (mixed power state):** Ignored. The server relies on per-output `<p1 A>` / `<p0 B>` messages for granular state. The `<p2>` global response is informational only and doesn't trigger any Firestore writes.
 
 ### DC auto-loco creation
 
@@ -153,7 +242,7 @@ Track output configuration is **not applied live**. When the user changes track 
 - List of named districts with color badges
 - Each district shows: **Name** | **Device name** | **Output letter** | **Mode** (read from referenced device) | **Power state** (live 🟢/🔴)
 - **Add district** — name field + device dropdown + output dropdown
-- **Power toggle** — sends `<1 {output}>` / `<0 {output}>` to the specific device via RTDB
+- **Power toggle** — writes `{ action: 'trackPower', payload: { deviceId, output, power } }` to RTDB `dccCommands/{layoutId}`. Server routes to the specific device.
 - **Delete district** — removes the mapping (doesn't affect the device's track config)
 
 ### Updated CommandStationTracks.vue
@@ -166,15 +255,16 @@ Evolve the existing component to show **all outputs across all connected devices
 
 ### `@repo/dccex` — Track output config + commands
 
-- `types.ts` — Add `TrackOutput`, `TrackMode` types
+- `types.ts` — Add `TrackOutput`, `TrackMode`, `TrackOutputLetter` types
 - `constants.ts` — Track mode options, labels, validation rules (PROG constraint, cabAddress rules, ESP32 modes)
-- `useTrackOutputs.ts` — Composable for reading/writing track outputs per device (VueFire bindings to `device.trackOutputs`)
-- `useDcc.ts` — Extend with:
-  - `configureTrackOutput(output, mode, cabAddress?)` — builds and sends `<= A MAIN>` command
-  - `setTrackPower(output, power)` — sends `<1 A>` / `<0 A>`
-  - `queryTrackConfig()` — sends `<=>`
-  - `parseTrackState(response)` — parses `<= A MAIN>` responses
-  - `parsePowerState(response)` — parses `<p1 A>` responses
+- `useTrackOutputs.ts` — **Client-side only** (Vue composable). VueFire bindings to `device.trackOutputs` for reactive UI updates. The server reads `device.trackOutputs` directly via Firebase Admin SDK — it does not use this composable.
+- `parsers.ts` — Pure functions for parsing DCC-EX responses (shared between client debug tools and server):
+  - `parseTrackState(response)` — parses `= A MAIN` → `{ output: 'A', mode: 'MAIN' }`
+  - `parsePowerState(response)` — parses `p1 A` → `{ output: 'A', power: true }`
+- `commands.ts` — Pure functions for building DCC-EX command strings:
+  - `buildTrackConfigCommand(output, mode, cabAddress?)` — returns `= A MAIN` or `= B DC 45`
+  - `buildTrackPowerCommand(output, power)` — returns `1 A` or `0 A`
+  - `buildQueryTracksCommand()` — returns `=`
 
 ### `@repo/modules` — Power districts
 
@@ -190,12 +280,22 @@ Evolve the existing component to show **all outputs across all connected devices
 ### `apps/server` — Server module
 
 - New `src/modules/trackOutputs.ts`:
-  - On device connect: read Firestore config → send track commands → verify with `<=>`
-  - Parse `<p...>` responses → write power state to Firestore
-  - DC auto-loco creation
+  - `configureDevice(deviceId)` — reads Firestore config, sends track commands, verifies with `<=>`
+  - `handleTrackPower(deviceId, output, power)` — sends per-output power command
+  - `createDcLocos(deviceId)` — checks/creates auto-locos for DC outputs
+  - Called from `layout.ts` `connectUsbDevice()` after `dcc.registerDevice()`
 - Update `src/lib/dcc.ts`:
-  - Broadcast throttle/function commands to all connected DCC-EX devices
-  - Route power commands to specific devices
+  - Replace single `com` with `dccDevices: Map<string, SerialCom>`
+  - Add `registerDevice()`, `unregisterDevice()`, `broadcastToAll()`, `sendToDevice()`
+  - Remove `setConnection()` (replaced by `registerDevice()`)
+  - Add `trackPower` case to `handleMessage` switch
+  - Extend `isPowerCommand` regex to match per-output form (`1 A`, `0 B`)
+  - Add `VALID_ACTIONS`: `'trackPower'`
+- Update `src/modules/layout.ts`:
+  - `connectUsbDevice()`: call `dcc.registerDevice()` then `trackOutputs.configureDevice()`
+  - `handleSerialMessage()`: parse track state → write to `device.trackOutputs` (per-device) instead of `layout.dccEx.trackA/trackB`
+  - `disconnectDevice()`: call `dcc.unregisterDevice()`
+- Update `dccLog` entries: Add optional `deviceId` field to log entries so multi-device commands are traceable: `{ type, message, deviceId?, timestamp }`
 
 ### `apps/cloud` — Cloud app UI
 
