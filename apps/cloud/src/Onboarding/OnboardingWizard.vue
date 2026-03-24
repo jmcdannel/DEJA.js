@@ -108,6 +108,16 @@ const steps = computed(() => [
   { value: 3, title: 'Register Layout', icon: 'mdi-map-marker-path', disabled: false },
   { value: 4, title: 'Install', icon: 'mdi-download-outline', disabled: false },
 ])
+
+// Map wizard currentStep (0-4) to DejaTracker activeStep (0-4)
+// Wizard: 0=Account, 1=Plan, 2=Payment, 3=Layout, 4=Install
+// Tracker: 0=SignUp, 1=SelectPlan, 2=CreateLayout, 3=Install, 4=Drive
+const trackerStep = computed(() => {
+  if (currentStep.value <= 1) return 1  // Plan step
+  if (currentStep.value === 2) return 1 // Payment = still on plan
+  if (currentStep.value === 3) return 2 // Layout
+  return 3                               // Install
+})
 </script>
 
 <template>
@@ -120,7 +130,7 @@ const steps = computed(() => [
     </div>
 
     <DejaTracker
-      :active-step="currentStep"
+      :active-step="trackerStep"
       :show-status="currentStep === 4"
       class="mb-8"
     />
