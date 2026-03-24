@@ -4,6 +4,7 @@ import type { FeatureStage, FeatureName, UserRole } from './types'
 export const STAGE_ACCESS: Record<UserRole, FeatureStage[]> = {
   admin: ['dev', 'alpha', 'beta', 'ga'],
   user: ['ga'],
+  demo: ['dev', 'alpha', 'beta', 'ga'],
 }
 
 /**
