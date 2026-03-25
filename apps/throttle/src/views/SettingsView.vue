@@ -14,6 +14,7 @@ import { useDisplay } from 'vuetify'
 import { wiThrottleService } from '@/services/WiThrottleService'
 import { useServerDiscovery } from '@/composables/useServerDiscovery'
 import { useThrottleSettings } from '@/throttle/useThrottleSettings'
+import { useQuickMenu } from '@/quick-menu/useQuickMenu'
 
 const user = useCurrentUser()
 const { plan, status, isTrialing, trialDaysLeft, subscription } = useSubscription()
@@ -24,6 +25,8 @@ const {
   variant, showFunctions, showSpeedometer, showConsist,
   setVariant, setShowFunctions, setShowSpeedometer, setShowConsist,
 } = useThrottleSettings()
+
+const { quickMenuVisible } = useQuickMenu()
 
 const { isScanning, discoveredServers, startScan, isAvailable, checkAvailability } = useServerDiscovery()
 onMounted(() => { checkAvailability() })
@@ -134,7 +137,7 @@ const sections = [
   { id: 'account', label: 'Account', icon: 'mdi-account-circle-outline' },
   { id: 'billing', label: 'Billing', icon: 'mdi-credit-card-outline' },
   { id: 'appearance', label: 'Appearance', icon: 'mdi-palette-outline' },
-  { id: 'throttle', label: 'Throttle', icon: 'mdi-speedometer' },
+  { id: 'throttle', label: 'Throttle & Quick Menu', icon: 'mdi-speedometer' },
   { id: 'connection', label: 'Connection', icon: 'mdi-server-network' },
   { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'favorites', label: 'Favorites', icon: 'mdi-star-outline' },
@@ -290,6 +293,15 @@ const backgroundPages = [
             </div>
             <div class="settings-row__value">
               <v-switch :model-value="showConsist" @update:model-value="(v) => setShowConsist(!!v)" color="primary" density="compact" hide-details />
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row__label">
+              <span class="settings-row__name">Quick Menu</span>
+              <span class="settings-row__desc">Show draggable quick-access menu for throttles and cloud navigation</span>
+            </div>
+            <div class="settings-row__value">
+              <v-switch v-model="quickMenuVisible" color="primary" density="compact" hide-details />
             </div>
           </div>
         </div>

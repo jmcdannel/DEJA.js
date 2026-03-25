@@ -10,6 +10,7 @@ import ConnectionStatusBanner from '@/core/ConnectionStatusBanner.vue'
 import useMenu from '@/core/Menu/useMenu'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { usePageSwipe } from '@/composables/usePageSwipe'
+import QuickMenu from '@/quick-menu/QuickMenu.vue'
 import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import { wiThrottleService } from '@/services/WiThrottleService'
 import { watch, onMounted, onUnmounted } from 'vue'
@@ -176,6 +177,7 @@ const throttleDefaults: AppBackgroundPrefs = {
           </div>
         </v-main>
         <Footer v-if="!isFullscreen" />
+        <QuickMenu v-if="!isFullscreen" />
         <ConnectionStatusBanner v-if="!isFullscreen" />
         <NotificationContainer />
       </PageBackground>
