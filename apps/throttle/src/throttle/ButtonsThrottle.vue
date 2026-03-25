@@ -8,7 +8,7 @@ import Speedometer from '@/throttle/Speedometer.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
 import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
-import { ConsistIndicator, LocoAvatar, FunctionsSpeedDial } from '@repo/ui'
+import { Consist, LocoAvatar, MiniConsist, FunctionsSpeedDial } from '@repo/ui'
 import { useThrottle } from '@/throttle/useThrottle'
 
 const props = defineProps({
@@ -52,13 +52,14 @@ async function clearLoco() {
         </div>
       </template>
       <template v-slot:right>
+        <v-btn color="red" variant="tonal" size="small" class="text-none mr-2" prepend-icon="mdi-alert-octagon" @click="handleStop">E-Stop</v-btn>
         <ThrottleActionMenu @park="clearLoco" />
       </template>
     </ThrottleHeader>
 
-    <section class="w-full h-full flex flex-col sm:flex-row justify-around flex-grow relative z-10">
+    <section class="w-full h-full flex flex-col sm:flex-row sm:items-center justify-around flex-grow relative z-10">
       <!-- Column 1: Speedometer + Consist + Logo (desktop) -->
-      <section v-if="loco" class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-center flex-1 overflow-visible">
+      <section v-if="loco" class="hidden sm:flex flex-col gap-4 mb-2 items-center justify-center flex-1 overflow-visible px-4">
         <Speedometer v-if="showSpeedometer" :speed="currentSpeed" :address="address" :size="200" :show-label="false" />
         <ConsistIndicator v-if="showConsist" :loco="loco" />
         <RoadnameLogo :roadname="loco.meta?.roadname" size="xl" />
@@ -72,7 +73,7 @@ async function clearLoco() {
       </section>
 
       <!-- Column 3: Speed display + buttons -->
-      <section class="flex flex-col gap-2 mb-2 items-center justify-between flex-1">
+      <section class="flex flex-col gap-2 mb-2 items-center justify-center flex-1" style="max-height: 60vh;">
         <CurrentSpeed :speed="currentSpeed" />
         <ThrottleButtonControls @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" />
       </section>

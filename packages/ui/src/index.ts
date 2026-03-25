@@ -1,4 +1,5 @@
 export { default as AppHeader } from './AppHeader.vue'
+export { default as ConnectionStatus } from './ConnectionStatus.vue'
 export { default as ThrottleLaunchQR } from './ThrottleLaunchQR.vue'
 export { default as Logo } from './Logo.vue'
 export { default as SplashPage } from './SplashPage.vue'

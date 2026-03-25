@@ -9,6 +9,7 @@ import UserProfile from './UserProfile.vue'
 import TrackPower from './TrackPower.vue'
 import Power from './Power.vue'
 import EmergencyStop from './EmergencyStop.vue'
+import ConnectionStatus from './ConnectionStatus.vue'
 import { useLayout, useServerStatus } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
 import { createLogger } from '@repo/utils'
@@ -30,9 +31,6 @@ const props = defineProps<{
   showLayoutPower?: boolean
   showEmergencyStop?: boolean
   showUserProfile?: boolean
-  showDeviceStatus?: boolean
-  showDeviceStatusLabel?: boolean
-  deviceStatusCompact?: boolean
   color?: string
   dark?: boolean
   layoutPowerState?: boolean
@@ -112,9 +110,6 @@ function handleDrawerToggle() {
   emit('drawerToggle', !(props.drawer ?? false))
 }
 
-const allConnected = computed(() => devices.value.every(device => device.isConnected))
-const hasDevices = computed(() => devices.value.length > 0)
-const connectedDevicesCount = computed(() => devices.value.filter(d => d.isConnected).length)
 const dccexConnected = computed(() => {
   if (wiThrottleConnected.value) return true
   const dccexDevice = devices.value.find(device => device.type === 'dcc-ex')
@@ -143,9 +138,6 @@ const defaultProps = {
   showLayoutPower: true,
   showEmergencyStop: true,
   showUserProfile: true,
-  showDeviceStatus: true,
-  showDeviceStatusLabel: true,
-  deviceStatusCompact: false,
   dark: true,
   layoutPowerState: false,
 }
@@ -171,25 +163,16 @@ const defaultProps = {
     <slot></slot>
     <template v-slot:append>
       <!-- User Profile - always on the far right --> 
-      <template v-if="mdAndUp">
-        <v-chip v-if="user" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-home" :color="layoutId ? 'success' : 'error'"
-          variant="elevated" @click="router.push('/connect')">
-          <span class="font-medium">{{ currentLayout?.name || 'No Layout' }}</span>
-        </v-chip>
-        <v-chip v-if="showDeviceStatus && hasDevices" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-devices"
-          :color="allConnected ? 'success' : 'warning'" variant="elevated" @click="router.push('/connect')">
-          <span v-if="showDeviceStatusLabel" class="font-medium">
-            {{ connectedDevicesCount }}/{{ devices.length }}
-          </span>
-        </v-chip>
-        <v-chip v-if="user" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-server-network"
-          :color="serverStatus?.online ? 'success' : 'error'" variant="elevated"
-          @click="router.push('/connect')">
-          <span class="font-medium hidden sm:inline-block">Server</span>
-        </v-chip>
-
-        <v-spacer class="ma-2"></v-spacer>
-      </template>
+      <ConnectionStatus
+        v-if="user"
+        class="ma-1"
+        :layout-name="currentLayout?.name"
+        :layout-id="layoutId"
+        :server-status="serverStatus"
+        :devices="devices"
+        @navigate="router.push('/connect')"
+      />
+      <v-spacer v-if="mdAndUp" class="ma-2" />
       <UserProfile v-if="showUserProfile !== false && user" class="mx-2" />
       <template v-if="layoutId && user">
         <TrackPower class="ma-1" :power-state="effectiveTrackPower" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
@@ -208,6 +191,8 @@ const defaultProps = {
 
     </template>
   </v-app-bar> -->
+
+
 
 </template>
 

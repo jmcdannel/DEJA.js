@@ -60,7 +60,7 @@ const headlightIcon = (state: string) => {
 
 const brakeGradient = computed(() => {
   const pct = (brakeLevel.value / 10) * 100
-  return `linear-gradient(90deg, #eab308 0%, #ef4444 ${pct}%, #1a202c ${pct}%, #1a202c 100%)`
+  return `linear-gradient(90deg, #eab308 0%, #ef4444 ${pct}%, #374151 ${pct}%, #374151 100%)`
 })
 
 // Sync localNotch from external speed changes
@@ -217,7 +217,7 @@ onBeforeUnmount(() => clearInterval(ledInterval))
       </template>
     </ThrottleHeader>
 
-    <section class="w-full h-full flex flex-col sm:flex-row justify-center items-start gap-4 flex-grow relative z-10">
+    <section class="w-full h-full flex flex-col sm:flex-row justify-center sm:items-center gap-4 flex-grow relative z-10">
       <!-- Left: Speedometer + Logo (desktop only) -->
       <section v-if="loco" class="hidden sm:flex flex-col gap-4 items-center justify-center flex-1">
         <Speedometer v-if="showSpeedometer" :speed="currentSpeed" :address="address" :size="200" :show-label="false" />
@@ -233,16 +233,18 @@ onBeforeUnmount(() => clearInterval(ledInterval))
           <!-- Status LED -->
           <div class="status-led" :class="{ 'led-on': statusLedOn }"></div>
           <!-- Horn icon -->
-          <v-icon
-            size="32"
-            class="horn-icon select-none"
-            :class="{ 'horn-active': hornActive }"
-            @pointerdown="hornDown"
-            @pointerup="hornUp"
-            @pointercancel="(e) => hornUp(e as PointerEvent)"
-            @pointerleave="(e) => hornUp(e as PointerEvent)"
-            style="cursor: pointer; touch-action: none;"
-          >mdi-bugle</v-icon>
+          <div class="horn-container">
+            <v-icon
+              size="32"
+              class="horn-icon select-none"
+              :class="{ 'horn-active': hornActive }"
+              @pointerdown="hornDown"
+              @pointerup="hornUp"
+              @pointercancel="(e) => hornUp(e as PointerEvent)"
+              @pointerleave="(e) => hornUp(e as PointerEvent)"
+              style="cursor: pointer; touch-action: none;"
+            >mdi-bugle</v-icon>
+          </div>
         </div>
 
         <!-- 2. LCD Screen -->
@@ -268,8 +270,13 @@ onBeforeUnmount(() => clearInterval(ledInterval))
           </div>
         </div>
 
-        <!-- 3. Speed Buttons (+5, +1, -1, -5) -->
+        <!-- 3. Speed Buttons: Row 1: -5, +5 | Row 2: -1, +1 -->
         <div class="nav-buttons-grid">
+          <button
+            class="nav-btn"
+            :class="{ 'nav-btn-active': pressedButton === 'down5' }"
+            @click="handleDown5Btn"
+          >-5</button>
           <button
             class="nav-btn"
             :class="{ 'nav-btn-active': pressedButton === 'up5' }"
@@ -277,19 +284,14 @@ onBeforeUnmount(() => clearInterval(ledInterval))
           >+5</button>
           <button
             class="nav-btn"
-            :class="{ 'nav-btn-active': pressedButton === 'up' }"
-            @click="handleUpBtn"
-          >+1</button>
-          <button
-            class="nav-btn"
             :class="{ 'nav-btn-active': pressedButton === 'down' }"
             @click="handleDownBtn"
           >-1</button>
           <button
             class="nav-btn"
-            :class="{ 'nav-btn-active': pressedButton === 'down5' }"
-            @click="handleDown5Btn"
-          >-5</button>
+            :class="{ 'nav-btn-active': pressedButton === 'up' }"
+            @click="handleUpBtn"
+          >+1</button>
         </div>
 
         <!-- 4. Notch Markings -->
@@ -298,7 +300,7 @@ onBeforeUnmount(() => clearInterval(ledInterval))
             v-for="(label, i) in NOTCH_LABELS"
             :key="label"
             class="notch-label"
-            :class="{ 'notch-active': localNotch === i }"
+            :class="{ 'notch-active': i <= localNotch && i > 0, 'notch-current': localNotch === i }"
           >{{ label }}</span>
         </div>
 
@@ -319,7 +321,7 @@ onBeforeUnmount(() => clearInterval(ledInterval))
 
         <!-- 6. Reverser -->
         <div class="reverser-area">
-          <span class="reverser-end-label" :class="{ 'reverser-active-label': localDirection === 'REV' }">REV</span>
+          <span class="reverser-end-label" :class="localDirection === 'REV' ? 'text-red-400' : 'opacity-40'">REV</span>
           <v-switch
             :model-value="localDirection === 'FWD'"
             @update:model-value="toggleDirection"
@@ -327,20 +329,23 @@ onBeforeUnmount(() => clearInterval(ledInterval))
             color="blue"
             hide-details
             density="compact"
+            inset
             class="reverser-switch"
           />
-          <span class="reverser-end-label" :class="{ 'reverser-active-label': localDirection === 'FWD' }">FWD</span>
+          <span class="reverser-end-label" :class="localDirection === 'FWD' ? 'text-green-400' : 'opacity-40'">FWD</span>
         </div>
 
         <!-- 7. Bell Icon -->
         <div class="bell-area">
-          <v-icon
-            size="32"
-            class="bell-icon select-none"
-            :class="{ 'bell-icon-active': bellActive }"
-            @click="toggleBell"
-            style="cursor: pointer;"
-          >mdi-bell</v-icon>
+          <div class="bell-container">
+            <v-icon
+              size="32"
+              class="bell-icon select-none"
+              :class="{ 'bell-icon-active': bellActive }"
+              @click="toggleBell"
+              style="cursor: pointer;"
+            >mdi-bell</v-icon>
+          </div>
         </div>
 
         <!-- 8. Brake Slider -->
@@ -362,13 +367,13 @@ onBeforeUnmount(() => clearInterval(ledInterval))
         <div class="headlight-knobs">
           <div class="knob-group">
             <span class="knob-label">REAR</span>
-            <button class="headlight-knob" @click="cycleRearHeadlight">
+            <button class="headlight-knob" :class="{ 'knob-on': rearHeadlight !== 'OFF' }" @click="cycleRearHeadlight">
               <v-icon size="16" class="knob-value">{{ headlightIcon(rearHeadlight) }}</v-icon>
             </button>
           </div>
           <div class="knob-group">
             <span class="knob-label">FRONT</span>
-            <button class="headlight-knob" @click="cycleFrontHeadlight">
+            <button class="headlight-knob" :class="{ 'knob-on': frontHeadlight !== 'OFF' }" @click="cycleFrontHeadlight">
               <v-icon size="16" class="knob-value">{{ headlightIcon(frontHeadlight) }}</v-icon>
             </button>
           </div>
@@ -457,12 +462,14 @@ onBeforeUnmount(() => clearInterval(ledInterval))
 
 /* ── Horn Icon ────────────────────────────────────────────── */
 .horn-icon {
-  color: #64748b;
+  color: #d97706;
+  filter: drop-shadow(0 0 3px rgba(217, 119, 6, 0.3));
   transition: all 0.15s ease;
 }
 .horn-icon.horn-active {
   color: #fbbf24;
-  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+  filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.6));
+  animation: shake 0.3s ease-in-out infinite;
 }
 
 /* ── LCD Screen ───────────────────────────────────────────── */
@@ -621,7 +628,12 @@ onBeforeUnmount(() => clearInterval(ledInterval))
 
 .notch-label.notch-active {
   color: #4ade80;
-  text-shadow: 0 0 4px rgba(74, 222, 128, 0.4);
+}
+
+.notch-label.notch-current {
+  color: #4ade80;
+  text-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+  font-size: 12px;
 }
 
 /* ── Throttle Slider ──────────────────────────────────────── */
@@ -689,20 +701,16 @@ onBeforeUnmount(() => clearInterval(ledInterval))
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 6px 24px;
+  padding: 12px 24px;
   width: 100%;
 }
 
 .reverser-end-label {
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 800;
   color: #475569;
   letter-spacing: 1px;
   transition: color 0.2s ease;
-}
-.reverser-end-label.reverser-active-label {
-  color: #93c5fd;
-  text-shadow: 0 0 4px rgba(147, 197, 253, 0.3);
 }
 
 /* ── Bell Icon ────────────────────────────────────────────── */
@@ -714,12 +722,14 @@ onBeforeUnmount(() => clearInterval(ledInterval))
 }
 
 .bell-icon {
-  color: #64748b;
+  color: #d97706;
+  filter: drop-shadow(0 0 3px rgba(217, 119, 6, 0.3));
   transition: all 0.15s ease;
 }
 .bell-icon.bell-icon-active {
   color: #fbbf24;
-  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+  filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.6));
+  animation: shake 0.3s ease-in-out infinite;
 }
 
 /* ── Brake Slider ─────────────────────────────────────────── */
@@ -846,6 +856,18 @@ onBeforeUnmount(() => clearInterval(ledInterval))
     inset 0 2px 4px rgba(0,0,0,0.3);
 }
 
+.headlight-knob.knob-on {
+  border-color: #d97706;
+  box-shadow:
+    0 0 10px 2px rgba(217, 119, 6, 0.3),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.headlight-knob.knob-on .knob-value {
+  color: #fbbf24;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
+}
+
 .knob-value {
   font-size: 8px;
   font-weight: 700;
@@ -861,5 +883,41 @@ onBeforeUnmount(() => clearInterval(ledInterval))
   background: linear-gradient(180deg, #374151 0%, #1f2937 100%);
   border-radius: 0 0 12px 12px;
   margin: 4px auto 0;
+}
+
+/* ── Fixed-size icon containers (prevent shake layout jumps) */
+.horn-container,
+.bell-container {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Shake animation for bell/horn ───────────────────────── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+/* ── Reverser switch lever styling ───────────────────────── */
+.reverser-switch :deep(.v-switch__track) {
+  height: 40px;
+  width: 80px;
+  border-radius: 20px;
+  opacity: 1;
+  background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+  border: 2px solid #475569;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+}
+.reverser-switch :deep(.v-switch__thumb) {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 </style>
