@@ -134,8 +134,6 @@ const throttleDefaults: AppBackgroundPrefs = {
           :drawer="drawer"
           :show-layout-power="true"
           :show-emergency-stop="true"
-          :show-device-status="true"
-          :show-device-status-label="true"
           :show-user-profile="true"
           @drawer-toggle="drawer = !drawer"
         />
