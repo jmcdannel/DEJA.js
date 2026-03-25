@@ -68,3 +68,6 @@ export * from './powerDistricts/types'
 
 // Features
 export * from './features'
+
+// Quick Menu
+export * from './quick-menu'
