@@ -46,7 +46,8 @@ const { mdAndUp } = useDisplay()
 
 const { serverStatus } = useServerStatus()
 
-const layouts = getLayouts(user.value?.email)
+const email = computed(() => user.value?.email ?? null)
+const layouts = getLayouts(email)
 const devices = getDevices()
 
 const wiThrottlePower = ref<0 | 1 | 2>(2) // 0=off, 1=on, 2=unknown
@@ -169,7 +170,7 @@ const defaultProps = {
         :layout-id="layoutId"
         :server-status="serverStatus"
         :devices="devices"
-        @navigate="router.push({ name: 'Devices' })"
+        @navigate="router.push('/connect')"
       />
       <v-spacer v-if="mdAndUp" class="ma-2" />
       <UserProfile v-if="showUserProfile !== false && user" class="mx-2" />
@@ -190,6 +191,7 @@ const defaultProps = {
 
     </template>
   </v-app-bar> -->
+
 
 
 </template>
