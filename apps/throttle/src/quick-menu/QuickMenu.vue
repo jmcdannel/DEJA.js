@@ -7,6 +7,7 @@ import { useQuickMenu, SUBSCREEN_CONFIGS, GROUP_SCREEN_META } from './useQuickMe
 import type { EntityScreen } from './useQuickMenu'
 import { useQuickMenuData } from './useQuickMenuData'
 import type { GroupItem } from './useQuickMenuData'
+import type { Ref } from 'vue'
 import { useFeatureFlags } from '@repo/modules'
 import QuickMenuThrottles from './QuickMenuThrottles.vue'
 import QuickMenuFavorites from './QuickMenuFavorites.vue'
@@ -51,20 +52,20 @@ const {
 const { isEnabled } = useFeatureFlags()
 const showFavorites = computed(() => isEnabled('quickMenuFavorites'))
 
-// Map group screen keys to their reactive data
-const groupData: Record<string, () => GroupItem[]> = {
-  'locos:by-roadname':  () => locosByRoadname.value,
-  'effects:by-device':  () => effectsByDevice.value,
-  'effects:by-type':    () => effectsByType.value,
-  'effects:by-tag':     () => effectsByTag.value,
-  'routes:by-waypoint': () => routesByWaypoint.value,
-  'turnouts:by-device': () => turnoutsByDevice.value,
-  'turnouts:by-tag':    () => turnoutsByTag.value,
-  'turnouts:labels':    () => turnoutLabels.value,
-  'signals:by-device':  () => signalsByDevice.value,
-  'signals:by-aspect':  () => signalsByAspect.value,
-  'sensors:by-device':  () => sensorsByDevice.value,
-  'sensors:automations':() => sensorAutomations.value,
+// Map group screen keys to their reactive computed refs
+const groupData: Record<string, Ref<GroupItem[]>> = {
+  'locos:by-roadname':  locosByRoadname,
+  'effects:by-device':  effectsByDevice,
+  'effects:by-type':    effectsByType,
+  'effects:by-tag':     effectsByTag,
+  'routes:by-waypoint': routesByWaypoint,
+  'turnouts:by-device': turnoutsByDevice,
+  'turnouts:by-tag':    turnoutsByTag,
+  'turnouts:labels':    turnoutLabels,
+  'signals:by-device':  signalsByDevice,
+  'signals:by-aspect':  signalsByAspect,
+  'sensors:by-device':  sensorsByDevice,
+  'sensors:automations':sensorAutomations,
 }
 
 // Screen type detection
@@ -78,8 +79,8 @@ const groupScreenMeta = computed(() => {
 })
 
 const groupScreenData = computed(() => {
-  const fn = groupData[currentScreen.value]
-  return fn ? fn() : []
+  const ref = groupData[currentScreen.value]
+  return ref ? ref.value : []
 })
 
 // Item list screen: pattern is "entity:filter-type:filter-value" or "entity:all"

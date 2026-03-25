@@ -258,7 +258,6 @@ export function useQuickMenuData() {
   async function toggleItem(entity: string, id: string, newState: boolean) {
     switch (entity) {
       case 'effects': {
-        // runEffect writes efx.state as-is, so pass the NEW desired state
         await efx.runEffect({ id, state: newState } as Effect)
         break
       }

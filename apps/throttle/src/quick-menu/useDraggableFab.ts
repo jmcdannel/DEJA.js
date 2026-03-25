@@ -17,6 +17,7 @@ export function useDraggableFab() {
   let startPos = { x: 0, y: 0 }
   let moved = false
   let tracking = false
+  let snapFrameId: number | null = null
 
   function snapToEdge(x: number, y: number) {
     const snapX = x < vw.value / 2 ? MARGIN : vw.value - FAB_SIZE - MARGIN
@@ -62,24 +63,25 @@ export function useDraggableFab() {
   }
 
   function animateTo(target: { x: number; y: number }) {
+    if (snapFrameId !== null) cancelAnimationFrame(snapFrameId)
     const from = { ...position.value }
     const start = performance.now()
     function tick(now: number) {
       const elapsed = now - start
       const t = Math.min(elapsed / SNAP_DURATION, 1)
-      // ease-out cubic
       const ease = 1 - Math.pow(1 - t, 3)
       position.value = {
         x: from.x + (target.x - from.x) * ease,
         y: from.y + (target.y - from.y) * ease,
       }
       if (t < 1) {
-        requestAnimationFrame(tick)
+        snapFrameId = requestAnimationFrame(tick)
       } else {
+        snapFrameId = null
         savedPosition.value = target
       }
     }
-    requestAnimationFrame(tick)
+    snapFrameId = requestAnimationFrame(tick)
   }
 
   function onPointerUp(e: PointerEvent) {

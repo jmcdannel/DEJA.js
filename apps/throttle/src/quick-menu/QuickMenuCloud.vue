@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { CLOUD_MENU_ITEMS } from '@repo/modules/quick-menu'
-import type { QuickMenuScreen } from './useQuickMenu'
+import type { EntityScreen } from './useQuickMenu'
 
 const router = useRouter()
 const emit = defineEmits<{
   navigate: []
-  drill: [screen: QuickMenuScreen]
+  drill: [screen: EntityScreen]
 }>()
 
 // Items that have sub-screens drill in instead of navigating

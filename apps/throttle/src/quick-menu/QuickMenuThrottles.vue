@@ -20,10 +20,11 @@ interface ThrottleWithLoco {
   raw: Throttle
 }
 
+const throttleItems = computed(() => (throttles.value || []) as Throttle[])
+
 const activeThrottles = computed<ThrottleWithLoco[]>(() => {
-  const items = (throttles.value || []) as unknown as Throttle[]
   const locoList = (locos.value || []) as Loco[]
-  return items.map((t) => {
+  return throttleItems.value.map((t) => {
     const loco = locoList.find((l) => l.address === t.address)
     return {
       address: t.address,
@@ -34,7 +35,7 @@ const activeThrottles = computed<ThrottleWithLoco[]>(() => {
   })
 })
 
-const activeAddresses = computed(() => new Set(activeThrottles.value.map((t) => t.address)))
+const activeAddresses = computed(() => new Set(throttleItems.value.map((t) => t.address)))
 
 const availableLocos = computed(() =>
   ((locos.value || []) as Loco[]).filter((l) => !activeAddresses.value.has(l.address))
