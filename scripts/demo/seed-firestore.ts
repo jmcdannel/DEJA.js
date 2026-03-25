@@ -42,18 +42,19 @@ async function seedDemoData() {
   for (const [collectionName, docs] of Object.entries(data.subCollections)) {
     const collRef = layoutRef.collection(collectionName)
 
-    // Delete existing docs first (for idempotent re-runs)
+    // Batch delete existing + write new docs (atomic per sub-collection)
+    const batch = db.batch()
     const existing = await collRef.listDocuments()
     for (const doc of existing) {
-      await doc.delete()
+      batch.delete(doc)
     }
 
-    // Write new docs
     let count = 0
     for (const [docId, docData] of Object.entries(docs)) {
-      await collRef.doc(docId).set(docData)
+      batch.set(collRef.doc(docId), docData)
       count++
     }
+    await batch.commit()
     console.log(`  ✅ ${collectionName}: ${count} documents`)
   }
 

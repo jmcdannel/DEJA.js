@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { getCurrentUser } from 'vuefire'
 import type { User } from 'firebase/auth'
 import { requireLayout } from '@repo/auth'
-import { useDemoAuth } from '@repo/auth'
+import { createTryDemoRoute } from '@repo/auth'
 import { createLogger } from '@repo/utils'
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
@@ -122,16 +122,7 @@ const router = createRouter({
       component: () => import('./views/SettingsView.vue'),
       meta: { requireAuth: true },
     },
-    {
-      path: '/try-demo',
-      name: 'try-demo',
-      beforeEnter: async () => {
-        const { signInAsDemo } = useDemoAuth()
-        await signInAsDemo()
-        return { path: '/' }
-      },
-      component: { template: '<div />' },
-    },
+    createTryDemoRoute(),
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',

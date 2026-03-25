@@ -16,12 +16,13 @@ interface DccWriteOptions {
   enqueue?: (execute: () => Promise<void>, description: string) => Promise<void>
 }
 
+const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
+const mockResponder = isDemoMode ? createMockResponder() : null
+
 export const useDcc = (options?: DccWriteOptions) => {
   const layoutId = useStorage('@DEJA/layoutId', '')
   const isEmulated = useStorage('@DEJA/isEmulated', false)
   const isSerial = useStorage('@DEJA/layoutId', false)
-  const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
-  const mockResponder = isDemoMode ? createMockResponder() : null
 
   const wrappedWrite = options?.enqueue ?? ((execute: () => Promise<void>) => execute())
 
