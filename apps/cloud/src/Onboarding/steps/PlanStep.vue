@@ -53,6 +53,7 @@ const planCards = computed<PlanCard[]>(() => [
       { text: 'Docs & AI support chatbot', included: true },
       { text: 'Turnouts & signals', included: false },
       { text: 'Effects & sounds', included: false },
+      { text: 'Remote monitoring', included: false },
       { text: 'Tour App', included: false },
       { text: 'Direct support', included: false },
     ],
@@ -74,6 +75,7 @@ const planCards = computed<PlanCard[]>(() => [
       { text: 'Turnouts & Signals', included: true, tag: '15 each' },
       { text: 'Effects & Sounds', included: true, tag: '15 each' },
       { text: '2 layout configurations', included: true },
+      { text: 'Remote monitoring via secure tunnel', included: true },
       { text: 'Basic macros & scheduling', included: true, partial: true },
       { text: 'Community forum access', included: true },
       { text: 'Support tickets', included: true, tag: '72hr SLA' },
@@ -97,6 +99,7 @@ const planCards = computed<PlanCard[]>(() => [
       { text: 'Unlimited locos, turnouts, signals', included: true },
       { text: 'Unlimited effects & sounds', included: true },
       { text: 'Unlimited layouts', included: true },
+      { text: 'Remote monitoring via secure tunnel', included: true },
       { text: 'Tour App included', included: true },
       { text: 'Advanced macros & automations', included: true },
       { text: 'Priority support', included: true, tag: '24hr SLA' },
@@ -253,11 +256,11 @@ async function selectPlan(tier: PlanTier) {
 
     <!-- Comparison Modal -->
     <v-dialog v-model="showCompare" max-width="900" scrollable>
-      <v-card class="bg-[#0f172a] border border-white/10">
+      <v-card color="surface" class="border border-opacity-10">
         <v-card-title class="font-display text-2xl text-sky-100 pa-6 pb-0">
           Full Feature Breakdown
         </v-card-title>
-        <v-card-subtitle class="px-6 text-slate-400">
+        <v-card-subtitle class="px-6 opacity-60">
           Everything you get, spelled out clearly.
         </v-card-subtitle>
         <v-card-text class="pa-6">

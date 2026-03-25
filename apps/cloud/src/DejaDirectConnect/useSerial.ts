@@ -9,12 +9,6 @@ declare global {
   }
 }
 
-type SendFunctionPayload = {
-  address: number
-  func: number
-  state: boolean
-}
-
 export function useSerial(handleMessage: (message: string) => void) {
   const isConnected = ref(false)
   /*        
@@ -34,10 +28,7 @@ export function useSerial(handleMessage: (message: string) => void) {
     inputDone: Promise<void> | null,
     inputStream,
     reader: ReadableStreamDefaultReader<string> | null,
-    stream: { write: (arg0: string) => void; releaseLock: () => void },
-    csVersion: string | number,
-    csIsReadyRequestSent: boolean,
-    csIsReady: boolean
+    stream: { write: (arg0: string) => void; releaseLock: () => void }
 
   async function send(payload: string) {
     try {
@@ -93,8 +84,8 @@ export function useSerial(handleMessage: (message: string) => void) {
 
       // Create an input stream and a reader to read the data. port.readable gets the readable stream
       // DCC++ commands are text, so we will pipe it through a text decoder.
-      let decoder = new TextDecoderStream()
-      inputDone = port?.readable.pipeTo(decoder.writable)
+      const decoder = new TextDecoderStream()
+      inputDone = port?.readable.pipeTo(decoder.writable) ?? null
       inputStream = decoder.readable
       //  .pipeThrough(new TransformStream(new LineBreakTransformer())); // added this line to pump through transformer
       //.pipeThrough(new TransformStream(new JSONTransformer()));
@@ -128,7 +119,7 @@ export function useSerial(handleMessage: (message: string) => void) {
       if (readerResult?.value) {
         commandString = commandString + readerResult.value
 
-        var moreToProcess = true
+        let moreToProcess = true
         while (moreToProcess) {
           // displayLog('[RECEIVE] '+ value);
           // log.debug('[RECEIVE] '+ value);
@@ -137,7 +128,7 @@ export function useSerial(handleMessage: (message: string) => void) {
             i
 
           for (i = 0; i < commandString.length; i++) {
-            if (commandString.charAt(i) == "\n" && i > 0) {
+            if (commandString.charAt(i) === "\n" && i > 0) {
               end = i
               break
             }
@@ -151,7 +142,7 @@ export function useSerial(handleMessage: (message: string) => void) {
             } else {
               moreToProcess = false
             }
-            displayLog("[R] " + thisCommandString)
+            displayLog(`[R] ${  thisCommandString}`)
             // log.debug(getTimeStamp() + " [R] " + thisCommandString)
             parseResponse(thisCommandString)
           } else {
@@ -161,7 +152,7 @@ export function useSerial(handleMessage: (message: string) => void) {
       }
       if (readerResult?.done) {
         log.debug(
-          getTimeStamp() + " [readLoop] DONE " + readerResult?.done.toString()
+          `${getTimeStamp()  } [readLoop] DONE ${  readerResult?.done.toString()}`
         )
         reader?.releaseLock()
         break
@@ -186,9 +177,10 @@ export function useSerial(handleMessage: (message: string) => void) {
 
       if (stream) {
         lines.forEach((line) => {
-          if (line == "\x03" || line == "echo(false);") {
+          if (line === "\x03" || line === "echo(false);") {
+            // Skip logging control characters and echo commands
           } else {
-            displayLog("[S] &lt;" + line?.toString() + "&gt;")
+            displayLog(`[S] &lt;${  line?.toString()  }&gt;`)
           }
           const packet = `${line}\n`
           stream.write(packet)
@@ -210,8 +202,6 @@ export function useSerial(handleMessage: (message: string) => void) {
     //   $("#power-switch").prop("checked", false)
     //   $("#power-status").html("Off")
     // }
-    csIsReady = false
-    csIsReadyRequestSent = false
     // uiDisable(true)
     if (port) {
       // Close the input stream (reader).
@@ -258,7 +248,7 @@ export function useSerial(handleMessage: (message: string) => void) {
     data = data.replace(/</g, "&lt;")
     data = data.replace(/>/g, "&gt;")
     data = data.replace(/\n/g, "<br>")
-    if (data.length > 0) data = getTimeStamp() + " <b>" + data + "</b>"
+    if (data.length > 0) data = `${getTimeStamp()  } <b>${  data  }</b>`
     // log.debug(data.toString())
     // $("#log-box").append(data.toString() + "<br>")
     // $("#log-box").scrollTop($("#log-box").prop("scrollHeight"))
@@ -270,8 +260,8 @@ export function useSerial(handleMessage: (message: string) => void) {
   function getTimeStamp() {
     // if (getPreference("timestamp") == "off") return ""
 
-    var now = new Date()
-    var startOfSec = new Date(
+    const now = new Date()
+    const startOfSec = new Date(
       now.getFullYear(),
       now.getMonth(),
       now.getDate(),
@@ -279,27 +269,27 @@ export function useSerial(handleMessage: (message: string) => void) {
       now.getMinutes(),
       now.getSeconds()
     )
-    var millsecs = now.getMilliseconds() - startOfSec.getMilliseconds()
+    const millsecs = now.getMilliseconds() - startOfSec.getMilliseconds()
     return (
       //(now.getFullYear()) + '/' +
       // (now.getMonth()+1) + '/' +
       // now.getDate() + " " +
-      now.getHours() +
-      ":" +
-      (now.getMinutes() < 10 ? "0" + now.getMinutes() : now.getMinutes()) +
-      ":" +
-      (now.getSeconds() < 10 ? "0" + now.getSeconds() : now.getSeconds()) +
-      ":" +
-      (millsecs < 10
-        ? "00" + millsecs
+      `${now.getHours() 
+      }:${ 
+      now.getMinutes() < 10 ? `0${  now.getMinutes()}` : now.getMinutes() 
+      }:${ 
+      now.getSeconds() < 10 ? `0${  now.getSeconds()}` : now.getSeconds() 
+      }:${ 
+      millsecs < 10
+        ? `00${  millsecs}`
         : millsecs < 100
-        ? "0" + millsecs
-        : millsecs)
+        ? `0${  millsecs}`
+        : millsecs}`
     )
   }
 
-  function browserType() {
-    let userAgent = navigator.userAgent
+  function _browserType() {
+    const userAgent = navigator.userAgent
     let browser = "Unknown"
     let browserOk = false
 
@@ -337,12 +327,12 @@ export function useSerial(handleMessage: (message: string) => void) {
 
     if (!browserOk) {
       window.alert(
-        "EX-WebThrottle is only known to work on Chromium based web browsers. (i.e. Chrome, Edge, Opera).\n\n Your browser '" +
-          browser +
-          "' is NOT one of these, so EX-WebThrottle will likely not work. You will not be able to select or interact with the USB port."
+        `EX-WebThrottle is only known to work on Chromium based web browsers. (i.e. Chrome, Edge, Opera).\n\n Your browser '${ 
+          browser 
+          }' is NOT one of these, so EX-WebThrottle will likely not work. You will not be able to select or interact with the USB port.`
       )
     }
-    return "[i] Web browser: " + browser + " - '" + userAgent + "'"
+    return `[i] Web browser: ${  browser  } - '${  userAgent  }'`
   }
 
   return {

@@ -1,6 +1,4 @@
-# 🚂 DEJA.js - DCC-EX JavaScript API
-
-> **🌟 The Modern, Comprehensive Model Railroad Control System**
+# 🚂 DEJA.js — DCC-EX JavaScript API
 
 <p align="center">
   <img src="https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D" />
@@ -10,384 +8,130 @@
   <img src="https://img.shields.io/badge/pnpm-F69220?style=for-the-badge&logo=pnpm&logoColor=white" />
 </p>
 
----
+**DEJA.js** (*DCC-EX JavaScript API*) is a TypeScript monorepo for model railroad control. It bridges [DCC-EX](https://dcc-ex.com/) command stations to a suite of modern web applications — giving you real-time train control, layout management, system monitoring, and visitor experiences from any browser.
 
-## 🎯 What is DEJA.js?
-
-**DEJA.js** (*DCC-EX JavaScript API*) is a modern, comprehensive suite of applications that transforms your model railroad into a connected, intelligent system. Built as a monorepo with multiple specialized applications, DEJA.js provides everything you need to control, monitor, and interact with your DCC-EX CommandStation.
-
-### 🌟 Key Features
-
-- 🎮 **Multiple Control Interfaces** - Throttle, Cloud management, and monitoring apps
-- 🔥 **Modern Web Technologies** - Vue 3, TypeScript, and real-time communication
-- 📱 **Cross-Platform** - Works on desktop, tablet, and mobile devices
-- 🛰️ **Real-Time Sync** - MQTT and WebSocket communication
-- 🎨 **Beautiful UI** - Dark/light themes with responsive design
-- 🚀 **Easy Deployment** - Containerized and cloud-ready
-- 🔧 **Developer Friendly** - TypeScript throughout with comprehensive tooling
+The system communicates over USB serial, Firebase (Firestore + RTDB), WebSocket, and MQTT, coordinating everything from a single Node.js backend to the electrical signals on your track. Vue 3 frontends provide the operator and visitor interfaces.
 
 ---
 
-## 🚀 Getting Started
+## 📂 Monorepo Structure
 
-By the end of this guide your DCC-EX CommandStation will be connected to DEJA.js running on your computer, and you'll be driving trains from any browser on your network.
+### 🖥️ Apps (`apps/`)
 
-### 🔧 How It Works
+| Directory | Description |
+|-----------|-------------|
+| [`apps/throttle`](apps/throttle/) | 🚂 Vue 3 train control interface — the primary operator app |
+| [`apps/cloud`](apps/cloud/) | ☁️ Vue 3 layout management and configuration hub |
+| [`apps/server`](apps/server/) | ⚙️ Node.js backend — bridges browsers to DCC-EX hardware over USB serial |
+| [`apps/monitor`](apps/monitor/) | 📊 Vue 3 system monitoring and diagnostics dashboard |
+| [`apps/tour`](apps/tour/) | 🎭 Vue 3 interactive visitor experience and effects runner |
+| [`apps/sound-api`](apps/sound-api/) | 🔊 Next.js API for sound effect asset management |
 
-```
-[DCC-EX CommandStation] --USB--> [DEJA Server] <--WiFi/LAN--> [Throttle App]
-       (your hardware)          (your computer)               (any device)
-                                      |
-                               [DEJA Cloud]
-                          (layout config & roster)
-```
+### 📦 Packages (`packages/`)
 
-The **DEJA Server** is the only piece you install locally. It bridges your CommandStation over USB to the rest of the system. The Throttle, Cloud, and Monitor apps are hosted web apps you open in a browser.
+| Package | Purpose |
+|---------|---------|
+| `@repo/modules` | 🧠 Core business logic — composables and types for locos, turnouts, effects, signals, routes, layouts |
+| `@repo/ui` | 🎨 Shared Vue component library (LocoAvatar, TurnoutSwitch, EmergencyStop, TrackPower, etc.) |
+| `@repo/dccex` | 🔧 DCC-EX command protocol — the `useDcc()` composable for sending DCC commands |
+| `@repo/deja` | 🔥 Core DEJA composable — writes commands to Firebase Realtime Database |
+| `@repo/firebase-config` | 🗄️ Firebase client SDK and Admin SDK initialization |
+| `@repo/auth` | 🔐 Firebase Authentication integration and Vue Router guards |
+| `@repo/sounds` | 🎵 Sound effect metadata and Vercel Blob utilities |
+| `@repo/utils` | 🛠️ Common utility functions |
+| `@repo/config-eslint` | 📏 Shared ESLint flat configuration |
+| `@repo/config-prettier` | ✨ Shared Prettier configuration |
+| `@repo/typescript-config` | 📘 Shared TypeScript base configurations |
 
----
+### 🔌 Device Firmware (`io/`)
 
-### 📋 Prerequisites
-
-| Requirement | Minimum | Get it |
-|---|---|---|
-| 📦 Node.js | v22+ | [Install via nvm](https://github.com/nvm-sh/nvm) |
-| 📦 pnpm | v9+ | `npm install -g pnpm` |
-| 📦 Git | Any recent | [git-scm.com](https://git-scm.com/install/) |
-| <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX CommandStation | Any supported board | [DCC-EX setup guide](https://dcc-ex.com/ex-commandstation/index.html) |
-| 🔌 USB cable | — | Connecting CommandStation to this computer |
-
-> Confirm Node.js is ready before continuing: `node --version` should print `v22.x.x` or higher.
-
----
-
-### 👤 Step 1 — Sign Up & Choose a Plan
-
-Create your free DEJA Cloud account and pick a tier. It takes one click.
-
-1. Go to [DEJA Cloud](https://cloud.dejajs.com) and click **Sign Up** (Google, GitHub, or email)
-2. The onboarding wizard starts automatically — **Choose a Plan**:
-
-| | Hobbyist | Engineer | Conductor |
-|---|---|---|---|
-| **Price** | Free | $7/mo or $67/yr | $18/mo or $173/yr |
-| **Locomotives** | 5 | 25 | Unlimited |
-| **Layouts** | 1 | 2 | Unlimited |
-| **Turnouts / Signals / Effects** | — | 15 each | Unlimited |
-
-- **Hobbyist** is completely free — no credit card required.
-- Paid plans include a **14-day free trial** — no charge until the trial ends.
-
-3. If you chose Engineer or Conductor, enter your card details to start the free trial
-
-**Verify:** You're signed in to DEJA Cloud.
+| Directory | Description |
+|-----------|-------------|
+| `io/src/deja-arduino/` | Arduino sketch for USB-connected IO boards (Serial/MQTT) |
+| `io/src/deja-pico-w/` | CircuitPython for WiFi-connected Pico W / ESP32 nodes (MQTT) |
+| `io/layouts/` | Per-layout, per-device JSON configuration files |
 
 ---
 
-### 🧭 Step 2 — Register Your Layout
-
-Give your layout a name and a unique ID (lowercase letters, numbers, and hyphens only). This scopes all your data — locomotives, turnouts, effects, and commands.
-
-After this step the wizard shows your `LAYOUT_ID` and all `VITE_FIREBASE_*` credentials. **Copy these values** — you'll need them in Step 4.
-
-> You can find these credentials later in [DEJA Cloud](https://cloud.dejajs.com) under **Settings > View Local Environment Configuration**.
-
-**Verify:** You can see your layout dashboard in [DEJA Cloud](https://cloud.dejajs.com).
-
----
-
-### 📦 Step 3 — Install
-
-#### ⚡ Quick Install
-
-The fastest way to get set up. Open a terminal on the machine connected to your DCC-EX Command Station and run one command — it downloads the DEJA.js server, installs dependencies, and walks you through configuration.
-
-**macOS / Linux**
+## 🚀 Quick Dev Setup
 
 ```bash
-curl -fsSL https://install.dejajs.com | bash
+git clone https://github.com/jmcdannel/DEJA.js.git
+cd DEJA.js
+pnpm install
+pnpm dev
 ```
 
-**Windows (PowerShell)**
+> **Prerequisites:** Node.js 20+, pnpm 9+
 
-```powershell
-irm https://install.dejajs.com/win | iex
-```
-
-After the script finishes, skip ahead to [Step 5 — Register Your CommandStation](#-step-5--register-your-commandstation).
-
-> Need help? See the [Install Guide](https://dejajs.com/docs/install) for detailed instructions and troubleshooting.
+Copy `.env.example` to `.env` at the root and fill in your Firebase credentials. See [CONTRIBUTING.md](CONTRIBUTING.md) for full environment setup.
 
 ---
 
-### ⚙️ Step 4 — Configure
-
-Copy the environment template and fill in the values from your onboarding (Step 2).
+## 🛠️ Key Commands
 
 ```bash
-cp .env.example .env.local
+pnpm dev                # 🚀 Start all apps in dev mode
+pnpm build              # 🏗️ Build all packages
+pnpm lint               # 🔍 Lint all packages (ESLint, auto-fix)
+pnpm format             # 💄 Format all .ts, .tsx, .md files (Prettier)
+pnpm check-types        # 🔬 TypeScript type checking across the monorepo
+
+pnpm deja               # ⚙️📊 Start Server + Monitor together
+
+pnpm deps:check         # 📋 List dependency version mismatches (syncpack)
+pnpm deps:fix           # 🔧 Auto-fix dependency mismatches
 ```
 
-Open `.env.local` in a text editor and paste your credentials. If you need to find them again:
-
-1. Log in to [DEJA Cloud](https://cloud.dejajs.com)
-2. Select your layout
-3. Click **"View Local Environment Configuration"**
-4. Copy the displayed values into your `.env.local`
-
-Your completed `.env.local` will look like this:
-
-```env
-LAYOUT_ID=my-layout-name
-
-VITE_FIREBASE_API_KEY=AIza...
-VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your-project
-VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
-VITE_FIREBASE_APP_ID=1:123456789:web:abc123
-
-VITE_MQTT_BROKER=mqtt://localhost
-VITE_MQTT_PORT=1883
-ENABLE_MQTT=true
-ENABLE_WS=true
-ENABLE_DEJACLOUD=true
-VITE_WS_PORT=8082
-VITE_WS_ID=DEJA.js
-```
-
-**Verify:** `.env.local` exists at the project root and contains your `LAYOUT_ID` and all `VITE_FIREBASE_*` values.
-
----
-
-### 🧱 Step 5 — Register Your CommandStation
-
-Tell DEJA Cloud that a DCC-EX CommandStation will connect via USB from this computer.
-
-1. In [DEJA Cloud](https://cloud.dejajs.com), open your layout
-2. Go to **Devices** and click **Add**
-3. Select **DCC-EX CommandStation** → connection type **USB** → click **Submit**
-
-The device will appear in the list with a "disconnected" status — that is expected until the server is running.
-
-**Verify:** Your DCC-EX CommandStation appears in the Devices list in DEJA Cloud.
-
----
-
-### 🖥️ Step 6 — Start the Server
+Run a single app:
 
 ```bash
-pnpm deja
-```
-
-This starts the DEJA Server (USB serial communication) and the Monitor app (diagnostics) together via Turborepo.
-
-**Verify:** Terminal output shows the WebSocket server listening on port `8082`. Open [DEJA Monitor](https://monitor.dejajs.com) in a browser — you should see the server connected.
-
----
-
-### 🔌 Step 7 — Connect Hardware
-
-Select the USB port for your CommandStation in the Monitor app.
-
-1. Open [DEJA Monitor](https://monitor.dejajs.com) on this computer
-2. Find the **DCC-EX CommandStation** device card
-3. Select the USB port from the dropdown
-4. Click **Connect**
-
-> **Finding your port:**
-> Linux / macOS — `ls /dev/tty*` and look for `/dev/ttyUSB0` or `/dev/ttyACM0`
-> Windows — Device Manager > Ports (COM & LPT) — note the `COMx` number
-
-**Verify:** The device card shows a green "connected" status and displays DCC-EX firmware version information.
-
----
-
-### 🚂 Step 8 — Drive Trains
-
-1. In [DEJA Cloud](https://cloud.dejajs.com), navigate to **Roster** and click **Add Loco** — enter the DCC address and a name
-2. Open [DEJA Throttle](https://throttle.dejajs.com) in any browser on your network
-3. Click the track power button to energize the track
-4. Select your locomotive and use the speed slider and direction controls to drive
-
-**Verify:** The locomotive moves on the track and responds to speed, direction, and function controls.
-
----
-
-### 📖 Quick Reference
-
-**Commands**
-
-| Task | Command |
-|---|---|
-| Install dependencies | `pnpm install` |
-| Start server + monitor | `pnpm deja` |
-| Start server only | `pnpm start` |
-| Start all apps (dev mode) | `pnpm dev` |
-| Build all apps | `pnpm build` |
-| Lint all packages | `pnpm lint` |
-| Check dependency versions | `pnpm deps:check` |
-
-**App URLs**
-
-| App | URL |
-|---|---|
-| ☁️ DEJA Cloud (layout config & roster) | https://cloud.dejajs.com |
-| 🚂 DEJA Throttle (train control) | https://throttle.dejajs.com |
-| 📊 DEJA Monitor (diagnostics) | https://monitor.dejajs.com |
-
----
-
-## 📁 Repository Structure
-
-### 🎮 Applications (`/apps`)
-
-| App | Description | Technologies |
-|-----|-------------|--------------|
-| **🚂 [Throttle](apps/throttle/)** | Train control interface with speed, direction, and function controls | Vue 3, Vuetify, MQTT |
-| **☁️ [Cloud](apps/cloud/)** | Layout management, device monitoring, and multi-user coordination | Vue 3, Firebase, Vuetify |
-| **🖥️ [Server](apps/server/)** | NodeJS API server that communicates with <img src="assets/dcc-ex-favicon-32x32.png" width="16" height="16" alt="DCC-EX Logo" /> DCC-EX CommandStation | Node.js, WebSockets, Serial |
-| **📊 [Monitor](apps/monitor/)** | System monitoring, logging, and diagnostics dashboard | Vue 3, MQTT, WebSockets |
-| **🎪 [Tour](apps/tour/)** | Interactive tour experiences and special effects control | Vue 3, Audio/Visual effects |
-
-### 📦 Packages (`/packages`)
-
-| Package | Description |
-|---------|-------------|
-| **🎨 UI** | Shared Vue components and design system |
-| **🔧 Utils** | Common utilities and helper functions |
-| **🔐 Auth** | Authentication and user management |
-| **📡 Modules** | Core DEJA.js modules and communication logic |
-| **⚙️ Config** | Shared configuration for ESLint, Prettier, TypeScript |
-
-### 🔧 Device Firmware (`/firmware`)
-
-DEJA.js provides generic firmware templates for your layout nodes that configure themselves dynamically. Rather than recompiling and flashing your devices every time your layout changes, these templates parse configurations sent instantly by the DEJA Server.
-
-| Firmware | Description | Protocol |
-|---------|-------------|----------|
-| **🔌 [deja-arduino](firmware/deja-arduino/)** | Generic sketch for USB-connected Arduino boards | Serial (USB) |
-| **📡 [deja-pico-w](firmware/deja-pico-w/)** | Generic sketch for WiFi-connected Pico W and ESP32 nodes | MQTT (WiFi) |
-
----
-
-## ⚙️ Configuration
-
-### 🔧 Environment Setup
-
-### 🛠️ Development Commands
-
-```bash
-# Development
-turbo dev              # 🚀 Start all apps in development mode
-turbo dev:throttle     # 🎮 Start only throttle app
-turbo dev:cloud        # ☁️ Start only cloud app
-
-# Building
-turbo build            # 🏗️ Build all applications
-turbo build:throttle   # 📦 Build only throttle app
-
-# Code Quality
-turbo lint             # 🔍 Lint all packages
-turbo format          # 💄 Format all code
-turbo type-check      # 🔬 TypeScript type checking
-
-# Dependencies
-turbo deps:check      # 📋 Check dependency versions
-turbo deps:fix        # 🔧 Fix dependency mismatches
+pnpm --filter=deja-throttle dev     # 🚂 Throttle
+pnpm --filter=deja-cloud dev        # ☁️ Cloud
+pnpm --filter=deja-serverts dev     # ⚙️ Server
+pnpm --filter=deja-monitor dev      # 📊 Monitor
+pnpm --filter=deja-tour dev         # 🎭 Tour
 ```
 
 ---
 
-## 🏗️ Architecture
+## ⚙️ Tech Stack
 
-
-
-## 🎯 Usage Scenarios
-
-### 🏠 Home Layout Control
-1. 🚀 Start the server: `turbo deja`
-2. 🎮 Open throttle app for train control
-3. ☁️ Use cloud app for layout management
-
-### 👥 Club or Exhibition Setup
-1. 📊 Set up monitor app for system oversight
-2. 🎪 Configure tour app for visitor experiences
-3. ☁️ Use cloud app for multi-operator coordination
-
-### 🧪 Development & Testing
-1. 🔍 Use monitor app for debugging
-2. 🎮 Test features with throttle app
-3. 📈 Monitor performance metrics
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | Vue 3, Vuetify 3, Pinia, Vue Router 4, VueFire, Tailwind CSS, Vite |
+| **Backend** | Node.js 20+, TypeScript, WebSocket (`ws`), SerialPort, Firebase Admin SDK |
+| **Communication** | Firebase (Firestore + RTDB), WebSocket, MQTT, USB Serial (115200 baud) |
+| **Build** | Turborepo, pnpm 9 workspaces, Vite, tsx, tsup |
+| **Quality** | ESLint, Prettier, syncpack, Vitest |
 
 ---
 
-## 🧰 Production Runbook
+## 📚 Further Reading
 
-### Keep the server running robustly (pm2 + turbo)
-
-Use pm2 to manage the turbo start process so it restarts on crashes and can boot on startup:
-
-```bash
-# Start server + monitor via turbo under pm2
-pm2 start --name deja-start --interpreter bash -- turbo run start --filter=apps/server --filter=apps/monitor
-pm2 start bash --name deja-start -- -lc "pnpm turbo run start --filter=apps/server --filter=apps/monitor"
-
-# For all apps
-pm2 start --name deja-start-all --interpreter bash -- turbo run start
-
-# Persist the pm2 process list and enable on boot
-pm2 save
-pm2 startup
-```
-
-Notes:
-- The root `package.json` is configured so `pnpm start` maps to the filtered turbo start.
-- `turbo.json` marks `start` and `start:all` as persistent to work well under pm2.
+| Document | Description |
+|----------|-------------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | 🏗️ System design, communication layers, data flow, and server subsystems |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | 🤝 Development workflow, coding conventions, and environment setup |
+| [CHANGELOG.md](CHANGELOG.md) | 📝 Version history (Keep a Changelog format) |
+| [ROADMAP.md](ROADMAP.md) | 🗺️ Planned features and current focus areas |
+| [dejajs.com/docs](https://dejajs.com/docs) | 📖 User documentation — install guides, setup, and usage |
 
 ---
 
-## 🗺️ Roadmap
+## 🚀 Release Process
 
-### 🔥 Current Focus
-- ✅ **Multi-throttle support** - Multiple simultaneous operators
-- ⏳ **Mobile optimizations** - Improved touch interfaces
-- ⏳ **Audio/visual effects** - Tour app enhancements
-
-### 🌟 Future Plans
-- 🎯 **AI-powered automation** - Smart train scheduling
-- 📱 **Native mobile apps** - iOS and Android versions
-- 🎮 **VR/AR integration** - Immersive experiences
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### 🛠️ Development Setup
-1. 🍴 Fork the repository
-2. 🌿 Create a feature branch
-3. 🧪 Write tests for new features
-4. 📝 Update documentation
-5. 🚀 Submit a pull request
+Releases are managed via [Changesets](https://github.com/changesets/changesets). Feature PRs target the `preview` branch; only `preview → main` PRs require a changeset. Tag a release with `git tag v1.x.x && git push --tags` — CI builds the server tarball and creates a GitHub Release. Users update via `deja update`.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- 🚂 **DCC-EX Team** - For the amazing CommandStation platform
-- 🌍 **Vue.js Community** - For the fantastic framework
-- 👥 **Contributors** - Everyone who helps make DEJA better
+DEJA.js is proprietary software distributed under a subscription license. See your subscription terms at [dejajs.com](https://dejajs.com).
 
 ---
 
 <p align="center">
-  <strong>🌟 Happy Railroading! 🚂</strong><br>
+  <strong>🚂 Happy Railroading!</strong><br>
   <em>Built with ❤️ for the model railroad community</em>
 </p>

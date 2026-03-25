@@ -5,6 +5,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useLayout, useServerStatus } from '@repo/modules'
 import { Logo, SelectLayout, UserProfile } from '@repo/ui'
 import { usePaneManager } from '../../composables/usePaneManager'
+import { useWsConnection } from '../../composables/useWsConnection'
 
 const emit = defineEmits<{
   'toggle-drawer': []
@@ -15,11 +16,11 @@ const emit = defineEmits<{
 const router = useRouter()
 const route = useRoute()
 const layoutId = useStorage('@DEJA/layoutId', '')
-const wshost = useStorage('@DEJA/pref/ws-host', 'localhost:8082')
 const paneManager = usePaneManager()
 const { getLayouts } = useLayout()
 const layouts = getLayouts()
 const { serverStatus } = useServerStatus()
+const { wsUrl } = useWsConnection()
 
 // Layout selection dialog
 const layoutDialogOpen = ref(false)
@@ -35,8 +36,11 @@ const currentLayoutName = computed(() => {
 })
 
 // WebSocket connection status
-const { status: wsStatus } = useWebSocket(`ws://${wshost.value}/`, {
-  autoReconnect: true,
+const { status: wsStatus } = useWebSocket(wsUrl, {
+  autoReconnect: {
+    delay: 2000,
+    retries: 10,
+  },
 })
 
 const wsConnected = computed(() => wsStatus.value === 'OPEN')

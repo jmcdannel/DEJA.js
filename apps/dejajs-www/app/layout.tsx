@@ -5,6 +5,9 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { ThemeProvider } from '../components/ThemeProvider';
 import { Analytics } from '@vercel/analytics/next';
+import { client } from '../sanity/lib/client';
+import { SITE_SETTINGS_QUERY } from '../sanity/lib/queries';
+import PromoBannerStrip from '../components/PromoBannerStrip';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -90,10 +93,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  let settings = null;
+  try {
+    if (client) settings = await client.fetch(SITE_SETTINGS_QUERY);
+  } catch {
+    // Fall back to hardcoded defaults in Header/Footer
+  }
+
   return (
     <html lang="en" className="dark">
-      <body className={`${dmSans.variable} ${dmMono.variable} ${bebasNeue.variable} font-sans bg-gray-50 text-gray-800 transition-colors duration-200 dark:bg-gray-950 dark:text-gray-50 relative antialiased`}>
+      <body className={`${dmSans.variable} ${dmMono.variable} ${bebasNeue.variable} font-sans bg-gray-950 text-gray-50 relative antialiased`}>
+        <PromoBannerStrip />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="fixed w-[600px] h-[600px] rounded-full bg-cyan-600/10 blur-[100px] -top-[100px] left-[50%] translate-x-[-50%]"></div>
           <div className="fixed w-[500px] h-[500px] rounded-full bg-fuchsia-500/10 blur-[80px] -bottom-[-10%] -right-[200px]"></div>
@@ -103,11 +114,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-cyan-600 focus:text-white focus:rounded">
             Skip to main content
           </a>
-          <Header />
-          <main id="main-content" className="max-w-5xl mx-auto px-6 py-10">
+          <Header settings={settings} />
+          <main id="main-content" className="w-full">
             {children}
           </main>
-          <Footer />
+          <Footer settings={settings} />
         </ThemeProvider>
         <Analytics />
       </body>

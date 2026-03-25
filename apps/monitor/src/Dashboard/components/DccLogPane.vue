@@ -3,6 +3,7 @@ import { ref, watch, computed } from 'vue'
 import { useDccLog } from './DCCLog/useDccLog'
 import DCCLogItem from './DCCLog/DCCLogItem.vue'
 import { useAutoScroll } from '../../composables/useAutoScroll'
+import type { LogEntry } from './DCCLog/types'
 
 const { log } = useDccLog(true)
 
@@ -11,9 +12,14 @@ useAutoScroll(scrollContainer, log)
 
 const messageCount = computed(() => log.value.length)
 
+function seed(entries: LogEntry[]) {
+  entries.forEach(entry => log.value.push(entry))
+}
+
 defineExpose({
   messageCount,
   clear: () => { log.value = [] },
+  seed,
 })
 </script>
 

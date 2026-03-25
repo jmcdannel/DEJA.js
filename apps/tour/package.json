@@ -1,7 +1,7 @@
 {
   "name": "deja-tour",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@mdi/font": "^7.4.47",
-    "@repo/auth": "workspace:^0.0.0",
+    "@repo/auth": "workspace:^0.0.1",
     "@repo/dccex": "workspace:*",
     "@repo/deja": "workspace:*",
     "@repo/eslint-config": "workspace:*",

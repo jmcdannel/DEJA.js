@@ -1,31 +1,29 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useCurrentUser } from 'vuefire'
-import { useStorage } from '@vueuse/core'
+import { useStorage, useWebSocket } from '@vueuse/core'
 import { getIdToken } from 'firebase/auth'
 import { useSubscription, PLAN_DISPLAY } from '@repo/modules'
-import { BackgroundSettings } from '@repo/ui'
+import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
+import { useWsConnection } from '../composables/useWsConnection'
 
 const user = useCurrentUser()
 const { plan, status, isTrialing, trialDaysLeft, subscription } = useSubscription()
 const { themePreference, setTheme } = useThemeSwitcher()
 const { mdAndUp } = useDisplay()
 
-// WebSocket connection
-const wshost = useStorage('@DEJA/pref/ws-host', 'localhost:8082')
-const wsEnabled = useStorage('@DEJA/pref/ws-logging', false)
+const layoutId = useStorage('@DEJA/layoutId', '')
 
-onMounted(() => {
-  // Auto-populate with local machine IP if still default
-  if (wshost.value === 'localhost:8082') {
-    const hostname = window.location.hostname
-    if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
-      wshost.value = `${hostname}:8082`
-    }
-  }
+// WebSocket connection
+const { wshost, wsUrl } = useWsConnection()
+const wsEnabled = useStorage('@DEJA/pref/ws-logging', false)
+const { status: wsStatus } = useWebSocket(wsUrl, {
+  autoReconnect: { delay: 2000, retries: 10 },
 })
+const wsConnected = computed(() => wsStatus.value === 'OPEN')
+const showTunnelHelp = ref(false)
 
 const planName = computed(() => PLAN_DISPLAY[plan.value].name)
 const planPrice = computed(() => {
@@ -87,12 +85,16 @@ const sections = [
   { id: 'billing', label: 'Billing', icon: 'mdi-credit-card-outline' },
   { id: 'appearance', label: 'Appearance', icon: 'mdi-palette-outline' },
   { id: 'connection', label: 'Connection', icon: 'mdi-server-network' },
+  { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'monitor', label: 'Monitor', icon: 'mdi-monitor-dashboard' },
+  { id: 'backgrounds', label: 'Backgrounds', icon: 'mdi-image-outline' },
 ]
 
 function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
+
+const appVersion = __APP_VERSION__
 
 const backgroundPages = [
   { path: '/', label: 'Dashboard', icon: 'mdi-view-dashboard' },
@@ -114,11 +116,11 @@ const backgroundPages = [
           </div>
           <div class="settings-row">
             <div class="settings-row__label"><span class="settings-row__name">Email</span></div>
-            <div class="settings-row__value text-slate-300">{{ user?.email }}</div>
+            <div class="settings-row__value">{{ user?.email }}</div>
           </div>
           <div class="settings-row">
             <div class="settings-row__label"><span class="settings-row__name">Display Name</span></div>
-            <div class="settings-row__value text-slate-300">{{ user?.displayName || '—' }}</div>
+            <div class="settings-row__value">{{ user?.displayName || '—' }}</div>
           </div>
         </div>
 
@@ -134,8 +136,8 @@ const backgroundPages = [
               <span class="settings-row__desc">{{ nextDateLabel }}</span>
             </div>
             <div class="settings-row__value flex items-center gap-3">
-              <span class="text-sky-100 font-semibold">{{ planName }}</span>
-              <span class="text-slate-400 text-sm">{{ planPrice }}</span>
+              <span class="font-semibold">{{ planName }}</span>
+              <span class="text-sm opacity-60">{{ planPrice }}</span>
               <v-chip :color="statusColor" size="x-small" variant="tonal" class="uppercase tracking-wider">{{ status }}</v-chip>
             </div>
           </div>
@@ -177,13 +179,6 @@ const backgroundPages = [
               </v-btn-toggle>
             </div>
           </div>
-          <div class="settings-row settings-row--block">
-            <div class="settings-row__label mb-3">
-              <span class="settings-row__name">Backgrounds</span>
-              <span class="settings-row__desc">Customize page backgrounds</span>
-            </div>
-            <BackgroundSettings app-name="monitor" :pages="backgroundPages" />
-          </div>
         </div>
 
         <!-- Connection -->
@@ -195,10 +190,37 @@ const backgroundPages = [
           <div class="settings-row">
             <div class="settings-row__label">
               <span class="settings-row__name">WebSocket Host</span>
-              <span class="settings-row__desc">Address of the DEJA.js server (auto-detected from your network)</span>
+              <span class="settings-row__desc">Address of the DEJA.js server or Cloudflare tunnel URL</span>
             </div>
-            <div class="settings-row__value">
-              <v-text-field v-model="wshost" density="compact" variant="outlined" hide-details style="min-width: 280px;" placeholder="localhost:8082" />
+            <div class="settings-row__value flex items-center gap-2">
+              <v-text-field v-model="wshost" density="compact" variant="outlined" hide-details style="min-width: 280px;" placeholder="your-tunnel.trycloudflare.com" />
+              <v-chip
+                :color="wsConnected ? 'success' : 'error'"
+                size="x-small"
+                variant="tonal"
+                :prepend-icon="wsConnected ? 'mdi-check-circle' : 'mdi-alert-circle'"
+              >
+                {{ wsConnected ? 'Connected' : 'Disconnected' }}
+              </v-chip>
+            </div>
+          </div>
+          <div class="settings-row settings-row--block">
+            <button
+              class="flex items-center gap-1 text-xs cursor-pointer bg-transparent border-none opacity-70 hover:opacity-100"
+              style="color: rgb(var(--v-theme-primary))"
+              @click="showTunnelHelp = !showTunnelHelp"
+            >
+              <v-icon size="14">{{ showTunnelHelp ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
+              Remote access via Cloudflare Tunnel
+            </button>
+            <div v-if="showTunnelHelp" class="mt-2 text-xs opacity-60 leading-relaxed">
+              <p class="mb-2">To access your DEJA.js server remotely:</p>
+              <ol class="list-decimal list-inside space-y-1 mb-2">
+                <li>In your server directory, run <code class="px-1 rounded" style="background: rgba(var(--v-theme-surface-variant), 0.5)">pnpm tunnel</code></li>
+                <li>Copy the generated <code class="px-1 rounded" style="background: rgba(var(--v-theme-surface-variant), 0.5)">*.trycloudflare.com</code> URL</li>
+                <li>Paste it in the WebSocket Host field above (no port or protocol needed)</li>
+              </ol>
+              <p class="opacity-70">For a persistent URL, use <code class="px-1 rounded" style="background: rgba(var(--v-theme-surface-variant), 0.5)">pnpm tunnel:named</code> with a Cloudflare account.</p>
             </div>
           </div>
           <div class="settings-row">
@@ -210,6 +232,15 @@ const backgroundPages = [
               <v-switch v-model="wsEnabled" color="primary" hide-details density="compact" />
             </div>
           </div>
+        </div>
+
+        <!-- Server Setup -->
+        <div id="server-setup" class="settings-section">
+          <div class="settings-section__header">
+            <v-icon size="20" class="settings-section__icon">mdi-download-outline</v-icon>
+            <h2 class="settings-section__title">Server Setup</h2>
+          </div>
+          <ServerSetupInfo :uid="user?.uid" :layout-id="layoutId" />
         </div>
 
         <!-- Monitor Settings -->
@@ -246,12 +277,26 @@ const backgroundPages = [
             </div>
           </div>
         </div>
+
+        <!-- Backgrounds -->
+        <div id="backgrounds" class="settings-section">
+          <div class="settings-section__header">
+            <v-icon size="20" class="settings-section__icon">mdi-image-outline</v-icon>
+            <h2 class="settings-section__title">Backgrounds</h2>
+          </div>
+          <div class="settings-row settings-row--block">
+            <BackgroundSettings app-name="monitor" :pages="backgroundPages" />
+          </div>
+        </div>
+
+        <!-- Version -->
+        <p class="settings-version">DEJA.js Monitor v{{ appVersion }}</p>
       </div>
 
       <!-- Jump-to nav (desktop only, right side) -->
       <nav v-if="mdAndUp" class="settings-nav">
         <div class="settings-nav__inner">
-          <p class="text-xs text-slate-500 uppercase tracking-widest font-medium mb-3">Settings</p>
+          <p class="text-xs opacity-50 uppercase tracking-widest font-medium mb-3">Settings</p>
           <button
             v-for="s in sections"
             :key="s.id"
@@ -298,7 +343,7 @@ const backgroundPages = [
   padding: 8px 12px;
   border: none;
   background: none;
-  color: rgba(148, 163, 184, 0.7);
+  color: rgba(var(--v-theme-on-surface), 0.5);
   font-size: 0.8rem;
   font-weight: 500;
   text-align: left;
@@ -308,8 +353,8 @@ const backgroundPages = [
 }
 
 .settings-nav__item:hover {
-  color: #e0f2fe;
-  background: rgba(56, 189, 248, 0.08);
+  color: rgba(var(--v-theme-on-surface), 0.85);
+  background: rgba(var(--v-theme-primary), 0.08);
 }
 
 .settings-content {
@@ -318,8 +363,8 @@ const backgroundPages = [
 }
 
 .settings-section {
-  background: rgba(15, 23, 42, 0.45);
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  background: rgba(var(--v-theme-surface), 0.7);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
   border-radius: 12px;
   margin-bottom: 20px;
   overflow: clip;
@@ -330,15 +375,15 @@ const backgroundPages = [
   align-items: center;
   gap: 10px;
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 }
 
-.settings-section__icon { color: #38bdf8; }
+.settings-section__icon { color: rgb(var(--v-theme-primary)); }
 
 .settings-section__title {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #e0f2fe;
+  color: rgba(var(--v-theme-on-surface), 0.9);
 }
 
 .settings-row {
@@ -346,7 +391,7 @@ const backgroundPages = [
   align-items: center;
   justify-content: space-between;
   padding: 14px 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06);
   gap: 16px;
 }
 .settings-row:last-child { border-bottom: none; }
@@ -354,7 +399,14 @@ const backgroundPages = [
 .settings-row--actions { padding: 12px 20px 16px; }
 
 .settings-row__label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.settings-row__name { font-size: 0.875rem; font-weight: 500; color: #cbd5e1; }
-.settings-row__desc { font-size: 0.75rem; color: rgba(148, 163, 184, 0.6); }
+.settings-row__name { font-size: 0.875rem; font-weight: 500; color: rgba(var(--v-theme-on-surface), 0.8); }
+.settings-row__desc { font-size: 0.75rem; color: rgba(var(--v-theme-on-surface), 0.45); }
 .settings-row__value { flex-shrink: 0; }
+
+.settings-version {
+  text-align: center;
+  font-size: 0.7rem;
+  color: rgba(var(--v-theme-on-surface), 0.3);
+  padding: 16px 0 8px;
+}
 </style>

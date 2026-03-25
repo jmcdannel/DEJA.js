@@ -296,8 +296,8 @@ function handleConnect() {
 .device-connection-card {
   border-left: 4px solid;
   transition: border-color 0.3s ease;
-  background: rgba(15, 23, 42, 0.65) !important;
-  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: rgba(var(--v-theme-surface), 0.65) !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.15);
   border-left: 4px solid;
 }
 

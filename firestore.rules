@@ -73,6 +73,12 @@ service cloud.firestore {
         allow read: if isAuth();
         allow write: if isLayoutOwner(layoutId);
       }
+
+      // Track diagrams - layout owner only
+      match /trackDiagrams/{diagramId} {
+        allow read: if isAuth();
+        allow write: if isLayoutOwner(layoutId);
+      }
     }
 
     // User preferences (backgrounds, settings, subscription) — each user owns their doc
@@ -89,6 +95,12 @@ service cloud.firestore {
     // Test effects collection (for sound testing)
     match /testEffects/{docId} {
       allow read, write: if isAuth();
+    }
+
+    // Promotions — public read, admin SDK handles writes (bypasses rules)
+    match /promotions/{promoId} {
+      allow read: if true;
+      allow write: if false;
     }
 
     // Deny everything else by default

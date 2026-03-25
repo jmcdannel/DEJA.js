@@ -3,7 +3,7 @@ import { useStorage } from '@vueuse/core'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useLayout, useEfx, useTurnouts, useLocos } from '@repo/modules'
-import Stat from '@repo/ui/src/Stat.vue'
+import Stat from '../Stat.vue'
 import DeviceStatusItem from './DeviceStatusItem.vue'
 
 dayjs.extend(relativeTime)
@@ -86,12 +86,21 @@ function handleThrottleClick(address: number) {
     </v-col>
    </v-row>
         
-   <v-row halign="start" justify="start" dense>
-    <v-col cols="12" sm="4" lg="3"
-      v-for="device in devices"
-      :key="device.id" >
-      <DeviceStatusItem :device="device" />
-    </v-col>
-  </v-row>
-  
+   <!-- 🎨 Device cards — CSS grid for consistent sizing -->
+   <div class="device-grid">
+      <DeviceStatusItem
+        v-for="device in devices"
+        :key="device.id"
+        :device="device"
+      />
+   </div>
+
 </template>
+<style scoped>
+.device-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+</style>

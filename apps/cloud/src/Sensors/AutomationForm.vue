@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useSensors, sensorActionTypes, type Automation, type AutomationAction } from '@repo/modules/sensors'
+import { useSensors, useAutomations, sensorActionTypes, type SensorAutomation, type SensorAction } from '@repo/modules/sensors'
 import { createLogger } from '@repo/utils'
 import { useNotification } from '@repo/ui'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 
 const log = createLogger('AutomationForm')
 
 const route = useRoute()
 const router = useRouter()
-const { getSensors, getAutomation, setAutomation } = useSensors()
+const { getSensors } = useSensors()
+const { getAutomation, setAutomation } = useAutomations()
 const { notify } = useNotification()
 
 const sensors = getSensors()
@@ -27,7 +28,7 @@ const name = ref('')
 const sensorId = ref('')
 const trigger = ref('activate')
 const delay = ref<number | string | undefined>(undefined)
-const actions = ref<AutomationAction[]>([])
+const actions = ref<SensorAction[]>([])
 const enabled = ref(true)
 const loading = ref(false)
 const loadingData = ref(false)
@@ -73,7 +74,7 @@ async function loadAutomation() {
     if (result) {
       name.value = result.name ?? ''
       sensorId.value = result.sensorId ?? ''
-      trigger.value = result.trigger ?? 'activate'
+      trigger.value = result.triggerOn ?? 'activate'
       delay.value = result.delay
       actions.value = result.actions ?? []
       enabled.value = result.enabled !== false
@@ -117,7 +118,7 @@ async function submit() {
       payload.delay = Number(delay.value)
     }
 
-    await setAutomation(automationId.value || '', payload)
+    await setAutomation(automationId.value || '', payload as unknown as import('@repo/modules/sensors').SensorAutomationInput)
     router.push({ name: 'Automations' })
   } catch (err) {
     log.error('Failed to save automation', err)
@@ -136,7 +137,7 @@ onMounted(loadAutomation)
 </script>
 
 <template>
-  <PageHeader menu="Sensors" />
+  <PageHeader title="Sensors" icon="mdi-access-point" color="teal" />
   <div v-if="loadingData" class="p-6 flex justify-center">
     <v-progress-circular indeterminate color="teal" />
   </div>

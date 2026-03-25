@@ -128,7 +128,7 @@ async function handleWriteLongAddress() {
           Write Short Address
         </v-btn>
       </div>
-      <div class="text-xs text-slate-400">
+      <div class="text-xs opacity-50">
         Range: 1-127. Uses CV1. CV29 bit 5 will be set to 0 (short address mode).
       </div>
     </v-card>
@@ -168,7 +168,7 @@ async function handleWriteLongAddress() {
           CV18 = {{ calculatedCvs.cv18 }}
         </v-chip>
       </div>
-      <div class="text-xs text-slate-400 mt-2">
+      <div class="text-xs opacity-50 mt-2">
         Range: 128-9999. Uses CV17/CV18. CV29 bit 5 will be set to 1 (long address mode).
         The <code>&lt;W address&gt;</code> command handles CV17, CV18, and CV29 automatically.
       </div>

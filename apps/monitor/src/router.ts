@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { Login, LogoutView, requireAuth, requireLayout } from '@repo/auth'
 import Dashboard from './Dashboard/Dashboard.vue'
-import { Login, requireAuth, requireDccEx, requireLayout } from '@repo/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,6 +15,11 @@ const router = createRouter({
       component: Login,
       name: 'login',
       path: '/login',
+    },
+    {
+      component: LogoutView,
+      name: 'logout',
+      path: '/logout',
     },
     {
       path: '/settings',
@@ -39,6 +44,12 @@ const router = createRouter({
       name: 'Device Monitor Demo',
       component: () => import('./Dashboard/components/DeviceSerialMonitor/DeviceSerialMonitorDemo.vue'),
       beforeEnter: [requireAuth, requireLayout],
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('./views/NotFound.vue'),
+      beforeEnter: [requireAuth],
     },
     // {
     //   path: '/dccex',

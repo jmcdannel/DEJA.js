@@ -3,7 +3,9 @@ import * as Sentry from '@sentry/node'
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
-  tracesSampleRate: 1.0,
+  enabled: process.env.NODE_ENV === 'production',
+  environment: process.env.NODE_ENV || 'development',
+  tracesSampleRate: 0.2,
 })
 
 import { wsServer } from './src/lib/ws-server.js'
@@ -14,9 +16,10 @@ import { stopAllSounds } from './src/lib/sound.js'
 import { audioCacheService } from './src/lib/AudioCacheService.js'
 
 import { log } from './src/utils/logger.js'
+import { validateSubscription, startPeriodicRecheck, stopPeriodicRecheck, readConfig, SubscriptionError } from './src/lib/subscription.js'
 
 const ENABLE_MQTT = process.env.ENABLE_MQTT === 'true' || false
-const ENABLE_WS = process.env.ENABLE_WS === 'true' || true
+const ENABLE_WS = process.env.ENABLE_WS !== 'false'
 const ENABLE_DEJACLOUD = process.env.ENABLE_DEJACLOUD === 'true' || false
 
 const SHUTDOWN_TIMEOUT_MS = 10_000
@@ -27,6 +30,20 @@ let isShuttingDown = false
 async function main(): Promise<void> {
   try {
     log.start('Running', '[MAIN]')
+
+    // --- Subscription gate (before any subsystem starts) ---
+    try {
+      await validateSubscription()
+      const config = await readConfig()
+      startPeriodicRecheck(config.uid)
+    } catch (error) {
+      if (error instanceof SubscriptionError) {
+        log.fatal(`[SUBSCRIPTION] ${error.message}`)
+        process.exit(1)
+      }
+      throw error
+    }
+
     log.note('ENABLE_MQTT', ENABLE_MQTT)
     log.note('ENABLE_WS', ENABLE_WS)
     log.note('ENABLE_DEJACLOUD', ENABLE_DEJACLOUD)
@@ -95,6 +112,9 @@ async function shutdown(): Promise<void> {
   forceExitTimer.unref()
 
   try {
+    // 0. Stop subscription re-check timer
+    stopPeriodicRecheck()
+
     // 1. WebSocket server — close all client connections with a proper close message
     if (ENABLE_WS && wsServer.isConnected()) {
       log.info('[SHUTDOWN] Closing WebSocket server and all client connections...')

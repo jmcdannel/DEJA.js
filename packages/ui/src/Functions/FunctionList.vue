@@ -2,7 +2,7 @@
   import { ref } from 'vue'
   import FunctionButton from './FunctionButton.vue'
   import { defaultFunctions, useLocos, type Loco, type ConsistLoco } from '@repo/modules'
-  import { LocoAvatar, MiniConsist } from '@repo/ui'
+  import { LocoAvatar } from '@repo/ui'
 
   const props = defineProps<{
     loco: Loco | null,
@@ -22,10 +22,10 @@
     // Replace the current loco with the selected loco to show its functions
     selectedConsistAddress.value = selected.address ?? null
     // try to find a full loco entry from the locos collection
-    const full = locos.value?.find((l: Loco) => l.address === selected.address)
+    const full = locos.value?.find((l) => (l as Loco).address === selected.address) as Loco | undefined
     if (full) {
       currentLoco.value = full
-      _functions.value = defaultFunctions.map(f => ({...f, ...full.functions?.find((lf) => lf.id === f.id)}))
+      _functions.value = defaultFunctions.map(f => ({...f, ...full.functions?.find((lf: { id: number }) => lf.id === f.id)}))
       return
     }
   }
@@ -57,14 +57,26 @@
       <header class="flex items-center justify-between mb-4">
           <div class="flex items-center space-x-3">
             <LocoAvatar v-if="loco" :loco="loco as Loco" :size="36" @select="handleLocoSelect" />
-            <MiniConsist v-if="loco" :loco="loco" :selectedAddress="selectedConsistAddress" @select="handleConsistSelect" />
+            <div v-if="loco?.consist?.length" class="flex items-center gap-1">
+              <v-avatar
+                v-for="cloco in loco.consist"
+                :key="cloco.address"
+                :color="cloco.direction ? '#059669' : '#dc2626'"
+                size="28"
+                class="cursor-pointer"
+                :style="{ opacity: selectedConsistAddress === cloco.address ? 1 : 0.5 }"
+                @click="handleConsistSelect(cloco)"
+              >
+                <span class="text-white text-[10px] font-bold">{{ cloco.address }}</span>
+              </v-avatar>
+            </div>
             <h2 class="text-2xl font-bold">Functions for {{ currentLoco?.name || loco?.name || 'Loco' }}</h2>
           </div>
         <v-btn icon @click="modelOpen = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </header>
-  <hr class="my-1 border-slate-500" />
+  <hr class="my-1" style="border-color: rgba(var(--v-theme-on-surface), 0.2)" />
       <ul v-if="loco" class="p-2 flex flex-row flex-wrap items-center">
         <li v-for="(func, fIdx) in _functions" :key="func.id"      
         class=" items-center

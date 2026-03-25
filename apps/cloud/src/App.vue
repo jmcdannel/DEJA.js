@@ -7,14 +7,18 @@ import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import { createLogger } from '@repo/utils'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { useMenu } from '@/Core/Menu/useMenu'
-import { useSubscription, PLAN_DISPLAY } from '@repo/modules'
+import { useSubscription, PLAN_DISPLAY, usePromotions, PROMO_SLOTS } from '@repo/modules'
 import { Signout } from '@repo/auth'
 import { isNavigating } from '@/router'
+import { useFeedbackUser } from '@repo/modules/feedback'
+import * as Sentry from '@sentry/vue'
 
 const log = createLogger('CloudApp')
+const { feedbackUser } = useFeedbackUser()
+watch(feedbackUser, (u) => Sentry.setUser(u), { immediate: true })
 
 // Components
-import { AppHeader, NotificationContainer, provideNotifications, PageBackground } from '@repo/ui'
+import { AppHeader, NotificationContainer, provideNotifications, PageBackground, PromoBanner } from '@repo/ui'
 
 provideNotifications()
 const drawer = ref(true)
@@ -32,10 +36,6 @@ async function handleLayoutPowerToggle(newState: boolean) {
 async function handleEmergencyStop() {
 }
 
-function handleDeviceSelect(deviceId: string) {
-  log.debug('Device selected:', deviceId)
-}
-
 
 const user = useCurrentUser()
 const router = useRouter()
@@ -51,11 +51,11 @@ watch(() => route.fullPath, () => {
   if (!routeReady.value && !isNavigating.value) {
     routeReady.value = true
   }
-})
+}, { immediate: true })
 // Also mark ready when navigation finishes
 watch(isNavigating, (navigating) => {
   if (!navigating) routeReady.value = true
-})
+}, { immediate: true })
 
 const isFullscreen = computed(() => {
   // Before initial route resolves, hide chrome to prevent flash
@@ -74,10 +74,15 @@ function handleLogoClick() {
 
 const { isTrialing, trialDaysLeft, plan } = useSubscription()
 const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
+const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
+console.log('activePromos', activePromos.value)
+watch(activePromos, (val) => {
+  console.log('🚀 activePromos changed:', val, 'length:', val.length)
+}, { immediate: true })
 </script>
 <template>
-  <v-responsive class="border rounded min-h-screen bg-gradient-to-br from-[var(--v-theme-surface)] to-[var(--v-theme-background)]">
-      <v-app :theme="themePreference" class="!bg-transparent">
+  <v-app :theme="themePreference">
+    <div class="app-bg min-h-screen">
         <PageBackground
           app-name="cloud"
           :background-id="isFullscreen ? 'stars' : undefined"
@@ -91,21 +96,21 @@ const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
           color="blue"
           :show-layout-power="true"
           :show-emergency-stop="true"
-          :show-device-status="true"
-          :show-device-status-label="true"
           :show-user-profile="true"
           @track-power-toggle="handleTrackPowerToggle"
           @layout-power-toggle="handleLayoutPowerToggle"
           @emergency-stop="handleEmergencyStop"
-          @device-select="handleDeviceSelect"
           @logo-click="handleLogoClick"
           @drawer-toggle="drawer = !drawer"
         />
+        <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
+      <v-main>
         <v-banner
           v-if="!isFullscreen && isTrialing"
           lines="one"
           color="info"
           density="compact"
+          :sticky="false"
           class="text-body-2"
         >
           <template #text>
@@ -115,8 +120,12 @@ const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
             <v-btn variant="text" size="small" :to="{ name: 'Settings' }">Manage subscription</v-btn>
           </template>
         </v-banner>
-        <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
-      <v-main>
+        <PromoBanner
+          v-if="!isFullscreen"
+          v-for="promo in activePromos"
+          :key="promo.id"
+          :promotion="promo"
+        />
         <v-progress-linear
           :active="isNavigating"
           indeterminate
@@ -162,11 +171,15 @@ const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
       </v-main>
       <NotificationContainer />
       </PageBackground>
-    </v-app>
-  </v-responsive>
+    </div>
+  </v-app>
 </template>
 
 <style scoped>
+.app-bg {
+  background: rgb(var(--v-theme-background));
+}
+
 .fullscreen-header {
   position: fixed;
   top: 0;

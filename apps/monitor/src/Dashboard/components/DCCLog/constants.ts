@@ -4,7 +4,7 @@ import type { LogEntry, DccMessage } from './types'
 export const defuaultEntry: LogEntry = {
   id: Date.now(),
   action: '',
-  payload: {},
+  payload: '',
 }
 export const dccMessages: DccMessage[] = [
   {

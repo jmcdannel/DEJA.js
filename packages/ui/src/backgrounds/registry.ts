@@ -13,12 +13,8 @@ export interface BackgroundDefinition {
   css?: CSSProperties
 }
 
-// Image assets — imported statically so Vite can resolve/hash them
-import northernlightsUrl from '../assets/backgrounds/northernlights.jpg'
-import tracksUrl from '../assets/backgrounds/tracks1.jpg'
-import forestUrl from '../assets/backgrounds/foresttracks.jpg'
-import wavesUrl from '../assets/backgrounds/vertwaves.jpg'
-import viaductUrl from '../assets/backgrounds/viaduct.jpg'
+// Image assets — hosted on Vercel Blob
+import { backgroundUrls } from './blob-urls'
 
 export const backgrounds: BackgroundDefinition[] = [
   {
@@ -26,35 +22,35 @@ export const backgrounds: BackgroundDefinition[] = [
     name: 'Northern Lights',
     type: 'image',
     category: 'photo',
-    asset: northernlightsUrl,
+    asset: backgroundUrls.northernlights,
   },
   {
     id: 'tracks',
     name: 'Railroad Tracks',
     type: 'image',
     category: 'photo',
-    asset: tracksUrl,
+    asset: backgroundUrls.tracks1,
   },
   {
     id: 'forest',
     name: 'Forest Tracks',
     type: 'image',
     category: 'photo',
-    asset: forestUrl,
+    asset: backgroundUrls.foresttracks,
   },
   {
     id: 'waves',
     name: 'Vertical Waves',
     type: 'image',
     category: 'photo',
-    asset: wavesUrl,
+    asset: backgroundUrls.vertwaves,
   },
   {
     id: 'viaduct',
     name: 'Viaduct Bridge',
     type: 'image',
     category: 'photo',
-    asset: viaductUrl,
+    asset: backgroundUrls.viaduct,
   },
   {
     id: 'decor',
@@ -69,6 +65,69 @@ export const backgrounds: BackgroundDefinition[] = [
     type: 'effect',
     category: 'animated',
     component: () => import('../BackgroundFallingStars.vue'),
+  },
+  {
+    id: 'nebula',
+    name: 'Nebula',
+    type: 'image',
+    category: 'photo',
+    asset: backgroundUrls.nebula,
+  },
+  {
+    id: 'milkyway',
+    name: 'Milky Way',
+    type: 'image',
+    category: 'photo',
+    asset: backgroundUrls.milkyway,
+  },
+  {
+    id: 'neon',
+    name: 'Neon Lines',
+    type: 'image',
+    category: 'photo',
+    asset: backgroundUrls['neon-lines'],
+  },
+  {
+    id: 'railroad-night',
+    name: 'Railroad at Night',
+    type: 'image',
+    category: 'photo',
+    asset: backgroundUrls['railroad-night'],
+  },
+  {
+    id: 'dark-tracks',
+    name: 'Dark Tracks',
+    type: 'image',
+    category: 'photo',
+    asset: backgroundUrls['dark-tracks'],
+  },
+  {
+    id: 'steam-locomotive',
+    name: 'Steam Locomotive',
+    type: 'image',
+    category: 'photo',
+    asset: backgroundUrls['steam-locomotive'],
+  },
+  {
+    id: 'train-station',
+    name: 'Train Station at Night',
+    type: 'image',
+    category: 'photo',
+    asset: backgroundUrls['train-station-night'],
+  },
+  {
+    id: 'starfield',
+    name: 'Starfield',
+    type: 'effect',
+    category: 'animated',
+    component: () => import('../BackgroundStarfield.vue'),
+  },
+  {
+    id: 'aurora',
+    name: 'Aurora',
+    type: 'effect',
+    category: 'animated',
+    component: () => import('../BackgroundAurora.vue'),
   },
 ]
 

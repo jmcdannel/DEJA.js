@@ -2,6 +2,7 @@ import { FieldValue, type DocumentData } from 'firebase-admin/firestore'
 import { db } from '@repo/firebase-config/firebase-admin-node'
 import { log } from '../utils/logger'
 import { broadcast } from '../broadcast'
+import { handleMacro } from './effects.js'
 
 const layoutId = process.env.LAYOUT_ID
 
@@ -158,6 +159,37 @@ async function processAction(action: any): Promise<void> {
           timestamp: FieldValue.serverTimestamp(),
         }, { merge: true })
       break
+    case 'route': {
+      const routeDoc = await db.collection('layouts').doc(layoutId)
+        .collection('routes').doc(action.id).get()
+      if (!routeDoc.exists) {
+        log.warn(`[SENSORS] Route ${action.id} not found`)
+        break
+      }
+      const route = routeDoc.data()
+      const turnouts: Array<{ id?: string | number; state?: boolean }> = route?.turnouts || []
+      for (const turnout of turnouts) {
+        if (turnout.id) {
+          await db.collection('layouts').doc(layoutId).collection('turnouts').doc(turnout.id.toString())
+            .set({ state: turnout.state ?? true, timestamp: FieldValue.serverTimestamp() }, { merge: true })
+        }
+      }
+      log.success(`[SENSORS] Executed route ${action.id} (${turnouts.length} turnouts)`)
+      break
+    }
+    case 'macro': {
+      const macroDoc = await db.collection('layouts').doc(layoutId)
+        .collection('effects').doc(action.id).get()
+      if (!macroDoc.exists) {
+        log.warn(`[SENSORS] Macro effect ${action.id} not found`)
+        break
+      }
+      const macro = { id: macroDoc.id, ...macroDoc.data() } as any
+      macro.state = action.state ?? true
+      await handleMacro(macro)
+      log.success(`[SENSORS] Executed macro ${action.id}`)
+      break
+    }
     default:
       log.warn(`[SENSORS] Unknown action type: ${action.type}`)
   }

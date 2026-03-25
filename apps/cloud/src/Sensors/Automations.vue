@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import type { Automation } from '@repo/modules/sensors'
+import type { SensorAutomation } from '@repo/modules/sensors'
 import { useRouter } from 'vue-router'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import AutomationList from '@/Sensors/AutomationList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 
 const router = useRouter()
 
-function handleEdit(automation: Automation) {
+function handleEdit(automation: SensorAutomation) {
   router.push({ name: 'Edit Automation', params: { automationId: automation.id } })
 }
 
@@ -17,7 +17,7 @@ function handleAdd() {
 
 </script>
 <template>
-  <PageHeader menu="Sensors" />
+  <PageHeader title="Sensors" icon="mdi-access-point" color="teal" />
   <AutomationList @edit="handleEdit">
     <template #prepend>
       <AddTile @click="handleAdd" color="teal" />

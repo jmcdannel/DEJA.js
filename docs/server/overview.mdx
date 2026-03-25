@@ -1,0 +1,70 @@
+---
+title: DEJA Server
+description: The background service that connects your browser to your DCC-EX CommandStation over USB — install it, manage it with the deja CLI, and troubleshoot common issues.
+section: apps
+order: 6
+---
+
+# DEJA Server
+
+The DEJA Server is the bridge between your browser and your DCC-EX CommandStation hardware. It runs in the background on the computer connected to your CommandStation via USB, translating the commands you send from the Throttle, Cloud, and Monitor apps into DCC-EX serial commands on the track.
+
+You don't interact with the server directly — it runs quietly in the background while you control your layout from the web apps.
+
+## Installing
+
+The fastest way to get the server running is the one-line installer. See the [Installation guide](/docs/installation) for full details, or just run:
+
+**macOS / Linux / Raspberry Pi**
+
+```bash
+curl -fsSL https://install.dejajs.com | bash
+```
+
+The installer downloads the server, installs dependencies, detects your CommandStation's serial port, and starts the server automatically.
+
+## Managing with the `deja` CLI
+
+After installation, use the `deja` command to manage the server:
+
+| Command | What it does |
+|---------|-------------|
+| `deja status` | Check if the server is running, your subscription status, and serial connection |
+| `deja logs` | View recent server logs |
+| `deja logs -f` | Follow server logs in real time |
+| `deja start` | Start the server |
+| `deja stop` | Stop the server |
+| `deja restart` | Restart the server |
+| `deja update` | Download and install the latest server version |
+
+## Troubleshooting
+
+### Server not connecting to CommandStation
+
+1. **Check that the USB cable is plugged in** — the server communicates over USB serial at 115200 baud.
+2. **Run `deja status`** — this shows whether the server sees a serial port and whether a connection is active.
+3. **Restart the server** — `deja restart` will re-detect serial ports and attempt to reconnect.
+
+### Serial port access denied (Linux)
+
+On Linux (including Raspberry Pi), your user may need permission to access USB serial ports:
+
+```bash
+sudo usermod -a -G dialout $USER
+```
+
+Log out and back in for the change to take effect.
+
+### Server won't start
+
+- **Check Node.js version** — the server requires Node.js 20 or later. Run `node --version` to verify.
+- **Check logs** — run `deja logs` to see error messages from the last run.
+- **Re-run the installer** — `curl -fsSL https://install.dejajs.com | bash` will download a fresh copy and reconfigure.
+
+### Firebase connection errors
+
+Double-check that all credentials are set in `~/.deja/.env`. You can re-run the install script to reconfigure, or edit the file manually. Your credentials are also available in the [Cloud app](https://cloud.dejajs.com) under **Settings > View Local Environment Configuration**.
+
+## Looking for developer docs?
+
+The server source code and architecture are documented in the repository's [server README](https://github.com/jmcdannel/DEJA.js/blob/main/apps/server/README.md).

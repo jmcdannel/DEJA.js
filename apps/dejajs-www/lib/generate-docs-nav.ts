@@ -10,15 +10,12 @@ export interface DocNavItem {
 }
 
 const SECTION_ORDER = [
-  'Getting Started',
+  'Server',
   'Throttle',
   'Cloud',
   'Monitor',
   'Tour',
-  'Server',
-  'Sound API',
-  'IO Devices',
-  'Developer'
+  'IO Devices'
 ];
 
 function getSectionFromPath(file: string): string {
@@ -27,9 +24,7 @@ function getSectionFromPath(file: string): string {
   if (file.startsWith('monitor/')) return 'Monitor';
   if (file.startsWith('server/')) return 'Server';
   if (file.startsWith('tour/')) return 'Tour';
-  if (file.startsWith('sound-api/')) return 'Sound API';
   if (file.startsWith('io/')) return 'IO Devices';
-  if (file.startsWith('dev/')) return 'Developer';
   return 'Getting Started';
 }
 
@@ -40,9 +35,7 @@ function getSectionSlug(sectionName: string): string {
     'Monitor': 'monitor',
     'Server': 'server',
     'Tour': 'tour',
-    'Sound API': 'sound-api',
     'IO Devices': 'io',
-    'Developer': 'dev',
   };
   return map[sectionName] || '';
 }

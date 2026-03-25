@@ -31,7 +31,7 @@ const media = computed(() => getRoadnameMedia(roadname.value?.value ?? normalize
 const label = computed(() => roadname.value?.label ?? props.roadname ?? '')
 
 const fallbackClass = computed(
-  () => media.value?.fallbackClass ?? 'bg-slate-700/80 text-white border border-slate-400/70'
+  () => media.value?.fallbackClass ?? 'border opacity-80'
 )
 </script>
 
@@ -41,7 +41,8 @@ const fallbackClass = computed(
       v-if="media?.logo"
       :src="media.logo"
       :alt="`${label} logo`"
-      :class="`${sizeClass} w-auto object-contain drop-shadow bg-gray-900 p-2 rounded`"
+      :class="`${sizeClass} w-auto object-contain drop-shadow p-2 rounded`"
+      :style="{ background: 'rgba(var(--v-theme-surface), 0.8)' }"
       loading="lazy"
     />
     <span

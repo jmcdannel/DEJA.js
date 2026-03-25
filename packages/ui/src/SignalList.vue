@@ -3,7 +3,10 @@ import { computed } from 'vue'
 import { useSignals, type Signal, type SignalAspect } from '@repo/modules/signals'
 import { useLayout, type Tag } from '@repo/modules'
 import List from './ModuleList/List.vue'
-import { type ListFilter } from './ModuleList/types'
+import PageHeader from './PageHeader/PageHeader.vue'
+import ListControlBar from './ListControls/ListControlBar.vue'
+import { useListControls } from './composables/useListControls'
+import type { ListFilter } from './ListControls/types'
 
 const { getSignals, setSignalAspect } = useSignals()
 const { getDevices, getLayout } = useLayout()
@@ -11,9 +14,15 @@ const signals = getSignals()
 const devices = getDevices()
 const layout = getLayout()
 
-const signalsList = computed(() => signals.value ? signals.value.map((signal) => ({ ...signal, icon: 'mdi-traffic-light' })) : [])
+const signalsList = computed(() =>
+  signals.value
+    ? signals.value.map((signal) => ({ ...signal, icon: 'mdi-traffic-light' }))
+    : []
+)
 
-const deviceOptions = computed(() => devices?.value ? devices.value.map((device) => ({ label: device.id, value: device.id })) : [])
+const deviceOptions = computed(() =>
+  devices?.value ? devices.value.map((device) => ({ label: device.id, value: device.id })) : []
+)
 const tagOptions = computed(() =>
   layout?.value?.tags
     ? layout.value.tags.map((tag: Tag) => ({ label: tag.name, value: tag.id }))
@@ -24,6 +33,27 @@ const filters = computed<ListFilter[]>(() => [
   { type: 'device', label: 'Device', options: deviceOptions.value },
   { type: 'tags', label: 'Tags', options: tagOptions.value },
 ])
+
+const viewOptions = [
+  { value: 'signal', icon: 'mdi-traffic-light', label: 'Signal' },
+  { value: 'card', icon: 'mdi-view-grid-outline', label: 'Card' },
+  { value: 'table', icon: 'mdi-table', label: 'Table' },
+  { value: 'raw', icon: 'mdi-code-json', label: 'Raw' },
+]
+
+const sortOptions = [
+  { value: 'order', label: 'Default' },
+  { value: 'name', label: 'Name' },
+  { value: 'device', label: 'Device' },
+]
+
+const controls = useListControls('signals', {
+  list: signalsList,
+  filters: filters.value,
+  viewOptions,
+  sortOptions,
+  defaultView: 'signal',
+})
 
 function canToggle(signal: Signal, aspect: Exclude<SignalAspect, null>): boolean {
   const pinMap: Record<Exclude<SignalAspect, null>, number | undefined> = {
@@ -42,19 +72,24 @@ async function toggleAspect(signal: Signal, aspect: Exclude<SignalAspect, null>)
 </script>
 
 <template>
+  <PageHeader title="Signals" icon="mdi-traffic-light" color="emerald">
+    <template #controls>
+      <ListControlBar
+        :controls="controls"
+        color="emerald"
+        :view-options="viewOptions"
+        :sort-options="sortOptions"
+        :filters="filters"
+        search-placeholder="Search signals..."
+      />
+    </template>
+  </PageHeader>
   <List
-    module-name="signals"
-    color="cyan-darken-4"
-    title="Signals"
-    icon="mdi-traffic-light"
-    :list="signalsList"
-    :filters="filters"
-    :view-options="[
-      { label: 'Signal', value: 'signal' },
-      { label: 'Card', value: 'card' },
-      { label: 'Table', value: 'table' },
-      { label: 'Raw', value: 'raw' },
-    ]"
+    :list="controls.filteredList.value"
+    :view-as="controls.viewAs.value"
+    empty-icon="mdi-traffic-light"
+    empty-title="No signals"
+    empty-description="Add signals to control track indicators"
   >
     <template #item="{ item }">
       <v-card class="p-2 flex flex-col items-center bg-opacity-50" color="cyan" variant="tonal" rounded>

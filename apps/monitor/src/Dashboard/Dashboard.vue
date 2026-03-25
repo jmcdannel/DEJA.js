@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useWebSocket } from '@vueuse/core'
 import { useLayout, useLocos, useTurnouts, useEfx, useSignals } from '@repo/modules'
 import { useLayoutLogListeners } from '../composables/useLayoutLogListeners'
 import { usePaneManager, PANE_COLORS, type PaneColorKey } from '../composables/usePaneManager'
+import { useWsConnection } from '../composables/useWsConnection'
+import { ThrottleLaunchQR } from '@repo/ui'
 import MonitorPane from './components/MonitorPane.vue'
 import DccLogPane from './components/DccLogPane.vue'
 import DeviceSerialPaneContent from './components/DeviceSerialPaneContent.vue'
@@ -11,6 +14,12 @@ import EffectLogPane from './components/EffectLogPane.vue'
 import SensorLogPane from './components/SensorLogPane.vue'
 import StatsPane from './components/StatsPane.vue'
 const paneManager = usePaneManager()
+const { wshost, wsUrl } = useWsConnection()
+const { status: wsStatus } = useWebSocket(wsUrl, {
+  autoReconnect: { delay: 2000, retries: 10 },
+})
+const wsDisconnected = computed(() => !wshost.value || wsStatus.value !== 'OPEN')
+const showWsBanner = ref(true)
 const { turnoutChanges, effectChanges, sensorChanges } = useLayoutLogListeners()
 const { getDevices } = useLayout()
 
@@ -101,11 +110,48 @@ function handleClear(id: string) {
 function deviceIdFromPaneId(paneId: string): string {
   return paneId.replace('device-', '')
 }
+
+// Dev-only: expose mock data injection for screenshot automation
+// Wrapped in onMounted so dccLogRef is populated before seedAll can be called
+if (import.meta.env.DEV) {
+  onMounted(() => {
+    import('../dev/mock-data').then((mockData) => {
+      ;(window as any).__DEJA_MOCK__ = {
+        seedAll: () => {
+          // Seed log panes (turnout/effect/sensor are props-driven from these refs)
+          turnoutChanges.value.push(...mockData.mockTurnoutChanges)
+          effectChanges.value.push(...mockData.mockEffectChanges)
+          sensorChanges.value.push(...mockData.mockSensorChanges)
+          // Seed DCC log via the pane's seed method
+          dccLogRef.value?.seed(mockData.mockDccLog)
+        },
+      }
+    })
+  })
+}
 </script>
 
 <template>
   <div class="flex flex-col h-screen">
     <div class="monitor-layout">
+      <!-- WebSocket connection banner -->
+      <v-alert
+        v-if="wsDisconnected && showWsBanner"
+        type="info"
+        variant="tonal"
+        closable
+        density="compact"
+        class="mx-2 mt-2"
+        @click:close="showWsBanner = false"
+      >
+        <template #title>WebSocket Not Connected</template>
+        <span class="text-sm">
+          DCC Log and Device Serial Monitor require a connection to your DEJA.js server.
+          Start a tunnel with <code class="bg-slate-700 px-1 rounded">pnpm tunnel</code> in your server directory,
+          then paste the URL in <router-link to="/settings" class="text-sky-300 underline">Settings</router-link>.
+        </span>
+      </v-alert>
+
       <!-- Main grid -->
       <div class="monitor-grid" :style="gridStyle">
         <!-- DCC Log Pane -->
@@ -211,6 +257,11 @@ function deviceIdFromPaneId(paneId: string): string {
           />
         </div>
       </div>
+    </div>
+
+    <!-- Quick Throttle Launch -->
+    <div class="fixed bottom-6 right-6 z-50">
+      <ThrottleLaunchQR :size="80" label="Open Throttle" />
     </div>
   </div>
 </template>

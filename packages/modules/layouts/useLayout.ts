@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, type Ref, type ComputedRef, isRef } from 'vue'
 import {
   doc,
   collection,
@@ -73,7 +73,16 @@ export const useLayout = () => {
     return layout
   }
 
-  function getLayouts(email: string | null = null) {
+  function getLayouts(email: string | null | Ref<string | null> | ComputedRef<string | null> = null) {
+    // Support reactive email refs so the query re-runs when auth resolves
+    if (isRef(email)) {
+      const queryRef = computed(() =>
+        email.value
+          ? query(collection(db, 'layouts'), where('owner', '==', email.value))
+          : null
+      )
+      return useCollection(queryRef, { ssrKey: 'layouts' })
+    }
     return email
       ? useCollection(query(collection(db, 'layouts'), where('owner', '==', email)), { ssrKey: 'layouts' })
       : null
@@ -123,7 +132,7 @@ export const useLayout = () => {
     try {
       await setDoc(doc(db, `layouts`, id), {
         ...layout,
-        approved: layout.approved ?? false,
+        approved: layout.approved ?? true,
         defaultSounds: layout.defaultSounds ?? defaultLayoutSounds,
         owner: layout.owner ?? user.value?.email,
         dcc: {
@@ -204,6 +213,21 @@ export const useLayout = () => {
       log.debug('disconnectDevice: ', deviceId)
     } catch (e) {
       log.error('Error disconnectDevice: ', e)
+    }
+  }
+
+  async function updateDevice(id: string, data: Partial<Device>) {
+    if (!layoutId.value) {
+      log.error('No layoutId set, cannot update device')
+      return false
+    }
+    try {
+      const deviceDoc = doc(db, `layouts/${layoutId.value}/devices`, id)
+      await setDoc(deviceDoc, { ...data, timestamp: serverTimestamp() }, { merge: true })
+      return true
+    } catch (e) {
+      log.error('Error updating device: ', e)
+      return false
     }
   }
 
@@ -299,6 +323,7 @@ export const useLayout = () => {
     getLayoutDevices,
     getDevices,
     createDevice,
+    updateDevice,
     autoConnectDevice,
     deviceTypes,
     connectDevice,

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Device } from '@repo/modules'
+import type { Device, Turnout, Effect } from '@repo/modules'
 import { useLayout, useTurnouts, useEfx } from '@repo/modules'
-import { useCollection } from 'vuefire'
 import DeviceConnectionCard from './DeviceConnectionCard.vue'
+import DeviceTile from '../Dashboard/DeviceTile.vue'
 
 interface Props {
   devices: Device[]
@@ -11,11 +11,21 @@ interface Props {
   availableTopics?: string[]
   linkMode: 'page' | 'modal'
   showHeader?: boolean
+  tileMode?: boolean
+  serverUptime?: string
+  connectedDeviceCount?: number
+  totalDeviceCount?: number
+  commandCount?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
   availableTopics: () => [],
   showHeader: true,
+  tileMode: false,
+  serverUptime: '',
+  connectedDeviceCount: 0,
+  totalDeviceCount: 0,
+  commandCount: 0,
 })
 
 const emit = defineEmits<{
@@ -28,33 +38,52 @@ const emit = defineEmits<{
 }>()
 
 const { getLayout } = useLayout()
-const { getTurnoutsByDevice } = useTurnouts()
-const { getEffectsByDevice } = useEfx()
+const { getTurnouts } = useTurnouts()
+const { getEffects } = useEfx()
 
 const layout = getLayout()
+
+// Fetch all turnouts and effects once during setup (proper VueFire composable usage)
+const allTurnouts = getTurnouts()
+const allEffects = getEffects()
 
 const trackPower = computed(() => layout?.value?.dccEx?.power ?? null)
 
 const sortedDevices = computed(() => {
   return [...props.devices].sort((a, b) => {
+    // deja-server always first
+    if (a.type === 'deja-server') return -1
+    if (b.type === 'deja-server') return 1
+    // then connected before disconnected
     const aConnected = a.isConnected ? 0 : 1
     const bConnected = b.isConnected ? 0 : 1
     return aConnected - bConnected
   })
 })
 
+// Compute counts from already-loaded collections (no useCollection in render)
+const turnoutCountsByDevice = computed(() => {
+  const counts = new Map<string, number>()
+  for (const t of (allTurnouts.value ?? []) as Turnout[]) {
+    if (t.device) counts.set(t.device, (counts.get(t.device) ?? 0) + 1)
+  }
+  return counts
+})
+
+const effectCountsByDevice = computed(() => {
+  const counts = new Map<string, number>()
+  for (const e of (allEffects.value ?? []) as Effect[]) {
+    if (e.device) counts.set(e.device, (counts.get(e.device) ?? 0) + 1)
+  }
+  return counts
+})
+
 function getTurnoutCount(deviceId: string): number {
-  const queryRef = getTurnoutsByDevice(deviceId)
-  if (!queryRef) return 0
-  const data = useCollection(queryRef)
-  return data.value?.length ?? 0
+  return turnoutCountsByDevice.value.get(deviceId) ?? 0
 }
 
 function getEffectCount(deviceId: string): number {
-  const queryRef = getEffectsByDevice(deviceId)
-  if (!queryRef) return 0
-  const data = useCollection(queryRef)
-  return data.value?.length ?? 0
+  return effectCountsByDevice.value.get(deviceId) ?? 0
 }
 </script>
 
@@ -83,22 +112,44 @@ function getEffectCount(deviceId: string): number {
       </div>
     </div>
 
-    <!-- Device cards -->
-    <DeviceConnectionCard
-      v-for="device in sortedDevices"
-      :key="device.id"
-      :device="device"
-      :available-ports="availablePorts"
-      :available-topics="availableTopics"
-      :link-mode="linkMode"
-      :turnout-count="getTurnoutCount(device.id)"
-      :effect-count="getEffectCount(device.id)"
-      :track-power="device.type === 'dcc-ex' ? trackPower : null"
-      @connect="(id, serial, topic) => emit('connect', id, serial, topic)"
-      @disconnect="(id) => emit('disconnect', id)"
-      @reconnect="(id) => emit('reconnect', id)"
-      @navigate="(id) => emit('navigate', id)"
-    />
+    <!-- Device cards / tiles -->
+    <template v-if="tileMode">
+      <DeviceTile
+        v-for="device in sortedDevices"
+        :key="device.id"
+        :device="device"
+        :available-ports="availablePorts"
+        :available-topics="availableTopics"
+        :turnout-count="getTurnoutCount(device.id)"
+        :effect-count="getEffectCount(device.id)"
+        :track-power="device.type === 'dcc-ex' ? trackPower : null"
+        :server-uptime="device.type === 'deja-server' ? serverUptime : undefined"
+        :connected-device-count="device.type === 'deja-server' ? connectedDeviceCount : undefined"
+        :total-device-count="device.type === 'deja-server' ? totalDeviceCount : undefined"
+        :command-count="device.type === 'deja-server' ? commandCount : undefined"
+        @connect="(id, serial, topic) => emit('connect', id, serial, topic)"
+        @disconnect="(id) => emit('disconnect', id)"
+        @reconnect="(id) => emit('reconnect', id)"
+        @navigate="(id) => emit('navigate', id)"
+      />
+    </template>
+    <template v-else>
+      <DeviceConnectionCard
+        v-for="device in sortedDevices"
+        :key="device.id"
+        :device="device"
+        :available-ports="availablePorts"
+        :available-topics="availableTopics"
+        :link-mode="linkMode"
+        :turnout-count="getTurnoutCount(device.id)"
+        :effect-count="getEffectCount(device.id)"
+        :track-power="device.type === 'dcc-ex' ? trackPower : null"
+        @connect="(id, serial, topic) => emit('connect', id, serial, topic)"
+        @disconnect="(id) => emit('disconnect', id)"
+        @reconnect="(id) => emit('reconnect', id)"
+        @navigate="(id) => emit('navigate', id)"
+      />
+    </template>
 
     <!-- Empty state -->
     <v-card

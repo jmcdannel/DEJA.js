@@ -1,5 +1,6 @@
 import { initializeApp, cert, getApps } from 'firebase-admin/app'
 import { getDatabase } from 'firebase-admin/database'
+import { getFirestore } from 'firebase-admin/firestore'
 
 const serviceAccount = {
   clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
@@ -16,3 +17,4 @@ if (!getApps().length) {
 }
 
 export const rtdb = getDatabase()
+export const db = getFirestore()

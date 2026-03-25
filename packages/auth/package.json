@@ -1,6 +1,6 @@
 {
   "name": "@repo/auth",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -10,6 +10,7 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/modules": "workspace:*",
+    "@repo/firebase-config": "workspace:*",
     "@repo/utils": "workspace:*",
     "@repo/prettier-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",

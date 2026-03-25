@@ -1,0 +1,43 @@
+---
+title: Connect
+description: How to connect the Throttle app to your layout — selecting your layout, connection status, and getting online.
+order: 10
+---
+
+# Connecting to Your Layout
+
+Before you can control trains, the Throttle app needs to connect to your layout. This page walks you through the connection process.
+
+## Selecting Your Layout
+
+When you first open the Throttle app, you'll be prompted to select a layout. If you have multiple layouts configured in your DEJA Cloud account, choose the one you want to control.
+
+![Throttle login and layout selection](/screenshots/throttle_desktop_login.png)
+
+Your selected layout is remembered between sessions, so you won't need to pick it again unless you switch layouts.
+
+## Connection Status
+
+The app header shows your connection status at all times:
+
+- **Connected** — The Throttle app is communicating with your DEJA Server and CommandStation. You're ready to control trains.
+- **Disconnected** — The app can't reach your server. Check that the DEJA Server is running (`deja status`) and that your device is on the same network.
+
+## Authentication
+
+The Throttle app supports two modes:
+
+- **Sign in** — Log in with your DEJA Cloud account for full access to all features
+- **Guest access** — Use the app without an account for quick demonstrations (limited features)
+
+## Troubleshooting
+
+### Can't connect to layout
+
+1. Verify the DEJA Server is running on the computer connected to your CommandStation — run `deja status`
+2. Make sure your phone/tablet/computer is on the same network as the server
+3. Try refreshing the browser page
+
+### Layout not appearing
+
+If your layout doesn't show up in the picker, verify that you've completed the onboarding wizard in the [Cloud app](https://cloud.dejajs.com) and that your layout has been created.

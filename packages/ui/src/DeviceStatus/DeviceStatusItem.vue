@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
 import { useCollection } from 'vuefire'
-import { useColors } from '@repo/ui/src/useColors'
+import { useColors } from '../useColors'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { deviceTypes, useTurnouts, useEfx, type Device } from '@repo/modules'
 import { createLogger } from '@repo/utils'
-import Stat from '@repo/ui/src/Stat.vue'
+import Stat from '../Stat.vue'
 import { StatusPulse } from '../animations'
 
 const log = createLogger('DeviceStatusItem')
@@ -31,8 +31,8 @@ const color = computed(() => colors[deviceType.value?.color || DEFAULT_COLOR])
 
 </script>
 <template>
-  <v-card 
-    class="rounded-2xl shadow-xl p-2 pb-5 device-gradient text-white"
+  <v-card
+    class="rounded-2xl shadow-xl p-2 pb-5 device-gradient text-white h-full flex flex-col"
     color="primary"
     variant="flat">
     <template v-slot:title>
@@ -47,8 +47,7 @@ const color = computed(() => colors[deviceType.value?.color || DEFAULT_COLOR])
       <v-icon v-else-if="device.type === 'deja-arduino-led'" class="mr-2" size="48" :color="device.isConnected ? 'success' : 'error'" icon="mdi-led-strip" />
       <v-icon v-else-if="device.type === 'deja-mqtt'" class="mr-2" size="48" :color="device.isConnected ? 'success' : 'error'" icon="mdi-wifi" />
     </template>
-    <v-card-text>
-      <!-- <pre>{{ device }}</pre> -->
+    <v-card-text class="flex-grow">
       <v-chip
         size="small"
         class="ma-1"
@@ -115,7 +114,18 @@ const color = computed(() => colors[deviceType.value?.color || DEFAULT_COLOR])
 </template>
 <style scoped>
 .device-gradient {
-  background: rgba(18, 68, 186, 0.25)!important;
+  background: rgba(18, 68, 186, 0.55) !important;
   backdrop-filter: blur(20px);
+  color: #fff !important;
+}
+
+.device-gradient :deep(.v-card-title),
+.device-gradient :deep(.v-card-subtitle),
+.device-gradient :deep(.v-card-text) {
+  color: #fff !important;
+}
+
+.device-gradient :deep(.v-card-subtitle) {
+  opacity: 0.7;
 }
 </style>

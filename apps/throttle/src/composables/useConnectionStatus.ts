@@ -1,4 +1,4 @@
-import { ref, readonly, onUnmounted, watch } from 'vue'
+import { ref, readonly, onUnmounted } from 'vue'
 import { ref as rtdbRef, onValue, type Unsubscribe } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
 import { createLogger } from '@repo/utils'

@@ -1,0 +1,67 @@
+---
+title: IO Devices
+description: Extend your layout with wireless lights, servos, sensors, and animations using Arduino and Raspberry Pi Pico W hardware devices.
+section: io
+order: 8
+---
+
+# IO Devices
+
+IO devices extend your layout beyond what the DCC-EX CommandStation handles directly. They control effects like lighting, servo-driven turnouts, sensors, and animated elements — anything that isn't powered through the DCC track bus.
+
+## Supported Hardware
+
+### Arduino (USB Serial)
+
+Standard Arduino boards (Uno, Mega, Nano) connect to the DEJA Server via USB. They can drive:
+
+- **PWM servos** via an Adafruit PCA9685 16-channel servo driver board — for turnout motors and animated elements
+- **Digital outputs** — for LEDs, relays, and on/off devices
+- **Signal heads** — for model railroad signal aspects
+- **Sensors** — for detecting train presence (block detection, occupancy)
+
+Arduino devices communicate over serial at 115200 baud.
+
+### Raspberry Pi Pico W (WiFi / MQTT)
+
+The Pico W connects to your layout wirelessly over WiFi and communicates via MQTT. This is ideal for devices placed inside scenery or buildings where running USB cables is impractical.
+
+Pico W devices support:
+
+- **Digital pin control** — LEDs, relays, and other outputs
+- **PWM servo control** — via Adafruit ServoKit over I2C
+
+## Setting Up a Device
+
+1. **Register the device** — In the [Cloud app](https://cloud.dejajs.com), go to your layout's **Devices** section and add a new device entry with a unique device ID.
+2. **Flash the firmware** — Upload the appropriate DEJA firmware to your board:
+   - Arduino: Open the sketch in Arduino IDE, set your `DEVICE_ID` and pin configuration, then upload.
+   - Pico W: Copy the CircuitPython firmware files to the device and configure WiFi and MQTT settings.
+3. **Connect** — Plug in the Arduino via USB, or power on the Pico W and it will connect to your WiFi network automatically.
+4. **Verify** — Open the [Monitor app](https://monitor.dejajs.com) to see your device appear in the device serial monitors.
+
+## Per-Layout Configuration
+
+Each device has a JSON configuration file that maps logical pin numbers to physical GPIO pins. These config files live per-layout and per-device, so you can customize the wiring for each installation.
+
+For example, a Pico W controlling Eagle Nest lighting might map pins like this:
+
+```json
+{
+  "pins": {
+    "6": "GP6",
+    "7": "GP7",
+    "8": "GP8",
+    "9": "GP9"
+  }
+}
+```
+
+## 🔧 Advanced: DIY & Custom Integration
+
+Want to build your own devices or integrate custom software with DEJA.js?
+
+- **[Building Custom Devices](/docs/io/custom-devices)** — 🛠️ Build MQTT devices from scratch using any microcontroller with WiFi
+- **[WebSocket Integration](/docs/io/websocket-integration)** — 🌐 Connect scripts and applications directly to the DEJA Server via WebSocket
+
+These guides are for hardware enthusiasts who want to go beyond the standard firmware and build custom integrations.

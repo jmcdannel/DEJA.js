@@ -44,9 +44,27 @@ export { useAutomations } from './sensors/useAutomations'
 export * from './sensors/types'
 export * from './sensors/constants'
 
+// Track Diagrams module
+export * from './trackDiagrams/index.js'
+
 // Plans
 export * from './plans'
+
+// Promotions
+export * from './promotions'
 
 // CV module
 export * from './cv/types'
 export * from './cv/constants'
+
+// Feedback
+export { default as useFeedbackUser } from './feedback/useFeedbackUser'
+export * from './feedback/types'
+export * from './feedback/config'
+
+// Power Districts module
+export { default as usePowerDistricts } from './powerDistricts/usePowerDistricts'
+export * from './powerDistricts/types'
+
+// Features
+export * from './features'
