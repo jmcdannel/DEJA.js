@@ -3,6 +3,7 @@
 import { ref, watch }  from 'vue'
 import { useLayoutRoutes } from '@repo/modules'
 import { useLayoutRoutesMap } from './useLayoutRoutesMap'
+import { PageHeader } from '@repo/ui'
 import TamarackJunction from './maps/tam/TamarackJunction.vue'
 import PayetteSub from './maps/tam/PayetteSub.vue'
 import './route-styles.css'
@@ -10,7 +11,7 @@ import './route-styles.css'
 const activeMap = ref('PayetteSub')
 
 const { runRoute, isRunning, percentComplete } = useLayoutRoutes()
-const { 
+const {
   clearP1,
   clearP2,
   getMapClasses,
@@ -24,13 +25,10 @@ const {
 </script>
 <template>
   <div class="relative">
-    <header class="m-2 flex items-center justify-between">
-      <hgroup class="flex items-center space-x-8">
-        <h1 class="text-3xl font-bold text-blue-400">Routes</h1>
-      </hgroup>
-      <nav class="flex items-center space-x-2">
-        <v-btn 
-          v-for="map in ['TamarackJunction', 'PayetteSub']" 
+    <PageHeader title="Routes" icon="mdi-routes" color="blue">
+      <template #actions>
+        <v-btn
+          v-for="map in ['TamarackJunction', 'PayetteSub']"
           :key="map"
           :variant="activeMap === map ? 'flat' : 'outlined'"
           color="primary"
@@ -47,8 +45,8 @@ const {
           size="small"
           @click="activeMap = 'RoutesList'"
         >Routes List</v-btn>
-      </nav>
-    </header>
+      </template>
+    </PageHeader>
     <main>
       <v-progress-linear v-model="percentComplete" :opacity="isRunning ? 1 : 0" color="primary" />
       <v-timeline class="my-2" direction="horizontal" side="start" size="small" truncate-line="both">

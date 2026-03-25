@@ -11,6 +11,7 @@ import { checkRequireFeature } from '@repo/auth'
 import type { FeatureName, UserRole } from '@repo/modules'
 import Dashboard from './Dashboard/Dashboard.vue'
 import Login from './views/Login.vue'
+import { LogoutView } from '@repo/auth'
 
 const log = createLogger('Router')
 
@@ -80,6 +81,12 @@ const router = createRouter({
       path: '/forgot-password',
       name: 'forgot-password',
       component: () => import('./views/ForgotPassword.vue'),
+      meta: { fullscreen: true },
+    },
+    {
+      path: '/logout',
+      name: 'logout',
+      component: LogoutView,
       meta: { fullscreen: true },
     },
     {
@@ -261,6 +268,12 @@ const router = createRouter({
       name: 'Edit Track Diagram',
       component: () => import('./TrackDiagram/EditTrackDiagram.vue'),
       meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'trackDiagrams' },
+    },
+    {
+      path: '/power-districts',
+      name: 'Power Districts',
+      component: () => import('./PowerDistricts/PowerDistricts.vue'),
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/dccex',

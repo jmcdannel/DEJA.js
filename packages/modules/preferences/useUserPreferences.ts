@@ -15,7 +15,14 @@ const DEFAULT_BACKGROUND_PREFS: AppBackgroundPrefs = {
 }
 
 export function useUserPreferences() {
-  const user = useCurrentUser()
+  // Guard against VueFireAuth not being available (e.g. Vite dep dedup issues)
+  let user: ReturnType<typeof useCurrentUser>
+  try {
+    user = useCurrentUser()
+  } catch {
+    log.warn('VueFireAuth not available — falling back to local-only preferences')
+    user = ref(null) as unknown as ReturnType<typeof useCurrentUser>
+  }
 
   const localCache = useStorage<UserPreferences | null>(
     '@DEJA/userPreferences',
@@ -26,7 +33,13 @@ export function useUserPreferences() {
     user.value?.uid ? doc(db, 'users', user.value.uid) : null,
   )
 
-  const firestorePrefs = useDocument<UserPreferences>(userDocRef)
+  let firestorePrefs: Ref<UserPreferences | null | undefined>
+  try {
+    firestorePrefs = useDocument<UserPreferences>(userDocRef)
+  } catch {
+    log.warn('useDocument not available — using local cache only')
+    firestorePrefs = ref(null)
+  }
 
   const isLoaded = computed(() => firestorePrefs.value !== undefined)
 

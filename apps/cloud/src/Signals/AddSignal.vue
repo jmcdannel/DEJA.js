@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import SignalForm from '@/Signals/SignalForm.vue'
 import type { Signal } from '@repo/modules/signals'
 
@@ -22,6 +22,6 @@ function handleClose() {
 }
 </script>
 <template>
-  <PageHeader menu="Signals" />
+  <PageHeader title="Signals" icon="mdi-traffic-light" color="emerald" />
   <SignalForm :signal="defaultSignal" @close="handleClose" />
 </template>

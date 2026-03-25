@@ -9,7 +9,6 @@ import UserProfile from './UserProfile.vue'
 import TrackPower from './TrackPower.vue'
 import Power from './Power.vue'
 import EmergencyStop from './EmergencyStop.vue'
-import SelectLayout from './SelectLayout.vue'
 import { useLayout, useServerStatus } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
 import { createLogger } from '@repo/utils'
@@ -49,11 +48,10 @@ const { mdAndUp } = useDisplay()
 
 const { serverStatus } = useServerStatus()
 
-const layouts = getLayouts(user.value?.email)
+const email = computed(() => user.value?.email ?? null)
+const layouts = getLayouts(email)
 const devices = getDevices()
 
-const isLayoutModalOpen = ref(false)
-const isDeviceModalOpen = ref(false)
 const wiThrottlePower = ref<0 | 1 | 2>(2) // 0=off, 1=on, 2=unknown
 const wiThrottleConnected = ref(false)
 
@@ -87,27 +85,8 @@ async function handleEmergencyStop() {
   await sendDccCommand({ action: 'dcc', payload: '!' })
 }
 
-function handleDeviceSelect(deviceId: string) {
-  log.debug('Device selected:', deviceId)
-  // Handle device selection if needed
-}
-
-function handleLayoutSelect(selectedLayoutId: string) {
-  layoutId.value = selectedLayoutId
-  router.push({ name: 'home' })
-  isLayoutModalOpen.value = false
-}
-
 function handleLogoClick() {
   router.push({ path: '/' })
-}
-
-function openLayoutModal() {
-  isLayoutModalOpen.value = true
-}
-
-function openDeviceModal() {
-  isDeviceModalOpen.value = true
 }
 
 function handleWiThrottlePowerState(event: Event) {
@@ -194,31 +173,18 @@ const defaultProps = {
       <!-- User Profile - always on the far right --> 
       <template v-if="mdAndUp">
         <v-chip v-if="user" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-home" :color="layoutId ? 'success' : 'error'"
-          variant="elevated" @click="openLayoutModal">
-          <template #append>
-            <span v-if="layoutId" class="status-dot success-dot"></span>
-            <span v-else class="status-dot error-dot"></span>
-          </template>
+          variant="elevated" @click="router.push('/connect')">
           <span class="font-medium">{{ currentLayout?.name || 'No Layout' }}</span>
         </v-chip>
         <v-chip v-if="showDeviceStatus && hasDevices" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-devices"
-          :color="allConnected ? 'success' : 'warning'" variant="elevated" @click="openDeviceModal">
-          <template #append>
-            <span v-if="allConnected" class="status-dot success-dot"></span>
-            <span v-else class="status-dot warning-dot"></span>
-          </template>
+          :color="allConnected ? 'success' : 'warning'" variant="elevated" @click="router.push('/connect')">
           <span v-if="showDeviceStatusLabel" class="font-medium">
             {{ connectedDevicesCount }}/{{ devices.length }}
           </span>
         </v-chip>
-        
         <v-chip v-if="user" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-server-network"
           :color="serverStatus?.online ? 'success' : 'error'" variant="elevated"
-          @click="router.push({ name: 'Devices' })">
-          <template #append>
-            <span v-if="serverStatus?.online" class="status-dot success-dot"></span>
-            <span v-else class="status-dot error-dot"></span>
-          </template>
+          @click="router.push('/connect')">
           <span class="font-medium hidden sm:inline-block">Server</span>
         </v-chip>
 
@@ -243,69 +209,6 @@ const defaultProps = {
     </template>
   </v-app-bar> -->
 
-    <!-- Layout Selection Modal -->
-    <v-dialog v-model="isLayoutModalOpen" max-width="600px">
-      <v-card>
-        <v-card-title class="flex items-center gap-2">
-          <v-icon>mdi-home</v-icon>
-          Select Layout
-        </v-card-title>
-        <v-card-text>
-          <SelectLayout @select="isLayoutModalOpen = false" />
-        </v-card-text>
-        <v-card-actions class="justify-end">
-          <v-btn variant="text" @click="isLayoutModalOpen = false">Close</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- Device Selection Modal -->
-    <v-dialog v-model="isDeviceModalOpen" max-width="600px">
-      <v-card>
-        <v-card-title class="flex items-center gap-2">
-          <v-icon>mdi-devices</v-icon>
-          Device Status
-        </v-card-title>
-        <v-card-text>
-          <div v-if="hasDevices" class="space-y-3">
-            <div v-for="device in devices" :key="device.id" 
-              class="p-4 rounded-lg border cursor-pointer transition-all"
-              :class="{ 'border-green-500': device.isConnected, 'border-red-500': !device.isConnected }"
-              @click="handleDeviceSelect(device.id)">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <v-icon :color="device.isConnected ? 'success' : 'error'">
-                    {{ device.type === 'dcc-ex' || device.connection === 'usb' ? 'mdi-memory' : device.connection === 'wifi' ? 'mdi-wifi' : 'mdi-bluetooth' }}
-                  </v-icon>
-                  <div>
-                    <h4 class="font-medium">{{ device.id }}</h4>
-                    <div class="flex gap-2 text-sm opacity-60">
-                      <span>{{ device.connection }}</span>
-                      <span v-if="device.port">{{ device.port }}</span>
-                      <span v-if="device.topic">{{ device.topic }}</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="status-dot" :class="device.isConnected ? 'success-dot' : 'error-dot'"></span>
-                  <span class="text-sm font-medium" :class="device.isConnected ? 'text-green-600' : 'text-red-600'">
-                    {{ device.isConnected ? 'Connected' : 'Disconnected' }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div v-else class="text-center py-8">
-            <v-icon size="48" color="grey">mdi-devices-outline</v-icon>
-            <h3 class="text-lg font-medium mt-2">No Devices Available</h3>
-            <p class="opacity-60">There are currently no devices configured.</p>
-          </div>
-        </v-card-text>
-        <v-card-actions class="justify-end">
-          <v-btn variant="text" @click="isDeviceModalOpen = false">Close</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
 </template>
 
 <style scoped>

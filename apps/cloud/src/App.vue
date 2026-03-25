@@ -127,11 +127,14 @@ watch(activePromos, (val) => {
           @logo-click="handleLogoClick"
           @drawer-toggle="drawer = !drawer"
         />
+        <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
+      <v-main>
         <v-banner
           v-if="!isFullscreen && isTrialing"
           lines="one"
           color="info"
           density="compact"
+          :sticky="false"
           class="text-body-2"
         >
           <template #text>
@@ -141,8 +144,12 @@ watch(activePromos, (val) => {
             <v-btn variant="text" size="small" :to="{ name: 'Settings' }">Manage subscription</v-btn>
           </template>
         </v-banner>
-        <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
-      <v-main>
+        <PromoBanner
+          v-if="!isFullscreen"
+          v-for="promo in activePromos"
+          :key="promo.id"
+          :promotion="promo"
+        />
         <v-progress-linear
           :active="isNavigating"
           indeterminate

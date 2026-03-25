@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import PageHeader from '@/Core/UI/PageHeader.vue'
+import { PageHeader } from '@repo/ui'
 import SoundList from '@/Sounds/SoundList.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
 
@@ -11,7 +11,7 @@ function handleAdd() {
 }
 </script>
 <template>
-  <PageHeader menu="Sounds" />
+  <PageHeader title="Sounds" icon="mdi-volume-high" color="sky" />
 
   <SoundList>
     <template #prepend>

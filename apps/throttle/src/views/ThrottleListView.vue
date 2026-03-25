@@ -1,8 +1,15 @@
-<script async setup lang="ts">
+<script setup lang="ts">
 import ThrottleList from '@/throttle/ThrottleList.vue'
 </script>
 <template>
-  <main class="@containerp p-2 md:p-4  flex-grow flex flex-col relative overflow-auto w-full h-full flex-1">
+  <main class="throttle-list-page">
     <ThrottleList />
   </main>
 </template>
+<style scoped>
+.throttle-list-page {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+</style>

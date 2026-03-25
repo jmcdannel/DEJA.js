@@ -7,11 +7,6 @@ import { createRosterModule } from '../modules/roster.js'
 import { log } from '../utils/logger'
 import { serial } from './serial'
 
-export interface ConnectCommand {
-  device: string
-  serial: string
-}
-
 export interface SerialCom {
   isConnected: boolean
   port: SerialPort | null
@@ -37,9 +32,15 @@ export interface OutputPayload {
   state: boolean
 }
 
+export interface TrackPowerPayload {
+  deviceId: string
+  output: string
+  power: boolean
+}
+
 // Allowed DCC-EX action types from Firebase
 const VALID_ACTIONS = new Set([
-  'connect', 'dcc', 'listPorts', 'power', 'throttle',
+  'dcc', 'listPorts', 'power', 'trackPower', 'throttle',
   'turnout', 'output', 'function', 'getStatus', 'status', 'ping',
   'syncRoster', 'importRoster',
 ])
@@ -62,12 +63,9 @@ function isFiniteNumber(val: unknown): val is number {
   return typeof val === 'number' && Number.isFinite(val)
 }
 
-let isConnected = false // serial port connection status
-const baudRate = 115200
-let com: SerialCom = {
-  isConnected: false,
-  port: null as SerialPort | null,
-}
+// 🔧 Multi-device registry — replaces the old single `com` variable
+const dccDevices: Map<string, SerialCom> = new Map()
+
 const layoutId = process.env.LAYOUT_ID
 
 const getPorts = async () => {
@@ -80,7 +78,12 @@ const getPorts = async () => {
 }
 
 export function isPowerCommand(data: string): boolean {
-  // Matches '1', '0', '1 MAIN', '0 MAIN', '1 PROG', '0 PROG' (ignoring whitespace)
+  // Matches global: '1', '0', '1 MAIN', '0 MAIN', '1 PROG', '0 PROG'
+  // Matches per-output: '1 A', '0 B', etc.
+  return /^\s*[01](\s+(MAIN|PROG|[A-H]))?\s*$/.test(data)
+}
+
+function isGlobalPowerCommand(data: string): boolean {
   return /^\s*[01](\s+(MAIN|PROG))?\s*$/.test(data)
 }
 
@@ -106,38 +109,118 @@ async function writePowerToFirestore(data: string): Promise<void> {
  */
 async function writeDccLog(
   type: 'cmd-out' | 'cmd-in' | 'info' | 'error' | 'system',
-  message: string
+  message: string,
+  deviceId?: string,
 ): Promise<void> {
   try {
     if (!layoutId) return
     const logRef = rtdb.ref(`dccLog/${layoutId}`)
-    await logRef.push({
+    const entry: Record<string, unknown> = {
       type,
       message,
       timestamp: ServerValue.TIMESTAMP,
-    })
+    }
+    if (deviceId) {
+      entry.deviceId = deviceId
+    }
+    await logRef.push(entry)
   } catch (err) {
     // Log locally but don't throw — logging failures must not break command flow
     log.error('[DCC] Failed to write dccLog entry:', err)
   }
 }
 
+// --- Multi-device registration ---
+
+function registerDevice(deviceId: string, port: SerialPort): void {
+  dccDevices.set(deviceId, { isConnected: true, port })
+  log.success(`[DCC] Registered device: ${deviceId} (total: ${dccDevices.size})`)
+}
+
+function unregisterDevice(deviceId: string): void {
+  dccDevices.delete(deviceId)
+  log.note(`[DCC] Unregistered device: ${deviceId} (total: ${dccDevices.size})`)
+}
+
+/**
+ * Get the first device ID (Device 1) — used for PROG-only commands.
+ * "Device 1" is the first dcc-ex device by insertion order (which follows
+ * Firestore document ID sort from layout.ts).
+ */
+function getDevice1Id(): string | undefined {
+  const first = dccDevices.keys().next()
+  return first.done ? undefined : first.value
+}
+
+// --- Command dispatch ---
+
+/**
+ * Send a command to ALL connected DCC-EX devices.
+ * Per-device try-catch ensures one broken connection doesn't block others.
+ */
+async function broadcastToAll(data: string): Promise<void> {
+  if (!validateDccCommand(data)) {
+    log.error('[DCC] Rejected invalid command:', data)
+    return
+  }
+  const cmd = `<${data}>\n`
+  for (const [deviceId, device] of dccDevices) {
+    try {
+      if (device.port) {
+        serial.send(device.port, cmd)
+      }
+    } catch (err) {
+      log.error(`[DCC] Error sending to device ${deviceId}:`, err)
+    }
+  }
+  broadcast({ action: 'dcc', payload: data })
+  await writeDccLog('cmd-out', data)
+  if (isGlobalPowerCommand(data)) {
+    await writePowerToFirestore(data)
+  }
+}
+
+/**
+ * Send a command to a specific device by ID.
+ * Used for track config, per-output power, and PROG commands.
+ */
+async function sendToDevice(deviceId: string, data: string): Promise<void> {
+  if (!validateDccCommand(data)) {
+    log.error('[DCC] Rejected invalid command:', data)
+    return
+  }
+  const device = dccDevices.get(deviceId)
+  if (!device?.port) {
+    log.error(`[DCC] Device not found or not connected: ${deviceId}`)
+    return
+  }
+  try {
+    const cmd = `<${data}>\n`
+    serial.send(device.port, cmd)
+    broadcast({ action: 'dcc', payload: data })
+    await writeDccLog('cmd-out', data, deviceId)
+  } catch (err) {
+    log.error(`[DCC] Error sending to device ${deviceId}:`, err)
+  }
+}
+
+// --- Message handling ---
+
 const handleMessage = async (msg: string): Promise<void> => {
   try {
     const { action, payload } = JSON.parse(msg)
-    // log.note('handleMessage', action, payload, msg)
     switch (action) {
-      case 'connect':
-        await connect(payload)
-        break
       case 'dcc':
-        await send(payload)
+        await broadcastToAll(payload)
         break
       case 'listPorts':
         await listPorts()
         break
       case 'power':
         await power(payload)
+        break
+      case 'trackPower':
+        await handleTrackPower(payload)
         break
       case 'throttle':
         await sendSpeed(payload)
@@ -163,78 +246,12 @@ const handleMessage = async (msg: string): Promise<void> => {
         await rosterModule.startRosterImport()
         break
       default:
-        //noop
         log.warn('Unknown action in `dcc handleMessage`', action, payload)
     }
   } catch (err) {
     log.fatal('Error handling message:', err)
   }
 }
-
-const handleConnectionMessage = async (payload: JSON | string): Promise<void> =>
-  await broadcast({ action: 'broadcast', payload })
-
-const send = async (data: string): Promise<void> => {
-  try {
-    if (!validateDccCommand(data)) {
-      log.error('[DCC] Rejected invalid command:', data)
-      return
-    }
-    const cmd = `<${data}>\n`
-    // log.await('Writing to port', data)
-    if (com.port) {
-      serial.send(com.port, cmd)
-      broadcast({ action: 'dcc', payload: data })
-      await writeDccLog('cmd-out', data)
-      if (isPowerCommand(data)) {
-        // Optimistically reflect requested power state in Firestore
-        await writePowerToFirestore(data)
-      }
-    }
-  } catch (err) {
-    log.fatal('Error writting to port:', err)
-  }
-}
-
-const connect = async (payload: ConnectCommand): Promise<boolean> => {
-  try {
-    log.star('[DCC] connect', payload)
-    const { serial: path, device } = payload
-    if (isConnected) {
-      await broadcast({ action: 'connected', payload: { baudRate, path } })
-      return isConnected
-    }
-    const port = await serial.connect({
-      baudRate,
-      handleMessage: handleConnectionMessage,
-      path,
-    })
-    await broadcast({
-      action: 'connected',
-      payload: { baudRate, device, path },
-    })
-    await writeDccLog('system', `Connected to ${path} (baud: ${baudRate})`)
-    isConnected = true
-    if (port) {
-      com = { isConnected, port }
-    }
-    return isConnected
-  } catch (err) {
-    log.fatal('Error opening port: ', err)
-    await writeDccLog('error', `Connection failed: ${(err as Error).message}`)
-    return false
-  }
-}
-
-const setConnection = async (port: SerialPort): Promise<SerialCom> => {
-  // log.log('setConnection', Boolean(port))
-  com = { isConnected: true, port }
-  isConnected = true
-  return com
-}
-
-// Roster sync module — initialized with the internal send function and connection state
-const rosterModule = createRosterModule(send, () => isConnected, serial.addDataListener)
 
 const listPorts = async (): Promise<void> => {
   const payload = await getPorts()
@@ -243,22 +260,32 @@ const listPorts = async (): Promise<void> => {
 }
 
 const getStatus = async (): Promise<void> => {
+  const connected = dccDevices.size > 0
   await broadcast({
     action: 'status',
-    payload: { client: 'dejaJS', isConnected },
+    payload: { client: 'dejaJS', isConnected: connected },
   })
-  log.star('[DCC] getStatus', { action: 'status', payload: { isConnected } })
+  log.star('[DCC] getStatus', { action: 'status', payload: { isConnected: connected } })
 }
 
 const power = async (state: string): Promise<void> => {
-  if (!isPowerCommand(state)) {
+  if (!isGlobalPowerCommand(state)) {
     log.error('[DCC] Rejected invalid power command:', state)
     return
   }
-  await send(state)
-  // Optimistically update Firestore power state as well
-  await writePowerToFirestore(state)
+  await broadcastToAll(state)
   log.star('Power', state)
+}
+
+const handleTrackPower = async (payload: TrackPowerPayload): Promise<void> => {
+  const { deviceId, output, power: powerState } = payload
+  if (!deviceId || !output) {
+    log.error('[DCC] Rejected invalid trackPower payload:', payload)
+    return
+  }
+  const cmd = `${powerState ? '1' : '0'} ${output}`
+  await sendToDevice(deviceId, cmd)
+  log.star('TrackPower', deviceId, output, powerState)
 }
 
 const sendSpeed = async ({
@@ -273,7 +300,7 @@ const sendSpeed = async ({
   const absSpeed = Math.abs(speed)
   log.star('Throttle', address, speed, direction)
   const cmd = `t ${address} ${absSpeed} ${direction}`
-  await send(cmd)
+  await broadcastToAll(cmd)
 }
 
 const sendTurnout = async ({
@@ -286,7 +313,7 @@ const sendTurnout = async ({
   }
   log.star('Turnout', turnoutIdx, state)
   const cmd = `T ${turnoutIdx} ${state ? 1 : 0}`
-  await send(cmd)
+  await broadcastToAll(cmd)
 }
 
 const sendFunction = async ({
@@ -300,7 +327,7 @@ const sendFunction = async ({
   }
   log.star('Function', address, func)
   const cmd = `F ${address} ${func} ${state ? 1 : 0}`
-  await send(cmd)
+  await broadcastToAll(cmd)
 }
 
 const sendOutput = async (payload: OutputPayload) => {
@@ -310,7 +337,7 @@ const sendOutput = async (payload: OutputPayload) => {
   }
   log.star('Output', payload)
   const cmd = `Z ${payload.pin} ${payload.state ? 1 : 0}`
-  await send(cmd)
+  await broadcastToAll(cmd)
 }
 
 interface SensorDefinition {
@@ -325,11 +352,11 @@ const defineSensor = async ({ id, pin, pullup }: SensorDefinition): Promise<void
     return
   }
   const cmd = `S ${id} ${pin} ${pullup ? 1 : 0}`
-  await send(cmd)
+  await broadcastToAll(cmd)
 }
 
 const querySensors = async (): Promise<void> => {
-  await send('Q')
+  await broadcastToAll('Q')
 }
 
 const querySensor = async (id: number): Promise<void> => {
@@ -337,7 +364,7 @@ const querySensor = async (id: number): Promise<void> => {
     log.error('[DCC] Rejected invalid sensor query id:', id)
     return
   }
-  await send(`q ${id}`)
+  await broadcastToAll(`q ${id}`)
 }
 
 export async function handleDccChange(snapshot: any, key: string): Promise<void> {
@@ -347,7 +374,6 @@ export async function handleDccChange(snapshot: any, key: string): Promise<void>
       log.error('[DCC] Rejected unknown action from RTDB:', action)
       return
     }
-    // log.log('handleDccChange: ', action, payload, snapshot.key)
     await handleMessage(
       JSON.stringify({ action, payload: JSON.parse(payload) })
     )
@@ -361,6 +387,16 @@ export async function handleDccChange(snapshot: any, key: string): Promise<void>
   }
 }
 
+// Roster sync module — broadcastToAll for sync, Device 1 for import (PROG access)
+const rosterModule = createRosterModule(
+  async (cmd: string) => {
+    // Roster sync broadcasts to all devices
+    await broadcastToAll(cmd)
+  },
+  () => dccDevices.size > 0,
+  serial.addDataListener,
+)
+
 // Register serial data listener to log incoming responses to RTDB
 serial.addDataListener((data: string) => {
   // Don't log sensor JSON data — it's high-frequency noise
@@ -369,17 +405,19 @@ serial.addDataListener((data: string) => {
 })
 
 export const dcc = {
-  dccSerial: com,
+  broadcastToAll,
   defineSensor,
+  getDevice1Id,
   handleDccChange,
   handleMessage,
   querySensor,
   querySensors,
-  sendCommand: send,
+  registerDevice,
+  sendToDevice,
   sendOutput,
   sendSpeed,
   sendTurnout,
-  setConnection,
+  unregisterDevice,
 }
 
 export default dcc

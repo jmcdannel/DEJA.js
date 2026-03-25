@@ -3,7 +3,7 @@ import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.vue'
 import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import { FunctionsSpeedDial } from '@repo/ui'
-import { LocoAvatar, MiniConsist } from '@repo/ui'
+import { LocoAvatar, ConsistIndicator } from '@repo/ui'
 import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
 import { useThrottle } from '@/throttle/useThrottle'
 import { useRouter } from 'vue-router'
@@ -38,7 +38,7 @@ const {
           :loco="loco" 
           :size="48" 
           @select="$router.push({ name: 'throttle', params: { address } })" />
-        <MiniConsist v-if="loco" :loco="loco" />
+        <ConsistIndicator v-if="loco" :loco="loco" />
       </template>
       <template v-slot:right>
           <span class="text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 font-bold">
