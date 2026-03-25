@@ -5,7 +5,8 @@ import { useRouter } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
-import { QuickConnectPanel, StatusPulse } from '@repo/ui'
+import { QuickConnectPanel, StatusPulse, OnboardingBanner } from '@repo/ui'
+import { useOnboarding } from '@repo/modules'
 import Speedometer from '@/throttle/Speedometer.vue'
 import {
   useLayout,
@@ -34,11 +35,14 @@ const { getEffects } = useEfx()
 const { getSignals } = useSignals()
 const { getSensors } = useSensors()
 
+const { state: onboardingState, isComplete: onboardingComplete } = useOnboarding()
+
 const throttles = getThrottles()
 const turnouts = getTurnouts()
 const effects = getEffects()
 const signals = getSignals()
 const sensors = getSensors()
+const locoCount = computed(() => throttles.value?.length ?? 0)
 
 // 🔌 Port list from RTDB
 const ports = ref<string[]>([])
@@ -87,6 +91,10 @@ function handleLayoutDisconnect() {
   router.push('/connect')
 }
 
+function openCloudSetup() {
+  window.open('https://cloud.dejajs.com', '_blank')
+}
+
 const navItems = [
   { title: 'Throttles', icon: 'mdi-gamepad-variant', route: '/throttles', color: 'cyan' },
   { title: 'Turnouts', icon: 'mdi-swap-horizontal', route: '/turnouts', color: 'amber' },
@@ -118,6 +126,16 @@ const navItems = [
         </div>
       </div>
     </header>
+
+    <!-- 🚂 Onboarding Banner -->
+    <OnboardingBanner
+      v-if="user && layoutId && !onboardingComplete"
+      :state="onboardingState"
+      :loco-count="locoCount"
+      variant="throttle"
+      @add-loco="router.push({ name: 'roster' })"
+      @open-cloud-setup="openCloudSetup"
+    />
 
     <!-- ⚡ Quick Connect (prominent) -->
     <QuickConnectPanel

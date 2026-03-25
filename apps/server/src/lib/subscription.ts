@@ -15,7 +15,7 @@ interface CachedSubscription {
   validatedAt: string // ISO 8601
 }
 
-interface DejaConfig {
+export interface DejaConfig {
   uid: string
   layoutId: string
   subscription?: CachedSubscription

@@ -17,6 +17,8 @@ import { audioCacheService } from './src/lib/AudioCacheService.js'
 
 import { log } from './src/utils/logger.js'
 import { validateSubscription, startPeriodicRecheck, stopPeriodicRecheck, readConfig, SubscriptionError } from './src/lib/subscription.js'
+import type { DejaConfig } from './src/lib/subscription.js'
+import { markServerStarted } from './src/lib/onboarding.js'
 
 const ENABLE_MQTT = process.env.ENABLE_MQTT === 'true' || false
 const ENABLE_WS = process.env.ENABLE_WS !== 'false'
@@ -32,9 +34,10 @@ async function main(): Promise<void> {
     log.start('Running', '[MAIN]')
 
     // --- Subscription gate (before any subsystem starts) ---
+    let config: DejaConfig
     try {
       await validateSubscription()
-      const config = await readConfig()
+      config = await readConfig()
       startPeriodicRecheck(config.uid)
     } catch (error) {
       if (error instanceof SubscriptionError) {
@@ -75,6 +78,9 @@ async function main(): Promise<void> {
         log.error('WebSocket server failed:', err)
       }
     }
+
+    // Mark onboarding serverStarted (write-once, non-blocking)
+    await markServerStarted(config.uid)
 
     log.start('DEJA.js Server is running!')
 

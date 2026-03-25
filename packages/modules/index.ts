@@ -50,6 +50,9 @@ export * from './trackDiagrams/index.js'
 // Plans
 export * from './plans'
 
+// Onboarding
+export * from './onboarding'
+
 // Promotions
 export * from './promotions'
 

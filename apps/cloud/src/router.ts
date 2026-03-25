@@ -60,6 +60,12 @@ const router = createRouter({
       meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
+      path: '/tracker-prototypes',
+      name: 'TrackerPrototypes',
+      component: () => import('./views/TrackerPrototypes.vue'),
+      meta: { requireAuth: true },
+    },
+    {
       path: '/login',
       name: 'login',
       component: Login,
@@ -105,7 +111,7 @@ const router = createRouter({
       path: '/locos',
       name: 'Roster',
       component: () => import('./Roster/Roster.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireDccEx: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/locos/new',
