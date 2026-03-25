@@ -61,7 +61,7 @@ Where `{vp}` = `desktop` or `mobile`.
 5. If no addresses found, skip this screenshot and log a warning
 6. Navigate to `/throttle/:address`
 
-> **Note:** The throttle app uses per-route `beforeEnter` guards from `@repo/auth` (`requireAuth`, `requireDccEx`, `requireLayout`). The `VITE_DEV_AUTO_LOGIN=true` flag bypasses all these guards in dev mode.
+> **Note:** The throttle app uses per-route `beforeEnter` guards from `@repo/auth` (`requireAuth`, `requireDccEx`, `requireLayout`). The `VITE_DEMO_MODE=true` flag bypasses all these guards in dev mode.
 
 ### Cloud App (22 views)
 

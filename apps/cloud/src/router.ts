@@ -6,6 +6,7 @@ import type { User } from 'firebase/auth'
 import { collection, query, where, getDocs, getDoc, doc } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { requireLayout } from '@repo/auth'
+import { createTryDemoRoute } from '@repo/auth'
 import { createLogger } from '@repo/utils'
 import { checkRequireFeature } from '@repo/auth'
 import type { FeatureName, UserRole } from '@repo/modules'
@@ -305,6 +306,7 @@ const router = createRouter({
       component: () => import('./Layout/Devices/DeviceDetails.vue'),
       meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
+    createTryDemoRoute(),
     // 404 - Catch all unmatched routes
     {
       path: '/:pathMatch(.*)*',
@@ -384,8 +386,8 @@ router.beforeEach(async (to) => {
   try {
     const { meta } = to
 
-    // Dev auto-login bypass for automated screenshot capture
-    if (import.meta.env.DEV && import.meta.env.VITE_DEV_AUTO_LOGIN === 'true') {
+    // Demo mode auto-login bypass (local dev only)
+    if (import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true') {
       return
     }
 

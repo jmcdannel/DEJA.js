@@ -20,7 +20,9 @@
     "changeset": "changeset",
     "changeset:status": "changeset status",
     "promo:push": "tsx scripts/push-promo.ts",
-    "promo:deactivate": "tsx scripts/push-promo.ts --deactivate"
+    "promo:deactivate": "tsx scripts/push-promo.ts --deactivate",
+    "demo:seed": "tsx scripts/demo/seed-firestore.ts",
+    "dev:demo": "VITE_DEMO_MODE=true turbo run dev"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",

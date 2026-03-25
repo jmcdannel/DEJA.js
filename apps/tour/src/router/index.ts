@@ -4,6 +4,7 @@ import { getDoc, doc } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { isFeatureAccessible } from '@repo/modules'
 import type { UserRole } from '@repo/modules'
+import { createTryDemoRoute } from '@repo/auth'
 import { requireGuestOrAuth } from '../auth/guest-auth'
 import Home from '../views/Home.vue'
 import Welcome from '../views/Welcome.vue'
@@ -68,6 +69,7 @@ const router = createRouter({
       name: 'not-available',
       component: () => import('../views/NotAvailable.vue'),
     },
+    createTryDemoRoute(TourLogin),
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',

@@ -1,7 +1,7 @@
 import { getCurrentUser } from 'vuefire'
 
 export async function requireAuth() {
-  if (import.meta.env.DEV && import.meta.env.VITE_DEV_AUTO_LOGIN === 'true') {
+  if (import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true') {
     return
   }
 

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { getCurrentUser } from 'vuefire'
 import type { User } from 'firebase/auth'
 import { requireLayout } from '@repo/auth'
+import { createTryDemoRoute } from '@repo/auth'
 import { createLogger } from '@repo/utils'
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
@@ -141,6 +142,7 @@ const router = createRouter({
       component: () => import('./views/SettingsView.vue'),
       meta: { requireAuth: true },
     },
+    createTryDemoRoute(),
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
@@ -161,8 +163,8 @@ router.beforeEach(async (to) => {
   try {
     const { meta } = to
 
-    // Dev auto-login bypass for automated screenshot capture
-    if (import.meta.env.DEV && import.meta.env.VITE_DEV_AUTO_LOGIN === 'true') {
+    // Demo mode auto-login bypass (local dev only)
+    if (import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true') {
       return
     }
 

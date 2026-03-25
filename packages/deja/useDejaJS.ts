@@ -17,10 +17,15 @@ interface DejaWriteOptions {
 
 export const useDejaJS = (options?: DejaWriteOptions) => {
   const layoutId = useStorage('@DEJA/layoutId', '')
+  const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
 
   const wrappedWrite = options?.enqueue ?? ((execute: () => Promise<void>) => execute())
 
   async function sendDejaCommand({ action, payload }: DejaCommand) {
+    if (isDemoMode) {
+      log.debug('[DEJA DEMO] skipping RTDB write:', action, payload)
+      return
+    }
     await wrappedWrite(
       async () => {
         const commandsRef = ref(rtdb, `dejaCommands/${layoutId.value}`)
