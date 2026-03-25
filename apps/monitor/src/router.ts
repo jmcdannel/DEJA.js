@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { Login, LogoutView, requireAuth, requireLayout } from '@repo/auth'
+import { Login, LogoutView, requireAuth, requireLayout, createTryDemoRoute } from '@repo/auth'
 import Dashboard from './Dashboard/Dashboard.vue'
 
 const router = createRouter({
@@ -45,6 +45,7 @@ const router = createRouter({
       component: () => import('./Dashboard/components/DeviceSerialMonitor/DeviceSerialMonitorDemo.vue'),
       beforeEnter: [requireAuth, requireLayout],
     },
+    createTryDemoRoute(Login),
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
