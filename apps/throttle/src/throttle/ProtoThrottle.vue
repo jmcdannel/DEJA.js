@@ -6,7 +6,7 @@ import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
 import Speedometer from '@/throttle/Speedometer.vue'
 import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
-import { Consist, LocoAvatar, MiniConsist, FunctionsSpeedDial } from '@repo/ui'
+import { ConsistIndicator, LocoAvatar, FunctionsSpeedDial } from '@repo/ui'
 import { useThrottle } from '@/throttle/useThrottle'
 import { useHaptics } from '@/composables/useHaptics'
 
@@ -205,7 +205,7 @@ onBeforeUnmount(() => clearInterval(ledInterval))
       <template v-slot:left>
         <div class="flex flex-row items-center justify-center gap-1 px-4" style="background: rgba(var(--v-theme-surface), 0.6)">
           <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" variant="flat" />
-          <MiniConsist v-if="loco" :loco="loco" />
+          <ConsistIndicator v-if="loco" :loco="loco" />
           <v-spacer class="w-2 md:w-6" />
           <h1 class="text-xl md:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 drop-shadow-lg">
             {{ loco?.name }}

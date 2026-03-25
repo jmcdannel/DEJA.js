@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { Login, requireAuth, requireLayout, createTryDemoRoute } from '@repo/auth'
+import { Login, LogoutView, requireAuth, requireLayout, createTryDemoRoute } from '@repo/auth'
 import Dashboard from './Dashboard/Dashboard.vue'
 
 const router = createRouter({
@@ -15,6 +15,11 @@ const router = createRouter({
       component: Login,
       name: 'login',
       path: '/login',
+    },
+    {
+      component: LogoutView,
+      name: 'logout',
+      path: '/logout',
     },
     {
       path: '/settings',

@@ -6,6 +6,7 @@ import { createTryDemoRoute } from '@repo/auth'
 import { createLogger } from '@repo/utils'
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
+import { LogoutView } from '@repo/auth'
 
 const log = createLogger('Router')
 
@@ -37,12 +38,31 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: { requireAuth: true, requireLayout: true },
     },
     {
       path: '/login',
       name: 'login',
       component: LoginView,
       meta: { redirectIfAuthenticated: true, fullscreen: true },
+    },
+    {
+      path: '/signup',
+      name: 'signup',
+      component: () => import('./views/SignupView.vue'),
+      meta: { redirectIfAuthenticated: true, fullscreen: true },
+    },
+    {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: () => import('./views/ForgotPasswordView.vue'),
+      meta: { fullscreen: true },
+    },
+    {
+      path: '/logout',
+      name: 'logout',
+      component: LogoutView,
+      meta: { fullscreen: true },
     },
     {
       path: '/connect',

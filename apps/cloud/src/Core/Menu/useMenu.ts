@@ -24,6 +24,7 @@ export function useMenu() {
     // Hardware
     { color: 'teal',    icon: 'mdi-access-point',    label: 'Sensors',        name: 'sensors',        section: 'hardware', feature: 'sensors' },
     { color: 'cyan',    icon: 'mdi-developer-board', label: 'Devices',        name: 'devices',        section: 'hardware' },
+    { color: 'yellow',  icon: 'mdi-lightning-bolt',   label: 'Power Districts', name: 'power-districts', section: 'hardware' },
     { color: 'lime',    icon: 'mdi-cpu-64-bit',      label: 'DCC-EX',         name: 'dcc-ex',         section: 'hardware' },
 
     // System
@@ -31,9 +32,9 @@ export function useMenu() {
     { color: 'rose',    icon: 'mdi-console',         label: 'Emulator',       name: 'emulator',       section: 'system' },
   ]
 
-  const menu = computed(() =>
-    menuConfig.filter(item => !item.feature || isEnabled(item.feature))
-  )
+  // Show all nav items regardless of plan/role — locked items will show
+  // upgrade prompts on the page itself (see Plan 3: Free Tier UX)
+  const menu = computed(() => menuConfig)
 
   function handleMenu(item: MenuItem) {
     router.push({ name: item.label })

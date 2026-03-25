@@ -50,6 +50,9 @@ export * from './trackDiagrams/index.js'
 // Plans
 export * from './plans'
 
+// Onboarding
+export * from './onboarding'
+
 // Promotions
 export * from './promotions'
 
@@ -61,6 +64,10 @@ export * from './cv/constants'
 export { default as useFeedbackUser } from './feedback/useFeedbackUser'
 export * from './feedback/types'
 export * from './feedback/config'
+
+// Power Districts module
+export { default as usePowerDistricts } from './powerDistricts/usePowerDistricts'
+export * from './powerDistricts/types'
 
 // Features
 export * from './features'
