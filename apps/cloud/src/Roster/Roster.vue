@@ -6,6 +6,7 @@ import { useStorage } from '@vueuse/core'
 import { rtdb } from '@repo/firebase-config'
 import type { Loco } from '@repo/modules/locos'
 import { useLocos } from '@repo/modules/locos'
+import { useLayout, useServerStatus } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
 import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
 import RosterList from '@/Roster/RosterList.vue'
@@ -16,8 +17,19 @@ const router = useRouter()
 const layoutId = useStorage('@DEJA/layoutId', '')
 const { getLocos } = useLocos()
 const { syncAllRoster, importRoster } = useDcc()
+const { getDevices } = useLayout()
+const { serverStatus } = useServerStatus()
 
 const locos = getLocos()
+const devices = getDevices()
+
+const isDisconnected = computed(() => {
+  const serverOffline = !serverStatus.value?.online
+  const noDccExConnected = !devices.value?.some(
+    (d) => d.type === 'dcc-ex' && d.isConnected
+  )
+  return serverOffline || noDccExConnected
+})
 
 const rosterList = computed(() =>
   locos?.value ? locos.value.map((l) => ({ ...l, id: l.address })) : []
@@ -100,7 +112,7 @@ async function importFromCS() {
     <template #actions>
       <v-btn
         :loading="rosterSyncStatus?.status === 'syncing'"
-        :disabled="isSyncing"
+        :disabled="isSyncing || isDisconnected"
         prepend-icon="mdi-sync"
         variant="tonal"
         color="primary"
@@ -111,7 +123,7 @@ async function importFromCS() {
       </v-btn>
       <v-btn
         :loading="rosterSyncStatus?.status === 'importing'"
-        :disabled="isSyncing"
+        :disabled="isSyncing || isDisconnected"
         prepend-icon="mdi-download"
         variant="tonal"
         color="secondary"
