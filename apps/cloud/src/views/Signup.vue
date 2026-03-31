@@ -6,9 +6,9 @@ const router = useRouter()
 
 const steps = [
   { value: 0, title: 'Create Account', icon: 'mdi-account-plus-outline' },
-  { value: 1, title: 'Choose Plan', icon: 'mdi-tag-outline' },
-  { value: 2, title: 'Payment', icon: 'mdi-credit-card-outline' },
-  { value: 3, title: 'Register Layout', icon: 'mdi-map-marker-path' },
+  { value: 1, title: 'Name Layout', icon: 'mdi-map-marker-path' },
+  { value: 2, title: 'Choose Plan', icon: 'mdi-tag-outline' },
+  { value: 3, title: 'Install', icon: 'mdi-download-outline' },
 ]
 
 function handleSignup() {
