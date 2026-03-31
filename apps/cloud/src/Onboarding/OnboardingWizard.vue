@@ -59,8 +59,9 @@ onMounted(() => {
   }
 })
 
-// Mark install step started when user reaches step 4
+// Smooth scroll to top + mark install step on step change
 watch(currentStep, (step) => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
   if (step === 4) {
     setInstallStarted()
   }
@@ -148,34 +149,53 @@ const trackerStep = computed(() => {
       class="mb-8"
     />
 
-    <div class="animate-deja-fade-in" :key="currentStep">
-      <!-- Step 1: Name your layout -->
-      <NameLayoutStep v-if="currentStep === 1" @complete="handleNameComplete" />
+    <Transition name="step-fade" mode="out-in">
+      <div :key="currentStep">
+        <!-- Step 1: Name your layout -->
+        <NameLayoutStep v-if="currentStep === 1" @complete="handleNameComplete" />
 
-      <!-- Step 2: Choose a plan (or skip) -->
-      <PlanStep v-else-if="currentStep === 2" @complete="handlePlanComplete" />
+        <!-- Step 2: Choose a plan (or skip) -->
+        <PlanStep v-else-if="currentStep === 2" @complete="handlePlanComplete" />
 
-      <!-- Step 3: Payment (paid plans only) -->
-      <template v-else-if="currentStep === 3">
-        <PaymentStep
-          v-if="selectedPlan !== 'hobbyist'"
-          :plan="selectedPlan"
-          :billing-cycle="selectedBillingCycle"
-          @complete="handlePaymentComplete"
+        <!-- Step 3: Payment (paid plans only) -->
+        <template v-else-if="currentStep === 3">
+          <PaymentStep
+            v-if="selectedPlan !== 'hobbyist'"
+            :plan="selectedPlan"
+            :billing-cycle="selectedBillingCycle"
+            @complete="handlePaymentComplete"
+          />
+          <div v-else class="text-center py-8 opacity-60">
+            No payment required for the Hobbyist plan.
+          </div>
+        </template>
+
+        <!-- Step 4: Install (creates layout + starts server detection) -->
+        <InstallStep
+          v-else-if="currentStep === 4"
+          :uid="user?.uid"
+          :layout-id="pendingLayoutId || primaryLayoutId"
+          :layout-name="pendingLayoutName"
+          @complete="handleInstallComplete"
         />
-        <div v-else class="text-center py-8 opacity-60">
-          No payment required for the Hobbyist plan.
-        </div>
-      </template>
-
-      <!-- Step 4: Install (creates layout + starts server detection) -->
-      <InstallStep
-        v-else-if="currentStep === 4"
-        :uid="user?.uid"
-        :layout-id="pendingLayoutId || primaryLayoutId"
-        :layout-name="pendingLayoutName"
-        @complete="handleInstallComplete"
-      />
-    </div>
+      </div>
+    </Transition>
   </v-container>
 </template>
+
+<style scoped>
+.step-fade-enter-active {
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.step-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.step-fade-enter-from {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.step-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-12px);
+}
+</style>
