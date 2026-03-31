@@ -1,6 +1,9 @@
 import type { Timestamp } from 'firebase/firestore'
 
 export interface OnboardingState {
+  layoutNamed: boolean
+  pendingLayoutName: string | null
+  pendingLayoutId: string | null
   planSelected: boolean
   layoutCreated: boolean
   installStarted: boolean
@@ -11,8 +14,8 @@ export interface OnboardingState {
 
 export type OnboardingStep =
   | 'account'
-  | 'plan'
   | 'layout'
+  | 'plan'
   | 'install'
   | 'ready'
 
