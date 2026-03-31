@@ -102,6 +102,12 @@ const router = createRouter({
       meta: { requireAuth: true, fullscreen: true },
     },
     {
+      path: '/connect',
+      name: 'Connect',
+      component: () => import('./Connect/Connect.vue'),
+      meta: { requireAuth: true },
+    },
+    {
       path: '/select-layout',
       name: 'Select Layout',
       component: () => import('./Layout/SelectLayout.vue'),

@@ -1,5 +1,5 @@
 import { computed, type Ref } from 'vue'
-import { useEfx, useTurnouts, useSignals, useSensors, useLayout, useLocos, useLayoutRoutes } from '@repo/modules'
+import { useEfx, useTurnouts, useSignals, useSensors, useLayout, useLocos, useRoutes } from '@repo/modules'
 import type { Effect } from '@repo/modules/effects'
 import type { Turnout } from '@repo/modules/turnouts'
 import type { Signal } from '@repo/modules/signals'
@@ -53,7 +53,7 @@ export function useQuickMenuData() {
   const locos = getLocos() as Ref<Loco[]>
   const throttles = getThrottles()
 
-  const routesMod = useLayoutRoutes()
+  const routesMod = useRoutes()
   const routes = routesMod.getRoutes()
 
   const layout = useLayout()

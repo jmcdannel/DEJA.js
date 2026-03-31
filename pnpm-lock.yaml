@@ -394,6 +394,9 @@ importers:
 
   apps/server:
     dependencies:
+      '@repo/dccex':
+        specifier: workspace:*
+        version: link:../../packages/dccex
       '@repo/modules':
         specifier: workspace:*
         version: link:../../packages/modules

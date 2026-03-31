@@ -23,6 +23,7 @@
     "tunnel:named": "bash scripts/tunnel.sh named"
   },
   "dependencies": {
+    "@repo/dccex": "workspace:*",
     "@repo/modules": "workspace:*",
     "@repo/sounds": "workspace:*",
     "@sentry/node": "^8.0.0",
