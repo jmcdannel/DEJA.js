@@ -14,7 +14,7 @@ const phrase = computed(() => PHRASES[phraseIndex.value])
 let phraseTimer: ReturnType<typeof setInterval>
 
 const activeStep = ref(3)
-const steps = ['Sign Up', 'Select Plan', 'Create Layout', 'Install', 'Drive Trains']
+const steps = ['Sign Up', 'Name Layout', 'Choose Plan', 'Install', 'Drive Trains']
 
 function signalColor(i: number) {
   if (i < activeStep.value) return '#22c55e'
