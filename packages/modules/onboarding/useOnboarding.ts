@@ -34,16 +34,33 @@ export function useOnboarding() {
   )
 
   // Current step index for progress tracker.
-  // Starts at 1 (plan step), not 0 (account step), because useOnboarding
-  // requires an authenticated user — the account step is always complete.
+  // New order: 0=Account, 1=NameLayout, 2=Plan, 3=Install, 4=Ready
+  // Starts at 1 because useOnboarding requires an authenticated user — account step is always complete.
   const currentStepIndex = computed(() => {
-    if (!state.value.planSelected) return 1 // plan step
-    if (!state.value.layoutCreated) return 2 // layout step
-    if (!state.value.serverStarted) return 3 // install step
+    if (!state.value.layoutNamed) return 1  // name layout step
+    if (!state.value.planSelected) return 2 // plan step
+    if (!state.value.layoutCreated) return 3 // install step (creates the layout)
+    if (!state.value.serverStarted) return 3 // still on install, waiting for server
     return 4 // ready
   })
 
-  // Write helpers — each is write-once (only writes if field is not already true)
+  // Write helpers — each is write-once (only writes if field is not already set)
+
+  async function setLayoutNamed(name: string, id: string): Promise<void> {
+    if (!user.value || state.value.layoutNamed) return
+    await setDoc(
+      doc(db, 'users', user.value.uid),
+      {
+        onboarding: {
+          layoutNamed: true,
+          pendingLayoutName: name,
+          pendingLayoutId: id,
+        },
+      },
+      { merge: true }
+    )
+  }
+
   async function setPlanSelected(): Promise<void> {
     if (!user.value || state.value.planSelected) return
     await setDoc(
@@ -82,6 +99,7 @@ export function useOnboarding() {
     needsLocos,
     isComplete,
     currentStepIndex,
+    setLayoutNamed,
     setPlanSelected,
     setLayoutCreated,
     setInstallStarted,
