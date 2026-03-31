@@ -28,6 +28,7 @@ export function useMenu() {
     { color: 'lime',    icon: 'mdi-cpu-64-bit',      label: 'DCC-EX',         name: 'dcc-ex',         section: 'hardware' },
 
     // System
+    { color: 'cyan',    icon: 'mdi-lan-connect',     label: 'Connect',        name: 'connect',        section: 'system' },
     { color: 'blue',    icon: 'mdi-cog',             label: 'Settings',       name: 'settings',       section: 'system' },
     { color: 'rose',    icon: 'mdi-console',         label: 'Emulator',       name: 'emulator',       section: 'system' },
   ]
