@@ -5,18 +5,22 @@ import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { useStorage } from '@vueuse/core'
 import { QuickStart } from '@repo/ui'
-import { useOnboarding, INSTALL_TIPS } from '@repo/modules'
+import { useOnboarding, useLayout, INSTALL_TIPS } from '@repo/modules'
 
 const props = defineProps<{
   uid?: string | null
   layoutId?: string
+  layoutName?: string
 }>()
 
 const emit = defineEmits<{
   complete: []
 }>()
 
-const { state: onboardingState } = useOnboarding()
+const { state: onboardingState, setLayoutCreated, setInstallStarted } = useOnboarding()
+const { createLayout } = useLayout()
+const layoutCreating = ref(false)
+const layoutCreateError = ref<string | null>(null)
 const storedLayoutId = useStorage('@DEJA/layoutId', '')
 
 // Server detection
@@ -37,6 +41,28 @@ onMounted(() => {
   tipInterval = setInterval(() => {
     currentTipIndex.value = (currentTipIndex.value + 1) % INSTALL_TIPS.length
   }, 6000)
+})
+
+onMounted(async () => {
+  const lid = props.layoutId || storedLayoutId.value
+  const lname = props.layoutName || lid
+  if (!lid) return
+
+  // Skip if layout already created (e.g., user returned to this step)
+  if (onboardingState.value.layoutCreated) return
+
+  layoutCreating.value = true
+  try {
+    await createLayout(lid, { name: lname, id: lid })
+    storedLayoutId.value = lid
+    setLayoutCreated()
+    setInstallStarted()
+  } catch (err: unknown) {
+    const fbErr = err as { message?: string }
+    layoutCreateError.value = fbErr.message || 'Failed to create layout'
+  } finally {
+    layoutCreating.value = false
+  }
 })
 
 // Loco form
@@ -137,6 +163,17 @@ function handleComplete() {
 
     <!-- ⏳ Waiting for Server — Productive Wait State -->
     <template v-else>
+      <v-alert
+        v-if="layoutCreateError"
+        type="error"
+        variant="tonal"
+        class="mb-6"
+        closable
+        @click:close="layoutCreateError = null"
+      >
+        {{ layoutCreateError }}
+      </v-alert>
+
       <div class="mb-6">
         <h2 class="text-xl font-semibold text-sky-100 mb-2">Install the DEJA Server</h2>
         <p class="opacity-60 text-sm">
