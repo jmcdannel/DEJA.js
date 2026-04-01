@@ -40,17 +40,21 @@ Verify it exists: `ls "$PREVIEW/.env"`
 
 **IMPORTANT:** Symlinks to `.env` don't load reliably in worktrees. Always **copy** the file.
 
-Copy `.env` to the worktree root AND into each app directory you plan to run:
+Copy `.env` to the worktree root, ALL app directories, AND ALL package directories:
 
 ```bash
 # Root copy (for Turborepo cache hashing)
 cp "$PREVIEW/.env" .env
 
 # App-level copies (Vite reads .env from the app directory, not monorepo root)
-cp "$PREVIEW/.env" apps/throttle/.env
-cp "$PREVIEW/.env" apps/cloud/.env
-cp "$PREVIEW/.env" apps/monitor/.env
-# Add more as needed for other apps
+for app in apps/*/; do
+  cp "$PREVIEW/.env" "$app/.env"
+done
+
+# Package-level copies (packages like @repo/firebase-config, @repo/dccex need env vars at runtime)
+for pkg in packages/*/; do
+  cp "$PREVIEW/.env" "$pkg/.env"
+done
 ```
 
 ### Step 3 — Install `node_modules/`
