@@ -10,7 +10,7 @@ const emit = defineEmits<{
 }>()
 
 // Items that have sub-screens drill in instead of navigating
-const drillScreens: Record<string, QuickMenuScreen> = {
+const drillScreens: Record<string, EntityScreen> = {
   locos: 'locos',
   effects: 'effects',
   routes: 'routes',

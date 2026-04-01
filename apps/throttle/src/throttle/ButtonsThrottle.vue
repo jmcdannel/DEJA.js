@@ -8,7 +8,7 @@ import Speedometer from '@/throttle/Speedometer.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
 import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
-import { Consist, LocoAvatar, MiniConsist, FunctionsSpeedDial } from '@repo/ui'
+import { ConsistIndicator, LocoAvatar, FunctionsSpeedDial } from '@repo/ui'
 import { useThrottle } from '@/throttle/useThrottle'
 
 const props = defineProps({

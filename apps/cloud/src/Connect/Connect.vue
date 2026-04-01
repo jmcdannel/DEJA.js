@@ -26,7 +26,7 @@ function handleLayoutSelect(selectedLayoutId: string) {
 const { serverStatus } = useServerStatus()
 const serverUptime = computed(() => {
   if (!serverStatus.value?.online || !serverStatus.value?.lastSeen) return ''
-  const elapsed = Date.now() - serverStatus.value.lastSeen
+  const elapsed = Date.now() - Number(serverStatus.value.lastSeen)
   const mins = Math.floor(elapsed / 60000)
   const hrs = Math.floor(mins / 60)
   if (hrs > 0) return `${hrs}h ${mins % 60}m`

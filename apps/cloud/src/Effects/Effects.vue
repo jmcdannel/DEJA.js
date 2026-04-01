@@ -17,7 +17,7 @@ const effects = getEffects()
 
 const effectsList = computed(() =>
   effects?.value
-    ? effects.value.map((effect) => ({ ...effect, id: effect.id }))
+    ? (effects.value as Effect[]).map((effect) => ({ ...effect, id: effect.id }))
     : []
 )
 

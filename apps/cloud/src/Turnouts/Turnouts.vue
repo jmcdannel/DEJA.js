@@ -15,7 +15,7 @@ const layout = getLayout()
 const turnouts = getTurnouts()
 
 const turnoutsList = computed(() =>
-  turnouts?.value ? turnouts.value.map((t) => ({ ...t, id: t.id })) : []
+  turnouts?.value ? (turnouts.value as Turnout[]).map((t) => ({ ...t, id: t.id })) : []
 )
 
 const deviceOptions = computed(() =>
