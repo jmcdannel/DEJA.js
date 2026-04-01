@@ -1,4 +1,5 @@
 import DocsSidebar from '../../components/DocsSidebar';
+import DocsPrevNext from '../../components/DocsPrevNext';
 import { generateDocsNav } from '../../lib/generate-docs-nav';
 
 export const metadata = {
@@ -18,6 +19,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       </aside>
       <article className="flex-1 min-w-0 max-w-3xl">
         {children}
+        <DocsPrevNext nav={nav} />
       </article>
     </div>
   );

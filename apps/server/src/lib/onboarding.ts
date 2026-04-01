@@ -8,10 +8,13 @@ import { log } from '../utils/logger.js'
  */
 export async function markServerStarted(uid: string): Promise<void> {
   try {
+    log.info('markServerStarted')
     const userRef = db.collection('users').doc(uid)
     const userDoc = await userRef.get()
     const onboarding = userDoc.data()?.onboarding
 
+    log.info(onboarding)
+    log.debug(uid)
     if (onboarding?.serverStarted) {
       log.info('Server already marked as started, skipping')
       return

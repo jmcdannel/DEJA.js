@@ -18,6 +18,7 @@ export const FEATURE_FLAGS: Record<FeatureName, FeatureStage> = {
   routes: 'dev',
   sensors: 'dev',
   tourApp: 'dev',
+  quickMenuFavorites: 'dev',
 }
 
 /**

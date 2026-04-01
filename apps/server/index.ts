@@ -80,7 +80,11 @@ async function main(): Promise<void> {
     }
 
     // Mark onboarding serverStarted (write-once, non-blocking)
-    await markServerStarted(config.uid)
+    try {
+      await markServerStarted(config.uid)
+    } catch (err) {
+      log.warn('Failed to mark server as started:', err)
+    }
 
     log.start('DEJA.js Server is running!')
 

@@ -175,7 +175,16 @@ export default function GettingStartedGuide() {
           <p>The onboarding wizard walks you through everything from here — you won&apos;t need to leave the browser until it&apos;s time to install the server.</p>
         </Step>
 
-        <Step number={2} title="Pick a Plan">
+        <Step number={2} title="Name Your Layout">
+          <p>
+            Give your railroad a name and we&apos;ll generate a unique Layout ID. Your layout is officially created when you install the server — no commitment until then.
+          </p>
+          <Callout emoji="💡">
+            <p>You can create multiple layouts later if you have more than one railroad (paid plans).</p>
+          </Callout>
+        </Step>
+
+        <Step number={3} title="Choose a Plan">
           <p>
             The <strong className="text-white">free Hobbyist plan</strong> gets you started with up to 5 locomotives — no credit card, no commitment.
             Upgrade anytime to unlock turnouts, effects, signals, and more.
@@ -209,16 +218,6 @@ export default function GettingStartedGuide() {
             </table>
           </div>
           <p className="text-xs text-gray-500">Paid plans include a 14-day free trial. See the <Link href="/pricing" className="text-deja-cyan hover:underline">full comparison</Link> for details.</p>
-        </Step>
-
-        <Step number={3} title="Name Your Layout">
-          <p>
-            Give your layout a name and a unique ID. This is how DEJA.js organizes everything —
-            your roster, turnout positions, effects, and settings all live under this layout.
-          </p>
-          <Callout emoji="💡">
-            <p>You can create multiple layouts later if you have more than one railroad (paid plans).</p>
-          </Callout>
         </Step>
 
         <Step number={4} title="Install the Server">

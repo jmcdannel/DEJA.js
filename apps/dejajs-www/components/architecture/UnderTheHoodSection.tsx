@@ -1,6 +1,7 @@
 'use client';
 
-import AnimateIn from '../home/AnimateIn';
+import { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
 const explainers = [
   {
@@ -36,9 +37,19 @@ const explainers = [
 ];
 
 export default function UnderTheHoodSection() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+
+  // Header
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.12], [0, 1]);
+  const headerY = useTransform(scrollYProgress, [0, 0.12], [24, 0]);
+
   return (
-    <section>
-      <AnimateIn className="text-center mb-8">
+    <section ref={sectionRef}>
+      <motion.div className="text-center mb-8" style={{ opacity: headerOpacity, y: headerY }}>
         <p className="text-xs text-gray-500 font-mono tracking-[0.2em] uppercase mb-2">Under the Hood</p>
         <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
           How it actually works.
@@ -47,18 +58,37 @@ export default function UnderTheHoodSection() {
           DEJA.js is closed-source, but we believe in being open about how the platform works.
           Here&apos;s what&apos;s happening behind the scenes.
         </p>
-      </AnimateIn>
+      </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
         {explainers.map((item, i) => (
-          <AnimateIn key={item.question} delay={i * 0.08} direction="up">
-            <div className={`rounded-xl border ${item.color} bg-gray-800/20 p-5 h-full`}>
-              <p className="text-white font-semibold text-sm mb-2">{item.question}</p>
-              <p className="text-gray-400 text-sm leading-relaxed">{item.answer}</p>
-            </div>
-          </AnimateIn>
+          <ExplainerCard key={item.question} item={item} index={i} scrollProgress={scrollYProgress} />
         ))}
       </div>
     </section>
+  );
+}
+
+function ExplainerCard({
+  item,
+  index,
+  scrollProgress,
+}: {
+  item: (typeof explainers)[number];
+  index: number;
+  scrollProgress: ReturnType<typeof useScroll>['scrollYProgress'];
+}) {
+  const start = 0.1 + index * 0.03;
+  const end = start + 0.1;
+  const opacity = useTransform(scrollProgress, [start, end], [0, 1]);
+  const y = useTransform(scrollProgress, [start, end], [20, 0]);
+
+  return (
+    <motion.div style={{ opacity, y }}>
+      <div className={`rounded-xl border ${item.color} bg-gray-800/20 p-5 h-full`}>
+        <p className="text-white font-semibold text-sm mb-2">{item.question}</p>
+        <p className="text-gray-400 text-sm leading-relaxed">{item.answer}</p>
+      </div>
+    </motion.div>
   );
 }

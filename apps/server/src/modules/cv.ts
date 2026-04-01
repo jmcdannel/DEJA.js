@@ -264,7 +264,7 @@ export function handleCvRequest(ws: WebSocket, request: CvRequest): void {
 
   // For POM writes, send command and respond immediately (no ACK expected)
   if (request.mode === 'pom') {
-    dcc.sendCommand(command)
+    dcc.broadcastToAll(command)
     ws.send(JSON.stringify({
       action: CV_WS_ACTIONS.RESPONSE,
       payload: {
@@ -288,6 +288,6 @@ export function handleCvRequest(ws: WebSocket, request: CvRequest): void {
   }
 
   // Send the command
-  dcc.sendCommand(command)
+  dcc.broadcastToAll(command)
   log.await('[CV] Service track command sent, awaiting response:', command)
 }

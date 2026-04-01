@@ -12,6 +12,7 @@ interface Props {
   linkMode: 'page' | 'modal'
   showHeader?: boolean
   tileMode?: boolean
+  serverOnline?: boolean
   serverUptime?: string
   connectedDeviceCount?: number
   totalDeviceCount?: number
@@ -22,6 +23,7 @@ const props = withDefaults(defineProps<Props>(), {
   availableTopics: () => [],
   showHeader: true,
   tileMode: false,
+  serverOnline: false,
   serverUptime: '',
   connectedDeviceCount: 0,
   totalDeviceCount: 0,
@@ -92,11 +94,16 @@ function getEffectCount(deviceId: string): number {
     <!-- Header -->
     <div
       v-if="showHeader"
-      class="d-flex justify-space-between align-center mb-4"
+      class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center mb-4 ga-2"
     >
       <h2 class="text-h5 font-weight-bold">Devices</h2>
       <div class="d-flex ga-2">
-        <v-btn variant="tonal" size="small" @click="emit('refreshPorts')">
+        <v-btn
+          variant="tonal"
+          size="small"
+          :disabled="!serverOnline"
+          @click="emit('refreshPorts')"
+        >
           <v-icon start icon="mdi-refresh" />
           Refresh Ports
         </v-btn>
