@@ -7,6 +7,7 @@ import { PageHeader } from '@repo/ui'
 import DeviceListItem from '@/Layout/Devices/DeviceListItem.vue'
 import AddDeviceItem from '@/Layout/Devices/AddDeviceItem.vue'
 import AddTile from '@/Core/UI/AddTile.vue'
+import PortList from '@/Layout/PortList.vue'
 
 const { getLayout, getDevices, updateDevice } = useLayout()
 
@@ -41,6 +42,8 @@ const showAdd = ref(false)
       </template>
     </draggable>
     <AddDeviceItem :show="showAdd" @close="showAdd = false" class="mt-4" />
+
+    <PortList v-if="layout?.ports?.length" :ports="layout.ports" class="mt-6" />
   </div>
 </template>
 <style scoped>

@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { ref, onMounted, computed, onUnmounted, type PropType } from 'vue'
 import { soundFileService, type SoundFile } from '@/Effects/Sounds/SoundFileService'
 import { createLogger } from '@repo/utils'
 import SoundListItem from '@/Sounds/SoundListItem.vue'
-import EmptyState from '@/Core/UI/EmptyState.vue'
 
 const log = createLogger('SoundList')
+
+const props = defineProps({
+  initialSounds: { type: Array as PropType<SoundFile[]>, default: undefined },
+})
 
 const emit = defineEmits<{
   edit: [sound: SoundFile]
@@ -26,7 +29,12 @@ const filteredSoundFiles = computed(() => {
 })
 
 onMounted(() => {
-  loadSoundFiles()
+  if (props.initialSounds) {
+    soundFiles.value = props.initialSounds
+    loading.value = false
+  } else {
+    loadSoundFiles()
+  }
 })
 
 onUnmounted(() => {
@@ -95,28 +103,13 @@ function handleStop() {
     <v-btn @click="loadSoundFiles" color="primary" variant="tonal">Retry</v-btn>
   </div>
 
-  <template v-else-if="filteredSoundFiles.length === 0 && !searchQuery">
-    <EmptyState
-      icon="mdi-volume-high"
-      color="sky"
-      title="No Sounds Yet"
-      description="Upload audio files to build your sound library. Sounds can be used in effects to trigger audio playback on your layout."
-      :use-cases="[
-        { icon: 'mdi-train', text: 'Train Whistles' },
-        { icon: 'mdi-bullhorn', text: 'Station Announcements' },
-        { icon: 'mdi-nature', text: 'Ambient Sounds' },
-        { icon: 'mdi-cog', text: 'Mechanical Effects' },
-      ]"
-      action-label="Upload Sound"
-      action-to="/sounds/new"
-    />
-  </template>
+  <div v-else-if="filteredSoundFiles.length === 0" class="flex flex-col items-center justify-center py-12 px-4">
+    <v-icon size="48" class="opacity-30 mb-3">mdi-magnify-close</v-icon>
+    <p class="text-sm opacity-60">No sounds match your search.</p>
+  </div>
 
   <template v-else>
     <v-row>
-      <v-col cols="12" sm="6" lg="4">
-        <slot name="prepend" />
-      </v-col>
       <v-col
         v-for="sound in filteredSoundFiles"
         :key="sound.url"
