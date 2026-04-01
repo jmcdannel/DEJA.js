@@ -16,13 +16,13 @@ LAYOUT_ID=betatrack
 
 # MQTT Configuration - Using localhost
 ENABLE_MQTT=true
-VITE_MQTT_BROKER=mqtt://localhost
-VITE_MQTT_PORT=1883
+MQTT_BROKER=mqtt://localhost
+MQTT_PORT=1883
 
 # WebSocket Configuration
 ENABLE_WS=true
 VITE_WS_PORT=8082
-VITE_WS_ID=DEJA.js
+WS_ID=DEJA.js
 
 # Firebase (for Cloud features)
 ENABLE_DEJACLOUD=false
