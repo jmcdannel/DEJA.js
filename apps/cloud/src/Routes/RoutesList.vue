@@ -1,4 +1,5 @@
 <script async setup lang="ts">
+import { computed, type PropType } from 'vue'
 import draggable from 'vuedraggable'
 import { useCollection } from 'vuefire'
 import { type Route } from '@repo/modules/index.ts'
@@ -6,15 +7,19 @@ import { useRoutes } from '@repo/modules/routes/useRoutes'
 import { createLogger } from '@repo/utils'
 import { useSortableList } from '@/Core/composables/useSortableList'
 import RouteListItem from '@/Routes/RouteListItem.vue'
-import EmptyState from '@/Core/UI/EmptyState.vue'
 
 const log = createLogger('RoutesList')
 
+const props = defineProps({
+  filteredList: { type: Array as PropType<Route[]>, default: undefined },
+})
 const emit = defineEmits(['edit'])
 
 const { routesCol, setRoute } = useRoutes()
 const rawList = useCollection<Route>(routesCol, { ssrKey: 'routes' })
-const { list, onDragStart, onDragEnd } = useSortableList<Route>(rawList as any, (id, data) => setRoute(id, data as any))
+const { list: sortableList, onDragStart, onDragEnd } = useSortableList<Route>(rawList as any, (id, data) => setRoute(id, data as any))
+
+const list = computed(() => props.filteredList ?? sortableList.value)
 
 function handleEdit(item: Route) {
   log.debug('handleEdit', item)
@@ -45,16 +50,10 @@ function handleEdit(item: Route) {
       </template>
     </draggable>
   </v-container>
-  <EmptyState
-    v-if="!list?.length"
-    icon="mdi-map"
-    color="purple"
-    title="No Routes Yet"
-    description="Create automated paths that throw multiple turnouts in sequence, making complex track arrangements a single-click operation."
-    :use-cases="[{ icon: 'mdi-arrow-decision', text: 'Yard entry paths' }, { icon: 'mdi-highway', text: 'Mainline bypass' }, { icon: 'mdi-format-list-group', text: 'Multi-turnout sequences' }]"
-    action-label="Create Your First Route"
-    action-to="/routes/new"
-  />
+  <div v-if="!list?.length" class="flex flex-col items-center justify-center py-12 px-4">
+    <v-icon size="48" class="opacity-30 mb-3">mdi-magnify-close</v-icon>
+    <p class="text-sm opacity-60">No routes match your filters.</p>
+  </div>
 </template>
 <style scoped>
 .ghost {

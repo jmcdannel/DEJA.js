@@ -6,11 +6,12 @@ import { useStorage } from '@vueuse/core'
 import { rtdb } from '@repo/firebase-config'
 import type { Loco } from '@repo/modules/locos'
 import { useLocos } from '@repo/modules/locos'
-import { useLayout, useServerStatus } from '@repo/modules'
+import { useLayout, useServerStatus, useSubscription, PLAN_DISPLAY } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
 import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
+import type { ListFilter } from '@repo/ui'
 import RosterList from '@/Roster/RosterList.vue'
-import AddTile from '@/Core/UI/AddTile.vue'
+import EmptyState from '@/Core/UI/EmptyState.vue'
 import { ThrottleLaunchQR } from '@repo/ui'
 
 const router = useRouter()
@@ -19,9 +20,26 @@ const { getLocos } = useLocos()
 const { syncAllRoster, importRoster } = useDcc()
 const { getDevices } = useLayout()
 const { serverStatus } = useServerStatus()
+const { plan } = useSubscription()
 
 const locos = getLocos()
 const devices = getDevices()
+
+// 🔄 Loading state
+const isLoaded = ref(false)
+let loadingTimeout: ReturnType<typeof setTimeout> | undefined
+onMounted(async () => {
+  loadingTimeout = setTimeout(() => { isLoaded.value = true }, 3000)
+  try {
+    await (locos as any).promise
+  } finally {
+    clearTimeout(loadingTimeout)
+    isLoaded.value = true
+  }
+})
+
+const isLoading = computed(() => !isLoaded.value)
+const isFreePlan = computed(() => plan.value === 'hobbyist')
 
 const isDisconnected = computed(() => {
   const serverOffline = !serverStatus.value?.online
@@ -32,10 +50,45 @@ const isDisconnected = computed(() => {
 })
 
 const rosterList = computed(() =>
-  locos?.value ? locos.value.map((l) => ({ ...l, id: l.address })) : []
+  locos?.value ? locos.value.map((l) => ({
+    ...l,
+    id: l.address,
+    sound: l.hasSound ? 'sound' : 'silent',
+    locoType: l.consist?.length ? 'consist' : 'single',
+  })) : []
 )
-const rosterControls = useListControls('cloud-roster', { list: rosterList })
 
+const hasItems = computed(() => isLoaded.value && rosterList.value.length > 0)
+
+// 🔍 Filter & sort options
+const soundOptions = [
+  { label: 'Sound Decoder', value: 'sound' },
+  { label: 'Silent', value: 'silent' },
+]
+
+const typeOptions = [
+  { label: 'Consist', value: 'consist' },
+  { label: 'Single', value: 'single' },
+]
+
+const filters = computed<ListFilter[]>(() => [
+  { type: 'sound', label: 'Sound', options: soundOptions },
+  { type: 'locoType', label: 'Type', options: typeOptions },
+])
+
+const sortOptions = [
+  { value: 'order', label: 'Default' },
+  { value: 'name', label: 'Name' },
+  { value: 'address', label: 'Address' },
+]
+
+const rosterControls = useListControls('cloud-roster', {
+  list: rosterList,
+  filters: filters.value,
+  sortOptions,
+})
+
+// 📡 Roster sync status
 interface RosterSyncStatus {
   status: 'syncing' | 'success' | 'error' | 'importing'
   message: string
@@ -76,6 +129,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  clearTimeout(loadingTimeout)
   if (unsubscribeStatus) unsubscribeStatus()
 })
 
@@ -98,53 +152,79 @@ async function importFromCS() {
 </script>
 
 <template>
-  <PageHeader title="Roster" icon="mdi-train" color="pink">
-    <template #controls>
-      <ListControlBar
-        :controls="rosterControls"
-        color="pink"
-        :show-filters="false"
-        :show-view="false"
-        :show-sort="false"
-        search-placeholder="Search roster..."
-      />
-    </template>
-    <template #actions>
-      <v-btn
-        :loading="rosterSyncStatus?.status === 'syncing'"
-        :disabled="isSyncing || isDisconnected"
-        prepend-icon="mdi-sync"
-        variant="tonal"
-        color="primary"
-        size="small"
-        @click="syncToCS"
-      >
-        Sync to DCC-EX
-      </v-btn>
-      <v-btn
-        :loading="rosterSyncStatus?.status === 'importing'"
-        :disabled="isSyncing || isDisconnected"
-        prepend-icon="mdi-download"
-        variant="tonal"
-        color="secondary"
-        size="small"
-        @click="importFromCS"
-      >
-        Import from DCC-EX
-      </v-btn>
-    </template>
-  </PageHeader>
+  <!-- 🔄 Loading -->
+  <div v-if="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4">
+    <v-skeleton-loader v-for="n in 6" :key="n" type="card" />
+  </div>
 
-  <RosterList @edit="handleEditLoco">
-    <template #prepend>
-      <AddTile @click="handleAddLoco" />
-    </template>
-    <template #append>
-      <v-card variant="outlined" class="d-flex flex-column align-center justify-center pa-4 text-center" min-height="120">
-        <ThrottleLaunchQR :size="100" label="Open Throttle on phone" />
-      </v-card>
-    </template>
-  </RosterList>
+  <!-- ✅ Has items -->
+  <template v-else-if="hasItems">
+    <PageHeader title="Roster" icon="mdi-train" color="pink" subtitle="Manage your locomotive fleet and decoder configurations.">
+      <template #controls>
+        <ListControlBar
+          :controls="rosterControls"
+          color="pink"
+          :sort-options="sortOptions"
+          :filters="filters"
+          :show-view="false"
+          search-placeholder="Search roster..."
+        />
+      </template>
+      <template #actions>
+        <v-btn prepend-icon="mdi-plus" color="pink" variant="flat" @click="handleAddLoco">
+          New Loco
+        </v-btn>
+        <v-btn
+          :loading="rosterSyncStatus?.status === 'syncing'"
+          :disabled="isSyncing || isDisconnected"
+          prepend-icon="mdi-sync"
+          variant="tonal"
+          color="pink"
+          size="small"
+          @click="syncToCS"
+        >
+          Sync to DCC-EX
+        </v-btn>
+        <v-btn
+          :loading="rosterSyncStatus?.status === 'importing'"
+          :disabled="isSyncing || isDisconnected"
+          prepend-icon="mdi-download"
+          variant="tonal"
+          color="pink"
+          size="small"
+          @click="importFromCS"
+        >
+          Import from DCC-EX
+        </v-btn>
+      </template>
+    </PageHeader>
+
+    <RosterList :filtered-list="rosterControls.filteredList.value" @edit="handleEditLoco">
+      <template #append>
+        <v-card variant="outlined" class="d-flex flex-column align-center justify-center pa-4 text-center" min-height="120">
+          <ThrottleLaunchQR :size="100" label="Open Throttle on phone" />
+        </v-card>
+      </template>
+    </RosterList>
+  </template>
+
+  <!-- 📭 Empty -->
+  <EmptyState
+    v-else
+    icon="mdi-train"
+    color="pink"
+    title="No Locomotives Yet"
+    :description="isFreePlan
+      ? `Upgrade to ${PLAN_DISPLAY.engineer.name} to unlock the full roster experience with up to 25 locomotives and advanced features.`
+      : 'Build your digital roster by adding locomotives with their DCC addresses, decoder functions, and custom configurations.'"
+    :use-cases="[
+      { icon: 'mdi-memory', text: 'Program DCC decoders' },
+      { icon: 'mdi-tune', text: 'Configure functions & lights' },
+      { icon: 'mdi-train-car', text: 'Build consists' },
+    ]"
+    :action-label="isFreePlan ? `Upgrade to ${PLAN_DISPLAY.engineer.name}` : 'Add Your First Loco'"
+    :action-to="isFreePlan ? '/upgrade' : '/locos/new'"
+  />
 
   <v-snackbar
     v-model="snackbarOpen"
