@@ -154,6 +154,7 @@ const defaultProps = {
     <template v-slot:title>
       <Logo
         :size="mdAndUp ? 'md' : 'sm'"
+        :stacked="!mdAndUp"
         :app-title="appName || defaultProps.appName"
         :variant="variant || defaultProps.variant"
         @click="handleLogoClick"
