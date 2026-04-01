@@ -34,7 +34,7 @@ const isLoading = computed(() => !isLoaded.value)
 const isFreePlan = computed(() => plan.value === 'hobbyist')
 
 const routesList = computed(() =>
-  routes?.value ? routes.value.map((r) => ({ ...r, id: r.id })) : []
+  routes?.value ? (routes.value as Route[]).map((r) => ({ ...r, id: r.id })) : []
 )
 
 const hasItems = computed(() => isLoaded.value && routesList.value.length > 0)

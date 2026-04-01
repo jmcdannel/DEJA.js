@@ -50,9 +50,9 @@ const isDisconnected = computed(() => {
 })
 
 const rosterList = computed(() =>
-  locos?.value ? locos.value.map((l) => ({
+  locos?.value ? (locos.value as Loco[]).map((l) => ({
     ...l,
-    id: l.address,
+    id: String(l.address),
     sound: l.hasSound ? 'sound' : 'silent',
     locoType: l.consist?.length ? 'consist' : 'single',
   })) : []
