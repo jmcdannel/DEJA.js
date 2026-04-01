@@ -1,11 +1,11 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
-import { BulkEditIcon } from '@sanity/icons'
+import { TagIcon } from '@sanity/icons'
 
 export const promotion = defineType({
   name: 'promotion',
   title: 'Promotion',
   type: 'document',
-  icon: BulkEditIcon,
+  icon: TagIcon,
   fields: [
     defineField({
       name: 'slug',
