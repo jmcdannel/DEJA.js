@@ -1,25 +1,46 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import type { Effect } from '@repo/modules'
 import { efxTypes, useEfx } from '@repo/modules/effects'
-import { useLayout, type Tag } from '@repo/modules'
+import { useLayout, type Tag, useSubscription, PLAN_DISPLAY } from '@repo/modules'
 import { useRouter } from 'vue-router'
 import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
 import EffectsList from '@/Effects/EffectsList.vue'
+import EmptyState from '@/Core/UI/EmptyState.vue'
 
 const router = useRouter()
 const { getEffects } = useEfx()
 const { getDevices, getLayout } = useLayout()
+const { plan } = useSubscription()
 const devices = getDevices()
 const layout = getLayout()
 const effects = getEffects()
+
+// 🔄 Loading state
+const isLoaded = ref(false)
+let loadingTimeout: ReturnType<typeof setTimeout> | undefined
+onMounted(async () => {
+  loadingTimeout = setTimeout(() => { isLoaded.value = true }, 3000)
+  try {
+    await (effects as any).promise
+  } finally {
+    clearTimeout(loadingTimeout)
+    isLoaded.value = true
+  }
+})
+onUnmounted(() => clearTimeout(loadingTimeout))
+
+const isLoading = computed(() => !isLoaded.value)
+const isFreePlan = computed(() => plan.value === 'hobbyist')
 
 const effectsList = computed(() =>
   effects?.value
     ? (effects.value as Effect[]).map((effect) => ({ ...effect, id: effect.id }))
     : []
 )
+
+const hasItems = computed(() => isLoaded.value && effectsList.value.length > 0)
 
 const deviceOptions = computed(() =>
   devices?.value ? devices.value.map((d) => ({ label: d.id, value: d.id })) : []
@@ -59,28 +80,54 @@ function handleAdd() {
 }
 </script>
 <template>
-  <PageHeader title="Effects" icon="mdi-rocket-launch" color="indigo" subtitle="Manage lighting, sound, and special effects for your layout.">
-    <template #actions>
-      <v-btn
-        prepend-icon="mdi-plus"
-        color="indigo"
-        variant="flat"
-        @click="handleAdd"
-      >
-        New Effect
-      </v-btn>
-    </template>
-    <template #controls>
-      <ListControlBar
-        :controls="controls"
-        color="indigo"
-        :sort-options="sortOptions"
-        :filters="filters"
-        :show-view="false"
-        search-placeholder="Search effects..."
-      />
-    </template>
-  </PageHeader>
+  <!-- 🔄 Loading -->
+  <div v-if="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4">
+    <v-skeleton-loader v-for="n in 6" :key="n" type="card" />
+  </div>
 
-  <EffectsList :filtered-list="controls.filteredList.value" @edit="handleEdit" />
+  <!-- ✅ Has items -->
+  <template v-else-if="hasItems">
+    <PageHeader title="Effects" icon="mdi-rocket-launch" color="indigo" subtitle="Manage lighting, sound, and special effects for your layout.">
+      <template #actions>
+        <v-btn
+          prepend-icon="mdi-plus"
+          color="indigo"
+          variant="flat"
+          @click="handleAdd"
+        >
+          New Effect
+        </v-btn>
+      </template>
+      <template #controls>
+        <ListControlBar
+          :controls="controls"
+          color="indigo"
+          :sort-options="sortOptions"
+          :filters="filters"
+          :show-view="false"
+          search-placeholder="Search effects..."
+        />
+      </template>
+    </PageHeader>
+
+    <EffectsList :filtered-list="controls.filteredList.value" @edit="handleEdit" />
+  </template>
+
+  <!-- 📭 Empty -->
+  <EmptyState
+    v-else
+    icon="mdi-rocket-launch"
+    color="indigo"
+    title="No Effects Yet"
+    :description="isFreePlan
+      ? `Upgrade to ${PLAN_DISPLAY.engineer.name} to create lighting, sound, and animation effects for your layout.`
+      : 'Create lighting, sound, and animation effects to bring your layout to life with immersive scenery and interactive elements.'"
+    :use-cases="[
+      { icon: 'mdi-volume-high', text: 'Ambient sounds & audio' },
+      { icon: 'mdi-led-on', text: 'LED animations & lighting' },
+      { icon: 'mdi-play-circle', text: 'Triggered sequences' },
+    ]"
+    :action-label="isFreePlan ? `Upgrade to ${PLAN_DISPLAY.engineer.name}` : 'Create Your First Effect'"
+    :action-to="isFreePlan ? '/upgrade' : '/effects/new'"
+  />
 </template>

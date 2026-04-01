@@ -3,7 +3,6 @@ import { computed, ref, type PropType } from 'vue'
 import draggable from 'vuedraggable'
 import { useSignals, type Signal, type SignalAspect } from '@repo/modules/signals'
 import { useSortableList } from '@/Core/composables/useSortableList'
-import EmptyState from '@/Core/UI/EmptyState.vue'
 
 defineEmits(['edit'])
 const props = defineProps({
@@ -151,16 +150,10 @@ const wiring = (signal: Signal) => signal.commonAnode ? 'Common Anode' : 'Common
       </template>
     </draggable>
   </v-container>
-  <EmptyState
-    v-if="!list?.length"
-    icon="mdi-traffic-light"
-    color="emerald"
-    title="No Signals Yet"
-    description="Configure signal heads with red, yellow, and green aspects to manage block protection and interlocking on your layout."
-    :use-cases="[{ icon: 'mdi-shield-check', text: 'Block signal protection' }, { icon: 'mdi-lock', text: 'Interlocking control' }, { icon: 'mdi-lightbulb-on', text: 'Approach lighting' }]"
-    action-label="Add Your First Signal"
-    action-to="/signals/new"
-  />
+  <div v-if="!list?.length" class="flex flex-col items-center justify-center py-12 px-4">
+    <v-icon size="48" class="opacity-30 mb-3">mdi-magnify-close</v-icon>
+    <p class="text-sm opacity-60">No signals match your filters.</p>
+  </div>
 </template>
 <style scoped>
 .ghost {
