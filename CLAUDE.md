@@ -230,7 +230,7 @@ When UI changes are made, update screenshots and MDX docs **before the `preview 
 
 **Test user login:** Alternatively, set `CLAUDE_TEST_EMAIL` and `CLAUDE_TEST_PASSWORD` in `.env` for realistic email/password login during automated testing.
 
-**Worktree dev setup:** Git worktrees don't inherit `.env` or `node_modules/`. Run `/worktree-dev-setup [app]` before starting any dev server in a worktree — it symlinks `node_modules/` and **copies** `.env` into each app directory, then starts the server. **Important:** `.env` must be **copied** (not symlinked) — symlinks fail to load reliably in some environments. Vite reads `.env` from the **app directory** (e.g., `apps/cloud/`), not the monorepo root. The canonical `.env` lives in the `preview` worktree. If you change `.env`, restart the dev server (Vite doesn't hot-reload env vars).
+**Worktree dev setup:** Git worktrees don't inherit `.env` or `node_modules/`. Run `/worktree-dev-setup [app]` before starting any dev server in a worktree — it installs `node_modules/` via `pnpm install` and **copies** `.env` into the root, all `apps/*/` directories, and all `packages/*/` directories, then starts the server. **Important:** `.env` must be **copied** (not symlinked) — symlinks fail to load reliably in some environments. Vite reads `.env` from the **app directory** (e.g., `apps/cloud/`), not the monorepo root. Packages like `@repo/firebase-config` and `@repo/dccex` also need `.env` at runtime. The canonical `.env` lives in the `preview` worktree. If you change `.env`, restart the dev server (Vite doesn't hot-reload env vars).
 
 ---
 

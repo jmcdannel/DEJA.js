@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 
 interface Props {
-  /** 0-based index of the current active step (0=Account, 1=Plan, 2=Layout, 3=Install, 4=Drive) */
+  /** 0-based index of the current active step (0=Account, 1=Layout, 2=Plan, 3=Install, 4=Drive) */
   activeStep: number
   /** Show cycling status text below the tracker */
   showStatus?: boolean
@@ -27,7 +27,7 @@ const phraseIndex = ref(0)
 const phrase = computed(() => PHRASES[phraseIndex.value])
 let phraseTimer: ReturnType<typeof setInterval> | undefined
 
-const steps = ['Sign Up', 'Select Plan', 'Create Layout', 'Install', 'Drive Trains']
+const steps = ['Sign Up', 'Name Layout', 'Choose Plan', 'Install', 'Drive Trains']
 
 function signalColor(i: number) {
   if (i < props.activeStep) return '#22c55e'
