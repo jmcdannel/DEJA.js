@@ -344,27 +344,39 @@ export default function ServerGuide() {
         {/* Reading the Console */}
         <div>
           <h3 className="text-white font-semibold text-lg mb-3">Reading the Console Output</h3>
-          <p className="text-gray-400 text-sm mb-3">
-            Each line in the console starts with a colored icon that tells you what kind of message it is.
-            Here are the most common ones:
+          <p className="text-gray-400 text-sm mb-4">
+            Each line in the console follows the same format. Here&apos;s what each part means:
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm mb-3">
-            {[
-              ['▶ start', 'A service is launching'],
-              ['✔ success', 'Something connected OK'],
-              ['★ star', 'DCC command sent to track'],
-              ['● note', 'Status or config detail'],
-              ['⚠ warn', 'Non-critical issue'],
-              ['✖ error', 'Something went wrong'],
-            ].map(([icon, desc]) => (
-              <div key={icon} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-900 border border-gray-800">
-                <span className="text-deja-lime font-mono text-xs shrink-0">{icon}</span>
-                <span className="text-gray-400 text-xs">{desc}</span>
-              </div>
-            ))}
+          <div className="rounded-lg border border-gray-700 bg-gray-950 overflow-hidden mb-4">
+            <div className="flex items-center gap-1.5 px-3 py-2 border-b border-gray-800 bg-gray-900">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+              <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+              <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+              <span className="ml-2 text-gray-500 text-xs font-mono">message types</span>
+            </div>
+            <div className="px-4 py-3 space-y-1 font-mono text-xs leading-relaxed">
+              {[
+                { icon: '▶', color: 'text-green-400', level: 'start', levelColor: 'text-green-400', msg: 'A service or process is launching' },
+                { icon: '✔', color: 'text-green-400', level: 'success', levelColor: 'text-green-400', msg: 'Something connected or completed' },
+                { icon: '✔', color: 'text-green-400', level: 'complete', levelColor: 'text-green-400', msg: 'A task finished (port opened, layout loaded)' },
+                { icon: '●', color: 'text-blue-400', level: 'note', levelColor: 'text-blue-400', msg: 'Configuration detail or status update' },
+                { icon: 'ℹ', color: 'text-blue-400', level: 'info', levelColor: 'text-blue-400', msg: 'Something happened, no action needed' },
+                { icon: '★', color: 'text-yellow-400', level: 'star', levelColor: 'text-yellow-400', msg: 'A DCC command was sent to the track' },
+                { icon: '⚠', color: 'text-yellow-400', level: 'warn', levelColor: 'text-yellow-400', msg: 'Non-critical issue — server keeps running' },
+                { icon: '✖', color: 'text-red-400', level: 'error', levelColor: 'text-red-400', msg: 'Something went wrong' },
+                { icon: '✖', color: 'text-red-400', level: 'fatal', levelColor: 'text-red-400', msg: 'Critical error — server may need a restart' },
+              ].map((row) => (
+                <div key={row.level} className="flex items-baseline">
+                  <span className="text-gray-600 shrink-0">[DEJA.JS] › </span>
+                  <span className={`${row.color} shrink-0`}>{row.icon}  </span>
+                  <span className={`${row.levelColor} shrink-0 w-20 inline-block`}>{row.level}</span>
+                  <span className="text-gray-400">{row.msg}</span>
+                </div>
+              ))}
+            </div>
           </div>
           <p className="text-xs text-gray-500">
-            For a complete guide to every message you might see — startup, DCC commands, shutdown, and errors — see the{' '}
+            For a complete guide to every message — startup sequence, DCC commands, shutdown, and common errors — see the{' '}
             <Link href="/docs/server/cli#understanding-console-output" className="text-deja-cyan hover:underline">Console Output reference</Link>.
           </p>
         </div>
