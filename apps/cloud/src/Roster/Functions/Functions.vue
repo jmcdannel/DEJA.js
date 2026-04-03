@@ -42,39 +42,16 @@ async function handleEdit(func: LocoFunction) {
   log.debug('handleEdit', locoFunctions.value, func, existing)
 }
 
+defineExpose({ handleSave, isModified })
 </script>
 <template>
-  <v-card-actions class="flex justify-end">
-  <v-btn variant="flat" class="m-2" color="pink" @click="handleSave" :disabled="!isModified">
-    <v-icon>mdi-content-save</v-icon>
-    Save
-  </v-btn>
-  <!-- <v-btn class="m-2" color="pink" variant="tonal">
-    All <v-icon>mdi-eye</v-icon>     
-  </v-btn>
-  <v-btn class="m-2" color="pink" variant="tonal">
-    All <v-icon>mdi-eye-off</v-icon>     
-  </v-btn> -->
-  </v-card-actions>
-  <v-card-body>
-    <EditFunc 
-      v-for="defaultFunc in defaultFunctions" 
-      :key="defaultFunc.label" 
-      :locoFunction="locoFunctions?.find((lf: LocoFunction) => lf.id === defaultFunc.id)" 
-      :defaultFunction="defaultFunc" 
+  <div class="px-5 py-4">
+    <EditFunc
+      v-for="defaultFunc in defaultFunctions"
+      :key="defaultFunc.label"
+      :locoFunction="locoFunctions?.find((lf: LocoFunction) => lf.id === defaultFunc.id)"
+      :defaultFunction="defaultFunc"
       @edit="handleEdit"
     />
-  </v-card-body>
-  <v-card-actions class="flex justify-end">
-  <v-btn variant="flat" class="m-2" color="pink" @click="handleSave" :disabled="!isModified">
-    <v-icon>mdi-content-save</v-icon>
-    Save
-  </v-btn>
-  <!-- <v-btn class="m-2" color="pink" variant="tonal">
-    All <v-icon>mdi-eye</v-icon>     
-  </v-btn>
-  <v-btn class="m-2" color="pink" variant="tonal">
-    All <v-icon>mdi-eye-off</v-icon>     
-  </v-btn> -->
-  </v-card-actions>
+  </div>
 </template>
