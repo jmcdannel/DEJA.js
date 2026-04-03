@@ -48,8 +48,8 @@ watch(debouncedSpeed, (speed) => {
   setSpeed(signedSpeed)
 })
 
-function toggleDirection(val: boolean) {
-  isForward.value = val
+function toggleDirection(val: boolean | null) {
+  isForward.value = val ?? true
   if (sliderVal.value !== 0) {
     const signedSpeed = isForward.value ? sliderVal.value : -sliderVal.value
     setSpeed(signedSpeed)

@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { onClickOutside } from '@vueuse/core'
+import { onClickOutside, useStorage } from '@vueuse/core'
+import { useCurrentUser } from 'vuefire'
 import { useDraggableFab } from './useDraggableFab'
 import { useQuickMenu, SUBSCREEN_CONFIGS, GROUP_SCREEN_META } from './useQuickMenu'
 import type { EntityScreen } from './useQuickMenu'
 import { useQuickMenuData } from './useQuickMenuData'
 import type { GroupItem } from './useQuickMenuData'
 import type { Ref } from 'vue'
-import { useFeatureFlags } from '@repo/modules'
+import { useFeatureFlags, useServerStatus } from '@repo/modules'
+import dejaLogo from '@repo/ui/src/assets/icons/deja.png'
 import QuickMenuThrottles from './QuickMenuThrottles.vue'
 import QuickMenuFavorites from './QuickMenuFavorites.vue'
 import QuickMenuCloud from './QuickMenuCloud.vue'
@@ -51,6 +53,15 @@ const {
 
 const { isEnabled } = useFeatureFlags()
 const showFavorites = computed(() => isEnabled('quickMenuFavorites'))
+
+// Auth & layout gating
+const user = useCurrentUser()
+const layoutId = useStorage('@DEJA/layoutId', '')
+const canShow = computed(() => !!user.value && !!layoutId.value && quickMenuVisible.value)
+
+// Server connection status — disables server-dependent actions
+const { serverStatus } = useServerStatus()
+const isServerOnline = computed(() => serverStatus.value?.online === true)
 
 // Map group screen keys to their reactive computed refs
 const groupData: Record<string, Ref<GroupItem[]>> = {
@@ -115,6 +126,16 @@ const entityRoutes: Record<string, string> = {
   sensors: 'signals',
 }
 
+// Cloud app paths for "new" actions
+const cloudNewPaths: Record<string, string> = {
+  locos: '/locos/new',
+  effects: '/effects/new',
+  routes: '/routes/new',
+  turnouts: '/turnouts/new',
+  signals: '/signals/new',
+  sensors: '/sensors/new',
+}
+
 // Handle sub-screen item selection
 function handleSubScreenSelect(itemId: string) {
   const entity = currentScreen.value as EntityScreen
@@ -132,11 +153,11 @@ function handleSubScreenSelect(itemId: string) {
     return
   }
 
-  // "new" → navigate to entity page
+  // "new" → open Cloud app in new tab
   if (itemId === 'new') {
-    const routeName = entityRoutes[entity]
-    if (routeName) {
-      router.push({ name: routeName })
+    const cloudPath = cloudNewPaths[entity]
+    if (cloudPath) {
+      window.open(`https://cloud.dejajs.com${cloudPath}`, '_blank')
       closeAll()
     }
     return
@@ -161,6 +182,20 @@ function handleToggle(id: string, state: boolean) {
   const info = itemScreenInfo.value
   if (info) {
     toggleItem(info.entity, id, state)
+  }
+}
+
+// Handle navigate (locos → throttle)
+function handleNavigate(id: string) {
+  router.push({ name: 'throttle', params: { address: id } })
+  closeAll()
+}
+
+// Handle activate (routes)
+function handleActivate(id: string) {
+  const info = itemScreenInfo.value
+  if (info) {
+    toggleItem(info.entity, id, true)
   }
 }
 
@@ -189,7 +224,7 @@ onClickOutside(wrapperRef, () => {
 
 <template>
   <div
-    v-if="quickMenuVisible"
+    v-if="canShow"
     ref="wrapperRef"
     class="quick-menu"
     :style="positionStyle"
@@ -211,7 +246,7 @@ onClickOutside(wrapperRef, () => {
             <QuickMenuFavorites />
           </template>
           <v-divider class="opacity-10" />
-          <QuickMenuCloud @navigate="closeAll" @drill="handleDrill" />
+          <QuickMenuCloud :server-online="isServerOnline" @navigate="closeAll" @drill="handleDrill" />
         </template>
 
         <!-- Entity menu (effects, turnouts, etc.) -->
@@ -234,13 +269,16 @@ onClickOutside(wrapperRef, () => {
           @select="handleGroupSelect"
         />
 
-        <!-- Item list with toggles -->
+        <!-- Item list with toggles / actions -->
         <QuickMenuItemList
           v-else-if="itemScreenInfo"
           :title="itemScreenInfo.title"
           :items="itemListData"
+          :server-online="isServerOnline"
           @back="popScreen"
           @toggle="handleToggle"
+          @navigate="handleNavigate"
+          @activate="handleActivate"
         />
       </v-card>
     </Transition>
@@ -260,9 +298,13 @@ onClickOutside(wrapperRef, () => {
       @pointerup="onPointerUp"
       @click.stop="handleFabClick"
     >
-      <v-icon size="20" :class="{ 'qm-fab__icon--open': isOpen }">
-        {{ isOpen ? 'mdi-close' : 'mdi-train' }}
-      </v-icon>
+      <v-icon v-if="isOpen" size="20" class="qm-fab__icon--open">mdi-close</v-icon>
+      <img
+        v-else
+        :src="dejaLogo"
+        alt="DEJA.js"
+        class="qm-fab__logo"
+      />
     </v-btn>
   </div>
 </template>
@@ -288,6 +330,13 @@ onClickOutside(wrapperRef, () => {
 .quick-menu--dragging .qm-fab {
   transform: scale(1.15);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35) !important;
+}
+.qm-fab__logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  pointer-events: none;
 }
 .qm-fab__icon--open {
   transition: transform 200ms ease;
