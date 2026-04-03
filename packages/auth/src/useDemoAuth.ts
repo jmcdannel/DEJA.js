@@ -14,8 +14,6 @@ export function useDemoAuth() {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
-  const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
-
   async function signInAsDemo(): Promise<boolean> {
     const email = import.meta.env.VITE_DEMO_EMAIL
     const password = import.meta.env.VITE_DEMO_PASSWORD
@@ -46,7 +44,6 @@ export function useDemoAuth() {
 
   return {
     signInAsDemo,
-    isDemoMode,
     isLoading,
     error,
     DEMO_LAYOUT_ID,
