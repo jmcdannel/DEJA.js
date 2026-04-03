@@ -96,74 +96,109 @@ View recent tunnel log output. Optionally pass a number to show more lines (e.g.
 
 ## Understanding Console Output
 
-When the server runs in the foreground (`deja start`), you'll see a live stream of status messages. Each line starts with a colored icon that tells you what kind of message it is:
+When the server runs in the foreground (`deja start`), you'll see a live stream of status messages. Each line follows this format:
+
+```
+[DEJA.JS] › ▶  start      Running [MAIN]
+```
+
+The prefix `[DEJA.JS] ›` appears on every line, followed by an icon, a level name, and the message. Here's what each level means:
 
 ### Message Types
 
-| Icon | Level | Meaning |
-|------|-------|---------|
-| ▶ **start** | A service or process is launching |
-| ✔ **success** | Something connected or completed successfully |
-| ✖ **error** | Something went wrong (check the message for details) |
-| ⚠ **warn** | A non-critical issue — the server keeps running |
-| ℹ **info** | Informational — something happened, no action needed |
-| ● **note** | Configuration detail or status update |
-| ★ **star** | A DCC command was sent to the track |
-| ✔ **complete** | A task finished (port opened, layout loaded, etc.) |
-| … **await** | Waiting for something (serial write, reconnect, etc.) |
-| ✖ **fatal** | A critical error — the server may need to be restarted |
+```
+[DEJA.JS] › ▶  start      A service or process is launching
+[DEJA.JS] › ✔  success    Something connected or completed successfully
+[DEJA.JS] › ✔  complete   A task finished (port opened, layout loaded)
+[DEJA.JS] › ●  note       Configuration detail or status update
+[DEJA.JS] › ℹ  info       Informational — no action needed
+[DEJA.JS] › ★  star       A DCC command was sent to the track
+[DEJA.JS] › …  await      Waiting for something (serial write, reconnect)
+[DEJA.JS] › ⚠  warn       Non-critical issue — server keeps running
+[DEJA.JS] › ✖  error      Something went wrong
+[DEJA.JS] › ✖  fatal      Critical error — server may need a restart
+```
 
-### Startup Messages
+### Startup Sequence
 
 When the server starts, you'll see messages like these in order:
 
-1. **Running [MAIN]** — the server process has started
-2. **Subscription valid** — your account was verified
-3. **MQTT ON / WebSocket ON / DEJA Cloud ON** — which services are enabled
-4. **Connecting to DejaCloud** — connecting to Firebase
-5. **RTDB connection established** — real-time database is live
-6. **Cleared stale entries** — cleaning up old command queues
-7. **Throttles listening for loco changes** — ready to receive throttle commands
-8. **Load layout / Layout loaded** — your layout configuration is loaded
-9. **Auto connect device** — connecting to your CommandStation's serial port
-10. **Port opened** — USB serial connection is active
-11. **Connected to DejaCloud** — Firebase sync is fully established
-12. **WebSocket server started** — browser apps can connect
-13. **DEJA.js Server is running!** — everything is ready
+```
+[DEJA.JS] › ▶  start      Running [MAIN]
+[DEJA.JS] › ✔  success    Subscription valid: trialing (engineer)
+[DEJA.JS] › ℹ  info       Server config loaded { layoutId: 'my-layout', mqtt: true, ws: true }
+[DEJA.JS] › ●  note       MQTT ON (mqtt://localhost:1883)
+[DEJA.JS] › ●  note       WebSocket ON (port 8082)
+[DEJA.JS] › ●  note       DEJA Cloud ON
+[DEJA.JS] › ▶  start      Connecting to DejaCloud my-layout
+[DEJA.JS] › ✔  success    [CLEANUP] Cleared stale entries from dccCommands/my-layout
+[DEJA.JS] › ▶  start      Throttles listening for loco changes on layout: my-layout
+[DEJA.JS] › ▶  start      Load layout my-layout
+[DEJA.JS] › ✔  complete   Layout loaded my-layout
+[DEJA.JS] › ✔  success    [FIREBASE] RTDB connection established
+[DEJA.JS] › ✔  success    Connected to DejaCloud my-layout
+[DEJA.JS] › ▶  start      DEJA Cloud connected
+[DEJA.JS] › ▶  start      MQTT initialized
+[DEJA.JS] › ▶  start      WebSocket server started 8082 DEJA.js 192.168.86.23
+[DEJA.JS] › ▶  start      DEJA.js Server is running!
+```
 
 ### DCC Command Messages
 
-When you control trains, turnouts, or effects, you'll see `★ star` messages confirming each command:
+When you control trains, turnouts, or effects, you'll see `★ star` messages confirming each command sent to the track:
 
-| Message | What happened |
-|---------|---------------|
-| **Throttle** `3 50 1` | Loco 3 set to speed 50, forward |
-| **Turnout** `1 1` | Turnout 1 thrown |
-| **Function** `3 0 1` | Loco 3 headlight (F0) turned on |
-| **Power** `1` | Track power turned on |
-| **Output** `{pin, state}` | An output pin was toggled |
+```
+[DEJA.JS] › ★  star       Throttle   3 50 1        ← Loco 3, speed 50, forward
+[DEJA.JS] › ★  star       Turnout    1 1            ← Turnout 1 thrown
+[DEJA.JS] › ★  star       Function   3 0 1          ← Loco 3, headlight on
+[DEJA.JS] › ★  star       Power      1              ← Track power on
+[DEJA.JS] › ★  star       Output     {pin: 5, ...}  ← Output pin toggled
+```
 
-### Shutdown Messages
+### Shutdown Sequence
 
-When you stop the server (Ctrl+C or `/stop`), you'll see an orderly shutdown sequence:
+When you stop the server (Ctrl+C or `/stop`), you'll see an orderly shutdown:
 
-1. **Graceful shutdown initiated** — shutdown process started
-2. **Closing WebSocket server** — disconnecting browser clients
-3. **Disconnecting from DEJA Cloud** — removing Firebase listeners
-4. **Disconnecting MQTT client** — closing broker connection
-5. **Stopping sound playback** — stopping any playing sounds
-6. **Clearing audio cache** — cleaning up temporary files
-7. **Disconnecting all serial ports** — releasing USB connections
-8. **Shutdown complete** — clean exit
+```
+[DEJA.JS] › ▶  start      [SHUTDOWN] Graceful shutdown initiated...
+[DEJA.JS] › ℹ  info       [SHUTDOWN] Closing WebSocket server and all client connections...
+[DEJA.JS] › ✔  success    [SHUTDOWN] WebSocket server closed
+[DEJA.JS] › ℹ  info       [SHUTDOWN] Disconnecting from DEJA Cloud (Firebase listeners)...
+[DEJA.JS] › ✔  success    [SHUTDOWN] DEJA Cloud disconnected
+[DEJA.JS] › ℹ  info       [SHUTDOWN] Disconnecting MQTT client...
+[DEJA.JS] › ✔  success    [SHUTDOWN] MQTT client disconnected
+[DEJA.JS] › ℹ  info       [SHUTDOWN] Stopping sound playback...
+[DEJA.JS] › ✔  success    [SHUTDOWN] Sound playback stopped
+[DEJA.JS] › ℹ  info       [SHUTDOWN] Disconnecting all serial ports...
+[DEJA.JS] › ✔  success    [SHUTDOWN] Serial ports disconnected
+[DEJA.JS] › ✔  success    [SHUTDOWN] DEJA.js Server shutdown complete
+```
 
 ### Common Error Messages
 
-| Message | What it means | What to do |
-|---------|---------------|------------|
-| **Subscription inactive** | Your subscription has expired | Visit [dejajs.com](https://dejajs.com) to renew |
-| **Port is already in use** | Another server instance is running | Run `deja stop` first, or check for other processes on the port |
-| **Error opening port** | Can't access the USB serial port | Check the cable, or run `sudo usermod -a -G dialout $USER` on Linux |
-| **Broker not available** | MQTT broker isn't running | Start Mosquitto, or set `ENABLE_MQTT=false` in `~/.deja/.env` |
-| **Firebase unreachable** | Can't connect to the cloud | Check your internet connection and Firebase credentials in `~/.deja/.env` |
+```
+[DEJA.JS] › ✖  error      Subscription inactive (status: canceled)
+```
+Your subscription has expired — visit [dejajs.com](https://dejajs.com) to renew.
+
+```
+[DEJA.JS] › ✖  error      [WS] Port 8082 is already in use
+```
+Another server instance is running — run `deja stop` first.
+
+```
+[DEJA.JS] › ✖  error      [SERIAL] Error opening port: Permission denied
+```
+Can't access the USB serial port — check the cable, or run `sudo usermod -a -G dialout $USER` on Linux.
+
+```
+[DEJA.JS] › ✖  error      [MQTT] Broker not available
+```
+MQTT broker isn't running — start Mosquitto, or set `ENABLE_MQTT=false` in `~/.deja/.env`.
+
+```
+[DEJA.JS] › ⚠  warn       Could not reach Firebase for subscription check
+```
+Can't connect to the cloud — check your internet connection and credentials in `~/.deja/.env`.
 
 For more solutions, see [Troubleshooting](/docs/server/troubleshooting).
