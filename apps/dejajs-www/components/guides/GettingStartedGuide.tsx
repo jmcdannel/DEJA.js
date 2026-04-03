@@ -1,55 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import CopyButton from '../home/CopyButton';
 import { mdiCellphoneLink, mdiLaptop, mdiUsb } from '@mdi/js';
 import ThrottleLaunchQR from '../home/ThrottleLaunchQR';
-
-function Step({ number, title, children }: { number: number; title: string; children: React.ReactNode }) {
-  return (
-    <div className="relative pl-14">
-      <div className="absolute left-0 top-0 w-10 h-10 rounded-full border border-deja-cyan/30 bg-deja-cyan/10 flex items-center justify-center shrink-0">
-        <span className="text-deja-cyan font-bold text-sm font-mono">0{number}</span>
-      </div>
-      <h3 className="text-white font-bold text-xl mb-3">{title}</h3>
-      <div className="text-gray-300 leading-relaxed space-y-3">{children}</div>
-    </div>
-  );
-}
-
-function CommandBlock({ command }: { command: string }) {
-  return (
-    <div className="rounded-lg border border-gray-700 bg-gray-950 overflow-hidden my-4">
-      <div className="flex items-center gap-1.5 px-3 py-2 border-b border-gray-800 bg-gray-900">
-        <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-        <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-        <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-        <span className="ml-2 text-gray-500 text-xs font-mono">bash</span>
-      </div>
-      <div className="flex items-center gap-2 px-4 py-3">
-        <span className="text-deja-lime/60 font-mono text-sm select-none shrink-0">$</span>
-        <span className="font-mono text-sm text-deja-lime flex-1 break-all">{command}</span>
-        <CopyButton text={command} />
-      </div>
-    </div>
-  );
-}
-
-function Callout({ emoji, children }: { emoji: string; children: React.ReactNode }) {
-  return (
-    <div className="flex gap-3 p-4 rounded-lg bg-deja-cyan/5 border border-deja-cyan/20 my-4">
-      <span className="text-lg shrink-0">{emoji}</span>
-      <div className="text-sm text-gray-300 leading-relaxed">{children}</div>
-    </div>
-  );
-}
-
-function MdiIcon({ path, className = '' }: { path: string; className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className}>
-      <path d={path} fill="currentColor" />
-    </svg>
-  );
-}
+import { Callout, CommandBlock, Step, MdiIcon } from './shared';
 
 function AppIcon({ src, alt, bgColor, borderColor }: { src: string; alt: string; bgColor: string; borderColor: string }) {
   return (
@@ -167,7 +120,7 @@ export default function GettingStartedGuide() {
 
       {/* Steps */}
       <div className="space-y-12">
-        <Step number={1} title="Create Your Account">
+        <Step number={1} title="Create Your Account" color="cyan">
           <p>
             Head to <a href="https://cloud.dejajs.com" target="_blank" rel="noopener noreferrer" className="text-deja-cyan hover:underline">cloud.dejajs.com</a> and
             sign up with Google, GitHub, or email. It takes about 10 seconds.
@@ -175,16 +128,16 @@ export default function GettingStartedGuide() {
           <p>The onboarding wizard walks you through everything from here — you won&apos;t need to leave the browser until it&apos;s time to install the server.</p>
         </Step>
 
-        <Step number={2} title="Name Your Layout">
+        <Step number={2} title="Name Your Layout" color="cyan">
           <p>
             Give your railroad a name and we&apos;ll generate a unique Layout ID. Your layout is officially created when you install the server — no commitment until then.
           </p>
-          <Callout emoji="💡">
+          <Callout emoji="💡" color="cyan">
             <p>You can create multiple layouts later if you have more than one railroad (paid plans).</p>
           </Callout>
         </Step>
 
-        <Step number={3} title="Choose a Plan">
+        <Step number={3} title="Choose a Plan" color="cyan">
           <p>
             The <strong className="text-white">free Hobbyist plan</strong> gets you started with up to 5 locomotives — no credit card, no commitment.
             Upgrade anytime to unlock turnouts, effects, signals, and more.
@@ -220,7 +173,7 @@ export default function GettingStartedGuide() {
           <p className="text-xs text-gray-500">Paid plans include a 14-day free trial. See the <Link href="/pricing" className="text-deja-cyan hover:underline">full comparison</Link> for details.</p>
         </Step>
 
-        <Step number={4} title="Install the Server">
+        <Step number={4} title="Install the Server" color="cyan">
           <p>
             Open a terminal on the machine connected to your CommandStation and run one command:
           </p>
@@ -230,7 +183,7 @@ export default function GettingStartedGuide() {
             and connects automatically. While it installs, you can start adding locomotives
             to your roster right in the browser.
           </p>
-          <Callout emoji="🍓">
+          <Callout emoji="🍓" color="cyan">
             <p>
               <strong className="text-white">Raspberry Pi?</strong> DEJA Server runs great on a Pi 4 or 5.
               Just plug your CommandStation in via USB and run the command above.
@@ -243,13 +196,13 @@ export default function GettingStartedGuide() {
           </p>
         </Step>
 
-        <Step number={5} title="Add Your First Locomotive">
+        <Step number={5} title="Add Your First Locomotive" color="cyan">
           <p>
             While the server installs, add a locomotive to your roster.
             You just need the <strong className="text-white">DCC address</strong> (usually printed on the decoder)
             and a <strong className="text-white">name</strong>.
           </p>
-          <Callout emoji="🔢">
+          <Callout emoji="🔢" color="cyan">
             <p>
               Not sure of the address? Most new decoders default to <strong className="text-white">address 3</strong>.
               You can always change it later.
@@ -257,7 +210,7 @@ export default function GettingStartedGuide() {
           </Callout>
         </Step>
 
-        <Step number={6} title="Open the Throttle & Drive">
+        <Step number={6} title="Open the Throttle & Drive" color="cyan">
           <p>
             Once the server connects, open{' '}
             <a href="https://throttle.dejajs.com" target="_blank" rel="noopener noreferrer" className="text-deja-cyan hover:underline">throttle.dejajs.com</a>
