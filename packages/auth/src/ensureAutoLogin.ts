@@ -1,4 +1,3 @@
-// packages/auth/src/ensureAutoLogin.ts
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { getCurrentUser } from 'vuefire'
 import { createLogger } from '@repo/utils'

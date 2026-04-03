@@ -1,7 +1,5 @@
-// packages/auth/src/isDemoUser.ts
 import { getAuth } from 'firebase/auth'
-
-const DEMO_EMAIL = 'demo@dejajs.com'
+import { DEMO_EMAIL } from '@repo/utils'
 
 export function isDemoUser(): boolean {
   return getAuth().currentUser?.email === DEMO_EMAIL

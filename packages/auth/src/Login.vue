@@ -295,9 +295,9 @@ onMounted(() => {
           </template>
 
           <!-- Try Demo -->
-          <v-divider v-if="props.showTryDemo" class="my-4" />
+          <v-divider v-if="showTryDemo" class="my-4" />
           <v-btn
-            v-if="props.showTryDemo"
+            v-if="showTryDemo"
             variant="outlined"
             color="secondary"
             size="large"
