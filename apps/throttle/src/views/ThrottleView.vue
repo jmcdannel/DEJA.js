@@ -6,7 +6,7 @@ import { useLocos } from '@repo/modules/locos'
 import ThrottleNavItem from '@/throttle/ThrottleNavItem.vue'
 import ButtonsThrottle from '@/throttle/ButtonsThrottle.vue'
 import SliderThrottle from '@/throttle/SliderThrottle.vue'
-import ProtoThrottle from '@/throttle/ProtoThrottle.vue'
+import Dashboard from '@/throttle/Dashboard.vue'
 import { useThrottleSettings } from '@/throttle/useThrottleSettings'
 
 const route = useRoute()
@@ -52,7 +52,7 @@ const { variant, showFunctions, showSpeedometer, showConsist } = useThrottleSett
 const variantMap = {
   buttons: ButtonsThrottle,
   slider: SliderThrottle,
-  protothrottle: ProtoThrottle,
+  dashboard: Dashboard,
 } as const
 
 const variantComponent = computed(() => variantMap[variant.value] ?? ButtonsThrottle)
