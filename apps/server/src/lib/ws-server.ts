@@ -231,7 +231,14 @@ export const disconnect = (): Promise<void> => {
         deviceConnections.clear()
 
         // Close the WebSocket server and wait for it to fully release the port
+        const timeout = setTimeout(() => {
+          log.warn('WebSocket server close timed out, forcing shutdown')
+          weServer = null
+          resolve()
+        }, 5000)
+
         weServer.close(() => {
+          clearTimeout(timeout)
           log.success('WebSocket server closed successfully')
           weServer = null
           resolve()

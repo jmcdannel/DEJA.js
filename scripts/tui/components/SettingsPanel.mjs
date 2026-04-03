@@ -17,26 +17,32 @@ const h = React.createElement
  * - defaultVal: fallback when neither config nor env is set
  */
 export const SETTINGS_ITEMS = [
-  { key: 'enableMqtt',   label: 'MQTT',         type: 'toggle', envKey: 'ENABLE_MQTT',      defaultVal: false },
-  { key: 'enableWs',     label: 'WebSocket',    type: 'toggle', envKey: 'ENABLE_WS',        defaultVal: true },
-  { key: 'enableTunnel', label: 'Tunnel',       type: 'toggle', envKey: null,                defaultVal: true },
-  { key: 'mqttPort',     label: 'MQTT Port',    type: 'number', envKey: 'VITE_MQTT_PORT',   defaultVal: '1883' },
-  { key: 'mqttBroker',   label: 'MQTT Broker',  type: 'text',   envKey: 'VITE_MQTT_BROKER', defaultVal: 'mqtt://localhost' },
-  { key: 'wsPort',       label: 'WS Port',      type: 'number', envKey: 'VITE_WS_PORT',     defaultVal: '8082' },
+  { key: 'enableMqtt',   label: 'MQTT',         type: 'toggle', envKey: 'ENABLE_MQTT',      defaultVal: false,              requiresRestart: true },
+  { key: 'enableWs',     label: 'WebSocket',    type: 'toggle', envKey: 'ENABLE_WS',        defaultVal: true,               requiresRestart: true },
+  { key: 'enableTunnel', label: 'Tunnel',       type: 'toggle', envKey: null,                defaultVal: true,               requiresRestart: false },
+  { key: 'mqttPort',     label: 'MQTT Port',    type: 'number', envKey: 'VITE_MQTT_PORT',   defaultVal: '1883',             requiresRestart: true },
+  { key: 'mqttBroker',   label: 'MQTT Broker',  type: 'text',   envKey: 'VITE_MQTT_BROKER', defaultVal: 'mqtt://localhost', requiresRestart: true },
+  { key: 'wsPort',       label: 'WS Port',      type: 'number', envKey: 'VITE_WS_PORT',     defaultVal: '8082',             requiresRestart: true },
 ]
 
 /**
  * Build initial settings object from config + env + defaults.
+ * Priority: config.json → env var → SETTINGS_ITEMS.defaultVal
  */
 export function getInitialSettings(config) {
-  return {
-    enableMqtt:   config.enableMqtt   ?? (process.env.ENABLE_MQTT === 'true'),
-    enableWs:     config.enableWs     ?? (process.env.ENABLE_WS !== 'false'),
-    enableTunnel: config.enableTunnel ?? true,
-    mqttPort:     config.mqttPort     ?? process.env.VITE_MQTT_PORT ?? '1883',
-    mqttBroker:   config.mqttBroker   ?? process.env.VITE_MQTT_BROKER ?? 'mqtt://localhost',
-    wsPort:       config.wsPort       ?? process.env.VITE_WS_PORT ?? '8082',
+  const settings = {}
+  for (const item of SETTINGS_ITEMS) {
+    if (config[item.key] != null) {
+      settings[item.key] = config[item.key]
+    } else if (item.envKey && process.env[item.envKey] != null) {
+      settings[item.key] = item.type === 'toggle'
+        ? process.env[item.envKey] === 'true'
+        : process.env[item.envKey]
+    } else {
+      settings[item.key] = item.defaultVal
+    }
   }
+  return settings
 }
 
 /**

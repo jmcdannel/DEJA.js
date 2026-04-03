@@ -124,19 +124,11 @@ export function App() {
   // ── Settings ──────────────────────────────────────────────────────────────
 
   const updateSetting = useCallback((key, value) => {
-    setSettings(prev => {
-      const next = { ...prev, [key]: value }
-      // Persist to config.json
-      writeConfig({ [key]: value })
-      configRef.current = readConfig()
-      // Sync env var so next server spawn picks it up
-      const item = SETTINGS_ITEMS.find(s => s.key === key)
-      if (item?.envKey) process.env[item.envKey] = String(value)
-      return next
-    })
-    // Server-related settings need a restart
-    const serverKeys = ['enableMqtt', 'enableWs', 'mqttPort', 'mqttBroker', 'wsPort']
-    if (serverKeys.includes(key)) {
+    setSettings(prev => ({ ...prev, [key]: value }))
+    writeConfig({ [key]: value })
+    const item = SETTINGS_ITEMS.find(s => s.key === key)
+    if (item?.envKey) process.env[item.envKey] = String(value)
+    if (item?.requiresRestart) {
       showHint('Setting saved. Restart server to apply.')
     }
   }, [showHint])
@@ -559,35 +551,15 @@ export function App() {
           // Help panel (shown above log pane when toggled)
           h(HelpPanel, { visible: showHelp }),
 
-          // Main body: log pane OR menu OR settings OR port selector OR device list
-          mode === 'menu'
-            ? h(MenuOverlay, { items: MENU_ITEMS, selectedIndex: menuIndex, cols })
-            : mode === 'settings'
-              ? h(SettingsPanel, {
-                  settings,
-                  selectedIndex: settingsIndex,
-                  editingKey: settingsEditing,
-                  editBuffer: settingsBuffer,
-                  cols,
-                })
-              : mode === 'ports'
-                ? h(PortSelector, {
-                    ports: availablePorts,
-                    portIndex,
-                    currentPort: cfg.serialPort || null,
-                    cols,
-                  })
-                : mode === 'devices'
-                  ? h(DeviceList, { devices, selectedIndex: deviceIndex, cols, serverStatus: status })
-                  : mode === 'dcc-ref'
-                    ? h(DccExReference, { cols })
-                    : mode === 'topic-input'
-                      ? h(TopicInput, {
-                          ref: topicInputRef,
-                          deviceName: editingDeviceRef.current?.id || '',
-                          currentTopic: editingDeviceRef.current?.topic || '',
-                        })
-                    : h(LogPane, { visibleLines, paddingLines, logHeight, filter: logFilter }),
+          // Main body — mode-switched panel
+          ({
+            menu:     () => h(MenuOverlay, { items: MENU_ITEMS, selectedIndex: menuIndex, cols }),
+            settings: () => h(SettingsPanel, { settings, selectedIndex: settingsIndex, editingKey: settingsEditing, editBuffer: settingsBuffer, cols }),
+            ports:    () => h(PortSelector, { ports: availablePorts, portIndex, currentPort: cfg.serialPort || null, cols }),
+            devices:  () => h(DeviceList, { devices, selectedIndex: deviceIndex, cols, serverStatus: status }),
+            'dcc-ref': () => h(DccExReference, { cols }),
+            'topic-input': () => h(TopicInput, { ref: topicInputRef, deviceName: editingDeviceRef.current?.id || '', currentTopic: editingDeviceRef.current?.topic || '' }),
+          }[mode] ?? (() => h(LogPane, { visibleLines, paddingLines, logHeight, filter: logFilter })))(),
 
           // Contextual hint row — system hints take priority, tips shown as fallback
           h(ContextHintRow, { hint: contextHint, tip: currentTip }),

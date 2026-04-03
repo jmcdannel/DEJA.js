@@ -86,7 +86,7 @@ export const CONTEXTUAL_TIPS = {
   ],
 }
 
-// ── Menu Items (8) ─────────────────────────────────────────────────────────────
+// ── Menu Items ────────────────────────────────────────────────────────────────
 
 export const MENU_ITEMS = [
   { label: 'Start Server',       action: 'start'    },
