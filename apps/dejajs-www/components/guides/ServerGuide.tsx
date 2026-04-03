@@ -339,6 +339,34 @@ export default function ServerGuide() {
             {' '}for more details.
           </p>
         </div>
+
+        {/* Reading the Console */}
+        <div>
+          <h3 className="text-white font-semibold text-lg mb-3">Reading the Console Output</h3>
+          <p className="text-gray-400 text-sm mb-3">
+            Each line in the console starts with a colored icon that tells you what kind of message it is.
+            Here are the most common ones:
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm mb-3">
+            {[
+              ['▶ start', 'A service is launching'],
+              ['✔ success', 'Something connected OK'],
+              ['★ star', 'DCC command sent to track'],
+              ['● note', 'Status or config detail'],
+              ['⚠ warn', 'Non-critical issue'],
+              ['✖ error', 'Something went wrong'],
+            ].map(([icon, desc]) => (
+              <div key={icon} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-900 border border-gray-800">
+                <span className="text-deja-lime font-mono text-xs shrink-0">{icon}</span>
+                <span className="text-gray-400 text-xs">{desc}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500">
+            For a complete guide to every message you might see — startup, DCC commands, shutdown, and errors — see the{' '}
+            <Link href="/docs/server/cli#understanding-console-output" className="text-deja-cyan hover:underline">Console Output reference</Link>.
+          </p>
+        </div>
       </section>
 
       {/* CLI Quick Reference */}
