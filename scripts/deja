@@ -767,7 +767,7 @@ case "${1:-}" in
     cmd_help
     ;;
   "")
-    cmd_help
+    cmd_start
     ;;
   *)
     err "Unknown command: $1"
