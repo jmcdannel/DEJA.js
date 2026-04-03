@@ -106,7 +106,7 @@ function setNotch(notch: number) {
 }
 
 // ⬆️⬇️ Direction reverser
-function toggleDirection(val: boolean) {
+function toggleDirection(val: boolean | null) {
   if (currentSpeed.value !== 0) {
     vibrate('heavy')
     return
