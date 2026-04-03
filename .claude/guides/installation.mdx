@@ -86,13 +86,40 @@ The Quick Install places all files under `~/.deja/`:
 ```
 ~/.deja/
 ├── bin/
-│   └── deja          # CLI executable (added to PATH)
-├── server/           # Server files (downloaded tarball)
-├── config.json       # Account config (uid, layoutId)
-└── .env              # Environment variables (Firebase, ports, etc.)
+│   └── deja          # ⚡ CLI executable (added to PATH)
+├── server/
+│   ├── index.js      # 🚂 Compiled server bundle
+│   ├── version.txt   # 📦 Installed version
+│   └── node_modules/ # 📦 Native dependencies (serialport, etc.)
+├── logs/
+│   ├── server.log    # 📋 Server output
+│   └── tunnel.log    # 🔒 Cloudflare tunnel output (paid plans)
+├── config.json       # 🪪 Account config (uid, layoutId)
+├── .env              # 🔑 Environment variables (Firebase, ports, etc.)
+└── server.pid        # 🔌 Running server PID (when active)
 ```
 
 After the script finishes, you're ready to [register your CommandStation](/docs/quick-start#step-5--register-your-commandstation).
+
+### 🛠️ Developer Mode
+
+If you're a contributor with the DEJA.js repo cloned locally, you can install from source instead of downloading a tarball:
+
+```bash
+./install.sh --dev
+```
+
+This builds the server with tsup from your local repo and copies the output to `~/.deja/server/`. You can also point to a specific repo path:
+
+```bash
+./install.sh --dev --repo /path/to/DEJA.js
+```
+
+The `deja` CLI also supports a `DEJA_DIR` environment variable to override the install directory, useful for testing:
+
+```bash
+DEJA_DIR=./tmp/test-deja ./scripts/deja status
+```
 
 ## Developer Setup
 

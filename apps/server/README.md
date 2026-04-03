@@ -57,12 +57,29 @@ This runs `tsx watch index.ts` — the server auto-restarts on source file chang
 
 ### Production
 
-The server is distributed as a self-contained bundle managed by the `deja` CLI:
+The server is distributed as a self-contained bundle managed by the `deja` CLI. All files live under `~/.deja/`:
 
 ```bash
-deja start      # 🚀 Launch the server
+deja start      # 🚀 Launch the server (interactive TUI)
+deja start -b   # 🚀 Launch in the background
 deja status     # 📊 Check status
 deja stop       # 🛑 Stop the server
+deja update     # ⬇️ Update to latest version
+deja logs -f    # 📋 Follow server logs
+```
+
+Users install via `curl -fsSL https://install.dejajs.com | bash` — no GitHub access required.
+
+### Developer Install
+
+To test the production `deja` CLI against a local build:
+
+```bash
+# Build from local source and install to ~/.deja/
+./install.sh --dev
+
+# Override install directory for isolated testing
+DEJA_DIR=./tmp/test-deja ./scripts/deja status
 ```
 
 ---
