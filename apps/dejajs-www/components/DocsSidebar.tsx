@@ -111,14 +111,6 @@ export default function DocsSidebar({ nav }: { nav: DocNavItem[] }) {
           >
             Back to Home
           </Link>
-          <a
-            href="https://github.com/jmcdannel/DEJA.js"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          >
-            GitHub
-          </a>
         </div>
       </nav>
     </>

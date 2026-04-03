@@ -38,10 +38,10 @@ function collectTags<T extends { tags?: string[] }>(items: T[]): GroupItem[] {
 
 export function useQuickMenuData() {
   const efx = useEfx()
-  const effects = efx.getEffects() as Ref<Effect[]>
+  const effects = efx.getEffects() as unknown as Ref<Effect[]>
 
   const tn = useTurnouts()
-  const turnouts = tn.getTurnouts() as Ref<Turnout[]>
+  const turnouts = tn.getTurnouts() as unknown as Ref<Turnout[]>
 
   const sig = useSignals()
   const signals = sig.getSignals() as Ref<Signal[]>
@@ -50,7 +50,7 @@ export function useQuickMenuData() {
   const sensors = sen.getSensors() as Ref<Sensor[]>
 
   const { getLocos, getThrottles } = useLocos()
-  const locos = getLocos() as Ref<Loco[]>
+  const locos = getLocos() as unknown as Ref<Loco[]>
   const throttles = getThrottles()
 
   const routesMod = useRoutes()

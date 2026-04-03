@@ -102,3 +102,7 @@ export { default as ListViewSheet } from './ListControls/ListViewSheet.vue'
 export { default as ListSortSheet } from './ListControls/ListSortSheet.vue'
 export { default as ListFilterSheet } from './ListControls/ListFilterSheet.vue'
 export type { ViewOption, SortOption, FilterOption, ListFilter, ListControlsReturn } from './ListControls/types'
+
+// LocoFront — SVG locomotive front-face illustrations by roadname
+export { LocoFront, LocoFrontGallery, getLocoFrontDesign, LOCO_FRONT_DESIGNS, DEFAULT_DESIGN } from './LocoFront'
+export type { LocoFrontDesign } from './LocoFront'

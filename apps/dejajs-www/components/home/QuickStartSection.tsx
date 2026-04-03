@@ -9,7 +9,7 @@ interface Step {
   number: string;
   color: 'cyan' | 'magenta' | 'lime';
   label: string;
-  description: string;
+  description: React.ReactNode;
   icon: React.ReactNode;
   cta?: { label: string; href: string; variant?: 'link' | 'button'; color?: 'cyan' | 'lime' };
   command?: string;
@@ -23,7 +23,7 @@ const steps: Step[] = [
     color: 'cyan',
     label: 'Sign Up',
     description:
-      'Create your free DEJA Cloud account — no credit card required. Choose a plan that fits your layout, or start free. Your roster, settings, and layout data sync instantly across every device.',
+      'Create your free DEJA Cloud account. Choose a plan that fits your layout. Your roster, settings, and layout data sync instantly across every device.',
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -37,7 +37,7 @@ const steps: Step[] = [
     color: 'magenta',
     label: 'Install the Server',
     description:
-      'One command installs DEJA Server on your computer. Plug in your DCC-EX CommandStation via USB and run deja init.',
+      <>Plug in your DCC-EX CommandStation via USB and install the CLI. Upon successful installation, the installer will automatically run <code className="text-deja-lime font-mono text-xs">deja start</code> for you.</>,
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -107,11 +107,6 @@ export default function QuickStartSection() {
               Up and running in 3 steps.
             </h2>
           </AnimateIn>
-          <AnimateIn delay={0.15}>
-            <p className="text-gray-400 text-lg">
-              No config files. No drivers. Just plug in and go.
-            </p>
-          </AnimateIn>
         </div>
 
         <div className="flex flex-col gap-6">
@@ -130,35 +125,40 @@ export default function QuickStartSection() {
                     )}
                   </div>
 
-                  {/* Content */}
-                  <div className="flex flex-col gap-3 pb-6 flex-1 min-w-0">
-                    <div className="flex items-center gap-3">
-                      <span className={`font-mono text-xs font-bold opacity-50 ${tokens.number}`}>{step.number}</span>
-                      <h3 className="text-white font-bold text-lg">{step.label}</h3>
-                    </div>
-                    <p className="text-gray-400 text-sm leading-relaxed">{step.description}</p>
-
-                    {/* Terminal-style command block */}
-                    {step.command && (
-                      <div className="rounded-lg border border-gray-700 bg-gray-950 overflow-hidden">
-                        {/* Terminal title bar */}
-                        <div className="flex items-center gap-1.5 px-3 py-2 border-b border-gray-800 bg-gray-900">
-                          <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-                          <span className="ml-2 text-gray-500 text-xs font-mono">bash</span>
-                        </div>
-                        {/* Command line */}
-                        <div className="flex items-center gap-2 px-4 py-3">
-                          <span className="text-deja-lime/60 font-mono text-xs select-none shrink-0">$</span>
-                          <span className="font-mono text-xs text-deja-lime break-all flex-1">{step.command}</span>
-                          <CopyButton text={step.command} />
-                        </div>
+                  {/* Content + QR flex row */}
+                  <div className="flex flex-1 min-w-0 gap-6 pb-6">
+                    <div className="flex flex-col gap-3 flex-1 min-w-0">
+                      <div className="flex items-center gap-3">
+                        <span className={`font-mono text-xs font-bold opacity-50 ${tokens.number}`}>{step.number}</span>
+                        <h3 className="text-white font-bold text-lg">{step.label}</h3>
                       </div>
-                    )}
+                      <p className="text-gray-400 text-sm leading-relaxed">{step.description}</p>
 
-                    {/* CTAs + QR */}
-                    <div className="flex flex-wrap items-start gap-5">
+                      {step.command && (
+                        <div className="rounded-lg border border-gray-700 bg-gray-950 overflow-hidden">
+                          <div className="flex items-center gap-1.5 px-3 py-2 border-b border-gray-800 bg-gray-900">
+                            <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                            <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+                            <span className="ml-2 text-gray-500 text-xs font-mono">bash</span>
+                          </div>
+                          <div className="flex items-center gap-2 px-4 py-3">
+                            <span className="text-deja-lime/60 font-mono text-xs select-none shrink-0">$</span>
+                            <span className="font-mono text-xs text-deja-lime break-all flex-1">{step.command}</span>
+                            <CopyButton text={step.command} />
+                          </div>
+                        </div>
+                      )}
+
+                      {step.command && (
+                        <a
+                          href="/guides/getting-started"
+                          className="text-xs text-gray-500 hover:text-deja-cyan transition-colors"
+                        >
+                          Need help? Read the Getting Started guide →
+                        </a>
+                      )}
+
                       <div className="flex flex-wrap items-center gap-4">
                         {step.cta && (
                           step.cta.variant === 'button' ? (
@@ -187,10 +187,19 @@ export default function QuickStartSection() {
                         )}
                         {step.pricingLink && <PricingModal />}
                       </div>
+
                       {step.showQR && (
-                        <ThrottleLaunchQR size={88} label="Scan to open on phone" />
+                        <div className="sm:hidden flex justify-center">
+                          <ThrottleLaunchQR size={88} label="Scan to open on phone" />
+                        </div>
                       )}
                     </div>
+
+                    {step.showQR && (
+                      <div className="hidden sm:flex items-center shrink-0 px-2">
+                        <ThrottleLaunchQR size={88} label="Scan to open on phone" />
+                      </div>
+                    )}
                   </div>
                 </article>
               </AnimateIn>

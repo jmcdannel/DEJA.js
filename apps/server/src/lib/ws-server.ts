@@ -6,7 +6,7 @@ import { log } from '../utils/logger.js'
 
 const layoutId = process.env.LAYOUT_ID
 const port = process.env.VITE_WS_PORT || '8082'
-const serverId = process.env.VITE_WS_ID || 'DEJA.js'
+const serverId = process.env.WS_ID || process.env.VITE_WS_ID || 'DEJA.js'
 let weServer: WebSocketServer | null = null
 
 // General connections for broadcast messages
