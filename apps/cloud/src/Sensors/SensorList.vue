@@ -3,7 +3,6 @@ import { computed, ref, type PropType } from 'vue'
 import draggable from 'vuedraggable'
 import { useSensors, type Sensor, sensorTypes, sensorInputTypes } from '@repo/modules/sensors'
 import { useSortableList } from '@/Core/composables/useSortableList'
-import EmptyState from '@/Core/UI/EmptyState.vue'
 
 defineEmits(['edit'])
 const props = defineProps({
@@ -145,16 +144,10 @@ function getInputTypeLabel(inputType: string): string {
       </template>
     </draggable>
   </v-container>
-  <EmptyState
-    v-if="!list?.length"
-    icon="mdi-access-point"
-    color="teal"
-    title="No Sensors Yet"
-    description="Configure sensors to detect train positions, occupancy, and environmental conditions on your layout."
-    :use-cases="[{ icon: 'mdi-map-marker', text: 'Block occupancy detection' }, { icon: 'mdi-motion-sensor', text: 'Position tracking' }, { icon: 'mdi-robot', text: 'Automation triggers' }]"
-    action-label="Add Your First Sensor"
-    action-to="/sensors/new"
-  />
+  <div v-if="!list?.length" class="flex flex-col items-center justify-center py-12 px-4">
+    <v-icon size="48" class="opacity-30 mb-3">mdi-magnify-close</v-icon>
+    <p class="text-sm opacity-60">No sensors match your filters.</p>
+  </div>
 </template>
 <style scoped>
 .ghost {

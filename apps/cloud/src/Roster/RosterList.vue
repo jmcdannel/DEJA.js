@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { computed, type PropType } from 'vue'
 import draggable from 'vuedraggable'
-import EmptyState from '@/Core/UI/EmptyState.vue'
 import RosterItem from '@/Roster/RosterItem.vue'
 import { useLocos, type Loco } from '@repo/modules/locos'
 import { createLogger } from '@repo/utils'
@@ -8,12 +8,17 @@ import { useSortableList } from '@/Core/composables/useSortableList'
 
 const log = createLogger('RosterList')
 
+const props = defineProps({
+  filteredList: { type: Array as PropType<Loco[]>, default: undefined },
+})
 const emit = defineEmits(['edit'])
 
 const { getLocos, updateLoco } = useLocos()
 
 const rawLocos = getLocos()
-const { list: locos, onDragStart, onDragEnd } = useSortableList<Loco>(rawLocos as any, (id, data) => updateLoco(id, data as any))
+const { list: sortableLocos, onDragStart, onDragEnd } = useSortableList<Loco>(rawLocos as any, (id, data) => updateLoco(id, data as any))
+
+const list = computed(() => props.filteredList ?? sortableLocos.value)
 
 function handleEdit(loco: Loco) {
   log.debug('handleEdit', loco)
@@ -23,8 +28,8 @@ function handleEdit(loco: Loco) {
 </script>
 <template>
   <draggable
-    v-if="locos?.length"
-    :list="locos"
+    v-if="list?.length"
+    :list="list"
     item-key="id"
     handle=".drag-handle"
     ghost-class="ghost"
@@ -43,16 +48,10 @@ function handleEdit(loco: Loco) {
       </div>
     </template>
   </draggable>
-  <EmptyState
-    v-if="!locos?.length"
-    icon="mdi-train"
-    color="pink"
-    title="No Locomotives Yet"
-    description="Build your digital roster by adding locomotives with their DCC addresses, decoder functions, and custom configurations."
-    :use-cases="[{ icon: 'mdi-memory', text: 'Program DCC decoders' }, { icon: 'mdi-tune', text: 'Configure functions & lights' }, { icon: 'mdi-train-car', text: 'Build consists' }]"
-    action-label="Add Your First Loco"
-    action-to="/locos/new"
-  />
+  <div v-if="!list?.length" class="flex flex-col items-center justify-center py-12 px-4">
+    <v-icon size="48" class="opacity-30 mb-3">mdi-magnify-close</v-icon>
+    <p class="text-sm opacity-60">No locomotives match your filters.</p>
+  </div>
 </template>
 <style scoped>
 .ghost {

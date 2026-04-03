@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useCurrentUser } from 'vuefire'
 import { useLayout } from '@repo/modules'
 
@@ -21,13 +22,16 @@ const emit = defineEmits<{
 
 const user = useCurrentUser()
 const { getLayouts } = useLayout()
-const layouts = getLayouts(user.value?.email)
+
+// Use a computed email so the query re-runs reactively when auth resolves
+const email = computed(() => user.value?.email ?? null)
+const layouts = getLayouts(email)
 </script>
 
 <template>
   <div
     class="flex flex-col items-center w-full"
-    :class="variant === 'page' ? 'min-h-[60vh] justify-center py-12 px-4' : 'py-2 px-2'"
+    :class="variant === 'page' ? 'min-h-[60vh] justify-center py-12 px-4' : 'py-1'"
   >
     <!-- 🏠 Hero section (page variant only) -->
     <template v-if="variant === 'page'">
@@ -42,55 +46,68 @@ const layouts = getLayouts(user.value?.email)
 
     <!-- ⏳ Loading state -->
     <template v-if="!layouts">
-      <v-row class="w-full max-w-2xl" justify="center">
-        <v-col v-for="n in 2" :key="n" cols="12" md="6">
-          <v-skeleton-loader type="card" class="rounded-2xl" />
-        </v-col>
-      </v-row>
+      <div class="w-full space-y-3">
+        <v-skeleton-loader v-for="n in 2" :key="n" type="list-item-two-line" class="rounded-xl" />
+      </div>
     </template>
 
-    <!-- 📋 Layout cards -->
-    <v-row v-else-if="layouts.length > 0" class="w-full max-w-2xl" justify="center">
-      <v-col
+    <!-- 📋 Layout list -->
+    <div v-else-if="layouts.length > 0" class="w-full space-y-2">
+      <div
         v-for="layout in layouts"
         :key="layout.id"
-        cols="12"
-        md="6"
+        class="layout-item"
+        :class="{ 'layout-item--active': layoutId === layout.id }"
+        @click="emit('selected', layout.id)"
       >
-        <v-card
-          class="glass-dark hover:glass-cyan hover:scale-[1.02] transition-all duration-300 rounded-2xl cursor-pointer"
-          :class="{ 'border-l-4 border-l-cyan-400': layoutId === layout.id }"
-          @click="emit('selected', layout.id)"
-        >
-          <v-card-text class="pa-5">
-            <div class="flex items-center gap-3 mb-3">
-              <v-icon v-if="layoutId === layout.id" color="cyan" size="20">mdi-check-circle</v-icon>
-              <span class="text-h6 font-weight-bold text-white">
-                {{ layout.name || 'Unnamed Layout' }}
-              </span>
+        <div class="flex items-center gap-3 min-w-0">
+          <v-icon
+            :color="layoutId === layout.id ? 'primary' : undefined"
+            size="20"
+          >
+            {{ layoutId === layout.id ? 'mdi-check-circle' : 'mdi-home-outline' }}
+          </v-icon>
+          <div class="min-w-0">
+            <div class="font-medium text-sm truncate">
+              {{ layout.name || 'Unnamed Layout' }}
             </div>
-            <v-chip
-              size="small"
-              color="primary"
-              variant="outlined"
-              class="mb-2"
-            >
-              {{ layout.id }}
-            </v-chip>
-            <p v-if="layout.description" class="text-body-2 text-medium-emphasis mt-2 mb-0">
-              {{ layout.description }}
-            </p>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+            <div class="text-xs opacity-50">{{ layout.id }}</div>
+          </div>
+        </div>
+        <v-icon v-if="layoutId === layout.id" size="16" color="primary">mdi-chevron-right</v-icon>
+      </div>
+    </div>
 
-    <!-- 🚫 Empty state (defensive — guard should redirect to onboarding) -->
-    <div v-else class="text-center py-8">
-      <v-icon size="48" color="grey" class="mb-4">mdi-home-off-outline</v-icon>
-      <p class="text-body-1 text-medium-emphasis">
-        No layouts found. Please create a layout first.
+    <!-- 🚫 Empty state -->
+    <div v-else class="text-center py-6">
+      <v-icon size="36" color="grey" class="mb-3">mdi-home-off-outline</v-icon>
+      <p class="text-body-2 text-medium-emphasis">
+        No layouts found. Create one to get started.
       </p>
     </div>
   </div>
 </template>
+
+<style scoped>
+.layout-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
+  background: rgba(var(--v-theme-surface), 0.4);
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.layout-item:hover {
+  border-color: rgba(var(--v-theme-primary), 0.3);
+  background: rgba(var(--v-theme-primary), 0.05);
+}
+
+.layout-item--active {
+  border-color: rgba(var(--v-theme-primary), 0.5);
+  background: rgba(var(--v-theme-primary), 0.08);
+}
+</style>

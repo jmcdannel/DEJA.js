@@ -1,19 +1,19 @@
 ---
 name: worktree-dev-setup
-description: Launch a dev server inside a Claude git worktree. Handles symlinking .env and node_modules from the main repo before starting the server. Use this whenever starting any dev server while working in a Claude worktree (path contains .claude/worktrees/). Trigger on "/worktree-dev-setup" or when asked to "start dev server", "run dev", "launch app" in a worktree context.
+description: Launch a dev server inside a Claude git worktree. Handles copying .env and installing node_modules before starting the server. Use this whenever starting any dev server while working in a Claude worktree (path contains .claude/worktrees/ or worktrees/). Trigger on "/worktree-dev-setup" or when asked to "start dev server", "run dev", "launch app" in a worktree context.
 user_invocable: true
 ---
 
 # Worktree Dev Setup
 
-Sets up a Claude git worktree for development by symlinking `.env` and `node_modules/` from the main repo, then starts the requested dev server.
+Sets up a git worktree for development by **copying** `.env` and running `pnpm install`, then starts the requested dev server.
 
 ## Why This Is Needed
 
-Claude worktrees live at `.claude/worktrees/<name>/` and are isolated git checkouts. They share the same `package.json`, `pnpm-workspace.yaml`, and `pnpm-lock.yaml` (all tracked in git), but **do not inherit**:
+Git worktrees are isolated checkouts. They share the same `package.json`, `pnpm-workspace.yaml`, and `pnpm-lock.yaml` (all tracked in git), but **do not inherit**:
 
-- `.env` — must be symlinked from the main repo
-- `node_modules/` — must be symlinked from the main repo (2.2 GB, takes 2+ min to reinstall)
+- `.env` — must be **copied** (not symlinked) from the preview worktree
+- `node_modules/` — must be installed via `pnpm install` (symlinks don't work with pnpm's per-package virtual store)
 
 ## Usage
 
@@ -26,55 +26,59 @@ Claude worktrees live at `.claude/worktrees/<name>/` and are isolated git checko
 
 ## Procedure
 
-### Step 1 — Detect Main Repo
+### Step 1 — Detect Preview Worktree
 
-Run this to get the main repo root dynamically (works in any worktree):
+The canonical `.env` lives in the `preview` worktree:
 
 ```bash
-MAIN_REPO=$(dirname "$(git rev-parse --git-common-dir)")
+PREVIEW=/Users/jmcdannel/TTT/worktrees/preview
 ```
 
-Verify it resolves to the main DEJA.js directory (not the worktree itself). If `git rev-parse --git-common-dir` returns a path ending in `.git` rather than `.git/worktrees/...`, you may not be in a worktree — that's fine, skip to Step 4.
+Verify it exists: `ls "$PREVIEW/.env"`
 
-### Step 2 — Symlink `.env`
+### Step 2 — Copy `.env` (NOT symlink)
+
+**IMPORTANT:** Symlinks to `.env` don't load reliably in worktrees. Always **copy** the file.
+
+Copy `.env` to the worktree root, ALL app directories, AND ALL package directories:
 
 ```bash
-if [ ! -f .env ] && [ ! -L .env ]; then
-  if [ -f "$MAIN_REPO/.env" ]; then
-    ln -sf "$MAIN_REPO/.env" .env
-    echo "✓ Symlinked .env from $MAIN_REPO"
-  else
-    echo "⚠ No .env found in $MAIN_REPO — create it from .env.example and configure"
-    exit 1
-  fi
+# Root copy (for Turborepo cache hashing)
+cp "$PREVIEW/.env" .env
+
+# App-level copies (Vite reads .env from the app directory, not monorepo root)
+for app in apps/*/; do
+  cp "$PREVIEW/.env" "$app/.env"
+done
+
+# Package-level copies (packages like @repo/firebase-config, @repo/dccex need env vars at runtime)
+for pkg in packages/*/; do
+  cp "$PREVIEW/.env" "$pkg/.env"
+done
+```
+
+### Step 3 — Install `node_modules/`
+
+**IMPORTANT:** Symlinks to `node_modules/` don't work with pnpm's per-package virtual store. Always run `pnpm install`.
+
+```bash
+if [ ! -d node_modules ]; then
+  pnpm install --frozen-lockfile
+  echo "✅ Installed node_modules"
 else
-  echo "✓ .env already present"
+  echo "✅ node_modules already present"
 fi
 ```
 
-### Step 3 — Symlink `node_modules/`
-
-```bash
-if [ ! -d node_modules ] && [ ! -L node_modules ]; then
-  if [ -d "$MAIN_REPO/node_modules" ]; then
-    ln -sf "$MAIN_REPO/node_modules" node_modules
-    echo "✓ Symlinked node_modules from $MAIN_REPO"
-  else
-    echo "⚠ No node_modules in $MAIN_REPO — running pnpm install (this will take a few minutes)"
-    pnpm install
-  fi
-else
-  echo "✓ node_modules already present"
-fi
-```
+This takes ~20 seconds with a warm pnpm store.
 
 ### Step 4 — Start Dev Server
 
 Start the app (or all apps if no app specified):
 
 ```bash
-# Single app
-pnpm --filter=<pnpm-filter-name> dev
+# Single app (use --port to avoid collisions with other worktrees)
+pnpm --filter=<pnpm-filter-name> dev --port <unique-port>
 
 # All apps
 pnpm dev
@@ -82,7 +86,7 @@ pnpm dev
 
 ## App Reference
 
-| App name | pnpm filter | Port | Notes |
+| App name | pnpm filter | Default port | Notes |
 |----------|------------|------|-------|
 | throttle | `deja-throttle` | 3041 | Primary train control UI |
 | cloud | `deja-cloud` | 5174 | Layout management UI |
@@ -93,12 +97,11 @@ pnpm dev
 
 ## Verification
 
-After setup, confirm symlinks exist:
+After setup, confirm `.env` files exist (as regular files, not symlinks):
 
 ```bash
-ls -la .env node_modules
-# .env -> /Users/.../DEJA.js/.env
-# node_modules -> /Users/.../DEJA.js/node_modules
+ls -la .env apps/throttle/.env
+# Should show regular files, NOT symlinks
 ```
 
-The dev server should start without "Cannot find module" errors.
+The dev server should start without "Cannot find module" or "invalid-api-key" errors.

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, reactive, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useLayout } from '@repo/modules'
 import type { Device } from '@repo/modules'
 import type { Effect } from '@repo/modules/effects'
@@ -64,7 +64,7 @@ const hydrating = ref(false)
 /* ------------------------------------------------------------------ */
 
 const rangeMode = ref<RangeMode>('all')
-const rangeSelection = reactive<[number, number]>([0, 150])
+const rangeSelection = ref<[number, number]>([0, 150])
 
 /* ------------------------------------------------------------------ */
 /*  Animation Steps State                                              */
@@ -187,12 +187,12 @@ function clampRange(value: number): number {
 }
 
 function ensureRangeWithinBounds(): void {
-  rangeSelection[0] = clampRange(rangeSelection[0])
-  rangeSelection[1] = clampRange(rangeSelection[1])
-  if (rangeSelection[0] > rangeSelection[1]) {
-    const temp = rangeSelection[0]
-    rangeSelection[0] = rangeSelection[1]
-    rangeSelection[1] = temp
+  rangeSelection.value[0] = clampRange(rangeSelection.value[0])
+  rangeSelection.value[1] = clampRange(rangeSelection.value[1])
+  if (rangeSelection.value[0] > rangeSelection.value[1]) {
+    const temp = rangeSelection.value[0]
+    rangeSelection.value[0] = rangeSelection.value[1]
+    rangeSelection.value[1] = temp
   }
 }
 
@@ -200,8 +200,8 @@ function updateRangeModel(): void {
   if (rangeMode.value === 'all') {
     if (range.value !== 'all') range.value = 'all'
   } else {
-    const start = clampRange(rangeSelection[0])
-    const end = clampRange(rangeSelection[1])
+    const start = clampRange(rangeSelection.value[0])
+    const end = clampRange(rangeSelection.value[1])
     const rangeString = `${start}:${end}`
     if (range.value !== rangeString) range.value = rangeString
   }
@@ -216,8 +216,8 @@ function buildConfig(): IALEDConfig {
     strip: strip.value,
     stripLength: maxRange.value,
     rangeMode: rangeMode.value,
-    rangeStart: clampRange(rangeSelection[0]),
-    rangeEnd: clampRange(rangeSelection[1]),
+    rangeStart: clampRange(rangeSelection.value[0]),
+    rangeEnd: clampRange(rangeSelection.value[1]),
     events: steps.value.map((step, index) => ({
       id: step.id || `step-${index}`,
       name: step.name || `Step ${index + 1}`,
@@ -355,8 +355,8 @@ function loadConfig(configString?: string): void {
       stripLength.value = parsed.stripLength
     }
     if (typeof parsed.rangeStart === 'number' && typeof parsed.rangeEnd === 'number') {
-      rangeSelection[0] = parsed.rangeStart
-      rangeSelection[1] = parsed.rangeEnd
+      rangeSelection.value[0] = parsed.rangeStart
+      rangeSelection.value[1] = parsed.rangeEnd
       rangeMode.value = parsed.rangeMode === 'custom' ? 'custom' : 'all'
     }
     if (Array.isArray(parsed.events)) {
@@ -409,7 +409,7 @@ watch(
   () => {
     if (selectedStripOption.value?.length) {
       stripLength.value = selectedStripOption.value.length
-      rangeSelection[1] = clampRange(selectedStripOption.value.length)
+      rangeSelection.value[1] = clampRange(selectedStripOption.value.length)
     }
     emitChange()
   },
@@ -417,7 +417,7 @@ watch(
 )
 
 watch(
-  () => [rangeMode.value, rangeSelection[0], rangeSelection[1]],
+  () => [rangeMode.value, rangeSelection.value[0], rangeSelection.value[1]],
   () => emitChange(),
   { deep: true }
 )

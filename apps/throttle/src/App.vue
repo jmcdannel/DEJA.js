@@ -10,6 +10,7 @@ import ConnectionStatusBanner from '@/core/ConnectionStatusBanner.vue'
 import useMenu from '@/core/Menu/useMenu'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { usePageSwipe } from '@/composables/usePageSwipe'
+import QuickMenu from '@/quick-menu/QuickMenu.vue'
 import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import { wiThrottleService } from '@/services/WiThrottleService'
 import { watch, onMounted, onUnmounted } from 'vue'
@@ -133,15 +134,13 @@ const throttleDefaults: AppBackgroundPrefs = {
           :drawer="drawer"
           :show-layout-power="true"
           :show-emergency-stop="true"
-          :show-device-status="true"
-          :show-device-status-label="true"
           :show-user-profile="true"
           @drawer-toggle="drawer = !drawer"
         />
         <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="menuConfig" @handle-menu="handleMenu" />
         <v-main>
           <!-- Normal (non-fullscreen) layout -->
-          <v-container v-if="!isFullscreen" ref="mainContentRef" class="p-0 flex flex-col flex-1" style="min-height: calc(100vh - var(--v-layout-top, 64px) - var(--v-layout-bottom, 56px))" fluid>
+          <v-container v-if="!isFullscreen" ref="mainContentRef" class="p-0 flex flex-col flex-1 h-full relative" style="min-height: calc(100vh - var(--v-layout-top, 64px) - var(--v-layout-bottom, 56px))" fluid>
             <RouterView v-slot="{ Component }">
               <TransitionFade>
                 <component :is="Component" />
@@ -178,6 +177,7 @@ const throttleDefaults: AppBackgroundPrefs = {
           </div>
         </v-main>
         <Footer v-if="!isFullscreen" />
+        <QuickMenu v-if="!isFullscreen" />
         <ConnectionStatusBanner v-if="!isFullscreen" />
         <NotificationContainer />
       </PageBackground>

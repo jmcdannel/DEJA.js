@@ -1,7 +1,13 @@
 import { useStorage } from '@vueuse/core'
 import { ref, push, set, serverTimestamp } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
-import { createLogger } from '@repo/utils'
+import { createLogger, DEMO_EMAIL } from '@repo/utils'
+import { getAuth } from 'firebase/auth'
+import { createMockResponder } from './mockResponses'
+
+function isDemoUser(): boolean {
+  return getAuth().currentUser?.email === DEMO_EMAIL
+}
 
 const log = createLogger('DCC')
 
@@ -14,6 +20,8 @@ interface DccWriteOptions {
   /** Optional callback that wraps a write with retry/queuing logic */
   enqueue?: (execute: () => Promise<void>, description: string) => Promise<void>
 }
+
+let _mockResponder: ReturnType<typeof createMockResponder> | null = null
 
 export const useDcc = (options?: DccWriteOptions) => {
   const layoutId = useStorage('@DEJA/layoutId', '')
@@ -72,7 +80,12 @@ export const useDcc = (options?: DccWriteOptions) => {
   }
 
   async function send(action: string, payload?: object): Promise<void> {
-    if (isEmulated.value) {
+    if (isDemoUser()) {
+      if (!_mockResponder) _mockResponder = createMockResponder()
+      log.debug('[DEJA DEMO] send', action, payload)
+      await _mockResponder.handleCommand(action, payload)
+      return
+    } else if (isEmulated.value) {
       log.debug('[DEJA EMULATOR] send', action, payload)
       return
     } else if (isSerial.value) {

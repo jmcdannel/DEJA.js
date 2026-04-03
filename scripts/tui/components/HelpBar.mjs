@@ -10,6 +10,7 @@ const HELP_TEXT = {
   'topic-input': '  [Enter] save  [Esc] cancel',
   ports:   '  [↑↓] navigate  [Enter] save  [Esc] back',
   status:  '  [Esc] back to logs',
+  'dcc-ref': '  [Esc] back to logs',
 }
 
 export const HelpBar = React.memo(function HelpBar({ mode, logFilter }) {

@@ -7,15 +7,10 @@ import type { RouteLocationNormalized, RouteLocationRaw } from 'vue-router'
 
 const log = createLogger('Auth')
 
-// Prefer the Vite environment variable VITE_LAYOUT_ID when available.
-// Use empty string (not null) as default to ensure useStorage always uses
-// the string serializer — consistent with all other consumers in the codebase.
-const defaultLayoutId = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_LAYOUT_ID)
-  ? String(import.meta.env.VITE_LAYOUT_ID)
-  : ''
-
 // Hoisted to module level so useStorage doesn't create a new ref per navigation.
-const layoutId = useStorage('@DEJA/layoutId', defaultLayoutId)
+// Default is empty string (not null) to ensure useStorage always uses the string serializer.
+// When empty, the guard queries Firestore to auto-select or redirect to layout selection.
+const layoutId = useStorage('@DEJA/layoutId', '')
 
 export async function requireLayout(
   userEmail: string,

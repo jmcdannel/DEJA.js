@@ -54,11 +54,11 @@ export function useDeviceConfig({ device, effects, turnouts }: UseDeviceConfigOp
 #define SERVO_FREQ 50
 #define SERVO_COUNT 16
 
-int OUTPINS[] = {${outPins.length > 0 ? ' ' + outPins.join(', ') + ' ' : ''}};
+int OUTPINS[] = {${outPins.length > 0 ? ` ${  outPins.join(', ')  } ` : ''}};
 int SIGNALPINS[] = {};
 int SENSORPINS[] = {};
 
-TurnoutPulser turnouts[] = {${turnoutPulsers.length > 0 ? ' ' + turnoutPulsers.join(', ') + ' ' : ''}};`
+TurnoutPulser turnouts[] = {${turnoutPulsers.length > 0 ? ` ${  turnoutPulsers.join(', ')  } ` : ''}};`
   })
 
   // 🍓 Pico W settings.toml

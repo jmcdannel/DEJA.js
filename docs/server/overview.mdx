@@ -2,69 +2,61 @@
 title: DEJA Server
 description: The background service that connects your browser to your DCC-EX CommandStation over USB — install it, manage it with the deja CLI, and troubleshoot common issues.
 section: apps
-order: 6
+order: 1
 ---
 
 # DEJA Server
 
-The DEJA Server is the bridge between your browser and your DCC-EX CommandStation hardware. It runs in the background on the computer connected to your CommandStation via USB, translating the commands you send from the Throttle, Cloud, and Monitor apps into DCC-EX serial commands on the track.
+The DEJA Server is the bridge between your browser and your DCC-EX CommandStation hardware. It runs in the background on the computer connected to your CommandStation via USB, translating commands from the Throttle, Cloud, and Monitor apps into DCC-EX serial commands on the track.
 
-You don't interact with the server directly — it runs quietly in the background while you control your layout from the web apps.
+{/* TODO: screenshot — server_terminal_start.png */}
 
-## Installing
+## How It Works
 
-The fastest way to get the server running is the one-line installer. See the [Installation guide](/docs/installation) for full details, or just run:
+You control your trains from a web browser — your phone, a tablet, your laptop. Those commands travel through the cloud to the DEJA Server, which talks to your CommandStation over USB. The server handles everything in between so you can focus on running your railroad.
 
-**macOS / Linux / Raspberry Pi**
+The server manages:
+
+- **WebSocket connections** — real-time communication with your browser apps
+- **Firebase sync** — cloud-based layout data (throttles, turnouts, effects, signals)
+- **Serial communication** — USB connection to your DCC-EX CommandStation at 115200 baud
+- **MQTT messaging** — optional communication with IoT devices (Arduino, Pico W)
+- **Sound playback** — layout sound effects played through the server's speakers
+
+## Getting Started
+
+The fastest way to get up and running is the [Server Guide](/guides/server) — a step-by-step walkthrough from installation to your first train.
+
+If you're already set up and looking for reference material, use the pages in this section:
+
+| Page | What it covers |
+|------|---------------|
+| [Installation](/docs/server/installation) | Platform requirements, one-command install, what the installer does |
+| [CLI Reference](/docs/server/cli) | Every `deja` command with flags and examples |
+| [Configuration](/docs/server/configuration) | Environment variables, config files, directory layout |
+| [Remote Access](/docs/server/remote-access) | Secure tunnel for monitoring from anywhere |
+| [Troubleshooting](/docs/server/troubleshooting) | Common issues and how to fix them |
+
+## Quick Install
+
+**macOS / Linux / Raspberry Pi:**
 
 ```bash
 curl -fsSL https://install.dejajs.com | bash
 ```
 
-The installer downloads the server, installs dependencies, detects your CommandStation's serial port, and starts the server automatically.
+The installer downloads the server, detects your CommandStation's serial port, and starts the server automatically. See [Installation](/docs/server/installation) for the full details.
 
 ## Managing with the `deja` CLI
 
-After installation, use the `deja` command to manage the server:
-
 | Command | What it does |
 |---------|-------------|
-| `deja status` | Check if the server is running, your subscription status, and serial connection |
+| `deja status` | Check if the server is running, your subscription, and serial connection |
 | `deja logs` | View recent server logs |
 | `deja logs -f` | Follow server logs in real time |
 | `deja start` | Start the server |
 | `deja stop` | Stop the server |
 | `deja restart` | Restart the server |
-| `deja update` | Download and install the latest server version |
+| `deja update` | Download and install the latest version |
 
-## Troubleshooting
-
-### Server not connecting to CommandStation
-
-1. **Check that the USB cable is plugged in** — the server communicates over USB serial at 115200 baud.
-2. **Run `deja status`** — this shows whether the server sees a serial port and whether a connection is active.
-3. **Restart the server** — `deja restart` will re-detect serial ports and attempt to reconnect.
-
-### Serial port access denied (Linux)
-
-On Linux (including Raspberry Pi), your user may need permission to access USB serial ports:
-
-```bash
-sudo usermod -a -G dialout $USER
-```
-
-Log out and back in for the change to take effect.
-
-### Server won't start
-
-- **Check Node.js version** — the server requires Node.js 20 or later. Run `node --version` to verify.
-- **Check logs** — run `deja logs` to see error messages from the last run.
-- **Re-run the installer** — `curl -fsSL https://install.dejajs.com | bash` will download a fresh copy and reconfigure.
-
-### Firebase connection errors
-
-Double-check that all credentials are set in `~/.deja/.env`. You can re-run the install script to reconfigure, or edit the file manually. Your credentials are also available in the [Cloud app](https://cloud.dejajs.com) under **Settings > View Local Environment Configuration**.
-
-## Looking for developer docs?
-
-The server source code and architecture are documented in the repository's [server README](https://github.com/jmcdannel/DEJA.js/blob/main/apps/server/README.md).
+See the [CLI Reference](/docs/server/cli) for the complete command list with flags and examples.

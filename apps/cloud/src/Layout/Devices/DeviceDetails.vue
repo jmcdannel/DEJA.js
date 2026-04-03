@@ -2,17 +2,23 @@
 import { computed, onMounted, ref } from 'vue'
 import { useCollection } from 'vuefire'
 import { useRouter } from 'vue-router'
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { db } from '@repo/firebase-config'
+import { useStorage } from '@vueuse/core'
 import { useColors } from '@/Core/UI/useColors'
 import { deviceTypes, useTurnouts, useEfx, useLayout, type Device, type Effect, type Turnout, efxTypes } from '@repo/modules'
-import { StatusPulse } from '@repo/ui'
+import { StatusPulse, TrackOutputConfig } from '@repo/ui'
+import { useTrackOutputs, type TrackOutput } from '@repo/dccex'
+import { useNotification } from '@repo/ui'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 import DeviceDownload from './DeviceDownload.vue'
 import { useDeviceConfig } from './useDeviceConfig'
 
-const { getDevice } = useLayout()
+const { getDevice, getDevices } = useLayout()
 const { getTurnoutsByDevice } = useTurnouts()
 const { getEffectsByDevice } = useEfx()
 const { colors, DEFAULT_COLOR } = useColors()
+const { notify } = useNotification()
 
 const route = useRouter()
 const deviceIdParam = route.currentRoute.value.params.deviceId || ''
@@ -20,6 +26,7 @@ const deviceId = Array.isArray(deviceIdParam) ? deviceIdParam[0] : deviceIdParam
 const turnouts = useCollection(getTurnoutsByDevice(deviceId))
 const effects = useCollection(getEffectsByDevice(deviceId))
 
+const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
 const device = ref(null as Device | null)
 const showDownloadDialog = ref(false)
 
@@ -30,6 +37,34 @@ onMounted(async () => {
 })
 
 const deviceType = computed(() => deviceTypes.find((type) => type.value === device.value?.type))
+const isDccEx = computed(() => device.value?.type === 'dcc-ex')
+
+// Track outputs composable for reactive updates
+const { trackOutputs, maxOutputs } = useTrackOutputs(() => deviceId)
+
+// Determine if this is Device 1 (first dcc-ex device by document ID)
+const allDevices = getDevices()
+const isDevice1 = computed(() => {
+  if (!isDccEx.value || !allDevices.value) return false
+  const dccExDevices = allDevices.value
+    .filter((d: Device) => d.type === 'dcc-ex')
+    .sort((a: Device, b: Device) => a.id.localeCompare(b.id))
+  return dccExDevices.length > 0 && dccExDevices[0].id === deviceId
+})
+
+async function handleSaveTrackOutputs(outputs: Record<string, TrackOutput>) {
+  if (!layoutId.value || !deviceId) return
+  try {
+    await setDoc(
+      doc(db, `layouts/${layoutId.value}/devices`, deviceId),
+      { trackOutputs: outputs, timestamp: serverTimestamp() },
+      { merge: true },
+    )
+    notify?.success('Track configuration saved. Restart the server to apply.')
+  } catch (err) {
+    notify?.error('Failed to save track configuration')
+  }
+}
 const color = computed(() => colors[deviceType.value?.color || DEFAULT_COLOR])
 
 const { isArduino, isPicoW, arduinoConfigH } = useDeviceConfig({
@@ -130,6 +165,16 @@ function handleBack() {
       </div>
       
       <v-divider class="mb-6"></v-divider>
+
+      <!-- 🔧 Track Output Configuration (DCC-EX devices only) -->
+      <TrackOutputConfig
+        v-if="isDccEx"
+        :track-outputs="trackOutputs"
+        :max-outputs="maxOutputs"
+        :is-device1="isDevice1"
+        :disabled="false"
+        @save="handleSaveTrackOutputs"
+      />
 
       <!-- Condensed Lists -->
       <v-row>

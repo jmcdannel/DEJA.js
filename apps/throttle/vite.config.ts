@@ -43,7 +43,6 @@ export default defineConfig({
   },
   server: {
     port: 3041,
-        
     cors: true
   },
 })

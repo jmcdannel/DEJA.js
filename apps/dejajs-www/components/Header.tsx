@@ -80,25 +80,25 @@ const defaultProducts: ProductItem[] = [
 ];
 
 const defaultGuidesLinks: DocItem[] = [
-  { name: 'Getting Started', href: '/guides/getting-started', icon: '🚀' },
-  { name: 'Architecture', href: '/guides/architecture', icon: '🏗️' },
-  { name: 'Throttle', href: '/guides/throttle', icon: '🚂' },
-  { name: 'Cloud', href: '/guides/cloud', icon: '☁️', comingSoon: true },
-  { name: 'Monitor', href: '/guides/monitor', icon: '📊', comingSoon: true },
-  { name: 'Server', href: '/guides/server', icon: '🖥️', comingSoon: true },
-  { name: 'IO', href: '/guides/io', icon: '🔌', comingSoon: true },
+  { name: 'Getting Started', href: '/guides/getting-started' },
+  { name: 'Architecture', href: '/guides/architecture' },
+  { name: 'Throttle', href: '/guides/throttle' },
+  { name: 'Cloud', href: '/guides/cloud', comingSoon: true },
+  { name: 'Monitor', href: '/guides/monitor', comingSoon: true },
+  { name: 'Server', href: '/guides/server' },
+  { name: 'IO', href: '/guides/io', comingSoon: true },
 ];
 
 const defaultDocsLinks: DocItem[] = [
-  { name: 'Server', href: '/docs/server', icon: '🖥️' },
-  { name: 'Throttle', href: '/docs/throttle', icon: '🚂' },
-  { name: 'Cloud', href: '/docs/cloud', icon: '☁️' },
-  { name: 'Monitor', href: '/docs/monitor', icon: '📊' },
-  { name: 'Tour', href: '/docs/tour', icon: '🗺️' },
-  { name: 'IO', href: '/docs/io', icon: '🔌' },
-  { name: 'Program', href: '#', icon: '⚙️', comingSoon: true },
-  { name: 'AI Ops', href: '#', icon: '🤖', comingSoon: true },
-  { name: 'Dispatcher', href: '#', icon: '🚦', comingSoon: true },
+  { name: 'Server', href: '/docs/server' },
+  { name: 'Throttle', href: '/docs/throttle' },
+  { name: 'Cloud', href: '/docs/cloud' },
+  { name: 'Monitor', href: '/docs/monitor' },
+  { name: 'Tour', href: '/docs/tour' },
+  { name: 'IO', href: '/docs/io' },
+  { name: 'Program', href: '#', comingSoon: true },
+  { name: 'AI Ops', href: '#', comingSoon: true },
+  { name: 'Dispatcher', href: '#', comingSoon: true },
 ];
 
 function useDropdown() {
@@ -297,9 +297,9 @@ export default function Header({ settings }: { settings?: SiteSettings | null })
                         href={product.href}
                         role="menuitem"
                         aria-current={pathname === product.href ? 'page' : undefined}
-                        className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group/item"
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group/item"
                       >
-                        <Image src={product.logo} alt="" width={40} height={40} className="h-10 w-10 flex-shrink-0 mt-0.5" />
+                        <Image src={product.logo} alt="" width={40} height={40} className="h-10 w-10 flex-shrink-0" />
                         <div className="min-w-0">
                           <div className="font-medium text-slate-900 dark:text-white group-hover/item:text-cyan-400 transition-colors">
                             {product.name}
