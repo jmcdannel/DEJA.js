@@ -273,26 +273,26 @@ export default function ServerGuide() {
           <div className="grid sm:grid-cols-2 gap-2 text-sm">
             {[
               { cat: 'Server', cmds: [
-                ['/start', 'Start the server'],
-                ['/stop', 'Stop the server and exit'],
-                ['/restart', 'Restart the server'],
-                ['/quit', 'Exit the console (server keeps running)'],
+                ['/start', '', 'Start the server'],
+                ['/stop', '', 'Stop the server and exit'],
+                ['/restart', '/r', 'Restart the server'],
+                ['/quit', '/q', 'Exit the console (server keeps running)'],
               ]},
               { cat: 'Navigation', cmds: [
-                ['/menu', 'Open the menu'],
-                ['/status', 'Show status panel'],
-                ['/logs', 'Show log view'],
-                ['/ports', 'Show serial port selector'],
+                ['/menu', '/m', 'Open the interactive menu'],
+                ['/status', '/s', 'Show the status panel'],
+                ['/logs', '/l', 'Show the log view'],
+                ['/ports', '/p', 'Show serial port selector'],
               ]},
               { cat: 'Devices', cmds: [
-                ['/devices', 'Show connected devices'],
-                ['/connect', 'Connect a device by name'],
-                ['/disconnect', 'Disconnect a device'],
+                ['/devices', '/d', 'Show device dialog and manage connections'],
+                ['/connect', '/c', 'Connect a device by name'],
+                ['/disconnect', '/dc', 'Disconnect a device by name'],
               ]},
               { cat: 'Tools', cmds: [
-                ['/help', 'Show all available commands'],
-                ['/filter', 'Cycle log filter (all → error → warn)'],
-                ['/tunnel', 'Toggle remote access tunnel'],
+                ['/help', '/h', 'Show all available commands'],
+                ['/filter', '/f', 'Cycle log filter (all → error → warn)'],
+                ['/tunnel', '/t', 'Toggle remote access tunnel'],
               ]},
             ].map((group) => (
               <div key={group.cat} className="rounded-lg border border-gray-800 bg-gray-900/50 overflow-hidden">
@@ -300,9 +300,10 @@ export default function ServerGuide() {
                   <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">{group.cat}</p>
                 </div>
                 <div className="px-3 py-2 space-y-1.5">
-                  {group.cmds.map(([cmd, desc]) => (
+                  {group.cmds.map(([cmd, shorthand, desc]) => (
                     <div key={cmd} className="flex items-baseline gap-2">
                       <code className="text-deja-lime font-mono text-xs shrink-0">{cmd}</code>
+                      {shorthand && <code className="text-gray-600 font-mono text-xs shrink-0">{shorthand}</code>}
                       <span className="text-gray-500 text-xs">{desc}</span>
                     </div>
                   ))}
