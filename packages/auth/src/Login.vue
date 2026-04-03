@@ -28,6 +28,10 @@ const emit = defineEmits<{
   'navigate-forgot-password': []
 }>()
 
+const props = defineProps<{
+  showTryDemo?: boolean
+}>()
+
 const auth = useFirebaseAuth()
 const user = useCurrentUser()
 const email = ref('')
@@ -52,8 +56,6 @@ const emailRules = [
 const passwordRules = [(v: string) => !!v || 'Password is required']
 
 const { signInAsDemo, isLoading: isDemoLoading, error: demoError } = useDemoAuth()
-const demoEmail = import.meta.env.VITE_DEMO_EMAIL
-const showDemoButton = !!demoEmail
 
 async function handleDemoLogin() {
   const success = await signInAsDemo()
@@ -293,9 +295,9 @@ onMounted(() => {
           </template>
 
           <!-- Try Demo -->
-          <v-divider v-if="showDemoButton" class="my-4" />
+          <v-divider v-if="props.showTryDemo" class="my-4" />
           <v-btn
-            v-if="showDemoButton"
+            v-if="props.showTryDemo"
             variant="outlined"
             color="secondary"
             size="large"
