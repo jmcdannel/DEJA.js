@@ -14,8 +14,8 @@ export function startMosquitto(): void {
     // start service
     execSync(`mosquitto -c ${sourcePath} &`, { stdio: 'inherit' })
     log.start('✅ Mosquitto started successfully')
-    log.log('MQTT broker:', process.env.VITE_MQTT_BROKER || 'mqtt://localhost') 
-    log.log('MQTT port:', process.env.VITE_MQTT_PORT || '8082')
+    log.log('MQTT broker:', process.env.MQTT_BROKER || process.env.VITE_MQTT_BROKER || 'mqtt://localhost')
+    log.log('MQTT port:', process.env.MQTT_PORT || process.env.VITE_MQTT_PORT || '1883')
     log.log('MQTT config file:', sourcePath)
     
   } catch (error) {

@@ -16,6 +16,7 @@ const meta: Meta<typeof Logo> = {
       control: 'select',
       options: ['default', 'cloud', 'throttle', 'monitor', 'tour'],
     },
+    stacked: { control: 'boolean' },
   },
 }
 
@@ -66,6 +67,44 @@ export const AllVariants: Story = {
         <Logo size="lg" variant="throttle" app-title="Throttle" />
         <Logo size="lg" variant="monitor" app-title="Monitor" />
         <Logo size="lg" variant="tour" app-title="Tour" />
+      </div>
+    `,
+  }),
+}
+
+export const Stacked: Story = {
+  args: {
+    size: 'sm',
+    showIcon: true,
+    appTitle: 'Throttle',
+    variant: 'throttle',
+    stacked: true,
+  },
+}
+
+export const StackedVsInline: Story = {
+  render: () => ({
+    components: { Logo },
+    template: `
+      <div class="flex flex-col gap-8 p-4">
+        <div>
+          <p class="text-sm text-gray-400 mb-2">Inline (desktop)</p>
+          <Logo size="md" variant="throttle" app-title="Throttle" />
+        </div>
+        <div>
+          <p class="text-sm text-gray-400 mb-2">Stacked (mobile)</p>
+          <Logo size="sm" variant="throttle" app-title="Throttle" :stacked="true" />
+        </div>
+        <div>
+          <p class="text-sm text-gray-400 mb-2">Stacked — all variants</p>
+          <div class="flex flex-col gap-4">
+            <Logo size="sm" variant="default" app-title="Default" :stacked="true" />
+            <Logo size="sm" variant="cloud" app-title="Cloud" :stacked="true" />
+            <Logo size="sm" variant="throttle" app-title="Throttle" :stacked="true" />
+            <Logo size="sm" variant="monitor" app-title="Monitor" :stacked="true" />
+            <Logo size="sm" variant="tour" app-title="Tour" :stacked="true" />
+          </div>
+        </div>
       </div>
     `,
   }),

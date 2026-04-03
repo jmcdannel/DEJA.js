@@ -1,0 +1,44 @@
+---
+title: Devices
+description: Register, configure, and monitor hardware devices connected to your DEJA.js layout — DCC-EX CommandStations, Arduino boards, and Pico W controllers.
+order: 3
+---
+
+# Devices
+
+The Devices section is where you register and manage the hardware controllers that make up your layout. Each device represents a physical piece of hardware — a DCC-EX CommandStation, an Arduino board, or a Raspberry Pi Pico W — connected to your DEJA Server via USB or WiFi.
+
+![Devices on the Cloud dashboard](/screenshots/cloud_desktop_dashboard.png)
+
+## Adding a Device
+
+Click the **Add** tile to expand the device registration form. Specify:
+
+- **Device ID** -- A unique identifier (e.g., `commandstation-1`, `turnout-board-east`).
+- **Device Type** -- DCC-EX CommandStation, DEJA Arduino, Raspberry Pi Pico W, or other supported types.
+- **Connection** -- USB serial or WiFi/MQTT.
+- **Port** -- The serial port path (for USB devices, e.g., `/dev/ttyACM0`).
+- **Topic** -- The MQTT topic (for WiFi devices).
+
+## Device Details
+
+Click any device card to view its details page. This includes:
+
+- **Connection status** -- USB or WiFi, port/topic, and live connected/disconnected indicator.
+- **Assigned turnouts** -- Table of all turnouts wired to this device with index, name, pins, type, and state.
+- **Assigned effects** -- Table of all effects on this device with name, type, and pin.
+- **Developer configuration** -- Auto-generated `config.h` snippet for Arduino/Pico W firmware flashing.
+
+## Managing Devices
+
+- **Drag to reorder** -- Prioritize devices by dragging cards in the list.
+- **Connect/disconnect** -- Quick-connect buttons on the dashboard with port selection.
+- **Reconnect** -- One-tap reconnect for devices that lost connection.
+- **Refresh ports** -- Re-scan for available serial ports.
+
+## Related Pages
+
+- [Connect](/docs/cloud/connect) -- Manage live connections between Cloud and your hardware.
+- [Layout Configuration](/docs/cloud/layout) -- Tags, ports, modules, and layout metadata.
+- [Turnouts](/docs/cloud/turnouts) -- Assign turnouts to registered devices.
+- [Effects](/docs/cloud/effects) -- Assign effects to registered devices.
