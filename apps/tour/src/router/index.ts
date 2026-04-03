@@ -4,6 +4,7 @@ import { getDoc, doc } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { isFeatureAccessible } from '@repo/modules'
 import type { UserRole } from '@repo/modules'
+import { ensureAutoLogin } from '@repo/auth'
 import { requireGuestOrAuth } from '../auth/guest-auth'
 import Home from '../views/Home.vue'
 import Welcome from '../views/Welcome.vue'
@@ -13,10 +14,8 @@ import AreaDetail from '../views/AreaDetail.vue'
 import TourLogin from '../views/TourLogin.vue'
 import ExploreSections from '../views/ExploreSections.vue'
 
-const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
-
 // Auth guard that allows both Firebase users and guest users
-const authGuard = isDemoMode ? [] : [requireGuestOrAuth]
+const authGuard = [requireGuestOrAuth]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -85,8 +84,8 @@ router.beforeEach(async (to) => {
   // Skip pages that don't need feature checks
   if (to.name === 'not-available' || to.name === 'login') return
 
-  // In demo mode, skip feature check
-  if (isDemoMode) return
+  // Dev auto-login (pnpm dev:demo)
+  await ensureAutoLogin()
 
   // Resolve user role from Firestore (cached per session)
   const currentUser = await getCurrentUser()
