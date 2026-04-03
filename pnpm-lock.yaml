@@ -902,9 +902,6 @@ importers:
 
   packages/dccex:
     dependencies:
-      '@repo/auth':
-        specifier: workspace:*
-        version: link:../auth
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
@@ -939,9 +936,6 @@ importers:
 
   packages/deja:
     dependencies:
-      '@repo/auth':
-        specifier: workspace:*
-        version: link:../auth
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils

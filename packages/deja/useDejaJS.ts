@@ -1,8 +1,13 @@
 import { useStorage } from '@vueuse/core'
 import { ref, push, set, serverTimestamp } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
+import { getAuth } from 'firebase/auth'
 import { createLogger } from '@repo/utils'
-import { isDemoUser } from '@repo/auth'
+
+const DEMO_EMAIL = 'demo@dejajs.com'
+function isDemoUser(): boolean {
+  return getAuth().currentUser?.email === DEMO_EMAIL
+}
 
 const log = createLogger('DejaJS')
 

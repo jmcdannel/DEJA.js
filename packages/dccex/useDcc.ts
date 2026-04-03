@@ -2,8 +2,13 @@ import { useStorage } from '@vueuse/core'
 import { ref, push, set, serverTimestamp } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
 import { createLogger } from '@repo/utils'
+import { getAuth } from 'firebase/auth'
 import { createMockResponder } from './mockResponses'
-import { isDemoUser } from '@repo/auth'
+
+const DEMO_EMAIL = 'demo@dejajs.com'
+function isDemoUser(): boolean {
+  return getAuth().currentUser?.email === DEMO_EMAIL
+}
 
 const log = createLogger('DCC')
 
