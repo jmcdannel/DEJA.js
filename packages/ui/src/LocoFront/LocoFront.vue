@@ -220,29 +220,30 @@ const shadowId = computed(() => `lf-shadow-${uid}`)
       <circle cx="200" cy="378" r="3" fill="#ee2222" opacity="0.8" />
 
       <!-- ══════ LOGO / NOSE ART ══════ -->
-      <!-- If a logo image is provided, render it centered on the nose -->
+      <!-- If a logo image is provided, render it larger and centered on the nose -->
       <image
         v-if="logoSrc"
         :href="logoSrc"
-        x="120" y="180"
-        width="160" height="100"
+        x="100" y="165"
+        width="200" height="130"
         preserveAspectRatio="xMidYMid meet"
+        style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));"
       />
       <!-- Fallback: nose text when no logo is available -->
       <text
         v-else
         x="200"
-        y="220"
+        y="230"
         text-anchor="middle"
         dominant-baseline="central"
         :fill="design.noseTextColor"
-        :font-size="design.noseText.length > 4 ? 36 : 48"
+        :font-size="design.noseText.length > 6 ? 36 : design.noseText.length > 4 ? 44 : 56"
         font-weight="900"
         :font-family="design.noseTextFont || `'Impact', 'Arial Black', sans-serif`"
         letter-spacing="3"
         paint-order="stroke"
-        :stroke="design.accent2Color || 'rgba(0,0,0,0.15)'"
-        stroke-width="1"
+        :stroke="design.accent2Color || 'rgba(0,0,0,0.3)'"
+        stroke-width="2"
       >{{ design.noseText }}</text>
 
       <!-- ══════ HANDRAILS / GRAB IRONS ══════ -->

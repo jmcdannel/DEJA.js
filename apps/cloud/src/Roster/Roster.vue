@@ -177,10 +177,11 @@ async function importFromCS() {
         />
       </template>
       <template #actions>
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center justify-end gap-2 w-full">
           <v-btn prepend-icon="mdi-plus" color="pink" variant="flat" size="small" @click="handleAddLoco">
             New Loco
           </v-btn>
+          <v-spacer class="hidden sm:block" />
           <v-btn
             :loading="rosterSyncStatus?.status === 'syncing'"
             :disabled="isSyncing || isDisconnected"

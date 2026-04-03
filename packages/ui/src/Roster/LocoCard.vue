@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import type { Loco } from '@repo/modules/locos'
 import { ROADNAMES } from '@repo/modules'
+import { LocoFront } from '../LocoFront'
 import LocoNumberPlate from './LocoNumberPlate.vue'
 import { getRoadnameMedia } from './roadnameLogos'
 
@@ -15,21 +16,13 @@ const emit = defineEmits<{
   click: [loco: Loco]
 }>()
 
-// 🚂 Roadname entry from ROADNAMES constant
 const roadname = computed(() =>
   ROADNAMES.find((r) => r.value === props.loco.meta?.roadname),
 )
 
-// 🎨 Media (logo + fallback gradient class) for the roadname
 const media = computed(() => getRoadnameMedia(props.loco.meta?.roadname))
-
-// 🖼️ Whether a real image URL is available
 const hasImage = computed(() => !!props.loco.meta?.imageUrl)
-
-// 🚃 Consist count — how many extra units are attached
 const consistCount = computed(() => props.loco.consist?.length ?? 0)
-
-// 🎨 Plate color pulled from roadname, default yellow
 const plateColor = computed(() => roadname.value?.color || 'yellow')
 </script>
 
@@ -40,27 +33,27 @@ const plateColor = computed(() => roadname.value?.color || 'yellow')
     @click="emit('click', loco)"
   >
     <!-- 🖼️ Image area -->
-    <div class="relative" style="height: 160px; overflow: hidden">
+    <div class="relative overflow-hidden" style="min-height: 200px;">
       <!-- Real photo when available -->
       <img
         v-if="hasImage"
         :src="loco.meta!.imageUrl"
         :alt="loco.name"
-        class="w-full h-full object-cover"
+        class="w-full h-full object-contain bg-white/5"
+        style="min-height: 200px;"
       />
 
-      <!-- 🎨 Roadname-colored fallback gradient with watermark logo -->
+      <!-- 🚂 Fallback: LocoFront SVG centered on dark background -->
       <div
         v-else
-        class="w-full h-full flex items-center justify-center"
-        :class="media?.fallbackClass ?? 'bg-zinc-700/80 border border-zinc-500/60'"
+        class="w-full flex items-center justify-center py-4"
+        style="min-height: 200px; background: rgba(15,15,20,0.8);"
       >
-        <!-- Railroad logo watermark -->
-        <img
-          v-if="media?.logo"
-          :src="media.logo"
-          :alt="roadname?.label ?? ''"
-          class="h-20 w-auto object-contain opacity-30 pointer-events-none select-none"
+        <LocoFront
+          :roadname="loco.meta?.roadname"
+          :road-number="loco.address"
+          :logo-src="media?.logo"
+          :size="180"
         />
       </div>
 
@@ -73,7 +66,7 @@ const plateColor = computed(() => roadname.value?.color || 'yellow')
         />
       </div>
 
-      <!-- 🚃 Consist badge — top-right, only when consist is present -->
+      <!-- 🚃 Consist badge — top-right -->
       <div v-if="consistCount > 0" class="absolute top-2 right-2">
         <v-chip
           color="pink"
@@ -88,11 +81,9 @@ const plateColor = computed(() => roadname.value?.color || 'yellow')
 
     <!-- 📋 Info strip -->
     <div class="px-3 py-2">
-      <!-- Loco name — primary -->
       <div class="text-sm font-semibold leading-tight truncate">
-        {{ loco.name }}
+        {{ loco.name || `Loco ${loco.address}` }}
       </div>
-      <!-- Roadname + address — secondary muted -->
       <div class="text-xs text-medium-emphasis mt-0.5 truncate">
         <span v-if="roadname">{{ roadname.label }}</span>
         <span v-if="roadname" class="mx-1 opacity-50">·</span>

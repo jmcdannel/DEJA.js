@@ -54,7 +54,6 @@ function getAvatarTextColor(loco: Loco): string {
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)
-  // Relative luminance approximation
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
   return luminance > 0.5 ? '#111111' : '#ffffff'
 }
@@ -122,8 +121,8 @@ defineExpose({ viewAs: controls.viewAs, viewOptions })
       </div>
     </div>
 
-    <!-- 🖼️ Avatar view — v-avatar circles with roadname color -->
-    <div v-else-if="controls.viewAs.value === 'avatar'" class="flex flex-wrap gap-3 p-4">
+    <!-- 🖼️ Avatar view — v-avatar circles, responsive sizes -->
+    <div v-else-if="controls.viewAs.value === 'avatar'" class="flex flex-wrap gap-4 p-4 justify-center sm:justify-start">
       <div
         v-for="loco in locos"
         :key="loco.address"
@@ -136,25 +135,12 @@ defineExpose({ viewAs: controls.viewAs, viewOptions })
           color="pink"
           overlap
         >
-          <v-avatar
-            :color="getVuetifyColor(loco)"
-            size="72"
-          >
-            <span
-              class="text-lg font-bold"
-              :style="{ color: getAvatarTextColor(loco) }"
-            >{{ loco.address }}</span>
+          <v-avatar :color="getVuetifyColor(loco)" size="64" class="sm:!w-20 sm:!h-20 md:!w-24 md:!h-24">
+            <span class="text-base sm:text-lg md:text-xl font-bold" :style="{ color: getAvatarTextColor(loco) }">{{ loco.address }}</span>
           </v-avatar>
         </v-badge>
-        <v-avatar
-          v-else
-          :color="getVuetifyColor(loco)"
-          size="72"
-        >
-          <span
-            class="text-lg font-bold"
-            :style="{ color: getAvatarTextColor(loco) }"
-          >{{ loco.address }}</span>
+        <v-avatar v-else :color="getVuetifyColor(loco)" size="64" class="sm:!w-20 sm:!h-20 md:!w-24 md:!h-24">
+          <span class="text-base sm:text-lg md:text-xl font-bold" :style="{ color: getAvatarTextColor(loco) }">{{ loco.address }}</span>
         </v-avatar>
       </div>
     </div>
