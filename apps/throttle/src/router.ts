@@ -1,8 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { getCurrentUser } from 'vuefire'
 import type { User } from 'firebase/auth'
-import { requireLayout } from '@repo/auth'
-import { createTryDemoRoute } from '@repo/auth'
+import { requireLayout, createTryDemoRoute, isDemoUser, ensureAutoLogin } from '@repo/auth'
 import { createLogger } from '@repo/utils'
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
@@ -163,10 +162,8 @@ router.beforeEach(async (to) => {
   try {
     const { meta } = to
 
-    // Demo mode auto-login bypass (local dev only)
-    if (import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true') {
-      return
-    }
+    // Dev auto-login (pnpm dev:demo)
+    await ensureAutoLogin()
 
     // Resolve Firebase auth state once for the entire guard chain.
     const currentUser = await getCurrentUser()
@@ -200,8 +197,8 @@ router.beforeEach(async (to) => {
       }
     }
 
-    // 4. Require DCC-EX device (placeholder — currently informational only)
-    if (meta.requireDccEx) {
+    // 4. Require DCC-EX device — skip for demo user (no real hardware)
+    if (meta.requireDccEx && !isDemoUser()) {
       // TODO: re-enable when DCC-EX device check is fully implemented
     }
 
