@@ -54,7 +54,7 @@ export const LOCO_FRONT_DESIGNS: Record<string, LocoFrontDesign> = {
     numberBoardBg: '#111111',
     numberBoardText: '#ffffff',
     noseText: 'BNSF',
-    noseTextColor: '#000000',
+    noseTextColor: '#ffffff',
     stripeStyle: 'wedge',
     handrailColor: '#f5f5f5',
     headlightHousing: '#cccccc',

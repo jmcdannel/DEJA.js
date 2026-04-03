@@ -154,7 +154,10 @@ async function importFromCS() {
 
   <!-- ✅ Has items -->
   <template v-else-if="hasItems">
-    <PageHeader title="Roster" icon="mdi-train" color="pink" subtitle="Manage your locomotive fleet and decoder configurations.">
+    <PageHeader title="Roster" icon="mdi-train" color="pink">
+      <template #subtitle>
+        <span class="hidden sm:inline">Manage your locomotive fleet and decoder configurations.</span>
+      </template>
       <template #controls>
         <ListControlBar
           :controls="rosterControls"
@@ -162,43 +165,45 @@ async function importFromCS() {
           :sort-options="sortOptions"
           :filters="filters"
           :show-view="true"
+          :show-search="false"
           :view-options="[
-            { value: 'cab', icon: 'mdi-train-car-flatbed', label: 'Cab' },
-            { value: 'avatar', icon: 'mdi-view-module', label: 'Avatar' },
+            { value: 'cab', icon: 'mdi-train', label: 'Cab' },
+            { value: 'avatar', icon: 'mdi-circle-outline', label: 'Avatar' },
             { value: 'plate', icon: 'mdi-card-text-outline', label: 'Plate' },
             { value: 'card', icon: 'mdi-view-grid-outline', label: 'Card' },
             { value: 'table', icon: 'mdi-table', label: 'Table' },
             { value: 'raw', icon: 'mdi-code-json', label: 'Raw' },
           ]"
-          search-placeholder="Search roster..."
         />
       </template>
       <template #actions>
-        <v-btn prepend-icon="mdi-plus" color="pink" variant="flat" @click="handleAddLoco">
-          New Loco
-        </v-btn>
-        <v-btn
-          :loading="rosterSyncStatus?.status === 'syncing'"
-          :disabled="isSyncing || isDisconnected"
-          prepend-icon="mdi-sync"
-          variant="tonal"
-          color="pink"
-          size="small"
-          @click="syncToCS"
-        >
-          Sync to DCC-EX
-        </v-btn>
-        <v-btn
-          :loading="rosterSyncStatus?.status === 'importing'"
-          :disabled="isSyncing || isDisconnected"
-          prepend-icon="mdi-download"
-          variant="tonal"
-          color="pink"
-          size="small"
-          @click="importFromCS"
-        >
-          Import from DCC-EX
-        </v-btn>
+        <div class="flex flex-wrap items-center gap-2">
+          <v-btn prepend-icon="mdi-plus" color="pink" variant="flat" size="small" @click="handleAddLoco">
+            New Loco
+          </v-btn>
+          <v-btn
+            :loading="rosterSyncStatus?.status === 'syncing'"
+            :disabled="isSyncing || isDisconnected"
+            prepend-icon="mdi-sync"
+            variant="tonal"
+            color="pink"
+            size="small"
+            @click="syncToCS"
+          >
+            Sync to DCC-EX
+          </v-btn>
+          <v-btn
+            :loading="rosterSyncStatus?.status === 'importing'"
+            :disabled="isSyncing || isDisconnected"
+            prepend-icon="mdi-download"
+            variant="tonal"
+            color="pink"
+            size="small"
+            @click="importFromCS"
+          >
+            Import from DCC-EX
+          </v-btn>
+        </div>
       </template>
     </PageHeader>
 

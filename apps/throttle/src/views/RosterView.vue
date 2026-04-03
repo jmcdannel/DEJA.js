@@ -31,8 +31,8 @@ const sortOptions = [
 ]
 
 const viewOptions = [
-  { value: 'cab', icon: 'mdi-train-car-flatbed', label: 'Cab' },
-  { value: 'avatar', icon: 'mdi-view-module', label: 'Avatar' },
+  { value: 'cab', icon: 'mdi-train', label: 'Cab' },
+  { value: 'avatar', icon: 'mdi-circle-outline', label: 'Avatar' },
   { value: 'plate', icon: 'mdi-card-text-outline', label: 'Plate' },
   { value: 'card', icon: 'mdi-view-grid-outline', label: 'Card' },
   { value: 'table', icon: 'mdi-table', label: 'Table' },
@@ -65,7 +65,7 @@ function handleLocoSelect(loco: Loco) {
           :filters="filters"
           :show-view="true"
           :view-options="viewOptions"
-          search-placeholder="Search roster..."
+          :show-search="false"
         />
       </template>
     </PageHeader>

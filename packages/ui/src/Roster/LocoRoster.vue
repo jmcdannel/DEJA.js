@@ -61,8 +61,8 @@ function getAvatarTextColor(loco: Loco): string {
 
 // 🗂️ View options: Cab, Avatar, Plate, Card, Table, Raw
 const viewOptions: ViewOption[] = [
-  { value: 'cab', icon: 'mdi-train-car-flatbed', label: 'Cab' },
-  { value: 'avatar', icon: 'mdi-account-circle-outline', label: 'Avatar' },
+  { value: 'cab', icon: 'mdi-train', label: 'Cab' },
+  { value: 'avatar', icon: 'mdi-circle-outline', label: 'Avatar' },
   { value: 'plate', icon: 'mdi-card-text-outline', label: 'Plate' },
   { value: 'card', icon: 'mdi-view-grid-outline', label: 'Card' },
   { value: 'table', icon: 'mdi-table', label: 'Table' },

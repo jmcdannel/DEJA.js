@@ -141,29 +141,29 @@ const shadowId = computed(() => `lf-shadow-${uid}`)
       <!-- ══════ NUMBER BOARDS — large, centered in each window ══════ -->
       <g v-if="number">
         <!-- Left number board — centered in left pane -->
-        <rect x="112" y="62" width="66" height="22" rx="3" :fill="design.numberBoardBg" stroke="#555" stroke-width="0.75" />
+        <rect x="108" y="58" width="74" height="30" rx="4" :fill="design.numberBoardBg" stroke="#555" stroke-width="0.75" />
         <text
           x="145" y="76"
           text-anchor="middle"
           dominant-baseline="central"
           :fill="design.numberBoardText"
-          font-size="15"
+          font-size="20"
           font-weight="800"
           font-family="'Roboto Condensed', 'Arial Narrow', sans-serif"
-          letter-spacing="1.5"
+          letter-spacing="2"
         >{{ number }}</text>
 
         <!-- Right number board — centered in right pane -->
-        <rect x="222" y="62" width="66" height="22" rx="3" :fill="design.numberBoardBg" stroke="#555" stroke-width="0.75" />
+        <rect x="218" y="58" width="74" height="30" rx="4" :fill="design.numberBoardBg" stroke="#555" stroke-width="0.75" />
         <text
           x="255" y="76"
           text-anchor="middle"
           dominant-baseline="central"
           :fill="design.numberBoardText"
-          font-size="15"
+          font-size="20"
           font-weight="800"
           font-family="'Roboto Condensed', 'Arial Narrow', sans-serif"
-          letter-spacing="1.5"
+          letter-spacing="2"
         >{{ number }}</text>
       </g>
 
