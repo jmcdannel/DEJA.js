@@ -1,8 +1,8 @@
 <script lang="ts" setup>
   import { ref } from 'vue'
   import FunctionButton from './FunctionButton.vue'
-  import { defaultFunctions, useLocos, type Loco, type ConsistLoco } from '@repo/modules'
-  import { LocoAvatar } from '@repo/ui'
+  import { defaultFunctions, useLocos, type Loco, type ConsistLoco, ROADNAMES } from '@repo/modules'
+  import { LocoNumberPlate } from '@repo/ui'
 
   const props = defineProps<{
     loco: Loco | null,
@@ -56,7 +56,13 @@
     <v-sheet class="p-4">
       <header class="flex items-center justify-between mb-4">
           <div class="flex items-center space-x-3">
-            <LocoAvatar v-if="loco" :loco="loco as Loco" :size="36" @select="handleLocoSelect" />
+            <div v-if="loco" class="cursor-pointer" @click="handleLocoSelect">
+              <LocoNumberPlate
+                :address="loco.address"
+                :color="loco.meta?.roadname ? ROADNAMES.find(r => r.value === loco.meta?.roadname)?.color : undefined"
+                size="xs"
+              />
+            </div>
             <div v-if="loco?.consist?.length" class="flex items-center gap-1">
               <v-avatar
                 v-for="cloco in loco.consist"

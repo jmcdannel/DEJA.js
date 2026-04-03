@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { toRef } from 'vue'
-import { LocoAvatar } from '@repo/ui'
+import { LocoNumberPlate } from '@repo/ui'
+import { ROADNAMES } from '@repo/modules'
 import ThrottleButtonControls from './ThrottleButtonControls.vue'
 import CurrentSpeed from './CurrentSpeed.vue'
 import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
@@ -45,15 +46,11 @@ const {
         <span class="bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-cyan-400 font-bold">{{loco?.name || throttle.address}}</span>
       </div>
       <div class="order-2  basis-1/3 pr-2">
-        <LocoAvatar 
-          v-if="loco" 
-          :loco="loco" 
-          class="justify-end"
-          @park="releaseThrottle" 
-          :size="48" 
-          @stop="handleStop"
-          showConsist
-          showMenu
+        <LocoNumberPlate
+          v-if="loco"
+          :address="loco.address"
+          :color="loco.meta?.roadname ? ROADNAMES.find(r => r.value === loco.meta?.roadname)?.color : undefined"
+          size="sm"
         />
         <!-- <pre>loco:{{loco}}</pre> -->
       </div>
