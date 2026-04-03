@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import CopyButton from '../home/CopyButton';
-import { mdiLaptop, mdiUsb } from '@mdi/js';
+import { mdiUsb } from '@mdi/js';
 
 function Step({ number, title, children }: { number: number; title: string; children: React.ReactNode }) {
   return (
@@ -82,77 +82,61 @@ export default function ServerGuide() {
         </p>
       </header>
 
-      {/* Requirements */}
+      {/* Prerequisites */}
       <section className="mb-12 p-5 rounded-xl border border-gray-800 bg-gray-900/50">
-        <h2 className="text-white font-semibold mb-3">What You&apos;ll Need</h2>
-        <ul className="space-y-3 text-sm text-gray-300">
-          <li className="flex items-center gap-3">
-            <MdiIcon path={mdiLaptop} className="w-5 h-5 shrink-0 text-deja-lime" />
-            <span>A <strong className="text-white">computer</strong> — Raspberry Pi, Mac, or Linux PC</span>
-          </li>
-          <li className="flex items-center gap-3">
-            <MdiIcon path={mdiUsb} className="w-5 h-5 shrink-0 text-amber-400" />
-            <span>A <strong className="text-white">USB cable</strong> connecting your CommandStation to the computer</span>
-          </li>
-          <li className="flex items-center gap-3">
-            <span className="w-5 h-5 shrink-0 flex items-center justify-center text-deja-cyan text-sm">⬡</span>
-            <span>
-              <strong className="text-white">Node.js 20</strong> — the installer will tell you if you need it
-            </span>
-          </li>
-        </ul>
-        <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-gray-800">
-          <span className="text-xs text-gray-500 mr-1 self-center">Supported platforms:</span>
-          {[
-            { emoji: '🍎', label: 'macOS' },
-            { emoji: '🐧', label: 'Linux' },
-            { emoji: '🍓', label: 'Raspberry Pi' },
-            { emoji: '🪟', label: 'Windows (via WSL)' },
-          ].map((p) => (
-            <span key={p.label} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-800 border border-gray-700 text-xs text-gray-300">
-              <span>{p.emoji}</span> {p.label}
-            </span>
-          ))}
+        <h2 className="text-white font-semibold mb-3">Before You Start</h2>
+        <p className="text-sm text-gray-300 mb-4">
+          This guide assumes you&apos;ve already{' '}
+          <a href="https://cloud.dejajs.com" target="_blank" rel="noopener noreferrer" className="text-deja-cyan hover:underline">signed up</a>
+          {' '}and completed the onboarding steps, which includes installing the server. If you haven&apos;t
+          done that yet, head to the{' '}
+          <Link href="/guides/getting-started" className="text-deja-cyan hover:underline">Getting Started guide</Link>
+          {' '}first — it only takes a few minutes.
+        </p>
+        <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-900 border border-gray-800">
+          <MdiIcon path={mdiUsb} className="w-5 h-5 shrink-0 text-amber-400 mt-0.5" />
+          <p className="text-sm text-gray-300">
+            Make sure your <strong className="text-white">DCC-EX CommandStation is connected via USB</strong> to
+            the computer running the server. That&apos;s all you need.
+          </p>
         </div>
+        <p className="text-xs text-gray-500 mt-3">
+          For platform compatibility and system requirements, see the{' '}
+          <Link href="/docs/server/installation" className="text-deja-cyan hover:underline">Installation docs</Link>.
+        </p>
       </section>
 
       {/* Steps */}
       <div className="space-y-12">
-        {/* Step 1 — Install */}
-        <Step number={1} title="Install the Server">
+        {/* Step 1 — Meet the CLI */}
+        <Step number={1} title="Meet the deja Command">
           <p>
-            Open a terminal on the computer connected to your CommandStation and run this one command:
+            The DEJA Server comes with a simple command-line tool called <code className="text-deja-lime font-mono text-xs">deja</code>.
+            Think of it like a remote control for your server — you type a short command,
+            and the server does the rest.
           </p>
-          <CommandBlock command="curl -fsSL https://install.dejajs.com | bash" />
-          <p className="text-sm">
-            That&apos;s it — the installer handles everything. It downloads the server, detects your
-            CommandStation on USB, and gets things running. The whole process takes about a minute.
+          <p>
+            You don&apos;t need to be a computer expert to use it. There are only a handful of
+            commands, and they all do exactly what their names say:{' '}
+            <code className="text-deja-lime font-mono text-xs">deja start</code>,{' '}
+            <code className="text-deja-lime font-mono text-xs">deja stop</code>,{' '}
+            <code className="text-deja-lime font-mono text-xs">deja status</code>.
+            That&apos;s the kind of thing we&apos;re talking about — nothing complicated.
           </p>
-          <Callout emoji="🍓">
+          <Callout emoji="💡">
             <p>
-              <strong className="text-white">Raspberry Pi?</strong> DEJA Server runs great on a Pi 4 or 5.
-              Just plug your CommandStation in via USB, open a terminal, and run the command above.
+              To use these commands, open a <strong className="text-white">terminal</strong> on the computer
+              connected to your CommandStation. On a Mac, search for &quot;Terminal&quot; in Spotlight.
+              On a Raspberry Pi or Linux, it&apos;s usually in your applications menu.
+              Type the command, press Enter, and you&apos;re done.
             </p>
           </Callout>
-          <Callout emoji="🔗">
-            <p>
-              <strong className="text-white">Personalized install link:</strong> If you started from the{' '}
-              <Link href="/guides/getting-started" className="text-deja-lime hover:underline">Getting Started</Link>{' '}
-              guide, the onboarding wizard gives you a pre-configured install command with your Layout ID
-              baked in — no extra setup needed.
-            </p>
-          </Callout>
-          <p className="text-xs text-gray-500 mt-3">
-            🪟 Windows users: install via{' '}
-            <a href="https://learn.microsoft.com/en-us/windows/wsl/install" target="_blank" rel="noopener noreferrer" className="text-deja-lime hover:underline">WSL</a>,
-            then run the command from a WSL terminal.
-          </p>
         </Step>
 
         {/* Step 2 — Status */}
         <Step number={2} title="Check That It&apos;s Working">
           <p>
-            Once the installer finishes, check that the server is running:
+            Let&apos;s start with the most useful command. Type this to see how your server is doing:
           </p>
           <CommandBlock command="deja status" />
           <p>
