@@ -127,7 +127,7 @@ export function useQuickMenuData() {
       name: e.name || e.id,
       state: e.state,
       icon: 'mdi-rocket-launch',
-      color: 'indigo',
+      color: e.color || 'indigo',
     }))
   }
 
@@ -137,7 +137,7 @@ export function useQuickMenuData() {
       name: t.name || t.id,
       state: t.state,
       icon: 'mdi-call-split',
-      color: 'amber',
+      color: t.color || 'amber',
     }))
   }
 
@@ -166,11 +166,13 @@ export function useQuickMenuData() {
       ((throttles.value || []) as Array<{ address: number }>).map((t) => t.address)
     )
     return list.map((l) => ({
-      id: l.id,
+      id: String(l.address),
       name: l.name || `Loco ${l.address}`,
       state: activeAddresses.has(l.address),
       icon: 'mdi-train',
-      color: 'pink',
+      color: l.meta?.color || 'pink',
+      action: 'navigate' as const,
+      actionIcon: 'mdi-gamepad-variant',
     }))
   }
 
@@ -180,7 +182,9 @@ export function useQuickMenuData() {
       name: r.name || r.id,
       state: false,
       icon: 'mdi-map',
-      color: 'purple',
+      color: r.color || 'purple',
+      action: 'activate' as const,
+      actionIcon: 'mdi-call-split',
     }))
   }
 

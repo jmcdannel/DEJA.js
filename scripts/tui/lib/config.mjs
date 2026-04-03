@@ -26,7 +26,7 @@ export function loadEnvFile(filepath) {
 
 // ── Paths (all derived from ~/.deja/) ───────────────────────────────────────────
 
-export const DEJA_DIR        = join(homedir(), '.deja')
+export const DEJA_DIR        = process.env.DEJA_DIR || join(homedir(), '.deja')
 export const ENTRY           = join(DEJA_DIR, 'server', 'index.js')
 export const VERSION_FILE    = join(DEJA_DIR, 'server', 'version.txt')
 export const CONFIG_FILE     = join(DEJA_DIR, 'config.json')

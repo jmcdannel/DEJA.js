@@ -27,6 +27,7 @@ Operators can run a single train with detailed throttle controls, manage multipl
 - **Signal monitoring** with red, yellow, and green aspect indicators.
 - **Effects control** for triggering sound effects, lights, and animations on your layout.
 - **Swipe navigation** between locomotives on the throttle screen.
+- **Quick Menu** — a draggable floating button for instant access to locos, effects, turnouts, routes, signals, and sensors from any page, with drill-down filtering and one-tap actions.
 - **Emergency stop** accessible from the app header on every page.
 - **Theme switching** between light and dark modes.
 - **Guest access** available without authentication for quick demonstrations.
@@ -42,6 +43,7 @@ The Throttle app uses a customizable footer navigation bar and a slide-out side 
 | [Home](/docs/throttle/home) | `/` | Landing page with speedometer widgets for active throttles, login cards, and layout selection |
 | [Throttle Control](/docs/throttle/throttle) | `/throttle/:address` | Full single-locomotive control with speed, functions, consist, and emergency stop |
 | [Throttle List](/docs/throttle/throttle-list) | `/throttles` | Grid view of all active throttles for multi-train operation |
+| [Quick Menu](/docs/throttle/quick-menu) | *(floating overlay)* | Draggable FAB with drill-down access to all layout entities |
 | [Conductor View](/docs/throttle/conductor) | `/conductor` | Three-pane operator station layout with throttle list, active throttle, and turnouts |
 | [Effects](/docs/throttle/effects) | `/effects` | Sound effects, lights, and animation control |
 | [Routes](/docs/throttle/routes) | `/routes` | Interactive track maps and route execution |
@@ -61,5 +63,6 @@ The Throttle app shell includes three persistent UI elements visible across all 
 - **AppHeader** -- displays the app name, layout power toggle, emergency stop button, device connection status, and user profile. The hamburger menu opens the side navigation drawer.
 - **Side Menu** -- a slide-out drawer with the full list of navigation items, each with an icon and color. Items marked as favorites also appear in the footer bar.
 - **Footer Bar** -- a pill-shaped button group at the bottom of the screen showing your favorited navigation items for quick access. The default favorites are Throttles, Conductor, Throttle, Effects, Routes, Turnouts, and Signals.
+- **[Quick Menu](/docs/throttle/quick-menu)** -- a draggable floating action button (FAB) displaying the DEJA.js logo. Tap to open a drill-down panel for browsing and controlling locos, effects, turnouts, routes, signals, and sensors without leaving the current page. The FAB can be repositioned by dragging and remembers its position across sessions.
 
 Page transitions use a fade animation when navigating between views. Swipe gestures on the main content area navigate forward and backward through the menu (disabled on the Throttle Control page, which uses swipe for locomotive switching).
