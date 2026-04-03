@@ -242,6 +242,92 @@ export default function ServerGuide() {
         </Step>
       </div>
 
+      {/* Inside the CLI */}
+      <section className="mt-12">
+        <h2 className="text-white font-bold text-xl mb-2">Inside the Server Console</h2>
+        <p className="text-gray-400 text-sm mb-6">
+          When the server is running in the foreground, you&apos;re inside an interactive console.
+          You can type commands right at the prompt — no need to stop and restart. Here&apos;s what&apos;s
+          available.
+        </p>
+
+        {/* Slash Commands */}
+        <div className="mb-8">
+          <h3 className="text-white font-semibold text-lg mb-3">Slash Commands</h3>
+          <p className="text-gray-400 text-sm mb-4">
+            Type a <code className="text-deja-lime font-mono text-xs">/</code> followed by a command name.
+            You can also press <kbd className="px-1.5 py-0.5 rounded bg-gray-800 border border-gray-700 text-xs text-gray-300">Tab</kbd> to
+            autocomplete, or type <code className="text-deja-lime font-mono text-xs">/help</code> to see the full list.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-2 text-sm">
+            {[
+              { cat: 'Server', cmds: [
+                ['/start', 'Start the server'],
+                ['/stop', 'Stop the server and exit'],
+                ['/restart', 'Restart the server'],
+                ['/quit', 'Exit the console (server keeps running)'],
+              ]},
+              { cat: 'Navigation', cmds: [
+                ['/menu', 'Open the menu'],
+                ['/status', 'Show status panel'],
+                ['/logs', 'Show log view'],
+                ['/ports', 'Show serial port selector'],
+              ]},
+              { cat: 'Devices', cmds: [
+                ['/devices', 'Show connected devices'],
+                ['/connect', 'Connect a device by name'],
+                ['/disconnect', 'Disconnect a device'],
+              ]},
+              { cat: 'Tools', cmds: [
+                ['/help', 'Show all available commands'],
+                ['/filter', 'Cycle log filter (all → error → warn)'],
+                ['/tunnel', 'Toggle remote access tunnel'],
+              ]},
+            ].map((group) => (
+              <div key={group.cat} className="rounded-lg border border-gray-800 bg-gray-900/50 overflow-hidden">
+                <div className="px-3 py-2 border-b border-gray-800 bg-gray-900">
+                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">{group.cat}</p>
+                </div>
+                <div className="px-3 py-2 space-y-1.5">
+                  {group.cmds.map(([cmd, desc]) => (
+                    <div key={cmd} className="flex items-baseline gap-2">
+                      <code className="text-deja-lime font-mono text-xs shrink-0">{cmd}</code>
+                      <span className="text-gray-500 text-xs">{desc}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Menu */}
+        <div className="mb-8">
+          <h3 className="text-white font-semibold text-lg mb-3">The Menu</h3>
+          <p className="text-gray-400 text-sm mb-3">
+            Type <code className="text-deja-lime font-mono text-xs">/menu</code> (or just press{' '}
+            <kbd className="px-1.5 py-0.5 rounded bg-gray-800 border border-gray-700 text-xs text-gray-300">Esc</kbd>)
+            to open a visual menu. Use the arrow keys to navigate and{' '}
+            <kbd className="px-1.5 py-0.5 rounded bg-gray-800 border border-gray-700 text-xs text-gray-300">Enter</kbd>
+            {' '}to select. It&apos;s another way to access everything above without remembering command names.
+          </p>
+          {/* TODO: screenshot — server_terminal_menu.png */}
+        </div>
+
+        {/* DCC Passthrough */}
+        <div>
+          <h3 className="text-white font-semibold text-lg mb-3">DCC Commands</h3>
+          <p className="text-gray-400 text-sm">
+            You can also type raw DCC-EX commands directly at the prompt — they&apos;re sent
+            straight to your CommandStation. For example, type{' '}
+            <code className="text-deja-lime font-mono text-xs">{'<1>'}</code> to turn track power on.
+            See the{' '}
+            <Link href="/docs/server/cli" className="text-deja-cyan hover:underline">CLI Reference</Link>
+            {' '}for more details.
+          </p>
+        </div>
+      </section>
+
       {/* CLI Quick Reference */}
       <section className="mt-12 p-5 rounded-xl border border-gray-800 bg-gray-900/50">
         <h2 className="text-white font-semibold mb-3">CLI Quick Reference</h2>
