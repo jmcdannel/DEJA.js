@@ -3,6 +3,7 @@ import { ref, push, set, serverTimestamp } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
 import { createLogger } from '@repo/utils'
 import { createMockResponder } from './mockResponses'
+import { isDemoUser } from '@repo/auth'
 
 const log = createLogger('DCC')
 
@@ -16,8 +17,7 @@ interface DccWriteOptions {
   enqueue?: (execute: () => Promise<void>, description: string) => Promise<void>
 }
 
-const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
-const mockResponder = isDemoMode ? createMockResponder() : null
+let _mockResponder: ReturnType<typeof createMockResponder> | null = null
 
 export const useDcc = (options?: DccWriteOptions) => {
   const layoutId = useStorage('@DEJA/layoutId', '')
@@ -76,9 +76,10 @@ export const useDcc = (options?: DccWriteOptions) => {
   }
 
   async function send(action: string, payload?: object): Promise<void> {
-    if (isDemoMode && mockResponder) {
+    if (isDemoUser()) {
+      if (!_mockResponder) _mockResponder = createMockResponder()
       log.debug('[DEJA DEMO] send', action, payload)
-      await mockResponder.handleCommand(action, payload)
+      await _mockResponder.handleCommand(action, payload)
       return
     } else if (isEmulated.value) {
       log.debug('[DEJA EMULATOR] send', action, payload)
