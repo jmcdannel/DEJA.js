@@ -43,9 +43,6 @@ export default defineConfig({
   },
   server: {
     port: 3041,
-    fs: {
-      allow: ['../..', '/Users/jmcdannel/TTT/worktrees/preview'],
-    },
     cors: true
   },
 })
