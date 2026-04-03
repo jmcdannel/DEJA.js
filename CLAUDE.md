@@ -226,9 +226,9 @@ When UI changes are made, update screenshots and MDX docs **before the `preview 
 
 **MDX docs** live in `docs/apps/{app}/overview.mdx` and are synced to the `dejajs-www` docs site at build time.
 
-**Dev auto-login:** Set `VITE_DEV_AUTO_LOGIN=true` in `.env` to bypass auth guards during screenshot capture. Only works in dev mode.
+**Demo mode:** Set `VITE_DEMO_MODE=true` in `.env` to enable demo mode, which bypasses auth guards during screenshot capture. Only works in dev mode.
 
-**Test user login:** Alternatively, set `CLAUDE_TEST_EMAIL` and `CLAUDE_TEST_PASSWORD` in `.env` for realistic email/password login during automated testing.
+**Demo user login:** Set `VITE_DEMO_EMAIL` and `VITE_DEMO_PASSWORD` in `.env` for realistic email/password login during automated testing and demo mode.
 
 **Worktree dev setup:** Git worktrees don't inherit `.env` or `node_modules/`. Run `/worktree-dev-setup [app]` before starting any dev server in a worktree — it installs `node_modules/` via `pnpm install` and **copies** `.env` into the root, all `apps/*/` directories, and all `packages/*/` directories, then starts the server. **Important:** `.env` must be **copied** (not symlinked) — symlinks fail to load reliably in some environments. Vite reads `.env` from the **app directory** (e.g., `apps/cloud/`), not the monorepo root. Packages like `@repo/firebase-config` and `@repo/dccex` also need `.env` at runtime. The canonical `.env` lives in the `preview` worktree. If you change `.env`, restart the dev server (Vite doesn't hot-reload env vars).
 
@@ -282,9 +282,9 @@ Copy `.env.example` to `.env` at the root. Key variables:
 | `ENABLE_MQTT` | Toggle MQTT communication |
 | `ENABLE_WS` | Toggle WebSocket communication |
 | `VITE_WS_PORT` | WebSocket server port (default: `8082`) |
-| `VITE_DEV_AUTO_LOGIN` | Bypass auth guards in dev mode (for screenshots) |
-| `CLAUDE_TEST_EMAIL` | Test user email for automated login |
-| `CLAUDE_TEST_PASSWORD` | Test user password for automated login |
+| `VITE_DEMO_MODE` | Enable demo mode — bypasses auth guards in dev mode (for screenshots) |
+| `VITE_DEMO_EMAIL` | Demo user email for automated login and demo mode |
+| `VITE_DEMO_PASSWORD` | Demo user password for automated login and demo mode |
 
 App-specific env files go in `apps/<app>/.env.local`.
 

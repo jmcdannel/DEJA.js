@@ -103,8 +103,10 @@ link_account() {
 
   if [ -z "${uid}" ]; then
     echo ""
-    info "Link your DEJA.js account."
-    info "Find your UID and Layout ID at: https://cloud.dejajs.com → Settings → Install"
+    echo -e "  ${BOLD}${YELLOW}Before you begin:${NC} Sign up for a free DEJA Cloud account"
+    echo -e "  🚀 ${CYAN}https://cloud.dejajs.com/signup${NC}"
+    echo ""
+    info "Then find your install command at: Cloud → Settings → Install"
     echo ""
     read -rp "Your UID: " uid < /dev/tty
   fi
