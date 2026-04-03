@@ -59,7 +59,7 @@
             <div v-if="loco" class="cursor-pointer" @click="handleLocoSelect">
               <LocoNumberPlate
                 :address="loco.address"
-                :color="loco.meta?.roadname ? ROADNAMES.find(r => r.value === loco.meta?.roadname)?.color : undefined"
+                :color="loco.meta?.roadname ? ROADNAMES.find(r => r.value === loco!.meta?.roadname)?.color : undefined"
                 size="xs"
               />
             </div>
