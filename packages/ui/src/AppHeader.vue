@@ -45,6 +45,7 @@ const router = useRouter()
 const { mdAndUp } = useDisplay()
 
 const { serverStatus } = useServerStatus()
+const stackedLogo = computed(() => !mdAndUp.value)
 
 const email = computed(() => user.value?.email ?? null)
 const layouts = getLayouts(email)
@@ -154,7 +155,7 @@ const defaultProps = {
     <template v-slot:title>
       <Logo
         :size="mdAndUp ? 'md' : 'sm'"
-        :stacked="!mdAndUp"
+        :stacked="stackedLogo"
         :app-title="appName || defaultProps.appName"
         :variant="variant || defaultProps.variant"
         @click="handleLogoClick"
@@ -182,19 +183,6 @@ const defaultProps = {
       </template>
     </template>
   </v-app-bar>
-  <!-- <v-app-bar class="header-gradient2 elative overflow-hidden"
-    :dark="dark !== undefined ? dark : defaultProps.dark">
-    <BackgroundDecor variant="blurred-bubbles-1" />
-    <template v-slot:prepend>
-      
-    </template>
-    <template v-slot:append>
-
-    </template>
-  </v-app-bar> -->
-
-
-
 </template>
 
 <style scoped>

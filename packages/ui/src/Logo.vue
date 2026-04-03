@@ -31,6 +31,10 @@ const sizeMap = {
 
 const s = computed(() => sizeMap[props.size])
 
+const textContainerClass = computed(() =>
+  props.stacked && props.appTitle ? 'flex-col' : `items-end ${s.value.gap}`
+)
+
 const appIconSrc = computed(() => {
   switch (props.variant) {
     case 'throttle':
@@ -64,7 +68,7 @@ const appIconSrc = computed(() => {
     <!-- Text container: stacked = flex-col, inline = flex-row -->
     <div
       class="flex"
-      :class="stacked && appTitle ? 'flex-col' : `items-center ${s.gap}`"
+      :class="textContainerClass"
     >
       <!-- Brand text -->
       <span class="font-bold tracking-[0.08em] leading-none whitespace-nowrap" :class="s.brand">
