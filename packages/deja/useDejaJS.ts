@@ -2,6 +2,7 @@ import { useStorage } from '@vueuse/core'
 import { ref, push, set, serverTimestamp } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
 import { createLogger } from '@repo/utils'
+import { isDemoUser } from '@repo/auth'
 
 const log = createLogger('DejaJS')
 
@@ -17,12 +18,11 @@ interface DejaWriteOptions {
 
 export const useDejaJS = (options?: DejaWriteOptions) => {
   const layoutId = useStorage('@DEJA/layoutId', '')
-  const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
 
   const wrappedWrite = options?.enqueue ?? ((execute: () => Promise<void>) => execute())
 
   async function sendDejaCommand({ action, payload }: DejaCommand) {
-    if (isDemoMode) {
+    if (isDemoUser()) {
       log.debug('[DEJA DEMO] skipping RTDB write:', action, payload)
       return
     }
