@@ -1,15 +1,27 @@
 'use client';
 
-import AnimateIn from '../home/AnimateIn';
+import { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
 export default function VideoSection() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'center center'],
+  });
+
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
+  const headerY = useTransform(scrollYProgress, [0, 0.3], [24, 0]);
+  const videoOpacity = useTransform(scrollYProgress, [0.15, 0.45], [0, 1]);
+  const videoScale = useTransform(scrollYProgress, [0.15, 0.45], [0.95, 1]);
+
   return (
-    <section>
-      <AnimateIn className="text-center mb-8">
+    <section ref={sectionRef}>
+      <motion.div className="text-center mb-8" style={{ opacity: headerOpacity, y: headerY }}>
         <p className="text-xs text-gray-500 font-mono tracking-[0.2em] uppercase mb-3">Walkthrough</p>
         <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">See it in action.</h2>
-      </AnimateIn>
-      <AnimateIn delay={0.2}>
+      </motion.div>
+      <motion.div style={{ opacity: videoOpacity, scale: videoScale }}>
         <div className="max-w-3xl mx-auto">
           <div className="relative aspect-video rounded-2xl border border-gray-700 bg-gray-900 overflow-hidden flex items-center justify-center">
             <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
@@ -23,7 +35,7 @@ export default function VideoSection() {
             </div>
           </div>
         </div>
-      </AnimateIn>
+      </motion.div>
     </section>
   );
 }

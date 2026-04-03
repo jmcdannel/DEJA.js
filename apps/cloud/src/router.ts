@@ -5,9 +5,8 @@ import { getCurrentUser } from 'vuefire'
 import type { User } from 'firebase/auth'
 import { collection, query, where, getDocs, getDoc, doc } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
-import { requireLayout } from '@repo/auth'
+import { requireLayout, ensureAutoLogin, checkRequireFeature, LogoutView } from '@repo/auth'
 import { createLogger } from '@repo/utils'
-import { checkRequireFeature } from '@repo/auth'
 import type { FeatureName, UserRole } from '@repo/modules'
 import Dashboard from './Dashboard/Dashboard.vue'
 import Login from './views/Login.vue'
@@ -59,6 +58,12 @@ const router = createRouter({
       meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
+      path: '/tracker-prototypes',
+      name: 'TrackerPrototypes',
+      component: () => import('./views/TrackerPrototypes.vue'),
+      meta: { requireAuth: true },
+    },
+    {
       path: '/login',
       name: 'login',
       component: Login,
@@ -77,6 +82,12 @@ const router = createRouter({
       meta: { fullscreen: true },
     },
     {
+      path: '/logout',
+      name: 'logout',
+      component: LogoutView,
+      meta: { fullscreen: true },
+    },
+    {
       path: '/setup-complete',
       name: 'setup-complete',
       component: () => import('./views/SetupComplete.vue'),
@@ -89,6 +100,12 @@ const router = createRouter({
       meta: { requireAuth: true, fullscreen: true },
     },
     {
+      path: '/connect',
+      name: 'Connect',
+      component: () => import('./Connect/Connect.vue'),
+      meta: { requireAuth: true },
+    },
+    {
       path: '/select-layout',
       name: 'Select Layout',
       component: () => import('./Layout/SelectLayout.vue'),
@@ -98,7 +115,7 @@ const router = createRouter({
       path: '/locos',
       name: 'Roster',
       component: () => import('./Roster/Roster.vue'),
-      meta: { requireAuth: true, requireOnboarding: true, requireDccEx: true, requireLayout: true },
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
       path: '/locos/new',
@@ -257,6 +274,12 @@ const router = createRouter({
       meta: { requireAuth: true, requireOnboarding: true, requireLayout: true, requireFeature: 'trackDiagrams' },
     },
     {
+      path: '/power-districts',
+      name: 'Power Districts',
+      component: () => import('./PowerDistricts/PowerDistricts.vue'),
+      meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
+    },
+    {
       path: '/dccex',
       name: 'DCC-EX',
       component: () => import('./DCCEX/DCCEX.vue'),
@@ -365,10 +388,8 @@ router.beforeEach(async (to) => {
   try {
     const { meta } = to
 
-    // Dev auto-login bypass for automated screenshot capture
-    if (import.meta.env.DEV && import.meta.env.VITE_DEV_AUTO_LOGIN === 'true') {
-      return
-    }
+    // Dev auto-login (pnpm dev:demo)
+    await ensureAutoLogin()
 
     // Resolve Firebase auth state once for the entire guard chain.
     const currentUser = await getCurrentUser()

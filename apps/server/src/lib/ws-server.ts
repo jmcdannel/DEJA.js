@@ -6,7 +6,7 @@ import { log } from '../utils/logger.js'
 
 const layoutId = process.env.LAYOUT_ID
 const port = process.env.VITE_WS_PORT || '8082'
-const serverId = process.env.VITE_WS_ID || 'DEJA.js'
+const serverId = process.env.WS_ID || process.env.VITE_WS_ID || 'DEJA.js'
 let weServer: WebSocketServer | null = null
 
 // General connections for broadcast messages
@@ -205,41 +205,54 @@ export const connect = async (): Promise<WebSocketServer | null> => {
   })
 }
 
-export const disconnect = async (): Promise<void> => {
-  try {
-    // Unsubscribe from broadcast events
-    dejaEmitter.offBroadcast(handleBroadcastEvent)
+export const disconnect = (): Promise<void> => {
+  return new Promise((resolve) => {
+    try {
+      // Unsubscribe from broadcast events
+      dejaEmitter.offBroadcast(handleBroadcastEvent)
 
-    if (weServer) {
-      // Close all client connections
-      connections.forEach((ws) => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.close(1000, 'Server shutting down')
-        }
-      })
-      connections.length = 0
-
-      // Close all device connections
-      deviceConnections.forEach((deviceConns) => {
-        deviceConns.forEach((ws) => {
+      if (weServer) {
+        // Close all client connections
+        connections.forEach((ws) => {
           if (ws.readyState === WebSocket.OPEN) {
             ws.close(1000, 'Server shutting down')
           }
         })
-      })
-      deviceConnections.clear()
+        connections.length = 0
 
-      // Close the WebSocket server
-      weServer.close(() => {
-        log.success('WebSocket server closed successfully')
-        weServer = null
-      })
+        // Close all device connections
+        deviceConnections.forEach((deviceConns) => {
+          deviceConns.forEach((ws) => {
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.close(1000, 'Server shutting down')
+            }
+          })
+        })
+        deviceConnections.clear()
 
-      log.info('WebSocket server shutdown initiated')
+        // Close the WebSocket server and wait for it to fully release the port
+        const timeout = setTimeout(() => {
+          log.warn('WebSocket server close timed out, forcing shutdown')
+          weServer = null
+          resolve()
+        }, 5000)
+
+        weServer.close(() => {
+          clearTimeout(timeout)
+          log.success('WebSocket server closed successfully')
+          weServer = null
+          resolve()
+        })
+
+        log.info('WebSocket server shutdown initiated')
+      } else {
+        resolve()
+      }
+    } catch (err) {
+      log.error('Error during WebSocket server shutdown:', err)
+      resolve()
     }
-  } catch (err) {
-    log.error('Error during WebSocket server shutdown:', err)
-  }
+  })
 }
 
 export const isConnected = (): boolean => {

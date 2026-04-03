@@ -1,23 +1,75 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { QuickStart } from '@repo/ui'
-import { useLocos } from '@repo/modules/locos'
+import { ref, computed, watch, onMounted } from 'vue'
+// Note: computed is still used for serverConnected and currentPhrase
+import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { db } from '@repo/firebase-config'
+import { useStorage } from '@vueuse/core'
+import { ServerSetupInfo } from '@repo/ui'
+import { useOnboarding, useLayout, INSTALL_TIPS } from '@repo/modules'
 
-defineProps<{
+const props = defineProps<{
   uid?: string | null
   layoutId?: string
+  layoutName?: string
 }>()
 
 const emit = defineEmits<{
   complete: []
 }>()
 
-const { createLoco } = useLocos()
+const { state: onboardingState, setLayoutCreated, setInstallStarted } = useOnboarding()
+const { createLayout } = useLayout()
+const layoutCreating = ref(false)
+const layoutCreateError = ref<string | null>(null)
+const storedLayoutId = useStorage('@DEJA/layoutId', '')
 
+// Server detection
+const serverConnected = computed(() => onboardingState.value.serverStarted)
+const showCelebration = ref(false)
+
+watch(serverConnected, (connected) => {
+  if (connected) {
+    showCelebration.value = true
+  }
+})
+
+// Tips rotation
+const currentTipIndex = ref(0)
+let tipInterval: ReturnType<typeof setInterval> | null = null
+
+onMounted(() => {
+  tipInterval = setInterval(() => {
+    currentTipIndex.value = (currentTipIndex.value + 1) % INSTALL_TIPS.length
+  }, 6000)
+})
+
+onMounted(async () => {
+  const lid = props.layoutId || storedLayoutId.value
+  const lname = props.layoutName || lid
+  if (!lid) return
+
+  // Skip if layout already created (e.g., user returned to this step)
+  if (onboardingState.value.layoutCreated) return
+
+  layoutCreating.value = true
+  try {
+    await createLayout(lid, { name: lname, id: lid })
+    storedLayoutId.value = lid
+    setLayoutCreated()
+    setInstallStarted()
+  } catch (err: unknown) {
+    const fbErr = err as { message?: string }
+    layoutCreateError.value = fbErr.message || 'Failed to create layout'
+  } finally {
+    layoutCreating.value = false
+  }
+})
+
+// Loco form
 const locoAddress = ref<string>('')
 const locoName = ref('')
 const locoLoading = ref(false)
-const locoAdded = ref(false)
+const addedLocos = ref<Array<{ address: number; name: string }>>([])
 const locoError = ref<string | null>(null)
 
 async function handleAddLoco() {
@@ -26,11 +78,25 @@ async function handleAddLoco() {
     locoError.value = 'Enter a valid DCC address (1–9999)'
     return
   }
+  const lid = props.layoutId || storedLayoutId.value
+  if (!lid) {
+    locoError.value = 'No layout selected'
+    return
+  }
   locoLoading.value = true
   locoError.value = null
   try {
-    await createLoco(address, locoName.value || `Loco ${address}`, undefined, true)
-    locoAdded.value = true
+    const name = locoName.value || `Loco ${address}`
+    await setDoc(doc(collection(db, `layouts/${lid}/locos`), address.toString()), {
+      address,
+      name,
+      hasSound: true,
+      meta: {},
+      timestamp: serverTimestamp(),
+    })
+    addedLocos.value.push({ address, name })
+    locoAddress.value = ''
+    locoName.value = ''
   } catch {
     locoError.value = 'Failed to add locomotive'
   } finally {
@@ -38,42 +104,124 @@ async function handleAddLoco() {
   }
 }
 
-function addAnother() {
-  locoAddress.value = ''
-  locoName.value = ''
-  locoAdded.value = false
+function handleComplete() {
+  if (tipInterval) clearInterval(tipInterval)
+  emit('complete')
 }
 </script>
 
 <template>
   <div class="install-step">
-    <div class="mb-6">
-      <h2 class="text-xl font-semibold text-sky-100 mb-2">Install the DEJA Server</h2>
-      <p class="opacity-60 text-sm">
-        Run the installer on the machine connected to your DCC-EX Command Station — a Raspberry Pi,
-        Mac, or Linux box. Your account and layout are linked automatically via the URL below.
-      </p>
-    </div>
+    <!-- 🎉 Server Connected — Celebration State -->
+    <template v-if="showCelebration">
+      <div class="glass-card celebration-card mb-6 text-center">
+        <div class="celebration-icon mb-4">🎉</div>
+        <h2 class="text-2xl font-bold text-sky-100 mb-2">Your Railroad is Connected!</h2>
+        <p class="opacity-70 text-sm mb-6">
+          The DEJA Server is running and linked to your layout. You're ready to drive trains.
+        </p>
 
-    <div class="glass-card mb-6">
-      <QuickStart :completed="[1]" :uid="uid" :layout-id="layoutId" />
-    </div>
+        <div v-if="addedLocos.length > 0" class="mb-6">
+          <p class="text-xs uppercase tracking-wider opacity-50 mb-3">Your Roster</p>
+          <div class="flex flex-wrap gap-2 justify-center">
+            <v-chip
+              v-for="loco in addedLocos"
+              :key="loco.address"
+              color="pink"
+              variant="tonal"
+              size="small"
+              prepend-icon="mdi-train"
+            >
+              {{ loco.name }} (#{{ loco.address }})
+            </v-chip>
+          </div>
+        </div>
 
-    <!-- Add First Locomotive -->
-    <div class="glass-card mb-6">
-      <div class="flex items-center gap-3 mb-4">
-        <v-icon color="pink" size="28">mdi-train</v-icon>
-        <h2 class="text-lg font-semibold text-sky-100">Add Your First Locomotive</h2>
+        <v-btn
+          color="pink"
+          size="large"
+          block
+          class="text-none font-weight-bold mb-3"
+          prepend-icon="mdi-speedometer"
+          href="https://throttle.dejajs.com"
+          target="_blank"
+        >
+          🚂 Open Throttle
+        </v-btn>
+        <v-btn
+          variant="tonal"
+          size="large"
+          block
+          class="text-none"
+          prepend-icon="mdi-view-dashboard-outline"
+          @click="handleComplete"
+        >
+          Explore Cloud Dashboard
+        </v-btn>
       </div>
-      <p class="opacity-60 text-sm mb-4">
-        Enter the DCC address programmed into your locomotive decoder to get running right away.
-      </p>
+    </template>
 
-      <v-alert v-if="locoError" type="error" variant="tonal" density="compact" class="mb-4" closable @click:close="locoError = null">
-        {{ locoError }}
+    <!-- ⏳ Waiting for Server — Productive Wait State -->
+    <template v-else>
+      <v-alert
+        v-if="layoutCreateError"
+        type="error"
+        variant="tonal"
+        class="mb-6"
+        closable
+        @click:close="layoutCreateError = null"
+      >
+        {{ layoutCreateError }}
       </v-alert>
 
-      <div v-if="!locoAdded">
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold text-sky-100 mb-2">Install the DEJA Server</h2>
+        <p class="opacity-60 text-sm">
+          Run the installer on the machine connected to your DCC-EX CommandStation — a Raspberry Pi,
+          Mac, or Linux box. Your account and layout are linked automatically.
+        </p>
+      </div>
+
+      <!-- Install Command -->
+      <div class="glass-card mb-6">
+        <div class="flex items-center gap-2 mb-4 px-1">
+          <v-icon size="16" style="opacity: 0.5">mdi-usb-port</v-icon>
+          <span class="text-xs opacity-50">Make sure your DCC-EX CommandStation is connected via USB.</span>
+        </div>
+        <ServerSetupInfo :uid="uid" :layout-id="layoutId" />
+      </div>
+
+      <!-- Add Locomotives — Productive Wait -->
+      <div class="glass-card mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <v-icon color="pink" size="28">mdi-train</v-icon>
+          <div>
+            <h2 class="text-lg font-semibold text-sky-100">Set Up Your Roster</h2>
+            <p class="opacity-50 text-xs">Add locos while the server installs — they'll be ready when it connects.</p>
+          </div>
+        </div>
+
+        <v-alert v-if="locoError" type="error" variant="tonal" density="compact" class="mb-4" closable @click:close="locoError = null">
+          {{ locoError }}
+        </v-alert>
+
+        <!-- Added locos list -->
+        <div v-if="addedLocos.length > 0" class="mb-4">
+          <div class="flex flex-wrap gap-2">
+            <v-chip
+              v-for="loco in addedLocos"
+              :key="loco.address"
+              color="pink"
+              variant="tonal"
+              size="small"
+              prepend-icon="mdi-train"
+            >
+              {{ loco.name }} (#{{ loco.address }})
+            </v-chip>
+          </div>
+        </div>
+
+        <!-- Add loco form -->
         <div class="flex gap-3 mb-3">
           <v-text-field
             v-model="locoAddress"
@@ -107,70 +255,81 @@ function addAnother() {
           class="text-none"
           @click="handleAddLoco"
         >
-          Add Locomotive
+          {{ addedLocos.length > 0 ? 'Add Another' : 'Add Locomotive' }}
         </v-btn>
       </div>
 
-      <div v-else>
-        <v-alert type="success" variant="tonal" density="compact" class="mb-4">
-          Locomotive {{ locoAddress }} added to your roster!
-        </v-alert>
-        <div class="flex gap-3">
-          <v-btn
-            variant="tonal"
-            prepend-icon="mdi-plus"
-            class="text-none"
-            @click="addAnother"
-          >
-            Add Another
-          </v-btn>
+      <!-- Tips & Tricks -->
+      <div class="glass-card mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <v-icon color="amber" size="28">mdi-lightbulb-on-outline</v-icon>
+          <h2 class="text-lg font-semibold text-sky-100">Tips & Tricks</h2>
+        </div>
+
+        <div class="tip-carousel">
+          <TransitionGroup name="tip-fade">
+            <div
+              v-for="(tip, index) in INSTALL_TIPS"
+              v-show="index === currentTipIndex"
+              :key="tip.title"
+              class="tip-item"
+            >
+              <div class="flex items-start gap-3">
+                <v-icon :color="'amber'" size="20" class="mt-0.5 shrink-0">{{ tip.icon }}</v-icon>
+                <div>
+                  <p class="text-sky-100 font-medium text-sm mb-1">{{ tip.title }}</p>
+                  <p class="opacity-60 text-xs leading-relaxed">{{ tip.text }}</p>
+                </div>
+              </div>
+            </div>
+          </TransitionGroup>
+        </div>
+
+        <!-- Tip dots -->
+        <div class="flex justify-center gap-1.5 mt-4">
+          <button
+            v-for="(_, index) in INSTALL_TIPS"
+            :key="index"
+            class="tip-dot"
+            :class="{ 'tip-dot--active': index === currentTipIndex }"
+            @click="currentTipIndex = index"
+          />
         </div>
       </div>
-    </div>
 
-    <!-- Explore More -->
-    <div class="glass-card mb-6">
-      <div class="flex items-center gap-3 mb-4">
-        <v-icon color="primary" size="28">mdi-compass-outline</v-icon>
-        <h2 class="text-lg font-semibold text-sky-100">Explore More</h2>
+      <!-- Navigate to Cloud while waiting -->
+      <div class="glass-card mb-6">
+        <div class="flex items-center gap-3 mb-3">
+          <v-icon color="blue" size="24">mdi-cloud</v-icon>
+          <h3 class="text-base font-semibold text-sky-100">Explore while you wait</h3>
+        </div>
+        <p class="opacity-50 text-xs mb-4">
+          Your layout is ready to configure. Start managing your roster, devices, and settings in the Cloud dashboard — the server will connect automatically when it's ready.
+        </p>
+        <v-btn
+          color="primary"
+          variant="tonal"
+          class="text-none"
+          prepend-icon="mdi-view-dashboard-outline"
+          @click="handleComplete"
+        >
+          Go to Dashboard
+        </v-btn>
       </div>
-      <p class="opacity-60 text-sm mb-4">
-        Ready to dig deeper? Here are some next steps.
-      </p>
-      <div class="flex flex-col gap-2">
-        <a href="https://dejajs.com/docs/install" target="_blank" rel="noopener noreferrer" class="explore-link">
-          <v-icon size="18" class="mr-2">mdi-book-open-page-variant-outline</v-icon>
-          Installation Guide
-          <v-icon size="14" class="ml-auto opacity-40">mdi-open-in-new</v-icon>
-        </a>
-        <a href="https://dejajs.com/docs/roster" target="_blank" rel="noopener noreferrer" class="explore-link">
-          <v-icon size="18" class="mr-2">mdi-train</v-icon>
-          Managing Your Roster
-          <v-icon size="14" class="ml-auto opacity-40">mdi-open-in-new</v-icon>
-        </a>
-        <a href="https://dejajs.com/docs/turnouts" target="_blank" rel="noopener noreferrer" class="explore-link">
-          <v-icon size="18" class="mr-2">mdi-call-split</v-icon>
-          Turnouts &amp; Routes
-          <v-icon size="14" class="ml-auto opacity-40">mdi-open-in-new</v-icon>
-        </a>
-        <a href="https://dejajs.com/docs/effects" target="_blank" rel="noopener noreferrer" class="explore-link">
-          <v-icon size="18" class="mr-2">mdi-lightbulb-outline</v-icon>
-          Effects &amp; Automation
-          <v-icon size="14" class="ml-auto opacity-40">mdi-open-in-new</v-icon>
-        </a>
-      </div>
-    </div>
 
-    <v-btn
-      color="primary"
-      size="large"
-      block
-      class="text-none font-weight-bold"
-      prepend-icon="mdi-view-dashboard-outline"
-      @click="emit('complete')"
-    >
-      Go to Dashboard
-    </v-btn>
+      <!-- Docs / Help -->
+      <div class="text-center mt-2 mb-6">
+        <a
+          href="https://docs.dejajs.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="docs-link"
+        >
+          <v-icon size="16" class="mr-1">mdi-book-open-variant</v-icon>
+          View Documentation & Help
+        </a>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -201,6 +360,20 @@ function addAnother() {
   padding: 1px;
 }
 
+/* Celebration card — golden glow */
+.celebration-card::before {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.4), rgba(236, 72, 153, 0.3) 40%, rgba(56, 189, 248, 0.3));
+}
+.celebration-icon {
+  font-size: 3rem;
+  animation: celebration-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+@keyframes celebration-bounce {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.3); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 .setup-input :deep(.v-field) {
   background: rgba(2, 6, 23, 0.9);
   border: 1px solid rgba(148, 163, 184, 0.2);
@@ -222,22 +395,53 @@ function addAnother() {
   color: rgba(148, 163, 184, 0.5);
 }
 
-.explore-link {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  border-radius: 10px;
-  background: rgba(2, 6, 23, 0.4);
-  border: 1px solid rgba(148, 163, 184, 0.08);
-  color: #cbd5e1;
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 150ms ease;
+/* Tip carousel */
+.tip-carousel {
+  position: relative;
+  min-height: 70px;
 }
-.explore-link:hover {
-  background: rgba(56, 189, 248, 0.08);
-  border-color: rgba(56, 189, 248, 0.2);
-  color: #38bdf8;
+.tip-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+.tip-fade-enter-active,
+.tip-fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+.tip-fade-enter-from,
+.tip-fade-leave-to {
+  opacity: 0;
+}
+
+/* Tip dots */
+.tip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.3);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.tip-dot--active {
+  background: #fbbf24;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+  transform: scale(1.3);
+}
+
+/* Docs link */
+.docs-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8rem;
+  color: rgba(148, 163, 184, 0.5);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.docs-link:hover {
+  color: rgba(56, 189, 248, 0.8);
 }
 </style>

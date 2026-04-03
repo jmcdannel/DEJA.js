@@ -15,10 +15,28 @@ interface CachedSubscription {
   validatedAt: string // ISO 8601
 }
 
-interface DejaConfig {
+export interface DejaConfig {
   uid: string
   layoutId: string
   subscription?: CachedSubscription
+  onboardingComplete?: boolean
+  mqtt?: {
+    enabled?: boolean
+    broker?: string
+    port?: number
+  }
+  ws?: {
+    enabled?: boolean
+    port?: number
+    id?: string
+  }
+  cloud?: {
+    enabled?: boolean
+  }
+  audio?: {
+    cacheSizeMb?: number
+    cacheDir?: string
+  }
 }
 
 interface SubscriptionCheckResult {

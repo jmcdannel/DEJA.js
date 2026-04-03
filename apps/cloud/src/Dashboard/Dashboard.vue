@@ -153,6 +153,7 @@ async function handleAddLoco(address: number, name: string) {
           :available-ports="ports"
           tile-mode
           link-mode="page"
+          :server-online="serverStatus?.online ?? false"
           :server-uptime="serverUptime"
           :connected-device-count="connectedCount"
           :total-device-count="devices?.length ?? 0"

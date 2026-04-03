@@ -4,6 +4,7 @@ import { useDocument } from 'vuefire'
 import { useStorage } from '@vueuse/core'
 import useSerial from './useSerial'
 import { db } from '@repo/firebase-config'
+import { useLayout, type Device } from '@repo/modules'
 import CommandStationLCD from './CommandStationLCD.vue'
 import CommandStationTracks from './CommandStationTracks.vue'
 import CommandStationStats from './CommandStationStats.vue'
@@ -14,6 +15,9 @@ const layoutDoc = layoutId.value
   ? doc(db, 'layouts', layoutId.value)
   : null
 const layout = useDocument(layoutDoc)
+
+const { getDevices } = useLayout()
+const devices = getDevices()
 
 const {
   disconnect
@@ -29,7 +33,7 @@ async function handleDisconnect() {
       <article class="p-4 flex flex-wrap gap-2 items-center relative" v-if="layout">
         
         <CommandStationLCD :dccEx="layout.dccEx" />
-        <CommandStationTracks :dccEx="layout.dccEx" />
+        <CommandStationTracks :devices="(devices ?? [])" :dccEx="layout.dccEx" />
         <CommandStationStats :dccEx="layout.dccEx" />
 
         

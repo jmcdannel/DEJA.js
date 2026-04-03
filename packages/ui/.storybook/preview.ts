@@ -8,7 +8,11 @@ import '@mdi/font/css/materialdesignicons.css'
 import './tailwind.css'
 import { mockRouter } from './mocks/router'
 
-const vuetify = createVuetify({ components, directives })
+const vuetify = createVuetify({
+  components,
+  directives,
+  theme: { defaultTheme: 'dark' },
+})
 
 setup((app) => {
   app.use(vuetify)

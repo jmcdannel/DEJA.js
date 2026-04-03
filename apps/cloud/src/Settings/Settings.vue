@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useCurrentUser } from 'vuefire'
 import { useStorage } from '@vueuse/core'
 import { getIdToken } from 'firebase/auth'
@@ -48,34 +48,6 @@ const nextDateLabel = computed(() => {
   return ''
 })
 
-// Server connection type
-const serverType = ref<'deja-server' | 'withrottle'>('deja-server')
-const serverSaving = ref(false)
-const serverSaved = ref(false)
-
-watch(() => layout, (l) => {
-  const layoutData = l as { throttleConnection?: { type: 'deja-server' | 'withrottle' } } | undefined
-  if (layoutData?.throttleConnection?.type) {
-    serverType.value = layoutData.throttleConnection.type
-  }
-}, { immediate: true })
-
-async function saveServerType() {
-  if (!storedLayoutId.value) return
-  serverSaving.value = true
-  try {
-    await updateLayout(storedLayoutId.value, {
-      throttleConnection: { type: serverType.value }
-    })
-    serverSaved.value = true
-    setTimeout(() => { serverSaved.value = false }, 3000)
-  } catch {
-    // Silent fail
-  } finally {
-    serverSaving.value = false
-  }
-}
-
 const portalLoading = ref(false)
 
 async function openBillingPortal() {
@@ -123,7 +95,6 @@ const sections = [
   { id: 'account', label: 'Account', icon: 'mdi-account-circle-outline' },
   { id: 'billing', label: 'Billing', icon: 'mdi-credit-card-outline' },
   { id: 'appearance', label: 'Appearance', icon: 'mdi-palette-outline' },
-  { id: 'connection', label: 'Connection', icon: 'mdi-server-network' },
   { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'layout', label: 'Layout', icon: 'mdi-floor-plan' },
   { id: 'backgrounds', label: 'Backgrounds', icon: 'mdi-image-outline' },
@@ -211,39 +182,6 @@ function scrollTo(id: string) {
                 </v-btn>
               </v-btn-toggle>
             </div>
-          </div>
-        </div>
-
-        <!-- Server Connection -->
-        <div id="connection" class="settings-section">
-          <div class="settings-section__header">
-            <v-icon size="20" class="settings-section__icon">mdi-server-network</v-icon>
-            <h2 class="settings-section__title">Server Connection</h2>
-          </div>
-          <div class="settings-row settings-row--block">
-            <div class="settings-row__label mb-3">
-              <span class="settings-row__name">Connection Type</span>
-              <span class="settings-row__desc">How your DEJA apps connect to your command station</span>
-            </div>
-            <div class="flex flex-col sm:flex-row gap-3 mb-4">
-              <div
-                v-for="opt in [
-                  { value: 'deja-server', label: 'DEJA.js Server', desc: 'USB-connected to your DCC-EX Command Station', icon: 'mdi-usb' },
-                  { value: 'withrottle', label: 'WiThrottle Server', desc: 'Existing WiThrottle on your network (DCC-EX WiFi or JMRI)', icon: 'mdi-wifi' },
-                ]"
-                :key="opt.value"
-                class="server-option"
-                :class="{ 'server-option--selected': serverType === opt.value }"
-                @click="serverType = opt.value as 'deja-server' | 'withrottle'"
-              >
-                <v-icon size="24" :color="serverType === opt.value ? 'primary' : undefined" class="mb-2">{{ opt.icon }}</v-icon>
-                <div class="font-medium text-sm">{{ opt.label }}</div>
-                <div class="text-xs opacity-60 mt-1">{{ opt.desc }}</div>
-              </div>
-            </div>
-            <v-btn color="primary" variant="tonal" size="small" :loading="serverSaving" :prepend-icon="serverSaved ? 'mdi-check' : 'mdi-content-save'" class="text-none" @click="saveServerType">
-              {{ serverSaved ? 'Saved!' : 'Save' }}
-            </v-btn>
           </div>
         </div>
 
@@ -400,26 +338,6 @@ function scrollTo(id: string) {
 .settings-row__name { font-size: 0.875rem; font-weight: 500; color: rgba(var(--v-theme-on-surface), 0.8); }
 .settings-row__desc { font-size: 0.75rem; color: rgba(var(--v-theme-on-surface), 0.45); }
 .settings-row__value { flex-shrink: 0; }
-
-.server-option {
-  flex: 1;
-  padding: 16px;
-  border-radius: 10px;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
-  background: rgba(var(--v-theme-surface-variant), 0.3);
-  cursor: pointer;
-  transition: border-color 150ms ease, background 150ms ease;
-  text-align: center;
-}
-.server-option:hover {
-  border-color: rgba(var(--v-theme-primary), 0.3);
-  background: rgba(var(--v-theme-primary), 0.05);
-}
-.server-option--selected {
-  border-color: rgba(var(--v-theme-primary), 0.5);
-  background: rgba(var(--v-theme-primary), 0.08);
-  box-shadow: 0 0 12px rgba(var(--v-theme-primary), 0.1);
-}
 
 .settings-version {
   text-align: center;

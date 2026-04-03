@@ -28,6 +28,13 @@ function getSectionFromPath(file: string): string {
   return 'Getting Started';
 }
 
+const NAV_TITLE_SUFFIXES = /\s+(Management|Configuration|Integration|View|Screen|List|Viewer|Library|Console)$/i;
+const NAV_TITLE_PREFIXES = /^(Building|Explore|Locomotive)\s+/i;
+
+function shortenNavTitle(title: string): string {
+  return title.replace(NAV_TITLE_PREFIXES, '').replace(NAV_TITLE_SUFFIXES, '').trim();
+}
+
 function getSectionSlug(sectionName: string): string {
   const map: Record<string, string> = {
     'Throttle': 'throttle',
@@ -58,7 +65,7 @@ export function generateDocsNav(): DocNavItem[] {
     const href = `/docs${slugArray.length > 0 ? '/' + slugArray.join('/') : ''}`;
 
     const item: DocNavItem = {
-      title: frontmatter.title || path.basename(file, '.mdx').replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+      title: frontmatter.navTitle || shortenNavTitle(frontmatter.title || path.basename(file, '.mdx').replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())),
       href,
       order: frontmatter.order || 999,
     };
