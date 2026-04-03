@@ -1,0 +1,119 @@
+---
+title: Command Reference
+description: Complete JSON command specification for all DEJA IO device actions.
+section: io
+order: 13
+---
+
+# Command Reference
+
+All DEJA IO devices receive JSON commands with an `action` and `payload`. The format differs slightly between Arduino (Serial) and Pico W (MQTT).
+
+## Actions
+
+### `pin` — Digital Output
+
+Toggle a digital GPIO pin on or off.
+
+```json
+{
+  "action": "pin",
+  "payload": { "pin": 8, "state": 1 }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `pin` | number | GPIO pin number (must match device config) |
+| `state` | number | `1` = on (HIGH), `0` = off (LOW) |
+
+### `servo` — Servo Position
+
+Set a PCA9685 servo channel to a specific angle.
+
+```json
+{
+  "action": "servo",
+  "payload": { "servo": 0, "value": 90, "current": 45 }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `servo` | number | PCA9685 channel (0–15) |
+| `value` | number | Target angle in degrees |
+| `current` | number | Current angle (Arduino only — used for smooth transition) |
+
+### `turnout` — Turnout Control
+
+Throw or close a configured turnout.
+
+```json
+{
+  "action": "turnout",
+  "payload": { "turnout": 0, "state": true }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `turnout` | number | Turnout index (matches device config array position) |
+| `state` | boolean | `true` = thrown, `false` = closed |
+
+### `ialed` — Addressable LED Strip (Planned)
+
+Control individually addressable LED strips.
+
+```json
+{
+  "action": "ialed",
+  "payload": { "strip": 0, "pattern": 0, "r": 255, "g": 0, "b": 0 }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `strip` | number | LED strip index |
+| `pattern` | number | Animation pattern ID |
+| `r`, `g`, `b` | number | RGB color values (0–255) |
+
+> This action is defined in the Arduino firmware but not yet fully implemented.
+
+## Format Differences
+
+### Arduino (Serial USB)
+
+Commands are sent as a **JSON array** over serial at 115200 baud:
+
+```json
+[
+  { "action": "pin", "payload": { "pin": 8, "state": 1 } },
+  { "action": "servo", "payload": { "servo": 0, "value": 90, "current": 45 } }
+]
+```
+
+Multiple commands can be batched in a single array.
+
+### Pico W (MQTT)
+
+Commands are sent as a **single JSON object** with a `device` field for filtering:
+
+```json
+{
+  "action": "pin",
+  "payload": { "pin": 8, "state": 1 },
+  "device": "my-pico-device"
+}
+```
+
+The `device` field is required — the Pico W ignores messages that don't match its `DEVICE_ID`.
+
+## Sensor Responses
+
+Arduino devices send sensor state changes back over serial:
+
+```json
+{ "sensor": 0, "state": 1 }
+```
+
+Sensor data is debounced (500ms minimum between state changes) and automatically routed to the DEJA Server for processing.

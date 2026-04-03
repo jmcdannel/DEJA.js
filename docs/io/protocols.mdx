@@ -1,0 +1,128 @@
+---
+title: Protocol Details
+description: Connection details for Serial, MQTT, and WebSocket communication with DEJA IO devices.
+section: io
+order: 15
+---
+
+# Protocol Details
+
+DEJA IO supports three communication protocols. All use JSON messages.
+
+## Serial USB
+
+Direct wired connection between an Arduino and the DEJA Server.
+
+| Parameter | Value |
+|---|---|
+| Baud rate | 115200 |
+| Data bits | 8 |
+| Stop bits | 1 |
+| Parity | None |
+| Encoding | UTF-8 JSON |
+
+### How It Works
+
+1. Arduino connects via USB to the server machine
+2. DEJA Server auto-detects the serial port
+3. Server opens the port at 115200 baud via the `serialport` Node.js package
+4. JSON commands are written to the port; responses are read line-by-line
+5. Auto-reconnect with exponential backoff (1s → 30s max) on disconnect
+
+### Port Detection
+
+The server lists available serial ports and matches them to registered devices. You can also manually specify a port path in your device configuration.
+
+## MQTT over WiFi
+
+Wireless publish/subscribe messaging via an MQTT broker (Mosquitto recommended).
+
+| Parameter | Value |
+|---|---|
+| Default port | 1883 (unencrypted) |
+| Protocol | MQTT v3.1.1 |
+| QoS | 0 (at most once) |
+| Encoding | UTF-8 JSON |
+
+### Topic Structure
+
+```
+{topicId}/{layoutId}/{deviceId}          ← device subscribes (receives commands)
+{topicId}/{layoutId}/{deviceId}/messages ← device publishes (sends status)
+```
+
+Default `topicId` is `DEJA`. Example for a device on the "tam" layout:
+
+```
+DEJA/tam/tj-eagle-nest-pico          ← commands IN
+DEJA/tam/tj-eagle-nest-pico/messages ← status OUT
+```
+
+### Device Filtering
+
+Multiple devices can share the same MQTT topic prefix. Each message includes a `device` field, and devices only process messages matching their own `DEVICE_ID`.
+
+### Broker Setup
+
+Install Mosquitto on your server machine:
+
+```bash
+# macOS
+brew install mosquitto
+
+# Linux (Debian/Ubuntu)
+sudo apt install mosquitto mosquitto-clients
+
+# Start the broker
+mosquitto -d
+```
+
+Set `MQTT_BROKER` in your `.env` to the server's IP address (e.g., `mqtt://192.168.1.100`).
+
+## WebSocket
+
+Real-time bidirectional communication over TCP.
+
+| Parameter | Value |
+|---|---|
+| Default port | 8082 (configurable via `VITE_WS_PORT`) |
+| Protocol | WebSocket (RFC 6455) |
+| Encoding | UTF-8 JSON |
+
+### Connection
+
+Connect to `ws://{serverHost}:8082`. On connection, the server sends an acknowledgment:
+
+```json
+{ "action": "ack", "payload": { "layoutId": "tam", "serverId": "DEJA.js" } }
+```
+
+### Device Monitoring
+
+Subscribe to a device's serial I/O stream:
+
+```json
+{ "action": "subscribe-device", "deviceId": "my-arduino" }
+```
+
+The server forwards serial data for that device:
+
+```json
+{
+  "action": "serial-data",
+  "payload": {
+    "deviceId": "my-arduino",
+    "data": "{ \"sensor\": 0, \"state\": 1 }",
+    "timestamp": "2026-04-03T12:00:00Z",
+    "direction": "incoming"
+  }
+}
+```
+
+Unsubscribe when done:
+
+```json
+{ "action": "unsubscribe-device", "deviceId": "my-arduino" }
+```
+
+See the [WebSocket Integration](/docs/io/websocket-integration) guide for full message reference and code examples.
