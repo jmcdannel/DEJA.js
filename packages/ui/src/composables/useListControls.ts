@@ -2,10 +2,11 @@ import { computed, type Ref } from 'vue'
 import { useStorage } from '@vueuse/core'
 import type { ListControlsOptions, ListControlsReturn } from '../ListControls/types'
 
-export function useListControls(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useListControls<T extends Record<string, any> = Record<string, any>>(
   moduleName: string,
-  options: ListControlsOptions
-): ListControlsReturn {
+  options: ListControlsOptions<T>
+): ListControlsReturn<T> {
   const { list, defaultView = 'card', defaultSort = 'order' } = options
 
   // Persisted state — same localStorage keys as existing code for seamless migration.

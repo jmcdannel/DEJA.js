@@ -60,9 +60,9 @@ async function handleSaveTrackOutputs(outputs: Record<string, TrackOutput>) {
       { trackOutputs: outputs, timestamp: serverTimestamp() },
       { merge: true },
     )
-    notify?.('Track configuration saved. Restart the server to apply.', 'success')
+    notify?.success('Track configuration saved. Restart the server to apply.')
   } catch (err) {
-    notify?.('Failed to save track configuration', 'error')
+    notify?.error('Failed to save track configuration')
   }
 }
 const color = computed(() => colors[deviceType.value?.color || DEFAULT_COLOR])

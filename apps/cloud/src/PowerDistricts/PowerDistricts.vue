@@ -58,19 +58,19 @@ async function handleAddDistrict() {
   })
 
   if (success) {
-    notify?.('Power district created', 'success')
+    notify?.success('Power district created')
     showAddForm.value = false
     newName.value = ''
     newDeviceId.value = ''
     newOutput.value = ''
   } else {
-    notify?.('Failed to create power district', 'error')
+    notify?.error('Failed to create power district')
   }
 }
 
 async function handleDeleteDistrict(district: PowerDistrict) {
   await deletePowerDistrict(district.id)
-  notify?.(`Removed "${district.name}"`, 'info')
+  notify?.info(`Removed "${district.name}"`)
 }
 
 // Import sendTrackPower from the first device's composable (used for power toggle)
