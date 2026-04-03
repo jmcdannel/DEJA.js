@@ -18,11 +18,11 @@ import { audioCacheService } from './src/lib/AudioCacheService.js'
 import { log } from './src/utils/logger.js'
 import { validateSubscription, startPeriodicRecheck, stopPeriodicRecheck, readConfig, SubscriptionError } from './src/lib/subscription.js'
 import type { DejaConfig } from './src/lib/subscription.js'
+import { getServerConfig } from './src/lib/server-config.js'
+import type { ServerConfig } from './src/lib/server-config.js'
 import { markServerStarted } from './src/lib/onboarding.js'
 
-const ENABLE_MQTT = process.env.ENABLE_MQTT === 'true' || false
-const ENABLE_WS = process.env.ENABLE_WS !== 'false'
-const ENABLE_DEJACLOUD = process.env.ENABLE_DEJACLOUD === 'true' || false
+let serverConfig: ServerConfig
 
 const SHUTDOWN_TIMEOUT_MS = 10_000
 
@@ -47,11 +47,15 @@ async function main(): Promise<void> {
       throw error
     }
 
-    log.note('ENABLE_MQTT', ENABLE_MQTT)
-    log.note('ENABLE_WS', ENABLE_WS)
-    log.note('ENABLE_DEJACLOUD', ENABLE_DEJACLOUD)
+    // Load server config from ~/.deja/config.json (with env var fallback).
+    // This also bridges values into process.env for module-level reads.
+    serverConfig = await getServerConfig()
 
-    if (ENABLE_DEJACLOUD) {
+    log.note('MQTT', serverConfig.mqtt.enabled ? `ON (${serverConfig.mqtt.broker}:${serverConfig.mqtt.port})` : 'OFF')
+    log.note('WebSocket', serverConfig.ws.enabled ? `ON (port ${serverConfig.ws.port})` : 'OFF')
+    log.note('DEJA Cloud', serverConfig.cloud.enabled ? 'ON' : 'OFF')
+
+    if (serverConfig.cloud.enabled) {
       try {
         await dejaCloud.connect()
         log.start('DEJA Cloud connected')
@@ -60,7 +64,7 @@ async function main(): Promise<void> {
       }
     }
 
-    if (ENABLE_MQTT) {
+    if (serverConfig.mqtt.enabled) {
       try {
         await mqtt.connect()
         log.start('MQTT initialized')
@@ -70,7 +74,7 @@ async function main(): Promise<void> {
       }
     }
 
-    if (ENABLE_WS) {
+    if (serverConfig.ws.enabled) {
       try {
         await wsServer.connect()
         log.start('WebSocket server started')
@@ -126,21 +130,21 @@ async function shutdown(): Promise<void> {
     stopPeriodicRecheck()
 
     // 1. WebSocket server — close all client connections with a proper close message
-    if (ENABLE_WS && wsServer.isConnected()) {
+    if (serverConfig?.ws.enabled && wsServer.isConnected()) {
       log.info('[SHUTDOWN] Closing WebSocket server and all client connections...')
       await wsServer.disconnect()
       log.success('[SHUTDOWN] WebSocket server closed')
     }
 
     // 2. Firebase listeners (Firestore snapshots + RTDB child_added)
-    if (ENABLE_DEJACLOUD) {
+    if (serverConfig?.cloud.enabled) {
       log.info('[SHUTDOWN] Disconnecting from DEJA Cloud (Firebase listeners)...')
       await dejaCloud.disconnect()
       log.success('[SHUTDOWN] DEJA Cloud disconnected')
     }
 
     // 3. MQTT client
-    if (ENABLE_MQTT) {
+    if (serverConfig?.mqtt.enabled) {
       log.info('[SHUTDOWN] Disconnecting MQTT client...')
       mqtt.disconnect()
       log.success('[SHUTDOWN] MQTT client disconnected')
