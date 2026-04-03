@@ -5,7 +5,7 @@ import { onValue, ref as dbRef } from 'firebase/database'
 import { useStorage } from '@vueuse/core'
 import { rtdb } from '@repo/firebase-config'
 import type { Loco } from '@repo/modules/locos'
-import { useLocos } from '@repo/modules/locos'
+import { useLocos, ROADNAMES } from '@repo/modules/locos'
 import { useLayout, useServerStatus, useSubscription, PLAN_DISPLAY } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
 import { PageHeader, ListControlBar, useListControls, LocoRoster, ThrottleLaunchQR } from '@repo/ui'
@@ -51,7 +51,7 @@ const rosterList = computed(() =>
   locos?.value ? (locos.value as Loco[]).map((l) => ({
     ...l,
     id: String(l.address),
-    sound: l.hasSound ? 'sound' : 'silent',
+    roadname: l.meta?.roadname || '',
     locoType: l.consist?.length ? 'consist' : 'single',
   })) : []
 )
@@ -59,10 +59,7 @@ const rosterList = computed(() =>
 const hasItems = computed(() => isLoaded.value && rosterList.value.length > 0)
 
 // 🔍 Filter & sort options
-const soundOptions = [
-  { label: 'Sound Decoder', value: 'sound' },
-  { label: 'Silent', value: 'silent' },
-]
+const roadnameOptions = ROADNAMES.map((r) => ({ label: r.label, value: r.value }))
 
 const typeOptions = [
   { label: 'Consist', value: 'consist' },
@@ -70,7 +67,7 @@ const typeOptions = [
 ]
 
 const filters = computed<ListFilter[]>(() => [
-  { type: 'sound', label: 'Sound', options: soundOptions },
+  { type: 'roadname', label: 'Road', options: roadnameOptions },
   { type: 'locoType', label: 'Type', options: typeOptions },
 ])
 
@@ -166,9 +163,12 @@ async function importFromCS() {
           :filters="filters"
           :show-view="true"
           :view-options="[
+            { value: 'cab', icon: 'mdi-train-car-flatbed', label: 'Cab' },
             { value: 'avatar', icon: 'mdi-view-module', label: 'Avatar' },
+            { value: 'plate', icon: 'mdi-card-text-outline', label: 'Plate' },
             { value: 'card', icon: 'mdi-view-grid-outline', label: 'Card' },
-            { value: 'list', icon: 'mdi-view-list', label: 'List' },
+            { value: 'table', icon: 'mdi-table', label: 'Table' },
+            { value: 'raw', icon: 'mdi-code-json', label: 'Raw' },
           ]"
           search-placeholder="Search roster..."
         />
