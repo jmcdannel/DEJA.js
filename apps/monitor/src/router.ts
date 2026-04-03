@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { getCurrentUser } from 'vuefire'
-import { Login, LogoutView, requireLayout } from '@repo/auth'
+import { Login, LogoutView, requireLayout, ensureAutoLogin } from '@repo/auth'
 import Dashboard from './Dashboard/Dashboard.vue'
 
 declare module 'vue-router' {
@@ -77,21 +77,20 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const meta = to.meta ?? {}
 
+  // Dev auto-login (pnpm dev:demo)
+  await ensureAutoLogin()
+
   // 1. Require authentication
   if (meta.requireAuth) {
-    if (import.meta.env.DEV && import.meta.env.VITE_DEV_AUTO_LOGIN === 'true') {
-      // skip auth in dev auto-login mode
-    } else {
-      const currentUser = await getCurrentUser()
-      if (!currentUser) {
-        return { path: '/login', query: { redirect: to.fullPath } }
-      }
+    const currentUser = await getCurrentUser()
+    if (!currentUser) {
+      return { path: '/login', query: { redirect: to.fullPath } }
+    }
 
-      // 2. Require a selected layout
-      if (meta.requireLayout) {
-        const redirect = await requireLayout(currentUser.email!, to)
-        if (redirect) return redirect
-      }
+    // 2. Require a selected layout
+    if (meta.requireLayout) {
+      const redirect = await requireLayout(currentUser.email!, to)
+      if (redirect) return redirect
     }
   }
 })

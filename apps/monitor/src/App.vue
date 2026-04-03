@@ -30,7 +30,6 @@ async function handleEmergencyStop() {
 }
 
 const user = useCurrentUser()
-const isDemoMode = import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true'
 const router = useRouter()
 
 const { themePreference } = useThemeSwitcher()
@@ -44,7 +43,7 @@ const menu: MenuItem[] = []
 
 <template>
   <v-responsive>
-    <v-app v-if="user || isDemoMode" :theme="themePreference">
+    <v-app v-if="user" :theme="themePreference">
       <PageBackground app-name="monitor">
       <MonitorStatusBar
         @toggle-drawer="drawer = !drawer"
