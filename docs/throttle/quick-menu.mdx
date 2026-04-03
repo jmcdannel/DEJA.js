@@ -1,0 +1,134 @@
+---
+title: Quick Menu
+description: A floating action button with a drill-down menu for fast access to locomotives, effects, turnouts, routes, signals, and sensors — available on every page when logged in.
+section: apps
+order: 2.5
+---
+
+# Quick Menu
+
+The Quick Menu is a draggable floating button that gives you instant access to your layout's locomotives, effects, turnouts, routes, signals, and sensors from any page in the Throttle app. It appears whenever you are logged in and have a layout selected.
+
+{/* TODO: screenshot of quick menu FAB and expanded panel */}
+
+## The FAB
+
+The Quick Menu button displays the DEJA.js "D" logo and floats above all page content. You can:
+
+- **Tap** to open the menu panel.
+- **Drag** to reposition the button anywhere along the left or right edge of the screen. Your position is remembered across sessions.
+
+When the menu is open, the logo changes to an **✕** close icon. Tapping outside the panel or dragging the button also closes the menu.
+
+The panel opens to the left or right of the button depending on which side of the screen the FAB is positioned — it always stays fully visible.
+
+## Home Screen
+
+When first opened, the Quick Menu shows three sections:
+
+### Active Throttles
+
+A compact list of your currently active throttle sessions showing locomotive name and speed. Tap any throttle to jump directly to its [Throttle Control](/docs/throttle/throttle) screen.
+
+### Favorites
+
+If the Quick Menu Favorites feature flag is enabled, a favorites section appears below the throttle list. This allows you to pin frequently used items for one-tap access.
+
+### Layout Controls
+
+A grid of icon buttons for each area of your layout:
+
+| Icon | Label | Action |
+|------|-------|--------|
+| 🚂 Locos | Locos | Drill into locomotive browser |
+| 🚀 Effects | Effects | Drill into effects browser |
+| 🗺️ Routes | Routes | Drill into routes browser |
+| 🔀 Turnouts | Turnouts | Drill into turnouts browser |
+| 🚦 Signals | Signals | Drill into signals browser |
+| 🔌 Connect | Connect | Navigate to connection settings |
+| 🧩 Program | Program | Navigate to CV programmer |
+| ⚙️ Settings | Settings | Navigate to app settings |
+
+If the DEJA.js server is offline, a **"Server offline"** indicator appears above the grid to let you know that server-dependent actions (toggles, route activation) will be disabled.
+
+## Drill-Down Navigation
+
+Tapping an entity (e.g., Effects) opens a sub-menu with filtering options specific to that entity type:
+
+### Locos
+
+- **All** — browse every locomotive in your roster
+- **Active** — show only locomotives with active throttle sessions
+- **By Roadname** — group locomotives by railroad company (e.g., BNSF, Union Pacific)
+- **New** — opens the [Cloud app](https://cloud.dejajs.com/locos/new) in a new tab to add a locomotive
+
+### Effects
+
+- **All** — every effect on the layout
+- **By Device** — group by the device that controls the effect
+- **By Type** — group by effect type (sound, LED, relay, macro, etc.)
+- **By Tag** — group by user-defined tags
+- **New** — opens the Cloud app to add an effect
+
+### Turnouts
+
+- **All** — every turnout on the layout
+- **By Device** — group by controller device
+- **By Tag** — group by tag
+- **Labels** — group by turnout type
+- **New** — opens the Cloud app to add a turnout
+
+### Routes
+
+- **All** — every route on the layout
+- **By Waypoint** — group by start/end waypoint
+- **New** — opens the Cloud app to add a route
+
+### Signals
+
+- **All** — every signal on the layout
+- **By Device** — group by controller device
+- **By Aspect** — group by current aspect (red, yellow, green)
+- **New** — opens the Cloud app to add a signal
+
+### Sensors
+
+- **All** — every sensor on the layout
+- **By Device** — group by controller device
+- **Automations** — sensors with attached automations
+- **New** — opens the Cloud app to add a sensor
+
+## Item Lists and Actions
+
+After selecting a filter (or "All"), you see the individual items. Each item displays its name, an icon in the item's configured color, and an action control:
+
+| Entity | Action | Behavior |
+|--------|--------|----------|
+| **Locos** | 🎮 Gamepad button | Navigates to `/throttle/:address` for that locomotive |
+| **Routes** | 🔀 Turnout button | Activates the route (fires the turnout sequence) |
+| **Effects** | Toggle switch | Turns the effect on or off |
+| **Turnouts** | Toggle switch | Throws or closes the turnout |
+| **Signals** | Toggle switch | Sets the signal to green or red |
+| **Sensors** | Toggle switch | Activates or deactivates the sensor |
+
+### Item Colors
+
+Each item uses its own color as configured in the Cloud app. If no custom color is set, items fall back to a default color for their entity type (pink for locos, indigo for effects, amber for turnouts, purple for routes, emerald for signals, teal for sensors).
+
+### Server Offline Behavior
+
+Toggle switches and route activation buttons are **disabled** when the DEJA.js server is not connected. The loco gamepad button and "New" links remain functional since they don't require the server — they navigate within the app or open the Cloud app in a new tab.
+
+## Creating New Items
+
+Every entity sub-menu includes a **New** option (green ✚ icon) that opens the corresponding form in the [Cloud app](https://cloud.dejajs.com) in a new browser tab. This lets you quickly add a locomotive, effect, turnout, route, signal, or sensor without leaving your operating session.
+
+## Visibility
+
+The Quick Menu is visible on every page in the Throttle app as long as:
+
+1. You are **logged in**.
+2. A **layout is selected**.
+3. The page is not a **fullscreen page** (login, signup, layout selection).
+
+You can toggle Quick Menu visibility in the [Settings](/docs/throttle/settings) page.

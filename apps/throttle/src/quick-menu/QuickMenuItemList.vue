@@ -5,20 +5,35 @@ export interface ToggleItem {
   state: boolean
   icon?: string
   color?: string
+  action?: 'toggle' | 'navigate' | 'activate'
+  actionIcon?: string
 }
 
-defineProps<{
+const props = withDefaults(defineProps<{
   title: string
   items: ToggleItem[]
-}>()
+  serverOnline?: boolean
+}>(), {
+  serverOnline: true,
+})
 
 const emit = defineEmits<{
   back: []
   toggle: [id: string, state: boolean]
+  navigate: [id: string]
+  activate: [id: string]
 }>()
 
 function onToggle(id: string, v: unknown) {
   emit('toggle', id, !!v)
+}
+
+function onAction(item: ToggleItem) {
+  if (item.action === 'navigate') {
+    emit('navigate', item.id)
+  } else if (item.action === 'activate') {
+    emit('activate', item.id)
+  }
 }
 </script>
 
@@ -44,11 +59,39 @@ function onToggle(id: string, v: unknown) {
           {{ item.icon }}
         </v-icon>
         <span class="qm-list-item__label">{{ item.name }}</span>
+        <!-- 🎮 Navigate action (locos → throttle) -->
+        <v-btn
+          v-if="item.action === 'navigate'"
+          icon
+          variant="text"
+          size="x-small"
+          :color="item.state ? (item.color || 'green') : undefined"
+          class="qm-item-row__action-btn"
+          @click.stop="onAction(item)"
+        >
+          <v-icon size="18">{{ item.actionIcon || 'mdi-gamepad-variant' }}</v-icon>
+        </v-btn>
+        <!-- 🚂 Activate action (routes) -->
+        <v-btn
+          v-else-if="item.action === 'activate'"
+          icon
+          variant="text"
+          size="x-small"
+          :color="item.state ? (item.color || 'green') : undefined"
+          :disabled="!props.serverOnline"
+          class="qm-item-row__action-btn"
+          @click.stop="onAction(item)"
+        >
+          <v-icon size="18">{{ item.actionIcon || 'mdi-call-split' }}</v-icon>
+        </v-btn>
+        <!-- 🔀 Default toggle switch -->
         <v-switch
+          v-else
           :model-value="item.state"
           density="compact"
           hide-details
           color="green"
+          :disabled="!props.serverOnline"
           class="qm-item-row__switch"
           @update:model-value="(v) => onToggle(item.id, v)"
         />
@@ -78,6 +121,10 @@ function onToggle(id: string, v: unknown) {
 }
 .qm-item-row__switch {
   flex-shrink: 0;
+}
+.qm-item-row__action-btn {
+  flex-shrink: 0;
+  margin-left: auto;
 }
 .qm-item-row__switch :deep(.v-switch__track) {
   height: 14px;
