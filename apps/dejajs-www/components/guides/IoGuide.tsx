@@ -3,7 +3,7 @@
 import AnimateIn from '../home/AnimateIn';
 import SectionLabel from '../home/SectionLabel';
 import DocLink from '../DocLink';
-import { FeatureGrid, VideoPlaceholder, Callout } from './shared';
+import { FeatureGrid, VideoPlaceholder, Callout, BeforeYouStart } from './shared';
 
 const protocolColors: Record<string, string> = {
   amber: 'border-amber-400/30 bg-amber-400/5 text-amber-400',
@@ -48,6 +48,9 @@ export default function IoGuide() {
           <VideoPlaceholder />
         </AnimateIn>
       </section>
+
+      {/* ── Prerequisites ── */}
+      <BeforeYouStart />
 
       {/* ── 2. Architecture Diagram — How It Works ── */}
       <section className="mb-20">
@@ -283,7 +286,7 @@ export default function IoGuide() {
         </AnimateIn>
       </section>
 
-      {/* ── 5. Deploy Flow Video ── */}
+      {/* ── 5. Deploy Flow ── */}
       <section className="mb-20">
         <AnimateIn>
           <SectionLabel color="cyan">Deploy Flow</SectionLabel>
@@ -292,9 +295,6 @@ export default function IoGuide() {
           </h2>
         </AnimateIn>
         <AnimateIn delay={0.1}>
-          <VideoPlaceholder />
-        </AnimateIn>
-        <AnimateIn delay={0.15}>
           <Callout emoji="🚀" color="cyan">
             <p>
               Plug in a new device and it&apos;s auto-detected by the server.

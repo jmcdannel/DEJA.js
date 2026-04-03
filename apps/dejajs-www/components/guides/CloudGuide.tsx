@@ -4,7 +4,7 @@ import Link from 'next/link';
 import AnimateIn from '../home/AnimateIn';
 import SectionLabel from '../home/SectionLabel';
 import Logo from '../Logo';
-import { FeatureSection, VideoPlaceholder, FeatureCarousel } from './shared';
+import { FeatureSection, VideoPlaceholder, FeatureCarousel, BeforeYouStart } from './shared';
 import type { CarouselSlide } from './shared';
 
 /* ── Cloud Features Data ── */
@@ -238,15 +238,7 @@ export default function CloudGuide() {
       </section>
 
       {/* ── Prerequisites ── */}
-      <AnimateIn>
-        <div className="max-w-2xl mx-auto mb-8 p-5 rounded-xl border border-gray-800 bg-gray-900/50 text-center">
-          <p className="text-gray-300 text-sm leading-relaxed">
-            Make sure you&apos;ve completed the{' '}
-            <Link href="/guides/getting-started" className="text-deja-cyan hover:underline">Getting Started</Link>{' '}
-            guide — your account should be created and your server running.
-          </p>
-        </div>
-      </AnimateIn>
+      <BeforeYouStart />
 
       {/* ── Dashboard ── */}
       <FeatureSection

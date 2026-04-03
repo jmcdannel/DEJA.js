@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { mdiUsb } from '@mdi/js';
-import { Callout, CommandBlock, Step, MdiIcon } from './shared';
+import { Callout, CommandBlock, Step, MdiIcon, BeforeYouStart } from './shared';
 import DocLink from '../DocLink';
 
 function TerminalOutput({ children }: { children: React.ReactNode }) {
@@ -50,28 +50,15 @@ export default function ServerGuide() {
       </div>
 
       {/* Prerequisites */}
-      <section className="mb-12 p-5 rounded-xl border border-gray-800 bg-gray-900/50">
-        <h2 className="text-white font-semibold mb-3">Before You Start</h2>
-        <p className="text-sm text-gray-300 mb-4">
-          This guide assumes you&apos;ve already{' '}
-          <a href="https://cloud.dejajs.com" target="_blank" rel="noopener noreferrer" className="text-deja-cyan hover:underline">signed up</a>
-          {' '}and completed the onboarding steps, which includes installing the server. If you haven&apos;t
-          done that yet, head to the{' '}
-          <Link href="/guides/getting-started" className="text-deja-cyan hover:underline">Getting Started guide</Link>
-          {' '}first — it only takes a few minutes.
-        </p>
-        <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-900 border border-gray-800">
+      <BeforeYouStart>
+        <div className="flex items-start gap-3 p-3 mt-4 rounded-lg bg-gray-900 border border-gray-800 text-left">
           <MdiIcon path={mdiUsb} className="w-5 h-5 shrink-0 text-amber-400 mt-0.5" />
           <p className="text-sm text-gray-300">
             Make sure your <strong className="text-white">DCC-EX CommandStation is connected via USB</strong> to
-            the computer running the server. That&apos;s all you need.
+            the computer running the server.
           </p>
         </div>
-        <p className="text-xs text-gray-500 mt-3">
-          For platform compatibility and system requirements, see the{' '}
-          <DocLink href="/docs/server/installation">Installation</DocLink>.
-        </p>
-      </section>
+      </BeforeYouStart>
 
       {/* Steps */}
       <div className="space-y-12">

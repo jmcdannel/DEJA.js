@@ -7,4 +7,5 @@ export { default as CommandBlock } from './CommandBlock';
 export { default as Step } from './Step';
 export { default as MdiIcon } from './MdiIcon';
 export { default as FeatureCarousel } from './FeatureCarousel';
+export { default as BeforeYouStart } from './BeforeYouStart';
 export type { CarouselSlide } from './FeatureCarousel';

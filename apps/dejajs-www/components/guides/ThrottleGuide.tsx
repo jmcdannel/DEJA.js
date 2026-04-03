@@ -7,7 +7,7 @@ import SectionLabel from '../home/SectionLabel';
 import Logo from '../Logo';
 import PhoneMockup from '../architecture/PhoneMockup';
 import DocLink from '../DocLink';
-import { FeatureGrid, FeatureSection, VideoPlaceholder, FeatureCarousel } from './shared';
+import { FeatureGrid, FeatureSection, VideoPlaceholder, FeatureCarousel, BeforeYouStart } from './shared';
 import type { CarouselSlide } from './shared';
 
 /* ── Shared sub-components ── */
@@ -240,15 +240,7 @@ export default function ThrottleGuide() {
       </section>
 
       {/* ── Prerequisites ── */}
-      <AnimateIn>
-        <div className="max-w-2xl mx-auto mb-8 p-5 rounded-xl border border-gray-800 bg-gray-900/50 text-center">
-          <p className="text-gray-300 text-sm leading-relaxed">
-            Make sure you&apos;ve completed the{' '}
-            <Link href="/guides/getting-started" className="text-deja-cyan hover:underline">Getting Started</Link>{' '}
-            guide — your server should be running and your command station connected.
-          </p>
-        </div>
-      </AnimateIn>
+      <BeforeYouStart />
 
       {/* ── Navigating the App ── */}
       <section className="bg-gray-900/50 border-y border-gray-800/50 py-20 -mx-6 px-6">
