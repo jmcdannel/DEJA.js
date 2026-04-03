@@ -7,7 +7,7 @@ export { default as NotFoundPage } from './NotFoundPage.vue'
 export { default as LocoAvatar } from './LocoAvatar.vue'
 
 // Roster components
-export { ROADNAME_MEDIA, getRoadnameMedia } from './Roster'
+export { LocoNumberPlate, ROADNAME_MEDIA, getRoadnameMedia } from './Roster'
 export type { RoadnameMedia } from './Roster'
 export { default as ConsistIndicator } from './Consist/ConsistIndicator.vue'
 export { default as ConsistEditor } from './Consist/ConsistEditor.vue'
