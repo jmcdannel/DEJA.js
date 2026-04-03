@@ -12,7 +12,6 @@ const defaultFooterLinks = [
   { label: 'Docs', href: '/docs' },
   { label: 'FAQ', href: '/faq' },
   { label: 'Pricing', href: '/pricing' },
-  { label: 'GitHub', href: 'https://github.com/jmcdannel/DEJA.js' },
 ];
 
 export default function Footer({ settings }: { settings?: FooterSettings | null }) {

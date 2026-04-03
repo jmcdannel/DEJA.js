@@ -31,17 +31,6 @@ function FeatureGrid({ items }: { items: { emoji: string; text: string }[] }) {
   );
 }
 
-function ThrottleNote({ children }: { children: React.ReactNode }) {
-  return (
-    <AnimateIn>
-      <div className="p-4 rounded-lg border border-teal-500/20 bg-teal-950/20">
-        <p className="text-xs text-teal-400 font-mono tracking-wider uppercase mb-2">🚂 See it in Throttle</p>
-        <div className="text-sm text-gray-300 leading-relaxed">{children}</div>
-      </div>
-    </AnimateIn>
-  );
-}
-
 function VideoPlaceholder() {
   return (
     <div className="rounded-2xl border border-gray-800 bg-gray-900/50 overflow-hidden shadow-2xl">
@@ -64,7 +53,6 @@ function FeatureSection({
   screenshot,
   screenshotAlt,
   flip = false,
-  throttleNote,
   docLink,
   docLabel,
   children,
@@ -75,7 +63,6 @@ function FeatureSection({
   screenshot: string;
   screenshotAlt: string;
   flip?: boolean;
-  throttleNote?: React.ReactNode;
   docLink?: string;
   docLabel?: string;
   children?: React.ReactNode;
@@ -87,7 +74,6 @@ function FeatureSection({
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">{title}</h2>
           <p className="text-gray-400 leading-relaxed mb-6">{desc}</p>
           <FeatureGrid items={features} />
-          {throttleNote && <div className="mt-4">{throttleNote}</div>}
           {children}
           {docLink && docLabel && (
             <div className="mt-4">
@@ -96,11 +82,8 @@ function FeatureSection({
           )}
         </AnimateIn>
         <AnimateIn direction={flip ? 'left' : 'right'} className={`flex justify-center ${flip ? 'lg:order-1' : ''}`}>
-          <div className="rounded-2xl border-2 border-gray-700 bg-gray-900 p-2 shadow-2xl w-full max-w-lg">
-            <div className="mx-auto w-8 h-1 bg-gray-800 rounded-full mb-1" />
-            <div className="rounded-xl overflow-hidden">
-              <Image src={screenshot} alt={screenshotAlt} width={1200} height={675} className="w-full h-auto" />
-            </div>
+          <div className="rounded-2xl overflow-hidden shadow-2xl w-full max-w-lg">
+            <Image src={screenshot} alt={screenshotAlt} width={1200} height={675} className="w-full h-auto" />
           </div>
         </AnimateIn>
       </div>
@@ -145,6 +128,25 @@ const cloudFeatures: CarouselSlide[] = [
     accentColor: 'text-pink-400',
     accentBg: 'bg-pink-400/10',
     accentBorder: 'border-pink-400/40',
+  },
+  {
+    id: 'devices',
+    emoji: '🖥️',
+    title: 'Devices',
+    tagline: 'Your hardware, connected',
+    desc: 'Manage DCC-EX command stations, microcontrollers, and serial devices. Monitor connection status and configure ports.',
+    desktopScreenshot: '/screenshots/cloud_desktop_dashboard.png',
+    features: [
+      { emoji: '🔌', text: 'Auto-detect available serial ports' },
+      { emoji: '🟢', text: 'Real-time connection status with reconnect' },
+      { emoji: '🔄', text: 'Drag-to-reorder devices in priority order' },
+      { emoji: '⚙️', text: 'Per-device configuration and port assignment' },
+    ],
+    docHref: '/docs/cloud/layout',
+    docLabel: 'Devices',
+    accentColor: 'text-cyan-400',
+    accentBg: 'bg-cyan-400/10',
+    accentBorder: 'border-cyan-400/40',
   },
   {
     id: 'turnouts',
@@ -244,6 +246,25 @@ const cloudFeatures: CarouselSlide[] = [
     accentBorder: 'border-teal-400/40',
   },
   {
+    id: 'connect',
+    emoji: '🔗',
+    title: 'Connect',
+    tagline: 'Bridge to your command station',
+    desc: 'Manage connectivity between DEJA Cloud and your DCC-EX hardware. Select devices, choose serial ports, and monitor connection health in real time.',
+    desktopScreenshot: '/screenshots/cloud_desktop_dashboard.png',
+    features: [
+      { emoji: '🔌', text: 'Connect and disconnect devices with one tap' },
+      { emoji: '📡', text: 'WebSocket bridge to your local DEJA Server' },
+      { emoji: '🟢', text: 'Live connection health indicators' },
+      { emoji: '🔄', text: 'Automatic reconnect on connection loss' },
+    ],
+    docHref: '/docs/cloud/layout',
+    docLabel: 'Connect',
+    accentColor: 'text-orange-400',
+    accentBg: 'bg-orange-400/10',
+    accentBorder: 'border-orange-400/40',
+  },
+  {
     id: 'dccex',
     emoji: '⌨️',
     title: 'DCC-EX Console',
@@ -328,20 +349,14 @@ function CloudFeaturesCarousel() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* Screenshot — desktop browser frame */}
-            <div className="relative">
-              <div className="rounded-2xl border-2 border-gray-700 bg-gray-900 p-2 shadow-2xl">
-                <div className="mx-auto w-8 h-1 bg-gray-800 rounded-full mb-1" />
-                <div className="rounded-xl overflow-hidden">
-                  <Image
-                    src={active.desktopScreenshot}
-                    alt={`${active.title} desktop view`}
-                    width={1200}
-                    height={675}
-                    className="w-full h-auto"
-                  />
-                </div>
-              </div>
+            <div className="rounded-2xl overflow-hidden shadow-2xl">
+              <Image
+                src={active.desktopScreenshot}
+                alt={`${active.title} desktop view`}
+                width={1200}
+                height={675}
+                className="w-full h-auto"
+              />
             </div>
 
             {/* Features */}
@@ -418,11 +433,6 @@ export default function CloudGuide() {
         ]}
         screenshot="/screenshots/cloud_desktop_dashboard.png"
         screenshotAlt="Cloud dashboard"
-        throttleNote={
-          <ThrottleNote>
-            Open Throttle from the QR code on your dashboard to start driving immediately.
-          </ThrottleNote>
-        }
         docLink="/docs/cloud/dashboard"
         docLabel="Dashboard reference"
       />
@@ -459,12 +469,6 @@ export default function CloudGuide() {
         ]}
         screenshot="/screenshots/cloud_desktop_roster.png"
         screenshotAlt="Cloud locomotive roster"
-        throttleNote={
-          <ThrottleNote>
-            Locomotives you add here appear instantly in the Throttle app — including
-            function labels and consist groups.
-          </ThrottleNote>
-        }
         docLink="/docs/cloud/roster"
         docLabel="Roster reference"
       />
@@ -483,12 +487,6 @@ export default function CloudGuide() {
           screenshot="/screenshots/cloud_desktop_turnouts.png"
           screenshotAlt="Cloud turnout configuration"
           flip
-          throttleNote={
-            <ThrottleNote>
-              Turnouts configured here appear in Throttle&apos;s turnout view with
-              color-coded toggle switches.
-            </ThrottleNote>
-          }
           docLink="/docs/cloud/turnouts"
           docLabel="Turnouts reference"
         />
@@ -506,15 +504,28 @@ export default function CloudGuide() {
         ]}
         screenshot="/screenshots/cloud_desktop_effects.png"
         screenshotAlt="Cloud effects management"
-        throttleNote={
-          <ThrottleNote>
-            Effects you create here can be triggered from the Throttle&apos;s Effects
-            view — or automatically via sensor automations.
-          </ThrottleNote>
-        }
         docLink="/docs/cloud/effects"
         docLabel="Effects reference"
       />
+
+      {/* ── DCC-EX Console ── */}
+      <div className="bg-gray-900/50 border-y border-gray-800/50 -mx-6 px-6">
+        <FeatureSection
+          title="DCC-EX Console"
+          desc="Send commands directly to your CommandStation. The built-in console shows real-time output, quick-access buttons for common operations, and a cheat sheet for the full command set."
+          features={[
+            { emoji: '📺', text: 'LCD terminal with live DCC-EX output stream' },
+            { emoji: '🎛️', text: 'Quick-access grid for power, stop, reset, and more' },
+            { emoji: '📖', text: 'Built-in command cheat sheet with syntax examples' },
+            { emoji: '🔌', text: 'Connection status and DCC-EX version display' },
+          ]}
+          screenshot="/screenshots/cloud_desktop_dashboard.png"
+          screenshotAlt="DCC-EX console"
+          flip
+          docLink="/docs/cloud/dcc-ex"
+          docLabel="DCC-EX Console reference"
+        />
+      </div>
 
       {/* ── Feature Reference Carousel ── */}
       <CloudFeaturesCarousel />
