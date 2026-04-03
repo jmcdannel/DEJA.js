@@ -53,6 +53,18 @@ The system communicates over USB serial, Firebase (Firestore + RTDB), WebSocket,
 
 ---
 
+## 🚂 User Install
+
+If you just want to run the DEJA Server (no source code needed):
+
+```bash
+curl -fsSL https://install.dejajs.com | bash
+```
+
+This downloads the server, installs it to `~/.deja/`, and starts it. No GitHub access required. See the [Quick Start](https://dejajs.com/docs/quick-start) guide for the full walkthrough.
+
+---
+
 ## 🚀 Quick Dev Setup
 
 ```bash
@@ -65,6 +77,8 @@ pnpm dev
 > **Prerequisites:** Node.js 20+, pnpm 9+
 
 Copy `.env.example` to `.env` at the root and fill in your Firebase credentials. See [CONTRIBUTING.md](CONTRIBUTING.md) for full environment setup.
+
+To test the production CLI from local source: `./install.sh --dev` (builds with tsup and installs to `~/.deja/`).
 
 ---
 

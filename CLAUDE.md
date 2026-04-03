@@ -242,10 +242,13 @@ DEJA.js is a **private, subscription-gated product**. The repo is private on Git
 ### Server Distribution
 - Server is distributed as a **tarball** via GitHub Releases, managed by the `deja` CLI
 - Supports `linux/amd64`, `linux/arm64` (Raspberry Pi), and `darwin` (macOS)
-- Users install via `curl -fsSL https://install.dejajs.com | bash`
+- Users install via `curl -fsSL https://install.dejajs.com | bash` — does NOT require GitHub access
+- Everything lives under **`~/.deja/`** — there is no separate `~/deja` directory
 - Server is built using **tsup** (not bare `tsc`) to produce a self-contained ESM bundle with all `@repo/*` workspace deps resolved at build time
 - Native modules (`serialport`, `firebase-admin`) are externals installed via `npm install --production` on the user's machine
 - CLI manages the server as a native Node.js process via PID file (`~/.deja/server.pid`)
+- Developers can install from local source with `./install.sh --dev` (builds with tsup, copies to `~/.deja/`)
+- CLI supports `DEJA_DIR` env var override for testing: `DEJA_DIR=./tmp/test deja status`
 
 ### Subscription Validation
 - Server validates subscription on startup via Firebase Admin SDK → Firestore `users/{uid}.subscription`
