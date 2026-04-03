@@ -22,7 +22,7 @@
     "promo:push": "tsx scripts/push-promo.ts",
     "promo:deactivate": "tsx scripts/push-promo.ts --deactivate",
     "demo:seed": "tsx scripts/demo/seed-firestore.ts",
-    "dev:demo": "VITE_DEMO_MODE=true turbo run dev"
+    "dev:demo": "VITE_AUTO_LOGIN=true turbo run dev"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
