@@ -17,22 +17,22 @@ export function registerNavigationCommands() {
   })
 
   register({
-    name: 'status',
-    aliases: ['s'],
-    description: 'Show status panel',
-    usage: '/status',
+    name: 'settings',
+    aliases: [],
+    description: 'Open settings panel',
+    usage: '/settings',
     execute(_args, ctx) {
-      ctx.transitionMode('status')
+      ctx.transitionMode('settings')
     },
   })
 
   register({
-    name: 'ports',
-    aliases: ['p'],
-    description: 'Show serial port selector',
-    usage: '/ports',
+    name: 'dcc-ref',
+    aliases: ['dcc', 'dccex', 'commands', 'ref'],
+    description: 'DCC-EX command quick reference',
+    usage: '/dcc-ref',
     execute(_args, ctx) {
-      ctx.transitionMode('ports')
+      ctx.transitionMode('dcc-ref')
     },
   })
 

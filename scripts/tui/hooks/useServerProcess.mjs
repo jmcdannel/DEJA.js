@@ -21,8 +21,9 @@ export function useServerProcess(wsPort, addLog, showHint) {
   const [pid, setPid]       = useState(null)
 
   // startTime in a REF (not state!) to avoid dependency in spawnServer
-  const startTimeRef = useRef(null)
-  const childRef     = useRef(null)
+  const startTimeRef      = useRef(null)
+  const childRef          = useRef(null)
+  const restartPendingRef = useRef(false)
 
   // ── Spawn server ───────────────────────────────────────────────────────────
 
@@ -67,9 +68,19 @@ export function useServerProcess(wsPort, addLog, showHint) {
         : 0
       setPid(null)
       startTimeRef.current = null
-      setStatus('stopped')
       childRef.current = null
 
+      // If a restart was requested, re-spawn immediately (port is now free)
+      if (restartPendingRef.current) {
+        restartPendingRef.current = false
+        addLog('Server stopped. Restarting...')
+        setStatus('starting')
+        // Small delay to ensure the OS fully releases the port
+        setTimeout(spawnServer, 200)
+        return
+      }
+
+      setStatus('stopped')
       if (code === 0 || code == null) {
         addLog('Server stopped.')
       } else if (upSecs < 5) {
@@ -98,12 +109,18 @@ export function useServerProcess(wsPort, addLog, showHint) {
 
   // ── Restart server ─────────────────────────────────────────────────────────
   // NOTE: restartServer does NOT stop the tunnel — App handles that via effects
+  // Waits for the child process to fully exit (and release the WS port)
+  // before respawning, via the restartPendingRef flag checked in the close handler.
 
   const restartServer = useCallback(() => {
-    childRef.current?.kill('SIGTERM')
-    childRef.current = null
-    setStatus('starting')
-    setTimeout(spawnServer, 800)
+    if (childRef.current) {
+      restartPendingRef.current = true
+      setStatus('starting')
+      childRef.current.kill('SIGTERM')
+    } else {
+      setStatus('starting')
+      spawnServer()
+    }
   }, [spawnServer])
 
   // ── Cleanup ────────────────────────────────────────────────────────────────
