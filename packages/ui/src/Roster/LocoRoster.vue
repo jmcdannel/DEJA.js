@@ -31,10 +31,38 @@ function getRoadnameColor(loco: Loco): string {
   return rn?.color || 'yellow'
 }
 
+// 🎨 Get Vuetify-compatible color for v-avatar
+const AVATAR_COLORS: Record<string, string> = {
+  orange: '#e87020',
+  sky: '#3b82f6',
+  yellow: '#eab308',
+  red: '#dc2626',
+  indigo: '#4f46e5',
+  zinc: '#71717a',
+  blue: '#2563eb',
+  green: '#16a34a',
+}
+
+function getVuetifyColor(loco: Loco): string {
+  const rn = loco.meta?.roadname ? ROADNAMES.find((r) => r.value === loco.meta?.roadname) : null
+  return AVATAR_COLORS[rn?.color || ''] || '#b8972e'
+}
+
+// 🎨 Contrast-safe text color for avatar (white on dark, black on light)
+function getAvatarTextColor(loco: Loco): string {
+  const hex = getVuetifyColor(loco)
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  // Relative luminance approximation
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  return luminance > 0.5 ? '#111111' : '#ffffff'
+}
+
 // 🗂️ View options: Cab, Avatar, Plate, Card, Table, Raw
 const viewOptions: ViewOption[] = [
   { value: 'cab', icon: 'mdi-train-car-flatbed', label: 'Cab' },
-  { value: 'avatar', icon: 'mdi-view-module', label: 'Avatar' },
+  { value: 'avatar', icon: 'mdi-account-circle-outline', label: 'Avatar' },
   { value: 'plate', icon: 'mdi-card-text-outline', label: 'Plate' },
   { value: 'card', icon: 'mdi-view-grid-outline', label: 'Card' },
   { value: 'table', icon: 'mdi-table', label: 'Table' },
@@ -64,8 +92,8 @@ defineExpose({ viewAs: controls.viewAs, viewOptions })
   </div>
 
   <template v-else>
-    <!-- 🚂 Cab view — LocoFront SVG illustrations (large) -->
-    <div v-if="controls.viewAs.value === 'cab'" class="grid gap-6 p-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+    <!-- 🚂 Cab view — LocoFront SVG illustrations (wide, 3 per row) -->
+    <div v-if="controls.viewAs.value === 'cab'" class="grid gap-6 p-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       <div
         v-for="loco in locos"
         :key="loco.address"
@@ -82,7 +110,6 @@ defineExpose({ viewAs: controls.viewAs, viewOptions })
             :roadname="loco.meta?.roadname"
             :road-number="loco.address"
             :logo-src="getRoadnameMedia(loco.meta?.roadname)?.logo"
-            :size="280"
           />
         </v-badge>
         <LocoFront
@@ -90,14 +117,13 @@ defineExpose({ viewAs: controls.viewAs, viewOptions })
           :roadname="loco.meta?.roadname"
           :road-number="loco.address"
           :logo-src="getRoadnameMedia(loco.meta?.roadname)?.logo"
-          :size="180"
         />
         <span class="text-xs text-gray-400">{{ loco.name || `Loco ${loco.address}` }}</span>
       </div>
     </div>
 
-    <!-- 🖼️ Avatar view — LocoFront medium grid (4-5 per row) -->
-    <div v-else-if="controls.viewAs.value === 'avatar'" class="grid gap-4 p-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+    <!-- 🖼️ Avatar view — v-avatar circles with roadname color -->
+    <div v-else-if="controls.viewAs.value === 'avatar'" class="flex flex-wrap gap-3 p-4">
       <div
         v-for="loco in locos"
         :key="loco.address"
@@ -110,26 +136,31 @@ defineExpose({ viewAs: controls.viewAs, viewOptions })
           color="pink"
           overlap
         >
-          <LocoFront
-            :roadname="loco.meta?.roadname"
-            :road-number="loco.address"
-            :logo-src="getRoadnameMedia(loco.meta?.roadname)?.logo"
-            :size="200"
-          />
+          <v-avatar
+            :color="getVuetifyColor(loco)"
+            size="72"
+          >
+            <span
+              class="text-lg font-bold"
+              :style="{ color: getAvatarTextColor(loco) }"
+            >{{ loco.address }}</span>
+          </v-avatar>
         </v-badge>
-        <LocoFront
+        <v-avatar
           v-else
-          :roadname="loco.meta?.roadname"
-          :road-number="loco.address"
-          :logo-src="getRoadnameMedia(loco.meta?.roadname)?.logo"
-          :size="200"
-        />
-        <span class="text-xs text-gray-400 truncate max-w-full">{{ loco.name || `Loco ${loco.address}` }}</span>
+          :color="getVuetifyColor(loco)"
+          size="72"
+        >
+          <span
+            class="text-lg font-bold"
+            :style="{ color: getAvatarTextColor(loco) }"
+          >{{ loco.address }}</span>
+        </v-avatar>
       </div>
     </div>
 
-    <!-- 🔩 Plate view — number plates grid -->
-    <div v-else-if="controls.viewAs.value === 'plate'" class="flex flex-wrap gap-4 p-4">
+    <!-- 🔩 Plate view — number plates grid (xl for readability) -->
+    <div v-else-if="controls.viewAs.value === 'plate'" class="flex flex-wrap gap-5 p-4">
       <div
         v-for="loco in locos"
         :key="loco.address"
@@ -145,7 +176,7 @@ defineExpose({ viewAs: controls.viewAs, viewOptions })
           <LocoNumberPlate
             :address="loco.address"
             :color="getRoadnameColor(loco)"
-            size="lg"
+            size="xl"
             :show-label="true"
             :label="loco.name"
           />
@@ -154,17 +185,17 @@ defineExpose({ viewAs: controls.viewAs, viewOptions })
           v-else
           :address="loco.address"
           :color="getRoadnameColor(loco)"
-          size="lg"
+          size="xl"
           :show-label="true"
           :label="loco.name"
         />
       </div>
     </div>
 
-    <!-- 🃏 Card view — responsive CSS grid -->
+    <!-- 🃏 Card view — 2 columns on desktop -->
     <div
       v-else-if="controls.viewAs.value === 'card'"
-      class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 p-4"
+      class="grid gap-4 grid-cols-1 md:grid-cols-2 p-4"
     >
       <LocoCard
         v-for="loco in locos"
