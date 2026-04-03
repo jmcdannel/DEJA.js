@@ -5,6 +5,11 @@ import { createLogger } from '@repo/utils'
 const log = createLogger('AutoLogin')
 
 export async function ensureAutoLogin(): Promise<void> {
+  log.debug('ensureAutoLogin check:', {
+    VITE_AUTO_LOGIN: import.meta.env.VITE_AUTO_LOGIN,
+    VITE_DEMO_EMAIL: import.meta.env.VITE_DEMO_EMAIL ? '✅ set' : '❌ missing',
+    VITE_DEMO_PASSWORD: import.meta.env.VITE_DEMO_PASSWORD ? '✅ set' : '❌ missing',
+  })
   if (import.meta.env.VITE_AUTO_LOGIN !== 'true') return
 
   const currentUser = await getCurrentUser()
