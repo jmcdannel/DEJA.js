@@ -70,7 +70,7 @@ function formatDuration(seconds: number): string {
 
 export const useTourStore = defineStore('tour', () => {
   // Ensure layout ID is set for the tour app
-  const layoutId = useStorage<string | null>('@DEJA/layoutId', import.meta.env.VITE_LAYOUT_ID || null)
+  const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
 
   // Mock data for tour effects (since we're not using Firebase modules)
   const mockEffects = ref<Effect[]>([

@@ -1,5 +1,7 @@
 import type { ComputedRef, Ref } from 'vue'
-import type { DocumentData } from 'firebase/firestore'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyRecord = Record<string, any>
 
 export interface ViewOption {
   value: string
@@ -23,8 +25,8 @@ export interface ListFilter {
   options: FilterOption[]
 }
 
-export interface ListControlsOptions {
-  list: Ref<DocumentData[]> | ComputedRef<DocumentData[]>
+export interface ListControlsOptions<T extends AnyRecord = AnyRecord> {
+  list: Ref<T[]> | ComputedRef<T[]>
   filters?: ListFilter[]
   viewOptions?: ViewOption[]
   sortOptions?: SortOption[]
@@ -32,12 +34,12 @@ export interface ListControlsOptions {
   defaultSort?: string
 }
 
-export interface ListControlsReturn {
+export interface ListControlsReturn<T extends AnyRecord = AnyRecord> {
   searchQuery: Ref<string>
   viewAs: Ref<string>
   sortBy: Ref<string>
   activeFilters: Ref<Record<string, string[]>>
-  filteredList: ComputedRef<DocumentData[]>
+  filteredList: ComputedRef<T[]>
   hasActiveFilters: ComputedRef<boolean>
   activeFilterCount: ComputedRef<number>
   isNonDefaultSort: ComputedRef<boolean>

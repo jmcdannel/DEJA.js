@@ -277,8 +277,8 @@ Copy `.env.example` to `.env` at the root. Key variables:
 |----------|---------|
 | `LAYOUT_ID` | Your DEJA Cloud layout ID |
 | `VITE_FIREBASE_*` | Firebase project configuration |
-| `VITE_MQTT_BROKER` | MQTT broker URL (default: `mqtt://localhost`) |
-| `VITE_MQTT_PORT` | MQTT port (default: `1883`) |
+| `MQTT_BROKER` | MQTT broker URL (default: `mqtt://localhost`) |
+| `MQTT_PORT` | MQTT port (default: `1883`) |
 | `ENABLE_MQTT` | Toggle MQTT communication |
 | `ENABLE_WS` | Toggle WebSocket communication |
 | `VITE_WS_PORT` | WebSocket server port (default: `8082`) |
@@ -659,13 +659,13 @@ Copy `.env.example` to `.env` (or `.env.local`) at the repo root. Turborepo read
 |---|---|
 | `LAYOUT_ID` | Unique identifier for the layout in Firebase |
 | `VITE_FIREBASE_*` | Firebase project credentials (API key, auth domain, project ID, etc.) |
-| `VITE_MQTT_BROKER` | MQTT broker URL (default: `mqtt://localhost`) |
-| `VITE_MQTT_PORT` | MQTT broker port (default: `1883`) |
+| `MQTT_BROKER` | MQTT broker URL (default: `mqtt://localhost`) |
+| `MQTT_PORT` | MQTT broker port (default: `1883`) |
 | `ENABLE_MQTT` | `true`/`false` — enable MQTT on server |
 | `ENABLE_WS` | `true`/`false` — enable WebSocket server (default true) |
 | `ENABLE_DEJACLOUD` | `true`/`false` — enable Firebase cloud integration |
 | `VITE_WS_PORT` | WebSocket server port (default: `8082`) |
-| `VITE_WS_ID` | Server identifier string (default: `DEJA.js`) |
+| `WS_ID` | Server identifier string (default: `DEJA.js`) |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob token for sound file storage |
 | `CLOUDFLARE_TUNNEL_TOKEN` | Cloudflare tunnel token for `pnpm tunnel:named` |
 

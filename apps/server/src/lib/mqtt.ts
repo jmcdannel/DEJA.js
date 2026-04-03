@@ -5,8 +5,8 @@ import { log } from '../utils/logger.js'
 import { ReconnectManager } from '../utils/reconnect.js'
 
 const layoutId = process.env.LAYOUT_ID
-const mqttBroker = process.env.VITE_MQTT_BROKER || 'mqtt://localhost'
-const mqttPort = process.env.VITE_MQTT_PORT || '1883'
+const mqttBroker = process.env.MQTT_BROKER || process.env.VITE_MQTT_BROKER || 'mqtt://localhost'
+const mqttPort = process.env.MQTT_PORT || process.env.VITE_MQTT_PORT || '1883'
 const subscriptionTopics: string[] = []
 const publishTopics: string[] = []
 
