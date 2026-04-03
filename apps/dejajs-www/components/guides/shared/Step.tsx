@@ -20,7 +20,7 @@ export default function Step({
   return (
     <div className="relative pl-14">
       <div className={`absolute left-0 top-0 w-10 h-10 rounded-full border ${border} ${bg} flex items-center justify-center shrink-0`}>
-        <span className={`${text} font-bold text-sm font-mono`}>0{number}</span>
+        <span className={`${text} font-bold text-sm font-mono`}>{String(number).padStart(2, '0')}</span>
       </div>
       <h3 className="text-white font-bold text-xl mb-3">{title}</h3>
       <div className="text-gray-300 leading-relaxed space-y-3">{children}</div>

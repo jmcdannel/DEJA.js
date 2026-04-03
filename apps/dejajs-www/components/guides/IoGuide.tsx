@@ -5,7 +5,11 @@ import SectionLabel from '../home/SectionLabel';
 import DocLink from '../DocLink';
 import { FeatureGrid, VideoPlaceholder, Callout } from './shared';
 
-/* ── 🔌 IO Guide — Beyond the Throttle ── */
+const protocolColors: Record<string, string> = {
+  amber: 'border-amber-400/30 bg-amber-400/5 text-amber-400',
+  purple: 'border-purple-400/30 bg-purple-400/5 text-purple-400',
+  cyan: 'border-deja-cyan/30 bg-deja-cyan/5 text-deja-cyan',
+};
 
 export default function IoGuide() {
   return (
@@ -97,23 +101,16 @@ export default function IoGuide() {
                 { label: 'Serial USB', color: 'amber', icon: '🔌', desc: 'Direct wired connection' },
                 { label: 'MQTT WiFi', color: 'purple', icon: '📡', desc: 'Wireless via broker' },
                 { label: 'WebSocket', color: 'cyan', icon: '🌐', desc: 'Real-time bidirectional' },
-              ].map((proto) => {
-                const colorMap: Record<string, string> = {
-                  amber: 'border-amber-400/30 bg-amber-400/5 text-amber-400',
-                  purple: 'border-purple-400/30 bg-purple-400/5 text-purple-400',
-                  cyan: 'border-deja-cyan/30 bg-deja-cyan/5 text-deja-cyan',
-                };
-                return (
-                  <div
-                    key={proto.label}
-                    className={`rounded-lg border p-3 text-center ${colorMap[proto.color]}`}
-                  >
-                    <p className="text-lg mb-1">{proto.icon}</p>
-                    <p className="text-xs font-bold">{proto.label}</p>
-                    <p className="text-[10px] text-gray-500 mt-1">{proto.desc}</p>
-                  </div>
-                );
-              })}
+              ].map((proto) => (
+                <div
+                  key={proto.label}
+                  className={`rounded-lg border p-3 text-center ${protocolColors[proto.color]}`}
+                >
+                  <p className="text-lg mb-1">{proto.icon}</p>
+                  <p className="text-xs font-bold">{proto.label}</p>
+                  <p className="text-[10px] text-gray-500 mt-1">{proto.desc}</p>
+                </div>
+              ))}
             </div>
 
             {/* Arrow down */}

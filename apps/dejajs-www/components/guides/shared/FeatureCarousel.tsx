@@ -23,6 +23,20 @@ export interface CarouselSlide {
   accentBorder: string;
 }
 
+function defaultScreenshot(slide: CarouselSlide) {
+  return (
+    <div className="rounded-2xl overflow-hidden shadow-2xl">
+      <Image
+        src={slide.desktopScreenshot}
+        alt={`${slide.title} desktop view`}
+        width={1200}
+        height={675}
+        className="w-full h-auto"
+      />
+    </div>
+  );
+}
+
 export default function FeatureCarousel({
   slides,
   sectionLabel,
@@ -42,19 +56,6 @@ export default function FeatureCarousel({
 }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const active = slides[activeIdx];
-
-  const defaultScreenshot = (slide: CarouselSlide) => (
-    <div className="rounded-2xl overflow-hidden shadow-2xl">
-      <Image
-        src={slide.desktopScreenshot}
-        alt={`${slide.title} desktop view`}
-        width={1200}
-        height={675}
-        className="w-full h-auto"
-      />
-    </div>
-  );
-
   const screenshotRenderer = renderScreenshot ?? defaultScreenshot;
 
   return (
