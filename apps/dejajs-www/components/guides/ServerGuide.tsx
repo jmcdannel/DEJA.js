@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import CopyButton from '../home/CopyButton';
 import { mdiUsb } from '@mdi/js';
 
@@ -82,6 +83,8 @@ export default function ServerGuide() {
         </p>
       </header>
 
+      {/* VIDEO: Walkthrough of the deja CLI — starting the server, checking status, viewing logs, updating */}
+
       {/* Prerequisites */}
       <section className="mb-12 p-5 rounded-xl border border-gray-800 bg-gray-900/50">
         <h2 className="text-white font-semibold mb-3">Before You Start</h2>
@@ -109,7 +112,7 @@ export default function ServerGuide() {
       {/* Steps */}
       <div className="space-y-12">
         {/* Step 1 — Meet the CLI */}
-        <Step number={1} title="Meet the deja Command">
+        <Step number={1} title="Meet the deja Server CLI">
           <p>
             The DEJA Server comes with a simple command-line tool called <code className="text-deja-lime font-mono text-xs">deja</code>.
             Think of it like a remote control for your server — you type a short command,
@@ -133,24 +136,28 @@ export default function ServerGuide() {
           </Callout>
         </Step>
 
-        {/* Step 2 — Status */}
-        <Step number={2} title="Check That It&apos;s Working">
+        {/* Step 2 — Starting the Server */}
+        <Step number={2} title="Starting the Server">
           <p>
-            Let&apos;s start with the most useful command. Type this to see how your server is doing:
+            When you type <code className="text-deja-lime font-mono text-xs">deja start</code>, the server
+            launches and you&apos;ll see a live console scrolling with status updates as it connects
+            to your CommandStation, Firebase, and any other services.
           </p>
-          <CommandBlock command="deja status" />
+          <CommandBlock command="deja start" />
+          <Image src="/screenshots/server_terminal_start.png" alt="DEJA Server starting up — live console output showing connections being established" width={800} height={400} className="rounded-lg border border-gray-700 my-4" />
           <p>
-            You should see a green <span className="text-green-400 font-mono text-sm">●</span> next to{' '}
-            <strong className="text-white">running</strong> — that means the server is connected to your
-            CommandStation and ready to receive commands.
+            This is the default mode — the server runs right in your terminal so you can
+            see exactly what&apos;s happening. Press{' '}
+            <kbd className="px-1.5 py-0.5 rounded bg-gray-800 border border-gray-700 text-xs text-gray-300">Ctrl+C</kbd>
+            {' '}when you want to stop it.
           </p>
-          {/* TODO: screenshot — server_terminal_status.png */}
-          <TerminalOutput>
-            <span className="text-green-400">●</span> DEJA Server <span className="text-gray-500">v1.2.0</span>{'\n'}
-            Status: <span className="text-green-400">running</span>{'\n'}
-            Layout: <span className="text-white">My Railroad</span>{'\n'}
-            Serial: <span className="text-white">/dev/ttyUSB0</span> <span className="text-gray-500">(115200 baud)</span>
-          </TerminalOutput>
+          <Callout emoji="💡">
+            <p>
+              Want the server to run in the background so you can close the terminal?
+              Add the <code className="text-deja-lime font-mono text-xs">-b</code> flag:{' '}
+              <code className="text-deja-lime font-mono text-xs">deja start -b</code>
+            </p>
+          </Callout>
         </Step>
 
         {/* Step 3 — Logs */}
@@ -191,11 +198,9 @@ export default function ServerGuide() {
           </div>
           <Callout emoji="💡">
             <p>
-              By default, the server runs in the background so you can close the terminal and it keeps going.
-              If you want to run it in the foreground (useful for debugging), start it without the{' '}
-              <code className="text-deja-lime font-mono text-xs">-b</code> flag:{' '}
-              <code className="text-deja-lime font-mono text-xs">deja start</code> runs in the background,
-              while <code className="text-deja-lime font-mono text-xs">deja run</code> runs in the foreground.
+              Remember: <code className="text-deja-lime font-mono text-xs">deja start</code> runs in the foreground
+              by default (you&apos;ll see the live console). Add{' '}
+              <code className="text-deja-lime font-mono text-xs">-b</code> to run in the background.
             </p>
           </Callout>
         </Step>
@@ -246,18 +251,18 @@ export default function ServerGuide() {
         </p>
         <div className="grid grid-cols-2 gap-2 text-sm font-mono">
           {[
-            ['deja start', 'Start the server (background)'],
+            ['deja start', 'Start the server'],
+            ['deja start -b', 'Start in background'],
             ['deja stop', 'Stop the server'],
             ['deja restart', 'Restart the server'],
             ['deja status', 'Check server status'],
             ['deja logs', 'View recent logs'],
-            ['deja logs -f', 'Follow logs in real time'],
-            ['deja run', 'Run in the foreground'],
+            ['deja logs -f', 'Follow logs live'],
             ['deja update', 'Update to latest version'],
-            ['deja tunnel start', 'Start remote access tunnel'],
-            ['deja tunnel stop', 'Stop the tunnel'],
-            ['deja config', 'View current configuration'],
-            ['deja version', 'Show installed version'],
+            ['deja tunnel start', 'Start remote access'],
+            ['deja tunnel stop', 'Stop remote access'],
+            ['deja tunnel status', 'Check tunnel status'],
+            ['deja --version', 'Show installed version'],
           ].map(([cmd, desc]) => (
             <div key={cmd} className="p-3 rounded-lg bg-gray-900 border border-gray-800">
               <p className="text-deja-lime text-xs">{cmd}</p>
