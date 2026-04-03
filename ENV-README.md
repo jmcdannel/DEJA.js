@@ -89,11 +89,12 @@ See [ENV.md](./ENV.md) for the full reference with per-app breakdowns.
 | `VITE_BILLING_API_URL` | monitor, throttle |
 | `VITE_STRIPE_PUBLISHABLE_KEY` | cloud |
 
-### Dev-Only
+### Demo / Dev
 | Variable | Used By | Notes |
 |----------|---------|-------|
-| `VITE_DEMO_MODE` | tour | Bypass auth |
-| `VITE_DEV_AUTO_LOGIN` | all apps | ⚠️ Never in production |
+| `VITE_DEMO_EMAIL` | throttle, `dev:demo` | Demo account email (`demo@dejajs.com`) |
+| `VITE_DEMO_PASSWORD` | throttle, `dev:demo` | Demo account password |
+| `VITE_AUTO_LOGIN` | all apps | Set by `pnpm dev:demo` — don't add to `.env` |
 | `VITE_DEV_FEATURES` | feature flags | Dev-only features |
 
 ## Adding a New Env Var
