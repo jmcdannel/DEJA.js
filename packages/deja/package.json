@@ -12,6 +12,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@repo/auth": "workspace:*",
     "@repo/utils": "workspace:*",
     "@vueuse/core": "^11.0.3",
     "firebase": "^10.14.1",
