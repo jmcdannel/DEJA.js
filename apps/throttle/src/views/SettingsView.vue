@@ -261,9 +261,9 @@ const backgroundPages = [
                   <v-icon start size="16">mdi-tune-vertical</v-icon>
                   <span class="hidden sm:inline">Slider</span>
                 </v-btn>
-                <v-btn value="protothrottle" size="small" class="text-none">
+                <v-btn value="dashboard" size="small" class="text-none">
                   <v-icon start size="16">mdi-train</v-icon>
-                  <span class="hidden sm:inline">ProtoThrottle</span>
+                  <span class="hidden sm:inline">Dashboard</span>
                 </v-btn>
               </v-btn-toggle>
             </div>

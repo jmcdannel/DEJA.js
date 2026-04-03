@@ -3,7 +3,7 @@ export interface AppBackgroundPrefs {
   pages: Record<string, string>
 }
 
-export type ThrottleVariant = 'buttons' | 'slider' | 'protothrottle'
+export type ThrottleVariant = 'buttons' | 'slider' | 'dashboard'
 
 export interface ThrottleSettings {
   variant: ThrottleVariant

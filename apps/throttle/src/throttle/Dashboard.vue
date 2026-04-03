@@ -6,7 +6,7 @@ import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
 import Speedometer from '@/throttle/Speedometer.vue'
 import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
-import { ConsistIndicator, LocoAvatar, FunctionsSpeedDial } from '@repo/ui'
+import { ConsistIndicator as Consist, LocoAvatar, FunctionsSpeedDial } from '@repo/ui'
 import { useThrottle } from '@/throttle/useThrottle'
 import { useHaptics } from '@/composables/useHaptics'
 
@@ -106,7 +106,7 @@ function setNotch(notch: number) {
 }
 
 // ⬆️⬇️ Direction reverser
-function toggleDirection(val: any) {
+function toggleDirection(val: boolean) {
   if (currentSpeed.value !== 0) {
     vibrate('heavy')
     return
@@ -191,21 +191,54 @@ async function clearLoco() {
   $router.push({ name: 'throttle-list' })
 }
 
+// 🛑 Brake — sets throttle to idle and gradually decreases speed
+let brakeInterval: ReturnType<typeof setInterval> | null = null
+
+watch(brakeLevel, (level) => {
+  if (brakeInterval) {
+    clearInterval(brakeInterval)
+    brakeInterval = null
+  }
+
+  if (level > 0) {
+    localNotch.value = 0
+
+    if (Math.abs(currentSpeed.value) < 1) return
+
+    const intervalMs = Math.max(50, 300 - level * 25)
+    const decrement = Math.max(1, Math.floor(level / 2))
+
+    brakeInterval = setInterval(() => {
+      const absSpeed = Math.abs(currentSpeed.value)
+      if (absSpeed < 1) {
+        if (brakeInterval) clearInterval(brakeInterval)
+        brakeInterval = null
+        return
+      }
+      const newSpeed = Math.max(0, absSpeed - decrement)
+      const signedSpeed = localDirection.value === 'REV' ? -newSpeed : newSpeed
+      setSpeed(signedSpeed)
+    }, intervalMs)
+  }
+})
+
 // Blink the status LED (with cleanup)
 const ledInterval = setInterval(() => {
   statusLedOn.value = !statusLedOn.value
 }, 2000)
-onBeforeUnmount(() => clearInterval(ledInterval))
+onBeforeUnmount(() => {
+  clearInterval(ledInterval)
+  if (brakeInterval) clearInterval(brakeInterval)
+})
 </script>
 
 <template>
-  <main v-if="throttle" class="proto-throttle-wrapper flex flex-col gap-2 p-2 overflow-hidden w-full h-full flex-1 relative">
+  <main v-if="throttle" class="@container proto-throttle-wrapper flex flex-col gap-2 p-2 overflow-hidden w-full h-full flex-1 relative">
     <!-- Header (consistent with other variants) -->
     <ThrottleHeader class="bg-gradient-to-r from-slate-700/20 to-blue-900/20">
       <template v-slot:left>
         <div class="flex flex-row items-center justify-center gap-1 px-4" style="background: rgba(var(--v-theme-surface), 0.6)">
           <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" variant="flat" />
-          <ConsistIndicator v-if="loco" :loco="loco" />
           <v-spacer class="w-2 md:w-6" />
           <h1 class="text-xl md:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 drop-shadow-lg">
             {{ loco?.name }}
@@ -217,16 +250,31 @@ onBeforeUnmount(() => clearInterval(ledInterval))
       </template>
     </ThrottleHeader>
 
-    <section class="w-full h-full flex flex-col sm:flex-row justify-center sm:items-center gap-4 flex-grow relative z-10">
-      <!-- Left: Speedometer + Logo (desktop only) -->
-      <section v-if="loco" class="hidden sm:flex flex-col gap-4 items-center justify-center flex-1">
-        <Speedometer v-if="showSpeedometer" :speed="currentSpeed" :address="address" :size="200" :show-label="false" />
-        <RoadnameLogo :roadname="loco.meta?.roadname" size="xl" />
+    <section class="w-full h-full flex flex-col @[640px]:flex-row justify-center @[640px]:items-center gap-4 flex-grow relative z-10">
+      <!-- Desktop left: Consist + Speedometer -->
+      <section v-if="loco" class="hidden @[640px]:flex flex-col gap-4 items-center justify-center flex-1">
         <Consist v-if="showConsist" :loco="loco" />
+        <Speedometer v-if="showSpeedometer" :speed="currentSpeed" :address="address" :size="200" :show-label="false" />
+        <div v-if="showConsist && loco.consist?.length" class="grid grid-cols-2 gap-3">
+          <Speedometer
+            v-for="cloco in loco.consist"
+            :key="cloco.address"
+            :speed="currentSpeed"
+            :address="cloco.address"
+            :size="120"
+            :show-label="true"
+          />
+        </div>
       </section>
 
-      <!-- Center: Device body -->
-      <section class="proto-device mx-auto w-full max-w-[360px] flex flex-col items-center gap-0 sm:flex-none overflow-y-auto">
+      <!-- Desktop center: Logo + Functions -->
+      <section v-if="loco" class="hidden @[640px]:flex flex-col gap-2 items-center justify-center flex-1">
+        <RoadnameLogo :roadname="loco.meta?.roadname" size="2xl" />
+        <FunctionsSpeedDial v-if="showFunctions" :loco="loco" />
+      </section>
+
+      <!-- Desktop right: Device body -->
+      <section class="proto-device mx-auto w-full max-w-[360px] flex flex-col items-center gap-0 @[640px]:flex-none overflow-y-auto">
 
         <!-- 1. Status LED + Horn Handle -->
         <div class="device-top-row w-full flex items-center justify-between px-4 py-2">
@@ -262,10 +310,10 @@ onBeforeUnmount(() => clearInterval(ledInterval))
               <span class="lcd-addr">ADDR:{{ displayAddress }}</span>
               <span class="lcd-notch">N:{{ displayNotch }}</span>
             </div>
-            <!-- Bell / Horn indicators -->
+            <!-- Bell / Horn indicators (always reserve space to prevent layout shift) -->
             <div class="lcd-indicators">
-              <span v-if="bellActive" class="lcd-indicator">🔔 BELL</span>
-              <span v-if="hornActive" class="lcd-indicator">📯 HORN</span>
+              <span class="lcd-indicator" :class="{ invisible: !bellActive }">🔔 BELL</span>
+              <span class="lcd-indicator" :class="{ invisible: !hornActive }">📯 HORN</span>
             </div>
           </div>
         </div>
@@ -383,18 +431,13 @@ onBeforeUnmount(() => clearInterval(ledInterval))
         <div class="device-bottom-cap"></div>
       </section>
 
-      <!-- Right: Functions (desktop only) -->
-      <section v-if="loco && showFunctions" class="hidden sm:flex flex-col gap-2 items-center justify-center flex-1">
-        <FunctionsSpeedDial :loco="loco" />
-      </section>
     </section>
 
-    <!-- Mobile-only optional sections -->
-    <section v-if="loco && showConsist" class="flex sm:hidden flex-col items-center mt-2">
-      <Consist :loco="loco" />
-    </section>
-    <section v-if="loco && showFunctions" class="flex sm:hidden flex-col items-center mt-2">
-      <FunctionsSpeedDial :loco="loco" />
+    <!-- Mobile-only: consist, functions, logo -->
+    <section v-if="loco" class="flex @[640px]:hidden flex-col items-center gap-2 mt-2">
+      <Consist v-if="showConsist" :loco="loco" />
+      <FunctionsSpeedDial v-if="showFunctions" :loco="loco" />
+      <RoadnameLogo :roadname="loco.meta?.roadname" size="xl" />
     </section>
   </main>
 
@@ -411,7 +454,7 @@ onBeforeUnmount(() => clearInterval(ledInterval))
 
 <style scoped>
 /* ═══════════════════════════════════════════════════════════════
-   ProtoThrottle — Skeuomorphic ISE ProtoThrottle replica
+   Dashboard — Skeuomorphic throttle control dashboard
    ═══════════════════════════════════════════════════════════════ */
 
 .proto-throttle-wrapper {
