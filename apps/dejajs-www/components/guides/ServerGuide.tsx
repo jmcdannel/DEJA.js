@@ -83,7 +83,7 @@ export default function ServerGuide() {
         </p>
       </header>
 
-      {/* VIDEO: Walkthrough of the deja CLI — starting the server, checking status, viewing logs, updating */}
+      {/* VIDEO: Prefer to watch? Here's a full walkthrough of the deja CLI — starting the server, checking status, viewing logs, and updating. */}
 
       {/* Prerequisites */}
       <section className="mb-12 p-5 rounded-xl border border-gray-800 bg-gray-900/50">
