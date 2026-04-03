@@ -38,6 +38,13 @@ export default function IoGuide() {
         </AnimateIn>
       </header>
 
+      {/* ── Video Walkthrough ── */}
+      <section className="mb-20">
+        <AnimateIn>
+          <VideoPlaceholder />
+        </AnimateIn>
+      </section>
+
       {/* ── 2. Architecture Diagram — How It Works ── */}
       <section className="mb-20">
         <AnimateIn>

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { mdiCellphoneLink, mdiLaptop, mdiUsb } from '@mdi/js';
 import ThrottleLaunchQR from '../home/ThrottleLaunchQR';
-import { Callout, CommandBlock, Step, MdiIcon } from './shared';
+import { Callout, CommandBlock, Step, MdiIcon, VideoPlaceholder } from './shared';
 
 function AppIcon({ src, alt, bgColor, borderColor }: { src: string; alt: string; bgColor: string; borderColor: string }) {
   return (
@@ -62,6 +62,11 @@ export default function GettingStartedGuide() {
           cloud-synced. Here&apos;s how to get started.
         </p>
       </header>
+
+      {/* Video Walkthrough */}
+      <section className="mb-12">
+        <VideoPlaceholder />
+      </section>
 
       {/* How It Works */}
       <section className="mb-12">
