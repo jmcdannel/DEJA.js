@@ -8,11 +8,9 @@ import type { Loco } from '@repo/modules/locos'
 import { useLocos } from '@repo/modules/locos'
 import { useLayout, useServerStatus, useSubscription, PLAN_DISPLAY } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
-import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
+import { PageHeader, ListControlBar, useListControls, LocoRoster, ThrottleLaunchQR } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
-import RosterList from '@/Roster/RosterList.vue'
 import EmptyState from '@/Core/UI/EmptyState.vue'
-import { ThrottleLaunchQR } from '@repo/ui'
 
 const router = useRouter()
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -166,7 +164,12 @@ async function importFromCS() {
           color="pink"
           :sort-options="sortOptions"
           :filters="filters"
-          :show-view="false"
+          :show-view="true"
+          :view-options="[
+            { value: 'avatar', icon: 'mdi-view-module', label: 'Avatar' },
+            { value: 'card', icon: 'mdi-view-grid-outline', label: 'Card' },
+            { value: 'list', icon: 'mdi-view-list', label: 'List' },
+          ]"
           search-placeholder="Search roster..."
         />
       </template>
@@ -199,13 +202,16 @@ async function importFromCS() {
       </template>
     </PageHeader>
 
-    <RosterList :filtered-list="rosterControls.filteredList.value" @edit="handleEditLoco">
-      <template #append>
-        <v-card variant="outlined" class="d-flex flex-column align-center justify-center pa-4 text-center" min-height="120">
-          <ThrottleLaunchQR :size="100" label="Open Throttle on phone" />
-        </v-card>
-      </template>
-    </RosterList>
+    <LocoRoster
+      :locos="rosterControls.filteredList.value"
+      default-view="card"
+      module-name="cloud-roster"
+      @select="handleEditLoco"
+    />
+
+    <v-card variant="outlined" class="d-flex flex-column align-center justify-center pa-4 text-center mt-4" min-height="120">
+      <ThrottleLaunchQR :size="100" label="Open Throttle on phone" />
+    </v-card>
   </template>
 
   <!-- 📭 Empty -->
