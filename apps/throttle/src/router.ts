@@ -1,11 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { getCurrentUser } from 'vuefire'
 import type { User } from 'firebase/auth'
-import { requireLayout, createTryDemoRoute, isDemoUser, ensureAutoLogin } from '@repo/auth'
+import { requireLayout, createTryDemoRoute, isDemoUser, ensureAutoLogin, LogoutView } from '@repo/auth'
 import { createLogger } from '@repo/utils'
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
-import { LogoutView } from '@repo/auth'
 
 const log = createLogger('Router')
 

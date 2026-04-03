@@ -5,13 +5,11 @@ import { getCurrentUser } from 'vuefire'
 import type { User } from 'firebase/auth'
 import { collection, query, where, getDocs, getDoc, doc } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
-import { requireLayout, ensureAutoLogin } from '@repo/auth'
+import { requireLayout, ensureAutoLogin, checkRequireFeature, LogoutView } from '@repo/auth'
 import { createLogger } from '@repo/utils'
-import { checkRequireFeature } from '@repo/auth'
 import type { FeatureName, UserRole } from '@repo/modules'
 import Dashboard from './Dashboard/Dashboard.vue'
 import Login from './views/Login.vue'
-import { LogoutView } from '@repo/auth'
 
 const log = createLogger('Router')
 
