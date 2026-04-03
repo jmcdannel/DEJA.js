@@ -1,0 +1,104 @@
+---
+title: Remote Access
+description: Access your DEJA Monitor dashboard from anywhere using a secure Cloudflare tunnel — setup, requirements, and tunnel management.
+order: 5
+---
+
+# Remote Access
+
+Remote access lets you reach your [Monitor dashboard](https://monitor.dejajs.com) from outside your home network — check on your railroad from your phone at a train show, from another room, or from anywhere with internet access.
+
+This feature uses a secure [Cloudflare tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) to create a safe connection between the internet and your DEJA Server. No ports to open, no router configuration needed.
+
+## Requirements
+
+- **Engineer or Conductor plan** — remote access is a paid feature. See [Pricing](/pricing) for details.
+- **`cloudflared` installed** on the computer running your DEJA Server.
+
+## Installing cloudflared
+
+### macOS
+
+```bash
+brew install cloudflare/cloudflare/cloudflared
+```
+
+### Linux / Raspberry Pi
+
+```bash
+curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared focal main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
+sudo apt-get update && sudo apt-get install cloudflared
+```
+
+For other platforms, see the [cloudflared downloads page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/).
+
+## Starting a Tunnel
+
+Once `cloudflared` is installed, start a tunnel with:
+
+```bash
+deja tunnel start
+```
+
+The command prints a URL you can open from any browser — no login or setup needed on the remote device. The URL looks something like `https://abc-xyz.trycloudflare.com`.
+
+When you start the server in background mode (`deja start -b`), the tunnel starts automatically if you're on a paid plan.
+
+## Managing the Tunnel
+
+| Command | What it does |
+|---------|-------------|
+| `deja tunnel start` | Start the tunnel and print the URL |
+| `deja tunnel stop` | Stop the tunnel |
+| `deja tunnel status` | Check if the tunnel is running and show the URL |
+| `deja tunnel logs` | View tunnel log output |
+
+## Tunnel Types
+
+### Quick Tunnel (Default)
+
+The default mode creates a temporary URL that works as long as the tunnel is running. No Cloudflare account needed. The URL changes each time you restart the tunnel.
+
+This is the easiest option and works great for most users.
+
+### Named Tunnel (Advanced)
+
+If you want a stable URL that doesn't change, you can set up a named tunnel with a Cloudflare account. Set the `CLOUDFLARE_TUNNEL_TOKEN` in your environment file:
+
+```bash
+nano ~/.deja/.env
+```
+
+Add your token:
+
+```
+CLOUDFLARE_TUNNEL_TOKEN=your-token-here
+```
+
+Then restart the server. The tunnel will use your named tunnel configuration automatically.
+
+## Troubleshooting
+
+### "cloudflared is not installed"
+
+Install `cloudflared` using the instructions above for your platform.
+
+### "Remote monitoring requires an Engineer or Conductor plan"
+
+Remote access is available on paid plans. Visit [dejajs.com/pricing](/pricing) to upgrade.
+
+### Tunnel starts but URL doesn't work
+
+Check the tunnel logs for errors:
+
+```bash
+deja tunnel logs
+```
+
+If the tunnel is having trouble connecting, try stopping and starting it again:
+
+```bash
+deja tunnel stop
+deja tunnel start
+```
