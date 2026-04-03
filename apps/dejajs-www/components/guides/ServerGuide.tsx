@@ -83,7 +83,17 @@ export default function ServerGuide() {
         </p>
       </header>
 
-      {/* VIDEO: Prefer to watch? Here's a full walkthrough of the deja CLI — starting the server, checking status, viewing logs, and updating. */}
+      {/* Video placeholder */}
+      <div className="mb-12 rounded-2xl border border-gray-800 bg-gray-900/50 overflow-hidden shadow-2xl">
+        <div className="aspect-video flex flex-col items-center justify-center gap-3 bg-gray-900/80">
+          <div className="w-16 h-16 rounded-full border-2 border-deja-lime/30 bg-deja-lime/10 flex items-center justify-center">
+            <svg className="w-6 h-6 text-deja-lime ml-1" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+          <p className="text-gray-400 text-sm">Video walkthrough coming soon</p>
+        </div>
+      </div>
 
       {/* Prerequisites */}
       <section className="mb-12 p-5 rounded-xl border border-gray-800 bg-gray-900/50">
@@ -254,6 +264,7 @@ export default function ServerGuide() {
         {/* Slash Commands */}
         <div className="mb-8">
           <h3 className="text-white font-semibold text-lg mb-3">Slash Commands</h3>
+          {/* TODO: screenshot — server_terminal_help.png (output of /help command) */}
           <p className="text-gray-400 text-sm mb-4">
             Type a <code className="text-deja-lime font-mono text-xs">/</code> followed by a command name.
             You can also press <kbd className="px-1.5 py-0.5 rounded bg-gray-800 border border-gray-700 text-xs text-gray-300">Tab</kbd> to
@@ -312,6 +323,8 @@ export default function ServerGuide() {
             {' '}to select. It&apos;s another way to access everything above without remembering command names.
           </p>
           {/* TODO: screenshot — server_terminal_menu.png */}
+          {/* TODO: screenshot — server_terminal_status_panel.png (the /status view) */}
+          {/* TODO: screenshot — server_terminal_ports.png (the /ports serial port selector) */}
         </div>
 
         {/* DCC Passthrough */}
