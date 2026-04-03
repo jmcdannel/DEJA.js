@@ -16,6 +16,7 @@
     "start": "turbo run start --filter=deja-serverts",
     "start:all": "turbo run start",
     "deja": "bash scripts/deja.sh",
+    "layout": "bash scripts/switch-layout.sh",
     "scan-sounds": "turbo run scan-sounds --filter=@repo/sounds",
     "changeset": "changeset",
     "changeset:status": "changeset status",
