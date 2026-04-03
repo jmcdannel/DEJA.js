@@ -85,7 +85,7 @@ const defaultGuidesLinks: DocItem[] = [
   { name: 'Throttle', href: '/guides/throttle' },
   { name: 'Cloud', href: '/guides/cloud', comingSoon: true },
   { name: 'Monitor', href: '/guides/monitor', comingSoon: true },
-  { name: 'Server', href: '/guides/server', comingSoon: true },
+  { name: 'Server', href: '/guides/server' },
   { name: 'IO', href: '/guides/io', comingSoon: true },
 ];
 

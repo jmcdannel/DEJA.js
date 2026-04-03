@@ -1,0 +1,90 @@
+---
+title: Troubleshooting
+description: Solutions to common DEJA Server issues — serial port problems, startup errors, Firebase connection failures, and subscription questions.
+order: 6
+---
+
+# Troubleshooting
+
+If something isn't working right, start here. These are the most common issues and their fixes. For all of these, running `deja logs` is a great first step — it shows you exactly what the server is doing (or what went wrong).
+
+## Server Not Connecting to CommandStation
+
+**Symptoms:** `deja status` shows no serial port, or the Throttle app says "Disconnected."
+
+1. **Check the USB cable** — make sure it's plugged in at both ends. Try a different USB port on the computer.
+2. **Run `deja status`** — look under Connections for a serial port like `/dev/ttyUSB0` or `/dev/tty.usbmodem*`. If none is listed, the server can't see the CommandStation.
+3. **Restart the server** — `deja restart` will re-scan for serial ports and try to connect again.
+4. **Try unplugging and replugging the USB cable**, then restart the server.
+
+## Serial Port Permission Denied (Linux / Raspberry Pi)
+
+**Symptoms:** The server starts but can't open the serial port. Logs show a "permission denied" error.
+
+Run this command once to add your user to the `dialout` group:
+
+```bash
+sudo usermod -a -G dialout $USER
+```
+
+Then **log out and log back in** (or reboot). This only needs to be done once — after that, the server will always have access.
+
+## Server Won't Start
+
+**Symptoms:** `deja start` shows an error or the server exits immediately.
+
+1. **Check Node.js version:** Run `node --version` — you need v20 or later. If you need to upgrade, visit [nodejs.org](https://nodejs.org/).
+2. **Check the logs:** Run `deja logs` to see what error the server reported.
+3. **Reinstall:** Run the installer again — it downloads a fresh copy and reconfigures:
+   ```bash
+   curl -fsSL https://install.dejajs.com | bash
+   ```
+
+## Firebase Connection Errors
+
+**Symptoms:** Logs show Firebase or Firestore errors. The Throttle and Cloud apps can't see the server.
+
+Your Firebase credentials may be missing or incorrect. They live in `~/.deja/.env`.
+
+1. Open the [Cloud app](https://cloud.dejajs.com) and go to **Settings → View Local Environment Configuration**.
+2. Compare those values with what's in your `~/.deja/.env` file.
+3. If they don't match, update the `.env` file and restart: `deja restart`.
+
+Or re-run the installer to reconfigure automatically.
+
+## Subscription Issues
+
+### "Subscription inactive"
+
+Your subscription may have expired or been canceled. Visit [dejajs.com](https://dejajs.com) to check your account status and renew.
+
+The server allows a 48-hour grace period when it can't reach the internet — if your subscription was active within the last 48 hours, the server will continue running using its cached status.
+
+### "Cannot verify subscription"
+
+The server needs to verify your subscription online periodically. If it can't reach Firebase and the cached verification is older than 48 hours, it will stop.
+
+Connect the computer to the internet and restart the server: `deja restart`.
+
+## `deja` Command Not Found
+
+If the terminal says `deja: command not found` after installation:
+
+1. **Open a new terminal window** — the installer added `deja` to your PATH, but the current terminal may not have picked it up yet.
+2. **Or reload your shell config:**
+   ```bash
+   source ~/.zshrc    # if using zsh
+   source ~/.bashrc   # if using bash
+   ```
+3. **Or run it directly:**
+   ```bash
+   ~/.deja/bin/deja status
+   ```
+
+## Still Stuck?
+
+If none of the above fixes your issue:
+
+1. Run `deja logs -n 100` and look for error messages near the bottom.
+2. Run `deja status` and note any warnings.
+3. Check the [DEJA.js community](https://dejajs.com) for help from other users.
