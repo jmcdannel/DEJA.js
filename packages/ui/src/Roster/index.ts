@@ -1,4 +1,5 @@
 export { default as LocoNumberPlate } from './LocoNumberPlate.vue'
 export { default as LocoCard } from './LocoCard.vue'
+export { default as LocoListRow } from './LocoListRow.vue'
 export { ROADNAME_MEDIA, getRoadnameMedia } from './roadnameLogos'
 export type { RoadnameMedia } from './roadnameLogos'
