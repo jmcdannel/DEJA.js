@@ -3,22 +3,37 @@
  * ASCII logo, gradient colors, startup tips, and menu items.
  */
 
-import figlet from 'figlet'
-
 // ── ASCII Logo ─────────────────────────────────────────────────────────────────
+// Hand-crafted to match install.sh — includes the full "DEJA.js" with colored
+// dot and JS suffix.  Each entry is { deja, dot, js } so the renderer can
+// apply separate colors per segment.
 
-export const LOGO_RAW   = figlet.textSync('DEJA', { font: 'ANSI Shadow', horizontalLayout: 'full' })
-export const LOGO_LINES = LOGO_RAW.split('\n').filter(l => l.trim().length > 0)
-
-// Cyan-to-sky-blue gradient — one hex color per logo line (6 lines)
-export const LOGO_COLORS = [
-  '#00FFFF',
-  '#00E0FF',
-  '#00C4FF',
-  '#00A8FF',
-  '#0090FF',
-  '#007FFF',
+export const LOGO_SEGMENTS = [
+  { deja: '██████╗ ███████╗     ██╗ █████╗   ',      dot: '',    js: '      ██╗███████╗' },
+  { deja: '██╔══██╗██╔════╝     ██║██╔══██╗  ',      dot: '',    js: '      ██║██╔════╝' },
+  { deja: '██║  ██║█████╗       ██║███████║  ',       dot: '',    js: '      ██║███████╗' },
+  { deja: '██║  ██║██╔══╝  ██   ██║██╔══██║  ',       dot: '',    js: '      ██║╚════██║' },
+  { deja: '██████╔╝███████╗╚█████╔╝██║  ██║',        dot: '██╗',  js: '╚█████╔╝███████║' },
+  { deja: '╚═════╝ ╚══════╝ ╚════╝ ╚═╝  ╚═╝',       dot: '╚═╝',  js: ' ╚════╝ ╚══════╝' },
 ]
+
+// For backwards compat — plain text lines (used by OnboardingScreen)
+export const LOGO_LINES = LOGO_SEGMENTS.map(s => s.deja + s.dot + s.js)
+
+// Colors for each segment type
+export const LOGO_DEJA_COLORS = [
+  '#00E8FC',   // line 1 — bright cyan
+  '#00C3F5',   // line 2
+  '#0AA0EB',   // line 3
+  '#1982DC',   // line 4
+  '#0A6AD0',   // line 5
+  '#005FBF',   // line 6 — deep blue
+]
+export const LOGO_DOT_COLOR = '#32FF32'   // green dot
+export const LOGO_JS_COLOR  = '#FF00AA'   // magenta/pink .js
+
+// Legacy single-color-per-line (kept for OnboardingScreen)
+export const LOGO_COLORS = LOGO_DEJA_COLORS
 
 // ── Startup Tips (10) ──────────────────────────────────────────────────────────
 
@@ -28,7 +43,7 @@ export const STARTUP_TIPS = [
   'Press [m] to open the command menu',
   'Press [l] to cycle log filters  all → error → warn',
   'Press [e] to export logs to ~/.deja/logs/',
-  'Press [t] to toggle the Cloudflare tunnel',
+  'Use /settings to configure tunnel, MQTT, and WS',
   'Use arrow keys ↑↓ in the menu to navigate',
   'Serial port selection is saved to config.json',
   'Tip: DCC-EX commands are queued in Firebase RTDB',
@@ -49,7 +64,7 @@ export const CONTEXTUAL_TIPS = {
   ],
   serverRunning: [
     'Server is running — press [r] to restart',
-    'Press [t] to toggle the Cloudflare tunnel',
+    'Use /settings to configure tunnel, MQTT, and more',
     'Use /status to see connection details',
   ],
   serverStopped: [
@@ -74,12 +89,11 @@ export const CONTEXTUAL_TIPS = {
 // ── Menu Items (8) ─────────────────────────────────────────────────────────────
 
 export const MENU_ITEMS = [
-  { label: 'Start Server',       action: 'start'   },
-  { label: 'Stop Server',        action: 'stop'    },
-  { label: 'Restart Server',     action: 'restart' },
-  { label: 'Devices',            action: 'devices' },
-  { label: 'Status Panel',       action: 'status'  },
-  { label: 'Select Serial Port', action: 'ports'   },
-  { label: 'Toggle Tunnel',      action: 'tunnel'  },
-  { label: 'Export Logs',        action: 'export'  },
+  { label: 'Start Server',       action: 'start'    },
+  { label: 'Stop Server',        action: 'stop'     },
+  { label: 'Restart Server',     action: 'restart'  },
+  { label: 'Devices',            action: 'devices'  },
+  { label: 'Settings',           action: 'settings' },
+  { label: 'DCC-EX Reference',   action: 'dcc-ref'  },
+  { label: 'Export Logs',        action: 'export'   },
 ]
