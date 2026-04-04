@@ -52,9 +52,8 @@ const guides = [
     href: '/guides/io',
     desc: 'Hardware expansion with Arduino and Pico W — LEDs, servos, signals, sensors, and MQTT.',
     icon: '🔌',
-    comingSoon: true,
-    color: 'border-gray-700/30',
-    iconBg: 'bg-gray-800',
+    color: 'border-fuchsia-400/30 hover:border-fuchsia-400/60',
+    iconBg: 'bg-fuchsia-400/10',
   },
   {
     label: 'Monitor',

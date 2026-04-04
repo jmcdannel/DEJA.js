@@ -1,0 +1,99 @@
+---
+title: Arduino Setup
+description: Flash DEJA IO firmware to an Arduino board and connect it to your server via USB.
+section: io
+order: 11
+---
+
+# Arduino Setup
+
+Connect a standard Arduino board to your DEJA Server via USB to control turnouts, signals, LEDs, relays, and sensors.
+
+## Hardware Requirements
+
+- **Arduino Uno, Mega, or Nano** (any ATmega-based board)
+- **USB cable** (Type-A to Type-B for Uno/Mega, Mini-USB for Nano)
+- **Adafruit PCA9685 16-Channel PWM Servo Driver** (optional, for servo-driven turnouts)
+- **Jumper wires** for connecting outputs and sensors
+
+### Wiring the PCA9685
+
+If using servo-driven turnouts, connect the PCA9685 to your Arduino via I2C:
+
+| PCA9685 Pin | Arduino Pin |
+|---|---|
+| VCC | 5V |
+| GND | GND |
+| SDA | A4 (Uno) / 20 (Mega) |
+| SCL | A5 (Uno) / 21 (Mega) |
+
+Power the servo rail separately with a 5–6V power supply — do not power servos from the Arduino's 5V pin.
+
+## Firmware Configuration
+
+Open `io/src/deja-arduino/config.h` (copy from `config.default.h` if it doesn't exist) and set your device identity and feature flags:
+
+```cpp
+// Device identity
+#define DEVICE_ID "my-arduino-device"
+
+// Feature toggles — enable what your hardware supports
+#define ENABLE_PWM true        // PCA9685 servo driver
+#define ENABLE_OUTPUTS true    // Digital output pins
+#define ENABLE_SIGNALS true    // Signal head outputs
+#define ENABLE_SENSORS true    // Sensor input pins
+#define ENABLE_TURNOUTS true   // Servo-driven turnouts
+
+// Pin assignments
+int OUTPINS[] = {8, 9, 10, 11};           // GPIO pins for digital outputs
+int SIGNALPINS[] = {4, 5, 6, 7};          // GPIO pins for signal heads
+int SENSORPINS[] = {A0, A1, A2};          // GPIO pins for sensors
+```
+
+### Turnout Configuration
+
+Turnouts are defined as `TurnoutPulser` objects with a servo channel, thrown angle, and closed angle:
+
+```cpp
+TurnoutPulser turnouts[] = {
+  TurnoutPulser(0, 45, 135),   // Servo channel 0: 45° closed, 135° thrown
+  TurnoutPulser(1, 50, 130),   // Servo channel 1: 50° closed, 130° thrown
+};
+```
+
+## Flashing the Firmware
+
+1. Open `io/src/deja-arduino/deja-arduino.ino` in the Arduino IDE
+2. Select your board type under **Tools → Board**
+3. Select the correct serial port under **Tools → Port**
+4. Click **Upload**
+
+Or use the DEJA deploy script:
+
+```bash
+cd io
+pnpm deploy
+```
+
+The deploy script auto-detects connected boards and can generate `config.h` from your Cloud device configuration.
+
+## Connecting to the Server
+
+1. Plug the Arduino into the server machine via USB
+2. In the [Cloud app](https://cloud.dejajs.com), register a device with type **deja-arduino** and your `DEVICE_ID`
+3. The DEJA Server auto-detects the serial port and connects at 115200 baud
+4. Open the [Monitor app](https://monitor.dejajs.com) to verify the device appears and responds to commands
+
+## Command Format
+
+Arduino devices receive JSON arrays over serial:
+
+```json
+[
+  { "action": "pin", "payload": { "pin": 8, "state": 1 } },
+  { "action": "servo", "payload": { "servo": 0, "value": 90, "current": 45 } },
+  { "action": "turnout", "payload": { "turnout": 0, "state": true } }
+]
+```
+
+See the [Command Reference](/docs/io/command-reference) for all supported actions.
