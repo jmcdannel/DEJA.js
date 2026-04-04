@@ -1,8 +1,13 @@
 // 🔧 Device config composable for cloud app
-// Generates config strings from Vuefire-loaded data + triggers ZIP download
+// Wraps shared generators from @repo/modules in Vue computed() refs + triggers ZIP download
 
 import { computed, type Ref, type ComputedRef } from 'vue'
 import type { Device, Effect, Turnout } from '@repo/modules'
+import {
+  generateArduinoConfig,
+  generatePicoSettings,
+  generatePicoConfig,
+} from '@repo/modules'
 
 interface UseDeviceConfigOptions {
   device: Ref<Device | null>
@@ -17,108 +22,61 @@ export function useDeviceConfig({ device, effects, turnouts }: UseDeviceConfigOp
 
   const isPicoW = computed(() => device.value?.type === 'deja-mqtt')
 
-  // 🔧 Arduino config.h — fixes bugs in previous inline template:
-  // ✅ Inserts turnoutPulsers into TurnoutPulser turnouts[]
-  // ✅ Generates SENSORPINS[] from device sensor data (not hardcoded)
-  // ✅ Includes OUTPINS[] from effects with pins
-  // ✅ Sets ENABLE_* flags dynamically
+  // 🔧 Arduino config.h
   const arduinoConfigH = computed(() => {
     if (!device.value) return ''
-
-    const outPins = effects.value
-      .filter(e => e.pin !== undefined && e.pin !== null)
-      .map(e => e.pin!)
-
-    const turnoutPulsers = turnouts.value
-      .filter(t => t.straight !== undefined && t.divergent !== undefined)
-      .map(t => `TurnoutPulser(${t.straight}, ${t.divergent})`)
-
-    const hasOutputs = outPins.length > 0
-    const hasTurnouts = turnoutPulsers.length > 0
-
-    return `#include <TurnoutPulser.h>
-
-#define DEVICE_ID "${device.value.id}"
-#define ENABLE_PWM false
-#define ENABLE_OUTPUTS ${hasOutputs}
-#define ENABLE_SIGNALS false
-#define ENABLE_TURNOUTS ${hasTurnouts}
-#define ENABLE_SENSORS false
-
-#define SERVOMIN 150
-#define SERVOMAX 600
-#define MIN_PULSE_WIDTH 650
-#define MAX_PULSE_WIDTH 2350
-#define USMIN 600
-#define USMAX 2400
-#define SERVO_FREQ 50
-#define SERVO_COUNT 16
-
-int OUTPINS[] = {${outPins.length > 0 ? ' ' + outPins.join(', ') + ' ' : ''}};
-int SIGNALPINS[] = {};
-int SENSORPINS[] = {};
-
-TurnoutPulser turnouts[] = {${turnoutPulsers.length > 0 ? ' ' + turnoutPulsers.join(', ') + ' ' : ''}};`
+    return generateArduinoConfig({
+      device: device.value,
+      effects: effects.value,
+      turnouts: turnouts.value,
+    })
   })
 
-  // 🍓 Pico W settings.toml
+  // 🍓 Pico W settings.toml (WiFi creds left empty — filled at download time)
   const picoSettingsToml = computed(() => {
     if (!device.value) return ''
-
-    return `# 🍓 DEJA.js Pico W Configuration
-# Generated for device: ${device.value.id}
-
-CIRCUITPY_WIFI_SSID = ""
-CIRCUITPY_WIFI_PASSWORD = ""
-
-ENABLE_CONFIG = "true"
-ENABLE_PWM = "false"
-ENABLE_MQTT = "true"
-
-MQTT_BROKER = ""
-LAYOUT_ID = ""
-DEVICE_ID = "${device.value.id}"
-TOPIC_ID = "${device.value.topic || 'deja'}"`
+    return generatePicoSettings({
+      device: device.value,
+      effects: effects.value,
+      turnouts: turnouts.value,
+      layoutId: '',
+    })
   })
 
   // 🍓 Pico W config.json (pin → GP mapping from effects)
   const picoConfigJson = computed(() => {
-    const pins: Record<string, string> = {}
-    for (const effect of effects.value) {
-      if (effect.pin !== undefined && effect.pin !== null) {
-        pins[String(effect.pin)] = `GP${effect.pin}`
-      }
-    }
-    return JSON.stringify({ pins }, null, 2)
+    if (!device.value) return ''
+    return generatePicoConfig({
+      device: device.value,
+      effects: effects.value,
+      turnouts: turnouts.value,
+      layoutId: '',
+    })
   })
 
   /**
    * 📦 Download a ready-to-deploy ZIP for this device
    */
   async function downloadPackage(wifiSsid?: string, wifiPassword?: string, mqttBroker?: string, layoutId?: string) {
+    if (!device.value) return
+
     const JSZip = (await import('jszip')).default
     const zip = new JSZip()
-    const folder = zip.folder(device.value?.id || 'device')!
+    const folder = zip.folder(device.value.id)!
 
     if (isArduino.value) {
       folder.file('config.h', arduinoConfigH.value)
     } else if (isPicoW.value) {
       // Generate settings.toml with user-provided WiFi creds
-      const settings = `# 🍓 DEJA.js Pico W Configuration
-# Generated for device: ${device.value?.id}
-
-CIRCUITPY_WIFI_SSID = "${wifiSsid || ''}"
-CIRCUITPY_WIFI_PASSWORD = "${wifiPassword || ''}"
-
-ENABLE_CONFIG = "true"
-ENABLE_PWM = "false"
-ENABLE_MQTT = "true"
-
-MQTT_BROKER = "${mqttBroker || ''}"
-LAYOUT_ID = "${layoutId || ''}"
-DEVICE_ID = "${device.value?.id}"
-TOPIC_ID = "${device.value?.topic || 'deja'}"`
-
+      const settings = generatePicoSettings({
+        device: device.value,
+        effects: effects.value,
+        turnouts: turnouts.value,
+        layoutId: layoutId ?? '',
+        wifiSsid,
+        wifiPassword,
+        mqttBroker,
+      })
       folder.file('settings.toml', settings)
       folder.file('config.json', picoConfigJson.value)
     }
@@ -127,7 +85,7 @@ TOPIC_ID = "${device.value?.topic || 'deja'}"`
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `${device.value?.id || 'device'}-firmware.zip`
+    a.download = `${device.value.id}-firmware.zip`
     a.click()
     URL.revokeObjectURL(url)
   }
