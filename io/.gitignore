@@ -1,3 +1,6 @@
 layouts
 dist/
 node_modules/
+
+# 🔐 Device credentials
+**/credentials.h
