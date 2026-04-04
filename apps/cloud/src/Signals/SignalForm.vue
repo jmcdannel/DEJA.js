@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useLayout } from '@repo/modules'
-import { useSignals, type Signal, type SignalAspect } from '@repo/modules/signals'
+import { useSignals, type Signal } from '@repo/modules/signals'
 import { createLogger } from '@repo/utils'
 import { useNotification } from '@repo/ui'
 import ColorPicker from '@/Common/Color/ColorPicker.vue'
@@ -106,7 +106,7 @@ async function submit() {
     if (tags.value.length > 0) {
       Object.assign(payload, { tags: tags.value })
     }
-    
+
     await setSignal(props.signal?.id || '', payload)
     emit('close')
   } catch (err) {
@@ -120,34 +120,32 @@ async function submit() {
 </script>
 
 <template>
-  <div class="p-6">
-    <v-form @submit.prevent="submit">
-      <v-label class="m-2 text-4xl">
-        {{ signal ? 'Edit' : 'Add'}} Signal
-      </v-label>
-      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      <v-label class="m-2">
-        Device
-      </v-label>
-      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large" :rules="deviceRules">
-          <v-btn v-for="deviceOpt in devices" :value="deviceOpt.id" :key="deviceOpt.id" 
-            class="min-h-24 min-w-48 border"
-            :color="color" >
-              {{ deviceOpt.id }}
-          </v-btn>
-      </v-btn-toggle>
-      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      <v-row>
-        <v-col cols="12" md="6">
+  <v-form @submit.prevent="submit" class="space-y-4">
+
+    <!-- ═══ IDENTITY SECTION ═══ -->
+    <div class="form-section" style="--form-accent: #10b981">
+      <div class="form-section__header">
+        <v-icon size="18" class="form-section__header-icon">mdi-label</v-icon>
+        <span class="form-section__title">Identity</span>
+      </div>
+
+      <!-- Name grid -->
+      <div class="form-section__grid" style="grid-template-columns: 1fr 1fr">
+        <div>
+          <label class="form-section__input-label">Signal Name</label>
           <v-text-field
             v-model="name"
-            label="Signal name"
-            required
             variant="outlined"
+            density="compact"
+            color="emerald"
+            hide-details="auto"
+            placeholder="Signal A"
+            required
           />
-        </v-col>
-        <v-col cols="12" md="6">
+          <div class="form-section__input-hint">Display name for this signal</div>
+        </div>
+        <div>
+          <label class="form-section__input-label">Default Aspect</label>
           <v-select
             v-model="aspect"
             :items="[
@@ -156,117 +154,175 @@ async function submit() {
               { title: 'Yellow', value: 'yellow' },
               { title: 'Green', value: 'green' },
             ]"
-            label="Default aspect"
             variant="outlined"
-            hint="Aspect applied when the signal is saved"
-            persistent-hint
+            density="compact"
+            color="emerald"
+            hide-details="auto"
           />
-        </v-col>
-      </v-row>      
-      <v-row>
-        <v-col cols="12" md="4">
+          <div class="form-section__input-hint">Aspect applied when the signal is saved</div>
+        </div>
+      </div>
+
+      <!-- Device row -->
+      <div class="form-section__row form-section__row--block">
+        <span class="form-section__row-name mb-2">Device</span>
+        <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="large" :rules="deviceRules">
+          <v-btn
+            v-for="deviceOpt in devices"
+            :value="deviceOpt.id"
+            :key="deviceOpt.id"
+            class="min-h-14 min-w-36 border text-none"
+            color="emerald"
+          >
+            {{ deviceOpt.id }}
+          </v-btn>
+        </v-btn-toggle>
+        <div class="form-section__input-hint mt-1">Hardware device that controls this signal</div>
+      </div>
+    </div>
+
+    <!-- ═══ PIN CONFIGURATION SECTION ═══ -->
+    <div class="form-section" style="--form-accent: #10b981">
+      <div class="form-section__header">
+        <v-icon size="18" class="form-section__header-icon">mdi-electric-switch</v-icon>
+        <span class="form-section__title">Pin Configuration</span>
+      </div>
+
+      <!-- Pin inputs grid -->
+      <div class="form-section__grid" style="grid-template-columns: repeat(3, 1fr)">
+        <div>
+          <label class="form-section__input-label">Red Pin</label>
           <v-text-field
             v-model="red"
-            label="Red pin"
             type="number"
             variant="outlined"
+            density="compact"
             color="red"
-            hint="Pin number for the red LED"
+            hide-details="auto"
           >
-          <template #prepend-inner>
-            <v-icon icon="mdi-circle" :color="'red'" />
-          </template>
-        </v-text-field>
-        </v-col>
-        <v-col cols="12" md="4">
+            <template #prepend-inner>
+              <v-icon icon="mdi-circle" color="red" size="16" />
+            </template>
+          </v-text-field>
+          <div class="form-section__input-hint">Pin number for the red LED</div>
+        </div>
+        <div>
+          <label class="form-section__input-label">Yellow Pin</label>
           <v-text-field
             v-model="yellow"
-            label="Yellow pin"
             type="number"
-            color="yellow"
             variant="outlined"
-            hint="Pin number for the yellow LED"
+            density="compact"
+            color="yellow"
+            hide-details="auto"
           >
-          <template #prepend-inner>
-            <v-icon icon="mdi-circle" :color="'yellow'" />
-          </template>
-        </v-text-field>
-        </v-col>
-        <v-col cols="12" md="4">
+            <template #prepend-inner>
+              <v-icon icon="mdi-circle" color="yellow" size="16" />
+            </template>
+          </v-text-field>
+          <div class="form-section__input-hint">Pin number for the yellow LED</div>
+        </div>
+        <div>
+          <label class="form-section__input-label">Green Pin</label>
           <v-text-field
             v-model="green"
-            label="Green pin"
-            color="green"
             type="number"
             variant="outlined"
-            hint="Pin number for the green LED"
+            density="compact"
+            color="green"
+            hide-details="auto"
           >
-          <template #prepend-inner>
-            <v-icon icon="mdi-circle" :color="'green'" />
-          </template>
-        </v-text-field>
-        </v-col>
-      </v-row>
+            <template #prepend-inner>
+              <v-icon icon="mdi-circle" color="green" size="16" />
+            </template>
+          </v-text-field>
+          <div class="form-section__input-hint">Pin number for the green LED</div>
+        </div>
+      </div>
 
-      <v-row class="items-center">
-        <v-col cols="12" md="6">
-          <v-switch
-            v-model="commonAnode"
-            :color="color"
-            :label="`Wiring: ${wiringLabel}`"
-            density="comfortable"
-          />
-          <v-textarea
-            v-model="description"
-            label="Description"
-            rows="3"
-            auto-grow
-            variant="outlined"
-          />
-        </v-col>
-        <v-col cols="12" md="6">
+      <!-- Wiring toggle row -->
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Wiring Type</span>
+          <span class="form-section__row-desc">{{ wiringLabel }}</span>
+        </div>
+        <v-switch v-model="commonAnode" color="emerald" hide-details density="compact" />
+      </div>
 
-          <!-- color -->
-          <section class="h-auto  my-4">
-            <v-btn
-              class="min-h-48 min-w-48 border flex"
-              :color="color"
-              @click="editColor = true" >
-              <!-- <v-icon :icon="efxOpt.icon" :color="efxOpt.color"></v-icon> -->
-              <div class="relative flex flex-col justify-center items-center">
-                <v-icon size="64">mdi-palette</v-icon>
-                <div class="mt-4">Color [{{ color }}]</div>
-              </div>        
-            </v-btn>
-          </section>
-          <v-dialog max-width="80vw" v-model="editColor">
-            <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = 'purple'"></ColorPicker>
-          </v-dialog>
-        </v-col>
-      </v-row>
+      <!-- Description row -->
+      <div class="form-section__row form-section__row--block">
+        <label class="form-section__input-label">Description</label>
+        <v-textarea
+          v-model="description"
+          rows="3"
+          auto-grow
+          variant="outlined"
+          density="compact"
+          color="emerald"
+          hide-details="auto"
+        />
+        <div class="form-section__input-hint">Optional notes about this signal's location or wiring</div>
+      </div>
+    </div>
 
-      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      <TagPicker class="my-4 " v-model="tags"></TagPicker>
+    <!-- ═══ APPEARANCE SECTION ═══ -->
+    <div class="form-section" style="--form-accent: #10b981">
+      <div class="form-section__header">
+        <v-icon size="18" class="form-section__header-icon">mdi-palette</v-icon>
+        <span class="form-section__title">Appearance</span>
+      </div>
 
-      <v-alert
-        v-if="error"
-        type="error"
-        class="mb-4"
-        :text="error"
-      />
+      <!-- Color picker row -->
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Color</span>
+          <span class="form-section__row-desc">Theme color for UI display</span>
+        </div>
+        <div
+          class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors"
+          style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
+          @click="editColor = true"
+        >
+          <div class="w-6 h-6 rounded-full border-2 border-white/12" :style="{ background: color }"></div>
+          <span class="text-sm text-white/60 capitalize">{{ color }}</span>
+          <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
+        </div>
+      </div>
+      <v-dialog v-model="editColor" max-width="80vw">
+        <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = 'cyan'" />
+      </v-dialog>
 
-      <div class="flex justify-end gap-2 mt-4">
-        <v-btn variant="text" @click="emit('close')">
-          Cancel
-        </v-btn>
+      <!-- Tags row -->
+      <div class="form-section__row form-section__row--block">
+        <span class="form-section__row-name mb-2">Tags</span>
+        <TagPicker v-model="tags" />
+      </div>
+    </div>
+
+    <!-- Error alert -->
+    <v-alert
+      v-if="error"
+      type="error"
+      class="mb-4"
+      :text="error"
+    />
+
+    <!-- ═══ FOOTER ═══ -->
+    <div class="form-section" style="--form-accent: #10b981">
+      <div class="form-section__footer" style="gap: 8px">
+        <v-btn variant="text" size="small" class="text-none" @click="emit('close')">Cancel</v-btn>
         <v-btn
-          :color="color"
+          variant="tonal"
+          color="emerald"
+          size="small"
           type="submit"
           :loading="loading"
+          class="text-none"
         >
           Save Signal
         </v-btn>
       </div>
-    </v-form>
-  </div>
+    </div>
+
+  </v-form>
 </template>
