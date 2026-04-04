@@ -1,6 +1,6 @@
 # 🚂 DEJA.js — DCC-EX JavaScript API
 
-<!-- trigger deploy 3 -->
+<!-- trigger deploy 4 -->
 <p align="center">
   <img src="https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D" />
   <img src="https://img.shields.io/badge/Node.js-5FA04E?style=for-the-badge&logo=nodedotjs&logoColor=white" />
