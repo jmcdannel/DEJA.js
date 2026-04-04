@@ -212,7 +212,7 @@ async function submit() {
         </div>
       </div>
       <v-dialog v-model="editColor" max-width="80vw">
-        <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = 'cyan'" />
+        <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.signal?.color ?? 'emerald'" />
       </v-dialog>
 
       <!-- Tags row -->
@@ -299,7 +299,7 @@ async function submit() {
       />
 
       <!-- Footer -->
-      <div class="form-section__footer" style="gap: 8px">
+      <div class="form-section__footer">
         <v-btn variant="text" size="small" class="text-none" @click="emit('close')">Cancel</v-btn>
         <v-btn
           variant="tonal"

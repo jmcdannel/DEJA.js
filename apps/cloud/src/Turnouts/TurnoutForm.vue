@@ -218,7 +218,7 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
           </div>
         </div>
 
-        <div class="form-section__footer" style="gap: 8px">
+        <div class="form-section__footer">
           <v-btn variant="tonal" size="small" class="text-none" type="button" @click="handleClose">Cancel</v-btn>
           <v-btn :loading="loading" variant="tonal" color="amber" size="small" type="submit" class="text-none">Save</v-btn>
         </div>

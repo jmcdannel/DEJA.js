@@ -224,7 +224,7 @@ function handleSoundFileSelect(soundFile: string) {
             v-model="name"
             variant="outlined"
             density="compact"
-            color="indigo"
+            :color="color"
             :rules="rules.required"
             hide-details="auto"
             placeholder="Crossing Lights"
@@ -267,7 +267,7 @@ function handleSoundFileSelect(soundFile: string) {
         </div>
         <v-switch
           v-model="allowGuest"
-          color="indigo"
+          :color="color"
           hide-details
           density="compact"
         >
@@ -298,7 +298,7 @@ function handleSoundFileSelect(soundFile: string) {
               :value="efxOpt.value"
               :key="efxOpt.value"
               class="min-h-48 min-w-48 border"
-              color="indigo"
+              :color="color"
             >
               <div class="flex flex-col">
                 <v-icon v-if="efxOpt.icon" size="32" :color="efxOpt.color" class="stroke-none">{{ efxOpt.icon }}</v-icon>
@@ -322,7 +322,7 @@ function handleSoundFileSelect(soundFile: string) {
               :value="deviceOpt.id"
               :key="deviceOpt.id"
               class="min-h-24 min-w-48 border"
-              color="indigo"
+              :color="color"
             >
               {{ deviceOpt.id }}
             </v-btn>
@@ -342,7 +342,7 @@ function handleSoundFileSelect(soundFile: string) {
           <div v-if="selectedSoundFile" class="mb-4 p-3 rounded-lg border flex items-center justify-between"
             style="background: rgba(99,102,241,0.06); border-color: rgba(99,102,241,0.2)">
             <div class="flex items-center gap-2">
-              <v-icon icon="mdi-check-circle" color="indigo" />
+              <v-icon icon="mdi-check-circle" :color="color" />
               <span class="text-sm text-white/80">{{ selectedSoundFile.split('/').pop() }}</span>
             </div>
             <v-btn size="small" variant="text" color="red" @click="selectedSoundFile = ''" title="Clear selection">
@@ -352,7 +352,7 @@ function handleSoundFileSelect(soundFile: string) {
 
           <v-btn
             class="min-h-48 min-w-48 border flex"
-            color="indigo"
+            :color="color"
             @click="showSoundDialog = true"
           >
             <div class="relative flex flex-col justify-center items-center">
@@ -403,7 +403,7 @@ function handleSoundFileSelect(soundFile: string) {
               v-model="pin"
               variant="outlined"
               density="compact"
-              color="indigo"
+              :color="color"
               hide-details="auto"
               placeholder="13"
             />
@@ -415,7 +415,7 @@ function handleSoundFileSelect(soundFile: string) {
       <!-- Save footer -->
       <div class="form-section__footer">
         <v-btn variant="tonal" size="small" class="text-none" @click="$emit('close')">Cancel</v-btn>
-        <v-btn variant="tonal" color="indigo" size="small" type="submit" :loading="loading" class="text-none">Save</v-btn>
+        <v-btn variant="tonal" :color="color" size="small" type="submit" :loading="loading" class="text-none">Save</v-btn>
       </div>
     </div>
 
@@ -437,7 +437,7 @@ function handleSoundFileSelect(soundFile: string) {
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn variant="tonal" @click="showSoundDialog = false">Cancel</v-btn>
-          <v-btn color="indigo" @click="showSoundDialog = false" :disabled="!selectedSoundFile">Confirm Selection</v-btn>
+          <v-btn :color="color" @click="showSoundDialog = false" :disabled="!selectedSoundFile">Confirm Selection</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

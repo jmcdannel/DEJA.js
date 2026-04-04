@@ -350,7 +350,7 @@ onMounted(loadAutomation)
       />
 
       <div class="form-section" :style="{ '--form-accent': 'teal' }">
-        <div class="form-section__footer" style="gap: 8px">
+        <div class="form-section__footer">
           <v-btn variant="text" size="small" class="text-none" @click="handleCancel">Cancel</v-btn>
           <v-btn variant="tonal" color="teal" size="small" type="submit" :loading="loading" class="text-none">
             Save Automation

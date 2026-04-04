@@ -119,7 +119,7 @@ async function submit() {
         </div>
 
         <!-- Save footer -->
-        <div class="form-section__footer" style="gap: 8px">
+        <div class="form-section__footer">
           <v-btn variant="tonal" size="small" class="text-none" @click="router.push({ name: 'Roster' })">Cancel</v-btn>
           <v-btn variant="tonal" color="pink" size="small" type="submit" :loading="loading" class="text-none">Add Locomotive</v-btn>
         </div>

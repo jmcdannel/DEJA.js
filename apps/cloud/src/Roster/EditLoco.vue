@@ -48,15 +48,18 @@ watch(
 
 async function saveIdentity() {
   identityLoading.value = true
-  const newLoco = loco.value || {}
+  const newLoco = structuredClone(loco.value) || {}
   newLoco.meta = newLoco.meta || {}
   newLoco.meta.roadname = roadname.value?.value || ''
   newLoco.meta.color = color.value || 'primary'
   newLoco.hasSound = hasSound.value
 
-  log.debug('Saving identity', { ...loco.value })
+  log.debug('Saving identity', newLoco)
+  const nameChanged = newLoco.name !== loco.value?.name
   await updateLoco(loco.value.id, newLoco)
-  void syncRosterEntry(loco.value.address, loco.value.name, loco.value.functions)
+  if (nameChanged) {
+    void syncRosterEntry(loco.value.address, newLoco.name, loco.value.functions)
+  }
   identityLoading.value = false
 }
 

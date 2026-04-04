@@ -192,7 +192,7 @@ function runCurrentRoute() {
         </v-btn>
       </div>
 
-      <div class="form-section__footer" style="gap: 8px">
+      <div class="form-section__footer">
         <v-btn variant="tonal" size="small" class="text-none" @click="$emit('close')">Cancel</v-btn>
         <v-btn
           :loading="loading"

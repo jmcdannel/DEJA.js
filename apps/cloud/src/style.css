@@ -182,5 +182,6 @@ select {
   padding: 12px 20px 14px;
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   border-top: 1px solid rgba(var(--v-theme-on-surface), 0.04);
 }
