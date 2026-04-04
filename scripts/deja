@@ -714,6 +714,46 @@ cmd_tunnel() {
   esac
 }
 
+# ======================================================================
+# Deploy — flash firmware to Arduino or Pico W device
+# ======================================================================
+
+cmd_deploy() {
+  info "🚀 DEJA.js Device Deploy"
+  echo ""
+
+  # Check if running from monorepo (development) or distribution
+  local SCRIPT_DIR
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  local MONOREPO_IO="${SCRIPT_DIR}/../io"
+
+  if [[ -d "$MONOREPO_IO" && -f "$MONOREPO_IO/package.json" ]]; then
+    # Monorepo mode: run deploy script via tsx
+    info "Running from monorepo..."
+    cd "$MONOREPO_IO"
+
+    # Ensure dependencies are installed
+    if [[ ! -d "node_modules" ]]; then
+      info "Installing io/ dependencies..."
+      pnpm install 2>/dev/null || npm install 2>/dev/null
+    fi
+
+    exec npx tsx ./scripts/deploy.ts "$@"
+  elif [[ -f "${SERVER_DIR}/deploy.js" ]]; then
+    # Distribution mode: run bundled deploy script
+    exec node "${SERVER_DIR}/deploy.js" "$@"
+  else
+    err "Deploy not available."
+    echo ""
+    echo -e "  ${DIM}The deploy command requires either:${NC}"
+    echo -e "  • Running from the DEJA.js monorepo, or"
+    echo -e "  • A server version that includes deploy support"
+    echo ""
+    echo -e "  Run ${CYAN}deja update${NC} to get the latest version."
+    exit 1
+  fi
+}
+
 cmd_help() {
   echo ""
   echo -e "  ${BOLD}${ICON_SERVER} DEJA.js Server CLI${NC}"
@@ -728,6 +768,9 @@ cmd_help() {
   echo -e "    ${CYAN}status${NC}         Show server status and connections"
   echo -e "    ${CYAN}logs${NC} [-f]      View server logs (-f to follow)"
   echo -e "    ${CYAN}update${NC}         Update to the latest version"
+  echo ""
+  echo -e "  ${BOLD}📟 Device Deployment${NC}"
+  echo -e "    ${CYAN}deploy${NC}         Deploy firmware to Arduino or Pico W device"
   echo ""
   echo -e "  ${BOLD}${ICON_TUNNEL} Remote Monitoring${NC} ${DIM}(Engineer & Conductor plans)${NC}"
   echo -e "    ${CYAN}tunnel start${NC}   Start Cloudflare tunnel for remote monitor access"
@@ -760,6 +803,7 @@ case "${1:-}" in
   logs)     shift; cmd_logs "$@" ;;
   update)   shift; cmd_update "$@" ;;
   tunnel)   shift; cmd_tunnel "$@" ;;
+  deploy)   shift; cmd_deploy "$@" ;;
   --version|-v)
     echo "deja $(get_version)"
     ;;
