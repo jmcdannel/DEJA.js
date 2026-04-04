@@ -181,7 +181,7 @@ defineExpose({ viewAs: controls.viewAs, viewOptions })
     <!-- 🃏 Card view — 2 columns on desktop -->
     <div
       v-else-if="controls.viewAs.value === 'card'"
-      class="grid gap-4 grid-cols-1 md:grid-cols-2 p-4"
+      class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 p-4"
     >
       <LocoCard
         v-for="loco in locos"

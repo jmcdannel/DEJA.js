@@ -94,7 +94,7 @@ async function handleTurnout(turnout: Turnout) {
         :turnout="item as Turnout"
         :turnout-id="item?.id"
         :state="item.state"
-        class="w-24 sm:w-32 md:w-36"
+        class="w-42 sm:w-64 md:w-84"
       />
     </template>
   </List>

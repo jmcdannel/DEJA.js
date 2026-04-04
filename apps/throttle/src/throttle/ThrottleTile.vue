@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { toRef } from 'vue'
-import { LocoNumberPlate } from '@repo/ui'
-import { ROADNAMES } from '@repo/modules'
+import { computed, ref, toRef } from 'vue'
+import { useRouter } from 'vue-router'
 import ThrottleButtonControls from './ThrottleButtonControls.vue'
 import CurrentSpeed from './CurrentSpeed.vue'
 import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
@@ -14,8 +13,10 @@ const props = defineProps({
   }
 })
 
+const $router = useRouter()
 const addressRef = toRef(props, 'address')
-const { 
+const isMenuOpen = ref(false)
+const {
   adjustSpeed: handleAdjustSpeed,
   currentSpeed,
   loco,
@@ -24,6 +25,7 @@ const {
   throttle,
 } = useThrottle(addressRef)
 
+const locoColor = computed(() => loco.value?.meta?.color || 'primary')
 </script>
 <template>
   <main v-if="throttle" class="rounded-2xl shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border ">
@@ -45,14 +47,35 @@ const {
         <RoadnameLogo :roadname="loco?.meta?.roadname" size="sm" />
         <span class="bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-cyan-400 font-bold">{{loco?.name || throttle.address}}</span>
       </div>
-      <div class="order-2  basis-1/3 pr-2">
-        <LocoNumberPlate
+      <div class="order-2 basis-1/3 pr-2 flex justify-end">
+        <v-speed-dial
           v-if="loco"
-          :address="loco.address"
-          :color="loco.meta?.roadname ? ROADNAMES.find(r => r.value === loco.meta?.roadname)?.color : undefined"
-          size="sm"
-        />
-        <!-- <pre>loco:{{loco}}</pre> -->
+          v-model="isMenuOpen"
+          location="left center"
+          transition="fade-transition"
+          contained
+        >
+          <template v-slot:activator="{ props: activatorProps }">
+            <component
+              :is="loco.consist?.length ? 'v-badge' : 'div'"
+              :color="loco.consist?.length ? 'primary' : undefined"
+              :content="loco.consist?.length"
+            >
+              <v-btn
+                v-bind="activatorProps"
+                :color="locoColor"
+                rounded="circle"
+                :size="48"
+                :text="loco.address?.toString() || '?'"
+                variant="tonal"
+              />
+            </component>
+          </template>
+          <v-btn @click="$router.push({ name: 'throttle', params: { address: loco.address } })" :color="locoColor" icon="mdi-gamepad-square" />
+          <v-btn @click="$router.push({ name: 'throttle-list' })" :color="locoColor" icon="mdi-view-sequential-outline" />
+          <v-btn @click="releaseThrottle" :color="locoColor" icon="mdi-parking" />
+          <v-btn @click="handleStop" :color="locoColor" icon="mdi-stop-circle-outline" />
+        </v-speed-dial>
       </div>
     </section>
   </main>

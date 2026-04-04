@@ -4,7 +4,7 @@
 </script>
 
 <template>
-  <main class="@container min-h-screen overflow-auto p-2 md:p-4">
+  <main class="@container min-h-screen overflow-auto">
     <TurnoutList />
   </main>
 </template>
