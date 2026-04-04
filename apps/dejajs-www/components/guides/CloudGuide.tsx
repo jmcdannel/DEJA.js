@@ -1,112 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import AnimateIn from '../home/AnimateIn';
 import SectionLabel from '../home/SectionLabel';
 import Logo from '../Logo';
-import DocLink from '../DocLink';
+import { FeatureSection, VideoPlaceholder, FeatureCarousel, BeforeYouStart } from './shared';
+import type { CarouselSlide } from './shared';
 
-/* ── Shared sub-components ── */
-
-function FeatureCard({ emoji, text }: { emoji: string; text: string }) {
-  return (
-    <div className="flex items-start gap-3 p-3 rounded-lg border border-gray-800/60 bg-gray-900/40 hover:border-deja-cyan/20 hover:bg-gray-900/60 transition-all">
-      <span className="text-lg shrink-0 mt-0.5">{emoji}</span>
-      <span className="text-sm text-gray-300">{text}</span>
-    </div>
-  );
-}
-
-function FeatureGrid({ items }: { items: { emoji: string; text: string }[] }) {
-  return (
-    <div className="grid sm:grid-cols-2 gap-2">
-      {items.map((item, i) => (
-        <AnimateIn key={item.text} delay={i * 0.05}>
-          <FeatureCard emoji={item.emoji} text={item.text} />
-        </AnimateIn>
-      ))}
-    </div>
-  );
-}
-
-function VideoPlaceholder() {
-  return (
-    <div className="rounded-2xl border border-gray-800 bg-gray-900/50 overflow-hidden shadow-2xl">
-      <div className="aspect-video flex flex-col items-center justify-center gap-3 bg-gray-900/80">
-        <div className="w-16 h-16 rounded-full border-2 border-deja-cyan/30 bg-deja-cyan/10 flex items-center justify-center">
-          <svg className="w-6 h-6 text-deja-cyan ml-1" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z" />
-          </svg>
-        </div>
-        <p className="text-gray-400 text-sm">Video walkthrough coming soon</p>
-      </div>
-    </div>
-  );
-}
-
-function FeatureSection({
-  title,
-  desc,
-  features,
-  screenshot,
-  screenshotAlt,
-  flip = false,
-  docLink,
-  docLabel,
-  children,
-}: {
-  title: string;
-  desc: string;
-  features: { emoji: string; text: string }[];
-  screenshot: string;
-  screenshotAlt: string;
-  flip?: boolean;
-  docLink?: string;
-  docLabel?: string;
-  children?: React.ReactNode;
-}) {
-  return (
-    <section className="py-20">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-        <AnimateIn direction={flip ? 'right' : 'left'} className={flip ? 'lg:order-2' : ''}>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">{title}</h2>
-          <p className="text-gray-400 leading-relaxed mb-6">{desc}</p>
-          <FeatureGrid items={features} />
-          {children}
-          {docLink && docLabel && (
-            <div className="mt-4">
-              <DocLink href={docLink}>{docLabel}</DocLink>
-            </div>
-          )}
-        </AnimateIn>
-        <AnimateIn direction={flip ? 'left' : 'right'} className={`flex justify-center ${flip ? 'lg:order-1' : ''}`}>
-          <div className="rounded-2xl overflow-hidden shadow-2xl w-full max-w-lg">
-            <Image src={screenshot} alt={screenshotAlt} width={1200} height={675} className="w-full h-auto" />
-          </div>
-        </AnimateIn>
-      </div>
-    </section>
-  );
-}
-
-/* ── Cloud Features Carousel ── */
-
-interface CarouselSlide {
-  id: string;
-  emoji: string;
-  title: string;
-  tagline: string;
-  desc: string;
-  desktopScreenshot: string;
-  features: { emoji: string; text: string }[];
-  docHref: string;
-  docLabel: string;
-  accentColor: string;
-  accentBg: string;
-  accentBorder: string;
-}
+/* ── Cloud Features Data ── */
 
 const cloudFeatures: CarouselSlide[] = [
   {
@@ -305,80 +206,6 @@ const cloudFeatures: CarouselSlide[] = [
   },
 ];
 
-function CloudFeaturesCarousel() {
-  const [activeIdx, setActiveIdx] = useState(0);
-  const active = cloudFeatures[activeIdx];
-
-  return (
-    <section className="py-20">
-      <div className="max-w-5xl mx-auto">
-        <AnimateIn>
-          <SectionLabel color="lime">Feature Reference</SectionLabel>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mt-4 mb-3">Everything in Cloud</h2>
-          <p className="text-gray-400 leading-relaxed mb-10">
-            Beyond the basics, Cloud gives you full control over every aspect of your layout.
-            Configure it here, control it from{' '}
-            <Link href="/guides/throttle" className="text-deja-cyan hover:underline">Throttle</Link>.
-          </p>
-        </AnimateIn>
-
-        {/* Tab buttons */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-12">
-          {cloudFeatures.map((slide, i) => (
-            <button
-              key={slide.id}
-              onClick={() => setActiveIdx(i)}
-              className={`flex flex-col items-center gap-2 px-4 py-4 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                i === activeIdx
-                  ? `${slide.accentBg} border-2 ${slide.accentBorder} ${slide.accentColor} shadow-lg`
-                  : 'border-2 border-gray-800/60 text-gray-500 hover:border-gray-600 hover:text-gray-300 hover:bg-gray-900/50'
-              }`}
-            >
-              <span className="text-2xl">{slide.emoji}</span>
-              <span>{slide.title}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Active slide */}
-        <div key={active.id}>
-          <div className="mb-8">
-            <h3 className={`text-3xl font-bold ${active.accentColor} mb-2`}>{active.title}</h3>
-            <p className="text-xl text-white font-semibold">{active.tagline}</p>
-            <p className="text-gray-400 leading-relaxed mt-3 max-w-2xl">{active.desc}</p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            <div className="rounded-2xl overflow-hidden shadow-2xl">
-              <Image
-                src={active.desktopScreenshot}
-                alt={`${active.title} desktop view`}
-                width={1200}
-                height={675}
-                className="w-full h-auto"
-              />
-            </div>
-
-            {/* Features */}
-            <div>
-              <FeatureGrid items={active.features} />
-              <div className="mt-6 flex flex-wrap gap-3">
-                <DocLink href={active.docHref}>{active.docLabel}</DocLink>
-              </div>
-
-              <div className={`mt-6 p-6 rounded-xl border-2 border-dashed ${active.accentBorder} ${active.accentBg} flex flex-col items-center gap-2`}>
-                <span className="text-4xl">{active.emoji}</span>
-                <p className={`text-sm font-medium ${active.accentColor}`}>Illustration coming soon</p>
-                <p className="text-xs text-gray-500 text-center">Custom graphic for {active.title.toLowerCase()}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ── Main guide ── */
 
 export default function CloudGuide() {
@@ -411,15 +238,7 @@ export default function CloudGuide() {
       </section>
 
       {/* ── Prerequisites ── */}
-      <AnimateIn>
-        <div className="max-w-2xl mx-auto mb-8 p-5 rounded-xl border border-gray-800 bg-gray-900/50 text-center">
-          <p className="text-gray-300 text-sm leading-relaxed">
-            Make sure you&apos;ve completed the{' '}
-            <Link href="/guides/getting-started" className="text-deja-cyan hover:underline">Getting Started</Link>{' '}
-            guide — your account should be created and your server running.
-          </p>
-        </div>
-      </AnimateIn>
+      <BeforeYouStart />
 
       {/* ── Dashboard ── */}
       <FeatureSection
@@ -528,7 +347,20 @@ export default function CloudGuide() {
       </div>
 
       {/* ── Feature Reference Carousel ── */}
-      <CloudFeaturesCarousel />
+      <FeatureCarousel
+        slides={cloudFeatures}
+        sectionLabel="Feature Reference"
+        sectionColor="lime"
+        title="Everything in Cloud"
+        description={
+          <>
+            Beyond the basics, Cloud gives you full control over every aspect of your layout.
+            Configure it here, control it from{' '}
+            <Link href="/guides/throttle" className="text-deja-cyan hover:underline">Throttle</Link>.
+          </>
+        }
+        tabColumns="sm:grid-cols-4"
+      />
 
       {/* ── What's Next ── */}
       <section className="py-16 border-t border-gray-800/50">

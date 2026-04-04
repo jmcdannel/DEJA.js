@@ -1,37 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import CopyButton from '../home/CopyButton';
 import { mdiUsb } from '@mdi/js';
-
-function Step({ number, title, children }: { number: number; title: string; children: React.ReactNode }) {
-  return (
-    <div className="relative pl-14">
-      <div className="absolute left-0 top-0 w-10 h-10 rounded-full border border-deja-lime/30 bg-deja-lime/10 flex items-center justify-center shrink-0">
-        <span className="text-deja-lime font-bold text-sm font-mono">0{number}</span>
-      </div>
-      <h3 className="text-white font-bold text-xl mb-3">{title}</h3>
-      <div className="text-gray-300 leading-relaxed space-y-3">{children}</div>
-    </div>
-  );
-}
-
-function CommandBlock({ command }: { command: string }) {
-  return (
-    <div className="rounded-lg border border-gray-700 bg-gray-950 overflow-hidden my-4">
-      <div className="flex items-center gap-1.5 px-3 py-2 border-b border-gray-800 bg-gray-900">
-        <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-        <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-        <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-        <span className="ml-2 text-gray-500 text-xs font-mono">bash</span>
-      </div>
-      <div className="flex items-center gap-2 px-4 py-3">
-        <span className="text-deja-lime/60 font-mono text-sm select-none shrink-0">$</span>
-        <span className="font-mono text-sm text-deja-lime flex-1 break-all">{command}</span>
-        <CopyButton text={command} />
-      </div>
-    </div>
-  );
-}
+import { Callout, CommandBlock, Step, MdiIcon, BeforeYouStart } from './shared';
+import DocLink from '../DocLink';
 
 function TerminalOutput({ children }: { children: React.ReactNode }) {
   return (
@@ -46,23 +17,6 @@ function TerminalOutput({ children }: { children: React.ReactNode }) {
         {children}
       </div>
     </div>
-  );
-}
-
-function Callout({ emoji, children }: { emoji: string; children: React.ReactNode }) {
-  return (
-    <div className="flex gap-3 p-4 rounded-lg bg-deja-lime/5 border border-deja-lime/20 my-4">
-      <span className="text-lg shrink-0">{emoji}</span>
-      <div className="text-sm text-gray-300 leading-relaxed">{children}</div>
-    </div>
-  );
-}
-
-function MdiIcon({ path, className = '' }: { path: string; className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className}>
-      <path d={path} fill="currentColor" />
-    </svg>
   );
 }
 
@@ -96,28 +50,15 @@ export default function ServerGuide() {
       </div>
 
       {/* Prerequisites */}
-      <section className="mb-12 p-5 rounded-xl border border-gray-800 bg-gray-900/50">
-        <h2 className="text-white font-semibold mb-3">Before You Start</h2>
-        <p className="text-sm text-gray-300 mb-4">
-          This guide assumes you&apos;ve already{' '}
-          <a href="https://cloud.dejajs.com" target="_blank" rel="noopener noreferrer" className="text-deja-cyan hover:underline">signed up</a>
-          {' '}and completed the onboarding steps, which includes installing the server. If you haven&apos;t
-          done that yet, head to the{' '}
-          <Link href="/guides/getting-started" className="text-deja-cyan hover:underline">Getting Started guide</Link>
-          {' '}first — it only takes a few minutes.
-        </p>
-        <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-900 border border-gray-800">
+      <BeforeYouStart>
+        <div className="flex items-start gap-3 p-3 mt-4 rounded-lg bg-gray-900 border border-gray-800 text-left">
           <MdiIcon path={mdiUsb} className="w-5 h-5 shrink-0 text-amber-400 mt-0.5" />
           <p className="text-sm text-gray-300">
             Make sure your <strong className="text-white">DCC-EX CommandStation is connected via USB</strong> to
-            the computer running the server. That&apos;s all you need.
+            the computer running the server.
           </p>
         </div>
-        <p className="text-xs text-gray-500 mt-3">
-          For platform compatibility and system requirements, see the{' '}
-          <Link href="/docs/server/installation" className="text-deja-cyan hover:underline">Installation docs</Link>.
-        </p>
-      </section>
+      </BeforeYouStart>
 
       {/* Steps */}
       <div className="space-y-12">
@@ -247,7 +188,7 @@ export default function ServerGuide() {
           </Callout>
           <p className="text-sm text-gray-400">
             For the full setup details, see the{' '}
-            <Link href="/docs/server/remote-access" className="text-deja-lime hover:underline">Remote Access docs</Link>.
+            <DocLink href="/docs/server/remote-access">Remote Access</DocLink>.
           </p>
         </Step>
       </div>
@@ -336,7 +277,7 @@ export default function ServerGuide() {
             straight to your CommandStation. For example, type{' '}
             <code className="text-deja-lime font-mono text-xs">{'<1>'}</code> to turn track power on.
             See the{' '}
-            <Link href="/docs/server/cli" className="text-deja-cyan hover:underline">CLI Reference</Link>
+            <DocLink href="/docs/server/cli">CLI Reference</DocLink>
             {' '}for more details.
           </p>
         </div>
@@ -377,7 +318,7 @@ export default function ServerGuide() {
           </div>
           <p className="text-xs text-gray-500">
             For a complete guide to every message — startup sequence, DCC commands, shutdown, and common errors — see the{' '}
-            <Link href="/docs/server/cli#understanding-console-output" className="text-deja-cyan hover:underline">Console Output reference</Link>.
+            <DocLink href="/docs/server/cli#understanding-console-output">Console Output reference</DocLink>.
           </p>
         </div>
       </section>
@@ -412,7 +353,7 @@ export default function ServerGuide() {
         </div>
         <p className="text-xs text-gray-500 mt-4">
           For the full CLI reference with all options and flags, see the{' '}
-          <Link href="/docs/server/cli" className="text-deja-lime hover:underline">CLI Reference docs</Link>.
+          <DocLink href="/docs/server/cli">CLI Reference</DocLink>.
         </p>
       </section>
 
@@ -461,7 +402,7 @@ export default function ServerGuide() {
         </div>
         <p className="text-xs text-gray-500 mt-4">
           Still stuck? Check the{' '}
-          <Link href="/docs/server/troubleshooting" className="text-deja-lime hover:underline">full troubleshooting guide</Link>{' '}
+          <DocLink href="/docs/server/troubleshooting">Troubleshooting</DocLink>{' '}
           or reach out on{' '}
           <a href="https://discord.gg/dejajs" target="_blank" rel="noopener noreferrer" className="text-deja-lime hover:underline">Discord</a>.
         </p>

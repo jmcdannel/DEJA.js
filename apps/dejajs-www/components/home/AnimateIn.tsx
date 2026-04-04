@@ -17,7 +17,7 @@ export default function AnimateIn({
   direction = 'up',
 }: AnimateInProps) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-80px' });
+  const isInView = useInView(ref, { once: true, margin: '0px 0px -40px 0px' });
 
   const variants = {
     hidden: {

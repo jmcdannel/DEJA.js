@@ -1,0 +1,69 @@
+---
+title: Deploy to Devices
+description: Use the DEJA deploy script to push configuration and firmware to your IO devices.
+section: io
+order: 16
+---
+
+# Deploy to Devices
+
+The DEJA IO deploy script fetches your device configuration from Firebase and generates the correct config files for each device type. It can also flash firmware to connected boards.
+
+## Running the Deploy Script
+
+```bash
+cd io
+pnpm deploy
+```
+
+The interactive script walks you through:
+
+1. **Board detection** — scans for connected Arduino and Pico W devices
+2. **Device selection** — choose which registered device to deploy to
+3. **Config generation** — fetches device config, effects, and turnouts from Firebase
+4. **File generation** — creates platform-specific config files
+5. **Deployment** — uploads to the device
+
+## What Gets Deployed
+
+### Arduino
+
+The script generates `config.h` with:
+
+- `DEVICE_ID` from your Cloud device entry
+- Feature flags based on what's configured (effects → `ENABLE_OUTPUTS`, turnouts → `ENABLE_TURNOUTS`, etc.)
+- Pin arrays from your device's pin mapping
+- Turnout servo definitions from your configured turnouts
+
+Then compiles and uploads via the Arduino CLI.
+
+### Pico W
+
+The script generates:
+
+- `settings.toml` with WiFi credentials, MQTT broker address, layout ID, and device ID
+- `config.json` with the pin mapping from your device configuration
+
+Then copies all files to the mounted CIRCUITPY drive.
+
+## Firebase Configuration Source
+
+The deploy script reads from Firestore:
+
+| Collection | Data |
+|---|---|
+| `layouts/{layoutId}/devices/{deviceId}` | Device type, connection, pin mapping |
+| `layouts/{layoutId}/effects` | Effects assigned to this device |
+| `layouts/{layoutId}/turnouts` | Turnouts assigned to this device |
+
+Your device must be registered in the Cloud app before deploying.
+
+## Layout-Specific Configs
+
+For layouts with customized wiring, place override configs at:
+
+```
+io/layouts/{layoutId}/deja-pico-w/{deviceId}/config.json
+```
+
+The deploy script checks for layout-specific configs first, falling back to the device's Cloud configuration.
