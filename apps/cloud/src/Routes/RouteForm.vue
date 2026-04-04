@@ -89,96 +89,135 @@ function runCurrentRoute() {
 </script>
 <template>
   <v-form validate-on="submit lazy" @submit.prevent="submit">
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <div class="flex items-center justify-between">
-      <v-label class="m-2 text-4xl">
-        <v-icon :icon="routeType.icon" :color="color" class="w-16 h-16 stoke-none mr-4"></v-icon>
-        {{ isEditing ? 'Edit' : 'Add'}} Route
-      </v-label>
-      <v-chip class="m-2" :color="color" size="x-large">
-        <v-icon :icon="routeType.icon" class="mr-2"></v-icon>
-        {{ routeType.label }}
-      </v-chip>
-    </div>
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+    <!-- ═══ IDENTITY SECTION ═══ -->
+    <div class="form-section" style="--form-accent: #a855f7">
+      <div class="form-section__header">
+        <v-icon size="18" class="form-section__header-icon">mdi-tag-outline</v-icon>
+        <span class="form-section__title">{{ isEditing ? 'Edit' : 'New' }} Route</span>
+      </div>
 
-    <!-- name, points -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <v-text-field
-        v-model="name"
-        label="Name"
-        variant="outlined"
-        :rules="rules.required"
-      ></v-text-field>
-      <div class="grid grid-cols-2 gap-4">
-        <v-text-field
+      <!-- Name + Points grid -->
+      <div class="form-section__grid" style="grid-template-columns: 1fr 1fr 1fr">
+        <div>
+          <label class="form-section__input-label">Name</label>
+          <v-text-field
+            v-model="name"
+            variant="outlined"
+            density="compact"
+            color="purple"
+            :rules="rules.required"
+            hide-details="auto"
+            placeholder="Main Line"
+          />
+          <div class="form-section__input-hint">Display name for this route</div>
+        </div>
+        <div>
+          <label class="form-section__input-label">Point 1</label>
+          <v-text-field
             v-model="point1"
-            label="Point 1"
             variant="outlined"
-            min-width="100"
-            max-width="200"
-          >
-        </v-text-field>
-        <v-text-field
+            density="compact"
+            color="purple"
+            hide-details="auto"
+            placeholder="Yard"
+          />
+          <div class="form-section__input-hint">Starting endpoint</div>
+        </div>
+        <div>
+          <label class="form-section__input-label">Point 2</label>
+          <v-text-field
             v-model="point2"
-            label="Point 2"
             variant="outlined"
-            min-width="100"
-            max-width="200"
-          >
-        </v-text-field>
+            density="compact"
+            color="purple"
+            hide-details="auto"
+            placeholder="Station"
+          />
+          <div class="form-section__input-hint">Ending endpoint</div>
+        </div>
       </div>
     </div>
 
+    <!-- ═══ TURNOUTS SECTION ═══ -->
+    <div class="form-section mt-4" style="--form-accent: #a855f7">
+      <div class="form-section__header">
+        <v-icon size="18" class="form-section__header-icon">mdi-directions-fork</v-icon>
+        <span class="form-section__title">Turnouts</span>
+      </div>
+      <div class="px-5 py-3">
+        <RouteTurnoutForm @change="handleTurnouts" :turnouts="turnouts" />
+      </div>
 
-    <RouteTurnoutForm @change="handleTurnouts" :turnouts="turnouts"></RouteTurnoutForm>
-
-
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <v-sheet class="p-4">
-      <v-btn text="Run Route" @click="runCurrentRoute" variant="flat" :color="color" prepend-icon="mdi-rocket-launch">
-        Run Route
-      </v-btn>
-    </v-sheet>
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <!-- color -->
-    <section class="h-auto  my-4">
-      <v-btn
-        class="min-h-48 min-w-48 border flex"
-        :color="color"
-        @click="editColor = true" >
-        <div class="relative flex flex-col justify-center items-center">
-          <v-icon size="64">mdi-palette</v-icon>
-          <div class="mt-4">Color [{{ color }}]</div>
+      <!-- Run route row -->
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Run Route</span>
+          <span class="form-section__row-desc">Throw all turnouts to their configured positions</span>
         </div>
-      </v-btn>
-    </section>
-    <v-dialog max-width="80vw" v-model="editColor">
-      <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.route?.color ?? routeType.color"></ColorPicker>
-    </v-dialog>
-
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-
-    <TagPicker class="my-4 " v-model="tags"></TagPicker>
-
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 my-4">
-      <v-btn
-        class="mt-2"
-        text="Close"
-        type="button"
-        variant="tonal"
-        @click="$emit('close')"
-      ></v-btn>
-      <v-btn
-        :loading="loading"
-        class="mt-2"
-        text="Submit"
-        type="submit"
-        :color="color"
-      ></v-btn>
+        <v-btn
+          variant="tonal"
+          color="purple"
+          size="small"
+          class="text-none"
+          prepend-icon="mdi-rocket-launch"
+          @click="runCurrentRoute"
+        >
+          Run
+        </v-btn>
+      </div>
     </div>
+
+    <!-- ═══ APPEARANCE SECTION ═══ -->
+    <div class="form-section mt-4" style="--form-accent: #a855f7">
+      <div class="form-section__header">
+        <v-icon size="18" class="form-section__header-icon">mdi-palette-outline</v-icon>
+        <span class="form-section__title">Appearance</span>
+      </div>
+
+      <!-- Color picker row -->
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Color</span>
+          <span class="form-section__row-desc">Theme color for this route in the UI</span>
+        </div>
+        <div
+          class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors"
+          style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
+          @click="editColor = true"
+        >
+          <div class="w-6 h-6 rounded-full border-2 border-white/12" :style="{ background: color }"></div>
+          <span class="text-sm text-white/60 capitalize">{{ color }}</span>
+          <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
+        </div>
+      </div>
+      <v-dialog max-width="80vw" v-model="editColor">
+        <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.route?.color ?? routeType.color" />
+      </v-dialog>
+
+      <!-- Tags row -->
+      <div class="form-section__row form-section__row--block">
+        <span class="form-section__row-name mb-2">Tags</span>
+        <TagPicker v-model="tags" />
+      </div>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <div class="form-section mt-4" style="--form-accent: #a855f7">
+      <div class="form-section__footer" style="gap: 8px">
+        <v-btn variant="tonal" size="small" class="text-none" @click="$emit('close')">Cancel</v-btn>
+        <v-btn
+          :loading="loading"
+          variant="tonal"
+          color="purple"
+          size="small"
+          type="submit"
+          class="text-none"
+        >
+          {{ isEditing ? 'Save Route' : 'Add Route' }}
+        </v-btn>
+      </div>
+    </div>
+
     <ViewJson :json="route" label="Route" />
   </v-form>
 </template>
