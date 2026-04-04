@@ -154,29 +154,6 @@ async function submit() {
 
 <template>
   <v-form @submit.prevent="submit">
-    <!-- ═══ DEVICE SECTION ═══ -->
-    <div class="form-section mb-4" style="--form-accent: #14b8a6">
-      <div class="form-section__header">
-        <v-icon size="18" class="form-section__header-icon">mdi-chip</v-icon>
-        <span class="form-section__title">Device</span>
-      </div>
-      <div class="px-5 py-4">
-        <label class="form-section__input-label">Select Device</label>
-        <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large" :rules="deviceRules">
-          <v-btn
-            v-for="deviceOpt in devices"
-            :value="deviceOpt.id"
-            :key="deviceOpt.id"
-            class="min-h-24 min-w-48 border"
-            color="teal"
-          >
-            {{ deviceOpt.id }}
-          </v-btn>
-        </v-btn-toggle>
-        <div class="form-section__input-hint">Select the hardware device that reads this sensor</div>
-      </div>
-    </div>
-
     <!-- ═══ IDENTITY SECTION ═══ -->
     <div class="form-section mb-4" style="--form-accent: #14b8a6">
       <div class="form-section__header">
@@ -222,6 +199,43 @@ async function submit() {
           <div class="form-section__input-hint">GPIO pin number</div>
         </div>
       </div>
+
+      <div class="form-section__row--block px-5 pb-4">
+        <label class="form-section__input-label">Description</label>
+        <v-textarea
+          v-model="description"
+          rows="3"
+          auto-grow
+          variant="outlined"
+          density="compact"
+          color="teal"
+          hide-details="auto"
+        />
+      </div>
+
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Color</span>
+          <span class="form-section__row-desc">Theme color for this sensor</span>
+        </div>
+        <div
+          class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors"
+          style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
+          @click="editColor = true"
+        >
+          <div class="w-6 h-6 rounded-full border-2 border-white/12" :style="{ background: color }"></div>
+          <span class="text-sm text-white/60 capitalize">{{ color }}</span>
+          <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
+        </div>
+      </div>
+      <v-dialog v-model="editColor" max-width="80vw">
+        <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = sensorColor" />
+      </v-dialog>
+
+      <div class="form-section__row--block px-5 pb-4">
+        <label class="form-section__input-label mb-2">Tags</label>
+        <TagPicker v-model="tags" />
+      </div>
     </div>
 
     <!-- ═══ CONFIGURATION SECTION ═══ -->
@@ -229,6 +243,22 @@ async function submit() {
       <div class="form-section__header">
         <v-icon size="18" class="form-section__header-icon">mdi-tune</v-icon>
         <span class="form-section__title">Configuration</span>
+      </div>
+
+      <div class="px-5 py-4">
+        <label class="form-section__input-label">Select Device</label>
+        <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large" :rules="deviceRules">
+          <v-btn
+            v-for="deviceOpt in devices"
+            :value="deviceOpt.id"
+            :key="deviceOpt.id"
+            class="min-h-24 min-w-48 border"
+            color="teal"
+          >
+            {{ deviceOpt.id }}
+          </v-btn>
+        </v-btn-toggle>
+        <div class="form-section__input-hint">Select the hardware device that reads this sensor</div>
       </div>
 
       <div class="form-section__grid" style="grid-template-columns: 1fr 1fr">
@@ -256,14 +286,6 @@ async function submit() {
           />
           <div class="form-section__input-hint">Electrical input configuration</div>
         </div>
-      </div>
-    </div>
-
-    <!-- ═══ ADVANCED SECTION ═══ -->
-    <div class="form-section mb-4" style="--form-accent: #14b8a6">
-      <div class="form-section__header">
-        <v-icon size="18" class="form-section__header-icon">mdi-cog</v-icon>
-        <span class="form-section__title">Advanced Configuration</span>
       </div>
 
       <div class="form-section__row--block px-5 pt-2 pb-0">
@@ -355,14 +377,6 @@ async function submit() {
           <div class="form-section__input-hint">Activation threshold for analog input</div>
         </div>
       </div>
-    </div>
-
-    <!-- ═══ LINKS SECTION ═══ -->
-    <div class="form-section mb-4" style="--form-accent: #14b8a6">
-      <div class="form-section__header">
-        <v-icon size="18" class="form-section__header-icon">mdi-link-variant</v-icon>
-        <span class="form-section__title">Links</span>
-      </div>
 
       <div class="form-section__grid" style="grid-template-columns: 1fr 1fr">
         <div>
@@ -388,66 +402,19 @@ async function submit() {
           <div class="form-section__input-hint">Automation to run when sensor activates</div>
         </div>
       </div>
-    </div>
 
-    <!-- ═══ APPEARANCE SECTION ═══ -->
-    <div class="form-section mb-4" style="--form-accent: #14b8a6">
-      <div class="form-section__header">
-        <v-icon size="18" class="form-section__header-icon">mdi-palette</v-icon>
-        <span class="form-section__title">Appearance</span>
-      </div>
+      <!-- ═══ ERROR + FOOTER ═══ -->
+      <v-alert
+        v-if="error"
+        type="error"
+        class="mx-5 mb-4"
+        :text="error"
+      />
 
-      <div class="form-section__row--block px-5 pb-4">
-        <label class="form-section__input-label">Description</label>
-        <v-textarea
-          v-model="description"
-          rows="3"
-          auto-grow
-          variant="outlined"
-          density="compact"
-          color="teal"
-          hide-details="auto"
-        />
-      </div>
-
-      <div class="form-section__row">
-        <div class="form-section__row-label">
-          <span class="form-section__row-name">Color</span>
-          <span class="form-section__row-desc">Theme color for this sensor</span>
-        </div>
-        <div
-          class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors"
-          style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
-          @click="editColor = true"
-        >
-          <div class="w-6 h-6 rounded-full border-2 border-white/12" :style="{ background: color }"></div>
-          <span class="text-sm text-white/60 capitalize">{{ color }}</span>
-          <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
-        </div>
-      </div>
-      <v-dialog v-model="editColor" max-width="80vw">
-        <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = sensorColor" />
-      </v-dialog>
-
-      <div class="form-section__row--block px-5 pb-4">
-        <label class="form-section__input-label mb-2">Tags</label>
-        <TagPicker v-model="tags" />
-      </div>
-    </div>
-
-    <!-- ═══ ERROR + FOOTER ═══ -->
-    <v-alert
-      v-if="error"
-      type="error"
-      class="mb-4"
-      :text="error"
-    />
-
-    <div class="form-section" style="--form-accent: #14b8a6">
       <div class="form-section__footer" style="gap: 8px">
         <v-btn variant="text" size="small" class="text-none" @click="emit('close')">Cancel</v-btn>
         <v-btn variant="tonal" color="teal" size="small" type="submit" :loading="loading" class="text-none">
-          Save Sensor
+          Save
         </v-btn>
       </div>
     </div>

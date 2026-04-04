@@ -136,43 +136,6 @@ function runCurrentRoute() {
           <div class="form-section__input-hint">Ending endpoint</div>
         </div>
       </div>
-    </div>
-
-    <!-- ═══ TURNOUTS SECTION ═══ -->
-    <div class="form-section mt-4" style="--form-accent: #a855f7">
-      <div class="form-section__header">
-        <v-icon size="18" class="form-section__header-icon">mdi-directions-fork</v-icon>
-        <span class="form-section__title">Turnouts</span>
-      </div>
-      <div class="px-5 py-3">
-        <RouteTurnoutForm @change="handleTurnouts" :turnouts="turnouts" />
-      </div>
-
-      <!-- Run route row -->
-      <div class="form-section__row">
-        <div class="form-section__row-label">
-          <span class="form-section__row-name">Run Route</span>
-          <span class="form-section__row-desc">Throw all turnouts to their configured positions</span>
-        </div>
-        <v-btn
-          variant="tonal"
-          color="purple"
-          size="small"
-          class="text-none"
-          prepend-icon="mdi-rocket-launch"
-          @click="runCurrentRoute"
-        >
-          Run
-        </v-btn>
-      </div>
-    </div>
-
-    <!-- ═══ APPEARANCE SECTION ═══ -->
-    <div class="form-section mt-4" style="--form-accent: #a855f7">
-      <div class="form-section__header">
-        <v-icon size="18" class="form-section__header-icon">mdi-palette-outline</v-icon>
-        <span class="form-section__title">Appearance</span>
-      </div>
 
       <!-- Color picker row -->
       <div class="form-section__row">
@@ -201,8 +164,34 @@ function runCurrentRoute() {
       </div>
     </div>
 
-    <!-- ═══ FOOTER ═══ -->
+    <!-- ═══ CONFIGURATION SECTION ═══ -->
     <div class="form-section mt-4" style="--form-accent: #a855f7">
+      <div class="form-section__header">
+        <v-icon size="18" class="form-section__header-icon">mdi-directions-fork</v-icon>
+        <span class="form-section__title">Configuration</span>
+      </div>
+      <div class="px-5 py-3">
+        <RouteTurnoutForm @change="handleTurnouts" :turnouts="turnouts" />
+      </div>
+
+      <!-- Run route row -->
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Run Route</span>
+          <span class="form-section__row-desc">Throw all turnouts to their configured positions</span>
+        </div>
+        <v-btn
+          variant="tonal"
+          color="purple"
+          size="small"
+          class="text-none"
+          prepend-icon="mdi-rocket-launch"
+          @click="runCurrentRoute"
+        >
+          Run
+        </v-btn>
+      </div>
+
       <div class="form-section__footer" style="gap: 8px">
         <v-btn variant="tonal" size="small" class="text-none" @click="$emit('close')">Cancel</v-btn>
         <v-btn
@@ -213,7 +202,7 @@ function runCurrentRoute() {
           type="submit"
           class="text-none"
         >
-          {{ isEditing ? 'Save Route' : 'Add Route' }}
+          Save
         </v-btn>
       </div>
     </div>

@@ -120,189 +120,107 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
   <v-form validate-on="submit lazy" @submit.prevent="submit">
     <div class="space-y-4">
 
-      <!-- ═══ IDENTITY SECTION ═══ -->
+      <!-- ═══ IDENTITY ═══ -->
       <div class="form-section" style="--form-accent: #f59e0b">
         <div class="form-section__header">
           <v-icon size="18" class="form-section__header-icon">mdi-tag-outline</v-icon>
           <span class="form-section__title">Identity</span>
         </div>
 
-        <div class="form-section__grid">
+        <div class="form-section__grid" style="grid-template-columns: 1fr 120px">
           <div>
             <label class="form-section__input-label">Name</label>
-            <v-text-field
-              v-model="name"
-              variant="outlined"
-              density="compact"
-              color="amber"
-              :rules="rules.required"
-              hide-details="auto"
-              placeholder="Main Yard Lead"
-            />
-            <div class="form-section__input-hint">Display name for this turnout</div>
+            <v-text-field v-model="name" variant="outlined" density="compact" color="amber" :rules="rules.required" hide-details="auto" placeholder="Main Yard Lead" />
           </div>
           <div>
             <label class="form-section__input-label">Index</label>
-            <v-text-field
-              v-model="index"
-              variant="outlined"
-              density="compact"
-              color="amber"
-              :rules="rules.required"
-              hide-details="auto"
-              placeholder="1"
-              type="number"
-            />
-            <div class="form-section__input-hint">DCC-EX turnout index</div>
+            <v-text-field v-model="index" variant="outlined" density="compact" color="amber" :rules="rules.required" hide-details="auto" placeholder="1" type="number" />
           </div>
         </div>
 
-        <div class="px-5 pb-2">
+        <div class="form-section__row form-section__row--block">
           <label class="form-section__input-label">Description</label>
-          <v-text-field
-            v-model="desc"
-            variant="outlined"
-            density="compact"
-            color="amber"
-            hide-details="auto"
-            placeholder="Optional description"
-          />
-        </div>
-      </div>
-
-      <!-- ═══ CONFIGURATION SECTION ═══ -->
-      <div class="form-section" style="--form-accent: #f59e0b">
-        <div class="form-section__header">
-          <v-icon size="18" class="form-section__header-icon">mdi-cog-outline</v-icon>
-          <span class="form-section__title">Configuration</span>
+          <v-text-field v-model="desc" variant="outlined" density="compact" color="amber" hide-details="auto" placeholder="Optional description" />
         </div>
 
-        <div class="form-section__grid">
-          <div>
-            <label class="form-section__input-label">Straight Value</label>
-            <v-text-field
-              v-model="straight"
-              variant="outlined"
-              density="compact"
-              color="amber"
-              :rules="rules.required"
-              hide-details="auto"
-              placeholder="0"
-              type="number"
-            />
-            <div class="form-section__input-hint">Servo/DCC value for straight position</div>
-          </div>
-          <div>
-            <label class="form-section__input-label">Divergent Value</label>
-            <v-text-field
-              v-model="divergent"
-              variant="outlined"
-              density="compact"
-              color="amber"
-              :rules="rules.required"
-              hide-details="auto"
-              placeholder="90"
-              type="number"
-            />
-            <div class="form-section__input-hint">Servo/DCC value for divergent position</div>
-          </div>
-        </div>
-
-        <!-- Type picker row -->
-        <div class="form-section__row">
-          <div class="form-section__row-label">
-            <span class="form-section__row-name">Type</span>
-            <span class="form-section__row-desc">Turnout mechanism type</span>
-          </div>
-          <div
-            class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors"
-            style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
-            @click="editType = true"
-          >
-            <v-icon size="18" color="amber">mdi-directions-fork</v-icon>
-            <span class="text-sm text-white/60 capitalize">{{ turnoutType }}</span>
-            <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
-          </div>
-        </div>
-
-        <!-- Device picker row -->
-        <div class="form-section__row">
-          <div class="form-section__row-label">
-            <span class="form-section__row-name">Device</span>
-            <span class="form-section__row-desc">Controller device for this turnout</span>
-          </div>
-          <div
-            class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors"
-            style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
-            @click="editDevice = true"
-          >
-            <v-icon size="18" color="amber">mdi-memory</v-icon>
-            <span class="text-sm text-white/60">{{ device }}</span>
-            <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ APPEARANCE SECTION ═══ -->
-      <div class="form-section" style="--form-accent: #f59e0b">
-        <div class="form-section__header">
-          <v-icon size="18" class="form-section__header-icon">mdi-palette-outline</v-icon>
-          <span class="form-section__title">Appearance</span>
-        </div>
-
-        <!-- Color picker row -->
+        <!-- Color -->
         <div class="form-section__row">
           <div class="form-section__row-label">
             <span class="form-section__row-name">Color</span>
-            <span class="form-section__row-desc">Theme color in the UI</span>
           </div>
-          <div
-            class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors"
-            style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
-            @click="editColor = true"
-          >
+          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer" style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)" @click="editColor = true">
             <div class="w-6 h-6 rounded-full border-2 border-white/12" :style="{ background: color }"></div>
             <span class="text-sm text-white/60 capitalize">{{ color }}</span>
             <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
           </div>
         </div>
 
-        <!-- Effect picker row -->
+        <!-- Tags -->
+        <div class="form-section__row form-section__row--block">
+          <span class="form-section__row-name mb-2">Tags</span>
+          <TagPicker v-model="tags" />
+        </div>
+      </div>
+
+      <!-- ═══ CONFIGURATION ═══ -->
+      <div class="form-section" style="--form-accent: #f59e0b">
+        <div class="form-section__header">
+          <v-icon size="18" class="form-section__header-icon">mdi-cog-outline</v-icon>
+          <span class="form-section__title">Configuration</span>
+        </div>
+
+        <div class="form-section__grid" style="grid-template-columns: 1fr 1fr">
+          <div>
+            <label class="form-section__input-label">Straight</label>
+            <v-text-field v-model="straight" variant="outlined" density="compact" color="amber" :rules="rules.required" hide-details="auto" placeholder="0" type="number" />
+            <div class="form-section__input-hint">Value for straight position</div>
+          </div>
+          <div>
+            <label class="form-section__input-label">Divergent</label>
+            <v-text-field v-model="divergent" variant="outlined" density="compact" color="amber" :rules="rules.required" hide-details="auto" placeholder="90" type="number" />
+            <div class="form-section__input-hint">Value for divergent position</div>
+          </div>
+        </div>
+
+        <!-- Type -->
+        <div class="form-section__row">
+          <div class="form-section__row-label">
+            <span class="form-section__row-name">Type</span>
+            <span class="form-section__row-desc">Turnout mechanism</span>
+          </div>
+          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer" style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)" @click="editType = true">
+            <span class="text-sm text-white/60 capitalize">{{ turnoutType }}</span>
+            <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
+          </div>
+        </div>
+
+        <!-- Device -->
+        <div class="form-section__row">
+          <div class="form-section__row-label">
+            <span class="form-section__row-name">Device</span>
+            <span class="form-section__row-desc">Controller device</span>
+          </div>
+          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer" style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)" @click="editDevice = true">
+            <span class="text-sm text-white/60">{{ device }}</span>
+            <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
+          </div>
+        </div>
+
+        <!-- Effect -->
         <div class="form-section__row">
           <div class="form-section__row-label">
             <span class="form-section__row-name">Effect</span>
-            <span class="form-section__row-desc">Sound or light effect on throw</span>
+            <span class="form-section__row-desc">Sound or light on throw</span>
           </div>
-          <div
-            class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors"
-            style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
-            @click="editEffect = true"
-          >
-            <v-icon size="18" color="amber">mdi-rocket</v-icon>
+          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer" style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)" @click="editEffect = true">
             <span class="text-sm text-white/60 truncate max-w-[120px]">{{ effectId || 'None' }}</span>
             <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
           </div>
         </div>
 
-        <!-- Tags row -->
-        <div class="form-section__row form-section__row--block">
-          <span class="form-section__row-name mb-2">Tags</span>
-          <TagPicker v-model="tags" />
-        </div>
-
-        <!-- Footer -->
         <div class="form-section__footer" style="gap: 8px">
           <v-btn variant="tonal" size="small" class="text-none" type="button" @click="handleClose">Cancel</v-btn>
-          <v-btn
-            :loading="loading"
-            variant="tonal"
-            color="amber"
-            size="small"
-            type="submit"
-            class="text-none"
-          >
-            {{ title.startsWith('Edit') ? 'Save Turnout' : 'Add Turnout' }}
-          </v-btn>
+          <v-btn :loading="loading" variant="tonal" color="amber" size="small" type="submit" class="text-none">Save</v-btn>
         </div>
       </div>
 

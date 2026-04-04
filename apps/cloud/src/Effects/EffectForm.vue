@@ -205,37 +205,11 @@ function handleSoundFileSelect(soundFile: string) {
 <template>
   <v-form validate-on="submit lazy" @submit.prevent="submit">
 
-    <!-- ═══ TYPE SECTION (only shown when no type is set yet) ═══ -->
-    <template v-if="!efx.type">
-      <div class="form-section mb-4" style="--form-accent: #6366f1">
-        <div class="form-section__header">
-          <v-icon size="18" class="form-section__header-icon">mdi-shape</v-icon>
-          <span class="form-section__title">Effect Type</span>
-        </div>
-        <div class="form-section__row form-section__row--block">
-          <v-btn-toggle v-model="efxType" divided class="flex-wrap h-auto" size="x-large">
-            <v-btn
-              v-for="efxOpt in efxTypes"
-              :value="efxOpt.value"
-              :key="efxOpt.value"
-              class="min-h-48 min-w-48 border"
-              color="indigo"
-            >
-              <div class="flex flex-col">
-                <v-icon v-if="efxOpt.icon" size="32" :color="efxOpt.color" class="stroke-none">{{ efxOpt.icon }}</v-icon>
-                <div class="mt-4">{{ efxOpt.label }}</div>
-              </div>
-            </v-btn>
-          </v-btn-toggle>
-        </div>
-      </div>
-    </template>
-
-    <!-- ═══ DETAILS SECTION ═══ -->
+    <!-- ═══ SECTION 1: IDENTITY ═══ -->
     <div class="form-section mb-4" style="--form-accent: #6366f1">
       <div class="form-section__header">
         <v-icon size="18" class="form-section__header-icon">mdi-label</v-icon>
-        <span class="form-section__title">Details</span>
+        <span class="form-section__title">Identity</span>
         <v-chip v-if="efxTypeObj" size="x-small" :color="efxTypeObj.color || 'indigo'" variant="tonal" class="ml-2">
           <v-icon v-if="efxTypeObj.icon" start size="14">{{ efxTypeObj.icon }}</v-icon>
           {{ efxType }}
@@ -259,54 +233,9 @@ function handleSoundFileSelect(soundFile: string) {
         </div>
       </div>
 
-      <!-- Pin (when required) -->
-      <template v-if="efxTypeObj?.require?.includes('pin') && efxType !== 'ialed'">
-        <div class="form-section__grid" style="grid-template-columns: 160px 1fr">
-          <div>
-            <label class="form-section__input-label">Pin</label>
-            <v-text-field
-              v-model="pin"
-              variant="outlined"
-              density="compact"
-              color="indigo"
-              hide-details="auto"
-              placeholder="13"
-            />
-            <div class="form-section__input-hint">Arduino pin number</div>
-          </div>
-        </div>
-      </template>
-
       <!-- Tags -->
       <div class="form-section__row form-section__row--block">
         <TagPicker v-model="tags" />
-      </div>
-
-      <!-- Guest Access toggle -->
-      <div class="form-section__row">
-        <div class="form-section__row-label">
-          <span class="form-section__row-name">Guest Access</span>
-          <span class="form-section__row-desc">Allow visitors to control this effect in the tour app</span>
-        </div>
-        <v-switch
-          v-model="allowGuest"
-          color="indigo"
-          hide-details
-          density="compact"
-        >
-          <template #label>
-            <v-icon :icon="allowGuest ? 'mdi-account-check' : 'mdi-account-off'" class="mr-2" />
-            {{ allowGuest ? 'Enabled' : 'Disabled' }}
-          </template>
-        </v-switch>
-      </div>
-    </div>
-
-    <!-- ═══ APPEARANCE SECTION ═══ -->
-    <div class="form-section mb-4" style="--form-accent: #6366f1">
-      <div class="form-section__header">
-        <v-icon size="18" class="form-section__header-icon">mdi-palette</v-icon>
-        <span class="form-section__title">Appearance</span>
       </div>
 
       <!-- Color picker row -->
@@ -328,18 +257,56 @@ function handleSoundFileSelect(soundFile: string) {
       <v-dialog v-model="editColor" max-width="80vw">
         <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.efx?.color ?? 'purple'" />
       </v-dialog>
+
+      <!-- Guest Access toggle -->
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Guest Access</span>
+          <span class="form-section__row-desc">Allow visitors to control this effect in the tour app</span>
+        </div>
+        <v-switch
+          v-model="allowGuest"
+          color="indigo"
+          hide-details
+          density="compact"
+        >
+          <template #label>
+            <v-icon :icon="allowGuest ? 'mdi-account-check' : 'mdi-account-off'" class="mr-2" />
+            {{ allowGuest ? 'Enabled' : 'Disabled' }}
+          </template>
+        </v-switch>
+      </div>
     </div>
 
-    <!-- ═══ CONFIGURATION SECTION (device, sound, macro, ialed) ═══ -->
-    <div
-      v-if="efxTypeObj?.require?.includes('device') || efxType === 'sound' || efxType === 'macro' || efxType === 'ialed'"
-      class="form-section mb-4"
-      style="--form-accent: #6366f1"
-    >
+    <!-- ═══ SECTION 2: CONFIGURATION ═══ -->
+    <div class="form-section" style="--form-accent: #6366f1">
       <div class="form-section__header">
         <v-icon size="18" class="form-section__header-icon">mdi-cog</v-icon>
         <span class="form-section__title">Configuration</span>
       </div>
+
+      <!-- Type picker (only shown when no type is set yet) -->
+      <template v-if="!efx.type">
+        <div class="form-section__row form-section__row--block">
+          <div class="form-section__row-label mb-2">
+            <span class="form-section__row-name">Effect Type</span>
+          </div>
+          <v-btn-toggle v-model="efxType" divided class="flex-wrap h-auto" size="x-large">
+            <v-btn
+              v-for="efxOpt in efxTypes"
+              :value="efxOpt.value"
+              :key="efxOpt.value"
+              class="min-h-48 min-w-48 border"
+              color="indigo"
+            >
+              <div class="flex flex-col">
+                <v-icon v-if="efxOpt.icon" size="32" :color="efxOpt.color" class="stroke-none">{{ efxOpt.icon }}</v-icon>
+                <div class="mt-4">{{ efxOpt.label }}</div>
+              </div>
+            </v-btn>
+          </v-btn-toggle>
+        </div>
+      </template>
 
       <!-- Device selector -->
       <template v-if="efxTypeObj?.require?.includes('device')">
@@ -425,10 +392,26 @@ function handleSoundFileSelect(soundFile: string) {
           />
         </div>
       </template>
-    </div>
 
-    <!-- ═══ SAVE FOOTER ═══ -->
-    <div class="form-section" style="--form-accent: #6366f1">
+      <!-- Pin (when required, non-ialed) -->
+      <template v-if="efxTypeObj?.require?.includes('pin') && efxType !== 'ialed'">
+        <div class="form-section__grid" style="grid-template-columns: 160px 1fr">
+          <div>
+            <label class="form-section__input-label">Pin</label>
+            <v-text-field
+              v-model="pin"
+              variant="outlined"
+              density="compact"
+              color="indigo"
+              hide-details="auto"
+              placeholder="13"
+            />
+            <div class="form-section__input-hint">Arduino pin number</div>
+          </div>
+        </div>
+      </template>
+
+      <!-- Save footer -->
       <div class="form-section__footer">
         <v-btn variant="tonal" size="small" class="text-none" @click="$emit('close')">Cancel</v-btn>
         <v-btn variant="tonal" color="indigo" size="small" type="submit" :loading="loading" class="text-none">Save</v-btn>

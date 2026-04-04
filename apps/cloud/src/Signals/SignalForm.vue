@@ -129,7 +129,7 @@ async function submit() {
         <span class="form-section__title">Identity</span>
       </div>
 
-      <!-- Name grid -->
+      <!-- Name + Aspect grid -->
       <div class="form-section__grid" style="grid-template-columns: 1fr 1fr">
         <div>
           <label class="form-section__input-label">Signal Name</label>
@@ -179,13 +179,54 @@ async function submit() {
         </v-btn-toggle>
         <div class="form-section__input-hint mt-1">Hardware device that controls this signal</div>
       </div>
+
+      <!-- Description row -->
+      <div class="form-section__row form-section__row--block">
+        <label class="form-section__input-label">Description</label>
+        <v-textarea
+          v-model="description"
+          rows="3"
+          auto-grow
+          variant="outlined"
+          density="compact"
+          color="emerald"
+          hide-details="auto"
+        />
+        <div class="form-section__input-hint">Optional notes about this signal's location or wiring</div>
+      </div>
+
+      <!-- Color picker row -->
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Color</span>
+          <span class="form-section__row-desc">Theme color for UI display</span>
+        </div>
+        <div
+          class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors"
+          style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
+          @click="editColor = true"
+        >
+          <div class="w-6 h-6 rounded-full border-2 border-white/12" :style="{ background: color }"></div>
+          <span class="text-sm text-white/60 capitalize">{{ color }}</span>
+          <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
+        </div>
+      </div>
+      <v-dialog v-model="editColor" max-width="80vw">
+        <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = 'cyan'" />
+      </v-dialog>
+
+      <!-- Tags row -->
+      <div class="form-section__row form-section__row--block">
+        <span class="form-section__row-name mb-2">Tags</span>
+        <TagPicker v-model="tags" />
+      </div>
     </div>
 
-    <!-- ═══ PIN CONFIGURATION SECTION ═══ -->
+    <!-- ═══ CONFIGURATION SECTION ═══ -->
     <div class="form-section" style="--form-accent: #10b981">
       <div class="form-section__header">
         <v-icon size="18" class="form-section__header-icon">mdi-electric-switch</v-icon>
-        <span class="form-section__title">Pin Configuration</span>
+        <span class="form-section__title">Configuration</span>
       </div>
 
       <!-- Pin inputs grid -->
@@ -249,66 +290,15 @@ async function submit() {
         <v-switch v-model="commonAnode" color="emerald" hide-details density="compact" />
       </div>
 
-      <!-- Description row -->
-      <div class="form-section__row form-section__row--block">
-        <label class="form-section__input-label">Description</label>
-        <v-textarea
-          v-model="description"
-          rows="3"
-          auto-grow
-          variant="outlined"
-          density="compact"
-          color="emerald"
-          hide-details="auto"
-        />
-        <div class="form-section__input-hint">Optional notes about this signal's location or wiring</div>
-      </div>
-    </div>
+      <!-- Error alert -->
+      <v-alert
+        v-if="error"
+        type="error"
+        class="mt-2"
+        :text="error"
+      />
 
-    <!-- ═══ APPEARANCE SECTION ═══ -->
-    <div class="form-section" style="--form-accent: #10b981">
-      <div class="form-section__header">
-        <v-icon size="18" class="form-section__header-icon">mdi-palette</v-icon>
-        <span class="form-section__title">Appearance</span>
-      </div>
-
-      <!-- Color picker row -->
-      <div class="form-section__row">
-        <div class="form-section__row-label">
-          <span class="form-section__row-name">Color</span>
-          <span class="form-section__row-desc">Theme color for UI display</span>
-        </div>
-        <div
-          class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors"
-          style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
-          @click="editColor = true"
-        >
-          <div class="w-6 h-6 rounded-full border-2 border-white/12" :style="{ background: color }"></div>
-          <span class="text-sm text-white/60 capitalize">{{ color }}</span>
-          <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
-        </div>
-      </div>
-      <v-dialog v-model="editColor" max-width="80vw">
-        <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = 'cyan'" />
-      </v-dialog>
-
-      <!-- Tags row -->
-      <div class="form-section__row form-section__row--block">
-        <span class="form-section__row-name mb-2">Tags</span>
-        <TagPicker v-model="tags" />
-      </div>
-    </div>
-
-    <!-- Error alert -->
-    <v-alert
-      v-if="error"
-      type="error"
-      class="mb-4"
-      :text="error"
-    />
-
-    <!-- ═══ FOOTER ═══ -->
-    <div class="form-section" style="--form-accent: #10b981">
+      <!-- Footer -->
       <div class="form-section__footer" style="gap: 8px">
         <v-btn variant="text" size="small" class="text-none" @click="emit('close')">Cancel</v-btn>
         <v-btn
@@ -319,7 +309,7 @@ async function submit() {
           :loading="loading"
           class="text-none"
         >
-          Save Signal
+          Save
         </v-btn>
       </div>
     </div>
