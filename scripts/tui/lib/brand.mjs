@@ -78,6 +78,7 @@ export const MENU_ITEMS = [
   { label: 'Stop Server',        action: 'stop'    },
   { label: 'Restart Server',     action: 'restart' },
   { label: 'Devices',            action: 'devices' },
+  { label: 'Deploy Firmware',    action: 'deploy'  },
   { label: 'Status Panel',       action: 'status'  },
   { label: 'Select Serial Port', action: 'ports'   },
   { label: 'Toggle Tunnel',      action: 'tunnel'  },

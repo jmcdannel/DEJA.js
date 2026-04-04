@@ -255,6 +255,7 @@ export function App() {
           case 'ports':   transitionMode('ports'); break
           case 'tunnel':  toggleTunnel(); transitionMode('logs'); break
           case 'export':  exportLogs(); transitionMode('logs'); break
+          case 'deploy':  handleCommand('/deploy'); transitionMode('logs'); break
         }
         return
       }
