@@ -74,11 +74,25 @@ select {
 
 /* ═══ Form Section — reusable card pattern for cloud app forms ═══ */
 .form-section {
+  position: relative;
   background: rgba(var(--v-theme-surface), 0.5);
   border: 1px solid rgba(var(--v-theme-on-surface), 0.07);
   border-radius: 14px;
   margin-bottom: 16px;
   overflow: clip;
+}
+.form-section::after {
+  content: '';
+  position: absolute;
+  bottom: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 60%;
+  background: radial-gradient(ellipse at center, var(--form-accent, rgb(var(--v-theme-primary))) 0%, transparent 70%);
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .form-section__header {
