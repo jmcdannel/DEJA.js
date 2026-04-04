@@ -7,7 +7,8 @@ import { createLogger } from '@repo/utils'
 import { ConsistIndicator } from '@repo/ui'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import Functions from '@/Roster/Functions/Functions.vue'
-import ColorPicker from '@/Common/Color/ColorPicker.vue'
+import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
+import FormPageHeader from '@/Common/FormPageHeader.vue'
 
 const log = createLogger('EditLoco')
 const { syncRosterEntry } = useDcc()
@@ -23,7 +24,6 @@ const { getLoco, updateLoco, getRoadname } = useLocos()
 const locoDoc = getLoco(parseInt(route.params.address.toString()))
 const loco = computed(() => (locoDoc.value as Loco) || null)
 
-const editColor = ref(false)
 const roadname = ref<RoadName | undefined>(undefined)
 const color = ref<string>('pink')
 const hasSound = ref(true)
@@ -71,36 +71,22 @@ async function saveFunctions() {
 </script>
 <template>
   <div v-if="loco" class="animate-fade-in-up space-y-4 max-w-[800px] px-4">
-    <!-- ═══ HERO HEADER ═══ -->
-    <div
-      class="flex items-center gap-4 p-5 rounded-[14px] border"
-      :style="{
-        background: `linear-gradient(135deg, ${color === 'pink' ? 'rgba(244,114,182,0.08)' : `color-mix(in srgb, ${color} 8%, transparent)`}, transparent)`,
-        borderColor: `color-mix(in srgb, ${color} 15%, transparent)`,
-      }"
+    <FormPageHeader
+      icon="mdi-train"
+      :title="loco.name || 'Unnamed Loco'"
+      :color="color"
+      back-label="Roster"
+      :back-route="{ name: 'Roster' }"
     >
-      <div
-        class="w-14 h-14 rounded-[14px] flex items-center justify-center flex-shrink-0"
-        :style="{ background: `color-mix(in srgb, ${color} 80%, black)` }"
-      >
-        <v-icon size="28" color="white">mdi-train</v-icon>
-      </div>
-      <div class="flex-1 min-w-0">
-        <h1 class="text-xl font-bold text-white/95 tracking-tight">{{ loco.name || 'Unnamed Loco' }}</h1>
-        <div class="flex items-center gap-2.5 mt-1">
-          <span class="text-xs text-white/45 bg-white/6 px-2 py-0.5 rounded font-mono">DCC #{{ loco.address }}</span>
-          <span
-            v-if="roadname?.label"
-            class="text-xs px-2 py-0.5 rounded"
-            :style="{ color: `color-mix(in srgb, ${color} 80%, white)`, background: `color-mix(in srgb, ${color} 10%, transparent)` }"
-          >{{ roadname.label }}</span>
-        </div>
-      </div>
-      <v-btn variant="outlined" size="small" class="text-none" @click="router.push({ name: 'Roster' })">
-        <v-icon start size="16">mdi-arrow-left</v-icon>
-        Roster
-      </v-btn>
-    </div>
+      <template #subtitle>
+        <span class="text-xs text-white/45 bg-white/6 px-2 py-0.5 rounded font-mono">DCC #{{ loco.address }}</span>
+        <span
+          v-if="roadname?.label"
+          class="text-xs px-2 py-0.5 rounded"
+          :style="{ color: `color-mix(in srgb, ${color} 80%, white)`, background: `color-mix(in srgb, ${color} 10%, transparent)` }"
+        >{{ roadname.label }}</span>
+      </template>
+    </FormPageHeader>
 
     <!-- ═══ IDENTITY SECTION — pink accent ═══ -->
     <v-form validate-on="submit lazy" @submit.prevent="saveIdentity">
@@ -153,25 +139,7 @@ async function saveFunctions() {
           </v-chip-group>
         </div>
 
-        <!-- Color picker row -->
-        <div class="form-section__row">
-          <div class="form-section__row-label">
-            <span class="form-section__row-name">Color</span>
-            <span class="form-section__row-desc">Theme color for throttle & UI</span>
-          </div>
-          <div
-            class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors"
-            style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
-            @click="editColor = true"
-          >
-            <div class="w-6 h-6 rounded-full border-2 border-white/12" :style="{ background: color }"></div>
-            <span class="text-sm text-white/60 capitalize">{{ color }}</span>
-            <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
-          </div>
-        </div>
-        <v-dialog v-model="editColor" max-width="80vw">
-          <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = loco?.meta?.color ?? 'pink'" />
-        </v-dialog>
+        <ColorPickerRow v-model="color" :default-color="loco?.meta?.color ?? 'pink'" description="Theme color for throttle & UI" />
 
         <!-- Sound toggle row -->
         <div class="form-section__row">

@@ -4,7 +4,7 @@ import { useLayout } from '@repo/modules'
 import { useSensors, type Sensor, sensorTypes, sensorInputTypes } from '@repo/modules/sensors'
 import { createLogger } from '@repo/utils'
 import { useNotification } from '@repo/ui'
-import ColorPicker from '@/Common/Color/ColorPicker.vue'
+import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 
 const log = createLogger('SensorForm')
@@ -18,7 +18,6 @@ const { notify } = useNotification()
 
 const devices = getDevices()
 
-const editColor = ref(false)
 const name = ref(props.sensor?.name ?? '')
 const device = ref(props.sensor?.device ?? '')
 const index = ref<number | string | undefined>(props.sensor?.index)
@@ -213,24 +212,7 @@ async function submit() {
         />
       </div>
 
-      <div class="form-section__row">
-        <div class="form-section__row-label">
-          <span class="form-section__row-name">Color</span>
-          <span class="form-section__row-desc">Theme color for this sensor</span>
-        </div>
-        <div
-          class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors"
-          style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
-          @click="editColor = true"
-        >
-          <div class="w-6 h-6 rounded-full border-2 border-white/12" :style="{ background: color }"></div>
-          <span class="text-sm text-white/60 capitalize">{{ color }}</span>
-          <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
-        </div>
-      </div>
-      <v-dialog v-model="editColor" max-width="80vw">
-        <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = sensorColor" />
-      </v-dialog>
+      <ColorPickerRow v-model="color" :default-color="(props.sensor as any)?.color ?? 'teal'" description="Theme color for this sensor" />
 
       <div class="form-section__row--block px-5 pb-4">
         <label class="form-section__input-label mb-2">Tags</label>

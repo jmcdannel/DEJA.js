@@ -7,7 +7,7 @@ import ViewJson from '@/Core/UI/ViewJson.vue'
 import MacroForm from '@/Effects/MacroForm.vue'
 import IALEDForm from '@/Effects/IALEDForm.vue'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
-import ColorPicker from '@/Common/Color/ColorPicker.vue'
+import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import SoundFileList from '@/Effects/Sounds/SoundFileList.vue'
 
@@ -66,8 +66,6 @@ log.debug('EffectForm: Imports check:', {
 
 log.debug('EffectForm: efxTypes value:', efxTypes)
 log.debug('EffectForm: Component mounting with props:', props.efx)
-
-const editColor = ref(false)
 
 const device = ref(props.efx?.device || DEFAULT_DEVICE)
 const name = ref(props.efx?.name || '')
@@ -239,25 +237,7 @@ function handleSoundFileSelect(soundFile: string) {
         <TagPicker v-model="tags" />
       </div>
 
-      <!-- Color picker row -->
-      <div class="form-section__row">
-        <div class="form-section__row-label">
-          <span class="form-section__row-name">Color</span>
-          <span class="form-section__row-desc">Theme color for this effect in the UI</span>
-        </div>
-        <div
-          class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors"
-          style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
-          @click="editColor = true"
-        >
-          <div class="w-6 h-6 rounded-full border-2 border-white/12" :style="{ background: color }"></div>
-          <span class="text-sm text-white/60 capitalize">{{ color }}</span>
-          <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
-        </div>
-      </div>
-      <v-dialog v-model="editColor" max-width="80vw">
-        <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.efx?.color ?? 'purple'" />
-      </v-dialog>
+      <ColorPickerRow v-model="color" :default-color="props.efx?.color ?? 'purple'" description="Theme color for this effect in the UI" />
 
       <!-- Guest Access toggle -->
       <div class="form-section__row">

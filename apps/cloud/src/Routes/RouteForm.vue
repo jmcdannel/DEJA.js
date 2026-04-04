@@ -5,7 +5,7 @@ import { useRoutes } from '@repo/modules/routes/useRoutes'
 import { createLogger } from '@repo/utils'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import RouteTurnoutForm from '@/Routes/RouteTurnoutForm.vue'
-import ColorPicker from '@/Common/Color/ColorPicker.vue'
+import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import { slugify } from '@repo/utils/slugify'
 
@@ -23,8 +23,6 @@ const props = defineProps<{
 const emit = defineEmits(['close'])
 
 const { setRoute, runRoute } = useRoutes()
-
-const editColor = ref(false)
 
 const name = ref(props.route?.name || '')
 const point1 = ref(props.route?.point1)
@@ -137,25 +135,7 @@ function runCurrentRoute() {
         </div>
       </div>
 
-      <!-- Color picker row -->
-      <div class="form-section__row">
-        <div class="form-section__row-label">
-          <span class="form-section__row-name">Color</span>
-          <span class="form-section__row-desc">Theme color for this route in the UI</span>
-        </div>
-        <div
-          class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer transition-colors"
-          style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
-          @click="editColor = true"
-        >
-          <div class="w-6 h-6 rounded-full border-2 border-white/12" :style="{ background: color }"></div>
-          <span class="text-sm text-white/60 capitalize">{{ color }}</span>
-          <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
-        </div>
-      </div>
-      <v-dialog max-width="80vw" v-model="editColor">
-        <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.route?.color ?? routeType.color" />
-      </v-dialog>
+      <ColorPickerRow v-model="color" :default-color="props.route?.color ?? 'purple'" description="Theme color for this route" />
 
       <!-- Tags row -->
       <div class="form-section__row form-section__row--block">

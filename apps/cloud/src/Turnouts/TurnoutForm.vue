@@ -7,7 +7,7 @@ import { slugify, createLogger } from '@repo/utils'
 import TurnoutTypePicker from '@/Turnouts/TurnoutTypePicker.vue'
 import DevicePicker from '@/Layout/Devices/DevicePicker.vue'
 import EffectPicker from '@/Effects/EffectPicker.vue'
-import ColorPicker from '@/Common/Color/ColorPicker.vue'
+import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 
@@ -31,7 +31,6 @@ const { setTurnout } = useTurnouts()
 const devices = getDevices()
 // const effects = getEffects()
 
-const editColor = ref(false)
 const editEffect = ref(false)
 const editType = ref(false)
 const editDevice = ref(false)
@@ -144,16 +143,7 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
         </div>
 
         <!-- Color -->
-        <div class="form-section__row">
-          <div class="form-section__row-label">
-            <span class="form-section__row-name">Color</span>
-          </div>
-          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer" style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)" @click="editColor = true">
-            <div class="w-6 h-6 rounded-full border-2 border-white/12" :style="{ background: color }"></div>
-            <span class="text-sm text-white/60 capitalize">{{ color }}</span>
-            <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
-          </div>
-        </div>
+        <ColorPickerRow v-model="color" :default-color="props.turnout?.color ?? 'yellow'" description="Theme color in the UI" />
 
         <!-- Tags -->
         <div class="form-section__row form-section__row--block">
@@ -243,14 +233,6 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
       :color="color"
       @select="editDevice = false"
       @cancel="editDevice = false; device = props?.turnout?.device ?? DEFAULT_DEVICE"
-    />
-  </v-dialog>
-
-  <v-dialog v-model="editColor" max-width="80vw">
-    <ColorPicker
-      v-model="color"
-      @select="editColor = false"
-      @cancel="editColor = false; color = props?.turnout?.color ?? 'yellow'"
     />
   </v-dialog>
 

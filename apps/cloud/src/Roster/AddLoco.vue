@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLocos, ROADNAMES } from '@repo/modules/locos'
+import FormPageHeader from '@/Common/FormPageHeader.vue'
 
 interface ValidationRules {
   required: ((val: unknown) => boolean | string)[]
@@ -32,28 +33,14 @@ async function submit() {
 
 <template>
   <div class="animate-fade-in-up space-y-4 max-w-[800px] px-4">
-    <!-- ═══ HERO HEADER ═══ -->
-    <div
-      class="flex items-center gap-4 p-5 rounded-[14px] border"
-      style="
-        background: linear-gradient(135deg, rgba(244, 114, 182, 0.08), transparent);
-        border-color: rgba(244, 114, 182, 0.15);
-      "
-    >
-      <div class="w-14 h-14 rounded-[14px] flex items-center justify-center flex-shrink-0 bg-pink-500/80">
-        <v-icon size="28" color="white">mdi-train</v-icon>
-      </div>
-      <div class="flex-1 min-w-0">
-        <h1 class="text-xl font-bold text-white/95 tracking-tight">New Locomotive</h1>
-        <div class="flex items-center gap-2.5 mt-1">
-          <span class="text-xs text-white/45">Add a loco to your roster</span>
-        </div>
-      </div>
-      <v-btn variant="outlined" size="small" class="text-none" @click="router.push({ name: 'Roster' })">
-        <v-icon start size="16">mdi-arrow-left</v-icon>
-        Roster
-      </v-btn>
-    </div>
+    <FormPageHeader
+      icon="mdi-train"
+      title="New Locomotive"
+      subtitle="Add a loco to your roster"
+      color="#f472b6"
+      back-label="Roster"
+      :back-route="{ name: 'Roster' }"
+    />
 
     <!-- ═══ IDENTITY SECTION ═══ -->
     <v-form validate-on="submit lazy" @submit.prevent="submit">
