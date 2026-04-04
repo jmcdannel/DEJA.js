@@ -22,9 +22,11 @@ import { HelpBar } from './components/HelpBar.mjs'
 import { MenuOverlay } from './components/MenuOverlay.mjs'
 import { PortSelector } from './components/PortSelector.mjs'
 import { StatusPanel } from './components/StatusPanel.mjs'
+import { SettingsPanel, SETTINGS_ITEMS, getInitialSettings } from './components/SettingsPanel.mjs'
 import { OnboardingScreen } from './components/OnboardingScreen.mjs'
 import { CommandInput } from './components/CommandInput.mjs'
 import { DeviceList } from './components/DeviceList.mjs'
+import { DccExReference } from './components/DccExReference.mjs'
 import { TopicInput } from './components/TopicInput.mjs'
 
 // Hooks
@@ -82,6 +84,10 @@ export function App() {
   const [portIndex, setPortIndex]           = useState(0)
   const [availablePorts, setAvailablePorts] = useState([])
   const [showHelp, setShowHelp]             = useState(false)
+  const [settings, setSettings]             = useState(() => getInitialSettings(readConfig()))
+  const [settingsIndex, setSettingsIndex]   = useState(0)
+  const [settingsEditing, setSettingsEditing] = useState(null)
+  const [settingsBuffer, setSettingsBuffer] = useState('')
   const [startupTip]                        = useState(() =>
     STARTUP_TIPS[Math.floor(Math.random() * STARTUP_TIPS.length)]
   )
@@ -112,7 +118,20 @@ export function App() {
     }
     if (next === 'menu') setMenuIndex(0)
     if (next === 'devices') setDeviceIndex(0)
+    if (next === 'settings') { setSettingsIndex(0); setSettingsEditing(null); setSettingsBuffer('') }
   }, [])
+
+  // ── Settings ──────────────────────────────────────────────────────────────
+
+  const updateSetting = useCallback((key, value) => {
+    setSettings(prev => ({ ...prev, [key]: value }))
+    writeConfig({ [key]: value })
+    const item = SETTINGS_ITEMS.find(s => s.key === key)
+    if (item?.envKey) process.env[item.envKey] = String(value)
+    if (item?.requiresRestart) {
+      showHint('Setting saved. Restart server to apply.')
+    }
+  }, [showHint])
 
   // ── Connect / Disconnect device ────────────────────────────────────────────
 
@@ -143,6 +162,21 @@ export function App() {
       timestamp: ServerValue.TIMESTAMP,
     })
   }, [rtdb, layoutId])
+
+  // ── Send raw DCC-EX command to all connected command stations ──────────────
+
+  const sendDccCommand = useCallback((raw) => {
+    if (!rtdb || !layoutId) {
+      addLog('Cannot send DCC command — not connected to Firebase.')
+      return
+    }
+    rtdb.ref(`dccCommands/${layoutId}`).push({
+      action: 'dcc',
+      payload: JSON.stringify(raw),
+      timestamp: ServerValue.TIMESTAMP,
+    })
+    addLog(`» ${raw}`)
+  }, [rtdb, layoutId, addLog])
 
   // ── handleCommand (text input + hotkey actions) ────────────────────────────
 
@@ -178,12 +212,12 @@ export function App() {
     addLog, showHint, transitionMode,
     spawnServer, stopServer, restartServer, setStatus,
     childRef,
-    toggleTunnel, tunnelCleanup,
+    tunnelCleanup,
     exportLogs, cycleFilter,
     get devices() { return devicesRef.current },
     connectDevice, disconnectDevice,
   }), [addLog, showHint, transitionMode, spawnServer, stopServer, restartServer,
-       setStatus, toggleTunnel, tunnelCleanup, exportLogs, cycleFilter,
+       setStatus, tunnelCleanup, exportLogs, cycleFilter,
        connectDevice, disconnectDevice])
 
   // ── Auto-start: triggers on mode='logs' ────────────────────────────────────
@@ -205,16 +239,19 @@ export function App() {
     firebaseCleanup()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Tunnel: auto-start when server running ─────────────────────────────────
+  // ── Tunnel: auto-start when server running + tunnel enabled in settings ────
 
   useEffect(() => {
-    if (status === 'running' && !tunnelRef.current) {
+    if (status === 'running' && !tunnelRef.current && settings.enableTunnel) {
       spawnTunnel()
+    }
+    if (status === 'running' && tunnelRef.current && !settings.enableTunnel) {
+      stopTunnel()
     }
     if (status === 'stopped' && tunnelRef.current) {
       stopTunnel()
     }
-  }, [status, spawnTunnel, stopTunnel])
+  }, [status, settings.enableTunnel, spawnTunnel, stopTunnel])
 
   // ── Keyboard input — mode-branched ─────────────────────────────────────────
 
@@ -250,11 +287,10 @@ export function App() {
             break
           case 'stop':    handleCommand('stop'); transitionMode('logs'); break
           case 'restart': handleCommand('restart'); transitionMode('logs'); break
-          case 'devices': transitionMode('devices'); break
-          case 'status':  transitionMode('status'); break
-          case 'ports':   transitionMode('ports'); break
-          case 'tunnel':  toggleTunnel(); transitionMode('logs'); break
-          case 'export':  exportLogs(); transitionMode('logs'); break
+          case 'devices':  transitionMode('devices'); break
+          case 'settings': transitionMode('settings'); break
+          case 'dcc-ref':  transitionMode('dcc-ref'); break
+          case 'export':   exportLogs(); transitionMode('logs'); break
         }
         return
       }
@@ -327,7 +363,38 @@ export function App() {
       return
     }
 
-    // Port selector mode
+    // Settings mode
+    if (mode === 'settings') {
+      if (settingsEditing) {
+        // Editing a text/number field
+        if (key.escape) { setSettingsEditing(null); setSettingsBuffer(''); return }
+        if (key.return) {
+          updateSetting(settingsEditing, settingsBuffer)
+          setSettingsEditing(null)
+          setSettingsBuffer('')
+          return
+        }
+        if (key.backspace || key.delete) { setSettingsBuffer(b => b.slice(0, -1)); return }
+        if (!key.ctrl && !key.meta && input) { setSettingsBuffer(b => b + input); return }
+        return
+      }
+      if (key.upArrow)   { setSettingsIndex(i => Math.max(0, i - 1)); return }
+      if (key.downArrow) { setSettingsIndex(i => Math.min(SETTINGS_ITEMS.length - 1, i + 1)); return }
+      if (key.escape)    { transitionMode('logs'); return }
+      if (key.return || input === ' ') {
+        const item = SETTINGS_ITEMS[settingsIndex]
+        if (item.type === 'toggle') {
+          updateSetting(item.key, !settings[item.key])
+        } else {
+          setSettingsEditing(item.key)
+          setSettingsBuffer(String(settings[item.key] || ''))
+        }
+        return
+      }
+      return
+    }
+
+    // Port selector mode (accessible from devices [p] only)
     if (mode === 'ports') {
       if (key.upArrow)   { setPortIndex(i => Math.max(0, i - 1)); return }
       if (key.downArrow) { setPortIndex(i => Math.min(Math.max(0, availablePorts.length - 1), i + 1)); return }
@@ -347,6 +414,12 @@ export function App() {
 
     // Status panel mode
     if (mode === 'status') {
+      if (key.escape || input === 'q') { transitionMode('logs'); return }
+      return
+    }
+
+    // DCC-EX reference mode
+    if (mode === 'dcc-ref') {
       if (key.escape || input === 'q') { transitionMode('logs'); return }
       return
     }
@@ -376,6 +449,8 @@ export function App() {
         } else {
           addLog(`Unknown command: "${raw}". Type /help for available commands.`)
         }
+      } else if (raw.startsWith('* ')) {
+        sendDccCommand(raw.slice(2))
       } else {
         handleCommand(raw)
       }
@@ -408,7 +483,6 @@ export function App() {
     if (input === '?') { setShowHelp(v => !v); return }
     if (input === 'r') { handleCommand('restart'); return }
     if (input === 's') { handleCommand('stop'); return }
-    if (input === 't') { toggleTunnel(); return }
     if (input === 'e') { exportLogs(); return }
     if (input === 'l') { cycleFilter(); return }
 
@@ -477,25 +551,15 @@ export function App() {
           // Help panel (shown above log pane when toggled)
           h(HelpPanel, { visible: showHelp }),
 
-          // Main body: log pane OR menu OR port selector OR device list
-          mode === 'menu'
-            ? h(MenuOverlay, { items: MENU_ITEMS, selectedIndex: menuIndex, cols })
-            : mode === 'ports'
-              ? h(PortSelector, {
-                  ports: availablePorts,
-                  portIndex,
-                  currentPort: cfg.serialPort || null,
-                  cols,
-                })
-              : mode === 'devices'
-                ? h(DeviceList, { devices, selectedIndex: deviceIndex, cols, serverStatus: status })
-                : mode === 'topic-input'
-                  ? h(TopicInput, {
-                      ref: topicInputRef,
-                      deviceName: editingDeviceRef.current?.id || '',
-                      currentTopic: editingDeviceRef.current?.topic || '',
-                    })
-                : h(LogPane, { visibleLines, paddingLines, logHeight, filter: logFilter }),
+          // Main body — mode-switched panel
+          ({
+            menu:     () => h(MenuOverlay, { items: MENU_ITEMS, selectedIndex: menuIndex, cols }),
+            settings: () => h(SettingsPanel, { settings, selectedIndex: settingsIndex, editingKey: settingsEditing, editBuffer: settingsBuffer, cols }),
+            ports:    () => h(PortSelector, { ports: availablePorts, portIndex, currentPort: cfg.serialPort || null, cols }),
+            devices:  () => h(DeviceList, { devices, selectedIndex: deviceIndex, cols, serverStatus: status }),
+            'dcc-ref': () => h(DccExReference, { cols }),
+            'topic-input': () => h(TopicInput, { ref: topicInputRef, deviceName: editingDeviceRef.current?.id || '', currentTopic: editingDeviceRef.current?.topic || '' }),
+          }[mode] ?? (() => h(LogPane, { visibleLines, paddingLines, logHeight, filter: logFilter })))(),
 
           // Contextual hint row — system hints take priority, tips shown as fallback
           h(ContextHintRow, { hint: contextHint, tip: currentTip }),
@@ -507,6 +571,7 @@ export function App() {
       status,
       pid,
       startTimeRef,
+      layoutId: layoutId || cfg.layoutId || null,
       connectedCount,
       totalCount,
       throttleCount,

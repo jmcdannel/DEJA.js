@@ -1,0 +1,83 @@
+---
+title: Installation
+description: Install the DEJA Server on macOS, Linux, or Raspberry Pi with a single command — platform requirements, what the installer does, and serial port setup.
+order: 2
+---
+
+# Installation
+
+Getting the DEJA Server running takes about two minutes. One command does everything — downloads the server, detects your CommandStation, and starts it up.
+
+## Requirements
+
+- **Node.js 20 or later** — check with `node --version`. If you need to install it, visit [nodejs.org](https://nodejs.org/).
+- **A USB cable** connecting your DCC-EX CommandStation to the computer running the server.
+- **A supported platform:**
+
+| Platform | Notes |
+|----------|-------|
+| macOS (Intel or Apple Silicon) | Works out of the box |
+| Linux (x86_64 or ARM64) | May need serial port permissions (see below) |
+| Raspberry Pi (Pi 4 or 5) | Runs great — plug in your CommandStation via USB |
+| Windows | Supported through [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) — run the installer from a WSL terminal |
+
+## Install
+
+Open a terminal on the computer connected to your CommandStation and run:
+
+```bash
+curl -fsSL https://install.dejajs.com | bash
+```
+
+You can also find a personalized install link in the [Cloud app](https://cloud.dejajs.com) under **Settings → Install**. That link includes your account info so you won't need to enter it manually.
+
+## What the Installer Does
+
+The installer runs through these steps automatically:
+
+1. **Detects your platform** — confirms macOS, Linux, or Raspberry Pi and the correct architecture.
+2. **Checks Node.js** — verifies you have Node.js 20 or later. If not, it tells you how to install it.
+3. **Links your account** — connects the server to your DEJA Cloud account using your User ID and Layout ID. If you used the personalized install link, this is automatic.
+4. **Sets up configuration** — creates the `~/.deja/` directory with your environment file and credentials.
+5. **Detects serial ports** — scans for USB devices that look like a DCC-EX CommandStation.
+6. **Downloads the server** — pulls the latest release and installs dependencies.
+7. **Installs the `deja` CLI** — adds the `deja` command to your terminal so you can manage the server.
+8. **Starts the server** — launches the server and connects to your CommandStation.
+
+## Serial Port Permissions (Linux / Raspberry Pi)
+
+On Linux, your user account may need permission to access USB serial ports. If the installer warns you about this, run:
+
+```bash
+sudo usermod -a -G dialout $USER
+```
+
+Then log out and log back in for the change to take effect. This only needs to be done once.
+
+## Reinstalling
+
+If something goes wrong or you want a fresh start, just run the install command again:
+
+```bash
+curl -fsSL https://install.dejajs.com | bash
+```
+
+This downloads a clean copy of the server and reconfigures everything. Your account and layout stay the same.
+
+## What Gets Installed
+
+Everything lives in `~/.deja/` inside your home directory:
+
+| Path | What it is |
+|------|-----------|
+| `~/.deja/bin/deja` | The `deja` CLI command |
+| `~/.deja/server/` | The server runtime |
+| `~/.deja/config.json` | Your account and layout configuration |
+| `~/.deja/.env` | Environment variables (Firebase credentials, feature flags) |
+| `~/.deja/logs/` | Server log files |
+
+## Next Steps
+
+- Run `deja status` to verify everything is connected — see [CLI Reference](/docs/server/cli)
+- Open [throttle.dejajs.com](https://throttle.dejajs.com) on any device and start driving
+- Check the [Troubleshooting](/docs/server/troubleshooting) page if anything isn't working

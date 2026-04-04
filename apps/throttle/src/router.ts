@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { getCurrentUser } from 'vuefire'
 import type { User } from 'firebase/auth'
-import { requireLayout , LogoutView } from '@repo/auth'
+import { requireLayout, createTryDemoRoute, isDemoUser, ensureAutoLogin, LogoutView } from '@repo/auth'
 import { createLogger } from '@repo/utils'
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
@@ -140,6 +140,7 @@ const router = createRouter({
       component: () => import('./views/SettingsView.vue'),
       meta: { requireAuth: true },
     },
+    createTryDemoRoute(),
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
@@ -160,10 +161,8 @@ router.beforeEach(async (to) => {
   try {
     const { meta } = to
 
-    // Dev auto-login bypass for automated screenshot capture
-    if (import.meta.env.DEV && import.meta.env.VITE_DEV_AUTO_LOGIN === 'true') {
-      return
-    }
+    // Dev auto-login (pnpm dev:demo)
+    await ensureAutoLogin()
 
     // Resolve Firebase auth state once for the entire guard chain.
     const currentUser = await getCurrentUser()
@@ -197,8 +196,8 @@ router.beforeEach(async (to) => {
       }
     }
 
-    // 4. Require DCC-EX device (placeholder — currently informational only)
-    if (meta.requireDccEx) {
+    // 4. Require DCC-EX device — skip for demo user (no real hardware)
+    if (meta.requireDccEx && !isDemoUser()) {
       // TODO: re-enable when DCC-EX device check is fully implemented
     }
 

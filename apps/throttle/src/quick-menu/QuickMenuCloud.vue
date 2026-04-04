@@ -3,6 +3,12 @@ import { useRouter } from 'vue-router'
 import { CLOUD_MENU_ITEMS } from '@repo/modules/quick-menu'
 import type { EntityScreen } from './useQuickMenu'
 
+const props = withDefaults(defineProps<{
+  serverOnline?: boolean
+}>(), {
+  serverOnline: true,
+})
+
 const router = useRouter()
 const emit = defineEmits<{
   navigate: []
@@ -32,6 +38,10 @@ function handleClick(item: (typeof CLOUD_MENU_ITEMS)[number]) {
 
 <template>
   <div class="quick-cloud">
+    <div v-if="!props.serverOnline" class="quick-cloud__offline">
+      <v-icon size="12" color="warning">mdi-cloud-off-outline</v-icon>
+      <span>Server offline</span>
+    </div>
     <div class="quick-cloud__grid">
       <button
         v-for="item in CLOUD_MENU_ITEMS"
@@ -49,6 +59,15 @@ function handleClick(item: (typeof CLOUD_MENU_ITEMS)[number]) {
 <style scoped>
 .quick-cloud {
   padding: 8px;
+}
+.quick-cloud__offline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 6px;
+  font-size: 0.65rem;
+  color: rgba(var(--v-theme-warning), 0.8);
+  letter-spacing: 0.04em;
 }
 .quick-cloud__grid {
   display: grid;

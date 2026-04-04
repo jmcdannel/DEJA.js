@@ -165,11 +165,14 @@ done
 
 | Variable | Used By | Description |
 |----------|---------|-------------|
-| `VITE_DEMO_MODE` | tour app | Skip auth, use demo layout |
-| `VITE_DEV_AUTO_LOGIN` | all app routers | Auto-login bypass for screenshots/testing |
+| `VITE_DEMO_EMAIL` | throttle "Try Demo" button, `dev:demo` auto-login | Demo account email (default: `demo@dejajs.com`) |
+| `VITE_DEMO_PASSWORD` | throttle "Try Demo" button, `dev:demo` auto-login | Demo account password |
+| `VITE_AUTO_LOGIN` | all app routers | Set automatically by `pnpm dev:demo` — do **not** add to `.env` |
 | `VITE_DEV_FEATURES` | feature flags, routers | Enable dev-only features |
 
-> ⚠️ Never enable `VITE_DEV_AUTO_LOGIN` in production. It's for local dev and automated screenshot capture only.
+> **`pnpm dev:demo`** starts all apps with auto-login using `VITE_DEMO_EMAIL`/`VITE_DEMO_PASSWORD`. Uses real Firebase auth and real data — not a mock.
+>
+> The throttle app always shows a "Try Demo" button on its login page (no env var needed). Other apps do not have demo mode.
 
 ### 📝 Sanity CMS
 
@@ -220,8 +223,8 @@ done
 If an app needs a different value than the root `.env`, create an `.env.local` in that app's directory:
 
 ```bash
-# Example: apps/tour/.env.local
-VITE_DEMO_MODE=true    # Tour app always runs in demo mode locally
+# Example: apps/throttle/.env.local
+VITE_DEV_FEATURES=true    # Enable dev-only features locally
 ```
 
 ## Adding a New Env Var

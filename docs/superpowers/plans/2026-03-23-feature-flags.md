@@ -712,7 +712,7 @@ git commit -m "feat: gate Tour app behind tourApp feature flag"
 
 - [ ] **Step 1: Add `VITE_DEV_FEATURES` to `.env.example`**
 
-Modify `.env.example`. Add after the `CLAUDE_TEST_PASSWORD` line (after line 26):
+Modify `.env.example`. Add after the `VITE_DEMO_PASSWORD` line (after line 26):
 
 ```bash
 

@@ -1,0 +1,18 @@
+{
+  "layout": {
+    "name": "BetaTrack",
+    "description": "Demo layout exported from betatrack",
+    "devices": [],
+    "approved": true
+  },
+  "subCollections": {
+    "locos": {},
+    "turnouts": {},
+    "effects": {},
+    "routes": {},
+    "signals": {},
+    "devices": {},
+    "tags": {},
+    "trackDiagrams": {}
+  }
+}

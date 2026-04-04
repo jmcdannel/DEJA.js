@@ -32,6 +32,17 @@ Vue 3 train control interface — the primary operator app for driving locomotiv
 | `SignalsView` | 🚦 Signal management |
 | `ConductorView` | 👷 Conductor layout overview |
 
+### 🎯 Quick Menu
+
+A draggable floating action button (FAB) available on every page when logged in with a layout selected. Tap the DEJA.js "D" logo to open a drill-down panel for browsing and controlling layout entities:
+
+- **🚂 Locos** — browse roster, tap 🎮 gamepad to open throttle
+- **🚀 Effects / 🔀 Turnouts / 🚦 Signals** — filter by device, type, or tag; toggle on/off
+- **🛤️ Routes** — filter by waypoint; tap to activate
+- **➕ New** — opens Cloud app in a new tab to create items
+
+Server-dependent actions (toggles, route activation) are automatically disabled when the DEJA server is offline. The FAB position is persisted across sessions.
+
 ### 🎯 Key Composable
 
 `useThrottle(address)` — manages speed, direction, and function state for a locomotive. Writes to `layouts/{layoutId}/throttles/{address}` in Firestore.

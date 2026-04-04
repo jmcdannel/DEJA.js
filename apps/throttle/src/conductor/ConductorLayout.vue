@@ -1,11 +1,25 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useLocos } from '@repo/modules'
 import ButtonsThrottle from '@/throttle/ButtonsThrottle.vue'
+import SliderThrottle from '@/throttle/SliderThrottle.vue'
+import Dashboard from '@/throttle/Dashboard.vue'
 import ThrottleList from '@/throttle/ThrottleList.vue'
 import { TurnoutList } from '@repo/ui'
+import { useThrottleSettings } from '@/throttle/useThrottleSettings'
 
 const { getThrottles } = useLocos()
 const throttles = getThrottles()
+
+const { variant } = useThrottleSettings()
+
+const variantMap = {
+  buttons: ButtonsThrottle,
+  slider: SliderThrottle,
+  dashboard: Dashboard,
+} as const
+
+const variantComponent = computed(() => variantMap[variant.value] ?? ButtonsThrottle)
 
 </script>
   <template>
@@ -25,7 +39,7 @@ const throttles = getThrottles()
           <!-- Column 2 content goes here -->
            <v-carousel v-if="throttles && throttles.length > 0" height="100%" class="min-h-90vh" hideDelimiters>
             <v-carousel-item v-for="(item) in throttles" :key="item.address" draggable>
-              <ButtonsThrottle :address="item.address" />
+              <component :is="variantComponent" :address="item.address" :show-speedometer="false" />
             </v-carousel-item>
           </v-carousel>
         </div>

@@ -25,7 +25,7 @@ const {
   throttle,
 } = useThrottle(addressRef)
 
-const locoColor = computed(() => loco.value?.meta?.color || 'primary')
+const locoColor = computed(() => loco?.meta?.color || 'primary')
 </script>
 <template>
   <main v-if="throttle" class="rounded-2xl shadow-xl relative bg-gradient-to-br from-violet-800 to-cyan-500 bg-gradient-border ">

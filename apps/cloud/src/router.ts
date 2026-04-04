@@ -5,7 +5,7 @@ import { getCurrentUser } from 'vuefire'
 import type { User } from 'firebase/auth'
 import { collection, query, where, getDocs, getDoc, doc } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
-import { requireLayout , checkRequireFeature , LogoutView } from '@repo/auth'
+import { requireLayout, ensureAutoLogin, checkRequireFeature, LogoutView } from '@repo/auth'
 import { createLogger } from '@repo/utils'
 import type { FeatureName, UserRole } from '@repo/modules'
 import Dashboard from './Dashboard/Dashboard.vue'
@@ -388,10 +388,8 @@ router.beforeEach(async (to) => {
   try {
     const { meta } = to
 
-    // Dev auto-login bypass for automated screenshot capture
-    if (import.meta.env.DEV && import.meta.env.VITE_DEV_AUTO_LOGIN === 'true') {
-      return
-    }
+    // Dev auto-login (pnpm dev:demo)
+    await ensureAutoLogin()
 
     // Resolve Firebase auth state once for the entire guard chain.
     const currentUser = await getCurrentUser()

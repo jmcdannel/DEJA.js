@@ -1,0 +1,103 @@
+---
+title: Configuration
+description: DEJA Server configuration files, environment variables, and the ~/.deja/ directory structure.
+order: 4
+---
+
+# Configuration
+
+The DEJA Server stores all of its configuration in the `~/.deja/` directory inside your home folder. The installer sets this up automatically — you generally won't need to edit these files by hand unless you're troubleshooting or changing advanced settings.
+
+## Directory Structure
+
+```
+~/.deja/
+├── bin/
+│   └── deja              # The deja CLI command
+├── server/               # Server runtime files
+│   ├── index.js          # Server entry point
+│   └── version.txt       # Installed version
+├── config.json           # Account and layout configuration
+├── .env                  # Environment variables
+├── server.pid            # Process ID of running server
+├── logs/
+│   ├── server.log        # Current server log
+│   └── server.log.1      # Previous log (rotated at 10 MB)
+└── tunnel.pid            # Process ID of running tunnel (if active)
+```
+
+## config.json
+
+Your account and layout information, created during installation.
+
+```json
+{
+  "uid": "your-user-id",
+  "layoutId": "your-layout-id"
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `uid` | Your DEJA Cloud user ID |
+| `layoutId` | The layout this server is connected to |
+
+The server also caches your subscription status here after each check. You don't need to edit this — it's managed automatically.
+
+## Environment Variables (.env)
+
+The `~/.deja/.env` file controls which features are enabled and how the server connects to external services. The installer creates this file with sensible defaults.
+
+### Core Settings
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `LAYOUT_ID` | *(from install)* | Your layout identifier — matches `config.json` |
+| `ENABLE_DEJACLOUD` | `true` | Connect to Firebase for real-time cloud sync |
+| `ENABLE_WS` | `true` | Start the WebSocket server for browser communication |
+| `ENABLE_MQTT` | `false` | Connect to an MQTT broker for IoT devices |
+| `ENABLE_SOUND` | `false` | Enable sound effect playback on the server |
+| `VITE_WS_PORT` | `8082` | Port for the WebSocket server |
+| `VITE_WS_ID` | `DEJA.js` | Server identifier string |
+
+### Firebase Credentials
+
+These are set automatically during installation. They connect the server to your DEJA Cloud account.
+
+| Variable | Description |
+|----------|-------------|
+| `VITE_FIREBASE_API_KEY` | Firebase API key (public) |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase auth domain |
+| `VITE_FIREBASE_PROJECT_ID` | Firebase project ID |
+| `VITE_FIREBASE_DATABASE_URL` | Firebase Realtime Database URL |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase storage bucket |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID |
+| `VITE_FIREBASE_APP_ID` | Firebase app ID |
+| `FIREBASE_CLIENT_EMAIL` | Service account email (private) |
+| `FIREBASE_PRIVATE_KEY` | Service account private key (private) |
+
+### Optional Settings
+
+| Variable | Description |
+|----------|-------------|
+| `CLOUDFLARE_TUNNEL_TOKEN` | Token for a named Cloudflare tunnel (see [Remote Access](/docs/server/remote-access)) |
+| `VITE_MQTT_BROKER` | MQTT broker URL (default: `mqtt://localhost`) |
+| `VITE_MQTT_PORT` | MQTT broker port (default: `1883`) |
+
+## Editing Configuration
+
+If you need to change a setting, open the `.env` file in any text editor:
+
+```bash
+nano ~/.deja/.env
+```
+
+After making changes, restart the server for them to take effect:
+
+```bash
+deja restart
+```
+
+## Log Rotation
+
+Server logs are stored at `~/.deja/logs/server.log`. When the log file reaches 10 MB, it's automatically rotated — the current log is saved as `server.log.1` and a new log file is started.

@@ -1,0 +1,88 @@
+---
+title: Configuration Reference
+description: All configuration file formats for DEJA IO devices — Arduino config.h, Pico W settings.toml, and config.json.
+section: io
+order: 14
+---
+
+# Configuration Reference
+
+DEJA IO devices use different configuration formats depending on the platform. This reference covers all of them.
+
+## Arduino — `config.h`
+
+Compile-time configuration. The Arduino firmware reads these values at build time.
+
+### Feature Flags
+
+| Flag | Type | Default | Description |
+|---|---|---|---|
+| `DEVICE_ID` | string | `"deja-arduino"` | Unique device identifier — must match your Cloud device entry |
+| `ENABLE_PWM` | bool | `true` | Enable PCA9685 servo driver support |
+| `ENABLE_OUTPUTS` | bool | `true` | Enable digital GPIO outputs |
+| `ENABLE_SIGNALS` | bool | `true` | Enable signal head control |
+| `ENABLE_SENSORS` | bool | `true` | Enable sensor input reading |
+| `ENABLE_TURNOUTS` | bool | `true` | Enable servo-driven turnouts |
+
+### Pin Arrays
+
+```cpp
+int OUTPINS[] = {8, 9, 10, 11};       // Digital output GPIO pins
+int SIGNALPINS[] = {4, 5, 6, 7};      // Signal head GPIO pins
+int SENSORPINS[] = {A0, A1, A2};      // Sensor input pins (analog or digital)
+```
+
+### Turnout Definitions
+
+```cpp
+TurnoutPulser turnouts[] = {
+  TurnoutPulser(channel, closedAngle, thrownAngle),
+};
+```
+
+- `channel` — PCA9685 servo channel (0–15)
+- `closedAngle` — servo angle for closed position (degrees)
+- `thrownAngle` — servo angle for thrown position (degrees)
+
+## Pico W — `settings.toml`
+
+Runtime environment configuration. Loaded by CircuitPython at boot.
+
+| Variable | Required | Description |
+|---|---|---|
+| `CIRCUITPY_WIFI_SSID` | ✅ | WiFi network name |
+| `CIRCUITPY_WIFI_PASSWORD` | ✅ | WiFi password |
+| `MQTT_BROKER` | ✅ | MQTT broker IP address |
+| `LAYOUT_ID` | ✅ | Your layout ID in DEJA Cloud |
+| `DEVICE_ID` | ✅ | Unique device identifier |
+| `TOPIC_ID` | No | MQTT topic prefix (default: `"DEJA"`) |
+| `ENABLE_CONFIG` | No | Load pin mapping from config.json (default: `"true"`) |
+| `ENABLE_PWM` | No | Enable PCA9685 servo support (default: `"true"`) |
+| `ENABLE_MQTT` | No | Enable MQTT communication (default: `"true"`) |
+
+## Pico W — `config.json`
+
+Pin mapping from logical pin numbers to physical CircuitPython GPIO names.
+
+```json
+{
+  "pins": {
+    "6": "GP6",
+    "7": "GP7",
+    "8": "GP8",
+    "9": "GP9"
+  }
+}
+```
+
+Keys are the logical pin numbers used in commands (`"pin": 8`). Values are CircuitPython GPIO names (`"GP8"`).
+
+## Layout-Specific Overrides
+
+Per-layout configs live under:
+
+```
+io/layouts/{layoutId}/deja-pico-w/{deviceId}/config.json
+```
+
+When the deploy script runs, it uses the layout-specific config instead of the default `io/src/deja-pico-w/config.json`.

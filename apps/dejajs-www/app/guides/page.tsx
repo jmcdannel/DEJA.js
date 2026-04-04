@@ -36,9 +36,8 @@ const guides = [
     href: '/guides/server',
     desc: 'Installation, CLI reference, configuration, and running the DEJA Server on any platform.',
     icon: '💻',
-    comingSoon: true,
-    color: 'border-gray-700/30',
-    iconBg: 'bg-gray-800',
+    color: 'border-deja-lime/30 hover:border-deja-lime/60',
+    iconBg: 'bg-deja-lime/10',
   },
   {
     label: 'Cloud',
@@ -53,9 +52,8 @@ const guides = [
     href: '/guides/io',
     desc: 'Hardware expansion with Arduino and Pico W — LEDs, servos, signals, sensors, and MQTT.',
     icon: '🔌',
-    comingSoon: true,
-    color: 'border-gray-700/30',
-    iconBg: 'bg-gray-800',
+    color: 'border-fuchsia-400/30 hover:border-fuchsia-400/60',
+    iconBg: 'bg-fuchsia-400/10',
   },
   {
     label: 'Monitor',
