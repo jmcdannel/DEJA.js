@@ -1,15 +1,7 @@
 // 🔧 Arduino config.h generator
 // Generates a complete config.h from device, effects, and turnout data
 
-import type { DeviceConfig } from './types.js'
-
-export interface ArduinoConfigInput extends DeviceConfig {
-  enablePwm?: boolean
-  enableSignals?: boolean
-  enableSensors?: boolean
-  sensorPins?: string[]
-  signalPins?: number[]
-}
+import type { ArduinoConfigInput } from './types'
 
 export function generateArduinoConfig(input: ArduinoConfigInput): string {
   const { device, effects, turnouts } = input

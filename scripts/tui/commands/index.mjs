@@ -8,6 +8,7 @@ import { registerTunnelCommands } from './tunnel.mjs'
 import { registerNavigationCommands } from './navigation.mjs'
 import { registerToolCommands } from './tools.mjs'
 import { registerDeviceCommands } from './devices.mjs'
+import { registerDeployCommands } from './deploy.mjs'
 
 export function registerAllCommands() {
   registerServerCommands()
@@ -15,4 +16,5 @@ export function registerAllCommands() {
   registerNavigationCommands()
   registerToolCommands()
   registerDeviceCommands()
+  registerDeployCommands()
 }

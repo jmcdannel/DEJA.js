@@ -74,3 +74,6 @@ export * from './features'
 
 // Quick Menu
 export * from './quick-menu'
+
+// Device Config module
+export * from './device-config'

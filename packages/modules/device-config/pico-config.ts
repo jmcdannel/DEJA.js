@@ -1,19 +1,11 @@
 // 🍓 Pico W config generator
 // Generates settings.toml and config.json for CircuitPython devices
 
-import type { DeviceConfig } from './types.js'
-
-export interface PicoConfigInput extends DeviceConfig {
-  wifiSsid?: string
-  wifiPassword?: string
-  mqttBroker?: string
-  topicId?: string
-  layoutId: string
-}
+import type { PicoConfigInput } from './types'
 
 /**
- * Generate settings.toml for Pico W (WiFi creds, MQTT broker, layout/device ID)
- * WiFi credentials are NOT stored in Firebase — passed in at generation time
+ * Generate settings.toml for Pico W (WiFi creds, MQTT broker, layout/device ID).
+ * WiFi credentials are NOT stored in Firebase — passed in at generation time.
  */
 export function generatePicoSettings(input: PicoConfigInput): string {
   const { device, layoutId } = input
@@ -40,7 +32,7 @@ TOPIC_ID = "${topicId}"
 }
 
 /**
- * Generate config.json for Pico W (pin → GP mapping from effects)
+ * Generate config.json for Pico W (pin → GP mapping from effects).
  */
 export function generatePicoConfig(input: PicoConfigInput): string {
   const { effects } = input

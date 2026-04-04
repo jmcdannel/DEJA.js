@@ -10,8 +10,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '../.env') })
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
 import { getDeviceConfig, listDevices } from './lib/firebase.js'
-import { generateArduinoConfig } from './lib/config-arduino.js'
-import { generatePicoSettings, generatePicoConfig } from './lib/config-pico.js'
+import { generateArduinoConfig, generatePicoSettings, generatePicoConfig } from '@repo/modules'
 import { findArduinoBoards, findCircuitPyMount } from './lib/detect.js'
 import { compileAndUpload } from './lib/deploy-arduino.js'
 import { copyToCircuitPy } from './lib/deploy-pico.js'
@@ -141,7 +140,7 @@ async function deploy() {
     const port = await promptSerialPort(boards)
     const board = boardOverride || 'arduino:avr:mega:cpu=atmega2560'
     console.log('')
-    compileAndUpload({
+    await compileAndUpload({
       sketchPath: outDir,
       port,
       board,

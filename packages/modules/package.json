@@ -19,7 +19,8 @@
     "./feedback": "./feedback/index.ts",
     "./sensors": "./sensors/index.ts",
     "./powerDistricts": "./powerDistricts/index.ts",
-    "./features": "./features/index.ts"
+    "./features": "./features/index.ts",
+    "./device-config": "./device-config/index.ts"
   },
   "scripts": {
     "test": "vitest run",

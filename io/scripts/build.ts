@@ -40,8 +40,7 @@ async function buildForDevice(layoutId: string, deviceId: string) {
   dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
   const { getDeviceConfig } = await import('./lib/firebase.js')
-  const { generateArduinoConfig } = await import('./lib/config-arduino.js')
-  const { generatePicoSettings, generatePicoConfig } = await import('./lib/config-pico.js')
+  const { generateArduinoConfig, generatePicoSettings, generatePicoConfig } = await import('@repo/modules')
 
   console.log(`🔥 Fetching config for device "${deviceId}" in layout "${layoutId}"...`)
   const config = await getDeviceConfig(layoutId, deviceId)

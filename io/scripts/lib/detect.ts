@@ -51,6 +51,53 @@ export function isArduinoCliInstalled(): boolean {
   }
 }
 
+/**
+ * Auto-install arduino-cli if not present.
+ * Returns true if arduino-cli is available after this call.
+ */
+export async function ensureArduinoCli(): Promise<boolean> {
+  if (isArduinoCliInstalled()) return true
+
+  console.log('📦 arduino-cli not found. Installing...')
+
+  try {
+    if (process.platform === 'darwin') {
+      try {
+        execSync('which brew', { stdio: 'pipe' })
+        console.log('   Using Homebrew...')
+        execSync('brew install arduino-cli', { stdio: 'inherit' })
+      } catch {
+        console.log('   Using install script...')
+        execSync('curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh', {
+          stdio: 'inherit',
+          cwd: '/usr/local/bin',
+        })
+      }
+    } else {
+      console.log('   Using install script...')
+      execSync('curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=/usr/local/bin sh', {
+        stdio: 'inherit',
+      })
+    }
+
+    if (isArduinoCliInstalled()) {
+      console.log('📦 Installing Arduino AVR core...')
+      execSync('arduino-cli core install arduino:avr', { stdio: 'inherit' })
+      console.log('✅ arduino-cli installed successfully!')
+      return true
+    }
+  } catch {
+    console.error('❌ Failed to install arduino-cli automatically.')
+    console.error('')
+    console.error('📦 Install manually:')
+    console.error('   macOS:  brew install arduino-cli')
+    console.error('   Linux:  curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh')
+    console.error('   Docs:   https://arduino.github.io/arduino-cli/latest/installation/')
+  }
+
+  return false
+}
+
 export interface ArduinoBoard {
   port: string
   boardName: string

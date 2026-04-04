@@ -291,6 +291,7 @@ export function App() {
           case 'settings': transitionMode('settings'); break
           case 'dcc-ref':  transitionMode('dcc-ref'); break
           case 'export':   exportLogs(); transitionMode('logs'); break
+          case 'deploy':   handleCommand('/deploy'); transitionMode('logs'); break
         }
         return
       }

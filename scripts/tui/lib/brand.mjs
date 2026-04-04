@@ -93,6 +93,7 @@ export const MENU_ITEMS = [
   { label: 'Stop Server',        action: 'stop'     },
   { label: 'Restart Server',     action: 'restart'  },
   { label: 'Devices',            action: 'devices'  },
+  { label: 'Deploy Firmware',    action: 'deploy'   },
   { label: 'Settings',           action: 'settings' },
   { label: 'DCC-EX Reference',   action: 'dcc-ref'  },
   { label: 'Export Logs',        action: 'export'   },
