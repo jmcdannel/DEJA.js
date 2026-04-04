@@ -1,5 +1,5 @@
 {
-  "name": "deja-scripts",
+  "name": "deja-cli",
   "version": "1.0.0",
   "type": "module",
   "private": true,
@@ -7,10 +7,6 @@
     "figlet": "^1.7.0",
     "firebase-admin": "^13.4.0",
     "ink": "^5.1.0",
-    "playwright": "^1.44.0",
     "react": "^18.3.1"
-  },
-  "scripts": {
-    "capture-screenshots": "node capture-screenshots.mjs"
   }
 }

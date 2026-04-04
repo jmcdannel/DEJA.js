@@ -71,7 +71,7 @@ jobs:
             -H "Authorization: Bearer ${UPLOAD_SECRET}" \
             -H "x-filename: deja" \
             -H "Content-Type: application/octet-stream" \
-            --data-binary "@scripts/deja" \
+            --data-binary "@apps/cli/deja" \
             "${INSTALL_API_URL}/releases/${VERSION}/upload"
 
           # Upload install script

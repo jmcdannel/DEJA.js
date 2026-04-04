@@ -389,13 +389,13 @@ install_cli() {
       repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     fi
 
-    cp "${repo_dir}/scripts/deja" "${DEJA_BIN}/deja"
+    cp "${repo_dir}/apps/cli/deja" "${DEJA_BIN}/deja"
     chmod +x "${DEJA_BIN}/deja"
 
     # Also copy TUI files if present
-    if [ -d "${repo_dir}/scripts/tui" ]; then
-      cp -r "${repo_dir}/scripts/tui" "${DEJA_BIN}/"
-      [ -f "${repo_dir}/scripts/deja-ui-ink.mjs" ] && cp "${repo_dir}/scripts/deja-ui-ink.mjs" "${DEJA_BIN}/"
+    if [ -d "${repo_dir}/apps/cli/tui" ]; then
+      cp -r "${repo_dir}/apps/cli/tui" "${DEJA_BIN}/"
+      [ -f "${repo_dir}/apps/cli/deja-ui-ink.mjs" ] && cp "${repo_dir}/apps/cli/deja-ui-ink.mjs" "${DEJA_BIN}/"
     fi
 
     ok "CLI installed from local repo 🛠️"
