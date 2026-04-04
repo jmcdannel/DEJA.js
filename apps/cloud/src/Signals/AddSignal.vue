@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { PageHeader } from '@repo/ui'
 import SignalForm from '@/Signals/SignalForm.vue'
+import FormPageHeader from '@/Common/FormPageHeader.vue'
 import type { Signal } from '@repo/modules/signals'
 
 const router = useRouter()
@@ -22,6 +22,16 @@ function handleClose() {
 }
 </script>
 <template>
-  <PageHeader title="Signals" icon="mdi-traffic-light" color="emerald" />
-  <SignalForm :signal="defaultSignal" @close="handleClose" />
+  <div class="animate-fade-in-up space-y-4 max-w-[800px] px-4">
+    <FormPageHeader
+      icon="mdi-traffic-light"
+      title="New Signal"
+      subtitle="Add a signal to your layout"
+      color="#10b981"
+      back-label="Signals"
+      :back-route="{ name: 'Signals' }"
+    />
+
+    <SignalForm :signal="defaultSignal" @close="handleClose" />
+  </div>
 </template>

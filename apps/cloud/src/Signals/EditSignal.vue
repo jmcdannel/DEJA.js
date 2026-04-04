@@ -2,8 +2,8 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createLogger } from '@repo/utils'
-import { PageHeader } from '@repo/ui'
 import SignalForm from '@/Signals/SignalForm.vue'
+import FormPageHeader from '@/Common/FormPageHeader.vue'
 import type { Signal } from '@repo/modules/signals'
 import { useSignals } from '@repo/modules/signals'
 import { useNotification } from '@repo/ui'
@@ -45,10 +45,19 @@ function handleClose() {
 onMounted(loadSignal)
 </script>
 <template>
-  <PageHeader title="Signals" icon="mdi-traffic-light" color="emerald" />
-  <div v-if="loading" class="p-6 flex justify-center">
-    <v-progress-circular indeterminate color="cyan" />
+  <div class="animate-fade-in-up space-y-4 max-w-[800px] px-4">
+    <FormPageHeader
+      icon="mdi-traffic-light"
+      :title="signal?.name || 'Edit Signal'"
+      color="#10b981"
+      back-label="Signals"
+      :back-route="{ name: 'Signals' }"
+    />
+
+    <div v-if="loading" class="p-6 flex justify-center">
+      <v-progress-circular indeterminate color="emerald" />
+    </div>
+    <v-alert v-else-if="error" type="error" class="ma-4" :text="error" closable @click:close="handleClose" />
+    <SignalForm v-else-if="signal" :signal="signal" @close="handleClose" />
   </div>
-  <v-alert v-else-if="error" type="error" class="ma-4" :text="error" closable @click:close="handleClose" />
-  <SignalForm v-else-if="signal" :signal="signal" @close="handleClose" />
 </template>

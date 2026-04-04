@@ -1,0 +1,204 @@
+---
+title: CLI Reference
+description: Complete reference for the deja command-line tool — every command, flag, and option for managing your DEJA Server.
+navTitle: CLI
+order: 3
+---
+
+# CLI Reference
+
+The `deja` CLI is how you manage your DEJA Server from the terminal. It's installed automatically when you run the [installer](/docs/server/installation).
+
+## Server Commands
+
+### `deja start`
+
+Start the server. By default, the server runs in the foreground with an interactive display.
+
+| Flag | Description |
+|------|-------------|
+| `-b`, `--background`, `--bg` | Start in the background (no terminal window needed) |
+
+**Interactive mode** (default) shows the DEJA.js banner and keeps the terminal attached. Type `exit` or press Ctrl+C to stop.
+
+**Background mode** (`deja start -b`) runs the server silently. Use `deja status` to check on it and `deja stop` to shut it down.
+
+### `deja stop`
+
+Stop a running server. The server shuts down gracefully — it closes connections, disconnects from Firebase, and releases the serial port before exiting.
+
+### `deja restart`
+
+Stop the server and start it again. Accepts the same flags as `deja start` (e.g., `deja restart -b` to restart in background mode).
+
+### `deja status`
+
+Show the current state of your server, connections, and subscription. The output includes:
+
+- **Server state** — running or stopped, version number, process ID
+- **Account** — your User ID and Layout ID
+- **Connections** — WebSocket port, MQTT status, Firebase Cloud status, detected serial ports
+- **Remote monitoring** — tunnel status and URL (if applicable)
+- **Apps** — links to Throttle, Cloud, and Monitor
+- **Log file** — path and size of the current log file
+
+### `deja logs`
+
+View recent server log output.
+
+| Flag | Description |
+|------|-------------|
+| `-f`, `--follow` | Follow logs in real time (like a live feed). Press Ctrl+C to stop. |
+| `-n LINES`, `--lines LINES` | Number of lines to show (default: 50) |
+
+**Examples:**
+
+```bash
+deja logs           # Show last 50 lines
+deja logs -f        # Follow logs in real time
+deja logs -n 100    # Show last 100 lines
+deja logs -f -n 20  # Follow, starting from last 20 lines
+```
+
+### `deja update`
+
+Check for and install the latest version of the DEJA Server. If the server is running, it will be stopped during the update and restarted automatically afterward.
+
+The update preserves your configuration — your account, layout, and environment settings stay exactly as they were.
+
+### `deja --version`
+
+Print the installed server version.
+
+### `deja help`
+
+Show the full list of available commands.
+
+## Tunnel Commands
+
+Remote access lets you reach your [Monitor dashboard](https://monitor.dejajs.com) from outside your home network. It requires an Engineer or Conductor plan and the `cloudflared` tool. See [Remote Access](/docs/server/remote-access) for setup details.
+
+### `deja tunnel start`
+
+Start a secure Cloudflare tunnel. Once connected, the command prints a URL you can open from anywhere.
+
+### `deja tunnel stop`
+
+Stop a running tunnel.
+
+### `deja tunnel status`
+
+Check whether the tunnel is running and show the current URL.
+
+### `deja tunnel logs`
+
+View recent tunnel log output. Optionally pass a number to show more lines (e.g., `deja tunnel logs 100`).
+
+## Understanding Console Output
+
+When the server runs in the foreground (`deja start`), you'll see a live stream of status messages. Each line follows this format:
+
+```
+[DEJA.JS] > ▶ start      Running [MAIN]
+```
+
+The prefix `[DEJA.JS] ›` appears on every line, followed by an icon, a level name, and the message. Here's what each level means:
+
+### Message Types
+
+```
+[DEJA.JS] > ▶ start      A service or process is launching
+[DEJA.JS] > ✔ success    Something connected or completed successfully
+[DEJA.JS] > ✔ complete   A task finished (port opened, layout loaded)
+[DEJA.JS] > ● note       Configuration detail or status update
+[DEJA.JS] > ℹ info       Informational — no action needed
+[DEJA.JS] > ★ star       A DCC command was sent to the track
+[DEJA.JS] > … await      Waiting for something (serial write, reconnect)
+[DEJA.JS] > ⚠ warn       Non-critical issue — server keeps running
+[DEJA.JS] > ✖ error      Something went wrong
+[DEJA.JS] > ✖ fatal      Critical error — server may need a restart
+```
+
+### Startup Sequence
+
+When the server starts, you'll see messages like these in order:
+
+```
+[DEJA.JS] > ▶ start      Running [MAIN]
+[DEJA.JS] > ✔ success    Subscription valid: trialing (engineer)
+[DEJA.JS] > ℹ info       Server config loaded { layoutId: 'my-layout', mqtt: true, ws: true }
+[DEJA.JS] > ● note       MQTT ON (mqtt://localhost:1883)
+[DEJA.JS] > ● note       WebSocket ON (port 8082)
+[DEJA.JS] > ● note       DEJA Cloud ON
+[DEJA.JS] > ▶ start      Connecting to DejaCloud my-layout
+[DEJA.JS] > ✔ success    [CLEANUP] Cleared stale entries from dccCommands/my-layout
+[DEJA.JS] > ▶ start      Throttles listening for loco changes on layout: my-layout
+[DEJA.JS] > ▶ start      Load layout my-layout
+[DEJA.JS] > ✔ complete   Layout loaded my-layout
+[DEJA.JS] > ✔ success    [FIREBASE] RTDB connection established
+[DEJA.JS] > ✔ success    Connected to DejaCloud my-layout
+[DEJA.JS] > ▶ start      DEJA Cloud connected
+[DEJA.JS] > ▶ start      MQTT initialized
+[DEJA.JS] > ▶ start      WebSocket server started 8082 DEJA.js 192.168.86.23
+[DEJA.JS] > ▶ start      DEJA.js Server is running!
+```
+
+### DCC Command Messages
+
+When you control trains, turnouts, or effects, you'll see `★ star` messages confirming each command sent to the track:
+
+```
+[DEJA.JS] > ★ star       Throttle  3 50 1        ← Loco 3, speed 50, forward
+[DEJA.JS] > ★ star       Turnout   1 1            ← Turnout 1 thrown
+[DEJA.JS] > ★ star       Function  3 0 1          ← Loco 3, headlight on
+[DEJA.JS] > ★ star       Power     1              ← Track power on
+[DEJA.JS] > ★ star       Output    {pin: 5, ...}  ← Output pin toggled
+```
+
+### Shutdown Sequence
+
+When you stop the server (Ctrl+C or `/stop`), you'll see an orderly shutdown:
+
+```
+[DEJA.JS] > ▶ start      [SHUTDOWN] Graceful shutdown initiated...
+[DEJA.JS] > ℹ info       [SHUTDOWN] Closing WebSocket server and all client connections...
+[DEJA.JS] > ✔ success    [SHUTDOWN] WebSocket server closed
+[DEJA.JS] > ℹ info       [SHUTDOWN] Disconnecting from DEJA Cloud (Firebase listeners)...
+[DEJA.JS] > ✔ success    [SHUTDOWN] DEJA Cloud disconnected
+[DEJA.JS] > ℹ info       [SHUTDOWN] Disconnecting MQTT client...
+[DEJA.JS] > ✔ success    [SHUTDOWN] MQTT client disconnected
+[DEJA.JS] > ℹ info       [SHUTDOWN] Stopping sound playback...
+[DEJA.JS] > ✔ success    [SHUTDOWN] Sound playback stopped
+[DEJA.JS] > ℹ info       [SHUTDOWN] Disconnecting all serial ports...
+[DEJA.JS] > ✔ success    [SHUTDOWN] Serial ports disconnected
+[DEJA.JS] > ✔ success    [SHUTDOWN] DEJA.js Server shutdown complete
+```
+
+### Common Error Messages
+
+```
+[DEJA.JS] > ✖ error      Subscription inactive (status: canceled)
+```
+Your subscription has expired — visit [dejajs.com](https://dejajs.com) to renew.
+
+```
+[DEJA.JS] > ✖ error      [WS] Port 8082 is already in use
+```
+Another server instance is running — run `deja stop` first.
+
+```
+[DEJA.JS] > ✖ error      [SERIAL] Error opening port: Permission denied
+```
+Can't access the USB serial port — check the cable, or run `sudo usermod -a -G dialout $USER` on Linux.
+
+```
+[DEJA.JS] > ✖ error      [MQTT] Broker not available
+```
+MQTT broker isn't running — start Mosquitto, or set `ENABLE_MQTT=false` in `~/.deja/.env`.
+
+```
+[DEJA.JS] > ⚠ warn       Could not reach Firebase for subscription check
+```
+Can't connect to the cloud — check your internet connection and credentials in `~/.deja/.env`.
+
+For more solutions, see [Troubleshooting](/docs/server/troubleshooting).

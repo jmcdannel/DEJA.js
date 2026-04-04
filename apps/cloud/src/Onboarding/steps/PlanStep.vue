@@ -254,6 +254,13 @@ async function selectPlan(tier: PlanTier) {
       </button>
     </div>
 
+    <!-- Skip — use free plan -->
+    <div class="text-center mt-6">
+      <button class="skip-btn" :disabled="loading" @click="selectPlan('hobbyist')">
+        Use Free for Now — I'll decide later →
+      </button>
+    </div>
+
     <!-- Comparison Modal -->
     <v-dialog v-model="showCompare" max-width="900" scrollable>
       <v-card color="surface" class="border border-opacity-10">
@@ -626,4 +633,25 @@ async function selectPlan(tier: PlanTier) {
 .tc-y { color: #22c55e; }
 .tc-n { color: rgba(239, 68, 68, 0.5); }
 .tc-p { color: #38bdf8; font-size: 0.75rem; font-family: 'DM Mono', monospace; }
+
+/* ── SKIP BUTTON ── */
+.skip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: rgba(148, 163, 184, 0.5);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: color 0.25s;
+  padding: 8px 16px;
+}
+.skip-btn:hover:not(:disabled) {
+  color: rgba(148, 163, 184, 0.8);
+}
+.skip-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
 </style>

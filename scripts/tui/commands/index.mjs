@@ -1,6 +1,6 @@
 /**
  * scripts/tui/commands/index.mjs
- * Registers all built-in slash commands (14 total).
+ * Registers all built-in slash commands.
  */
 
 import { registerServerCommands } from './server.mjs'

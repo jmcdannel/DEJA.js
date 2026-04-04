@@ -72,7 +72,7 @@ async function buildForDevice(layoutId: string, deviceId: string) {
     await fs.writeFile(path.join(outDir, 'config.json'), configJson)
 
     // Generate settings.toml (WiFi creds left empty — filled at deploy time or manually)
-    const mqttBroker = process.env.VITE_MQTT_BROKER || process.env.MQTT_BROKER || ''
+    const mqttBroker = process.env.MQTT_BROKER || process.env.VITE_MQTT_BROKER || ''
     const settingsToml = generatePicoSettings({
       device,
       effects,

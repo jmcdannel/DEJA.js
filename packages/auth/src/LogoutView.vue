@@ -2,10 +2,12 @@
 import { ref, onMounted } from 'vue'
 import { signOut } from 'firebase/auth'
 import { useFirebaseAuth } from 'vuefire'
+import { useRouter } from 'vue-router'
 import { createLogger } from '@repo/utils'
 
 const log = createLogger('Auth')
 const auth = useFirebaseAuth()
+const router = useRouter()
 
 const signingOut = ref(true)
 const error = ref(false)
@@ -18,10 +20,10 @@ onMounted(async () => {
   try {
     await signOut(auth)
     log.debug('User signed out successfully')
+    router.replace('/login')
   } catch (reason) {
     log.error('Failed signOut', reason)
     error.value = true
-  } finally {
     signingOut.value = false
   }
 })

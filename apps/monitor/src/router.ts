@@ -1,15 +1,23 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { Login, LogoutView, requireAuth, requireLayout, createTryDemoRoute } from '@repo/auth'
+import { getCurrentUser } from 'vuefire'
+import { Login, LogoutView, requireLayout, ensureAutoLogin } from '@repo/auth'
 import Dashboard from './Dashboard/Dashboard.vue'
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    requireAuth?: boolean
+    requireLayout?: boolean
+  }
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      beforeEnter: [requireAuth, requireLayout],
       component: Dashboard,
       name: 'home',
       path: '/',
+      meta: { requireAuth: true, requireLayout: true },
     },
     {
       component: Login,
@@ -25,46 +33,66 @@ const router = createRouter({
       path: '/settings',
       name: 'Settings',
       component: () => import('./Settings/Settings.vue'),
-      beforeEnter: [requireAuth],
+      meta: { requireAuth: true },
     },
     {
       path: '/logs/:logType',
       name: 'log-view',
       component: () => import('./views/LogView.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      meta: { requireAuth: true, requireLayout: true },
     },
     {
       path: '/logs/devices/:deviceId',
       name: 'device-log-view',
       component: () => import('./views/DeviceSerialMonitorView.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      meta: { requireAuth: true, requireLayout: true },
     },
     {
       path: '/demo',
       name: 'Device Monitor Demo',
       component: () => import('./Dashboard/components/DeviceSerialMonitor/DeviceSerialMonitorDemo.vue'),
-      beforeEnter: [requireAuth, requireLayout],
+      meta: { requireAuth: true, requireLayout: true },
     },
-    createTryDemoRoute(Login),
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
       component: () => import('./views/NotFound.vue'),
-      beforeEnter: [requireAuth],
+      meta: { requireAuth: true },
     },
     // {
     //   path: '/dccex',
     //   name: 'DCC-EX',
     //   component: () => import('./DCCEX/DCCEX.vue'),
-    //   beforeEnter: [requireAuth, requireDccEx, requireLayout],
+    //   meta: { requireAuth: true, requireLayout: true },
     // },
     // {
     //   path: '/layout',
     //   name: 'Layout',
     //   component: () => import('./Layout/Layout.vue'),
-    //   beforeEnter: [requireAuth, requireDccEx, requireLayout],
+    //   meta: { requireAuth: true, requireLayout: true },
     // },
   ],
+})
+
+router.beforeEach(async (to) => {
+  const meta = to.meta ?? {}
+
+  // Dev auto-login (pnpm dev:demo)
+  await ensureAutoLogin()
+
+  // 1. Require authentication
+  if (meta.requireAuth) {
+    const currentUser = await getCurrentUser()
+    if (!currentUser) {
+      return { path: '/login', query: { redirect: to.fullPath } }
+    }
+
+    // 2. Require a selected layout
+    if (meta.requireLayout) {
+      const redirect = await requireLayout(currentUser.email!, to)
+      if (redirect) return redirect
+    }
+  }
 })
 
 export default router

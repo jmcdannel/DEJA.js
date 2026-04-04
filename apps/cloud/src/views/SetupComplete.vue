@@ -157,8 +157,8 @@ function goToDashboard() {
         </div>
       </div>
 
-      <!-- Install Server -->
-      <div class="glass-card mb-6">
+      <!-- Install Server — hidden once server is online and user is on "drive trains" step -->
+      <div v-if="!serverStatus?.online" class="glass-card mb-6">
         <QuickStart
           :completed="quickStartCompleted"
           :uid="user?.uid"

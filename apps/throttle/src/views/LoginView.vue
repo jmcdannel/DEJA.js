@@ -20,6 +20,7 @@ function handleNavigateForgotPassword() {
 <template>
   <div class="fill-height">
     <Login
+      :show-try-demo="true"
       @auth="handleAuth"
       @navigate-signup="handleNavigateSignup"
       @navigate-forgot-password="handleNavigateForgotPassword"

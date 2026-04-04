@@ -2,8 +2,8 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createLogger } from '@repo/utils'
-import { PageHeader } from '@repo/ui'
 import TurnoutForm from '@/Turnouts/TurnoutForm.vue'
+import FormPageHeader from '@/Common/FormPageHeader.vue'
 import { useTurnouts, type Turnout } from '@repo/modules'
 
 const log = createLogger('EditTurnout')
@@ -35,11 +35,28 @@ function handleClose() {
 
 onMounted(loadTurnout)
 </script>
+
 <template>
-  <PageHeader title="Turnouts" icon="mdi-call-split" color="amber" />
-  <div v-if="loading" class="p-6 flex justify-center">
-    <v-progress-circular indeterminate color="yellow" />
+  <div class="animate-fade-in-up space-y-4 max-w-[800px] px-4">
+    <FormPageHeader
+      icon="mdi-call-split"
+      :title="turnout?.name || 'Edit Turnout'"
+      color="#f59e0b"
+      back-label="Turnouts"
+      :back-route="{ name: 'Turnouts' }"
+    >
+      <template #subtitle>
+        <span v-if="turnout?.turnoutIdx !== undefined" class="text-xs text-white/45 bg-white/6 px-2 py-0.5 rounded font-mono">
+          Index #{{ turnout.turnoutIdx }}
+        </span>
+        <span v-if="turnout?.device" class="text-xs text-white/45">{{ turnout.device }}</span>
+      </template>
+    </FormPageHeader>
+
+    <div v-if="loading" class="p-6 flex justify-center">
+      <v-progress-circular indeterminate color="amber" />
+    </div>
+    <v-alert v-else-if="error" type="error" class="ma-4" :text="error" closable @click:close="handleClose" />
+    <TurnoutForm v-else :turnout="turnout" @close="handleClose" />
   </div>
-  <v-alert v-else-if="error" type="error" class="ma-4" :text="error" closable @click:close="handleClose" />
-  <TurnoutForm v-else :turnout="turnout" @close="handleClose" />
 </template>

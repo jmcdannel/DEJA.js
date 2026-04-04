@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, useSlots } from 'vue'
+import { computed } from 'vue'
 
 export type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'
 export type LogoVariant = 'default' | 'cloud' | 'throttle' | 'monitor' | 'tour'
@@ -9,15 +9,15 @@ interface Props {
   showIcon?: boolean
   appTitle?: string
   variant?: LogoVariant
+  stacked?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   showIcon: true,
   variant: 'default',
+  stacked: false,
 })
-
-const slots = useSlots()
 
 const sizeMap = {
   xs:  { brand: 'text-sm',  js: 'text-[0.55rem]', icon: 'w-4 h-4',   gap: 'gap-1',   title: 'text-xs' },
@@ -30,6 +30,10 @@ const sizeMap = {
 } as const
 
 const s = computed(() => sizeMap[props.size])
+
+const textContainerClass = computed(() =>
+  props.stacked && props.appTitle ? 'flex-col' : `items-end ${s.value.gap}`
+)
 
 const appIconSrc = computed(() => {
   switch (props.variant) {
@@ -46,7 +50,6 @@ const appIconSrc = computed(() => {
   }
 })
 
-const hasIconSlot = computed(() => !!slots.icon)
 </script>
 
 <template>
@@ -62,19 +65,25 @@ const hasIconSlot = computed(() => !!slots.icon)
       </slot>
     </template>
 
-    <!-- Brand text -->
-    <span class="font-bold tracking-[0.08em] leading-none whitespace-nowrap" :class="s.brand">
-      <span class="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">DEJA</span><span class="text-lime-400">.</span><span class="text-fuchsia-500 font-mono" :class="s.js">js</span>
-    </span>
-
-    <!-- Optional app title suffix -->
-    <span
-      v-if="appTitle"
-      class="font-semibold leading-none whitespace-nowrap"
-      style="color: rgba(var(--v-theme-on-surface), 0.9)"
-      :class="s.title"
+    <!-- Text container: stacked = flex-col, inline = flex-row -->
+    <div
+      class="flex"
+      :class="textContainerClass"
     >
-      {{ appTitle }}
-    </span>
+      <!-- Brand text -->
+      <span class="font-bold tracking-[0.08em] leading-none whitespace-nowrap" :class="s.brand">
+        <span class="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">DEJA</span><span class="text-lime-400">.</span><span class="text-fuchsia-500 font-mono" :class="s.js">js</span>
+      </span>
+
+      <!-- Optional app title suffix -->
+      <span
+        v-if="appTitle"
+        class="font-semibold leading-none whitespace-nowrap"
+        style="color: rgba(var(--v-theme-on-surface), 0.9)"
+        :class="s.title"
+      >
+        {{ appTitle }}
+      </span>
+    </div>
   </div>
 </template>

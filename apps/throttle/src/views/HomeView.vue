@@ -105,7 +105,7 @@ const navItems = [
 ]
 </script>
 <template>
-  <main class="flex flex-col flex-grow p-4 md:p-8 w-full overflow-auto gap-6">
+  <main class="flex flex-col flex-grow w-full overflow-auto gap-6">
 
     <!-- 🎨 Big Gradient Title -->
     <header>

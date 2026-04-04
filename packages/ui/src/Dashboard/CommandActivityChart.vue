@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 
 interface Props {
-  data: { timestamp: number; count: number }[]
+  data: readonly { timestamp: number; count: number }[]
 }
 
 const props = defineProps<Props>()

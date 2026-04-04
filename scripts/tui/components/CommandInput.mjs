@@ -121,6 +121,9 @@ export const CommandInput = React.memo(forwardRef(function CommandInput(_props, 
           ...menuItems.map((cmd, i) => {
             const selected = i === menuIndex
             const name = `/${cmd.name}`
+            const aliases = (cmd.aliases || []).length > 0
+              ? ` (${cmd.aliases.map(a => `/${a}`).join(', ')})`
+              : ''
             const padded = name.padEnd(CMD_COL)
             return h(Box, { key: cmd.name },
               h(Text, {
@@ -133,6 +136,9 @@ export const CommandInput = React.memo(forwardRef(function CommandInput(_props, 
                 dimColor: !selected,
               }, padded),
               h(Text, { dimColor: true }, cmd.description),
+              aliases
+                ? h(Text, { dimColor: true, color: '#666' }, aliases)
+                : null,
             )
           })
         )

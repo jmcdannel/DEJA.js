@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useCurrentUser } from 'vuefire'
 import { collection, query, where } from 'firebase/firestore'
@@ -12,30 +12,19 @@ const log = createLogger('LayoutSelector')
 
 const user = useCurrentUser()
 const layoutId = useStorage('@DEJA/layoutId', '')
-const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
 
 const showDialog = computed(() => {
-  if (isDemoMode) {
-    // In demo mode, auto-select demo layout
-    if (!layoutId.value) {
-      layoutId.value = 'demo-layout'
-    }
-    return false
-  }
   return !layoutId.value && !!user.value
 })
 
-// Get layouts for the current user (or demo layouts)
+// Get layouts for the current user
 const layoutsRef = collection(db, 'layouts')
 const layoutsQuery = computed(() => {
-  if (isDemoMode) return null
-  return user.value?.email 
+  return user.value?.email
     ? query(layoutsRef, where('owner', '==', user.value.email))
     : null
 })
-const layouts = isDemoMode ? ref([
-  { layoutId: 'demo-layout', name: 'Demo Model Train Layout' }
-]) : useCollection(layoutsQuery)
+const layouts = useCollection(layoutsQuery)
 
 const selectLayout = (selectedLayoutId: string) => {
   layoutId.value = selectedLayoutId

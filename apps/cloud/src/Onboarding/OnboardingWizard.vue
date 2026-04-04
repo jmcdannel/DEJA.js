@@ -5,9 +5,9 @@ import { useCurrentUser, useCollection } from 'vuefire'
 import { doc, setDoc, serverTimestamp, collection, query, where } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { Logo, DejaTracker } from '@repo/ui'
+import NameLayoutStep from './steps/NameLayoutStep.vue'
 import PlanStep from './steps/PlanStep.vue'
 import PaymentStep from './steps/PaymentStep.vue'
-import LayoutStep from './steps/LayoutStep.vue'
 import InstallStep from './steps/InstallStep.vue'
 import { TIER_ORDER, useOnboarding } from '@repo/modules'
 import type { PlanTier, BillingCycle } from '@repo/modules'
@@ -16,7 +16,7 @@ const router = useRouter()
 const route = useRoute()
 const user = useCurrentUser()
 const currentStep = ref(1)
-const { setPlanSelected, setLayoutCreated, setInstallStarted } = useOnboarding()
+const { state: onboardingState, setLayoutNamed, setPlanSelected, setInstallStarted } = useOnboarding()
 
 const userLayouts = useCollection(
   computed(() =>
@@ -26,96 +26,110 @@ const userLayouts = useCollection(
   ),
 )
 const primaryLayoutId = computed(() => userLayouts.value?.[0]?.id ?? '')
+
+// Layout info collected in step 1, used in step 4 (install) to create the layout
+const pendingLayoutName = ref('')
+const pendingLayoutId = ref('')
+
 const selectedPlan = ref<PlanTier>('hobbyist')
 const selectedBillingCycle = ref<BillingCycle>('monthly')
 
-onMounted(async () => {
-  const planParam = route.query.plan as string | undefined
-  const billingParam = route.query.billing as string | undefined
+// Restore state from Firestore if user returns mid-onboarding
+onMounted(() => {
+  const os = onboardingState.value
+  if (os.layoutNamed && os.pendingLayoutName && os.pendingLayoutId) {
+    pendingLayoutName.value = os.pendingLayoutName
+    pendingLayoutId.value = os.pendingLayoutId
 
-  if (planParam && TIER_ORDER.includes(planParam as PlanTier)) {
-    const plan = planParam as PlanTier
-    selectedPlan.value = plan
-    if (billingParam === 'annual' || billingParam === 'monthly') {
-      selectedBillingCycle.value = billingParam
-    }
-
-    if (plan === 'hobbyist') {
-      // Auto-create hobbyist subscription and skip to layout step
-      if (user.value) {
-        await setDoc(doc(db, 'users', user.value.uid), {
-          email: user.value.email ?? '',
-          displayName: user.value.displayName ?? null,
-          createdAt: serverTimestamp(),
-          subscription: {
-            plan: 'hobbyist',
-            status: 'active',
-            billingCycle: null,
-            stripeCustomerId: null,
-            stripeSubscriptionId: null,
-            trialEndsAt: null,
-            currentPeriodEnd: null,
-            cancelAtPeriodEnd: false,
-            updatedAt: serverTimestamp(),
-          },
-        }, { merge: true })
-      }
-      setPlanSelected() // 🔥 fire-and-forget — persist onboarding progress
-      currentStep.value = 3
+    if (os.planSelected) {
+      currentStep.value = 4
     } else {
-      setPlanSelected() // 🔥 fire-and-forget — persist onboarding progress
       currentStep.value = 2
     }
   }
-})
 
-// 🚀 Mark install step started when user reaches step 4
-watch(currentStep, (step) => {
-  if (step === 4) {
-    setInstallStarted() // 🔥 fire-and-forget — persist onboarding progress
+  // Handle deep-link query params (e.g., /onboarding?plan=engineer)
+  const planParam = route.query.plan as string | undefined
+  const billingParam = route.query.billing as string | undefined
+  if (planParam && TIER_ORDER.includes(planParam as PlanTier)) {
+    selectedPlan.value = planParam as PlanTier
+    if (billingParam === 'annual' || billingParam === 'monthly') {
+      selectedBillingCycle.value = billingParam
+    }
   }
 })
 
+// Smooth scroll to top + mark install step on step change
+watch(currentStep, (step) => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+  if (step === 4) {
+    setInstallStarted()
+  }
+})
+
+// Step 1: Name Layout complete
+function handleNameComplete(payload: { name: string; id: string }) {
+  pendingLayoutName.value = payload.name
+  pendingLayoutId.value = payload.id
+  setLayoutNamed(payload.name, payload.id)
+  currentStep.value = 2
+}
+
+// Step 2: Plan selection complete
 function handlePlanComplete(payload: { plan: PlanTier; billingCycle: BillingCycle | null }) {
   selectedPlan.value = payload.plan
   selectedBillingCycle.value = payload.billingCycle ?? 'monthly'
-  setPlanSelected() // 🔥 fire-and-forget — persist onboarding progress
+  setPlanSelected()
 
   if (payload.plan === 'hobbyist') {
-    currentStep.value = 3
+    if (user.value) {
+      setDoc(doc(db, 'users', user.value.uid), {
+        email: user.value.email ?? '',
+        displayName: user.value.displayName ?? null,
+        createdAt: serverTimestamp(),
+        subscription: {
+          plan: 'hobbyist',
+          status: 'active',
+          billingCycle: null,
+          stripeCustomerId: null,
+          stripeSubscriptionId: null,
+          trialEndsAt: null,
+          currentPeriodEnd: null,
+          cancelAtPeriodEnd: false,
+          updatedAt: serverTimestamp(),
+        },
+      }, { merge: true })
+    }
+    currentStep.value = 4
   } else {
-    currentStep.value = 2
+    currentStep.value = 3
   }
 }
 
+// Step 3: Payment complete
 function handlePaymentComplete() {
-  currentStep.value = 3
-}
-
-function handleLayoutComplete() {
-  setLayoutCreated() // 🔥 fire-and-forget — persist onboarding progress
   currentStep.value = 4
 }
 
+// Step 4: Install complete → go to dashboard
 function handleInstallComplete() {
   router.push({ name: 'home' })
 }
 
+// Steps config for visual tracker
 const steps = computed(() => [
   { value: 0, title: 'Create Account', icon: 'mdi-account-plus-outline', disabled: false },
-  { value: 1, title: 'Choose Plan', icon: 'mdi-tag-outline', disabled: false },
-  { value: 2, title: 'Payment', icon: 'mdi-credit-card-outline', disabled: selectedPlan.value === 'hobbyist' },
-  { value: 3, title: 'Register Layout', icon: 'mdi-map-marker-path', disabled: false },
+  { value: 1, title: 'Name Layout', icon: 'mdi-map-marker-path', disabled: false },
+  { value: 2, title: 'Choose Plan', icon: 'mdi-tag-outline', disabled: false },
+  { value: 3, title: 'Payment', icon: 'mdi-credit-card-outline', disabled: selectedPlan.value === 'hobbyist' },
   { value: 4, title: 'Install', icon: 'mdi-download-outline', disabled: false },
 ])
 
-// Map wizard currentStep (0-4) to DejaTracker activeStep (0-4)
-// Wizard: 0=Account, 1=Plan, 2=Payment, 3=Layout, 4=Install
-// Tracker: 0=SignUp, 1=SelectPlan, 2=CreateLayout, 3=Install, 4=Drive
+// Map wizard currentStep to DejaTracker activeStep
 const trackerStep = computed(() => {
-  if (currentStep.value <= 1) return 1  // Plan step
-  if (currentStep.value === 2) return 1 // Payment = still on plan
-  if (currentStep.value === 3) return 2 // Layout
+  if (currentStep.value <= 1) return 1  // Name Layout
+  if (currentStep.value === 2) return 2 // Plan
+  if (currentStep.value === 3) return 2 // Payment = still on plan visually
   return 3                               // Install
 })
 </script>
@@ -130,35 +144,59 @@ const trackerStep = computed(() => {
     </div>
 
     <DejaTracker
+      v-if="currentStep < 4"
       :active-step="trackerStep"
-      :show-status="currentStep === 4"
+      compact
       class="mb-8"
     />
 
-    <div class="animate-deja-fade-in" :key="currentStep">
-      <PlanStep v-if="currentStep === 1" @complete="handlePlanComplete" />
+    <Transition name="step-fade" mode="out-in">
+      <div :key="currentStep">
+        <!-- Step 1: Name your layout -->
+        <NameLayoutStep v-if="currentStep === 1" @complete="handleNameComplete" />
 
-      <template v-else-if="currentStep === 2">
-        <PaymentStep
-          v-if="selectedPlan !== 'hobbyist'"
-          :plan="selectedPlan"
-          :billing-cycle="selectedBillingCycle"
-          @complete="handlePaymentComplete"
+        <!-- Step 2: Choose a plan (or skip) -->
+        <PlanStep v-else-if="currentStep === 2" @complete="handlePlanComplete" />
+
+        <!-- Step 3: Payment (paid plans only) -->
+        <template v-else-if="currentStep === 3">
+          <PaymentStep
+            v-if="selectedPlan !== 'hobbyist'"
+            :plan="selectedPlan"
+            :billing-cycle="selectedBillingCycle"
+            @complete="handlePaymentComplete"
+          />
+          <div v-else class="text-center py-8 opacity-60">
+            No payment required for the Hobbyist plan.
+          </div>
+        </template>
+
+        <!-- Step 4: Install (creates layout + starts server detection) -->
+        <InstallStep
+          v-else-if="currentStep === 4"
+          :uid="user?.uid"
+          :layout-id="pendingLayoutId || primaryLayoutId"
+          :layout-name="pendingLayoutName"
+          @complete="handleInstallComplete"
         />
-        <div v-else class="text-center py-8 opacity-60">
-          No payment required for the Hobbyist plan.
-        </div>
-      </template>
-
-      <LayoutStep v-else-if="currentStep === 3" @complete="handleLayoutComplete" />
-
-      <InstallStep
-        v-else-if="currentStep === 4"
-        :uid="user?.uid"
-        :layout-id="primaryLayoutId"
-        @complete="handleInstallComplete"
-      />
-    </div>
+      </div>
+    </Transition>
   </v-container>
 </template>
 
+<style scoped>
+.step-fade-enter-active {
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.step-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.step-fade-enter-from {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.step-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-12px);
+}
+</style>

@@ -7,7 +7,7 @@ import ViewJson from '@/Core/UI/ViewJson.vue'
 import MacroForm from '@/Effects/MacroForm.vue'
 import IALEDForm from '@/Effects/IALEDForm.vue'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
-import ColorPicker from '@/Common/Color/ColorPicker.vue'
+import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import SoundFileList from '@/Effects/Sounds/SoundFileList.vue'
 
@@ -67,8 +67,6 @@ log.debug('EffectForm: Imports check:', {
 log.debug('EffectForm: efxTypes value:', efxTypes)
 log.debug('EffectForm: Component mounting with props:', props.efx)
 
-const editColor = ref(false)
-
 const device = ref(props.efx?.device || DEFAULT_DEVICE)
 const name = ref(props.efx?.name || '')
 const pin = ref(props.efx?.pin)
@@ -79,7 +77,7 @@ const range = ref(props.efx?.range || undefined)
 const config = ref(props.efx?.config || undefined)
 const efxType = ref(props.efx?.type)
 const efxTypeObj = ref(props.efx?.type ? getEfxType(props.efx?.type) : undefined)
-const color = ref(props.efx?.color || efxTypeObj.value?.color || 'purple')  
+const color = ref(props.efx?.color || efxTypeObj.value?.color || 'purple')
 const tags = ref<string[]>(props.efx?.tags || [])
 const allowGuest = ref<boolean>(props.efx?.allowGuest || false)
 const loading = ref(false)
@@ -119,7 +117,7 @@ watch(efxType, (newType) => {
     // Set default device if the effect type has one and no device is currently set
     if (efxTypeObj.value?.defaultDevice && !props.efx?.device) {
       device.value = efxTypeObj.value.defaultDevice
-    }   
+    }
   } else {
     efxTypeObj.value = undefined
   }
@@ -164,7 +162,7 @@ async function submit () {
     newEfx.on = macroOn.value
     newEfx.off = macroOff.value
   }
-  //  set macro
+  //  set ialed
   if (efxType.value === 'ialed') {
     newEfx.pin = pin.value
     newEfx.pattern = pattern.value
@@ -191,7 +189,7 @@ function handleIALED(ialedEffectConfig: {
     pattern: string;
     range: string;
     config: string;
-  }): void {  
+  }): void {
   pattern.value = ialedEffectConfig.pattern
   range.value = ialedEffectConfig.range
   config.value = ialedEffectConfig.config
@@ -201,167 +199,205 @@ function handleSoundFileSelect(soundFile: string) {
   selectedSoundFile.value = soundFile
   showSoundDialog.value = false
 }
-
-
 </script>
 <template>
-  <div>    
-    <v-form validate-on="submit lazy" @submit.prevent="submit">
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <div class="flex items-center justify-between">
-    <v-label class="m-2 text-4xl">
-      <v-icon v-if="efxTypeObj?.icon" size="32" class="stroke-none">{{efxTypeObj.icon}}</v-icon>
-      {{ efx ? 'Edit' : 'Add'}} Effect
-    </v-label>
-    <v-chip class="m-2" :color="color" size="x-large">
-      <v-icon v-if="efxTypeObj?.icon" :icon="efxTypeObj.icon" class="mr-2"></v-icon>
-      {{ efxType }}
-    </v-chip>
-    </div>
-    <template v-if="efxTypeObj?.require?.includes('device')">
-      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      <v-label class="m-2">
-        Device
-      </v-label>
-      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large" :rules="deviceRules">
-          <v-btn v-for="deviceOpt in devices" :value="deviceOpt.id" :key="deviceOpt.id" 
-            class="min-h-24 min-w-48 border"
-            :color="color" >
-              {{ deviceOpt.id }}
-          </v-btn>
-      </v-btn-toggle>
-      <div v-if="efxTypeObj?.defaultDevice" class="text-xs opacity-70 mt-1">
-        Default device: {{ efxTypeObj.defaultDevice }}
+  <v-form validate-on="submit lazy" @submit.prevent="submit">
+
+    <!-- ═══ SECTION 1: IDENTITY ═══ -->
+    <div class="form-section mb-4" :style="{ '--form-accent': color }">
+      <div class="form-section__header">
+        <v-icon size="18" class="form-section__header-icon">mdi-label</v-icon>
+        <span class="form-section__title">Identity</span>
+        <v-chip v-if="efxTypeObj" size="x-small" :color="efxTypeObj.color || 'indigo'" variant="tonal" class="ml-2">
+          <v-icon v-if="efxTypeObj.icon" start size="14">{{ efxTypeObj.icon }}</v-icon>
+          {{ efxType }}
+        </v-chip>
       </div>
-    </template>
-    
-    <template v-if="!efx.type">
-      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      <v-label class="m-2">Type</v-label>
-      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      <v-btn-toggle v-model="efxType" divided class="flex-wrap h-auto" size="x-large">
-        <v-btn v-for="efxOpt in efxTypes" :value="efxOpt.value" :key="efxOpt.value"
-          class="min-h-48 min-w-48 border"
-          :color="color">
-          <div class="flex flex-col">
-            <v-icon v-if="efxOpt.icon" size="32" :color="efxOpt.color" class="stroke-none">{{efxOpt.icon}}</v-icon>
-            <div class="mt-4">{{ efxOpt.label }}</div>
-          </div>
-          
-        </v-btn>
-      </v-btn-toggle>
-    </template>
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <!-- name -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <v-text-field
-        v-model="name"
-        label="Name"
-        variant="outlined"
-        :rules="rules.required"
-      ></v-text-field>
-    </div>   
 
-    <!-- pin -->
-    <template v-if="efxTypeObj?.require?.includes('pin')">
-      <v-text-field
-        v-model="pin"
-        label="Pin"
-        variant="outlined"
-        min-width="100"
-        max-width="200"
-      >
-      </v-text-field>
-    </template>
-
-    <!-- sound file selection -->
-    <template v-else-if="efxType === 'sound'">
-      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      <v-label class="m-2">
-        Sound File <span class="text-red-500">*</span>
-        <div class="text-sm opacity-70 mt-1">Select a sound file to play when this effect is triggered</div>
-      </v-label>
-      <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-      
-      <!-- Selected sound file display -->
-      <div v-if="selectedSoundFile" class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <v-icon icon="mdi-check-circle" color="green" class="mr-2"></v-icon>
-            <span class="text-green-800">Selected: {{ selectedSoundFile.split('/').pop() }}</span>
-          </div>
-          <v-btn 
-            size="small" 
-            variant="text" 
-            color="red" 
-            @click="selectedSoundFile = ''"
-            title="Clear selection"
-          >
-            <v-icon icon="mdi-close"></v-icon>
-          </v-btn>
+      <!-- Name -->
+      <div class="form-section__grid">
+        <div>
+          <label class="form-section__input-label">Name <span class="text-red-400">*</span></label>
+          <v-text-field
+            v-model="name"
+            variant="outlined"
+            density="compact"
+            :color="color"
+            :rules="rules.required"
+            hide-details="auto"
+            placeholder="Crossing Lights"
+          />
+          <div class="form-section__input-hint">Display name for this effect</div>
         </div>
       </div>
-      
-      <!-- Sound file selection button -->
-      <div class="mb-4">
-        <v-btn
-          class="min-h-48 min-w-48 border flex"
-          :color="color"
-          @click="showSoundDialog = true"
-        >
-          <div class="relative flex flex-col justify-center items-center">
-            <v-icon size="64">mdi-volume-high</v-icon>
-            <div class="mt-4">
-              {{ selectedSoundFile ? 'Change Sound File' : 'Select Sound File' }}
-            </div>
-          </div>
-        </v-btn>
+
+      <!-- Tags -->
+      <div class="form-section__row form-section__row--block">
+        <span class="form-section__row-name mb-2">Tags</span>
+        <TagPicker v-model="tags" />
       </div>
-    </template>
 
-    <!-- macro -->
-    <template v-else-if="efxType === 'macro'">
-      <MacroForm @change="handleMacro" :on="macroOn" :off="macroOff"></MacroForm>
-    </template>
+      <ColorPickerRow v-model="color" :default-color="props.efx?.color ?? 'purple'" description="Theme color for this effect in the UI" />
 
-    <!-- macro -->
-    <template v-if="efxType === 'ialed'">
-      <IALEDForm 
-        @change="handleIALED" :efx="efx"
-        :color="color"
-        :device="device"
-        v-model:pattern="pattern"
-        v-model:range="range"
-        v-model:config="config"
-        v-model:strip="pin"
-      ></IALEDForm>
-      <LcdDisplay 
-        :content="config ? JSON.stringify(config, null, 2).split('\n') : []"
-        title="CONFIG"
-        color="amber"
-        size="sm"
-        :max-lines="10"
-      />
-    </template>
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+      <!-- Guest Access toggle -->
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Guest Access</span>
+          <span class="form-section__row-desc">Allow visitors to control this effect in the tour app</span>
+        </div>
+        <v-switch
+          v-model="allowGuest"
+          :color="color"
+          hide-details
+          density="compact"
+        >
+          <template #label>
+            <v-icon :icon="allowGuest ? 'mdi-account-check' : 'mdi-account-off'" class="mr-2" />
+            {{ allowGuest ? 'Enabled' : 'Disabled' }}
+          </template>
+        </v-switch>
+      </div>
+    </div>
 
-    <!-- color -->
-    <section class="h-auto  my-4">
-      <v-btn
-        class="min-h-48 min-w-48 border flex"
-        :color="color"
-        @click="editColor = true" >
-        <!-- <v-icon :icon="efxOpt.icon" :color="efxOpt.color"></v-icon> -->
-        <div class="relative flex flex-col justify-center items-center">
-          <v-icon size="64">mdi-palette</v-icon>
-          <div class="mt-4">Color [{{ color }}]</div>
-        </div>        
-      </v-btn>
-    </section>
-    <v-dialog max-width="80vw" v-model="editColor">
-      <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.efx?.color ?? 'purple'"></ColorPicker>
-    </v-dialog>
+    <!-- ═══ SECTION 2: CONFIGURATION ═══ -->
+    <div class="form-section" :style="{ '--form-accent': color }">
+      <div class="form-section__header">
+        <v-icon size="18" class="form-section__header-icon">mdi-cog</v-icon>
+        <span class="form-section__title">Configuration</span>
+      </div>
+
+      <!-- Type picker (only shown when no type is set yet) -->
+      <template v-if="!efx.type">
+        <div class="form-section__row form-section__row--block">
+          <div class="form-section__row-label mb-2">
+            <span class="form-section__row-name">Effect Type</span>
+          </div>
+          <v-btn-toggle v-model="efxType" divided class="flex-wrap h-auto" size="x-large">
+            <v-btn
+              v-for="efxOpt in efxTypes"
+              :value="efxOpt.value"
+              :key="efxOpt.value"
+              class="min-h-48 min-w-48 border"
+              :color="color"
+            >
+              <div class="flex flex-col">
+                <v-icon v-if="efxOpt.icon" size="32" :color="efxOpt.color" class="stroke-none">{{ efxOpt.icon }}</v-icon>
+                <div class="mt-4">{{ efxOpt.label }}</div>
+              </div>
+            </v-btn>
+          </v-btn-toggle>
+        </div>
+      </template>
+
+      <!-- Device selector -->
+      <template v-if="efxTypeObj?.require?.includes('device')">
+        <div class="form-section__row form-section__row--block">
+          <div class="form-section__row-label mb-2">
+            <span class="form-section__row-name">Device</span>
+            <span v-if="efxTypeObj?.defaultDevice" class="form-section__row-desc">Default: {{ efxTypeObj.defaultDevice }}</span>
+          </div>
+          <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large" :rules="deviceRules">
+            <v-btn
+              v-for="deviceOpt in devices"
+              :value="deviceOpt.id"
+              :key="deviceOpt.id"
+              class="min-h-24 min-w-48 border"
+              :color="color"
+            >
+              {{ deviceOpt.id }}
+            </v-btn>
+          </v-btn-toggle>
+        </div>
+      </template>
+
+      <!-- Sound file selection -->
+      <template v-if="efxType === 'sound'">
+        <div class="form-section__row form-section__row--block">
+          <div class="form-section__row-label mb-2">
+            <span class="form-section__row-name">Sound File <span class="text-red-400">*</span></span>
+            <span class="form-section__row-desc">Select a sound file to play when this effect is triggered</span>
+          </div>
+
+          <!-- Selected sound file display -->
+          <div v-if="selectedSoundFile" class="mb-4 p-3 rounded-lg border flex items-center justify-between"
+            style="background: rgba(99,102,241,0.06); border-color: rgba(99,102,241,0.2)">
+            <div class="flex items-center gap-2">
+              <v-icon icon="mdi-check-circle" :color="color" />
+              <span class="text-sm text-white/80">{{ selectedSoundFile.split('/').pop() }}</span>
+            </div>
+            <v-btn size="small" variant="text" color="red" @click="selectedSoundFile = ''" title="Clear selection">
+              <v-icon icon="mdi-close" />
+            </v-btn>
+          </div>
+
+          <v-btn
+            class="min-h-48 min-w-48 border flex"
+            :color="color"
+            @click="showSoundDialog = true"
+          >
+            <div class="relative flex flex-col justify-center items-center">
+              <v-icon size="64">mdi-volume-high</v-icon>
+              <div class="mt-4">{{ selectedSoundFile ? 'Change Sound File' : 'Select Sound File' }}</div>
+            </div>
+          </v-btn>
+        </div>
+      </template>
+
+      <!-- Macro form -->
+      <template v-if="efxType === 'macro'">
+        <div class="form-section__row form-section__row--block">
+          <MacroForm @change="handleMacro" :on="macroOn" :off="macroOff" />
+        </div>
+      </template>
+
+      <!-- IALED form -->
+      <template v-if="efxType === 'ialed'">
+        <div class="form-section__row form-section__row--block">
+          <IALEDForm
+            @change="handleIALED"
+            :efx="efx"
+            :color="color"
+            :device="device"
+            v-model:pattern="pattern"
+            v-model:range="range"
+            v-model:config="config"
+            v-model:strip="pin"
+          />
+          <LcdDisplay
+            :content="config ? JSON.stringify(config, null, 2).split('\n') : []"
+            title="CONFIG"
+            color="amber"
+            size="sm"
+            :max-lines="10"
+            class="mt-4"
+          />
+        </div>
+      </template>
+
+      <!-- Pin (when required, non-ialed) -->
+      <template v-if="efxTypeObj?.require?.includes('pin') && efxType !== 'ialed'">
+        <div class="form-section__grid" style="grid-template-columns: 160px 1fr">
+          <div>
+            <label class="form-section__input-label">Pin</label>
+            <v-text-field
+              v-model="pin"
+              variant="outlined"
+              density="compact"
+              :color="color"
+              hide-details="auto"
+              placeholder="13"
+            />
+            <div class="form-section__input-hint">Arduino pin number</div>
+          </div>
+        </div>
+      </template>
+
+      <!-- Save footer -->
+      <div class="form-section__footer">
+        <v-btn variant="tonal" size="small" class="text-none" @click="$emit('close')">Cancel</v-btn>
+        <v-btn variant="tonal" :color="color" size="small" type="submit" :loading="loading" class="text-none">Save</v-btn>
+      </div>
+    </div>
 
     <!-- Sound File Selection Dialog -->
     <v-dialog max-width="90vw" v-model="showSoundDialog">
@@ -373,74 +409,21 @@ function handleSoundFileSelect(soundFile: string) {
           </v-btn>
         </v-card-title>
         <v-card-text>
-          <SoundFileList 
-            :selection-mode="true" 
+          <SoundFileList
+            :selection-mode="true"
             :selected-sound="selectedSoundFile"
             @select="handleSoundFileSelect"
           />
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn 
-            variant="tonal" 
-            @click="showSoundDialog = false"
-          >
-            Cancel
-          </v-btn>
-          <v-btn 
-            :color="color" 
-            @click="showSoundDialog = false"
-            :disabled="!selectedSoundFile"
-          >
-            Confirm Selection
-          </v-btn>
+          <v-btn variant="tonal" @click="showSoundDialog = false">Cancel</v-btn>
+          <v-btn :color="color" @click="showSoundDialog = false" :disabled="!selectedSoundFile">Confirm Selection</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <TagPicker class="my-4 " v-model="tags"></TagPicker>
-    
-    <!-- Guest Access -->
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <div class="flex items-center justify-between my-4">
-      <div>
-        <v-label class="text-lg">Guest Access</v-label>
-        <div class="text-sm opacity-70 mt-1">Allow visitors to control this effect in the tour app</div>
-      </div>
-      <v-switch
-        v-model="allowGuest"
-        :color="color"
-        hide-details
-      >
-        <template #label>
-          <v-icon 
-            :icon="allowGuest ? 'mdi-account-check' : 'mdi-account-off'" 
-            class="mr-2"
-          ></v-icon>
-          {{ allowGuest ? 'Enabled' : 'Disabled' }}
-        </template>
-      </v-switch>
-    </div>
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 my-4">
-      <v-btn
-        class="mt-2"
-        text="Close"
-        type="button"
-        variant="tonal"
-        @click="$emit('close')"
-      ></v-btn>
-      <v-btn
-        :loading="loading"
-        class="mt-2"
-        text="Submit"
-        type="submit"
-        :color="color"
-      ></v-btn>  
-    </div>
     <ViewJson :json="efx" label="Efx" />
     <ViewJson :json="efxTypeObj" label="efxTypeObj" />
     <ViewJson :json="efxTypes" label="efxTypes" />
   </v-form>
-  </div>
 </template>

@@ -15,7 +15,6 @@ export const HelpPanel = React.memo(function HelpPanel({ visible }) {
     h(Text, { dimColor: true }, ' ─────────────────────────────────'),
     h(Text, null, '  r        Restart server'),
     h(Text, null, '  s        Stop server & exit'),
-    h(Text, null, '  t        Toggle Cloudflare tunnel'),
     h(Text, null, '  l        Cycle log filter  all → error → warn'),
     h(Text, null, '  e        Export logs to ~/.deja/logs/'),
     h(Text, null, '  m / Esc  Open command menu'),

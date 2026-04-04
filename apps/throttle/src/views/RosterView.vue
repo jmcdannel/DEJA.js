@@ -1,43 +1,53 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useLocos, type Loco } from '@repo/modules/locos'
-import List from '@repo/ui/src/ModuleList/List.vue'
-import { LocoAvatar } from '@repo/ui'
-import type { ListFilter } from '@repo/ui/src/ModuleList/types'
+import { useLocos, ROADNAMES, type Loco } from '@repo/modules/locos'
+import { LocoRoster, PageHeader, ListControlBar, useListControls } from '@repo/ui'
+import type { ListFilter } from '@repo/ui'
 
 const router = useRouter()
 const { getLocos } = useLocos()
 const locos = getLocos()
 
 const locosList = computed(() =>
-  locos.value
-    ? locos.value.map((loco) => ({
-        ...loco,
-        icon: 'mdi-train',
-        hasSound: String(loco.hasSound ?? false),
-      }))
-    : []
+  locos.value ? (locos.value as Loco[]).map((l) => ({
+    ...l,
+    id: String(l.address),
+    roadname: l.meta?.roadname || '',
+  })) : []
 )
 
+// 🔍 Filter & sort
+const roadnameOptions = ROADNAMES.map((r) => ({ label: r.label, value: r.value }))
+
 const filters = computed<ListFilter[]>(() => [
-  {
-    type: 'hasSound',
-    label: 'Sound',
-    options: [
-      { label: 'Sound', value: 'true' },
-      { label: 'No Sound', value: 'false' },
-    ],
-  },
+  { type: 'roadname', label: 'Road', options: roadnameOptions },
 ])
 
-function getLocoFromItem(item: Record<string, unknown>): Loco {
-  const loco = locos.value?.find((l) => l.id === item.id)
-  return (loco || item) as Loco
-}
+const sortOptions = [
+  { value: 'order', label: 'Default' },
+  { value: 'name', label: 'Name' },
+  { value: 'address', label: 'Address' },
+]
 
-function handleLocoClick(item: Record<string, unknown>) {
-  const loco = getLocoFromItem(item)
+const viewOptions = [
+  { value: 'cab', icon: 'mdi-train', label: 'Cab' },
+  { value: 'avatar', icon: 'mdi-circle-outline', label: 'Avatar' },
+  { value: 'plate', icon: 'mdi-card-text-outline', label: 'Plate' },
+  { value: 'card', icon: 'mdi-view-grid-outline', label: 'Card' },
+  { value: 'table', icon: 'mdi-table', label: 'Table' },
+  { value: 'raw', icon: 'mdi-code-json', label: 'Raw' },
+]
+
+const rosterControls = useListControls('throttle-roster', {
+  list: locosList,
+  filters: filters.value,
+  sortOptions,
+  viewOptions,
+  defaultView: 'avatar',
+})
+
+function handleLocoSelect(loco: Loco) {
   if (loco.address) {
     router.push({ name: 'throttle', params: { address: loco.address } })
   }
@@ -45,34 +55,26 @@ function handleLocoClick(item: Record<string, unknown>) {
 </script>
 
 <template>
-  <main class="@container min-h-screen overflow-auto p-2 md:p-4">
-    <List
-      module-name="locos"
-      color="purple-darken-4"
-      title="Loco Roster"
-      icon="mdi-train"
-      :list="locosList"
-      :filters="filters"
-      empty-icon="mdi-train"
-      empty-title="No locomotives"
-      empty-description="Add locomotives to your roster to get started"
-      :view-options="[
-        { label: 'Avatar', value: 'avatar' },
-        { label: 'Card', value: 'card' },
-        { label: 'Table', value: 'table' },
-        { label: 'Raw', value: 'raw' },
-      ]"
-      :sort-options="[
-        { label: 'Default', value: 'order' },
-        { label: 'Name', value: 'name' },
-        { label: 'Address', value: 'address' },
-      ]"
-    >
-      <template #item="{ item }">
-        <div class="cursor-pointer" @click="handleLocoClick(item)">
-          <LocoAvatar :loco="getLocoFromItem(item)" :size="48" />
-        </div>
+  <main class="@container min-h-screen overflow-auto">
+    <PageHeader title="Roster" icon="mdi-train" color="pink">
+      <template #controls>
+        <ListControlBar
+          :controls="rosterControls"
+          color="pink"
+          :sort-options="sortOptions"
+          :filters="filters"
+          :show-view="true"
+          :view-options="viewOptions"
+          :show-search="false"
+        />
       </template>
-    </List>
+    </PageHeader>
+
+    <LocoRoster
+      :locos="rosterControls.filteredList.value"
+      default-view="avatar"
+      module-name="throttle-roster"
+      @select="handleLocoSelect"
+    />
   </main>
 </template>

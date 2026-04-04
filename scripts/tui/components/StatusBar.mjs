@@ -30,12 +30,13 @@ const UptimeTicker = React.memo(function UptimeTicker({ status, startTimeRef }) 
 })
 
 /**
- * StatusBar — colorful footer with server status, uptime, devices, throttles, tunnel.
+ * StatusBar — colorful footer with server status, uptime, layout, devices, throttles, tunnel.
  *
  * Props:
  *   status: 'starting' | 'running' | 'stopped'
  *   pid: number | null
  *   startTimeRef: React.MutableRefObject<number | null>
+ *   layoutId: string | null
  *   connectedCount: number
  *   totalCount: number
  *   throttleCount: number
@@ -45,6 +46,7 @@ const UptimeTicker = React.memo(function UptimeTicker({ status, startTimeRef }) 
  */
 export const StatusBar = React.memo(function StatusBar({
   status, pid, startTimeRef,
+  layoutId,
   connectedCount = 0, totalCount = 0,
   throttleCount = 0, activeThrottleCount = 0,
   tunnelUrl, selectedPort,
@@ -78,8 +80,13 @@ export const StatusBar = React.memo(function StatusBar({
     h(UptimeTicker, { status, startTimeRef }),
 
     // Separator
-    (totalCount > 0 || throttleCount > 0 || tunnelUrl || selectedPort)
+    (layoutId || totalCount > 0 || throttleCount > 0 || tunnelUrl || selectedPort)
       ? h(Text, { dimColor: true }, '  │')
+      : null,
+
+    // Layout ID (always visible when set)
+    layoutId
+      ? h(Text, { color: '#A078FF' }, `  📐 ${layoutId}`)
       : null,
 
     // Device connections

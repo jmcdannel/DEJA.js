@@ -48,7 +48,14 @@ export const DeviceList = React.memo(function DeviceList({ devices, selectedInde
             `  ${selected ? '▸' : ' '} `
           ),
           h(Text, { color: dotColor }, `${dot} `),
-          h(Text, { color: nameColor, bold: selected }, typeLabel),
+          h(Text, { color: nameColor, bold: selected }, device.name || device.id),
+        )
+      )
+
+      // Type row (indented, dimmed)
+      rows.push(
+        h(Box, { key: `${device.id}-type` },
+          h(Text, { dimColor: true }, `        ${typeLabel}`)
         )
       )
 

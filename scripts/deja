@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
-# scripts/deja — DEJA.js Server CLI
+# 🚂 scripts/deja — DEJA.js Server CLI
 # Manages the DEJA.js server as a native Node.js process.
 # Install location: ~/.deja/bin/deja
+#
+# Override install directory with DEJA_DIR env var:
+#   DEJA_DIR=./tmp/test-deja ./scripts/deja start
 
 set -euo pipefail
 
-DEJA_DIR="${HOME}/.deja"
+DEJA_DIR="${DEJA_DIR:-$HOME/.deja}"
 SERVER_DIR="${DEJA_DIR}/server"
 PID_FILE="${DEJA_DIR}/server.pid"
 LOG_DIR="${DEJA_DIR}/logs"
@@ -16,7 +19,7 @@ ENV_FILE="${DEJA_DIR}/.env"
 ENTRY="${SERVER_DIR}/index.js"
 INSTALL_BASE_URL="https://install.dejajs.com"
 
-# Tunnel
+# 🔒 Tunnel
 TUNNEL_PID_FILE="${DEJA_DIR}/tunnel.pid"
 TUNNEL_LOG_FILE="${LOG_DIR}/tunnel.log"
 TUNNEL_URL_FILE="${DEJA_DIR}/tunnel.url"
@@ -31,37 +34,26 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
-MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 DIM='\033[2m'
 NC='\033[0m'
 
-# --- Icons (Unicode) ---
-ICON_SERVER="⚡"
-ICON_RUNNING="●"
-ICON_STOPPED="○"
-ICON_SERIAL="🔌"
-ICON_WS="🌐"
-ICON_TRAIN="🚂"
-ICON_CHECK="✔"
-ICON_CROSS="✖"
-ICON_WARN="▲"
-ICON_ARROW="→"
-ICON_CLOUD="☁"
-ICON_THROTTLE="🎮"
-ICON_MONITOR="📊"
-ICON_UPDATE="↻"
-ICON_LOG="📋"
-ICON_CONFIG="⚙"
-ICON_TUNNEL="🔒"
+info()  { echo -e "  💬 ${BLUE}$*${NC}"; }
+ok()    { echo -e "  ✅ ${GREEN}$*${NC}"; }
+warn()  { echo -e "  ⚠️  ${YELLOW}$*${NC}"; }
+err()   { echo -e "  ❌ ${RED}$*${NC}" >&2; }
 
-info()  { echo -e "  ${BLUE}${ICON_ARROW}${NC} $*"; }
-ok()    { echo -e "  ${GREEN}${ICON_CHECK}${NC} $*"; }
-warn()  { echo -e "  ${YELLOW}${ICON_WARN}${NC} $*"; }
-err()   { echo -e "  ${RED}${ICON_CROSS}${NC} $*" >&2; }
+print_banner() {
+  echo -e "  \033[38;2;0;232;252m██████╗ \033[38;2;0;195;245m███████╗\033[38;2;10;160;235m     ██╗\033[38;2;25;130;220m █████╗         \033[38;2;255;0;170m██╗███████╗\033[0m"
+  echo -e "  \033[38;2;0;232;252m██╔══██╗\033[38;2;0;195;245m██╔════╝\033[38;2;10;160;235m     ██║\033[38;2;25;130;220m██╔══██╗        \033[38;2;255;0;170m██║██╔════╝\033[0m"
+  echo -e "  \033[38;2;0;232;252m██║  ██║\033[38;2;0;195;245m█████╗\033[38;2;10;160;235m       ██║\033[38;2;25;130;220m███████║        \033[38;2;255;0;170m██║███████╗\033[0m"
+  echo -e "  \033[38;2;0;232;252m██║  ██║\033[38;2;0;195;245m██╔══╝\033[38;2;10;160;235m  ██   ██║\033[38;2;25;130;220m██╔══██║   \033[38;2;255;0;170m     ██║╚════██║\033[0m"
+  echo -e "  \033[38;2;0;232;252m██████╔╝\033[38;2;0;195;245m███████╗\033[38;2;10;160;235m╚█████╔╝\033[38;2;25;130;220m██║  ██║\033[38;2;50;255;50m██╗\033[38;2;255;0;170m╚█████╔╝███████║\033[0m"
+  echo -e "  \033[38;2;0;232;252m╚═════╝ \033[38;2;0;195;245m╚══════╝\033[38;2;10;160;235m ╚════╝ \033[38;2;25;130;220m╚═╝  ╚═╝\033[38;2;50;255;50m╚═╝\033[38;2;255;0;170m ╚════╝ ╚══════╝\033[0m"
+}
 
 # ======================================================================
-# Helpers
+# 🔧 Helpers
 # ======================================================================
 
 get_version() {
@@ -72,41 +64,44 @@ get_version() {
   fi
 }
 
-is_running() {
-  if [ -f "${PID_FILE}" ]; then
+# Check if a process is running by PID file. Returns 0 if running, 1 if not.
+# Outputs the PID to stdout if running (avoids double-reading the PID file).
+_check_pid_file() {
+  local pid_file="$1"
+  if [ -f "${pid_file}" ]; then
     local pid
-    pid=$(cat "${PID_FILE}")
+    pid=$(cat "${pid_file}")
     if kill -0 "${pid}" 2>/dev/null; then
+      echo "${pid}"
       return 0
     else
-      # Stale PID file
-      rm -f "${PID_FILE}"
+      rm -f "${pid_file}"
       return 1
     fi
   fi
   return 1
 }
 
-get_pid() {
-  if [ -f "${PID_FILE}" ]; then
-    cat "${PID_FILE}"
-  fi
-}
+is_running() { _check_pid_file "${PID_FILE}" >/dev/null; }
+get_pid()    { _check_pid_file "${PID_FILE}" 2>/dev/null || true; }
 
-rotate_log() {
-  if [ -f "${LOG_FILE}" ]; then
+_rotate_file() {
+  local file="$1"
+  if [ -f "${file}" ]; then
     local size
-    size=$(stat -f%z "${LOG_FILE}" 2>/dev/null || stat -c%s "${LOG_FILE}" 2>/dev/null || echo 0)
+    size=$(stat -f%z "${file}" 2>/dev/null || stat -c%s "${file}" 2>/dev/null || echo 0)
     if [ "${size}" -gt "${MAX_LOG_SIZE}" ]; then
-      mv "${LOG_FILE}" "${LOG_FILE}.1"
+      mv "${file}" "${file}.1"
     fi
   fi
 }
 
+rotate_log() { _rotate_file "${LOG_FILE}"; }
+
 check_installed() {
   if [ ! -f "${ENTRY}" ]; then
     err "DEJA.js server is not installed."
-    err "Run the installer: curl -fsSL https://install.dejajs.com | bash"
+    info "🚀 Run the installer: ${CYAN}curl -fsSL https://install.dejajs.com | bash${NC}"
     exit 1
   fi
 }
@@ -119,13 +114,14 @@ check_env() {
 }
 
 # ======================================================================
-# Tunnel Helpers
+# 🔒 Tunnel Helpers
 # ======================================================================
 
 check_cloudflared() {
   if ! command -v cloudflared &>/dev/null; then
     warn "cloudflared is not installed. Remote monitoring requires cloudflared."
-    info "Install it:"
+    echo ""
+    info "📦 Install it:"
     echo -e "    ${DIM}macOS:${NC}  brew install cloudflare/cloudflare/cloudflared"
     echo -e "    ${DIM}Linux:${NC}  curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null"
     echo -e "           ${DIM}echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared focal main' | sudo tee /etc/apt/sources.list.d/cloudflared.list${NC}"
@@ -155,35 +151,9 @@ is_paid_plan() {
   [[ "${plan}" == "engineer" || "${plan}" == "conductor" ]]
 }
 
-is_tunnel_running() {
-  if [ -f "${TUNNEL_PID_FILE}" ]; then
-    local pid
-    pid=$(cat "${TUNNEL_PID_FILE}")
-    if kill -0 "${pid}" 2>/dev/null; then
-      return 0
-    else
-      rm -f "${TUNNEL_PID_FILE}"
-      return 1
-    fi
-  fi
-  return 1
-}
-
-get_tunnel_pid() {
-  if [ -f "${TUNNEL_PID_FILE}" ]; then
-    cat "${TUNNEL_PID_FILE}"
-  fi
-}
-
-rotate_tunnel_log() {
-  if [ -f "${TUNNEL_LOG_FILE}" ]; then
-    local size
-    size=$(stat -f%z "${TUNNEL_LOG_FILE}" 2>/dev/null || stat -c%s "${TUNNEL_LOG_FILE}" 2>/dev/null || echo 0)
-    if [ "${size}" -gt "${MAX_LOG_SIZE}" ]; then
-      mv "${TUNNEL_LOG_FILE}" "${TUNNEL_LOG_FILE}.1"
-    fi
-  fi
-}
+is_tunnel_running() { _check_pid_file "${TUNNEL_PID_FILE}" >/dev/null; }
+get_tunnel_pid()    { _check_pid_file "${TUNNEL_PID_FILE}" 2>/dev/null || true; }
+rotate_tunnel_log() { _rotate_file "${TUNNEL_LOG_FILE}"; }
 
 start_tunnel_bg() {
   if is_tunnel_running; then
@@ -195,7 +165,7 @@ start_tunnel_bg() {
 
   if ! is_paid_plan; then
     echo ""
-    echo -e "  ${YELLOW}${ICON_TUNNEL} Remote monitoring${NC} requires an ${BOLD}Engineer${NC} or ${BOLD}Conductor${NC} plan."
+    echo -e "  🔒 ${YELLOW}Remote monitoring${NC} requires an ${BOLD}Engineer${NC} or ${BOLD}Conductor${NC} plan."
     echo -e "  ${DIM}Upgrade at${NC} ${CYAN}https://dejajs.com/pricing${NC}"
     return 1
   fi
@@ -213,15 +183,15 @@ start_tunnel_bg() {
   local tunnel_token="${CLOUDFLARE_TUNNEL_TOKEN:-}"
 
   if [ -n "${tunnel_token}" ]; then
-    info "Starting named Cloudflare tunnel..."
+    info "🔒 Starting named Cloudflare tunnel..."
     nohup cloudflared tunnel run --token "${tunnel_token}" \
       >> "${TUNNEL_LOG_FILE}" 2>&1 &
   elif [ -f "${CLOUDFLARED_YML}" ]; then
-    info "Starting named Cloudflare tunnel ${DIM}(cloudflared.yml)${NC}..."
+    info "🔒 Starting named Cloudflare tunnel ${DIM}(cloudflared.yml)${NC}..."
     nohup cloudflared tunnel --config "${CLOUDFLARED_YML}" run \
       >> "${TUNNEL_LOG_FILE}" 2>&1 &
   else
-    info "Starting quick Cloudflare tunnel ${DIM}(ephemeral URL)${NC}..."
+    info "🔒 Starting quick Cloudflare tunnel ${DIM}(ephemeral URL)${NC}..."
     nohup cloudflared tunnel --url "http://localhost:${WS_PORT}" \
       >> "${TUNNEL_LOG_FILE}" 2>&1 &
   fi
@@ -240,13 +210,13 @@ start_tunnel_bg() {
   fi
 
   if is_tunnel_running; then
-    echo -e "  ${GREEN}${ICON_TUNNEL} Tunnel started${NC} ${DIM}(PID ${tunnel_pid})${NC}"
+    echo -e "  🔒 ${GREEN}Tunnel started${NC} ${DIM}(PID ${tunnel_pid})${NC}"
     if [ -n "${url}" ]; then
-      echo -e "    ${DIM}URL${NC}       ${CYAN}${url}${NC}"
+      echo -e "    🌐 ${DIM}URL${NC}       ${CYAN}${url}${NC}"
     elif [ -n "${tunnel_token}" ] || [ -f "${CLOUDFLARED_YML}" ]; then
-      echo -e "    ${DIM}URL${NC}       ${CYAN}wss://ws.dejajs.com${NC}"
+      echo -e "    🌐 ${DIM}URL${NC}       ${CYAN}wss://ws.dejajs.com${NC}"
     fi
-    echo -e "    ${DIM}Logs${NC}      deja tunnel logs"
+    echo -e "    📋 ${DIM}Logs${NC}      deja tunnel logs"
   else
     err "Tunnel failed to start. Check logs: deja tunnel logs"
     rm -f "${TUNNEL_PID_FILE}"
@@ -261,12 +231,12 @@ stop_tunnel() {
     kill "${pid}" 2>/dev/null || true
     sleep 1
     rm -f "${TUNNEL_PID_FILE}" "${TUNNEL_URL_FILE}"
-    ok "Tunnel stopped."
+    ok "Tunnel stopped 🔒"
   fi
 }
 
 # ======================================================================
-# Interactive TUI
+# 🖥️ Interactive TUI
 # ======================================================================
 
 cmd_start_interactive() {
@@ -276,7 +246,7 @@ cmd_start_interactive() {
     local pid
     pid=$(get_pid)
     warn "Server is already running in the background ${DIM}(PID ${pid})${NC}"
-    info "Stop it first with: ${CYAN}deja stop${NC}"
+    info "🛑 Stop it first with: ${CYAN}deja stop${NC}"
     return 1
   fi
 
@@ -288,20 +258,14 @@ cmd_start_interactive() {
     set -a; source "${ENV_FILE}" 2>/dev/null || true; set +a
   fi
 
-  # Banner
   echo ""
-  echo -e "  \033[38;2;0;232;252m██████╗ \033[38;2;0;195;245m███████╗\033[38;2;10;160;235m     ██╗\033[38;2;25;130;220m █████╗         \033[38;2;255;0;170m██╗███████╗\033[0m"
-  echo -e "  \033[38;2;0;232;252m██╔══██╗\033[38;2;0;195;245m██╔════╝\033[38;2;10;160;235m     ██║\033[38;2;25;130;220m██╔══██╗        \033[38;2;255;0;170m██║██╔════╝\033[0m"
-  echo -e "  \033[38;2;0;232;252m██║  ██║\033[38;2;0;195;245m█████╗\033[38;2;10;160;235m       ██║\033[38;2;25;130;220m███████║        \033[38;2;255;0;170m██║███████╗\033[0m"
-  echo -e "  \033[38;2;0;232;252m██║  ██║\033[38;2;0;195;245m██╔══╝\033[38;2;10;160;235m  ██   ██║\033[38;2;25;130;220m██╔══██║   \033[38;2;255;0;170m██   ██║╚════██║\033[0m"
-  echo -e "  \033[38;2;0;232;252m██████╔╝\033[38;2;0;195;245m███████╗\033[38;2;10;160;235m╚█████╔╝\033[38;2;25;130;220m██║  ██║\033[38;2;50;255;50m██╗\033[38;2;255;0;170m╚█████╔╝███████║\033[0m"
-  echo -e "  \033[38;2;0;232;252m╚═════╝ \033[38;2;0;195;245m╚══════╝\033[38;2;10;160;235m ╚════╝ \033[38;2;25;130;220m╚═╝  ╚═╝\033[38;2;50;255;50m╚═╝\033[38;2;255;0;170m ╚════╝ ╚══════╝\033[0m"
+  print_banner
   echo ""
-  echo -e "  \033[1mDCC-EX JavaScript API\033[0m — Starting..."
+  echo -e "  ${BOLD}🚂 DCC-EX JavaScript API${NC} — Starting..."
   echo ""
 
   # Launch the interactive TUI.
-  # Defaults to blessed; set DEJA_UI=ink to use the ink (React) version.
+  # Defaults to ink; set DEJA_UI to use a different renderer.
   local script_dir
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   local ui="${DEJA_UI:-ink}"
@@ -309,7 +273,7 @@ cmd_start_interactive() {
 }
 
 # ======================================================================
-# Commands
+# 🎮 Commands
 # ======================================================================
 
 cmd_start() {
@@ -333,16 +297,10 @@ cmd_start() {
 }
 
 cmd_start_background() {
-  # Banner
   echo ""
-  echo -e "  \033[38;2;0;232;252m██████╗ \033[38;2;0;195;245m███████╗\033[38;2;10;160;235m     ██╗\033[38;2;25;130;220m █████╗         \033[38;2;255;0;170m██╗███████╗\033[0m"
-  echo -e "  \033[38;2;0;232;252m██╔══██╗\033[38;2;0;195;245m██╔════╝\033[38;2;10;160;235m     ██║\033[38;2;25;130;220m██╔══██╗        \033[38;2;255;0;170m██║██╔════╝\033[0m"
-  echo -e "  \033[38;2;0;232;252m██║  ██║\033[38;2;0;195;245m█████╗\033[38;2;10;160;235m       ██║\033[38;2;25;130;220m███████║        \033[38;2;255;0;170m██║███████╗\033[0m"
-  echo -e "  \033[38;2;0;232;252m██║  ██║\033[38;2;0;195;245m██╔══╝\033[38;2;10;160;235m  ██   ██║\033[38;2;25;130;220m██╔══██║   \033[38;2;255;0;170m██   ██║╚════██║\033[0m"
-  echo -e "  \033[38;2;0;232;252m██████╔╝\033[38;2;0;195;245m███████╗\033[38;2;10;160;235m╚█████╔╝\033[38;2;25;130;220m██║  ██║\033[38;2;50;255;50m██╗\033[38;2;255;0;170m╚█████╔╝███████║\033[0m"
-  echo -e "  \033[38;2;0;232;252m╚═════╝ \033[38;2;0;195;245m╚══════╝\033[38;2;10;160;235m ╚════╝ \033[38;2;25;130;220m╚═╝  ╚═╝\033[38;2;50;255;50m╚═╝\033[38;2;255;0;170m ╚════╝ ╚══════╝\033[0m"
+  print_banner
   echo ""
-  echo -e "  \033[1mDCC-EX JavaScript API\033[0m — Starting..."
+  echo -e "  ${BOLD}🚂 DCC-EX JavaScript API${NC} — Starting..."
   echo ""
 
   check_installed
@@ -364,7 +322,7 @@ cmd_start_background() {
     set -a; source "${ENV_FILE}" 2>/dev/null || true; set +a
   fi
 
-  info "Starting DEJA.js server..."
+  info "🚀 Starting DEJA.js server..."
 
   # CWD must be ~/.deja so dotenv/config finds .env
   cd "${DEJA_DIR}"
@@ -376,16 +334,16 @@ cmd_start_background() {
   sleep 1
   if kill -0 "${pid}" 2>/dev/null; then
     echo ""
-    echo -e "  ${GREEN}${ICON_SERVER} Server started${NC} ${DIM}(PID ${pid})${NC}"
+    echo -e "  ⚡ ${GREEN}${BOLD}Server started${NC} ${DIM}(PID ${pid})${NC}"
     echo ""
-    echo -e "    ${DIM}Version${NC}   $(get_version)"
-    echo -e "    ${DIM}Logs${NC}      deja logs -f"
-    echo -e "    ${DIM}Status${NC}    deja status"
+    echo -e "    📦 ${DIM}Version${NC}   $(get_version)"
+    echo -e "    📋 ${DIM}Logs${NC}      deja logs -f"
+    echo -e "    📊 ${DIM}Status${NC}    deja status"
     echo ""
   else
     rm -f "${PID_FILE}"
     err "Server failed to start. Check logs:"
-    echo -e "    ${LOG_FILE}"
+    echo -e "    📋 ${LOG_FILE}"
     exit 1
   fi
 
@@ -401,7 +359,7 @@ cmd_stop() {
 
   local pid
   pid=$(get_pid)
-  info "Stopping server ${DIM}(PID ${pid})${NC}..."
+  info "🛑 Stopping server ${DIM}(PID ${pid})${NC}..."
 
   # Graceful shutdown
   kill "${pid}" 2>/dev/null || true
@@ -418,13 +376,13 @@ cmd_stop() {
 
   # Force kill if still running
   if kill -0 "${pid}" 2>/dev/null; then
-    warn "Forcing shutdown..."
+    warn "💀 Forcing shutdown..."
     kill -9 "${pid}" 2>/dev/null || true
     sleep 1
   fi
 
   rm -f "${PID_FILE}"
-  ok "Server stopped."
+  ok "Server stopped 🛑"
   stop_tunnel
 }
 
@@ -435,21 +393,21 @@ cmd_restart() {
 
 cmd_status() {
   echo ""
-  echo -e "  ${BOLD}${ICON_SERVER} DEJA.js Server${NC}"
+  echo -e "  ${BOLD}⚡ DEJA.js Server${NC}"
   echo -e "  ${DIM}──────────────────────────────${NC}"
 
   # Version
   local version
   version=$(get_version)
-  echo -e "  ${DIM}Version${NC}     ${version}"
+  echo -e "  📦 ${DIM}Version${NC}     ${version}"
 
   # Process state
   if is_running; then
     local pid
     pid=$(get_pid)
-    echo -e "  ${DIM}Status${NC}      ${GREEN}${ICON_RUNNING} running${NC} ${DIM}(PID ${pid})${NC}"
+    echo -e "  🟢 ${DIM}Status${NC}      ${GREEN}running${NC} ${DIM}(PID ${pid})${NC}"
   else
-    echo -e "  ${DIM}Status${NC}      ${RED}${ICON_STOPPED} stopped${NC}"
+    echo -e "  🔴 ${DIM}Status${NC}      ${RED}stopped${NC}"
   fi
 
   # Config
@@ -458,45 +416,41 @@ cmd_status() {
     uid=$(grep -o '"uid"[[:space:]]*:[[:space:]]*"[^"]*"' "${CONFIG_FILE}" | sed 's/.*"uid"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' 2>/dev/null || echo "")
     layout_id=$(grep -o '"layoutId"[[:space:]]*:[[:space:]]*"[^"]*"' "${CONFIG_FILE}" | sed 's/.*"layoutId"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' 2>/dev/null || echo "")
     if [ -n "${uid}" ]; then
-      echo -e "  ${DIM}Account${NC}     ${uid}"
+      echo -e "  🪪 ${DIM}Account${NC}     ${uid}"
     fi
     if [ -n "${layout_id}" ]; then
-      echo -e "  ${DIM}Layout${NC}      ${layout_id}"
+      echo -e "  🏷️  ${DIM}Layout${NC}      ${layout_id}"
     fi
   fi
 
   echo ""
-  echo -e "  ${BOLD}${ICON_CONFIG} Connections${NC}"
+  echo -e "  ${BOLD}🔌 Connections${NC}"
   echo -e "  ${DIM}──────────────────────────────${NC}"
 
-  # WebSocket
+  # Source .env once to read all connection settings
+  local ws_port="${VITE_WS_PORT:-8082}"
+  local ws_enabled="${ENABLE_WS:-true}"
+  local mqtt_enabled="${ENABLE_MQTT:-false}"
+  local cloud_enabled="${ENABLE_DEJACLOUD:-false}"
   if [ -f "${ENV_FILE}" ]; then
-    local ws_port ws_enabled
-    ws_port=$(grep '^VITE_WS_PORT=' "${ENV_FILE}" | cut -d'=' -f2 || echo "8082")
-    ws_port="${ws_port:-8082}"
-    ws_enabled=$(grep '^ENABLE_WS=' "${ENV_FILE}" | cut -d'=' -f2 || echo "true")
-    ws_enabled="${ws_enabled:-true}"
-    if [ "${ws_enabled}" != "false" ]; then
-      echo -e "  ${ICON_WS} ${DIM}WebSocket${NC}   ${CYAN}ws://localhost:${ws_port}${NC}"
-    else
-      echo -e "  ${ICON_WS} ${DIM}WebSocket${NC}   ${DIM}disabled${NC}"
-    fi
+    # shellcheck disable=SC1090
+    eval "$(grep -E '^(VITE_WS_PORT|ENABLE_WS|ENABLE_MQTT|ENABLE_DEJACLOUD)=' "${ENV_FILE}" 2>/dev/null || true)"
+    ws_port="${VITE_WS_PORT:-${ws_port}}"
+    ws_enabled="${ENABLE_WS:-${ws_enabled}}"
+    mqtt_enabled="${ENABLE_MQTT:-${mqtt_enabled}}"
+    cloud_enabled="${ENABLE_DEJACLOUD:-${cloud_enabled}}"
+  fi
 
-    # MQTT
-    local mqtt_enabled
-    mqtt_enabled=$(grep '^ENABLE_MQTT=' "${ENV_FILE}" | cut -d'=' -f2 || echo "false")
-    mqtt_enabled="${mqtt_enabled:-false}"
-    if [ "${mqtt_enabled}" = "true" ]; then
-      echo -e "  ${ICON_CLOUD} ${DIM}MQTT${NC}        ${GREEN}enabled${NC}"
-    fi
-
-    # Cloud
-    local cloud_enabled
-    cloud_enabled=$(grep '^ENABLE_DEJACLOUD=' "${ENV_FILE}" | cut -d'=' -f2 || echo "false")
-    cloud_enabled="${cloud_enabled:-false}"
-    if [ "${cloud_enabled}" = "true" ]; then
-      echo -e "  ${ICON_CLOUD} ${DIM}DEJA Cloud${NC}  ${GREEN}connected${NC}"
-    fi
+  if [ "${ws_enabled}" != "false" ]; then
+    echo -e "  🌐 ${DIM}WebSocket${NC}   ${CYAN}ws://localhost:${ws_port}${NC}"
+  else
+    echo -e "  🌐 ${DIM}WebSocket${NC}   ${DIM}disabled${NC}"
+  fi
+  if [ "${mqtt_enabled}" = "true" ]; then
+    echo -e "  📡 ${DIM}MQTT${NC}        ${GREEN}enabled${NC}"
+  fi
+  if [ "${cloud_enabled}" = "true" ]; then
+    echo -e "  ☁️  ${DIM}DEJA Cloud${NC}  ${GREEN}connected${NC}"
   fi
 
   # Serial ports
@@ -506,42 +460,40 @@ cmd_status() {
   done
   if [ ${#ports[@]} -gt 0 ]; then
     for port in "${ports[@]}"; do
-      echo -e "  ${ICON_SERIAL} ${DIM}Serial${NC}      ${port}"
+      echo -e "  🔌 ${DIM}Serial${NC}      ${port}"
     done
   else
-    echo -e "  ${ICON_SERIAL} ${DIM}Serial${NC}      ${DIM}none detected${NC}"
+    echo -e "  🔌 ${DIM}Serial${NC}      ${DIM}none detected${NC}"
   fi
 
   echo ""
-  echo -e "  ${BOLD}${ICON_TUNNEL} Remote Monitoring${NC}"
+  echo -e "  ${BOLD}🔒 Remote Monitoring${NC}"
   echo -e "  ${DIM}──────────────────────────────${NC}"
   if is_tunnel_running; then
     local tunnel_pid
     tunnel_pid=$(get_tunnel_pid)
-    echo -e "  ${DIM}Tunnel${NC}      ${GREEN}${ICON_RUNNING} running${NC} ${DIM}(PID ${tunnel_pid})${NC}"
+    echo -e "  🟢 ${DIM}Tunnel${NC}      ${GREEN}running${NC} ${DIM}(PID ${tunnel_pid})${NC}"
     if [ -f "${TUNNEL_URL_FILE}" ]; then
       local tunnel_url
       tunnel_url=$(cat "${TUNNEL_URL_FILE}")
-      echo -e "  ${ICON_TUNNEL} ${DIM}URL${NC}         ${CYAN}${tunnel_url}${NC}"
+      echo -e "  🌐 ${DIM}URL${NC}         ${CYAN}${tunnel_url}${NC}"
     else
-      echo -e "  ${ICON_TUNNEL} ${DIM}URL${NC}         ${CYAN}wss://ws.dejajs.com${NC}"
+      echo -e "  🌐 ${DIM}URL${NC}         ${CYAN}wss://ws.dejajs.com${NC}"
     fi
   else
-    local plan
-    plan=$(get_plan)
-    if [[ "${plan}" == "engineer" || "${plan}" == "conductor" ]]; then
-      echo -e "  ${DIM}Tunnel${NC}      ${RED}${ICON_STOPPED} stopped${NC} ${DIM}— run: deja tunnel start${NC}"
+    if is_paid_plan; then
+      echo -e "  🔴 ${DIM}Tunnel${NC}      ${RED}stopped${NC} ${DIM}— run: deja tunnel start${NC}"
     else
-      echo -e "  ${DIM}Tunnel${NC}      ${DIM}not available${NC} ${DIM}(upgrade to Engineer or Conductor — https://dejajs.com/pricing)${NC}"
+      echo -e "  🔴 ${DIM}Tunnel${NC}      ${DIM}not available${NC} ${DIM}(upgrade to Engineer or Conductor — https://dejajs.com/pricing)${NC}"
     fi
   fi
 
   echo ""
-  echo -e "  ${BOLD}${ICON_TRAIN} Apps${NC}"
+  echo -e "  ${BOLD}🚂 Apps${NC}"
   echo -e "  ${DIM}──────────────────────────────${NC}"
-  echo -e "  ${ICON_THROTTLE} ${DIM}Throttle${NC}    ${CYAN}https://throttle.dejajs.com${NC}"
-  echo -e "  ${ICON_CLOUD} ${DIM}Cloud${NC}       ${CYAN}https://cloud.dejajs.com${NC}"
-  echo -e "  ${ICON_MONITOR} ${DIM}Monitor${NC}     ${CYAN}https://monitor.dejajs.com${NC}"
+  echo -e "  🎮 ${DIM}Throttle${NC}    ${CYAN}https://throttle.dejajs.com${NC}"
+  echo -e "  ☁️  ${DIM}Cloud${NC}       ${CYAN}https://cloud.dejajs.com${NC}"
+  echo -e "  📊 ${DIM}Monitor${NC}     ${CYAN}https://monitor.dejajs.com${NC}"
 
   # Log file
   echo ""
@@ -549,11 +501,11 @@ cmd_status() {
     local log_size
     log_size=$(stat -f%z "${LOG_FILE}" 2>/dev/null || stat -c%s "${LOG_FILE}" 2>/dev/null || echo 0)
     if [ "${log_size}" -gt 1048576 ]; then
-      echo -e "  ${ICON_LOG} ${DIM}Log${NC}  ${LOG_FILE} ${DIM}($((log_size / 1048576))MB)${NC}"
+      echo -e "  📋 ${DIM}Log${NC}  ${LOG_FILE} ${DIM}($((log_size / 1048576))MB)${NC}"
     elif [ "${log_size}" -gt 1024 ]; then
-      echo -e "  ${ICON_LOG} ${DIM}Log${NC}  ${LOG_FILE} ${DIM}($((log_size / 1024))KB)${NC}"
+      echo -e "  📋 ${DIM}Log${NC}  ${LOG_FILE} ${DIM}($((log_size / 1024))KB)${NC}"
     else
-      echo -e "  ${ICON_LOG} ${DIM}Log${NC}  ${LOG_FILE} ${DIM}(${log_size}B)${NC}"
+      echo -e "  📋 ${DIM}Log${NC}  ${LOG_FILE} ${DIM}(${log_size}B)${NC}"
     fi
   fi
 
@@ -593,7 +545,7 @@ cmd_logs() {
 
 cmd_update() {
   echo ""
-  echo -e "  ${ICON_UPDATE} ${BOLD}Checking for updates...${NC}"
+  echo -e "  🔄 ${BOLD}Checking for updates...${NC}"
 
   local current_version
   current_version=$(get_version)
@@ -609,41 +561,43 @@ cmd_update() {
   local tarball_url="${INSTALL_BASE_URL}/releases/latest/deja-server.tar.gz"
   local tmp_dir
   tmp_dir=$(mktemp -d)
+  trap "rm -rf '${tmp_dir}'" EXIT
 
-  info "Downloading latest release..."
+  info "⬇️  Downloading latest release..."
   curl -fsSL "${tarball_url}" -o "${tmp_dir}/deja-server.tar.gz" || {
     err "Failed to download update. Check your internet connection."
-    rm -rf "${tmp_dir}"
     exit 1
   }
 
-  # Extract and replace
-  info "Installing..."
+  info "📦 Installing..."
   mkdir -p "${SERVER_DIR}"
   tar -xzf "${tmp_dir}/deja-server.tar.gz" -C "${SERVER_DIR}"
   rm -rf "${tmp_dir}"
+  trap - EXIT
 
   # Read updated version
   local latest_version
   latest_version=$(get_version)
 
   if [ "${current_version}" = "${latest_version}" ]; then
-    ok "Already up to date ${DIM}(${current_version})${NC}"
+    ok "Already up to date ${DIM}(${current_version})${NC} 👍"
   else
     # Install/update native dependencies
-    info "Installing dependencies..."
-    cd "${SERVER_DIR}" && npm install --production --silent 2>/dev/null
+    info "📦 Installing dependencies..."
+    (cd "${SERVER_DIR}" && npm install --production --silent 2>/dev/null)
 
-    ok "Updated: ${current_version} ${ICON_ARROW} ${latest_version}"
+    ok "Updated: ${current_version} → ${latest_version} 🎉"
   fi
 
   # Update CLI itself
   local cli_url="${INSTALL_BASE_URL}/releases/latest/deja"
-  info "Updating CLI..."
-  curl -fsSL "${cli_url}" -o "${DEJA_BIN}/deja" || {
+  info "⬇️  Updating CLI..."
+  if curl -fsSL "${cli_url}" -o "${DEJA_BIN}/deja"; then
+    chmod +x "${DEJA_BIN}/deja"
+    ok "CLI updated"
+  else
     warn "Failed to update CLI. Continuing with current version."
-  }
-  chmod +x "${DEJA_BIN}/deja"
+  fi
 
   # Restart if was running
   if [ "${was_running}" = true ]; then
@@ -677,23 +631,21 @@ cmd_tunnel() {
       ;;
     status)
       echo ""
-      echo -e "  ${BOLD}${ICON_TUNNEL} Tunnel Status${NC}"
+      echo -e "  ${BOLD}🔒 Tunnel Status${NC}"
       echo -e "  ${DIM}──────────────────────────────${NC}"
       if is_tunnel_running; then
         local pid
         pid=$(get_tunnel_pid)
-        echo -e "  ${DIM}Status${NC}    ${GREEN}${ICON_RUNNING} running${NC} ${DIM}(PID ${pid})${NC}"
+        echo -e "  🟢 ${DIM}Status${NC}    ${GREEN}running${NC} ${DIM}(PID ${pid})${NC}"
         if [ -f "${TUNNEL_URL_FILE}" ]; then
           local url
           url=$(cat "${TUNNEL_URL_FILE}")
-          echo -e "  ${DIM}URL${NC}       ${CYAN}${url}${NC}"
+          echo -e "  🌐 ${DIM}URL${NC}       ${CYAN}${url}${NC}"
         fi
       else
-        local plan
-        plan=$(get_plan)
-        echo -e "  ${DIM}Status${NC}    ${RED}${ICON_STOPPED} stopped${NC}"
-        if [[ "${plan}" != "engineer" && "${plan}" != "conductor" ]]; then
-          echo -e "  ${DIM}Plan${NC}      ${plan:-unknown} ${DIM}(upgrade to enable — https://dejajs.com/pricing)${NC}"
+        echo -e "  🔴 ${DIM}Status${NC}    ${RED}stopped${NC}"
+        if ! is_paid_plan; then
+          echo -e "  💳 ${DIM}Plan${NC}      ${DIM}upgrade to enable — https://dejajs.com/pricing${NC}"
         fi
       fi
       echo ""
@@ -756,43 +708,43 @@ cmd_deploy() {
 
 cmd_help() {
   echo ""
-  echo -e "  ${BOLD}${ICON_SERVER} DEJA.js Server CLI${NC}"
+  echo -e "  ${BOLD}🚂 DEJA.js Server CLI${NC}"
   echo ""
   echo -e "  ${DIM}Usage:${NC} deja ${CYAN}<command>${NC} [options]"
   echo ""
-  echo -e "  ${BOLD}Commands${NC}"
-  echo -e "    ${CYAN}start${NC}          Start the server (interactive mode)"
-  echo -e "    ${CYAN}start -b${NC}       Start the server in the background"
-  echo -e "    ${CYAN}stop${NC}           Stop the server"
-  echo -e "    ${CYAN}restart${NC}        Restart the server"
-  echo -e "    ${CYAN}status${NC}         Show server status and connections"
-  echo -e "    ${CYAN}logs${NC} [-f]      View server logs (-f to follow)"
-  echo -e "    ${CYAN}update${NC}         Update to the latest version"
+  echo -e "  ${BOLD}🎮 Commands${NC}"
+  echo -e "    ${CYAN}start${NC}          🖥️  Start the server (interactive mode)"
+  echo -e "    ${CYAN}start -b${NC}       🚀 Start the server in the background"
+  echo -e "    ${CYAN}stop${NC}           🛑 Stop the server"
+  echo -e "    ${CYAN}restart${NC}        🔄 Restart the server"
+  echo -e "    ${CYAN}status${NC}         📊 Show server status and connections"
+  echo -e "    ${CYAN}logs${NC} [-f]      📋 View server logs (-f to follow)"
+  echo -e "    ${CYAN}update${NC}         ⬇️  Update to the latest version"
   echo ""
   echo -e "  ${BOLD}📟 Device Deployment${NC}"
-  echo -e "    ${CYAN}deploy${NC}         Deploy firmware to Arduino or Pico W device"
+  echo -e "    ${CYAN}deploy${NC}         📟 Deploy firmware to Arduino or Pico W device"
   echo ""
-  echo -e "  ${BOLD}${ICON_TUNNEL} Remote Monitoring${NC} ${DIM}(Engineer & Conductor plans)${NC}"
-  echo -e "    ${CYAN}tunnel start${NC}   Start Cloudflare tunnel for remote monitor access"
-  echo -e "    ${CYAN}tunnel stop${NC}    Stop the tunnel"
-  echo -e "    ${CYAN}tunnel status${NC}  Show tunnel status and URL"
-  echo -e "    ${CYAN}tunnel logs${NC}    View tunnel logs"
+  echo -e "  ${BOLD}🔒 Remote Monitoring${NC} ${DIM}(Engineer & Conductor plans)${NC}"
+  echo -e "    ${CYAN}tunnel start${NC}   🔒 Start Cloudflare tunnel for remote monitor access"
+  echo -e "    ${CYAN}tunnel stop${NC}    🛑 Stop the tunnel"
+  echo -e "    ${CYAN}tunnel status${NC}  📊 Show tunnel status and URL"
+  echo -e "    ${CYAN}tunnel logs${NC}    📋 View tunnel logs"
   echo ""
-  echo -e "  ${BOLD}Options${NC}"
-  echo -e "    ${DIM}--version${NC}      Show installed version"
-  echo -e "    ${DIM}--help, -h${NC}     Show this help"
+  echo -e "  ${BOLD}⚙️  Options${NC}"
+  echo -e "    ${DIM}--version${NC}      📦 Show installed version"
+  echo -e "    ${DIM}--help, -h${NC}     ❓ Show this help"
   echo ""
-  echo -e "  ${BOLD}Interactive Mode${NC}"
+  echo -e "  ${BOLD}🖥️  Interactive Mode${NC}"
   echo -e "    When started without ${DIM}-b${NC}, the server runs in the foreground."
   echo -e "    Type ${CYAN}exit${NC} to stop the server, or press ${CYAN}Ctrl+C${NC}."
   echo ""
-  echo -e "  ${ICON_CONFIG} Config  ${DIM}${DEJA_DIR}/${NC}"
-  echo -e "  ${ICON_LOG} Logs    ${DIM}${LOG_FILE}${NC}"
+  echo -e "  📁 Config  ${DIM}${DEJA_DIR}/${NC}"
+  echo -e "  📋 Logs    ${DIM}${LOG_FILE}${NC}"
   echo ""
 }
 
 # ======================================================================
-# Main
+# 🚂 Main
 # ======================================================================
 
 case "${1:-}" in
@@ -805,7 +757,7 @@ case "${1:-}" in
   tunnel)   shift; cmd_tunnel "$@" ;;
   deploy)   shift; cmd_deploy "$@" ;;
   --version|-v)
-    echo "deja $(get_version)"
+    echo "🚂 deja $(get_version)"
     ;;
   --help|-h|help)
     cmd_help

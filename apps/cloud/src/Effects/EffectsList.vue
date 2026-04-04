@@ -5,7 +5,6 @@ import { useEfx, type Effect } from '@repo/modules'
 import { createLogger } from '@repo/utils'
 import { useSortableList } from '@/Core/composables/useSortableList'
 import EffectListItem from '@/Effects/EffectListItem.vue'
-import EmptyState from '@/Core/UI/EmptyState.vue'
 
 const log = createLogger('EffectsList')
 
@@ -51,16 +50,10 @@ function handleEdit(item: Effect) {
       </template>
     </draggable>
   </v-container>
-  <EmptyState
-    v-if="!list?.length"
-    icon="mdi-rocket-launch"
-    color="indigo"
-    title="No Effects Yet"
-    description="Create lighting, sound, and animation effects to bring your layout to life with immersive scenery and interactive elements."
-    :use-cases="[{ icon: 'mdi-volume-high', text: 'Ambient sounds & audio' }, { icon: 'mdi-led-on', text: 'LED animations & lighting' }, { icon: 'mdi-play-circle', text: 'Triggered sequences' }]"
-    action-label="Create Your First Effect"
-    action-to="/effects/new"
-  />
+  <div v-if="!list?.length" class="flex flex-col items-center justify-center py-12 px-4">
+    <v-icon size="48" class="opacity-30 mb-3">mdi-magnify-close</v-icon>
+    <p class="text-sm opacity-60">No effects match your filters.</p>
+  </div>
 </template>
 <style scoped>
 .ghost {

@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { computed, toRef } from 'vue'
-import { useLocos, type Loco } from '@repo/modules/locos'
-import { useThrottle } from './useThrottle'
+import { computed } from 'vue'
 
 const props = defineProps({
   speed: {
@@ -25,12 +23,6 @@ const props = defineProps({
     default: true,
   },
 })
-
-const addressRef = toRef(props, 'address')
-const { getRoadname } = useLocos()
-const {
-  loco,
-} = useThrottle(addressRef)
 
 // SVG coordinate system — everything centered at (100, 100) in a 200x200 viewBox
 const cx = 100
@@ -99,7 +91,7 @@ const valueLabels = computed(() => {
 </script>
 
 <template>
-  <div v-if="loco" class="flex flex-col items-center gap-2">
+  <div class="flex flex-col items-center gap-2">
     <!-- SVG Speedometer -->
     <svg
       :width="size"

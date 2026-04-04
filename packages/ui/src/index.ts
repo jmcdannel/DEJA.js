@@ -4,7 +4,9 @@ export { default as ThrottleLaunchQR } from './ThrottleLaunchQR.vue'
 export { default as Logo } from './Logo.vue'
 export { default as SplashPage } from './SplashPage.vue'
 export { default as NotFoundPage } from './NotFoundPage.vue'
-export { default as LocoAvatar } from './LocoAvatar.vue'
+// Roster components
+export { LocoNumberPlate, LocoCard, LocoListRow, LocoRoster, ROADNAME_MEDIA, getRoadnameMedia } from './Roster'
+export type { RoadnameMedia } from './Roster'
 export { default as ConsistIndicator } from './Consist/ConsistIndicator.vue'
 export { default as ConsistEditor } from './Consist/ConsistEditor.vue'
 export { default as Functions } from './Functions/Functions.vue'
@@ -59,7 +61,7 @@ export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart, Devic
 export { DejaTracker } from './DejaTracker'
 export { default as EmptyState } from './EmptyState/EmptyState.vue'
 export { default as ModuleList } from './ModuleList/List.vue'
-export { default as LocoList } from './Locos/LocoList.vue'
+
 export { default as Menu } from './Menu/Menu.vue'
 export { default as NotificationContainer } from './Notifications/NotificationContainer.vue'
 export { useNotification, provideNotifications } from './Notifications/useNotification'
@@ -102,3 +104,7 @@ export { default as ListViewSheet } from './ListControls/ListViewSheet.vue'
 export { default as ListSortSheet } from './ListControls/ListSortSheet.vue'
 export { default as ListFilterSheet } from './ListControls/ListFilterSheet.vue'
 export type { ViewOption, SortOption, FilterOption, ListFilter, ListControlsReturn } from './ListControls/types'
+
+// LocoFront — SVG locomotive front-face illustrations by roadname
+export { LocoFront, LocoFrontGallery, getLocoFrontDesign, LOCO_FRONT_DESIGNS, DEFAULT_DESIGN } from './LocoFront'
+export type { LocoFrontDesign } from './LocoFront'

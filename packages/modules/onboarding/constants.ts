@@ -1,6 +1,9 @@
 import type { OnboardingState, OnboardingStepInfo } from './types'
 
 export const DEFAULT_ONBOARDING_STATE: OnboardingState = {
+  layoutNamed: false,
+  pendingLayoutName: null,
+  pendingLayoutId: null,
   planSelected: false,
   layoutCreated: false,
   installStarted: false,
@@ -17,16 +20,16 @@ export const ONBOARDING_STEPS: OnboardingStepInfo[] = [
     icon: 'mdi-account-plus',
   },
   {
-    key: 'plan',
-    label: 'Choose Plan',
-    description: 'Pick the right plan for your railroad',
-    icon: 'mdi-star',
+    key: 'layout',
+    label: 'Name Layout',
+    description: 'Give your railroad a name',
+    icon: 'mdi-map-marker',
   },
   {
-    key: 'layout',
-    label: 'Register Layout',
-    description: 'Name your layout and get your Layout ID',
-    icon: 'mdi-map-marker',
+    key: 'plan',
+    label: 'Choose Plan',
+    description: 'Pick a plan or start free',
+    icon: 'mdi-star',
   },
   {
     key: 'install',
