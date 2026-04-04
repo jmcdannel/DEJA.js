@@ -3,7 +3,7 @@
 
 import { initializeApp, cert, type ServiceAccount } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
-import type { Device, Effect, Turnout, DeviceConfig } from './types.js'
+import type { Device, Effect, Turnout, DeviceConfigInput } from '@repo/modules'
 
 let initialized = false
 
@@ -32,7 +32,7 @@ function initFirebase() {
 /**
  * Fetch device config + effects + turnouts for a specific device
  */
-export async function getDeviceConfig(layoutId: string, deviceId: string): Promise<DeviceConfig> {
+export async function getDeviceConfig(layoutId: string, deviceId: string): Promise<DeviceConfigInput> {
   initFirebase()
   const db = getFirestore()
 

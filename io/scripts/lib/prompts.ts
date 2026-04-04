@@ -1,7 +1,7 @@
 // 💬 Interactive CLI prompts for deploy script
 
 import { input, select, password, confirm } from '@inquirer/prompts'
-import type { Device } from './types.js'
+import type { Device } from '@repo/modules'
 import type { ArduinoBoard } from './detect.js'
 
 /**
