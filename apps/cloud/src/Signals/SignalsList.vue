@@ -111,40 +111,41 @@ const wiring = (signal: Signal) => signal.commonAnode ? 'Common Anode' : 'Common
                 </div>
               </div>
             </v-card-text>
-            <v-card-actions class="py-1">
-              <template v-if="confirmDelete === item?.id">
+            <v-divider />
+            <div class="flex items-center pa-1" style="background: rgba(var(--v-theme-on-surface), 0.04)">
+              <v-btn
+                v-if="confirmDelete !== item?.id"
+                icon="mdi-delete-outline"
+                variant="text"
+                color="error"
+                size="small"
+                @click="confirmDelete = item?.id"
+              />
+              <template v-else>
                 <v-btn
-                  class="ma-1"
                   text="Cancel"
                   variant="outlined"
-                  size="x-small"
-                  @click="confirmDelete = ''" />
+                  size="small"
+                  @click="confirmDelete = ''"
+                />
                 <v-btn
-                  class="ma-1"
                   text="Confirm"
                   variant="tonal"
-                  size="x-small"
+                  color="error"
+                  size="small"
                   prepend-icon="mdi-delete"
-                  @click="deleteSignal(item?.id)" />
+                  @click="deleteSignal(item?.id)"
+                />
               </template>
+              <v-spacer />
               <v-btn
-                v-else
-                class="ma-1"
-                icon="mdi-delete"
-                variant="tonal"
-                size="x-small"
-                @click="confirmDelete = item?.id"
-              ></v-btn>
-              <v-spacer></v-spacer>
-
-              <v-btn
-                text="Edit"
-                variant="tonal"
-                prepend-icon="mdi-pencil"
-                size="x-small"
+                icon="mdi-pencil-outline"
+                variant="text"
+                :color="color"
+                size="small"
                 @click="$emit('edit', item)"
-              ></v-btn>
-            </v-card-actions>
+              />
+            </div>
           </v-card>
         </div>
       </template>

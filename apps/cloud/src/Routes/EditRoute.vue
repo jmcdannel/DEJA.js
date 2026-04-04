@@ -2,8 +2,8 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createLogger } from '@repo/utils'
-import { PageHeader } from '@repo/ui'
 import RouteForm from '@/Routes/RouteForm.vue'
+import FormPageHeader from '@/Common/FormPageHeader.vue'
 import { type Route } from '@repo/modules/index.ts'
 import { useRoutes } from '@repo/modules/routes/useRoutes'
 
@@ -42,10 +42,28 @@ function handleClose() {
 onMounted(loadRoute)
 </script>
 <template>
-  <PageHeader title="Routes" icon="mdi-map" color="purple" />
-  <div v-if="loading" class="p-6 flex justify-center">
-    <v-progress-circular indeterminate color="purple" />
+  <div class="animate-fade-in-up space-y-4 max-w-[800px] px-4">
+    <FormPageHeader
+      icon="mdi-map"
+      :title="routeEffect?.name || 'Edit Route'"
+      color="#a855f7"
+      back-label="Routes"
+      :back-route="{ name: 'Routes' }"
+    >
+      <template #subtitle>
+        <span class="text-xs text-white/45">
+          <template v-if="routeEffect?.point1 || routeEffect?.point2">
+            {{ routeEffect?.point1 }} → {{ routeEffect?.point2 }}
+          </template>
+          <template v-else>Configure route settings</template>
+        </span>
+      </template>
+    </FormPageHeader>
+
+    <div v-if="loading" class="p-6 flex justify-center">
+      <v-progress-circular indeterminate color="purple" />
+    </div>
+    <v-alert v-else-if="error" type="error" class="ma-4" :text="error" closable @click:close="handleClose" />
+    <RouteForm v-else-if="routeEffect" :route="routeEffect" @close="handleClose" />
   </div>
-  <v-alert v-else-if="error" type="error" class="ma-4" :text="error" closable @click:close="handleClose" />
-  <RouteForm v-else-if="routeEffect" :route="routeEffect" @close="handleClose" />
 </template>
