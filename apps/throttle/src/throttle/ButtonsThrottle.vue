@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { toRef } from 'vue'
 import { useRouter } from 'vue-router'
-import type { Loco } from '@repo/modules/locos'
 import ThrottleButtonControls from '@/throttle/ThrottleButtonControls.vue'
 import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import Speedometer from '@/throttle/Speedometer.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
 import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
-import { ConsistIndicator, LocoAvatar, FunctionsSpeedDial } from '@repo/ui'
+import { ConsistIndicator, LocoNumberPlate, FunctionsSpeedDial } from '@repo/ui'
+import { ROADNAMES } from '@repo/modules'
 import { useThrottle } from '@/throttle/useThrottle'
 
 const props = defineProps({
@@ -42,7 +42,12 @@ async function clearLoco() {
     <ThrottleHeader class="bg-gradient-to-r from-slate-700/20 to-blue-900/20">
       <template v-slot:left>
         <div class="flex flex-row items-center justify-center gap-1 px-4" style="background: rgba(var(--v-theme-surface), 0.6)">
-          <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" variant="flat" />
+          <LocoNumberPlate
+            v-if="loco"
+            :address="loco.address"
+            :color="loco.meta?.roadname ? ROADNAMES.find(r => r.value === loco.meta?.roadname)?.color : undefined"
+            size="sm"
+          />
           <v-spacer class="w-2 md:w-6" />
           <h1 class="text-xl md:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 drop-shadow-lg">
             {{ loco?.name }}

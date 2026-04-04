@@ -2,8 +2,9 @@
 import { computed, ref, watch } from 'vue'
 import type { Throttle } from '@repo/modules/locos'
 import ThrottleTile from '@/throttle/ThrottleTile.vue'
-import { useLocos, type Loco } from '@repo/modules/locos'
-import { LocoAvatar } from '@repo/ui'
+import { useLocos } from '@repo/modules/locos'
+import { LocoNumberPlate } from '@repo/ui'
+import { ROADNAMES } from '@repo/modules'
 import { useStorage } from '@vueuse/core'
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import draggable from 'vuedraggable'
@@ -94,13 +95,13 @@ watch(
             v-for="loco in locos"
             :key="loco.address" 
             >
-            <LocoAvatar 
-              :loco="loco as Loco"
-              @select="async () => { await acquireThrottle(loco.address); isRosterOpen = false }"
-              :showMenu="false" 
-              variant="flat"
-              class="m-2"
-            />
+            <div class="m-2 cursor-pointer" @click="async () => { await acquireThrottle(loco.address); isRosterOpen = false }">
+              <LocoNumberPlate
+                :address="loco.address"
+                :color="loco.meta?.roadname ? ROADNAMES.find(r => r.value === loco.meta?.roadname)?.color : undefined"
+                size="sm"
+              />
+            </div>
           </v-col>
         </v-row>
       </v-sheet>

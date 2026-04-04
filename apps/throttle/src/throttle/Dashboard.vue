@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, toRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import type { Loco } from '@repo/modules/locos'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
 import Speedometer from '@/throttle/Speedometer.vue'
 import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
-import { ConsistIndicator as Consist, LocoAvatar, FunctionsSpeedDial } from '@repo/ui'
+import { ConsistIndicator, LocoNumberPlate, FunctionsSpeedDial } from '@repo/ui'
+import { ROADNAMES } from '@repo/modules'
 import { useThrottle } from '@/throttle/useThrottle'
 import { useHaptics } from '@/composables/useHaptics'
 
@@ -238,7 +238,13 @@ onBeforeUnmount(() => {
     <ThrottleHeader class="bg-gradient-to-r from-slate-700/20 to-blue-900/20">
       <template v-slot:left>
         <div class="flex flex-row items-center justify-center gap-1 px-4" style="background: rgba(var(--v-theme-surface), 0.6)">
-          <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" variant="flat" />
+          <LocoNumberPlate
+            v-if="loco"
+            :address="loco.address"
+            :color="loco.meta?.roadname ? ROADNAMES.find(r => r.value === loco.meta?.roadname)?.color : undefined"
+            size="sm"
+          />
+          <ConsistIndicator v-if="loco" :loco="loco" />
           <v-spacer class="w-2 md:w-6" />
           <h1 class="text-xl md:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 drop-shadow-lg">
             {{ loco?.name }}
@@ -253,7 +259,7 @@ onBeforeUnmount(() => {
     <section class="w-full h-full flex flex-col @[640px]:flex-row justify-center @[640px]:items-center gap-4 flex-grow relative z-10">
       <!-- Desktop left: Consist + Speedometer -->
       <section v-if="loco" class="hidden @[640px]:flex flex-col gap-4 items-center justify-center flex-1">
-        <Consist v-if="showConsist" :loco="loco" />
+        <ConsistIndicator v-if="showConsist" :loco="loco" />
         <Speedometer v-if="showSpeedometer" :speed="currentSpeed" :address="address" :size="200" :show-label="false" />
         <div v-if="showConsist && loco.consist?.length" class="grid grid-cols-2 gap-3">
           <Speedometer
@@ -435,7 +441,7 @@ onBeforeUnmount(() => {
 
     <!-- Mobile-only: consist, functions, logo -->
     <section v-if="loco" class="flex @[640px]:hidden flex-col items-center gap-2 mt-2">
-      <Consist v-if="showConsist" :loco="loco" />
+      <ConsistIndicator v-if="showConsist" :loco="loco" />
       <FunctionsSpeedDial v-if="showFunctions" :loco="loco" />
       <RoadnameLogo :roadname="loco.meta?.roadname" size="xl" />
     </section>

@@ -16,6 +16,7 @@ export interface Loco {
   meta?: {
     color?: string
     roadname?: string
+    imageUrl?: string
   }
   order?: number
 }

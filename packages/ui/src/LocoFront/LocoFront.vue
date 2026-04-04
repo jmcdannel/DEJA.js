@@ -141,29 +141,29 @@ const shadowId = computed(() => `lf-shadow-${uid}`)
       <!-- ══════ NUMBER BOARDS — large, centered in each window ══════ -->
       <g v-if="number">
         <!-- Left number board — centered in left pane -->
-        <rect x="112" y="62" width="66" height="22" rx="3" :fill="design.numberBoardBg" stroke="#555" stroke-width="0.75" />
+        <rect x="108" y="58" width="74" height="30" rx="4" :fill="design.numberBoardBg" stroke="#555" stroke-width="0.75" />
         <text
           x="145" y="76"
           text-anchor="middle"
           dominant-baseline="central"
           :fill="design.numberBoardText"
-          font-size="15"
+          font-size="20"
           font-weight="800"
           font-family="'Roboto Condensed', 'Arial Narrow', sans-serif"
-          letter-spacing="1.5"
+          letter-spacing="2"
         >{{ number }}</text>
 
         <!-- Right number board — centered in right pane -->
-        <rect x="222" y="62" width="66" height="22" rx="3" :fill="design.numberBoardBg" stroke="#555" stroke-width="0.75" />
+        <rect x="218" y="58" width="74" height="30" rx="4" :fill="design.numberBoardBg" stroke="#555" stroke-width="0.75" />
         <text
           x="255" y="76"
           text-anchor="middle"
           dominant-baseline="central"
           :fill="design.numberBoardText"
-          font-size="15"
+          font-size="20"
           font-weight="800"
           font-family="'Roboto Condensed', 'Arial Narrow', sans-serif"
-          letter-spacing="1.5"
+          letter-spacing="2"
         >{{ number }}</text>
       </g>
 
@@ -220,29 +220,30 @@ const shadowId = computed(() => `lf-shadow-${uid}`)
       <circle cx="200" cy="378" r="3" fill="#ee2222" opacity="0.8" />
 
       <!-- ══════ LOGO / NOSE ART ══════ -->
-      <!-- If a logo image is provided, render it centered on the nose -->
+      <!-- If a logo image is provided, render it larger and centered on the nose -->
       <image
         v-if="logoSrc"
         :href="logoSrc"
-        x="120" y="180"
-        width="160" height="100"
+        x="100" y="165"
+        width="200" height="130"
         preserveAspectRatio="xMidYMid meet"
+        style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));"
       />
       <!-- Fallback: nose text when no logo is available -->
       <text
         v-else
         x="200"
-        y="220"
+        y="230"
         text-anchor="middle"
         dominant-baseline="central"
         :fill="design.noseTextColor"
-        :font-size="design.noseText.length > 4 ? 36 : 48"
+        :font-size="design.noseText.length > 6 ? 36 : design.noseText.length > 4 ? 44 : 56"
         font-weight="900"
         :font-family="design.noseTextFont || `'Impact', 'Arial Black', sans-serif`"
         letter-spacing="3"
         paint-order="stroke"
-        :stroke="design.accent2Color || 'rgba(0,0,0,0.15)'"
-        stroke-width="1"
+        :stroke="design.accent2Color || 'rgba(0,0,0,0.3)'"
+        stroke-width="2"
       >{{ design.noseText }}</text>
 
       <!-- ══════ HANDRAILS / GRAB IRONS ══════ -->

@@ -1,45 +1,28 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useLocos, type Loco } from '@repo/modules/locos'
-import List from '@repo/ui/src/ModuleList/List.vue'
-import ListControlBar from '@repo/ui/src/ListControls/ListControlBar.vue'
-import { useListControls } from '@repo/ui/src/composables/useListControls'
-import { LocoAvatar, LocoFront } from '@repo/ui'
-import type { ListFilter } from '@repo/ui/src/ListControls/types'
+import { useLocos, ROADNAMES, type Loco } from '@repo/modules/locos'
+import { LocoRoster, PageHeader, ListControlBar, useListControls } from '@repo/ui'
+import type { ListFilter } from '@repo/ui'
 
 const router = useRouter()
 const { getLocos } = useLocos()
 const locos = getLocos()
 
 const locosList = computed(() =>
-  locos.value
-    ? locos.value.map((loco) => ({
-        ...loco,
-        icon: 'mdi-train',
-        hasSound: String(loco.hasSound ?? false),
-      }))
-    : []
+  locos.value ? (locos.value as Loco[]).map((l) => ({
+    ...l,
+    id: String(l.address),
+    roadname: l.meta?.roadname || '',
+  })) : []
 )
 
-const filters = computed<ListFilter[]>(() => [
-  {
-    type: 'hasSound',
-    label: 'Sound',
-    options: [
-      { label: 'Sound', value: 'true' },
-      { label: 'No Sound', value: 'false' },
-    ],
-  },
-])
+// 🔍 Filter & sort
+const roadnameOptions = ROADNAMES.map((r) => ({ label: r.label, value: r.value }))
 
-const viewOptions = [
-  { value: 'cab', icon: 'mdi-train', label: 'Cab' },
-  { value: 'avatar', icon: 'mdi-account-circle-outline', label: 'Avatar' },
-  { value: 'card', icon: 'mdi-view-grid-outline', label: 'Card' },
-  { value: 'table', icon: 'mdi-table', label: 'Table' },
-  { value: 'raw', icon: 'mdi-code-json', label: 'Raw' },
-]
+const filters = computed<ListFilter[]>(() => [
+  { type: 'roadname', label: 'Road', options: roadnameOptions },
+])
 
 const sortOptions = [
   { value: 'order', label: 'Default' },
@@ -47,21 +30,24 @@ const sortOptions = [
   { value: 'address', label: 'Address' },
 ]
 
-const controls = useListControls('locos', {
+const viewOptions = [
+  { value: 'cab', icon: 'mdi-train', label: 'Cab' },
+  { value: 'avatar', icon: 'mdi-circle-outline', label: 'Avatar' },
+  { value: 'plate', icon: 'mdi-card-text-outline', label: 'Plate' },
+  { value: 'card', icon: 'mdi-view-grid-outline', label: 'Card' },
+  { value: 'table', icon: 'mdi-table', label: 'Table' },
+  { value: 'raw', icon: 'mdi-code-json', label: 'Raw' },
+]
+
+const rosterControls = useListControls('throttle-roster', {
   list: locosList,
   filters: filters.value,
-  viewOptions,
   sortOptions,
-  defaultView: 'cab',
+  viewOptions,
+  defaultView: 'avatar',
 })
 
-function getLocoFromItem(item: Record<string, unknown>): Loco {
-  const loco = locos.value?.find((l) => l.id === item.id)
-  return (loco || item) as Loco
-}
-
-function handleLocoClick(item: Record<string, unknown>) {
-  const loco = getLocoFromItem(item)
+function handleLocoSelect(loco: Loco) {
   if (loco.address) {
     router.push({ name: 'throttle', params: { address: loco.address } })
   }
@@ -69,35 +55,26 @@ function handleLocoClick(item: Record<string, unknown>) {
 </script>
 
 <template>
-  <main class="@container min-h-screen overflow-auto p-2 md:p-4">
-    <ListControlBar
-      :controls="controls"
-      color="purple-darken-4"
-      :view-options="viewOptions"
-      :sort-options="sortOptions"
-      :filters="filters"
-      search-placeholder="Search roster..."
-    />
-    <List
-      :list="controls.filteredList.value"
-      :view-as="controls.viewAs.value"
-      empty-icon="mdi-train"
-      empty-title="No locomotives"
-      empty-description="Add locomotives to your roster to get started"
-    >
-      <template #item="{ item }">
-        <div class="cursor-pointer" @click="handleLocoClick(item)">
-          <template v-for="loco in [getLocoFromItem(item)]" :key="loco.id">
-            <LocoFront
-              v-if="controls.viewAs.value === 'cab'"
-              :roadname="loco.meta?.roadname"
-              :road-number="loco.address"
-              :size="200"
-            />
-            <LocoAvatar v-else :loco="loco" :size="48" />
-          </template>
-        </div>
+  <main class="@container min-h-screen overflow-auto">
+    <PageHeader title="Roster" icon="mdi-train" color="pink">
+      <template #controls>
+        <ListControlBar
+          :controls="rosterControls"
+          color="pink"
+          :sort-options="sortOptions"
+          :filters="filters"
+          :show-view="true"
+          :view-options="viewOptions"
+          :show-search="false"
+        />
       </template>
-    </List>
+    </PageHeader>
+
+    <LocoRoster
+      :locos="rosterControls.filteredList.value"
+      default-view="avatar"
+      module-name="throttle-roster"
+      @select="handleLocoSelect"
+    />
   </main>
 </template>

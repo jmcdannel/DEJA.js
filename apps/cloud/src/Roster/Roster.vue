@@ -5,14 +5,12 @@ import { onValue, ref as dbRef } from 'firebase/database'
 import { useStorage } from '@vueuse/core'
 import { rtdb } from '@repo/firebase-config'
 import type { Loco } from '@repo/modules/locos'
-import { useLocos } from '@repo/modules/locos'
+import { useLocos, ROADNAMES } from '@repo/modules/locos'
 import { useLayout, useServerStatus, useSubscription, PLAN_DISPLAY } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
-import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
+import { PageHeader, ListControlBar, useListControls, LocoRoster, ThrottleLaunchQR } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
-import RosterList from '@/Roster/RosterList.vue'
 import EmptyState from '@/Core/UI/EmptyState.vue'
-import { ThrottleLaunchQR } from '@repo/ui'
 
 const router = useRouter()
 const layoutId = useStorage('@DEJA/layoutId', '')
@@ -53,7 +51,7 @@ const rosterList = computed(() =>
   locos?.value ? (locos.value as Loco[]).map((l) => ({
     ...l,
     id: String(l.address),
-    sound: l.hasSound ? 'sound' : 'silent',
+    roadname: l.meta?.roadname || '',
     locoType: l.consist?.length ? 'consist' : 'single',
   })) : []
 )
@@ -61,10 +59,7 @@ const rosterList = computed(() =>
 const hasItems = computed(() => isLoaded.value && rosterList.value.length > 0)
 
 // 🔍 Filter & sort options
-const soundOptions = [
-  { label: 'Sound Decoder', value: 'sound' },
-  { label: 'Silent', value: 'silent' },
-]
+const roadnameOptions = ROADNAMES.map((r) => ({ label: r.label, value: r.value }))
 
 const typeOptions = [
   { label: 'Consist', value: 'consist' },
@@ -72,7 +67,7 @@ const typeOptions = [
 ]
 
 const filters = computed<ListFilter[]>(() => [
-  { type: 'sound', label: 'Sound', options: soundOptions },
+  { type: 'roadname', label: 'Road', options: roadnameOptions },
   { type: 'locoType', label: 'Type', options: typeOptions },
 ])
 
@@ -159,53 +154,70 @@ async function importFromCS() {
 
   <!-- ✅ Has items -->
   <template v-else-if="hasItems">
-    <PageHeader title="Roster" icon="mdi-train" color="pink" subtitle="Manage your locomotive fleet and decoder configurations.">
+    <PageHeader title="Roster" icon="mdi-train" color="pink">
+      <template #subtitle>
+        <span class="hidden sm:inline">Manage your locomotive fleet and decoder configurations.</span>
+      </template>
       <template #controls>
         <ListControlBar
           :controls="rosterControls"
           color="pink"
           :sort-options="sortOptions"
           :filters="filters"
-          :show-view="false"
-          search-placeholder="Search roster..."
+          :show-view="true"
+          :show-search="false"
+          :view-options="[
+            { value: 'cab', icon: 'mdi-train', label: 'Cab' },
+            { value: 'avatar', icon: 'mdi-circle-outline', label: 'Avatar' },
+            { value: 'plate', icon: 'mdi-card-text-outline', label: 'Plate' },
+            { value: 'card', icon: 'mdi-view-grid-outline', label: 'Card' },
+            { value: 'table', icon: 'mdi-table', label: 'Table' },
+            { value: 'raw', icon: 'mdi-code-json', label: 'Raw' },
+          ]"
         />
       </template>
       <template #actions>
-        <v-btn prepend-icon="mdi-plus" color="pink" variant="flat" @click="handleAddLoco">
-          New Loco
-        </v-btn>
-        <v-btn
-          :loading="rosterSyncStatus?.status === 'syncing'"
-          :disabled="isSyncing || isDisconnected"
-          prepend-icon="mdi-sync"
-          variant="tonal"
-          color="pink"
-          size="small"
-          @click="syncToCS"
-        >
-          Sync to DCC-EX
-        </v-btn>
-        <v-btn
-          :loading="rosterSyncStatus?.status === 'importing'"
-          :disabled="isSyncing || isDisconnected"
-          prepend-icon="mdi-download"
-          variant="tonal"
-          color="pink"
-          size="small"
-          @click="importFromCS"
-        >
-          Import from DCC-EX
-        </v-btn>
+        <div class="flex flex-wrap items-center justify-end gap-2 w-full">
+          <v-btn prepend-icon="mdi-plus" color="pink" variant="flat" size="small" @click="handleAddLoco">
+            New Loco
+          </v-btn>
+          <v-spacer class="hidden sm:block" />
+          <v-btn
+            :loading="rosterSyncStatus?.status === 'syncing'"
+            :disabled="isSyncing || isDisconnected"
+            prepend-icon="mdi-sync"
+            variant="tonal"
+            color="pink"
+            size="small"
+            @click="syncToCS"
+          >
+            Sync to DCC-EX
+          </v-btn>
+          <v-btn
+            :loading="rosterSyncStatus?.status === 'importing'"
+            :disabled="isSyncing || isDisconnected"
+            prepend-icon="mdi-download"
+            variant="tonal"
+            color="pink"
+            size="small"
+            @click="importFromCS"
+          >
+            Import from DCC-EX
+          </v-btn>
+        </div>
       </template>
     </PageHeader>
 
-    <RosterList :filtered-list="rosterControls.filteredList.value" @edit="handleEditLoco">
-      <template #append>
-        <v-card variant="outlined" class="d-flex flex-column align-center justify-center pa-4 text-center" min-height="120">
-          <ThrottleLaunchQR :size="100" label="Open Throttle on phone" />
-        </v-card>
-      </template>
-    </RosterList>
+    <LocoRoster
+      :locos="rosterControls.filteredList.value"
+      default-view="card"
+      module-name="cloud-roster"
+      @select="handleEditLoco"
+    />
+
+    <v-card variant="outlined" class="d-flex flex-column align-center justify-center pa-4 text-center mt-4" min-height="120">
+      <ThrottleLaunchQR :size="100" label="Open Throttle on phone" />
+    </v-card>
   </template>
 
   <!-- 📭 Empty -->
