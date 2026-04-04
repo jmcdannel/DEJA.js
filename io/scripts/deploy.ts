@@ -140,7 +140,7 @@ async function deploy() {
     const port = await promptSerialPort(boards)
     const board = boardOverride || 'arduino:avr:mega:cpu=atmega2560'
     console.log('')
-    compileAndUpload({
+    await compileAndUpload({
       sketchPath: outDir,
       port,
       board,
