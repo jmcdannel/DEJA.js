@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useTurnouts, type Turnout } from '@repo/modules'
 import { useLayout } from '@repo/modules'
 // import { useEfx } from '@repo/modules/effects'
@@ -7,7 +7,7 @@ import { slugify, createLogger } from '@repo/utils'
 import TurnoutTypePicker from '@/Turnouts/TurnoutTypePicker.vue'
 import DevicePicker from '@/Layout/Devices/DevicePicker.vue'
 import EffectPicker from '@/Effects/EffectPicker.vue'
-import ColorPicker from '@/Common/Color/ColorPicker.vue'
+import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 
@@ -31,10 +31,9 @@ const { setTurnout } = useTurnouts()
 const devices = getDevices()
 // const effects = getEffects()
 
-const editColor = ref(false)
 const editEffect = ref(false)
-const editType = ref(false) // TODO: remove - don't allow this to be changed
-const editDevice = ref(false) // TODO: remove - don't allow this to be changed
+const editType = ref(false)
+const editDevice = ref(false)
 
 const name = ref(props.turnout?.name || '')
 const desc = ref(props.turnout?.desc || '')
@@ -53,12 +52,12 @@ const rules: ValidationRules = {
 
 function autoId() {
   log.debug('autoId', name.value, device.value, index.value)
-  return name.value && device.value && index.value 
-    ? `${slugify(name.value)}-${slugify(index.value.toString())}-${slugify(device.value)}` 
+  return name.value && device.value && index.value
+    ? `${slugify(name.value)}-${slugify(index.value.toString())}-${slugify(device.value)}`
     : ''
 }
 
-async function submit (e: Promise<{ valid: boolean }>): Promise<void> {
+async function submit(e: Promise<{ valid: boolean }>): Promise<void> {
   loading.value = true
   const results = await e
   const turnoutId = props.turnout?.id || autoId()
@@ -80,7 +79,7 @@ async function submit (e: Promise<{ valid: boolean }>): Promise<void> {
       turnout.divergent = Number(divergent.value)
     }
     if (index.value) {
-      turnout.turnoutIdx = Number(index.value )
+      turnout.turnoutIdx = Number(index.value)
     }
     if (effectId.value) {
       turnout.effectId = effectId.value
@@ -90,7 +89,6 @@ async function submit (e: Promise<{ valid: boolean }>): Promise<void> {
     reset()
     emit('close')
   } else {
-    // reset()
     log.debug('invalid form', results)
     loading.value = false
   }
@@ -101,7 +99,7 @@ function handleClose() {
   emit('close')
 }
 
-function reset(){
+function reset() {
   name.value = ''
   desc.value = ''
   color.value = ''
@@ -115,136 +113,138 @@ function reset(){
 }
 
 const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name}` : 'Add Turnout')
-
 </script>
+
 <template>
   <v-form validate-on="submit lazy" @submit.prevent="submit">
-    <h3 class="my-6 text-2xl">{{ title }}</h3>
-    
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <v-text-field
-        v-model="name"
-        label="Name"
-        variant="outlined"
-        :color="color"
-        :rules="rules.required"
-      ></v-text-field>
-      <v-text-field
-          v-model="index"
-          label="Index"
-          variant="outlined"
-          min-width="100"
-          max-width="200"
-          :color="color"
-          :rules="rules.required"
-        >
-      </v-text-field>
-      <v-text-field
-        v-model="desc"
-        label="Description"
-        variant="outlined"
-          :color="color"
-      ></v-text-field>
-      <v-text-field 
-          v-model="straight"
-          label="Straight"
-          variant="outlined"
-          min-width="100"
-          max-width="200"
-          :color="color"
-          :rules="rules.required"
-        >
-      </v-text-field>
-      <v-text-field
-        v-model="divergent"
-        label="Divergent"
-        variant="outlined"
-        min-width="100"
-        max-width="200"
-          :color="color"
-          :rules="rules.required"
-      >
-      </v-text-field>
-    </div>
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <TagPicker class="my-4 " v-model="tags"></TagPicker>
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-      <section>
-        <v-btn
-          class="min-h-48 min-w-48 border w-full"
-          :color="color"
-          @click="editType = true" >
-          <div class="relative flex flex-col justify-center items-center">
-            <v-icon size="64">mdi-directions-fork</v-icon>
-            <div class="mt-4">Type [{{ turnoutType }}]</div>
+    <div class="space-y-4">
+
+      <!-- ═══ IDENTITY ═══ -->
+      <div class="form-section" :style="{ '--form-accent': color }">
+        <div class="form-section__header">
+          <v-icon size="18" class="form-section__header-icon">mdi-tag-outline</v-icon>
+          <span class="form-section__title">Identity</span>
+        </div>
+
+        <div class="form-section__grid" style="grid-template-columns: 1fr 120px">
+          <div>
+            <label class="form-section__input-label">Name</label>
+            <v-text-field v-model="name" variant="outlined" density="compact" color="amber" :rules="rules.required" hide-details="auto" placeholder="Main Yard Lead" />
           </div>
-        </v-btn>
-      </section>
-
-      <section>
-        <v-btn
-          class="min-h-48 min-w-48 border w-full"
-          :color="color"
-          @click="editDevice = true" >
-          <div class="relative flex flex-col justify-center items-center">
-            <v-icon size="64">mdi-memory</v-icon>
-            <div class="mt-4">Device [{{ device }}]</div>
+          <div>
+            <label class="form-section__input-label">Index</label>
+            <v-text-field v-model="index" variant="outlined" density="compact" color="amber" :rules="rules.required" hide-details="auto" placeholder="1" type="number" />
           </div>
-        </v-btn>
-      </section>
+        </div>
 
-      <section>
-        <v-btn
-          class="min-h-48 min-w-48 border w-full"
-          :color="color"
-          @click="editColor = true" >
-          <!-- <v-icon :icon="efxOpt.icon" :color="efxOpt.color"></v-icon> -->
-          <div class="relative flex flex-col justify-center items-center">
-            <v-icon size="64">mdi-palette</v-icon>
-            <div class="mt-4">Color [{{ color }}]</div>
-          </div>        
-        </v-btn>
-      </section>
+        <div class="form-section__row form-section__row--block">
+          <label class="form-section__input-label">Description</label>
+          <v-text-field v-model="desc" variant="outlined" density="compact" color="amber" hide-details="auto" placeholder="Optional description" />
+        </div>
 
-      <section>
-        <v-btn
-          class="min-h-48 min-w-48 border w-full"
-          :color="color"
-          @click="editEffect = true" >
-          <div class="relative flex flex-col justify-center items-center">
-            <v-icon size="64">mdi-rocket</v-icon>
-            <div class="mt-4">Effect</div>
-            <span class="text-xs line-clamp-1">[{{ effectId }}]</span>
+        <!-- Color -->
+        <ColorPickerRow v-model="color" :default-color="props.turnout?.color ?? 'yellow'" description="Theme color in the UI" />
+
+        <!-- Tags -->
+        <div class="form-section__row form-section__row--block">
+          <span class="form-section__row-name mb-2">Tags</span>
+          <TagPicker v-model="tags" />
+        </div>
+      </div>
+
+      <!-- ═══ CONFIGURATION ═══ -->
+      <div class="form-section" :style="{ '--form-accent': color }">
+        <div class="form-section__header">
+          <v-icon size="18" class="form-section__header-icon">mdi-cog-outline</v-icon>
+          <span class="form-section__title">Configuration</span>
+        </div>
+
+        <div class="form-section__grid" style="grid-template-columns: 1fr 1fr">
+          <div>
+            <label class="form-section__input-label">Straight</label>
+            <v-text-field v-model="straight" variant="outlined" density="compact" color="amber" :rules="rules.required" hide-details="auto" placeholder="0" type="number" />
+            <div class="form-section__input-hint">Value for straight position</div>
           </div>
-        </v-btn>
-      </section>
+          <div>
+            <label class="form-section__input-label">Divergent</label>
+            <v-text-field v-model="divergent" variant="outlined" density="compact" color="amber" :rules="rules.required" hide-details="auto" placeholder="90" type="number" />
+            <div class="form-section__input-hint">Value for divergent position</div>
+          </div>
+        </div>
 
-    </div>
+        <!-- Type -->
+        <div class="form-section__row">
+          <div class="form-section__row-label">
+            <span class="form-section__row-name">Type</span>
+            <span class="form-section__row-desc">Turnout mechanism</span>
+          </div>
+          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer" style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)" @click="editType = true">
+            <span class="text-sm text-white/60 capitalize">{{ turnoutType }}</span>
+            <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
+          </div>
+        </div>
 
-    <TurnoutTypePicker v-if="editType" v-model="turnoutType" :color="color" @select="editType = false" @cancel="editType = false; turnoutType = props?.turnout?.type ?? 'kato'"></TurnoutTypePicker>
-    <DevicePicker v-if="editDevice" v-model="device" :color="color" @select="editDevice = false" @cancel="editDevice = false; device = props?.turnout?.device ?? DEFAULT_DEVICE"></DevicePicker>
-    <ColorPicker v-if="editColor" v-model="color" @select="editColor = false" @cancel="editColor = false; color = props?.turnout?.color ?? 'yellow'"></ColorPicker>
-    <EffectPicker v-if="editEffect" v-model="effectId" :color="color" @select="editEffect = false" @cancel="editEffect = false; effectId = props?.turnout?.effectId"></EffectPicker>
+        <!-- Device -->
+        <div class="form-section__row">
+          <div class="form-section__row-label">
+            <span class="form-section__row-name">Device</span>
+            <span class="form-section__row-desc">Controller device</span>
+          </div>
+          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer" style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)" @click="editDevice = true">
+            <span class="text-sm text-white/60">{{ device }}</span>
+            <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
+          </div>
+        </div>
 
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <div class="grid grid-cols-2 gap-8 my-4">
-      <v-btn
-        class="mt-2"
-        text="Close"
-        type="button"
-        variant="tonal"
-        @click="handleClose"
-      ></v-btn>
-      <v-btn
-        :loading="loading"
-        class="mt-2"
-        text="Submit"
-        type="submit"
-        :color="color"
-      ></v-btn>  
+        <!-- Effect -->
+        <div class="form-section__row">
+          <div class="form-section__row-label">
+            <span class="form-section__row-name">Effect</span>
+            <span class="form-section__row-desc">Sound or light on throw</span>
+          </div>
+          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer" style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)" @click="editEffect = true">
+            <span class="text-sm text-white/60 truncate max-w-[120px]">{{ effectId || 'None' }}</span>
+            <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
+          </div>
+        </div>
+
+        <div class="form-section__footer">
+          <v-btn variant="tonal" size="small" class="text-none" type="button" @click="handleClose">Cancel</v-btn>
+          <v-btn :loading="loading" variant="tonal" color="amber" size="small" type="submit" class="text-none">Save</v-btn>
+        </div>
+      </div>
+
     </div>
   </v-form>
-  <ViewJson :json="turnout || {}"></ViewJson>
-  <ViewJson :json="devices"></ViewJson>
+
+  <!-- Pickers rendered as dialogs -->
+  <v-dialog v-model="editType" max-width="80vw">
+    <TurnoutTypePicker
+      v-model="turnoutType"
+      :color="color"
+      @select="editType = false"
+      @cancel="editType = false; turnoutType = props?.turnout?.type ?? 'kato'"
+    />
+  </v-dialog>
+
+  <v-dialog v-model="editDevice" max-width="80vw">
+    <DevicePicker
+      v-model="device"
+      :color="color"
+      @select="editDevice = false"
+      @cancel="editDevice = false; device = props?.turnout?.device ?? DEFAULT_DEVICE"
+    />
+  </v-dialog>
+
+  <v-dialog v-model="editEffect" max-width="80vw">
+    <EffectPicker
+      v-model="effectId"
+      :color="color"
+      @select="editEffect = false"
+      @cancel="editEffect = false; effectId = props?.turnout?.effectId"
+    />
+  </v-dialog>
+
+  <ViewJson :json="turnout || {}" />
+  <ViewJson :json="devices" />
 </template>

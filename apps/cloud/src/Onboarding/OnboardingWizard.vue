@@ -144,8 +144,8 @@ const trackerStep = computed(() => {
     </div>
 
     <DejaTracker
+      v-if="currentStep < 4"
       :active-step="trackerStep"
-      :show-status="currentStep === 4"
       compact
       class="mb-8"
     />

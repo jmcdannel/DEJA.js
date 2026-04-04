@@ -152,8 +152,8 @@ watch(activePromos, (val) => {
           style="z-index: 9999;"
         />
         <DejaTracker
-          v-if="!isFullscreen && !onboardingComplete && !dismissedOnboarding"
-          :active-step="onboardingState.serverStarted ? 4 : 3"
+          v-if="!isFullscreen && !onboardingComplete && !dismissedOnboarding && !onboardingState.serverStarted"
+          :active-step="3"
           :show-status="false"
           compact
         />
