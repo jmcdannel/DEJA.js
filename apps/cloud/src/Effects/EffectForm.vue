@@ -235,6 +235,7 @@ function handleSoundFileSelect(soundFile: string) {
 
       <!-- Tags -->
       <div class="form-section__row form-section__row--block">
+        <span class="form-section__row-name mb-2">Tags</span>
         <TagPicker v-model="tags" />
       </div>
 

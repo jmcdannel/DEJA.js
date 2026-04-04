@@ -80,40 +80,40 @@ const color = computed(() => colors[roadname?.value?.color || DEFAULT_COLOR])
         </v-badge>
     </v-card-text>
     <v-spacer></v-spacer>
-    <v-card-actions class="py-1">
+    <v-divider />
+    <div class="flex items-center pa-1" style="background: rgba(var(--v-theme-on-surface), 0.04)">
       <v-btn
-        :color="props?.loco?.meta?.color || color.value || 'primary'"
-        text="Edit"
-        variant="tonal"
-        size="x-small"
-       @click="$emit('edit', loco)"
-      ></v-btn>
-      <v-spacer></v-spacer>
-      <v-btn
-        icon="mdi-delete"
-        variant="tonal"
-        size="x-small"
-        @click="confirmDelete = true"></v-btn>
-    </v-card-actions>
-  </v-card>
-  <v-dialog
-      v-model="confirmDelete"
-      max-width="400"
-      persistent
-    ><v-card
-      prepend-icon="mdi-delete"
-      title="Confirm Delete"
-      text="Are you sure you want to delete this loco? There is no undo."
-      >
-      <template v-slot:actions>
-        <v-spacer></v-spacer>
-        <v-btn @click="confirmDelete = false">
-          Cancel
-        </v-btn>
-        <v-btn @click="handleDelete">
-          Agree
-        </v-btn>
+        v-if="!confirmDelete"
+        icon="mdi-delete-outline"
+        variant="text"
+        color="error"
+        size="small"
+        @click="confirmDelete = true"
+      />
+      <template v-else>
+        <v-btn
+          text="Cancel"
+          variant="outlined"
+          size="small"
+          @click="confirmDelete = false"
+        />
+        <v-btn
+          text="Confirm"
+          variant="tonal"
+          color="error"
+          size="small"
+          prepend-icon="mdi-delete"
+          @click="handleDelete"
+        />
       </template>
-    </v-card>
-  </v-dialog>
+      <v-spacer />
+      <v-btn
+        icon="mdi-pencil-outline"
+        variant="text"
+        :color="props?.loco?.meta?.color || color.value || 'primary'"
+        size="small"
+        @click="$emit('edit', loco)"
+      />
+    </div>
+  </v-card>
 </template>
