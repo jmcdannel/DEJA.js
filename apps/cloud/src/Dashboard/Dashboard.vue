@@ -16,7 +16,7 @@ import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
 import { useStorage } from '@vueuse/core'
 import { formatUptime } from '@repo/utils'
-import { useCommandActivity } from '@/composables/useCommandActivity'
+import { useCommandActivity } from '@/DCCEX/composables/useCommandActivity'
 
 const router = useRouter()
 const user = useCurrentUser()

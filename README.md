@@ -93,6 +93,9 @@ pnpm format             # 💄 Format all .ts, .tsx, .md files (Prettier)
 pnpm check-types        # 🔬 TypeScript type checking across the monorepo
 
 pnpm deja               # ⚙️📊 Start Server + Monitor together
+pnpm layout             # 🚂 Show current LAYOUT_ID
+pnpm layout <id>        # 🚂 Switch layout across .env + ~/.deja/config.json
+pnpm layout --list      # 🚂 List available layouts from Firebase
 
 pnpm deps:check         # 📋 List dependency version mismatches (syncpack)
 pnpm deps:fix           # 🔧 Auto-fix dependency mismatches
