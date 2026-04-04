@@ -206,7 +206,7 @@ function handleSoundFileSelect(soundFile: string) {
   <v-form validate-on="submit lazy" @submit.prevent="submit">
 
     <!-- ═══ SECTION 1: IDENTITY ═══ -->
-    <div class="form-section mb-4" style="--form-accent: #6366f1">
+    <div class="form-section mb-4" :style="{ '--form-accent': color }">
       <div class="form-section__header">
         <v-icon size="18" class="form-section__header-icon">mdi-label</v-icon>
         <span class="form-section__title">Identity</span>
@@ -280,7 +280,7 @@ function handleSoundFileSelect(soundFile: string) {
     </div>
 
     <!-- ═══ SECTION 2: CONFIGURATION ═══ -->
-    <div class="form-section" style="--form-accent: #6366f1">
+    <div class="form-section" :style="{ '--form-accent': color }">
       <div class="form-section__header">
         <v-icon size="18" class="form-section__header-icon">mdi-cog</v-icon>
         <span class="form-section__title">Configuration</span>

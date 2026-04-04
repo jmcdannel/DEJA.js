@@ -123,7 +123,7 @@ async function submit() {
   <v-form @submit.prevent="submit" class="space-y-4">
 
     <!-- ═══ IDENTITY SECTION ═══ -->
-    <div class="form-section" style="--form-accent: #10b981">
+    <div class="form-section" :style="{ '--form-accent': color }">
       <div class="form-section__header">
         <v-icon size="18" class="form-section__header-icon">mdi-label</v-icon>
         <span class="form-section__title">Identity</span>
@@ -223,7 +223,7 @@ async function submit() {
     </div>
 
     <!-- ═══ CONFIGURATION SECTION ═══ -->
-    <div class="form-section" style="--form-accent: #10b981">
+    <div class="form-section" :style="{ '--form-accent': color }">
       <div class="form-section__header">
         <v-icon size="18" class="form-section__header-icon">mdi-electric-switch</v-icon>
         <span class="form-section__title">Configuration</span>

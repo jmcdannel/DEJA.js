@@ -155,7 +155,7 @@ async function submit() {
 <template>
   <v-form @submit.prevent="submit">
     <!-- ═══ IDENTITY SECTION ═══ -->
-    <div class="form-section mb-4" style="--form-accent: #14b8a6">
+    <div class="form-section mb-4" :style="{ '--form-accent': sensorColor }">
       <div class="form-section__header">
         <v-icon size="18" class="form-section__header-icon">mdi-label</v-icon>
         <span class="form-section__title">Identity</span>
@@ -239,7 +239,7 @@ async function submit() {
     </div>
 
     <!-- ═══ CONFIGURATION SECTION ═══ -->
-    <div class="form-section mb-4" style="--form-accent: #14b8a6">
+    <div class="form-section mb-4" :style="{ '--form-accent': sensorColor }">
       <div class="form-section__header">
         <v-icon size="18" class="form-section__header-icon">mdi-tune</v-icon>
         <span class="form-section__title">Configuration</span>

@@ -90,7 +90,7 @@ function runCurrentRoute() {
 <template>
   <v-form validate-on="submit lazy" @submit.prevent="submit">
     <!-- ═══ IDENTITY SECTION ═══ -->
-    <div class="form-section" style="--form-accent: #a855f7">
+    <div class="form-section" :style="{ '--form-accent': color }">
       <div class="form-section__header">
         <v-icon size="18" class="form-section__header-icon">mdi-tag-outline</v-icon>
         <span class="form-section__title">{{ isEditing ? 'Edit' : 'New' }} Route</span>
@@ -165,7 +165,7 @@ function runCurrentRoute() {
     </div>
 
     <!-- ═══ CONFIGURATION SECTION ═══ -->
-    <div class="form-section mt-4" style="--form-accent: #a855f7">
+    <div class="form-section mt-4" :style="{ '--form-accent': color }">
       <div class="form-section__header">
         <v-icon size="18" class="form-section__header-icon">mdi-directions-fork</v-icon>
         <span class="form-section__title">Configuration</span>

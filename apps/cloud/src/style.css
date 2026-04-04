@@ -76,7 +76,7 @@ select {
 .form-section {
   position: relative;
   background: rgba(var(--v-theme-surface), 0.5);
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.07);
+  border: 1px solid color-mix(in srgb, var(--form-accent, rgb(var(--v-theme-primary))) 15%, rgba(var(--v-theme-on-surface), 0.07));
   border-radius: 14px;
   margin-bottom: 16px;
   overflow: clip;
@@ -90,7 +90,7 @@ select {
   width: 70%;
   height: 60%;
   background: radial-gradient(ellipse at center, var(--form-accent, rgb(var(--v-theme-primary))) 0%, transparent 70%);
-  opacity: 0.06;
+  opacity: 0.12;
   pointer-events: none;
   z-index: 0;
 }

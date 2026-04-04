@@ -101,7 +101,7 @@ async function saveFunctions() {
 
     <!-- ═══ IDENTITY SECTION — pink accent ═══ -->
     <v-form validate-on="submit lazy" @submit.prevent="saveIdentity">
-      <div class="form-section" style="--form-accent: #f472b6">
+      <div class="form-section" :style="{ '--form-accent': color }">
         <div class="form-section__header">
           <v-icon size="18" class="form-section__header-icon">mdi-label</v-icon>
           <span class="form-section__title">Identity</span>
@@ -199,7 +199,7 @@ async function saveFunctions() {
     </div>
 
     <!-- ═══ FUNCTIONS — pink accent ═══ -->
-    <div class="form-section" style="--form-accent: #f472b6">
+    <div class="form-section" :style="{ '--form-accent': color }">
       <div class="form-section__header">
         <v-icon size="18" class="form-section__header-icon">mdi-tune-vertical</v-icon>
         <span class="form-section__title">Functions</span>

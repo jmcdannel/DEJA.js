@@ -161,7 +161,7 @@ onMounted(loadAutomation)
 
     <v-form v-else @submit.prevent="submit">
       <!-- ═══ IDENTITY SECTION ═══ -->
-      <div class="form-section mb-4" style="--form-accent: #14b8a6">
+      <div class="form-section mb-4" :style="{ '--form-accent': 'teal' }">
         <div class="form-section__header">
           <v-icon size="18" class="form-section__header-icon">mdi-label</v-icon>
           <span class="form-section__title">Identity</span>
@@ -196,7 +196,7 @@ onMounted(loadAutomation)
       </div>
 
       <!-- ═══ TRIGGER SECTION ═══ -->
-      <div class="form-section mb-4" style="--form-accent: #14b8a6">
+      <div class="form-section mb-4" :style="{ '--form-accent': 'teal' }">
         <div class="form-section__header">
           <v-icon size="18" class="form-section__header-icon">mdi-lightning-bolt</v-icon>
           <span class="form-section__title">Trigger</span>
@@ -239,7 +239,7 @@ onMounted(loadAutomation)
       </div>
 
       <!-- ═══ ACTIONS SECTION ═══ -->
-      <div class="form-section mb-4" style="--form-accent: #14b8a6">
+      <div class="form-section mb-4" :style="{ '--form-accent': 'teal' }">
         <div class="form-section__header">
           <v-icon size="18" class="form-section__header-icon">mdi-play-circle</v-icon>
           <span class="form-section__title">Actions</span>
@@ -349,7 +349,7 @@ onMounted(loadAutomation)
         :text="error"
       />
 
-      <div class="form-section" style="--form-accent: #14b8a6">
+      <div class="form-section" :style="{ '--form-accent': 'teal' }">
         <div class="form-section__footer" style="gap: 8px">
           <v-btn variant="text" size="small" class="text-none" @click="handleCancel">Cancel</v-btn>
           <v-btn variant="tonal" color="teal" size="small" type="submit" :loading="loading" class="text-none">

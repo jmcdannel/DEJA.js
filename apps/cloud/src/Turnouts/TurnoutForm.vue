@@ -121,7 +121,7 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
     <div class="space-y-4">
 
       <!-- ═══ IDENTITY ═══ -->
-      <div class="form-section" style="--form-accent: #f59e0b">
+      <div class="form-section" :style="{ '--form-accent': color }">
         <div class="form-section__header">
           <v-icon size="18" class="form-section__header-icon">mdi-tag-outline</v-icon>
           <span class="form-section__title">Identity</span>
@@ -163,7 +163,7 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
       </div>
 
       <!-- ═══ CONFIGURATION ═══ -->
-      <div class="form-section" style="--form-accent: #f59e0b">
+      <div class="form-section" :style="{ '--form-accent': color }">
         <div class="form-section__header">
           <v-icon size="18" class="form-section__header-icon">mdi-cog-outline</v-icon>
           <span class="form-section__title">Configuration</span>
