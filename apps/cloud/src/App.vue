@@ -92,10 +92,6 @@ function openThrottle() {
 }
 
 const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
-console.log('activePromos', activePromos.value)
-watch(activePromos, (val) => {
-  console.log('🚀 activePromos changed:', val, 'length:', val.length)
-}, { immediate: true })
 </script>
 <template>
   <v-app :theme="themePreference">
@@ -156,12 +152,6 @@ watch(activePromos, (val) => {
           :active-step="3"
           :show-status="false"
           compact
-        />
-        <PromoBanner
-          v-if="!isFullscreen"
-          v-for="promo in activePromos"
-          :key="promo.id"
-          :promotion="promo"
         />
         <v-container v-if="!isFullscreen" class="pa-6 pa-md-12 max-w-7xl mx-auto">
           <RouterView v-slot="{ Component, route: r }">

@@ -26,7 +26,9 @@ const { getBackground } = useUserPreferences()
 
 /** 🎨 Backgrounds are disabled in light & high-contrast modes */
 const isBackgroundDisabled = computed(() => {
-  const mode = vuetifyTheme.global.name.value
+  // Guard against useTheme() returning a partially-initialized instance
+  // during initial mount (throttle login path hit this — see Sentry).
+  const mode = vuetifyTheme?.global?.name?.value
   return mode === 'light' || mode === 'high-contrast'
 })
 

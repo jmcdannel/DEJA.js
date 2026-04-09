@@ -83,8 +83,7 @@ if (import.meta.env.PROD) {
   })
 
   app.config.errorHandler = (err, _instance, info) => {
-    const eventId = Sentry.captureException(err, { extra: { info } })
-    Sentry.showReportDialog({ eventId })
+    Sentry.captureException(err, { extra: { info } })
   }
 }
 

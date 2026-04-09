@@ -22,10 +22,6 @@ import * as Sentry from '@sentry/vue'
 
 provideNotifications()
 const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
-console.log('activePromos', activePromos.value)
-watch(activePromos, (val) => {
-  console.log('🚀 activePromos changed:', val, 'length:', val.length)
-}, { immediate: true })
 
 const { feedbackUser } = useFeedbackUser()
 watch(feedbackUser, (u) => Sentry.setUser(u), { immediate: true })

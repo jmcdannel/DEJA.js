@@ -30,8 +30,12 @@ export function useThemeSwitcher() {
     // Add classes for the current mode
     modeDef.htmlClasses.forEach(cls => html.classList.add(cls))
 
-    // Update Vuetify theme name directly
-    vuetifyTheme.global.name.value = mode
+    // Update Vuetify theme name directly.
+    // Guard against a partially-initialized theme instance during initial
+    // mount (throttle login path hit this — see Sentry).
+    if (vuetifyTheme?.global?.name) {
+      vuetifyTheme.global.name.value = mode
+    }
   }
 
   // Watch for changes in preference
