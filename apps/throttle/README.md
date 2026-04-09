@@ -74,3 +74,5 @@ Uses **Vitest** with `@vue/test-utils` and `jsdom`.
 ## 📖 Docs
 
 User documentation is available at [dejajs.com/docs](https://dejajs.com/docs).
+
+<!-- build: trigger rebuild -->
