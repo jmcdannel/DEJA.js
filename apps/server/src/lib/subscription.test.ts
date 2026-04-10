@@ -1,38 +1,46 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { vol } from 'memfs'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 
-// Mock node:fs/promises and node:fs with memfs
-vi.mock('node:fs/promises', async () => {
-  const memfs = await import('memfs')
-  return memfs.fs.promises
-})
-vi.mock('node:fs', async () => {
-  const memfs = await import('memfs')
-  return memfs.fs
-})
+// --- Mock firebase-client (Client SDK wrapper) ---
+//
+// We control the signed-in user and the Firestore handle from the test
+// instead of standing up a real Firebase app.
+const mockGetCurrentUser = vi.fn()
+const mockGetDb = vi.fn(() => ({} as unknown as object))
 
-// Mock homedir to a predictable path
-vi.mock('node:os', () => ({
-  homedir: () => '/home/testuser',
+vi.mock('./firebase-client.js', () => ({
+  getCurrentUser: () => mockGetCurrentUser(),
+  getDb: () => mockGetDb(),
 }))
 
-// Mock Firebase Admin SDK
-vi.mock('@repo/firebase-config/firebase-admin-node', () => ({
-  db: {
-    collection: vi.fn(() => ({
-      doc: vi.fn(() => ({
-        get: vi.fn(),
-      })),
-    })),
-  },
+// --- Mock firebase/firestore ---
+//
+// `subscription.ts` only uses `doc` and `getDoc` from firestore. We swap
+// them with vi.fn()s so each test can control what `getDoc` returns.
+const mockGetDoc = vi.fn()
+const mockDoc = vi.fn(() => ({} as unknown as object))
+
+vi.mock('firebase/firestore', () => ({
+  doc: (...args: unknown[]) => mockDoc.apply(null, args as []),
+  getDoc: (...args: unknown[]) => mockGetDoc.apply(null, args as []),
 }))
 
 // Mock logger
-vi.mock('../utils/logger', () => ({
+vi.mock('../utils/logger.js', () => ({
   log: {
-    start: vi.fn(), success: vi.fn(), error: vi.fn(), warn: vi.fn(),
-    fatal: vi.fn(), note: vi.fn(), info: vi.fn(), debug: vi.fn(),
-    await: vi.fn(), complete: vi.fn(), star: vi.fn(),
+    start: vi.fn(),
+    success: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    fatal: vi.fn(),
+    note: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+    await: vi.fn(),
+    complete: vi.fn(),
+    star: vi.fn(),
   },
 }))
 
@@ -44,59 +52,77 @@ import {
   isCacheValid,
   validateSubscription,
   SubscriptionError,
-} from './subscription'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+} from './subscription.js'
+
+// --- Helpers ---
+
+let dir: string
+const configPath = () => join(dir, 'config.json')
+
+function writeConfigFile(contents: unknown | string) {
+  mkdirSync(dir, { recursive: true })
+  const raw =
+    typeof contents === 'string' ? contents : JSON.stringify(contents)
+  writeFileSync(configPath(), raw)
+}
+
+function readConfigFile(): Record<string, unknown> {
+  return JSON.parse(readFileSync(configPath(), 'utf8')) as Record<string, unknown>
+}
+
+function setSignedInUser(uid: string) {
+  mockGetCurrentUser.mockReturnValue({ uid })
+}
+
+beforeEach(() => {
+  dir = mkdtempSync(join(tmpdir(), 'deja-subscription-test-'))
+  process.env.DEJA_DIR = dir
+  vi.clearAllMocks()
+  // Default: a signed-in user is available
+  setSignedInUser('user-123')
+})
+
+afterEach(() => {
+  rmSync(dir, { recursive: true, force: true })
+  delete process.env.DEJA_DIR
+})
 
 // --- Task 2: Config file read/write ---
 
 describe('readConfig', () => {
-  beforeEach(() => { vol.reset() })
-
   it('returns config when file exists and is valid', async () => {
-    vol.fromJSON({
-      '/home/testuser/.deja/config.json': JSON.stringify({
-        uid: 'user-123',
-        layoutId: 'my-layout',
-      }),
-    })
+    writeConfigFile({ uid: 'user-123', layoutId: 'my-layout' })
     const config = await readConfig()
     expect(config.uid).toBe('user-123')
     expect(config.layoutId).toBe('my-layout')
   })
 
   it('throws ConfigMissing when file does not exist', async () => {
-    vol.fromJSON({})
     await expect(readConfig()).rejects.toMatchObject({ code: 'ConfigMissing' })
   })
 
   it('throws ConfigCorrupt when file contains invalid JSON', async () => {
-    vol.fromJSON({
-      '/home/testuser/.deja/config.json': 'not json {{{',
-    })
+    writeConfigFile('not json {{{')
     await expect(readConfig()).rejects.toMatchObject({ code: 'ConfigCorrupt' })
   })
 
   it('throws ConfigMissingUid when uid field is absent', async () => {
-    vol.fromJSON({
-      '/home/testuser/.deja/config.json': JSON.stringify({ layoutId: 'x' }),
-    })
+    writeConfigFile({ layoutId: 'x' })
     await expect(readConfig()).rejects.toMatchObject({ code: 'ConfigMissingUid' })
   })
 })
 
 describe('writeConfigCache', () => {
-  beforeEach(() => { vol.reset() })
-
   it('writes subscription cache to existing config', async () => {
-    vol.fromJSON({
-      '/home/testuser/.deja/config.json': JSON.stringify({
-        uid: 'user-123',
-        layoutId: 'my-layout',
-      }),
+    writeConfigFile({ uid: 'user-123', layoutId: 'my-layout' })
+    await writeConfigCache({
+      status: 'active',
+      plan: 'engineer',
+      validatedAt: '2026-03-12T10:00:00Z',
     })
-    await writeConfigCache({ status: 'active', plan: 'engineer', validatedAt: '2026-03-12T10:00:00Z' })
-    const raw = vol.readFileSync('/home/testuser/.deja/config.json', 'utf8') as string
-    const config = JSON.parse(raw)
+    const config = readConfigFile() as {
+      subscription: { status: string; plan: string; validatedAt: string }
+    }
     expect(config.subscription.status).toBe('active')
     expect(config.subscription.plan).toBe('engineer')
     expect(config.subscription.validatedAt).toBe('2026-03-12T10:00:00Z')
@@ -112,59 +138,59 @@ describe('isStatusAllowed', () => {
   it('denies canceled', () => expect(isStatusAllowed('canceled')).toBe(false))
   it('denies unpaid', () => expect(isStatusAllowed('unpaid')).toBe(false))
   it('denies incomplete', () => expect(isStatusAllowed('incomplete')).toBe(false))
-  it('denies incomplete_expired', () => expect(isStatusAllowed('incomplete_expired')).toBe(false))
+  it('denies incomplete_expired', () =>
+    expect(isStatusAllowed('incomplete_expired')).toBe(false))
   it('denies undefined', () => expect(isStatusAllowed(undefined)).toBe(false))
 })
 
 describe('checkSubscriptionStatus', () => {
   it('returns allowed for active subscription', async () => {
-    const mockGet = vi.fn().mockResolvedValue({
-      exists: true,
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
       data: () => ({
         subscription: { status: 'active', plan: 'engineer' },
       }),
     })
-    vi.mocked(db.collection).mockReturnValue({
-      doc: vi.fn().mockReturnValue({ get: mockGet }),
-    } as any)
-
     const result = await checkSubscriptionStatus('user-123')
     expect(result).toEqual({ allowed: true, status: 'active', plan: 'engineer' })
   })
 
   it('returns denied for canceled subscription', async () => {
-    const mockGet = vi.fn().mockResolvedValue({
-      exists: true,
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
       data: () => ({
         subscription: { status: 'canceled', plan: 'engineer' },
       }),
     })
-    vi.mocked(db.collection).mockReturnValue({
-      doc: vi.fn().mockReturnValue({ get: mockGet }),
-    } as any)
-
     const result = await checkSubscriptionStatus('user-123')
     expect(result).toEqual({ allowed: false, status: 'canceled', plan: 'engineer' })
   })
 
   it('returns denied when user document does not exist', async () => {
-    const mockGet = vi.fn().mockResolvedValue({ exists: false })
-    vi.mocked(db.collection).mockReturnValue({
-      doc: vi.fn().mockReturnValue({ get: mockGet }),
-    } as any)
-
+    mockGetDoc.mockResolvedValue({ exists: () => false })
     const result = await checkSubscriptionStatus('user-123')
     expect(result).toEqual({ allowed: false, status: undefined, plan: undefined })
   })
 
   it('throws on network error', async () => {
-    const mockGet = vi.fn().mockRejectedValue(new Error('Network error'))
-    vi.mocked(db.collection).mockReturnValue({
-      doc: vi.fn().mockReturnValue({ get: mockGet }),
-    } as any)
-
-    // Raw Error propagation (not SubscriptionError) — don't match on message string
+    mockGetDoc.mockRejectedValue(new Error('Network error'))
     await expect(checkSubscriptionStatus('user-123')).rejects.toThrow()
+  })
+
+  it('throws a clear error when no user is signed in', async () => {
+    mockGetCurrentUser.mockReturnValue(null)
+    await expect(checkSubscriptionStatus('user-123')).rejects.toThrow(/not signed in/)
+  })
+
+  it('uses the signed-in user uid for the Firestore lookup', async () => {
+    setSignedInUser('signed-in-uid')
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ subscription: { status: 'active', plan: 'engineer' } }),
+    })
+    await checkSubscriptionStatus('ignored-uid')
+    // doc(db, 'users', '<uid>') was called with the signed-in uid, not the arg
+    expect(mockDoc).toHaveBeenCalledWith(expect.anything(), 'users', 'signed-in-uid')
   })
 })
 
@@ -193,96 +219,76 @@ describe('isCacheValid', () => {
 // --- Task 5: validateSubscription orchestrator ---
 
 describe('validateSubscription', () => {
-  beforeEach(() => { vol.reset() })
-
   it('allows when Firestore returns active', async () => {
-    vol.fromJSON({
-      '/home/testuser/.deja/config.json': JSON.stringify({ uid: 'user-123', layoutId: 'test' }),
-    })
-    const mockGet = vi.fn().mockResolvedValue({
-      exists: true,
+    writeConfigFile({ uid: 'user-123', layoutId: 'test' })
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
       data: () => ({ subscription: { status: 'active', plan: 'engineer' } }),
     })
-    vi.mocked(db.collection).mockReturnValue({
-      doc: vi.fn().mockReturnValue({ get: mockGet }),
-    } as any)
-
     await expect(validateSubscription()).resolves.not.toThrow()
   })
 
   it('exits with SubscriptionDenied when status is canceled', async () => {
-    vol.fromJSON({
-      '/home/testuser/.deja/config.json': JSON.stringify({ uid: 'user-123', layoutId: 'test' }),
-    })
-    const mockGet = vi.fn().mockResolvedValue({
-      exists: true,
+    writeConfigFile({ uid: 'user-123', layoutId: 'test' })
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
       data: () => ({ subscription: { status: 'canceled', plan: 'engineer' } }),
     })
-    vi.mocked(db.collection).mockReturnValue({
-      doc: vi.fn().mockReturnValue({ get: mockGet }),
-    } as any)
-
-    await expect(validateSubscription()).rejects.toMatchObject({ code: 'SubscriptionDenied' })
+    await expect(validateSubscription()).rejects.toMatchObject({
+      code: 'SubscriptionDenied',
+    })
   })
 
   it('uses cache when Firestore is unreachable and cache is fresh', async () => {
-    vol.fromJSON({
-      '/home/testuser/.deja/config.json': JSON.stringify({
-        uid: 'user-123',
-        layoutId: 'test',
-        subscription: {
-          status: 'active',
-          plan: 'engineer',
-          validatedAt: new Date().toISOString(),
-        },
-      }),
+    writeConfigFile({
+      uid: 'user-123',
+      layoutId: 'test',
+      subscription: {
+        status: 'active',
+        plan: 'engineer',
+        validatedAt: new Date().toISOString(),
+      },
     })
-    const mockGet = vi.fn().mockRejectedValue(new Error('Network error'))
-    vi.mocked(db.collection).mockReturnValue({
-      doc: vi.fn().mockReturnValue({ get: mockGet }),
-    } as any)
-
+    mockGetDoc.mockRejectedValue(new Error('Network error'))
     await expect(validateSubscription()).resolves.not.toThrow()
   })
 
   it('exits with GracePeriodExpired when cache is stale and Firestore is unreachable', async () => {
-    vol.fromJSON({
-      '/home/testuser/.deja/config.json': JSON.stringify({
-        uid: 'user-123',
-        layoutId: 'test',
-        subscription: {
-          status: 'active',
-          plan: 'engineer',
-          validatedAt: new Date(Date.now() - 49 * 60 * 60 * 1000).toISOString(),
-        },
-      }),
+    writeConfigFile({
+      uid: 'user-123',
+      layoutId: 'test',
+      subscription: {
+        status: 'active',
+        plan: 'engineer',
+        validatedAt: new Date(Date.now() - 49 * 60 * 60 * 1000).toISOString(),
+      },
     })
-    const mockGet = vi.fn().mockRejectedValue(new Error('Network error'))
-    vi.mocked(db.collection).mockReturnValue({
-      doc: vi.fn().mockReturnValue({ get: mockGet }),
-    } as any)
-
-    await expect(validateSubscription()).rejects.toMatchObject({ code: 'GracePeriodExpired' })
+    mockGetDoc.mockRejectedValue(new Error('Network error'))
+    await expect(validateSubscription()).rejects.toMatchObject({
+      code: 'GracePeriodExpired',
+    })
   })
 
   it('throws GracePeriodExpired when cache has denied status and Firestore is unreachable', async () => {
-    vol.fromJSON({
-      '/home/testuser/.deja/config.json': JSON.stringify({
-        uid: 'user-123',
-        layoutId: 'test',
-        subscription: {
-          status: 'canceled',
-          plan: 'engineer',
-          validatedAt: new Date().toISOString(), // fresh cache, but denied status
-        },
-      }),
+    writeConfigFile({
+      uid: 'user-123',
+      layoutId: 'test',
+      subscription: {
+        status: 'canceled',
+        plan: 'engineer',
+        validatedAt: new Date().toISOString(), // fresh cache, but denied status
+      },
     })
-    const mockGet = vi.fn().mockRejectedValue(new Error('Network error'))
-    vi.mocked(db.collection).mockReturnValue({
-      doc: vi.fn().mockReturnValue({ get: mockGet }),
-    } as any)
-
+    mockGetDoc.mockRejectedValue(new Error('Network error'))
     // Even with fresh cache, denied status means no fallback
-    await expect(validateSubscription()).rejects.toMatchObject({ code: 'GracePeriodExpired' })
+    await expect(validateSubscription()).rejects.toMatchObject({
+      code: 'GracePeriodExpired',
+    })
+  })
+
+  it('surfaces SubscriptionError for missing config without touching Firestore', async () => {
+    // No config file written
+    await expect(validateSubscription()).rejects.toBeInstanceOf(SubscriptionError)
+    expect(mockGetDoc).not.toHaveBeenCalled()
   })
 })

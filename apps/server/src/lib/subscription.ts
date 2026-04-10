@@ -1,42 +1,39 @@
 // apps/server/src/lib/subscription.ts
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
-import { homedir } from 'node:os'
-import { join } from 'node:path'
+//
+// Subscription validation for the DEJA.js server.
+//
+// Reads the user's subscription document from Firestore via the Firebase
+// **Client** SDK as the signed-in user (the device's authenticated session).
+// Caches the result in ~/.deja/config.json so the server can survive a
+// 48-hour offline grace period before requiring re-validation.
+//
+// Replaces the older Admin-SDK-based check that ran with god-mode credentials.
+import { doc, getDoc } from 'firebase/firestore'
 import type { SubscriptionStatus } from '@repo/modules/plans/types'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import {
+  createConfigStore,
+  type DejaConfig as StoredDejaConfig,
+} from './config-store.js'
+import { getDb, getCurrentUser } from './firebase-client.js'
 import { log } from '../utils/logger.js'
 
 // --- Types ---
+
+/**
+ * Server-side view of `~/.deja/config.json`. Mirrors the shared
+ * `DejaConfig` from `./config-store.js` but narrows `uid` to a required
+ * string — `readConfig()` guarantees this by throwing
+ * `ConfigMissingUid` otherwise.
+ */
+export interface DejaConfig extends StoredDejaConfig {
+  uid: string
+  layoutId: string
+}
 
 interface CachedSubscription {
   status: SubscriptionStatus | undefined
   plan: string | undefined
   validatedAt: string // ISO 8601
-}
-
-export interface DejaConfig {
-  uid: string
-  layoutId: string
-  subscription?: CachedSubscription
-  onboardingComplete?: boolean
-  mqtt?: {
-    enabled?: boolean
-    broker?: string
-    port?: number
-  }
-  ws?: {
-    enabled?: boolean
-    port?: number
-    id?: string
-  }
-  cloud?: {
-    enabled?: boolean
-  }
-  audio?: {
-    cacheSizeMb?: number
-    cacheDir?: string
-  }
 }
 
 interface SubscriptionCheckResult {
@@ -56,19 +53,19 @@ const ALLOWED_STATUSES: ReadonlySet<SubscriptionStatus> = new Set([
 const GRACE_PERIOD_MS = 48 * 60 * 60 * 1000 // 48 hours
 const RECHECK_INTERVAL_MS = 6 * 60 * 60 * 1000 // 6 hours
 
-function getConfigPath(): string {
-  return join(homedir(), '.deja', 'config.json')
-}
-
 // --- Custom Error Classes ---
 
-export class SubscriptionError extends Error {
-  code: 'ConfigMissing' | 'ConfigCorrupt' | 'ConfigMissingUid' | 'SubscriptionDenied' | 'GracePeriodExpired'
+export type SubscriptionErrorCode =
+  | 'ConfigMissing'
+  | 'ConfigCorrupt'
+  | 'ConfigMissingUid'
+  | 'SubscriptionDenied'
+  | 'GracePeriodExpired'
 
-  constructor(
-    code: 'ConfigMissing' | 'ConfigCorrupt' | 'ConfigMissingUid' | 'SubscriptionDenied' | 'GracePeriodExpired',
-    message: string,
-  ) {
+export class SubscriptionError extends Error {
+  code: SubscriptionErrorCode
+
+  constructor(code: SubscriptionErrorCode, message: string) {
     super(message)
     this.code = code
     this.name = code
@@ -76,29 +73,34 @@ export class SubscriptionError extends Error {
 }
 
 // --- Config File I/O ---
+//
+// All disk I/O is delegated to `createConfigStore()` so the layout of
+// `~/.deja/config.json` stays consistent across the CLI, the server, and
+// any other code that touches it. The store is created lazily so that
+// tests using a non-default `DEJA_DIR` (set after import) still work.
+
+function store() {
+  return createConfigStore()
+}
 
 export async function readConfig(): Promise<DejaConfig> {
-  const configPath = getConfigPath()
-
-  if (!existsSync(configPath)) {
+  const cs = store()
+  let config: StoredDejaConfig | null
+  try {
+    config = cs.read()
+  } catch (err) {
+    // Parse failure from createConfigStore — surface as ConfigCorrupt
     throw new SubscriptionError(
-      'ConfigMissing',
-      `Config file not found at ${configPath}. Run the DEJA install script: curl -fsSL https://install.dejajs.com | bash`,
+      'ConfigCorrupt',
+      `Config file at ${cs.path()} contains invalid JSON: ${(err as Error).message}`,
     )
   }
 
-  let raw: string
-  try {
-    raw = await readFile(configPath, 'utf8')
-  } catch {
-    throw new SubscriptionError('ConfigMissing', `Cannot read config file at ${configPath}`)
-  }
-
-  let config: Record<string, unknown>
-  try {
-    config = JSON.parse(raw) as Record<string, unknown>
-  } catch {
-    throw new SubscriptionError('ConfigCorrupt', `Config file at ${configPath} contains invalid JSON`)
+  if (!config) {
+    throw new SubscriptionError(
+      'ConfigMissing',
+      `Config file not found at ${cs.path()}. Run the DEJA install script: curl -fsSL https://install.dejajs.com | bash`,
+    )
   }
 
   if (typeof config.uid !== 'string' || config.uid.length === 0) {
@@ -108,37 +110,74 @@ export async function readConfig(): Promise<DejaConfig> {
     )
   }
 
-  return config as unknown as DejaConfig
+  // Narrow: at this point uid is a non-empty string. layoutId may still be
+  // missing — older configs allowed it — fall back to empty string so the
+  // typed shape is honored. Callers that need a real layoutId go through
+  // server-config.ts which has env-var fallbacks.
+  return {
+    ...config,
+    uid: config.uid,
+    layoutId: config.layoutId ?? '',
+  }
 }
 
-export async function writeConfigCache(subscription: CachedSubscription): Promise<void> {
-  const configPath = getConfigPath()
-  const raw = await readFile(configPath, 'utf8')
-  const config = JSON.parse(raw) as DejaConfig
-  config.subscription = subscription
-  const dir = join(homedir(), '.deja')
-  if (!existsSync(dir)) {
-    await mkdir(dir, { recursive: true })
-  }
-  await writeFile(configPath, JSON.stringify(config, null, 2), 'utf8')
+export async function writeConfigCache(
+  subscription: CachedSubscription,
+): Promise<void> {
+  const cs = store()
+  // The on-disk shape (`DejaSubscriptionCache`) types `status` as a plain
+  // `string`; our richer in-memory shape allows `undefined` so we can
+  // surface "no status returned by Firestore" in logs. Coerce here so the
+  // store's type contract is satisfied.
+  cs.update({
+    subscription: {
+      status: subscription.status ?? 'unknown',
+      plan: subscription.plan,
+      validatedAt: subscription.validatedAt,
+    },
+  })
 }
 
 // --- Subscription Status Check ---
 
-export function isStatusAllowed(status: SubscriptionStatus | undefined): boolean {
+export function isStatusAllowed(
+  status: SubscriptionStatus | undefined,
+): boolean {
   if (status === undefined) return false
   return ALLOWED_STATUSES.has(status)
 }
 
-export async function checkSubscriptionStatus(uid: string): Promise<SubscriptionCheckResult> {
-  const docRef = db.collection('users').doc(uid)
-  const snapshot = await docRef.get()
+/**
+ * Read `users/{uid}.subscription` via the Firebase Client SDK as the
+ * currently signed-in device user. The caller must have already run
+ * `authenticateDevice` + `signInWithDeviceToken` (Tasks 11 & 14) so that
+ * `getCurrentUser()` returns a non-null `User`.
+ *
+ * The `_uid` parameter is preserved purely for call-site compatibility
+ * with the older Admin-SDK-based signature; the actual UID used for the
+ * Firestore lookup is always taken from the signed-in client user.
+ */
+export async function checkSubscriptionStatus(
+  _uid?: string,
+): Promise<SubscriptionCheckResult> {
+  const user = getCurrentUser()
+  if (!user) {
+    throw new Error(
+      'subscription: not signed in — call authenticateDevice + signInWithDeviceToken first',
+    )
+  }
 
-  if (!snapshot.exists) {
+  const db = getDb()
+  const ref = doc(db, 'users', user.uid)
+  const snapshot = await getDoc(ref)
+
+  if (!snapshot.exists()) {
     return { allowed: false, status: undefined, plan: undefined }
   }
 
-  const data = snapshot.data()
+  const data = snapshot.data() as
+    | { subscription?: { status?: SubscriptionStatus; plan?: string } }
+    | undefined
   const status = data?.subscription?.status as SubscriptionStatus | undefined
   const plan = data?.subscription?.plan as string | undefined
 
@@ -188,7 +227,7 @@ export async function validateSubscription(): Promise<void> {
 
     // Network/Firebase failure — try cache fallback
     log.warn('Could not reach Firebase for subscription check — checking cache...')
-    const cached = config.subscription
+    const cached = config.subscription as CachedSubscription | undefined
 
     if (cached && isStatusAllowed(cached.status) && isCacheValid(cached.validatedAt)) {
       log.info(`Using cached subscription: ${cached.status} (validated ${cached.validatedAt})`)
@@ -225,8 +264,8 @@ export function startPeriodicRecheck(uid: string): void {
         // Denied — warn but do NOT shut down mid-session
         log.warn(
           `Subscription status changed to "${result.status}". ` +
-          'Server will continue running but will block on next cold start. ' +
-          'Visit https://dejajs.com to renew.',
+            'Server will continue running but will block on next cold start. ' +
+            'Visit https://dejajs.com to renew.',
         )
         await writeConfigCache({
           status: result.status,
