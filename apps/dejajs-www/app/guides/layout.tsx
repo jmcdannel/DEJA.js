@@ -1,4 +1,5 @@
 import GuidesSidebar from '../../components/GuidesSidebar';
+import GuideFooterNav from '../../components/GuideFooterNav';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default function GuidesLayout({ children }: { children: React.ReactNode }
       </aside>
       <article className="flex-1 min-w-0 max-w-4xl">
         {children}
+        <GuideFooterNav />
       </article>
     </div>
   );

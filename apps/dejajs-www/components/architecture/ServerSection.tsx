@@ -7,8 +7,10 @@ import DocLink from '../DocLink';
 import TerminalMockup from './TerminalMockup';
 
 const terminalLines = [
-  { text: '$ deja start', color: 'text-deja-cyan' },
+  { text: '$ curl -fsSL install.dejajs.com | bash', color: 'text-gray-400' },
+  { text: '✓ Installed deja to ~/.deja', color: 'text-green-400' },
   { text: '', color: '' },
+  { text: '$ deja start', color: 'text-deja-cyan' },
   { text: '✓ WebSocket server on :8082', color: 'text-green-400' },
   { text: '✓ Firebase connected (layout: tamarack)', color: 'text-green-400' },
   { text: '✓ Serial: /dev/ttyUSB0 @ 115200', color: 'text-green-400' },
@@ -60,7 +62,7 @@ export default function ServerSection() {
           <p className="text-xs text-deja-cyan font-mono tracking-[0.2em] uppercase mb-3">DEJA Server</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">One command. Everything connects.</h2>
           <p className="text-gray-400 leading-relaxed mb-6">The DEJA Server bridges your apps to your layout. It speaks WebSocket to your browser, Firebase to the cloud, serial to your DCC-EX command station, and MQTT to your IO devices.</p>
-          <p className="text-gray-400 leading-relaxed mb-6">Install it anywhere Node.js runs — your laptop, a Raspberry Pi, or a dedicated server. One command and your entire layout is online.</p>
+          <p className="text-gray-400 leading-relaxed mb-6">Install it anywhere Node.js runs — your laptop, a Raspberry Pi, or a dedicated server. One <code className="text-deja-cyan font-mono text-sm">curl</code> to install, one <code className="text-deja-cyan font-mono text-sm">deja start</code> to launch, and your entire layout is online.</p>
           <div className="flex flex-wrap gap-3">
             <Link href="/server" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-deja-cyan/10 border border-deja-cyan/30 text-deja-cyan font-semibold text-sm hover:bg-deja-cyan/20 transition-colors">
               Explore Server
