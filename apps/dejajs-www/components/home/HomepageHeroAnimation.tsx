@@ -114,6 +114,7 @@ export default function HomepageHeroAnimation() {
               width={440}
               height={300}
               className="w-full h-auto drop-shadow-[0_0_12px_rgba(139,92,246,0.25)]"
+              priority
             />
             <Image
               src="/dcc-ex/android-chrome-192x192.png"
@@ -146,13 +147,18 @@ export default function HomepageHeroAnimation() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: SEQ.trackFade, duration: SEQ.trackDur, ease: 'easeOut' }}
           >
-            <SequenceOvalTrack trainStartDelay={SEQ.trainStart} />
+            <SequenceOvalTrack
+              trainStartDelay={SEQ.trainStart}
+              orbitId="home-stadium-orbit"
+            />
           </motion.div>
         </div>
       </div>
 
       {/* Phone → Terminal connector on sm+ — overlaid SVG that spans from the
-          phone's right edge to the terminal's left edge. */}
+          phone's right edge to the terminal's left edge. The left/width %s
+          are tied to the sm:w-[55%]/sm:w-[45%] column split above; update
+          together if that split ever changes. */}
       <div className="hidden sm:block absolute top-0 left-[45%] w-[20%] h-[28%] pointer-events-none">
         <Connector
           direction="left-to-right"

@@ -238,7 +238,15 @@ export function SequenceTerminal() {
 }
 
 /** Stadium track — train parked initially, starts orbiting at `trainStartDelay`. */
-export function SequenceOvalTrack({ trainStartDelay }: { trainStartDelay: number }) {
+export function SequenceOvalTrack({
+  trainStartDelay,
+  orbitId = 'stadium-orbit',
+}: {
+  trainStartDelay: number;
+  /** Globally unique ID for the orbit path — required when multiple
+   *  SequenceOvalTrack instances can coexist in the same document. */
+  orbitId?: string;
+}) {
   const outerTrack = 'M 60,10 L 140,10 A 30,30 0 0 1 140,70 L 60,70 A 30,30 0 0 1 60,10 Z';
   const innerTrack = 'M 62,14 L 138,14 A 26,26 0 0 1 138,66 L 62,66 A 26,26 0 0 1 62,14 Z';
   const orbitPath = 'M 61,12 L 139,12 A 28,28 0 0 1 139,68 L 61,68 A 28,28 0 0 1 61,12 Z';
@@ -295,7 +303,7 @@ export function SequenceOvalTrack({ trainStartDelay }: { trainStartDelay: number
           [0, 1, 2, 3, 4].map((i) => (
             <circle key={i} r={i === 0 ? 4.5 : 3} fill="#F97316" fillOpacity={i === 0 ? 1 : 0.75 - i * 0.1}>
               <animateMotion dur="3s" repeatCount="indefinite" begin={`${i * 0.1}s`}>
-                <mpath href="#stadium-orbit" />
+                <mpath href={`#${orbitId}`} />
               </animateMotion>
             </circle>
           ))
@@ -310,7 +318,7 @@ export function SequenceOvalTrack({ trainStartDelay }: { trainStartDelay: number
           </>
         )}
 
-        <path id="stadium-orbit" d={orbitPath} fill="none" stroke="none" />
+        <path id={orbitId} d={orbitPath} fill="none" stroke="none" />
       </svg>
     </div>
   );
