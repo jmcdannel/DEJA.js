@@ -2,7 +2,6 @@ import { useStorage } from '@vueuse/core'
 import { deleteDoc, doc, setDoc } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { useCommandQueue } from '@/composables/useCommandQueue'
-import { wiThrottleService } from '@/services/WiThrottleService'
 import type { Throttle } from '@/throttle/types'
 import { getSignedSpeed } from '@/throttle/utils'
 
@@ -20,7 +19,6 @@ export function useQuickThrottleActions() {
     // needless oscillation vs the main throttle composable.
     const newSpeed = Math.abs(speed)
     const newDirection = speed > 0
-    await wiThrottleService.setThrottleSpeed(address, newSpeed, speed >= 0)
     await enqueue(
       async () => {
         await setDoc(
@@ -43,7 +41,6 @@ export function useQuickThrottleActions() {
   }
 
   async function park(address: number) {
-    await wiThrottleService.releaseLoco(address)
     await enqueue(
       async () => {
         await deleteDoc(getThrottleDocRef(address))
