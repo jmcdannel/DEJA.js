@@ -75,7 +75,7 @@ export default function ThrottleSpotlight() {
       }}
       mainScreenshot={{ src: '/screenshots/throttle_desktop_throttle.png', alt: 'DEJA Throttle desktop view' }}
       pipScreenshot={{ src: '/screenshots/throttle_mobile_home.png', alt: 'DEJA Throttle mobile view' }}
-      logoPath="/throttle/icon-512.png"
+      logoVariant="throttle"
       ctaHref="https://throttle.dejajs.com/demo"
       ctaLabel="Try Now in Demo Mode"
       docsHref="/throttle"

@@ -19,9 +19,16 @@ body {
 
 /* ─── DEJA brand tokens (Tailwind v4 @theme) ─── */
 @theme {
-  --color-deja-cyan: #00E5FF;
+  --color-deja-cyan: #00C3FF;
   --color-deja-magenta: #D500F9;
   --color-deja-lime: #69FF00;
+  /* 🎨 Per-product accents — sourced from each product logo SVG */
+  --color-deja-throttle: #43F20D; /* lime green game controller */
+  --color-deja-server: #FF0700;   /* signal red */
+  --color-deja-cloud: #E40DF2;    /* fuchsia cloud */
+  --color-deja-io: #8D00FF;       /* purple io */
+  --color-deja-monitor: #1A32E6;  /* deep blue monitor */
+  --color-deja-tour: #F2B40D;     /* gold tour */
   --animate-marquee: marquee 30s linear infinite;
   --animate-pulse-glow: pulse-glow 3s ease-in-out infinite;
 }
@@ -45,6 +52,37 @@ body {
 }
 .glow-lime {
   box-shadow: 0 0 20px rgba(105, 255, 0, 0.4), 0 0 60px rgba(105, 255, 0, 0.15);
+}
+/* Per-product glow utilities derived from the @theme brand tokens. */
+.glow-throttle {
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-deja-throttle) 40%, transparent),
+    0 0 60px color-mix(in srgb, var(--color-deja-throttle) 15%, transparent);
+}
+.glow-server {
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-deja-server) 40%, transparent),
+    0 0 60px color-mix(in srgb, var(--color-deja-server) 15%, transparent);
+}
+.glow-cloud {
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-deja-cloud) 40%, transparent),
+    0 0 60px color-mix(in srgb, var(--color-deja-cloud) 15%, transparent);
+}
+.glow-io {
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-deja-io) 40%, transparent),
+    0 0 60px color-mix(in srgb, var(--color-deja-io) 15%, transparent);
+}
+.glow-monitor {
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-deja-monitor) 40%, transparent),
+    0 0 60px color-mix(in srgb, var(--color-deja-monitor) 15%, transparent);
+}
+.glow-tour {
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-deja-tour) 40%, transparent),
+    0 0 60px color-mix(in srgb, var(--color-deja-tour) 15%, transparent);
 }
 .text-gradient-cyan {
   background: linear-gradient(135deg, #00E5FF 0%, #0891b2 100%);

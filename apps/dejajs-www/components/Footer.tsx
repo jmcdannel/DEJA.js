@@ -1,21 +1,12 @@
 import Link from 'next/link';
 
-interface FooterSettings {
-  footerLinks?: Array<{
-    _key: string;
-    label: string;
-    href: string;
-  }>;
-}
-
-const defaultFooterLinks = [
+const footerLinks = [
   { label: 'Docs', href: '/docs' },
   { label: 'FAQ', href: '/faq' },
   { label: 'Pricing', href: '/pricing' },
 ];
 
-export default function Footer({ settings }: { settings?: FooterSettings | null }) {
-  const footerLinks = settings?.footerLinks ?? defaultFooterLinks;
+export default function Footer() {
 
   return (
     <footer className="border-t border-gray-200 mt-20 pt-12 pb-8 flex flex-col items-center gap-4 text-center text-gray-500 text-[0.8rem] font-mono tracking-[0.05em] dark:border-gray-800 dark:text-gray-400">

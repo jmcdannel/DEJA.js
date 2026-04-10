@@ -92,7 +92,7 @@ export default function ServerGuide() {
           <p>
             When you type <code className="text-deja-lime font-mono text-xs">deja start</code>, the server
             launches and you&apos;ll see a live console scrolling with status updates as it connects
-            to your CommandStation, Firebase, and any other services.
+            to your CommandStation, DEJA Cloud, and any other services.
           </p>
           <CommandBlock command="deja start" />
           <Image src="/screenshots/server_terminal_start.png" alt="DEJA Server starting up — live console output showing connections being established" width={800} height={400} className="rounded-lg border border-gray-700 my-4" />

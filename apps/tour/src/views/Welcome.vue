@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { createLogger } from '@repo/utils'
-import TourLogo from '../components/TourLogo.vue'
+import { Logo } from '@repo/ui'
 import { TOUR_ASSETS } from '../assets/blob-urls'
 
 const log = createLogger('Welcome')
@@ -64,8 +64,8 @@ const playIntroVideo = () => {
     <v-row>
       <v-col cols="12">
         <v-card elevation="4" class="mb-6">
-          <v-card-title class="text-h4 text-center pa-6">
-            <TourLogo class="mr-4" />
+          <v-card-title class="text-h4 text-center pa-6 d-flex align-center justify-center">
+            <Logo size="md" variant="tour" class="mr-4" />
             Welcome to Our Model Train Layout
           </v-card-title>
         </v-card>

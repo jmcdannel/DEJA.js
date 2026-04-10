@@ -28,7 +28,7 @@ const faqs: FAQ[] = [
   },
   {
     q: 'What is DEJA Cloud?',
-    a: 'DEJA Cloud is the web app for managing your layout configuration — roster, turnouts, signals, effects, and devices. All data is stored in Firebase and syncs in real time to every connected device.',
+    a: 'DEJA Cloud is the web app for managing your layout configuration — roster, turnouts, signals, effects, and devices. Everything syncs in real time to every connected device.',
   },
   {
     q: 'Do I need to keep a computer running?',
