@@ -92,14 +92,42 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
   async function updateSpeed(speed: number) {
     const addr = address.value
     if (addr === undefined || addr === null) return
-    await wiThrottleService.setThrottleSpeed(addr, Math.abs(speed), speed >= 0)
+
+    const newSpeed = Math.abs(speed)
+    const newDirection = speed > 0
+
+    // 🛡️ Dedup guard — skip writes that would not change the server state.
+    // Prevents feedback loops between multiple throttle tabs/browsers watching
+    // the same doc where a local reactive chain bounces echoes back as writes.
+    // At speed 0, direction is meaningless — any speed-0 write with matching speed is a no-op.
+    const current = throttle.value as Throttle | undefined
+    if (current && current.speed === newSpeed) {
+      if (newSpeed === 0 || current.direction === newDirection) return
+    }
+
+    // 🔬 DEBUG INSTRUMENTATION — remove after multi-instance bug is fixed
+    const tabId = ((): string => {
+      const w = window as unknown as { __DEJA_TAB_ID__?: string }
+      if (!w.__DEJA_TAB_ID__) w.__DEJA_TAB_ID__ = Math.random().toString(36).slice(2, 8)
+      return w.__DEJA_TAB_ID__
+    })()
+    const counter = ((): number => {
+      const w = window as unknown as { __DEJA_WRITE_COUNT__?: number }
+      w.__DEJA_WRITE_COUNT__ = (w.__DEJA_WRITE_COUNT__ ?? 0) + 1
+      return w.__DEJA_WRITE_COUNT__
+    })()
+    const stack = new Error('trace').stack?.split('\n').slice(2, 7).join('\n')
+    // eslint-disable-next-line no-console
+    console.warn(`🚨 [tab ${tabId} #${counter}] updateSpeed(addr=${addr} speed=${speed})\n${stack}`)
+
+    await wiThrottleService.setThrottleSpeed(addr, newSpeed, speed >= 0)
     await enqueue(
       async () => {
         await setDoc(
           doc(db, `layouts/${layoutId.value}/throttles`, addr.toString()),
           {
-            direction: speed > 0,
-            speed: Math.abs(speed),
+            direction: newDirection,
+            speed: newSpeed,
           },
           { merge: true },
         )

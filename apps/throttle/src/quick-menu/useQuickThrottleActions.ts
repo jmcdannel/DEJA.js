@@ -15,12 +15,17 @@ export function useQuickThrottleActions() {
   }
 
   async function setSpeed(address: number, speed: number) {
-    await wiThrottleService.setThrottleSpeed(address, Math.abs(speed), speed >= 0)
+    // Match useThrottle.updateSpeed semantics: direction is true only for speed > 0.
+    // Previously used `speed >= 0` here which flipped direction at speed 0 and caused
+    // needless oscillation vs the main throttle composable.
+    const newSpeed = Math.abs(speed)
+    const newDirection = speed > 0
+    await wiThrottleService.setThrottleSpeed(address, newSpeed, speed >= 0)
     await enqueue(
       async () => {
         await setDoc(
           getThrottleDocRef(address),
-          { direction: speed >= 0, speed: Math.abs(speed) },
+          { direction: newDirection, speed: newSpeed },
           { merge: true },
         )
       },
