@@ -31,7 +31,7 @@ Git worktrees are isolated checkouts. They share the same `package.json`, `pnpm-
 The canonical `.env` lives in the `preview` worktree:
 
 ```bash
-PREVIEW=/Users/jmcdannel/TTT/worktrees/preview
+PREVIEW=/Users/jmcdannel/TTT/DEJA.js.git/preview
 ```
 
 Verify it exists: `ls "$PREVIEW/.env"`
