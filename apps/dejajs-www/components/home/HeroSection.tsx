@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import AnimateIn from './AnimateIn';
-import SectionLabel from './SectionLabel';
 import Logo from '../Logo';
 import HomepageHeroAnimation from './HomepageHeroAnimation';
 

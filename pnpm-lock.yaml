@@ -241,9 +241,6 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
-      lucide-react:
-        specifier: ^1.8.0
-        version: 1.8.0(react@19.2.4)
       next:
         specifier: 15.5.8
         version: 15.5.8(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -10928,11 +10925,6 @@ packages:
 
   lru-memoizer@2.3.0:
     resolution: {integrity: sha512-GXn7gyHAMhO13WSKrIiNfztwxodVsP8IoZ3XfrJV4yH2x0/OeTO/FIaAHTY5YekdGgW94njfuKmyyt1E0mR6Ug==}
-
-  lucide-react@1.8.0:
-    resolution: {integrity: sha512-WuvlsjngSk7TnTBJ1hsCy3ql9V9VOdcPkd3PKcSmM34vJD8KG6molxz7m7zbYFgICwsanQWmJ13JlYs4Zp7Arw==}
-    peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
@@ -27687,10 +27679,6 @@ snapshots:
     dependencies:
       lodash.clonedeep: 4.5.0
       lru-cache: 6.0.0
-
-  lucide-react@1.8.0(react@19.2.4):
-    dependencies:
-      react: 19.2.4
 
   lz-string@1.5.0: {}
 
