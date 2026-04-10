@@ -12,11 +12,17 @@ Exports configured Firebase instances for both browser and server use. This pack
 import { db, rtdb } from '@repo/firebase-config'
 ```
 
-### ⚙️ Server (Node.js with Admin SDK)
+### ⚙️ Server (Node.js Admin SDK)
+
+For privileged server-side access (Vercel Functions, operator scripts),
+import directly from `firebase-admin/*`:
 
 ```typescript
-import { db, rtdb } from '@repo/firebase-config/firebase-admin-node'
+import { initializeApp, cert } from 'firebase-admin/app'
+import { getFirestore } from 'firebase-admin/firestore'
 ```
+
+See `apps/cloud/api/lib/firebase.ts` for a reference implementation.
 
 ## 📤 Exports
 

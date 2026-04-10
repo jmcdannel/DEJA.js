@@ -1,5 +1,28 @@
-import { FieldValue } from 'firebase-admin/firestore'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+// ⚠️ Operator-run one-shot migration script — NOT part of the running server.
+// Requires a service-account JSON file on the operator's machine:
+//
+//   FIREBASE_SERVICE_ACCOUNT=./sa.json \
+//   tsx apps/server/src/scripts/migrate-signals.ts [--dry-run] [--layout id1,id2] [--delete-originals]
+//
+// Uses the Firebase Admin SDK directly (bypasses Firestore rules) so it
+// can read/write every layout document. Do not import from production
+// server code.
+
+import { initializeApp, cert, getApps } from 'firebase-admin/app'
+import { FieldValue, getFirestore } from 'firebase-admin/firestore'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
+const saPath = process.env.FIREBASE_SERVICE_ACCOUNT
+if (!saPath) {
+  console.error('ERROR: Set FIREBASE_SERVICE_ACCOUNT to the path of a service-account JSON file')
+  process.exit(2)
+}
+const sa = JSON.parse(readFileSync(resolve(saPath), 'utf8'))
+if (!getApps().length) {
+  initializeApp({ credential: cert(sa) })
+}
+const db = getFirestore()
 
 interface Options {
   dryRun: boolean

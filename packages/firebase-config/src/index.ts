@@ -4,4 +4,5 @@ export { getFirebaseStorage } from './storage'
 
 // Note: For Node.js/server usage, import directly from:
 // - './firebase-node' for client-side Node.js
-// - './firebase-admin-node' for server-side admin operations
+// Server-side admin operations should import `firebase-admin/*` directly
+// (see apps/cloud/api/lib/firebase.ts for an example).
