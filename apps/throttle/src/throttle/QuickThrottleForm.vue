@@ -13,6 +13,7 @@ const value = ref<string>('')
 
 const parsed = computed<number | null>(() => {
   if (!value.value) return null
+  if (!/^\d+$/.test(value.value)) return null
   const n = Number(value.value)
   if (!Number.isInteger(n)) return null
   if (n < 1 || n > 9999) return null
