@@ -1,17 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// Mock Firebase before any import that uses it
-const setDocMock = vi.fn().mockResolvedValue(undefined)
-const getDocMock = vi.fn()
-const docRef = { __type: 'docRef' }
-const docFnMock = vi.fn(() => docRef)
+const { setDocMock, getDocMock, docFnMock } = vi.hoisted(() => ({
+  setDocMock: vi.fn().mockResolvedValue(undefined),
+  getDocMock: vi.fn(),
+  docFnMock: vi.fn(() => ({ __type: 'docRef' })),
+}))
 
 vi.mock('firebase/firestore', () => ({
-  doc: (...args: unknown[]) => docFnMock(...args),
+  doc: docFnMock,
   collection: vi.fn(() => ({ __type: 'collection' })),
-  getDoc: (...args: unknown[]) => getDocMock(...args),
+  getDoc: getDocMock,
   getDocs: vi.fn(),
-  setDoc: (...args: unknown[]) => setDocMock(...args),
+  setDoc: setDocMock,
   deleteDoc: vi.fn(),
   where: vi.fn(),
   query: vi.fn(),
