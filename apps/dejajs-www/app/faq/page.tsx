@@ -1,6 +1,4 @@
 import type { Metadata } from 'next';
-import { client } from '../../sanity/lib/client';
-import { FAQ_PAGE_QUERY } from '../../sanity/lib/queries';
 
 export const metadata: Metadata = {
   title: 'FAQ - DEJA.js',
@@ -64,16 +62,12 @@ const defaultSections = [
   },
 ];
 
-export default async function FAQPage() {
-  let faq: any = null;
-  try {
-    if (client) faq = await client.fetch(FAQ_PAGE_QUERY);
-  } catch {
-    // Fall back to hardcoded content
-  }
+type FAQEntry = { _key?: string; question: string; answer: string };
+type FAQSection = { _key?: string; heading: string; entries: FAQEntry[] };
 
-  const pageTitle = faq?.title || 'Frequently Asked Questions';
-  const sections = faq?.sections?.length ? faq.sections : defaultSections;
+export default function FAQPage() {
+  const pageTitle = 'Frequently Asked Questions';
+  const sections: FAQSection[] = defaultSections;
 
   return (
     <div className="space-y-16 max-w-4xl mx-auto px-4 sm:px-6 py-12">
@@ -87,13 +81,13 @@ export default async function FAQPage() {
       </section>
 
       <div className="space-y-12">
-        {sections.map((section: any, sIdx: number) => (
+        {sections.map((section, sIdx) => (
           <section key={section._key || sIdx}>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 border-b border-gray-200 dark:border-slate-800 pb-2">
               {section.heading}
             </h2>
             <div className="space-y-6">
-              {section.entries?.map((entry: any, eIdx: number) => (
+              {section.entries?.map((entry, eIdx) => (
                 <div key={entry._key || eIdx} className="bg-white dark:bg-slate-900 rounded-xl p-6 border border-gray-100 dark:border-slate-800 shadow-sm">
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{entry.question}</h3>
                   <p className="text-gray-600 dark:text-gray-400">
