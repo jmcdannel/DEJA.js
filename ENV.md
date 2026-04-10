@@ -82,9 +82,11 @@ End users running the DEJA server CLI don't use `.env` files. Their configuratio
 
 Worktrees don't inherit `.env` files. **Always copy** (don't symlink — symlinks fail in some environments):
 
+> This repo uses a bare-repo + sibling-worktrees layout: bare at `/Users/jmcdannel/TTT/DEJA.js.git/.bare`, worktrees are siblings inside `/Users/jmcdannel/TTT/DEJA.js.git/`.
+
 ```bash
-PREVIEW=/Users/jmcdannel/TTT/worktrees/preview
-WT=/Users/jmcdannel/TTT/worktrees/<your-worktree>
+PREVIEW=/Users/jmcdannel/TTT/DEJA.js.git/preview
+WT=/Users/jmcdannel/TTT/DEJA.js.git/<your-worktree>
 
 # Root (for Turborepo)
 cp "$PREVIEW/.env" "$WT/.env"

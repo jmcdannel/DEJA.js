@@ -11,6 +11,11 @@ import { fn } from '@storybook/test'
 // Constants re-export
 // ---------------------------------------------------------------------------
 
+export const isValidCabAddress = fn((addr: unknown) => {
+  const n = Number(addr)
+  return Number.isInteger(n) && n >= 1 && n <= 10293
+}).mockName('isValidCabAddress')
+
 export const defaultCommands = {
   powerOn: { action: 'dcc', payload: { command: '1' } },
   powerOff: { action: 'dcc', payload: { command: '0' } },

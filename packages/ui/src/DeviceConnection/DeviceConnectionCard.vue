@@ -134,20 +134,21 @@ function handleConnect() {
           >
             <v-icon :icon="deviceConfig?.icon ?? 'mdi-devices'" />
           </v-avatar>
-          <div>
+          <div class="device-info-text">
             <div
-              class="text-subtitle-1 font-weight-bold cursor-pointer"
+              class="text-subtitle-1 font-weight-bold cursor-pointer device-info-id"
               :class="`text-${deviceConfig?.color ?? 'grey'}`"
             >
-              {{ device.name || deviceConfig?.label || device.type }}
+              {{ device.id }}
             </div>
-            <div v-if="isConnected" class="text-caption text-medium-emphasis">
-              {{ connectionLabel }} &middot; {{ connectionPath }}
+            <div class="text-caption text-medium-emphasis">
+              {{ deviceConfig?.label || device.type }}
             </div>
-            <div v-else class="text-caption text-error">
-              &#9679; Disconnected{{
-                connectionPath ? '' : ' — no port assigned'
-              }}
+            <div v-if="connectionPath" class="text-caption text-medium-emphasis device-info-path">
+              {{ connectionPath }}
+            </div>
+            <div v-else-if="!isConnected" class="text-caption text-error">
+              &#9679; No {{ isMqttDevice ? 'topic' : 'port' }} assigned
             </div>
           </div>
         </div>
@@ -318,10 +319,31 @@ function handleConnect() {
 .device-info-link {
   cursor: pointer;
   transition: opacity 0.15s ease;
+  min-width: 0; /* allow child truncation */
 }
 
 .device-info-link:hover {
   opacity: 0.8;
+}
+
+.device-info-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.device-info-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.01em;
+}
+
+.device-info-path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 420px;
 }
 
 @media (min-width: 600px) {

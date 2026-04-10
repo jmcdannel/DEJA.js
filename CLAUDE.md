@@ -147,13 +147,15 @@ When the `preview` branch has been tested on staging and is ready to ship:
 
 After completing work, keep worktrees and branches tidy. **Remove merged worktrees and branches, except those merged in the last 3 days** (to allow for quick reverts).
 
+> **Layout note:** This repo uses a bare-repo + sibling-worktrees layout. The bare repo lives at `/Users/jmcdannel/TTT/DEJA.js.git/.bare`, and each worktree is a sibling directory alongside it (e.g. `/Users/jmcdannel/TTT/DEJA.js.git/main`, `/preview`, `/io-build-fix`).
+
 ```bash
 # From the main worktree, list merged branches with merge dates:
-cd /Users/jmcdannel/TTT/worktrees/main
+cd /Users/jmcdannel/TTT/DEJA.js.git/main
 git fetch origin
-for d in /Users/jmcdannel/TTT/worktrees/*/; do
+for d in /Users/jmcdannel/TTT/DEJA.js.git/*/; do
   name=$(basename "$d")
-  [[ "$name" == "main" || "$name" == "preview" ]] && continue
+  [[ "$name" == "main" || "$name" == "preview" || "$name" == ".bare" ]] && continue
   branch=$(git -C "$d" branch --show-current 2>/dev/null)
   [[ -z "$branch" ]] && continue
   merged=$(git branch -a --merged origin/preview 2>/dev/null | grep -F "$branch")
@@ -164,7 +166,7 @@ for d in /Users/jmcdannel/TTT/worktrees/*/; do
 done
 
 # Remove a worktree + branch:
-git worktree remove /Users/jmcdannel/TTT/worktrees/<name> --force
+git worktree remove /Users/jmcdannel/TTT/DEJA.js.git/<name> --force
 git branch -D <branch-name>
 git worktree prune
 ```
