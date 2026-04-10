@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Device } from '@repo/modules'
+import type { Device, Turnout, Effect } from '@repo/modules'
 import { useLayout, useTurnouts, useEfx } from '@repo/modules'
-import { useCollection } from 'vuefire'
 import DeviceConnectionCard from './DeviceConnectionCard.vue'
 import DeviceTile from '../Dashboard/DeviceTile.vue'
 
@@ -13,6 +12,7 @@ interface Props {
   linkMode: 'page' | 'modal'
   showHeader?: boolean
   tileMode?: boolean
+  serverOnline?: boolean
   serverUptime?: string
   connectedDeviceCount?: number
   totalDeviceCount?: number
@@ -23,6 +23,7 @@ const props = withDefaults(defineProps<Props>(), {
   availableTopics: () => [],
   showHeader: true,
   tileMode: false,
+  serverOnline: false,
   serverUptime: '',
   connectedDeviceCount: 0,
   totalDeviceCount: 0,
@@ -39,10 +40,14 @@ const emit = defineEmits<{
 }>()
 
 const { getLayout } = useLayout()
-const { getTurnoutsByDevice } = useTurnouts()
-const { getEffectsByDevice } = useEfx()
+const { getTurnouts } = useTurnouts()
+const { getEffects } = useEfx()
 
 const layout = getLayout()
+
+// Fetch all turnouts and effects once during setup (proper VueFire composable usage)
+const allTurnouts = getTurnouts()
+const allEffects = getEffects()
 
 const trackPower = computed(() => layout?.value?.dccEx?.power ?? null)
 
@@ -58,18 +63,29 @@ const sortedDevices = computed(() => {
   })
 })
 
+// Compute counts from already-loaded collections (no useCollection in render)
+const turnoutCountsByDevice = computed(() => {
+  const counts = new Map<string, number>()
+  for (const t of (allTurnouts.value ?? []) as Turnout[]) {
+    if (t.device) counts.set(t.device, (counts.get(t.device) ?? 0) + 1)
+  }
+  return counts
+})
+
+const effectCountsByDevice = computed(() => {
+  const counts = new Map<string, number>()
+  for (const e of (allEffects.value ?? []) as Effect[]) {
+    if (e.device) counts.set(e.device, (counts.get(e.device) ?? 0) + 1)
+  }
+  return counts
+})
+
 function getTurnoutCount(deviceId: string): number {
-  const queryRef = getTurnoutsByDevice(deviceId)
-  if (!queryRef) return 0
-  const data = useCollection(queryRef)
-  return data.value?.length ?? 0
+  return turnoutCountsByDevice.value.get(deviceId) ?? 0
 }
 
 function getEffectCount(deviceId: string): number {
-  const queryRef = getEffectsByDevice(deviceId)
-  if (!queryRef) return 0
-  const data = useCollection(queryRef)
-  return data.value?.length ?? 0
+  return effectCountsByDevice.value.get(deviceId) ?? 0
 }
 </script>
 
@@ -78,11 +94,16 @@ function getEffectCount(deviceId: string): number {
     <!-- Header -->
     <div
       v-if="showHeader"
-      class="d-flex justify-space-between align-center mb-4"
+      class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center mb-4 ga-2"
     >
       <h2 class="text-h5 font-weight-bold">Devices</h2>
       <div class="d-flex ga-2">
-        <v-btn variant="tonal" size="small" @click="emit('refreshPorts')">
+        <v-btn
+          variant="tonal"
+          size="small"
+          :disabled="!serverOnline"
+          @click="emit('refreshPorts')"
+        >
           <v-icon start icon="mdi-refresh" />
           Refresh Ports
         </v-btn>

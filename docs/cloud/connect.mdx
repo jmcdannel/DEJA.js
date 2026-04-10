@@ -1,0 +1,49 @@
+---
+title: Connect
+description: Manage live connections between DEJA Cloud and your DCC-EX CommandStation — device selection, port configuration, and connection monitoring.
+order: 4
+---
+
+# Connect
+
+The Connect page manages the live bridge between DEJA Cloud and your hardware. When your DEJA Server is running and a device is registered, you can connect, disconnect, and monitor the link from here.
+
+![Cloud dashboard with device connections](/screenshots/cloud_desktop_dashboard.png)
+
+## How Connection Works
+
+DEJA Cloud communicates with your hardware through the DEJA Server:
+
+1. **DEJA Cloud** → Firebase Realtime Database (commands)
+2. **DEJA Server** picks up commands → sends via serial USB to your hardware
+3. **Hardware** responds → Server pushes status back through WebSocket + Firebase
+
+The Connect page lets you manage step 1 — selecting which device to talk to and verifying the connection is healthy.
+
+## Connecting a Device
+
+From the dashboard or Connect page:
+
+1. Select a registered device from the device list.
+2. Choose the serial port (auto-detected from available USB ports).
+3. Click **Connect** — the status indicator turns green when the link is established.
+
+## Connection Status
+
+Each connected device shows:
+
+- **🟢 Connected** -- Device is online and responding.
+- **🔴 Disconnected** -- Device is not reachable. Check USB cable and server status.
+- **🟡 Reconnecting** -- Automatic reconnect in progress after a connection drop.
+
+## Troubleshooting
+
+- **No ports available** -- Make sure your CommandStation is plugged in via USB and the DEJA Server is running. Click **Refresh Ports** to re-scan.
+- **Connection drops** -- Check USB cable quality. The server will auto-reconnect on brief interruptions.
+- **Multiple devices** -- Each device connects independently. You can have a DCC-EX CommandStation and IO boards connected simultaneously.
+
+## Related Pages
+
+- [Devices](/docs/cloud/devices) -- Register and configure hardware devices.
+- [Dashboard](/docs/cloud/dashboard) -- Quick-connect from the home screen.
+- [DCC-EX Console](/docs/cloud/dcc-ex) -- Send commands once connected.

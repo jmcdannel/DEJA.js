@@ -11,7 +11,6 @@ provideNotifications()
 const drawer = ref(false)
 const theme = useTheme()
 const tourStore = useTourStore()
-const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
 
 const navigationItems = [
   { title: 'Home', icon: 'mdi-home', to: '/' },
@@ -51,17 +50,6 @@ onMounted(() => {
           </span>
         </router-link>
       </v-app-bar-title>
-      
-      <!-- Demo Mode Indicator -->
-      <v-chip 
-        v-if="isDemoMode" 
-        color="warning" 
-        size="small" 
-        class="mr-4"
-      >
-        <v-icon icon="mdi-test-tube" class="mr-1"></v-icon>
-        Demo Mode
-      </v-chip>
       
       <v-spacer></v-spacer>
       

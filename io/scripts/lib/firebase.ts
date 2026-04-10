@@ -3,7 +3,7 @@
 
 import { initializeApp, cert, type ServiceAccount } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
-import type { Device, Effect, Turnout, DeviceConfig } from './types.js'
+import type { Device, Effect, Loco, Turnout, DeviceConfigInput, Layout } from '@repo/modules'
 
 let initialized = false
 
@@ -32,7 +32,7 @@ function initFirebase() {
 /**
  * Fetch device config + effects + turnouts for a specific device
  */
-export async function getDeviceConfig(layoutId: string, deviceId: string): Promise<DeviceConfig> {
+export async function getDeviceConfig(layoutId: string, deviceId: string): Promise<DeviceConfigInput> {
   initFirebase()
   const db = getFirestore()
 
@@ -52,7 +52,30 @@ export async function getDeviceConfig(layoutId: string, deviceId: string): Promi
   const effects = effectsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Effect)
   const turnouts = turnoutsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Turnout)
 
-  return { device, effects, turnouts }
+  // dcc-ex devices need the layout-wide loco roster for myAutomation.h generation.
+  let locos: Loco[] | undefined
+  if (device.type === 'dcc-ex') {
+    const locosSnap = await layoutRef.collection('locos').get()
+    locos = locosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Loco)
+  }
+
+  return { device, effects, turnouts, locos }
+}
+
+/**
+ * List all layouts owned by a given email address.
+ * Used by `pnpm build` (no args) to build every layout the caller owns.
+ */
+export async function listLayoutsByOwner(ownerEmail: string): Promise<Layout[]> {
+  initFirebase()
+  const db = getFirestore()
+
+  const snapshot = await db
+    .collection('layouts')
+    .where('owner', '==', ownerEmail)
+    .get()
+
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Layout)
 }
 
 /**

@@ -345,9 +345,9 @@ When UI changes are made, update screenshots and MDX docs **before the `preview 
 
 **MDX docs** live in `docs/apps/{app}/overview.mdx` and are synced to the `dejajs-www` docs site at build time.
 
-**Dev auto-login:** Set `VITE_DEV_AUTO_LOGIN=true` in `.env` to bypass auth guards during screenshot capture. Only works in dev mode.
+**Dev auto-login:** Set `VITE_DEMO_MODE=true` in `.env` to enable demo mode, which bypasses auth guards during screenshot capture. Only works in dev mode.
 
-**Test user login:** Alternatively, set `CLAUDE_TEST_EMAIL` and `CLAUDE_TEST_PASSWORD` in `.env` for realistic email/password login during automated testing.
+**Test user login:** Alternatively, set `VITE_DEMO_EMAIL` and `VITE_DEMO_PASSWORD` in `.env` for realistic email/password login during automated testing and demo mode.
 
 **Worktree env setup:** Git worktrees don't inherit `.env`. Symlink it: `ln -sf /path/to/DEJA.js/.env .env`
 

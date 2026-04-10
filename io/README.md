@@ -2,7 +2,7 @@
 
 The `io/` directory contains firmware for physical hardware devices that extend your layout beyond what the DCC-EX CommandStation handles directly. These devices control effects like lighting, servo-driven turnouts, sensors, and animated elements. They communicate with the DEJA.js server over MQTT or USB serial.
 
-> ⚠️ This directory is **not part of the pnpm workspace** -- it contains embedded firmware, not Node.js packages.
+> 📦 This directory is part of the **pnpm workspace** and imports shared config generators from `@repo/modules`.
 >
 > 📐 See [ARCHITECTURE.md](../ARCHITECTURE.md) for how IO devices fit into the overall system communication layers.
 
@@ -10,18 +10,79 @@ The `io/` directory contains firmware for physical hardware devices that extend 
 
 ```
 io/
-|-- src/
-|   |-- deja-arduino/       🔧 Arduino sketch (.ino) for IO effect boards
-|   |-- deja-pico-w/        🍓 CircuitPython code for Raspberry Pi Pico W
-|       |-- code.py          📄 Main application entry point
-|       |-- config.json       ⚙️ Pin mapping configuration
-|       |-- lib/              📚 Adafruit libraries (MQTT, servo, bus device)
-|-- layouts/
-    |-- tam/                 🏔️ Tamarack Junction layout configs
-        |-- deja-pico-w/
-            |-- tj-eagle-nest-pico/config.json
-            |-- tj-thunder-city-pico/config.json
+├── scripts/
+│   ├── build.ts              🔧 Build firmware packages
+│   ├── deploy.ts             🚀 Interactive deploy wizard
+│   └── lib/
+│       ├── detect.ts          🔍 Device and mount detection, arduino-cli auto-install
+│       ├── deploy-arduino.ts  ⬆️ Arduino compile & upload via arduino-cli
+│       ├── deploy-pico.ts     🍓 Pico W copy-to-CIRCUITPY
+│       ├── firebase.ts        🔥 Fetch device config from Firestore
+│       └── prompts.ts         💬 Interactive CLI prompts
+├── src/
+│   ├── deja-arduino/          🔧 Arduino sketch (.ino) for IO effect boards
+│   └── deja-pico-w/           🍓 CircuitPython code for Raspberry Pi Pico W
+│       ├── code.py             📄 Main application entry point
+│       ├── config.json          ⚙️ Pin mapping configuration
+│       └── lib/                 📚 Adafruit libraries (MQTT, servo, bus device)
+├── tests/
+│   └── esp01-wifi-test/       🛜 ESP-01 WiFi connectivity test (PlatformIO)
+└── dist/                      📦 Build output (gitignored)
 ```
+
+---
+
+## 🚀 Deploy Firmware
+
+The easiest way to deploy firmware to a device:
+
+### Option 1: `deja deploy` (recommended)
+
+```bash
+deja deploy
+```
+
+This launches the interactive deploy wizard:
+1. 🗺️ Select your layout
+2. 📟 Select a device
+3. 🔐 Enter WiFi credentials (Pico W only)
+4. 📦 Build firmware package
+5. ⬆️ Auto-detect USB and deploy
+
+`arduino-cli` is **auto-installed** if not found on your system.
+
+### Option 2: Cloud App Download
+
+1. Configure your device in the **Cloud app** (assign effects, turnouts, pins)
+2. Click **Download Firmware** → get a ZIP with `config.h` (Arduino) or `settings.toml` + `config.json` (Pico W)
+3. Flash manually using Arduino IDE or copy to CIRCUITPY drive
+
+### Option 3: Build scripts (developer)
+
+```bash
+# Interactive deploy
+pnpm --filter=@deja/io deploy
+
+# Build only (no deploy)
+pnpm --filter=@deja/io build -- --layout tam --device my-mega
+```
+
+---
+
+## 🔧 Shared Config Generation
+
+Device configurations are generated from Firebase data using shared pure functions in `@repo/modules/device-config`:
+
+| Function | Output | Platform |
+|----------|--------|----------|
+| `generateArduinoConfig()` | `config.h` (C++ preprocessor directives) | Arduino |
+| `generatePicoSettings()` | `settings.toml` (WiFi, MQTT, device ID) | Pico W |
+| `generatePicoConfig()` | `config.json` (pin → GPIO mapping) | Pico W |
+
+These generators are shared between:
+- **Cloud app** — wraps them in Vue `computed()` for preview + ZIP download
+- **IO build/deploy scripts** — calls them directly for automated builds
+- **deja deploy** — uses them for CLI-based deployment
 
 ---
 
@@ -40,7 +101,7 @@ The sketch communicates over serial at **115200 baud**. It receives JSON-formatt
 
 ### 🏗️ Config Flags
 
-Feature flags in `config.h` (or `config.default.h`) control which subsystems are compiled:
+Feature flags in `config.h` control which subsystems are compiled:
 
 | Flag | Purpose |
 |------|---------|
@@ -50,18 +111,6 @@ Feature flags in `config.h` (or `config.default.h`) control which subsystems are
 | `ENABLE_SENSORS` | 📡 Enable sensor input pins |
 
 Pin arrays (`OUTPINS`, `SIGNALPINS`, `SENSORPINS`) and the `DEVICE_ID` are defined in the config header. Each device has a unique ID that the server uses to route commands.
-
-### 🚀 Startup Sequence
-
-On startup, the sketch:
-
-1. 📡 Initializes serial communication at 115200 baud.
-2. 🏷️ Prints its `DEVICE_ID` for identification.
-3. 📌 Configures output, signal, and sensor pins.
-4. 🔀 Initializes turnout servos.
-5. 🎛️ Starts the PWM servo driver (if enabled).
-
-The main loop processes incoming serial commands and updates turnout servo positions.
 
 ---
 
@@ -116,34 +165,22 @@ The firmware checks the `device` field against its own `DEVICE_ID` and ignores m
 
 ---
 
-## 🗺️ Per-Layout Device Configurations
+## 🛜 Tests (`io/tests/`)
 
-The `io/layouts/` directory contains per-layout, per-device JSON configuration files. These files define the pin mapping for each device in a specific layout installation.
+### ESP-01 WiFi Test
 
-For example, the Eagle Nest Pico W device for the Tamarack Junction layout (`io/layouts/tam/deja-pico-w/tj-eagle-nest-pico/config.json`) maps logical pin numbers to physical GPIO pins:
+PlatformIO project for testing ESP-01 WiFi connectivity from an Arduino Nano via SoftwareSerial. Runs a full diagnostic sequence: AT check → firmware info → station mode → WiFi connect → IP address → HTTP GET.
 
-```json
-{
-  "pins": {
-    "6": "GP6",
-    "7": "GP7",
-    "8": "GP8",
-    "9": "GP9"
-  }
-}
+```bash
+cd io/tests/esp01-wifi-test
+pio run --target upload
 ```
-
-The default config (`io/src/deja-pico-w/config.json`) provides a broader set of pins (GP8 through GP17) that can be customized per installation.
-
-To deploy a device, copy the appropriate layout config to the device filesystem as `config.json` before flashing.
 
 ---
 
 ## ➕ Adding a New Device
 
-1. 🔧 **Choose the hardware platform** -- Arduino or Pico W.
-2. 📄 **Create a config file** in `io/layouts/{layoutId}/deja-{platform}/{deviceId}/config.json` with the pin mapping for your device.
-3. 🔧 **For Arduino:** Set the `DEVICE_ID` and pin arrays in `config.h`.
-4. 🍓 **For Pico W:** Set environment variables in `settings.toml` on the device and copy the config file.
-5. 🔥 **Register the device** in Firestore under `layouts/{layoutId}/devices` so the server and Monitor app can track its connection status.
-6. 📬 **Enable MQTT** on the server (`ENABLE_MQTT=true`) if using Pico W devices.
+1. 🔥 **Register the device** in the Cloud app under your layout's Devices section
+2. ⚡ **Assign effects and turnouts** to the device in the Cloud app
+3. 📟 **Deploy firmware** with `deja deploy` — it auto-generates all config files
+4. 📬 **Enable MQTT** on the server (`ENABLE_MQTT=true`) if using Pico W devices

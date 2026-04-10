@@ -8,14 +8,16 @@ Set up a git worktree for development by copying `.env` files and symlinking `no
 
 ## Context
 
-Git worktrees don't inherit `.env` or `node_modules/`. The canonical `.env` files live in the **preview** worktree at `/Users/jmcdannel/TTT/worktrees/preview/`. This command copies them (not symlinks — Vite can't reliably read symlinked env files) and symlinks `node_modules/` to avoid re-installing.
+Git worktrees don't inherit `.env` or `node_modules/`. The canonical `.env` files live in the **preview** worktree at `/Users/jmcdannel/TTT/DEJA.js.git/preview/`. This command copies them (not symlinks — Vite can't reliably read symlinked env files) and symlinks `node_modules/` to avoid re-installing.
+
+> **Repo layout:** This is a bare-repo + sibling-worktrees setup. Bare repo: `/Users/jmcdannel/TTT/DEJA.js.git/.bare`. Each worktree is a sibling directory (e.g. `/Users/jmcdannel/TTT/DEJA.js.git/main`, `/preview`, `/io-build-fix`).
 
 ## Steps
 
 ### 1. Detect worktree root and preview path
 
 - Current worktree root: run `git rev-parse --show-toplevel`
-- Preview worktree: `/Users/jmcdannel/TTT/worktrees/preview`
+- Preview worktree: `/Users/jmcdannel/TTT/DEJA.js.git/preview`
 - If the current directory IS the preview worktree, abort with: "You're already in the preview worktree — no setup needed."
 
 ### 2. Copy `.env` files from preview

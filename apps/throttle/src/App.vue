@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, useTemplateRef } from 'vue'
-import { RouterView, useRoute } from 'vue-router'
+import { RouterView, useRoute, useRouter } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { AppHeader, TransitionFade, NotificationContainer, provideNotifications, PageBackground, PromoBanner } from '@repo/ui'
 import { Signout } from '@repo/auth'
@@ -10,6 +10,7 @@ import ConnectionStatusBanner from '@/core/ConnectionStatusBanner.vue'
 import useMenu from '@/core/Menu/useMenu'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { usePageSwipe } from '@/composables/usePageSwipe'
+import QuickMenu from '@/quick-menu/QuickMenu.vue'
 import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import { wiThrottleService } from '@/services/WiThrottleService'
 import { watch, onMounted, onUnmounted } from 'vue'
@@ -21,10 +22,6 @@ import * as Sentry from '@sentry/vue'
 
 provideNotifications()
 const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
-console.log('activePromos', activePromos.value)
-watch(activePromos, (val) => {
-  console.log('🚀 activePromos changed:', val, 'length:', val.length)
-}, { immediate: true })
 
 const { feedbackUser } = useFeedbackUser()
 watch(feedbackUser, (u) => Sentry.setUser(u), { immediate: true })
@@ -36,10 +33,8 @@ const route = useRoute()
 
 // Prevent flash of nav chrome before initial route resolves (mirrors cloud pattern)
 const routeReady = ref(false)
-const stopRouteWatch = watch(() => route.fullPath, () => {
-  routeReady.value = true
-  stopRouteWatch()
-})
+const router = useRouter()
+router.isReady().then(() => { routeReady.value = true })
 
 const isFullscreen = computed(() => {
   if (!routeReady.value) return true  // hide chrome until route resolves
@@ -135,20 +130,13 @@ const throttleDefaults: AppBackgroundPrefs = {
           :drawer="drawer"
           :show-layout-power="true"
           :show-emergency-stop="true"
-          :show-device-status="true"
-          :show-device-status-label="true"
           :show-user-profile="true"
           @drawer-toggle="drawer = !drawer"
         />
         <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="menuConfig" @handle-menu="handleMenu" />
         <v-main>
-          <PromoBanner
-            v-for="promo in activePromos"
-            :key="promo.id"
-            :promotion="promo"
-          />
           <!-- Normal (non-fullscreen) layout -->
-          <v-container v-if="!isFullscreen" ref="mainContentRef" class="p-0 flex flex-col flex-1" style="min-height: calc(100vh - var(--v-layout-top, 64px) - var(--v-layout-bottom, 56px))" fluid>
+          <v-container v-if="!isFullscreen" ref="mainContentRef" class="p-0 flex flex-col flex-1 h-full relative" style="min-height: calc(100vh - var(--v-layout-top, 64px) - var(--v-layout-bottom, 56px))" fluid>
             <RouterView v-slot="{ Component }">
               <TransitionFade>
                 <component :is="Component" />
@@ -174,12 +162,18 @@ const throttleDefaults: AppBackgroundPrefs = {
             </header>
             <RouterView v-slot="{ Component, route: r }">
               <div class="animate-deja-fade-in" :key="r.fullPath">
+              <PromoBanner
+                v-for="promo in activePromos"
+                :key="promo.id"
+                :promotion="promo"
+              />
                 <component :is="Component" />
               </div>
             </RouterView>
           </div>
         </v-main>
         <Footer v-if="!isFullscreen" />
+        <QuickMenu v-if="!isFullscreen" />
         <ConnectionStatusBanner v-if="!isFullscreen" />
         <NotificationContainer />
       </PageBackground>

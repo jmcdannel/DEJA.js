@@ -63,7 +63,7 @@ const defaultProducts: ProductItem[] = [
     name: 'IO',
     desc: 'Arduino and Pico W code for layout expansion.',
     logo: '/icon-512.png',
-    href: '/tour',
+    href: '/guides/io',
   },
   {
     name: 'Monitor',
@@ -80,31 +80,31 @@ const defaultProducts: ProductItem[] = [
 ];
 
 const defaultGuidesLinks: DocItem[] = [
-  { name: 'Getting Started', href: '/guides/getting-started', icon: '🚀' },
-  { name: 'Architecture', href: '/guides/architecture', icon: '🏗️' },
-  { name: 'Throttle', href: '/guides/throttle', icon: '🚂' },
-  { name: 'Cloud', href: '/guides/cloud', icon: '☁️', comingSoon: true },
-  { name: 'Monitor', href: '/guides/monitor', icon: '📊', comingSoon: true },
-  { name: 'Server', href: '/guides/server', icon: '🖥️', comingSoon: true },
-  { name: 'IO', href: '/guides/io', icon: '🔌', comingSoon: true },
+  { name: 'Getting Started', href: '/guides/getting-started' },
+  { name: 'Architecture', href: '/guides/architecture' },
+  { name: 'Throttle', href: '/guides/throttle' },
+  { name: 'Cloud', href: '/guides/cloud' },
+  { name: 'Server', href: '/guides/server' },
+  { name: 'IO', href: '/guides/io' },
+  { name: 'Monitor', href: '/guides/monitor', comingSoon: true },
 ];
 
 const defaultDocsLinks: DocItem[] = [
-  { name: 'Server', href: '/docs/server', icon: '🖥️' },
-  { name: 'Throttle', href: '/docs/throttle', icon: '🚂' },
-  { name: 'Cloud', href: '/docs/cloud', icon: '☁️' },
-  { name: 'Monitor', href: '/docs/monitor', icon: '📊' },
-  { name: 'Tour', href: '/docs/tour', icon: '🗺️' },
-  { name: 'IO', href: '/docs/io', icon: '🔌' },
-  { name: 'Program', href: '#', icon: '⚙️', comingSoon: true },
-  { name: 'AI Ops', href: '#', icon: '🤖', comingSoon: true },
-  { name: 'Dispatcher', href: '#', icon: '🚦', comingSoon: true },
+  { name: 'Server', href: '/docs/server' },
+  { name: 'Throttle', href: '/docs/throttle' },
+  { name: 'Cloud', href: '/docs/cloud' },
+  { name: 'Monitor', href: '/docs/monitor' },
+  { name: 'Tour', href: '/docs/tour' },
+  { name: 'IO', href: '/docs/io' },
+  { name: 'Program', href: '#', comingSoon: true },
+  { name: 'AI Ops', href: '#', comingSoon: true },
+  { name: 'Dispatcher', href: '#', comingSoon: true },
 ];
 
 function useDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
 
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
@@ -164,7 +164,7 @@ export default function Header({ settings }: { settings?: SiteSettings | null })
     menuItems: { href: string; comingSoon?: boolean }[],
     containerRef: React.RefObject<HTMLDivElement | null>,
     close: () => void,
-    triggerRef: React.RefObject<HTMLButtonElement | null>
+    triggerRef: React.RefObject<HTMLButtonElement | HTMLAnchorElement | null>
   ) => {
     const focusableItems = containerRef.current?.querySelectorAll<HTMLElement>(
       'a[role="menuitem"]:not([aria-disabled="true"])'
@@ -204,9 +204,9 @@ export default function Header({ settings }: { settings?: SiteSettings | null })
         <nav className="hidden md:flex flex-1 items-center gap-8 ml-6" aria-label="Main navigation">
           {/* Guides Dropdown */}
           <div className="relative group py-2" ref={guidesDropdown.ref}>
-            <button
-              ref={guidesDropdown.triggerRef}
-              onClick={guidesDropdown.toggle}
+            <Link
+              href="/guides"
+              ref={guidesDropdown.triggerRef as React.RefObject<HTMLAnchorElement | null>}
               onMouseEnter={guidesDropdown.open}
               aria-expanded={guidesDropdown.isOpen}
               aria-haspopup="true"
@@ -215,7 +215,7 @@ export default function Header({ settings }: { settings?: SiteSettings | null })
               <svg className="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
               Guides
               <svg className={`w-4 h-4 opacity-70 transition-transform ${guidesDropdown.isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-            </button>
+            </Link>
             {guidesDropdown.isOpen && (
               <div
                 className="absolute left-0 top-full pt-2 w-48 bg-transparent"
@@ -259,9 +259,9 @@ export default function Header({ settings }: { settings?: SiteSettings | null })
 
           {/* Products Mega Menu */}
           <div className="relative group py-2" ref={productsDropdown.ref}>
-            <button
-              ref={productsDropdown.triggerRef}
-              onClick={productsDropdown.toggle}
+            <Link
+              href="/#products"
+              ref={productsDropdown.triggerRef as React.RefObject<HTMLAnchorElement | null>}
               onMouseEnter={productsDropdown.open}
               aria-expanded={productsDropdown.isOpen}
               aria-haspopup="true"
@@ -270,7 +270,7 @@ export default function Header({ settings }: { settings?: SiteSettings | null })
               <svg className="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
               Products
               <svg className={`w-4 h-4 opacity-70 transition-transform ${productsDropdown.isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-            </button>
+            </Link>
             {productsDropdown.isOpen && (
               <div
                 className="absolute left-1/2 -translate-x-1/2 top-full pt-2 w-[540px] bg-transparent"
@@ -297,9 +297,9 @@ export default function Header({ settings }: { settings?: SiteSettings | null })
                         href={product.href}
                         role="menuitem"
                         aria-current={pathname === product.href ? 'page' : undefined}
-                        className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group/item"
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group/item"
                       >
-                        <Image src={product.logo} alt="" width={40} height={40} className="h-10 w-10 flex-shrink-0 mt-0.5" />
+                        <Image src={product.logo} alt="" width={40} height={40} className="h-10 w-10 flex-shrink-0" />
                         <div className="min-w-0">
                           <div className="font-medium text-slate-900 dark:text-white group-hover/item:text-cyan-400 transition-colors">
                             {product.name}

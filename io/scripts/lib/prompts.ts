@@ -1,7 +1,7 @@
 // 💬 Interactive CLI prompts for deploy script
 
 import { input, select, password, confirm } from '@inquirer/prompts'
-import type { Device } from './types.js'
+import type { Device } from '@repo/modules'
 import type { ArduinoBoard } from './detect.js'
 
 /**
@@ -48,7 +48,7 @@ export async function promptWifiCredentials(): Promise<{
   broker: string
 }> {
   const defaultSsid = process.env.WIFI_SSID || ''
-  const defaultBroker = process.env.VITE_MQTT_BROKER || process.env.MQTT_BROKER || ''
+  const defaultBroker = process.env.MQTT_BROKER || process.env.VITE_MQTT_BROKER || ''
 
   const ssid = await input({
     message: '📶 WiFi SSID:',

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { PageHeader } from '@repo/ui'
 import SensorForm from '@/Sensors/SensorForm.vue'
+import FormPageHeader from '@/Common/FormPageHeader.vue'
 import type { Sensor } from '@repo/modules/sensors'
 
 const router = useRouter()
@@ -35,6 +35,16 @@ function handleClose() {
 }
 </script>
 <template>
-  <PageHeader title="Sensors" icon="mdi-access-point" color="teal" />
-  <SensorForm :sensor="defaultSensor" @close="handleClose" />
+  <div class="animate-fade-in-up space-y-4 max-w-[800px] px-4">
+    <FormPageHeader
+      icon="mdi-access-point"
+      title="New Sensor"
+      subtitle="Add a sensor to your layout"
+      color="#14b8a6"
+      back-label="Sensors"
+      :back-route="{ name: 'Sensors' }"
+    />
+
+    <SensorForm :sensor="defaultSensor" @close="handleClose" />
+  </div>
 </template>

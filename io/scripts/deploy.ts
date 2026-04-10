@@ -10,8 +10,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '../.env') })
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
 import { getDeviceConfig, listDevices } from './lib/firebase.js'
-import { generateArduinoConfig } from './lib/config-arduino.js'
-import { generatePicoSettings, generatePicoConfig } from './lib/config-pico.js'
+import { isExcludedDeviceType, resolvePlatform, writeDeviceBundle } from './lib/bundle.js'
 import { findArduinoBoards, findCircuitPyMount } from './lib/detect.js'
 import { compileAndUpload } from './lib/deploy-arduino.js'
 import { copyToCircuitPy } from './lib/deploy-pico.js'
@@ -22,7 +21,6 @@ import {
   promptDeployMethod,
   promptSerialPort,
 } from './lib/prompts.js'
-import * as fs from 'fs-extra'
 
 const args = process.argv.slice(2)
 const dryRun = args.includes('--dry-run')
@@ -65,14 +63,27 @@ async function deploy() {
   console.log('')
   console.log(`🔥 Fetching config for "${deviceId}"...`)
   const config = await getDeviceConfig(layoutId, deviceId)
-  const { device, effects, turnouts } = config
-
-  const isArduino = ['dcc-ex', 'deja-arduino', 'deja-arduino-led'].includes(device.type)
-  const isPicoW = device.type === 'deja-mqtt'
+  const { device, effects, turnouts, locos } = config
 
   console.log(`   📟 Type: ${device.type}`)
   console.log(`   ⚡ Effects: ${effects.length}`)
   console.log(`   🔀 Turnouts: ${turnouts.length}`)
+
+  // Reject device types that have their own firmware source
+  if (isExcludedDeviceType(device.type)) {
+    console.error(
+      `❌ "${device.type}" devices have their own firmware source and cannot be deployed from this tool.`
+    )
+    process.exit(1)
+  }
+
+  const platform = resolvePlatform(device.type)
+  if (!platform) {
+    console.error(`❌ Unsupported device type: "${device.type}"`)
+    process.exit(1)
+  }
+  const isArduino = platform === 'arduino'
+  const isPicoW = platform === 'pico'
 
   // 4. Pico W: prompt for WiFi credentials
   let wifiSsid = ''
@@ -87,36 +98,19 @@ async function deploy() {
     mqttBroker = wifi.broker
   }
 
-  // 5. Build firmware package
-  const outDir = path.resolve('dist', deviceId)
-  await fs.ensureDir(outDir)
-
-  if (isArduino) {
-    await fs.copy('./src/deja-arduino/', outDir)
-    const configH = generateArduinoConfig({ device, effects, turnouts })
-    await fs.writeFile(path.join(outDir, 'config.h'), configH)
-    console.log('')
-    console.log(`📦 Built Arduino package → dist/${deviceId}/`)
-  } else if (isPicoW) {
-    await fs.copy('./src/deja-pico-w/', outDir)
-    const configJson = generatePicoConfig({ device, effects, turnouts, layoutId })
-    await fs.writeFile(path.join(outDir, 'config.json'), configJson)
-    const settingsToml = generatePicoSettings({
-      device,
-      effects,
-      turnouts,
-      layoutId,
-      wifiSsid,
-      wifiPassword,
-      mqttBroker,
-    })
-    await fs.writeFile(path.join(outDir, 'settings.toml'), settingsToml)
-    console.log('')
-    console.log(`📦 Built Pico W package → dist/${deviceId}/`)
-  } else {
-    console.error(`❌ Unsupported device type: "${device.type}"`)
-    process.exit(1)
-  }
+  // 5. Build firmware package (shared with `pnpm build` via lib/bundle.ts)
+  console.log('')
+  const { outDir, sketchDir, relativeDir } = await writeDeviceBundle({
+    layoutId,
+    device,
+    effects,
+    turnouts,
+    locos,
+    wifiSsid,
+    wifiPassword,
+    mqttBroker,
+  })
+  console.log(`📦 Built ${isArduino ? 'Arduino' : 'Pico W'} package → ${relativeDir}/`)
 
   // 6. Prompt for deploy method
   console.log('')
@@ -124,7 +118,7 @@ async function deploy() {
 
   if (method === 'build-only') {
     console.log('')
-    console.log(`✅ Done! Firmware package is at: dist/${deviceId}/`)
+    console.log(`✅ Done! Firmware package is at: ${relativeDir}/`)
     return
   }
 
@@ -132,7 +126,7 @@ async function deploy() {
   if (dryRun) {
     console.log('')
     console.log('🏜️  Dry run — skipping actual deployment')
-    console.log(`   Would deploy dist/${deviceId}/ to device`)
+    console.log(`   Would deploy ${relativeDir}/ to device`)
     return
   }
 
@@ -141,8 +135,8 @@ async function deploy() {
     const port = await promptSerialPort(boards)
     const board = boardOverride || 'arduino:avr:mega:cpu=atmega2560'
     console.log('')
-    compileAndUpload({
-      sketchPath: outDir,
+    await compileAndUpload({
+      sketchPath: sketchDir, // nested deja-arduino/ folder that Arduino IDE expects
       port,
       board,
     })

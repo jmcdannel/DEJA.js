@@ -71,3 +71,117 @@ select {
     @apply border border-brand-lime/30 shadow-glow-lime bg-brand-lime/5 backdrop-blur-md;
   }
 }
+
+/* ═══ Form Section — reusable card pattern for cloud app forms ═══ */
+.form-section {
+  position: relative;
+  background: rgba(var(--v-theme-surface), 0.5);
+  border: 1px solid color-mix(in srgb, var(--form-accent, rgb(var(--v-theme-primary))) 15%, rgba(var(--v-theme-on-surface), 0.07));
+  border-radius: 14px;
+  margin-bottom: 16px;
+  overflow: clip;
+}
+.form-section::after {
+  content: '';
+  position: absolute;
+  bottom: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 60%;
+  background: radial-gradient(ellipse at center, var(--form-accent, rgb(var(--v-theme-primary))) 0%, transparent 70%);
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.form-section__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06);
+  border-left: 3px solid var(--form-accent, rgb(var(--v-theme-primary)));
+}
+
+.form-section__header-icon {
+  color: var(--form-accent, rgb(var(--v-theme-primary)));
+}
+
+.form-section__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(var(--v-theme-on-surface), 0.9);
+  flex: 1;
+}
+
+.form-section__docs-link {
+  font-size: 0.7rem;
+  color: rgba(var(--v-theme-info), 0.5);
+  text-decoration: none;
+}
+.form-section__docs-link:hover {
+  color: rgba(var(--v-theme-info), 0.8);
+}
+
+.form-section__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.04);
+  gap: 16px;
+}
+.form-section__row:last-child {
+  border-bottom: none;
+}
+.form-section__row--block {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.form-section__row-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.form-section__row-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(var(--v-theme-on-surface), 0.75);
+}
+.form-section__row-desc {
+  font-size: 0.65rem;
+  color: rgba(var(--v-theme-on-surface), 0.3);
+}
+
+.form-section__grid {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.04);
+  display: grid;
+  gap: 14px;
+}
+
+.form-section__input-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(var(--v-theme-on-surface), 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.form-section__input-hint {
+  font-size: 0.65rem;
+  color: rgba(var(--v-theme-on-surface), 0.3);
+  margin-top: 4px;
+}
+
+.form-section__footer {
+  padding: 12px 20px 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid rgba(var(--v-theme-on-surface), 0.04);
+}

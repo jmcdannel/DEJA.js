@@ -3,11 +3,14 @@ import { ref } from 'vue'
 import { useTimeoutFn } from '@vueuse/core'
 import { useEfx } from '@repo/modules/effects'
 import { useTurnouts, type Turnout } from '@repo/modules'
+import { createLogger } from '@repo/utils'
 
-const { setTurnout } = useTurnouts()
+const log = createLogger('TurnoutListItem')
+
+const { setTurnout, deleteTurnout } = useTurnouts()
 const { runEffect, getEffect } = useEfx()
 
-defineEmits(['edit'])
+defineEmits(['edit', 'delete'])
 
 const props = defineProps<{
   state?: boolean
@@ -16,9 +19,20 @@ const props = defineProps<{
 }>()
 
 const internalState = ref(props.state !== undefined ? props.state : props.turnout?.state)
+const confirmDelete = ref(false)
 
 async function handleSwitch() {
   await setTurnout(props.turnoutId, {...props.turnout, id: props.turnoutId, state: internalState.value })
+}
+
+async function handleDelete() {
+  log.debug('handleDelete', props.turnoutId)
+  if (!props.turnoutId) {
+    log.error('No turnout ID provided for deletion')
+    return
+  }
+  await deleteTurnout(props.turnoutId)
+  confirmDelete.value = false
 }
 
 </script>
@@ -81,14 +95,32 @@ async function handleSwitch() {
     </v-card-text>
     <v-spacer />
     <v-divider />
-    <div class="flex justify-between pa-1" style="background: rgba(var(--v-theme-on-surface), 0.04)">
+    <div class="flex items-center pa-1" style="background: rgba(var(--v-theme-on-surface), 0.04)">
       <v-btn
+        v-if="!confirmDelete"
         icon="mdi-delete-outline"
         variant="text"
         color="error"
         size="small"
-        disabled
+        @click="confirmDelete = true"
       />
+      <template v-else>
+        <v-btn
+          text="Cancel"
+          variant="outlined"
+          size="small"
+          @click="confirmDelete = false"
+        />
+        <v-btn
+          text="Confirm"
+          variant="tonal"
+          color="error"
+          size="small"
+          prepend-icon="mdi-delete"
+          @click="handleDelete"
+        />
+      </template>
+      <v-spacer />
       <v-btn
         icon="mdi-pencil-outline"
         variant="text"

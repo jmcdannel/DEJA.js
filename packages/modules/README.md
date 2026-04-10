@@ -74,15 +74,35 @@ Each domain exports its TypeScript types and interfaces:
 | `signals/types` | 🚦 Signal state interfaces |
 | `routes/types` | 🛤️ Route and route step interfaces |
 | `routes/constants` | 🛤️ Route-related constants |
+| `device-config/types` | 📟 Device config input interfaces |
+
+## 📟 Device Config Generators
+
+The `device-config/` module provides pure functions for generating firmware configuration files from Firebase device data. These are shared between the Cloud app (browser) and io/ build scripts (Node.js).
+
+```typescript
+import {
+  generateArduinoConfig,
+  generatePicoSettings,
+  generatePicoConfig,
+} from '@repo/modules'
+```
+
+| Function | Output | Platform |
+|----------|--------|----------|
+| `generateArduinoConfig(input)` | `config.h` — C++ preprocessor directives | Arduino |
+| `generatePicoSettings(input)` | `settings.toml` — WiFi, MQTT, device ID | Pico W |
+| `generatePicoConfig(input)` | `config.json` — pin → GPIO mapping | Pico W |
 
 ## 🗂️ Directory Structure
 
 ```
 packages/modules/
-├── effects/     ✨ useEfx, effect types & constants
-├── layouts/     🗺️ useLayout, layout types & constants
-├── locos/       🚂 useLocos, useFunctions, useFunctionIcon, loco types
-├── routes/      🛤️ useLayoutRoutes, useRoutes, route types
-├── signals/     🚦 useSignals, signal types
-└── turnouts/    🔀 useTurnouts, turnout types
+├── device-config/ 📟 Config generators for Arduino & Pico W firmware
+├── effects/       ✨ useEfx, effect types & constants
+├── layouts/       🗺️ useLayout, layout types & constants
+├── locos/         🚂 useLocos, useFunctions, useFunctionIcon, loco types
+├── routes/        🛤️ useLayoutRoutes, useRoutes, route types
+├── signals/       🚦 useSignals, signal types
+└── turnouts/      🔀 useTurnouts, turnout types
 ```

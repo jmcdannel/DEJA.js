@@ -16,7 +16,7 @@ import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
 import { useStorage } from '@vueuse/core'
 import { formatUptime } from '@repo/utils'
-import { useCommandActivity } from '@/composables/useCommandActivity'
+import { useCommandActivity } from '@/DCCEX/composables/useCommandActivity'
 
 const router = useRouter()
 const user = useCurrentUser()
@@ -153,6 +153,7 @@ async function handleAddLoco(address: number, name: string) {
           :available-ports="ports"
           tile-mode
           link-mode="page"
+          :server-online="serverStatus?.online ?? false"
           :server-uptime="serverUptime"
           :connected-device-count="connectedCount"
           :total-device-count="devices?.length ?? 0"

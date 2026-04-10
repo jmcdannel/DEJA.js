@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   serverTimestamp,
   setDoc,
   doc,
@@ -137,7 +138,20 @@ export function useTurnouts() {
     }
   }
 
+  async function deleteTurnout(id: string): Promise<void> {
+    if (!layoutId.value) {
+      log.error('Layout ID is not set')
+      return
+    }
+    try {
+      await deleteDoc(doc(db, `layouts/${layoutId.value}/turnouts`, id))
+    } catch (error) {
+      log.error('Error deleting turnout:', error)
+    }
+  }
+
   return {
+    deleteTurnout,
     getTurnout,
     getTurnouts,
     getTurnoutsByDevice,

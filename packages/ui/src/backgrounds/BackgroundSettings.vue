@@ -12,7 +12,7 @@ const props = defineProps<{
 
 const vuetifyTheme = useVuetifyTheme()
 
-const isDark = computed(() => vuetifyTheme.global.name.value === 'dark')
+const isDark = computed(() => vuetifyTheme?.global?.name?.value === 'dark')
 const customizePerPage = ref(false)
 
 const { preferences, getBackground, setAppBackground, setPageBackground, clearPageBackground } =

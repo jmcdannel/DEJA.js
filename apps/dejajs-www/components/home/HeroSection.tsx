@@ -25,11 +25,6 @@ export default function HeroSection() {
 
       {/* Main content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 pt-24 pb-16 flex-1 flex flex-col justify-center">
-        {/* Announcement badge */}
-        <AnimateIn delay={0} className="flex justify-center mb-12">
-          <SectionLabel color="magenta">Private Beta — Now Available</SectionLabel>
-        </AnimateIn>
-
         {/* Two-column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12">
           {/* Left: text column */}

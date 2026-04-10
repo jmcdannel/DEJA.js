@@ -4,9 +4,9 @@ import QuickStartSection from '../components/home/QuickStartSection';
 import VideoPlaceholder from '../components/home/VideoPlaceholder';
 import ThrottleSpotlight from '../components/home/ThrottleSpotlight';
 import CloudSpotlight from '../components/home/CloudSpotlight';
-import MonitorSpotlight from '../components/home/MonitorSpotlight';
 import ServerCLISection from '../components/home/ServerCLISection';
 import DejaIOSection from '../components/home/DejaIOSection';
+import GuidesGrid from '../components/home/GuidesGrid';
 import PlatformFeatures from '../components/home/PlatformFeatures';
 import ComingSoonStrip from '../components/home/ComingSoonStrip';
 import FAQSection from '../components/home/FAQSection';
@@ -34,10 +34,10 @@ export default function Home() {
       <QuickStartSection />
       <VideoPlaceholder />
       <ThrottleSpotlight />
-      <CloudSpotlight />
-      <MonitorSpotlight />
       <ServerCLISection />
+      <CloudSpotlight />
       <DejaIOSection />
+      <GuidesGrid />
       <PlatformFeatures />
       <ComingSoonStrip />
       <FAQSection />
