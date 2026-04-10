@@ -45,8 +45,9 @@ export default defineConfig({
   },
   server: {
     port: 3031,
-        
+    // 🌍 Bind to 0.0.0.0 so phones/tablets on the same wifi can connect
+    host: true,
     // CORS configuration for development
-    cors: true
+    cors: true,
   },
 })
