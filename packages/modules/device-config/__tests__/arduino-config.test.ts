@@ -71,18 +71,51 @@ describe('generateArduinoConfig', () => {
     expect(result).toContain('#define ENABLE_OUTPUTS false')
   })
 
-  it('generates TurnoutPulser array from turnouts with straight/divergent', () => {
+  it('generates TurnoutPulser array from kato turnouts with straight/divergent', () => {
     const input: ArduinoConfigInput = {
       device: makeDevice(),
       effects: [],
       turnouts: [
-        makeTurnout({ straight: 150, divergent: 600 }),
-        makeTurnout({ id: 't2', name: 'T2', straight: 200, divergent: 500 }),
+        makeTurnout({ type: 'kato', straight: 150, divergent: 600 }),
+        makeTurnout({ id: 't2', name: 'T2', type: 'kato', straight: 200, divergent: 500 }),
       ],
     }
     const result = generateArduinoConfig(input)
     expect(result).toContain('TurnoutPulser turnouts[] = { TurnoutPulser(150, 600), TurnoutPulser(200, 500) };')
     expect(result).toContain('#define ENABLE_TURNOUTS true')
+  })
+
+  it('excludes non-kato turnouts from TurnoutPulser array', () => {
+    // servo/tortise/dcc turnouts use straight/divergent for different purposes
+    // (e.g. servo min/max positions) and must not end up in TurnoutPulser[]
+    const input: ArduinoConfigInput = {
+      device: makeDevice(),
+      effects: [],
+      turnouts: [
+        makeTurnout({ id: 's1', type: 'servo', straight: 150, divergent: 600 }),
+        makeTurnout({ id: 't1', type: 'tortise', straight: 0, divergent: 1 }),
+        makeTurnout({ id: 'd1', type: 'dcc', straight: 1, divergent: 0 }),
+        makeTurnout({ id: 'k1', type: 'kato', straight: 42, divergent: 43 }),
+      ],
+    }
+    const result = generateArduinoConfig(input)
+    expect(result).toContain('TurnoutPulser turnouts[] = { TurnoutPulser(42, 43) };')
+    expect(result).not.toContain('TurnoutPulser(150, 600)')
+    expect(result).not.toContain('TurnoutPulser(0, 1)')
+    expect(result).not.toContain('TurnoutPulser(1, 0)')
+  })
+
+  it('produces empty TurnoutPulser array when only servo turnouts are present', () => {
+    const input: ArduinoConfigInput = {
+      device: makeDevice(),
+      effects: [],
+      turnouts: [
+        makeTurnout({ type: 'servo', straight: 150, divergent: 600 }),
+      ],
+    }
+    const result = generateArduinoConfig(input)
+    expect(result).toContain('TurnoutPulser turnouts[] = {};')
+    expect(result).toContain('#define ENABLE_TURNOUTS false')
   })
 
   it('sets enable flags from explicit inputs', () => {

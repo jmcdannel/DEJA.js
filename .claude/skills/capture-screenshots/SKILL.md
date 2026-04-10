@@ -33,8 +33,8 @@ Capture screenshots of DEJA.js app views using Playwright MCP (headless browser)
 If in a git worktree (check if `.git` is a file, not a directory):
 ```bash
 # Symlink .env from preview worktree if not present
-if [ ! -f .env ] && [ -f /Users/jmcdannel/TTT/worktrees/preview/.env ]; then
-  ln -sf /Users/jmcdannel/TTT/worktrees/preview/.env .env
+if [ ! -f .env ] && [ -f /Users/jmcdannel/TTT/DEJA.js.git/preview/.env ]; then
+  ln -sf /Users/jmcdannel/TTT/DEJA.js.git/preview/.env .env
 fi
 ```
 
