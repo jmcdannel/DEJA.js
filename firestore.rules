@@ -24,9 +24,11 @@ service cloud.firestore {
       // Reads: only the owner can fetch a specific layout
       allow get: if isLayoutOwnerByResource(resource);
 
-      // Lists: only when filtered by ownerUid == auth.uid (cross-tenant
-      // enumeration is denied — clients must use a where() clause)
-      allow list: if isAuth();
+      // Lists: Firestore rules evaluate `resource.data.ownerUid` against
+      // each candidate doc, and the query planner rejects any query whose
+      // filters don't guarantee this will hold — effectively forcing
+      // clients to include where('ownerUid', '==', auth.uid).
+      allow list: if isAuth() && resource.data.ownerUid == request.auth.uid;
 
       // Creates: client writes are denied entirely. Layout creation must
       // go through /api/layouts/create which runs as the admin SDK and

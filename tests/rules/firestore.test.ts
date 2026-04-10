@@ -1,5 +1,5 @@
 import { initializeTestEnvironment, RulesTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, collection, getDocs, query, where } from 'firebase/firestore'
 import { beforeAll, afterAll, beforeEach, describe, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -117,5 +117,39 @@ describe('firestore.rules — layouts/{layoutId} create denial', () => {
   it('denies all client creates of layouts (must go through /api/layouts/create)', async () => {
     const alice = testEnv.authenticatedContext('alice', { email: 'alice@test.com' })
     await assertFails(setDoc(doc(alice.firestore(), 'layouts/new-layout'), { ownerUid: 'alice', name: 'Test' }))
+  })
+})
+
+describe('firestore.rules — layouts list (cross-tenant enumeration)', () => {
+  it('denies an unfiltered list across tenants', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'layouts/a'), { ownerUid: 'alice' })
+      await setDoc(doc(ctx.firestore(), 'layouts/b'), { ownerUid: 'bob' })
+    })
+    const alice = testEnv.authenticatedContext('alice', { email: 'alice@test.com' })
+    await assertFails(getDocs(collection(alice.firestore(), 'layouts')))
+  })
+
+  it('denies a list filtered on someone else\u2019s ownerUid', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'layouts/a'), { ownerUid: 'alice' })
+    })
+    const bob = testEnv.authenticatedContext('bob', { email: 'bob@test.com' })
+    await assertFails(getDocs(query(
+      collection(bob.firestore(), 'layouts'),
+      where('ownerUid', '==', 'alice'),
+    )))
+  })
+
+  it('allows a list filtered on the caller\u2019s own ownerUid', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'layouts/a'), { ownerUid: 'alice' })
+      await setDoc(doc(ctx.firestore(), 'layouts/b'), { ownerUid: 'bob' })
+    })
+    const alice = testEnv.authenticatedContext('alice', { email: 'alice@test.com' })
+    await assertSucceeds(getDocs(query(
+      collection(alice.firestore(), 'layouts'),
+      where('ownerUid', '==', 'alice'),
+    )))
   })
 })
