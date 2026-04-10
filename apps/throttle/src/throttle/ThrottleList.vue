@@ -8,6 +8,7 @@ import { ROADNAMES } from '@repo/modules'
 import { useStorage } from '@vueuse/core'
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import draggable from 'vuedraggable'
+import QuickThrottleButton from '@/throttle/QuickThrottleButton.vue'
 
 const { getLocos, getThrottles, acquireThrottle } = useLocos()
 const locos = getLocos()
@@ -85,7 +86,10 @@ watch(
         </div>
       </template>
     </draggable>
-    <v-fab icon="mdi-plus" color="primary" size="56" @click="isRosterOpen = true"  app />
+    <div class="throttle-list-fabs">
+      <QuickThrottleButton size="default" color="primary" icon="mdi-numeric" />
+      <v-fab icon="mdi-plus" color="primary" size="56" @click="isRosterOpen = true" app />
+    </div>
   </div>
   <v-dialog v-model="isRosterOpen" max-width="800px">
     <template v-slot:default>
@@ -127,5 +131,16 @@ watch(
   align-items: flex-end;
   width: 100%;
   margin-top: auto;
+}
+
+.throttle-list-fabs {
+  position: fixed;
+  right: 16px;
+  bottom: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  z-index: 5;
 }
 </style>
