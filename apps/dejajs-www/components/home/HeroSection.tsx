@@ -1,8 +1,8 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import AnimateIn from './AnimateIn';
 import SectionLabel from './SectionLabel';
 import Logo from '../Logo';
+import HomepageHeroAnimation from './HomepageHeroAnimation';
 
 export default function HeroSection() {
   return (
@@ -75,30 +75,9 @@ export default function HeroSection() {
             </AnimateIn>
           </div>
 
-          {/* Right: visual column */}
+          {/* Right: animated architecture sequence */}
           <AnimateIn delay={0.3} direction="right" className="flex justify-center lg:justify-end">
-            <div className="relative aspect-square w-full max-w-[480px]">
-              {/* Architecture SVG background */}
-              <Image
-                src="/ttt-architecture.svg"
-                alt="DEJA.js architecture diagram"
-                fill
-                className="object-contain opacity-40"
-              />
-
-              {/* Phone mockup overlay */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="relative w-[160px] sm:w-[200px] glow-cyan rounded-3xl border border-deja-cyan/30 overflow-hidden">
-                  <Image
-                    src="/screenshots/throttle_mobile_home.png"
-                    alt="DEJA.js Throttle app on mobile"
-                    width={200}
-                    height={430}
-                    className="w-full h-auto"
-                  />
-                </div>
-              </div>
-            </div>
+            <HomepageHeroAnimation />
           </AnimateIn>
         </div>
       </div>
