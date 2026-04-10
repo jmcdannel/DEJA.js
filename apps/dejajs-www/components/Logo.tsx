@@ -1,20 +1,14 @@
 import Image from 'next/image';
+import type { ProductSlug } from './products/types';
 
 export type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
-export type LogoVariant =
-  | 'default'
-  | 'throttle'
-  | 'server'
-  | 'cloud'
-  | 'io'
-  | 'monitor'
-  | 'tour';
+export type LogoVariant = 'default' | ProductSlug;
 export type LogoIconShape = 'rounded' | 'circle';
 export type LogoLayout = 'inline' | 'stacked' | 'product';
 
 interface LogoProps {
   size?: LogoSize;
-  showIcon?: boolean;
+  showMark?: boolean;
   showWordmark?: boolean;
   appTitle?: string;
   iconSrc?: string;
@@ -27,59 +21,25 @@ interface LogoProps {
   children?: React.ReactNode;
 }
 
-const variantBrandColor: Record<LogoVariant, string | undefined> = {
-  default: undefined,
-  throttle: '#43F20D',
-  server: '#FF0700',
-  cloud: '#E40DF2',
-  io: '#8D00FF',
-  monitor: '#1A32E6',
-  tour: '#F2B40D',
-};
-
-const productKickerSizeMap: Record<LogoSize, string> = {
-  xs: 'text-[0.55rem]',
-  sm: 'text-[0.55rem]',
-  md: 'text-[0.65rem]',
-  lg: 'text-xs',
-  xl: 'text-sm',
-  '2xl': 'text-base',
-  '3xl': 'text-lg',
-};
-
-const productTitleSizeMap: Record<LogoSize, string> = {
-  xs: 'text-2xl',
-  sm: 'text-3xl',
-  md: 'text-4xl',
-  lg: 'text-5xl',
-  xl: 'text-6xl',
-  '2xl': 'text-7xl',
-  '3xl': 'text-8xl',
-};
-
 const sizeMap = {
-  xs:  { brand: 'text-sm',  js: 'text-[0.55rem]', iconPx: 16, gap: 'gap-1',   title: 'text-xs' },
-  sm:  { brand: 'text-lg',  js: 'text-[0.7rem]',  iconPx: 24, gap: 'gap-1.5', title: 'text-sm' },
-  md:  { brand: 'text-2xl', js: 'text-[1rem]',    iconPx: 32, gap: 'gap-2',   title: 'text-lg' },
-  lg:  { brand: 'text-3xl', js: 'text-[1.2rem]',  iconPx: 40, gap: 'gap-2',   title: 'text-xl' },
-  xl:  { brand: 'text-4xl', js: 'text-[1.5rem]',  iconPx: 48, gap: 'gap-3',   title: 'text-2xl' },
-  '2xl': { brand: 'text-5xl', js: 'text-[1.8rem]', iconPx: 56, gap: 'gap-3', title: 'text-3xl' },
-  '3xl': { brand: 'text-6xl', js: 'text-[2.2rem]', iconPx: 64, gap: 'gap-4', title: 'text-4xl' },
+  xs:  { brand: 'text-sm',  js: 'text-[0.55rem]', iconPx: 16, gap: 'gap-1',   title: 'text-xs',  productKicker: 'text-[0.55rem]', productTitle: 'text-2xl' },
+  sm:  { brand: 'text-lg',  js: 'text-[0.7rem]',  iconPx: 24, gap: 'gap-1.5', title: 'text-sm',  productKicker: 'text-[0.55rem]', productTitle: 'text-3xl' },
+  md:  { brand: 'text-2xl', js: 'text-[1rem]',    iconPx: 32, gap: 'gap-2',   title: 'text-lg',  productKicker: 'text-[0.65rem]', productTitle: 'text-4xl' },
+  lg:  { brand: 'text-3xl', js: 'text-[1.2rem]',  iconPx: 40, gap: 'gap-2',   title: 'text-xl',  productKicker: 'text-xs',        productTitle: 'text-5xl' },
+  xl:  { brand: 'text-4xl', js: 'text-[1.5rem]',  iconPx: 48, gap: 'gap-3',   title: 'text-2xl', productKicker: 'text-sm',        productTitle: 'text-6xl' },
+  '2xl': { brand: 'text-5xl', js: 'text-[1.8rem]', iconPx: 56, gap: 'gap-3',   title: 'text-3xl', productKicker: 'text-base',      productTitle: 'text-7xl' },
+  '3xl': { brand: 'text-6xl', js: 'text-[2.2rem]', iconPx: 64, gap: 'gap-4',   title: 'text-4xl', productKicker: 'text-lg',        productTitle: 'text-8xl' },
 } as const;
 
-const variantIconMap: Record<LogoVariant, string> = {
-  default: '/icon-512.png',
-  throttle: '/throttle/icon-512.png',
-  server: '/server/icon-512.png',
-  cloud: '/cloud/icon-512.png',
-  io: '/io/icon-512.png',
-  monitor: '/monitor/icon-512.png',
-  tour: '/tour/icon-512.png',
-};
+const productVariantIconPath = (slug: LogoVariant): string =>
+  slug === 'default' ? '/icon-512.png' : `/${slug}/icon-512.png`;
+
+const variantBrandColorVar = (variant: LogoVariant): string | undefined =>
+  variant === 'default' ? undefined : `var(--color-deja-${variant})`;
 
 export default function Logo({
   size = 'md',
-  showIcon = true,
+  showMark = true,
   showWordmark = true,
   appTitle,
   iconSrc,
@@ -91,11 +51,10 @@ export default function Logo({
   children,
 }: LogoProps) {
   const s = sizeMap[size];
-  const resolvedIconSrc = iconSrc ?? variantIconMap[variant];
+  const resolvedIconSrc = iconSrc ?? productVariantIconPath(variant);
   const iconShapeClass =
     iconShape === 'circle' ? 'rounded-full overflow-hidden' : 'rounded-lg';
 
-  // 🔁 Backwards compat: `stacked` boolean wins over `layout`.
   const resolvedLayout: LogoLayout = stacked ? 'stacked' : layout;
   const isProduct = resolvedLayout === 'product' && !!appTitle;
 
@@ -104,11 +63,11 @@ export default function Logo({
       ? 'flex flex-col items-start gap-1'
       : `flex items-end ${s.gap}`;
 
-  const brandColor = variantBrandColor[variant];
+  const brandColor = variantBrandColorVar(variant);
 
   return (
     <span className={`inline-flex items-center ${s.gap} ${className}`}>
-      {showIcon && (
+      {showMark && (
         children || (
           <Image
             src={resolvedIconSrc}
@@ -125,12 +84,12 @@ export default function Logo({
           {isProduct ? (
             <>
               <span
-                className={`font-mono uppercase tracking-[0.25em] text-gray-500 leading-none whitespace-nowrap ${productKickerSizeMap[size]}`}
+                className={`font-mono uppercase tracking-[0.25em] text-gray-500 leading-none whitespace-nowrap ${s.productKicker}`}
               >
                 DEJA.JS
               </span>
               <span
-                className={`font-bold leading-none whitespace-nowrap ${productTitleSizeMap[size]}`}
+                className={`font-bold leading-none whitespace-nowrap ${s.productTitle}`}
                 style={brandColor ? { color: brandColor } : undefined}
               >
                 {appTitle}

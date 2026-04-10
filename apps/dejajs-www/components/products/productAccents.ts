@@ -6,6 +6,7 @@ import type { ProductAccent, ProductSlug } from './types';
 export const PRODUCT_ACCENTS: Record<ProductSlug, ProductAccent> = {
   throttle: {
     slug: 'throttle',
+    name: 'Throttle',
     textClass: 'text-deja-throttle',
     bgClass: 'bg-deja-throttle',
     borderClass: 'border-deja-throttle',
@@ -13,6 +14,7 @@ export const PRODUCT_ACCENTS: Record<ProductSlug, ProductAccent> = {
   },
   server: {
     slug: 'server',
+    name: 'Server',
     textClass: 'text-deja-server',
     bgClass: 'bg-deja-server',
     borderClass: 'border-deja-server',
@@ -20,6 +22,7 @@ export const PRODUCT_ACCENTS: Record<ProductSlug, ProductAccent> = {
   },
   cloud: {
     slug: 'cloud',
+    name: 'Cloud',
     textClass: 'text-deja-cloud',
     bgClass: 'bg-deja-cloud',
     borderClass: 'border-deja-cloud',
@@ -27,6 +30,7 @@ export const PRODUCT_ACCENTS: Record<ProductSlug, ProductAccent> = {
   },
   io: {
     slug: 'io',
+    name: 'IO',
     textClass: 'text-deja-io',
     bgClass: 'bg-deja-io',
     borderClass: 'border-deja-io',
@@ -34,6 +38,7 @@ export const PRODUCT_ACCENTS: Record<ProductSlug, ProductAccent> = {
   },
   monitor: {
     slug: 'monitor',
+    name: 'Monitor',
     textClass: 'text-deja-monitor',
     bgClass: 'bg-deja-monitor',
     borderClass: 'border-deja-monitor',
@@ -41,6 +46,7 @@ export const PRODUCT_ACCENTS: Record<ProductSlug, ProductAccent> = {
   },
   tour: {
     slug: 'tour',
+    name: 'Tour',
     textClass: 'text-deja-tour',
     bgClass: 'bg-deja-tour',
     borderClass: 'border-deja-tour',

@@ -31,8 +31,6 @@ export default function TourPage() {
   return (
     <>
       <ProductHero
-        productName={tourContent.name}
-        icon={tourContent.icon}
         tagline={tourContent.tagline}
         kicker={tourContent.heroKicker}
         accent={accent}
@@ -88,7 +86,6 @@ export default function TourPage() {
         heading="Give your layout a story."
         subheading="Tour ships with DEJA.js Cloud. Start narrating your layout today."
         accent={accent}
-        productName={tourContent.name}
         primary={tourContent.ctas.primary}
         secondary={tourContent.ctas.secondary}
       />

@@ -43,7 +43,6 @@ export const monitorContent: ProductContent = {
       style: 'primary',
     },
     secondary: {
-      label: 'Monitor Docs',
       href: '/docs/monitor',
       style: 'secondary',
     },

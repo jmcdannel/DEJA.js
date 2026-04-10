@@ -42,7 +42,6 @@ export const serverContent: ProductContent = {
       style: 'primary',
     },
     secondary: {
-      label: 'Server Docs',
       href: '/docs/server',
       style: 'secondary',
     },

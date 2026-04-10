@@ -30,8 +30,6 @@ export default function IOPage() {
   return (
     <>
       <ProductHero
-        productName={ioContent.name}
-        icon={ioContent.icon}
         tagline={ioContent.tagline}
         kicker={ioContent.heroKicker}
         accent={accent}
@@ -97,7 +95,6 @@ export default function IOPage() {
         heading="Build the layout you want."
         subheading="Open firmware, open hardware, open protocols. Start with an Arduino or a Pico W."
         accent={accent}
-        productName={ioContent.name}
         primary={ioContent.ctas.primary}
         secondary={ioContent.ctas.secondary}
         guide={ioContent.ctas.guide}

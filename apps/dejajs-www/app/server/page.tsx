@@ -30,8 +30,6 @@ export default function ServerPage() {
   return (
     <>
       <ProductHero
-        productName={serverContent.name}
-        icon={serverContent.icon}
         tagline={serverContent.tagline}
         kicker={serverContent.heroKicker}
         accent={accent}
@@ -112,7 +110,6 @@ export default function ServerPage() {
         heading="Bridge your layout to the browser in under a minute."
         subheading="Paste the install command. Plug in USB. You're live."
         accent={accent}
-        productName={serverContent.name}
         primary={serverContent.ctas.primary}
         secondary={serverContent.ctas.secondary}
         guide={serverContent.ctas.guide}

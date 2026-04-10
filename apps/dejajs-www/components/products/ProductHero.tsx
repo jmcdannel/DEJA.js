@@ -1,4 +1,4 @@
-// 🚀 Hero section for a product page: icon, name, tagline, CTAs, and a hero visual slot.
+// Hero section for a product page: branded Logo, tagline, CTAs, hero visual slot.
 
 import type { ReactNode } from 'react';
 import Logo from '../Logo';
@@ -7,8 +7,6 @@ import CtaLink, { GuideIcon } from './CtaLink';
 import type { CTAAction, ProductAccent } from './types';
 
 interface ProductHeroProps {
-  productName: string;
-  icon: string;
   tagline: string;
   kicker?: string;
   accent: ProductAccent;
@@ -19,7 +17,6 @@ interface ProductHeroProps {
 }
 
 export default function ProductHero({
-  productName,
   tagline,
   kicker,
   accent,
@@ -35,7 +32,7 @@ export default function ProductHero({
           <Logo
             variant={accent.slug}
             layout="product"
-            appTitle={productName}
+            appTitle={accent.name}
             size="xl"
           />
           {kicker && (
@@ -55,7 +52,7 @@ export default function ProductHero({
             </div>
             {secondaryCta && (
               <div>
-                <DocLink href={secondaryCta.href}>{productName}</DocLink>
+                <DocLink href={secondaryCta.href}>{accent.name}</DocLink>
               </div>
             )}
           </div>

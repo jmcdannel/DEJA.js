@@ -42,7 +42,6 @@ export const ioContent: ProductContent = {
       style: 'primary',
     },
     secondary: {
-      label: 'IO Docs',
       href: '/docs/io',
       style: 'secondary',
     },

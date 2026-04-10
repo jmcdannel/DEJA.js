@@ -53,24 +53,36 @@ body {
 .glow-lime {
   box-shadow: 0 0 20px rgba(105, 255, 0, 0.4), 0 0 60px rgba(105, 255, 0, 0.15);
 }
-/* 🎨 Per-product glow aliases */
+/* Per-product glow utilities derived from the @theme brand tokens. */
 .glow-throttle {
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), 0 0 60px rgba(0, 229, 255, 0.15);
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-deja-throttle) 40%, transparent),
+    0 0 60px color-mix(in srgb, var(--color-deja-throttle) 15%, transparent);
 }
 .glow-server {
-  box-shadow: 0 0 20px rgba(105, 255, 0, 0.4), 0 0 60px rgba(105, 255, 0, 0.15);
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-deja-server) 40%, transparent),
+    0 0 60px color-mix(in srgb, var(--color-deja-server) 15%, transparent);
 }
 .glow-cloud {
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.4), 0 0 60px rgba(56, 189, 248, 0.15);
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-deja-cloud) 40%, transparent),
+    0 0 60px color-mix(in srgb, var(--color-deja-cloud) 15%, transparent);
 }
 .glow-io {
-  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4), 0 0 60px rgba(245, 158, 11, 0.15);
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-deja-io) 40%, transparent),
+    0 0 60px color-mix(in srgb, var(--color-deja-io) 15%, transparent);
 }
 .glow-monitor {
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), 0 0 60px rgba(168, 85, 247, 0.15);
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-deja-monitor) 40%, transparent),
+    0 0 60px color-mix(in srgb, var(--color-deja-monitor) 15%, transparent);
 }
 .glow-tour {
-  box-shadow: 0 0 20px rgba(236, 72, 153, 0.4), 0 0 60px rgba(236, 72, 153, 0.15);
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--color-deja-tour) 40%, transparent),
+    0 0 60px color-mix(in srgb, var(--color-deja-tour) 15%, transparent);
 }
 .text-gradient-cyan {
   background: linear-gradient(135deg, #00E5FF 0%, #0891b2 100%);

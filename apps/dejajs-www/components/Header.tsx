@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Logo from './Logo';
+import GuideIcon from './icons/GuideIcon';
 import type { ProductSlug } from './products/types';
 
 interface ProductItem {
@@ -125,12 +126,10 @@ export default function Header() {
   const loginUrl = 'https://cloud.dejajs.com/';
   const signupUrl = 'https://cloud.dejajs.com/signup';
 
-  // 📱 Close mobile nav on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
-  // 🔒 Lock body scroll while mobile nav is open
   useEffect(() => {
     if (!mobileOpen) return;
     const prev = document.body.style.overflow;
@@ -140,7 +139,6 @@ export default function Header() {
     };
   }, [mobileOpen]);
 
-  // ⎋ Close mobile nav on Escape
   useEffect(() => {
     if (!mobileOpen) return;
     const handler = (e: KeyboardEvent) => {
@@ -202,7 +200,7 @@ export default function Header() {
               aria-haspopup="true"
               className={`cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1 bg-transparent border-none text-[0.8rem] tracking-[0.06em] font-mono ${pathname?.startsWith('/guides') ? 'text-gray-900 dark:text-white' : ''}`}
             >
-              <svg className="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
+              <GuideIcon className="w-3.5 h-3.5 opacity-70" />
               Guides
               <svg className={`w-4 h-4 opacity-70 transition-transform ${guidesDropdown.isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </Link>
@@ -381,7 +379,6 @@ export default function Header() {
           <a href={loginUrl} className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors hidden sm:block tracking-[0.06em] font-mono text-[0.8rem]">Log in</a>
           <a href={signupUrl} className="inline-flex px-5 py-2 border border-deja-lime text-deja-lime hover:bg-deja-lime/10 rounded-lg transition-colors text-center whitespace-nowrap font-bold tracking-[0.06em] font-mono text-[0.8rem]">Sign up</a>
 
-          {/* 🍔 Mobile menu toggle */}
           <button
             type="button"
             onClick={() => setMobileOpen((o) => !o)}
@@ -403,7 +400,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* 📱 Mobile nav panel */}
       {mobileOpen && (
         <div
           id="mobile-nav"
@@ -413,13 +409,13 @@ export default function Header() {
             aria-label="Mobile navigation"
             className="max-w-7xl mx-auto px-6 py-6 flex flex-col gap-8"
           >
-            <MobileSection title="Guides" pathname={pathname}>
+            <MobileSection title="Guides">
               {defaultGuidesLinks.map((link) => (
                 <MobileLink key={link.name} link={link} pathname={pathname} />
               ))}
             </MobileSection>
 
-            <MobileSection title="Products" pathname={pathname}>
+            <MobileSection title="Products">
               {products.map((p) => (
                 <MobileLink
                   key={p.name}
@@ -429,7 +425,7 @@ export default function Header() {
               ))}
             </MobileSection>
 
-            <MobileSection title="Docs" pathname={pathname}>
+            <MobileSection title="Docs">
               {docsLinks.map((link) => (
                 <MobileLink key={link.name} link={link} pathname={pathname} />
               ))}
@@ -462,7 +458,6 @@ function MobileSection({
   children,
 }: {
   title: string;
-  pathname: string | null;
   children: React.ReactNode;
 }) {
   return (

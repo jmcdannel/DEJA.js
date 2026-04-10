@@ -79,7 +79,6 @@ export const throttleContent: ProductContent = {
       style: 'primary',
     },
     secondary: {
-      label: 'Throttle Docs',
       href: '/docs/throttle',
       style: 'secondary',
     },

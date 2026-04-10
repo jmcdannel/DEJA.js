@@ -33,8 +33,6 @@ export default function ThrottlePage() {
   return (
     <>
       <ProductHero
-        productName={throttleContent.name}
-        icon={throttleContent.icon}
         tagline={throttleContent.tagline}
         kicker={throttleContent.heroKicker}
         accent={accent}
@@ -101,7 +99,6 @@ export default function ThrottlePage() {
         heading="Start driving in under a minute."
         subheading="No install. No configuration. Just open the link on your phone."
         accent={accent}
-        productName={throttleContent.name}
         primary={throttleContent.ctas.primary}
         secondary={throttleContent.ctas.secondary}
         guide={throttleContent.ctas.guide}

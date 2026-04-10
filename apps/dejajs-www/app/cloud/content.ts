@@ -91,7 +91,6 @@ export const cloudContent: ProductContent = {
       style: 'primary',
     },
     secondary: {
-      label: 'Cloud Docs',
       href: '/docs/cloud',
       style: 'secondary',
     },

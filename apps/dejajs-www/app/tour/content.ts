@@ -43,7 +43,6 @@ export const tourContent: ProductContent = {
       style: 'primary',
     },
     secondary: {
-      label: 'Tour Docs',
       href: '/docs/tour',
       style: 'secondary',
     },

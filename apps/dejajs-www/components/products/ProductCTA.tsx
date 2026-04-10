@@ -1,4 +1,4 @@
-// 🎯 Final call-to-action strip with primary, secondary, and optional guide buttons.
+// Final call-to-action strip with primary, secondary, and optional guide buttons.
 
 import DocLink from '../DocLink';
 import CtaLink, { GuideIcon } from './CtaLink';
@@ -8,7 +8,6 @@ interface ProductCTAProps {
   heading: string;
   subheading?: string;
   accent: ProductAccent;
-  productName: string;
   primary: CTAAction;
   secondary?: CTAAction;
   guide?: CTAAction;
@@ -18,7 +17,6 @@ export default function ProductCTA({
   heading,
   subheading,
   accent,
-  productName,
   primary,
   secondary,
   guide,
@@ -39,7 +37,7 @@ export default function ProductCTA({
           </div>
           {secondary && (
             <div>
-              <DocLink href={secondary.href}>{productName}</DocLink>
+              <DocLink href={secondary.href}>{accent.name}</DocLink>
             </div>
           )}
         </div>
