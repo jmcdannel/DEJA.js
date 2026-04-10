@@ -1,7 +1,16 @@
 import { SerialPort } from 'serialport'
-import { FieldValue } from 'firebase-admin/firestore'
-import { ServerValue } from 'firebase-admin/database'
-import { rtdb, db } from '@repo/firebase-config/firebase-admin-node'
+import {
+  doc,
+  setDoc,
+  serverTimestamp,
+} from 'firebase/firestore'
+import {
+  ref,
+  push,
+  remove,
+  serverTimestamp as rtdbServerTimestamp,
+} from 'firebase/database'
+import { getDb, getRtdb } from './firebase-client'
 import { broadcast } from '../broadcast'
 import { createRosterModule } from '../modules/roster.js'
 import { log } from '../utils/logger'
@@ -91,13 +100,17 @@ async function writePowerToFirestore(data: string): Promise<void> {
   try {
     if (!layoutId) return
     const isOn = /^\s*1(\s|$)/.test(data)
-    await db.collection('layouts').doc(layoutId).set({
-      dccEx: {
-        power: isOn,
-        client: 'dejaJS',
-        timestamp: FieldValue.serverTimestamp(),
+    await setDoc(
+      doc(getDb(), `layouts/${layoutId}`),
+      {
+        dccEx: {
+          power: isOn,
+          client: 'dejaJS',
+          timestamp: serverTimestamp(),
+        },
       },
-    }, { merge: true })
+      { merge: true },
+    )
   } catch (err) {
     log.error('Failed to write dccEx.power to Firestore', err)
   }
@@ -105,7 +118,7 @@ async function writePowerToFirestore(data: string): Promise<void> {
 
 /**
  * Write a log entry to the dccLog RTDB path for cloud app consumption.
- * Uses ServerValue.TIMESTAMP so entries are ordered by server time.
+ * Uses RTDB serverTimestamp() so entries are ordered by server time.
  */
 async function writeDccLog(
   type: 'cmd-out' | 'cmd-in' | 'info' | 'error' | 'system',
@@ -114,16 +127,16 @@ async function writeDccLog(
 ): Promise<void> {
   try {
     if (!layoutId) return
-    const logRef = rtdb.ref(`dccLog/${layoutId}`)
+    const logRef = ref(getRtdb(), `dccLog/${layoutId}`)
     const entry: Record<string, unknown> = {
       type,
       message,
-      timestamp: ServerValue.TIMESTAMP,
+      timestamp: rtdbServerTimestamp(),
     }
     if (deviceId) {
       entry.deviceId = deviceId
     }
-    await logRef.push(entry)
+    await push(logRef, entry)
   } catch (err) {
     // Log locally but don't throw — logging failures must not break command flow
     log.error('[DCC] Failed to write dccLog entry:', err)
@@ -381,8 +394,7 @@ export async function handleDccChange(snapshot: any, key: string): Promise<void>
     log.fatal('Error handling dcc command:', err)
   } finally {
     if (key) {
-      const cmd = rtdb.ref(`dccCommands/${layoutId}/${key}`)
-      cmd.remove()
+      remove(ref(getRtdb(), `dccCommands/${layoutId}/${key}`))
     }
   }
 }

@@ -1,8 +1,16 @@
-import { FieldValue } from 'firebase-admin/firestore'
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+} from 'firebase/firestore'
 import type { SerialPort } from 'serialport'
 import type { Layout, Device, LayoutSensor } from '@repo/modules'
 import { parseTrackState, parsePowerState } from '@repo/dccex'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import { getDb } from '../lib/firebase-client.js'
 import { serial as serialLib } from '../lib/serial'
 import { log } from '../utils/logger'
 import { dcc } from '../lib/dcc'
@@ -218,8 +226,8 @@ async function autoConnect(devices: Device[]): Promise<void> {
 
 async function loadLayout(): Promise<Layout | undefined> {
   try {
-    const layoutData = await db.collection('layouts').doc(layoutId).get()
-    const layoutDoc = layoutData.exists ? layoutData.data() : undefined
+    const layoutData = await getDoc(doc(getDb(), `layouts/${layoutId}`))
+    const layoutDoc = layoutData.exists() ? layoutData.data() : undefined
     if (layoutDoc) {
       log.complete('Layout loaded', layoutId)
       return { ...layoutDoc, id: layoutData.id } as Layout
@@ -232,8 +240,10 @@ async function loadLayout(): Promise<Layout | undefined> {
 
 async function loadDevices(): Promise<Device[]> {
   try {
-    const devicesSnapshot = await db.collection('layouts').doc(layoutId).collection('devices').get()
-    const devices = devicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Device))
+    const devicesSnapshot = await getDocs(
+      collection(getDb(), `layouts/${layoutId}/devices`),
+    )
+    const devices = devicesSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Device))
     return devices
   } catch (error) {
     log.error('Error loading devices', error)
@@ -243,8 +253,10 @@ async function loadDevices(): Promise<Device[]> {
 
 async function loadSensors(): Promise<LayoutSensor[]> {
   try {
-    const sensorsSnapshot = await db.collection('layouts').doc(layoutId).collection('sensors').get()
-    const sensors = sensorsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LayoutSensor))
+    const sensorsSnapshot = await getDocs(
+      collection(getDb(), `layouts/${layoutId}/sensors`),
+    )
+    const sensors = sensorsSnapshot.docs.map(d => ({ id: d.id, ...d.data() } as LayoutSensor))
     return sensors
   } catch (error) {
     log.error('Error loading sensors', error)
@@ -301,12 +313,15 @@ async function connectUsbDevice(
       client: 'dejaJS',
       isConnected: true,
       lastConnected: new Date(),
-      timestamp: FieldValue.serverTimestamp(),
+      timestamp: serverTimestamp(),
       port: serialPort,
     }
 
-    db.doc(`layouts/${layoutId}/devices/${device.id}`)
-      .set(updates, { merge: true })
+    setDoc(
+      doc(getDb(), `layouts/${layoutId}/devices/${device.id}`),
+      updates,
+      { merge: true },
+    )
 
     const connection: Connection = {
       isConnected: true,
@@ -337,17 +352,17 @@ async function connectMqttDevice(device: Device): Promise<void> {
       const topic = `DEJA/${layoutId}/${device.id}`
       mqtt.subscribe(topic)
 
-      db.doc(`layouts/${layoutId}/devices/${device.id}`)
-        .set(
-          {
-            client: 'dejaJS',
-            isConnected: true,
-            lastConnected: new Date(),
-            timestamp: FieldValue.serverTimestamp(),
-            topic,
-          },
-          { merge: true }
-        )
+      setDoc(
+        doc(getDb(), `layouts/${layoutId}/devices/${device.id}`),
+        {
+          client: 'dejaJS',
+          isConnected: true,
+          lastConnected: new Date(),
+          timestamp: serverTimestamp(),
+          topic,
+        },
+        { merge: true },
+      )
 
       _connections[device.id] = {
         isConnected: true,
@@ -370,18 +385,21 @@ async function handleSerialMessage(payload: string, device: Device): Promise<voi
 
     // Parse DCC-EX status lines for power and tracks
     const text = payload.replace(/[<>]/g, '').trim()
-    const dccExUpdates: Record<string, any> = { timestamp: FieldValue.serverTimestamp(), client: 'dejaJS' }
+    const dccExUpdates: Record<string, any> = { timestamp: serverTimestamp(), client: 'dejaJS' }
 
     // Track state lines (A-H): "= A MAIN", "= B PROG", "= C DC 45"
     const trackState = parseTrackState(text)
     if (trackState && device.type === 'dcc-ex') {
       // Write to per-device trackOutputs in Firestore
-      await db.doc(`layouts/${layoutId}/devices/${device.id}`).update({
-        [`trackOutputs.${trackState.output}.mode`]: trackState.mode,
-        ...(trackState.cabAddress != null
-          ? { [`trackOutputs.${trackState.output}.cabAddress`]: trackState.cabAddress }
-          : {}),
-      })
+      await updateDoc(
+        doc(getDb(), `layouts/${layoutId}/devices/${device.id}`),
+        {
+          [`trackOutputs.${trackState.output}.mode`]: trackState.mode,
+          ...(trackState.cabAddress != null
+            ? { [`trackOutputs.${trackState.output}.cabAddress`]: trackState.cabAddress }
+            : {}),
+        },
+      )
       // Also write to layout.dccEx for backward compat (A/B only)
       if (trackState.output === 'A' || trackState.output === 'B') {
         const line = trackState.output === 'A' ? 'trackA' : 'trackB'
@@ -420,7 +438,11 @@ async function handleSerialMessage(payload: string, device: Device): Promise<voi
     // If any updates were collected other than timestamp/client, persist to layout.dccEx
     const hasStateUpdate = Object.keys(dccExUpdates).some(k => k !== 'timestamp' && k !== 'client')
     if (hasStateUpdate) {
-      await db.collection('layouts').doc(layoutId).set({ dccEx: dccExUpdates }, { merge: true })
+      await setDoc(
+        doc(getDb(), `layouts/${layoutId}`),
+        { dccEx: dccExUpdates },
+        { merge: true },
+      )
     }
 
     await broadcast({ action: 'serial', payload: { payload } })
@@ -460,15 +482,15 @@ export async function disconnectDevice(deviceId: string): Promise<void> {
     }
 
     // Update the device status in the database
-    db.doc(`layouts/${layoutId}/devices/${deviceId}`)
-      .set(
-        {
-          isConnected: false,
-          lastDisconnected: new Date(),
-          timestamp: FieldValue.serverTimestamp(),
-        },
-        { merge: true }
-      )
+    setDoc(
+      doc(getDb(), `layouts/${layoutId}/devices/${deviceId}`),
+      {
+        isConnected: false,
+        lastDisconnected: new Date(),
+        timestamp: serverTimestamp(),
+      },
+      { merge: true },
+    )
     log.complete('[LAYOUT] Device disconnected:', deviceId)
   } catch (err) {
     log.fatal('[LAYOUT] Error disconnecting device:', err)

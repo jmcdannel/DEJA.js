@@ -1,5 +1,13 @@
-import { FieldValue } from 'firebase-admin/firestore'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  type DocumentData,
+  type DocumentChange,
+  type QuerySnapshot,
+} from 'firebase/firestore'
+import { getDb } from '../lib/firebase-client.js'
 import { log } from '../utils/logger'
 import { broadcast } from '../broadcast'
 
@@ -9,10 +17,10 @@ export async function updateBlockOccupancy(blockId: string): Promise<void> {
   if (!layoutId) return
 
   try {
-    const blockDoc = await db.collection('layouts').doc(layoutId)
-      .collection('blocks').doc(blockId).get()
+    const db = getDb()
+    const blockDoc = await getDoc(doc(db, `layouts/${layoutId}/blocks/${blockId}`))
 
-    if (!blockDoc.exists) return
+    if (!blockDoc.exists()) return
 
     const block = blockDoc.data()
     const sensorIds: string[] = block?.sensorIds || []
@@ -22,17 +30,19 @@ export async function updateBlockOccupancy(blockId: string): Promise<void> {
     // Check if any sensor in this block is active
     let occupied = false
     for (const sensorId of sensorIds) {
-      const sensorDoc = await db.collection('layouts').doc(layoutId)
-        .collection('sensors').doc(sensorId).get()
-      if (sensorDoc.exists && sensorDoc.data()?.state) {
+      const sensorDoc = await getDoc(doc(db, `layouts/${layoutId}/sensors/${sensorId}`))
+      if (sensorDoc.exists() && sensorDoc.data()?.state) {
         occupied = true
         break
       }
     }
 
     // Update block occupancy
-    await db.collection('layouts').doc(layoutId).collection('blocks').doc(blockId)
-      .set({ occupied, timestamp: FieldValue.serverTimestamp() }, { merge: true })
+    await setDoc(
+      doc(db, `layouts/${layoutId}/blocks/${blockId}`),
+      { occupied, timestamp: serverTimestamp() },
+      { merge: true },
+    )
 
     // Broadcast to WebSocket clients
     broadcast({
@@ -46,14 +56,12 @@ export async function updateBlockOccupancy(blockId: string): Promise<void> {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Firestore snapshot type
-export async function handleBlockChange(snapshot: any): Promise<void> {
+export async function handleBlockChange(snapshot: QuerySnapshot<DocumentData>): Promise<void> {
   if (!snapshot || !snapshot.docChanges) return
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Firestore document change type
-  snapshot.docChanges().forEach(async (change: any) => {
+  snapshot.docChanges().forEach(async (change: DocumentChange<DocumentData>) => {
     if (change.type === 'modified') {
-      const block = { id: change.doc.id, ...change.doc.data() }
+      const block = { id: change.doc.id, ...change.doc.data() } as { id: string; occupied?: boolean }
       log.log('[BLOCKS] Block modified', block.id, block.occupied)
       broadcast({
         action: 'block',

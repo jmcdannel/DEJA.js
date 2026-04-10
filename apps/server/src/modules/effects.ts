@@ -1,6 +1,14 @@
 import type { Effect, MacroItem } from '@repo/modules'
-import { FieldValue, type DocumentData } from 'firebase-admin/firestore'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  type DocumentData,
+  type DocumentChange,
+  type QuerySnapshot,
+} from 'firebase/firestore'
+import { getDb } from '../lib/firebase-client.js'
 import { log } from '../utils/logger.js'
 import { dcc, type OutputPayload } from '../lib/dcc.js'
 import { layout } from './layout.js'
@@ -46,8 +54,9 @@ async function getEffect(id: string): Promise<Effect | undefined> {
     log.error('Effect ID is not provided')
     return undefined
   }
-  const effectData = await db.collection('layouts').doc(layoutId)
-    .collection('effects').doc(id).get()
+  const effectData = await getDoc(
+    doc(getDb(), `layouts/${layoutId}/effects/${id}`),
+  )
   return { id: effectData.id, ...effectData.data() } as Effect
 }
 
@@ -95,17 +104,26 @@ async function handleMacroItem(
   state: boolean,
   macroState: boolean
 ): Promise<void> {
+  const db = getDb()
   if (item.type === 'turnout' && item.id) {
-    db.collection('layouts').doc(layoutId).collection('turnouts').doc(item.id.toString()).set({
-      state: item.state,
-      timestamp: FieldValue.serverTimestamp(),
-    }, { merge: true })
+    setDoc(
+      doc(db, `layouts/${layoutId}/turnouts/${item.id.toString()}`),
+      {
+        state: item.state,
+        timestamp: serverTimestamp(),
+      },
+      { merge: true },
+    )
     // log.log('handleMacroItem turnout', item)
   } else if (item.type === 'effect' && item.id) {
-    db.collection('layouts').doc(layoutId).collection('effects').doc(item.id.toString()).set({
-      state: item.state,
-      timestamp: FieldValue.serverTimestamp(),
-    }, { merge: true })
+    setDoc(
+      doc(db, `layouts/${layoutId}/effects/${item.id.toString()}`),
+      {
+        state: item.state,
+        timestamp: serverTimestamp(),
+      },
+      { merge: true },
+    )
 
   } else if (
     item.type === 'throttle' &&
@@ -114,11 +132,15 @@ async function handleMacroItem(
     item.speed !== undefined
   ) {
     // log.log('handleMacroItem throttle', item)
-    db.collection('layouts').doc(layoutId).collection('throttles').doc(item.id.toString()).set({
-      direction: item?.direction === 'forward',
-      speed: item.speed,
-      timestamp: FieldValue.serverTimestamp(),
-    }, { merge: true })
+    setDoc(
+      doc(db, `layouts/${layoutId}/throttles/${item.id.toString()}`),
+      {
+        direction: item?.direction === 'forward',
+        speed: item.speed,
+        timestamp: serverTimestamp(),
+      },
+      { merge: true },
+    )
   }
   // log.log('handleMacroItem', item)
 }
@@ -242,12 +264,12 @@ export async function handleEffect(payload: Effect): Promise<void> {
 }
 
 export async function handleEffectChange(
-  snapshot: DocumentData
+  snapshot: QuerySnapshot<DocumentData>
 ): Promise<void> {
-  snapshot.docChanges().forEach(async (change: DocumentData) => {
+  snapshot.docChanges().forEach(async (change: DocumentChange<DocumentData>) => {
     if (change.type === 'modified') {
       // log.log('handleEffectChange', change.type, change.doc.data())
-      await handleEffect(change.doc.data())
+      await handleEffect(change.doc.data() as Effect)
     }
   })
 }

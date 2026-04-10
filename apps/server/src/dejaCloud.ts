@@ -1,6 +1,24 @@
 import 'dotenv/config'
 import os from 'node:os'
-import { db, rtdb } from '@repo/firebase-config/firebase-admin-node'
+import {
+  collection,
+  getDocs,
+  onSnapshot,
+  setDoc,
+  type DocumentData,
+  type QuerySnapshot,
+} from 'firebase/firestore'
+import {
+  ref,
+  set,
+  remove,
+  onChildAdded,
+  onValue,
+  onDisconnect,
+  serverTimestamp as rtdbServerTimestamp,
+  type DataSnapshot,
+} from 'firebase/database'
+import { getDb, getRtdb } from './lib/firebase-client'
 import type { Effect } from '@repo/modules'
 import { dejaEmitter, type BroadcastMessage } from './broadcast'
 import { initialize } from './modules/layout'
@@ -25,7 +43,11 @@ function getLocalIp(): string | undefined {
   return interfaces?.['en0']?.find(d => d.family === 'IPv4')?.address
     || interfaces?.['en1']?.find(d => d.family === 'IPv4')?.address
 }
-const serverStatusRef = rtdb.ref(`serverStatus/${layoutId}`)
+
+// Lazy server status ref — must be created after firebase-client is initialized
+function serverStatusRef() {
+  return ref(getRtdb(), `serverStatus/${layoutId}`)
+}
 
 // Reconnect manager for Firebase listener recovery
 const firebaseReconnect = new ReconnectManager({
@@ -34,10 +56,9 @@ const firebaseReconnect = new ReconnectManager({
   maxDelay: 30_000,
 })
 
-// Store listeners for cleanup
-// Using firebase-admin snapshot types — typed as callback return values
-let dccCommandsRef: ReturnType<typeof rtdb.ref> | null = null
-let dejaCommandsRef: ReturnType<typeof rtdb.ref> | null = null
+// Store listeners for cleanup — Client SDK returns plain unsubscribe functions
+let dccCommandsUnsubscribe: (() => void) | null = null
+let dejaCommandsUnsubscribe: (() => void) | null = null
 let throttleUnsubscribe: (() => void) | null = null
 let effectUnsubscribe: (() => void) | null = null
 let turnoutUnsubscribe: (() => void) | null = null
@@ -81,28 +102,28 @@ function scheduleFirebaseReconnect(): void {
 
 /**
  * Monitor the RTDB connectivity state.
- * Firebase Admin SDK reconnects automatically, but we log transitions
+ * Firebase Client SDK reconnects automatically, but we log transitions
  * and can take action (e.g., re-announce server presence) on reconnect.
  */
 function monitorConnectivity(): void {
-  const connectedRef = rtdb.ref('.info/connected')
+  const connectedRef = ref(getRtdb(), '.info/connected')
 
-  const callback = (snapshot: { val: () => boolean | null }): void => {
+  const callback = (snapshot: DataSnapshot): void => {
     const connected = snapshot.val()
     if (connected) {
       log.success('[FIREBASE] RTDB connection established')
 
       // Re-announce server presence after reconnecting
-      serverStatusRef.onDisconnect().set({
+      onDisconnect(serverStatusRef()).set({
         online: false,
-        lastSeen: { '.sv': 'timestamp' },
+        lastSeen: rtdbServerTimestamp(),
       }).catch((err: Error) => {
         log.error('[FIREBASE] Failed to set onDisconnect handler:', err.message)
       })
 
-      serverStatusRef.set({
+      set(serverStatusRef(), {
         online: true,
-        lastSeen: { '.sv': 'timestamp' },
+        lastSeen: rtdbServerTimestamp(),
         version: process.env.npm_package_version || 'unknown',
         ip: getLocalIp() || null,
       }).catch((err: Error) => {
@@ -113,11 +134,7 @@ function monitorConnectivity(): void {
     }
   }
 
-  connectedRef.on('value', callback)
-
-  connectivityUnsubscribe = () => {
-    connectedRef.off('value', callback)
-  }
+  connectivityUnsubscribe = onValue(connectedRef, callback)
 }
 
 /**
@@ -133,7 +150,7 @@ async function clearStaleLogs(): Promise<void> {
 
   for (const path of paths) {
     try {
-      await rtdb.ref(path).remove()
+      await remove(ref(getRtdb(), path))
       log.success(`[CLEANUP] Cleared stale entries from ${path}`)
     } catch (error) {
       log.error(`[CLEANUP] Failed to clear ${path}:`, error)
@@ -142,52 +159,66 @@ async function clearStaleLogs(): Promise<void> {
 }
 
 async function listen(): Promise<void> {
-  dccCommandsRef = rtdb.ref(`dccCommands/${layoutId}`)
-  dccCommandsRef.on('child_added', (data) => {
-    if (data.key) {
-      handleDccChange(data.val(), data.key)
-    }
-  })
+  const rtdbInst = getRtdb()
+  const dbInst = getDb()
 
-  dejaCommandsRef = rtdb.ref(`dejaCommands/${layoutId}`)
-  dejaCommandsRef.on('child_added', (data) => {
-    if (data.key) {
-      handleDejaCommands(data.val(), data.key)
-    }
-  })
+  dccCommandsUnsubscribe = onChildAdded(
+    ref(rtdbInst, `dccCommands/${layoutId}`),
+    (data) => {
+      if (data.key) {
+        handleDccChange(data.val(), data.key)
+      }
+    },
+  )
+
+  dejaCommandsUnsubscribe = onChildAdded(
+    ref(rtdbInst, `dejaCommands/${layoutId}`),
+    (data) => {
+      if (data.key) {
+        handleDejaCommands(data.val(), data.key)
+      }
+    },
+  )
 
   listenToLocoChanges()
 
   // Firestore snapshot listeners with error handling for automatic reconnection
-  throttleUnsubscribe = db.collection(`layouts/${layoutId}/throttles`).onSnapshot(
+  throttleUnsubscribe = onSnapshot(
+    collection(dbInst, `layouts/${layoutId}/throttles`),
     handleThrottleChange,
-    (error) => handleSnapshotError('throttles', error)
+    (error) => handleSnapshotError('throttles', error),
   )
-  effectUnsubscribe = db.collection(`layouts/${layoutId}/effects`).onSnapshot(
+  effectUnsubscribe = onSnapshot(
+    collection(dbInst, `layouts/${layoutId}/effects`),
     handleEffectChange,
-    (error) => handleSnapshotError('effects', error)
+    (error) => handleSnapshotError('effects', error),
   )
-  signalUnsubscribe = db.collection(`layouts/${layoutId}/signals`).onSnapshot(
+  signalUnsubscribe = onSnapshot(
+    collection(dbInst, `layouts/${layoutId}/signals`),
     handleSignalChange,
-    (error) => handleSnapshotError('signals', error)
+    (error) => handleSnapshotError('signals', error),
   )
-  turnoutUnsubscribe = db.collection(`layouts/${layoutId}/turnouts`).onSnapshot(
+  turnoutUnsubscribe = onSnapshot(
+    collection(dbInst, `layouts/${layoutId}/turnouts`),
     handleTurnoutChange,
-    (error) => handleSnapshotError('turnouts', error)
+    (error) => handleSnapshotError('turnouts', error),
   )
-  sensorUnsubscribe = db.collection(`layouts/${layoutId}/sensors`).onSnapshot(
+  sensorUnsubscribe = onSnapshot(
+    collection(dbInst, `layouts/${layoutId}/sensors`),
     handleSensorChange,
-    (error) => handleSnapshotError('sensors', error)
+    (error) => handleSnapshotError('sensors', error),
   )
-  blockUnsubscribe = db.collection(`layouts/${layoutId}/blocks`).onSnapshot(
+  blockUnsubscribe = onSnapshot(
+    collection(dbInst, `layouts/${layoutId}/blocks`),
     handleBlockChange,
-    (error) => handleSnapshotError('blocks', error)
+    (error) => handleSnapshotError('blocks', error),
   )
 
   // Monitor test effects for sound testing
-  testEffectUnsubscribe = db.collection('testEffects').onSnapshot(
+  testEffectUnsubscribe = onSnapshot(
+    collection(dbInst, 'testEffects'),
     handleTestEffectChange,
-    (error) => handleSnapshotError('testEffects', error)
+    (error) => handleSnapshotError('testEffects', error),
   )
 
   // Start syncing device configs (Arduino serial, etc)
@@ -197,11 +228,13 @@ async function listen(): Promise<void> {
 async function resetThrottles(): Promise<void> {
   log.complete('reset throttles', layoutId)
 
-  const throttlesSnapshot = await db.collection('layouts').doc(layoutId).collection('throttles').get()
-  throttlesSnapshot.docs.map((doc) => {
-    serial.disconnect(doc.data().port)
-    doc.ref.set({
-      ...doc.data(),
+  const throttlesSnapshot = await getDocs(
+    collection(getDb(), `layouts/${layoutId}/throttles`),
+  )
+  throttlesSnapshot.docs.map((d) => {
+    serial.disconnect(d.data().port)
+    setDoc(d.ref, {
+      ...d.data(),
       direction: false,
       speed: 0,
     }, { merge: true })
@@ -209,12 +242,12 @@ async function resetThrottles(): Promise<void> {
 }
 
 async function resetDevices(): Promise<void> {
-
-  const devicesSnapshot = await db.collection('layouts').doc(layoutId).collection('devices').get()
-  devicesSnapshot.docs.map((doc) => {
-
-    doc.ref.set({
-      ...doc.data(),
+  const devicesSnapshot = await getDocs(
+    collection(getDb(), `layouts/${layoutId}/devices`),
+  )
+  devicesSnapshot.docs.map((d) => {
+    setDoc(d.ref, {
+      ...d.data(),
       client: null,
       isConnected: false,
       lastConnected: null,
@@ -231,13 +264,13 @@ async function reset(): Promise<void> {
 async function cleanup(): Promise<void> {
   try {
     // Remove Firebase Realtime Database listeners
-    if (dccCommandsRef) {
-      dccCommandsRef.off()
-      dccCommandsRef = null
+    if (dccCommandsUnsubscribe) {
+      dccCommandsUnsubscribe()
+      dccCommandsUnsubscribe = null
     }
-    if (dejaCommandsRef) {
-      dejaCommandsRef.off()
-      dejaCommandsRef = null
+    if (dejaCommandsUnsubscribe) {
+      dejaCommandsUnsubscribe()
+      dejaCommandsUnsubscribe = null
     }
 
     // Unsubscribe from Firestore listeners
@@ -280,7 +313,7 @@ async function cleanup(): Promise<void> {
 }
 
 // Handle test effect changes (for sound testing from cloud app)
-async function handleTestEffectChange(snapshot: FirebaseFirestore.QuerySnapshot): Promise<void> {
+async function handleTestEffectChange(snapshot: QuerySnapshot<DocumentData>): Promise<void> {
   try {
     snapshot.docChanges().forEach(async (change) => {
       if (change.type === 'added') {
@@ -323,19 +356,15 @@ export async function connect(): Promise<boolean> {
     dejaEmitter.onBroadcast(handleCloudBroadcast)
 
     // Set up presence tracking
-    await serverStatusRef.onDisconnect().set({
+    await onDisconnect(serverStatusRef()).set({
       online: false,
-      lastSeen: {
-        '.sv': 'timestamp'
-      }
+      lastSeen: rtdbServerTimestamp(),
     })
 
     // Set online
-    await serverStatusRef.set({
+    await set(serverStatusRef(), {
       online: true,
-      lastSeen: {
-        '.sv': 'timestamp'
-      },
+      lastSeen: rtdbServerTimestamp(),
       version: process.env.npm_package_version || 'unknown',
       ip: getLocalIp() || null,
     })
@@ -380,12 +409,10 @@ export async function disconnect(): Promise<void> {
     serial.disconnectAll()
 
     // Cancel the onDisconnect and mark offline immediately
-    await serverStatusRef.onDisconnect().cancel()
-    await serverStatusRef.set({
+    await onDisconnect(serverStatusRef()).cancel()
+    await set(serverStatusRef(), {
       online: false,
-      lastSeen: {
-        '.sv': 'timestamp'
-      }
+      lastSeen: rtdbServerTimestamp(),
     })
 
     log.success('Disconnected from DejaCloud', layoutId)

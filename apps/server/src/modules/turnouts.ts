@@ -1,5 +1,11 @@
-import { type DocumentData } from 'firebase/firestore'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import {
+  type DocumentData,
+  type DocumentChange,
+  type QuerySnapshot,
+  doc,
+  getDoc,
+} from 'firebase/firestore'
+import { getDb } from '../lib/firebase-client.js'
 import type { Turnout, KatoCommand, ServoCommand } from '@repo/modules'
 import { log } from '../utils/logger.js'
 import { dcc, type TurnoutPayload } from '../lib/dcc.js'
@@ -52,9 +58,9 @@ export async function getTurnout(id: string): Promise<Turnout | undefined> {
     return undefined
   }
   log.log('getTurnout', id, layoutId)
-  const turnoutRef = db.collection(`layouts/${layoutId}/turnouts`).doc(id)
-  const docSnap = await turnoutRef.get()
-  if (docSnap.exists) {
+  const turnoutRef = doc(getDb(), `layouts/${layoutId}/turnouts/${id}`)
+  const docSnap = await getDoc(turnoutRef)
+  if (docSnap.exists()) {
     return { ...docSnap.data(), id: docSnap.id } as Turnout
   }
   log.error('No such turnout', id, layoutId)
@@ -149,16 +155,16 @@ function servoCommand(turnout: Turnout): ServoCommand | undefined {
 }
 
 export async function handleTurnoutChange(
-  snapshot: DocumentData
+  snapshot: QuerySnapshot<DocumentData>
 ): Promise<void> {
-  snapshot.docChanges().forEach(async (change: DocumentData) => {
+  snapshot.docChanges().forEach(async (change: DocumentChange<DocumentData>) => {
     if (change.type === 'added') {
       turnoutStates[change.doc.id] = change.doc.data()?.state
     }
     if (change.type === 'modified') {
       if (turnoutStates[change.doc.id] !== change.doc.data()?.state) {
         turnoutStates[change.doc.id] = change.doc.data()?.state
-        await handleTurnout(change.doc.data())
+        await handleTurnout(change.doc.data() as Turnout)
       }
     }
   })

@@ -1,5 +1,17 @@
-import { FieldValue } from 'firebase-admin/firestore'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+} from 'firebase/firestore'
+import { getDb } from '../lib/firebase-client.js'
 import {
   buildTrackConfigCommand,
   buildQueryTracksCommand,
@@ -24,12 +36,12 @@ export async function configureDevice(deviceId: string): Promise<void> {
   }
 
   try {
-    const deviceDoc = await db
-      .collection(`layouts/${layoutId}/devices`)
-      .doc(deviceId)
-      .get()
+    const db = getDb()
+    const deviceDoc = await getDoc(
+      doc(db, `layouts/${layoutId}/devices/${deviceId}`),
+    )
 
-    if (!deviceDoc.exists) {
+    if (!deviceDoc.exists()) {
       log.warn(`[TrackOutputs] Device ${deviceId} not found in Firestore`)
       return
     }
@@ -43,12 +55,14 @@ export async function configureDevice(deviceId: string): Promise<void> {
     }
 
     // Determine if this is Device 1 (first by document ID)
-    const allDevices = await db
-      .collection(`layouts/${layoutId}/devices`)
-      .where('type', '==', 'dcc-ex')
-      .orderBy('__name__')
-      .limit(1)
-      .get()
+    const allDevices = await getDocs(
+      query(
+        collection(db, `layouts/${layoutId}/devices`),
+        where('type', '==', 'dcc-ex'),
+        orderBy('__name__'),
+        limit(1),
+      ),
+    )
     const isDevice1 = !allDevices.empty && allDevices.docs[0].id === deviceId
 
     for (const [output, config] of Object.entries(trackOutputs)) {
@@ -106,17 +120,18 @@ async function createDcLocos(
     if (!isValidCabAddress(config.cabAddress)) continue
 
     try {
-      const locoRef = db
-        .collection(`layouts/${layoutId}/locos`)
-        .doc(config.cabAddress.toString())
-      const existing = await locoRef.get()
+      const locoRef = doc(
+        getDb(),
+        `layouts/${layoutId}/locos/${config.cabAddress.toString()}`,
+      )
+      const existing = await getDoc(locoRef)
 
-      if (!existing.exists) {
-        await locoRef.set({
+      if (!existing.exists()) {
+        await setDoc(locoRef, {
           address: config.cabAddress,
           name: `DC Track ${output}`,
           isDcTrack: true,
-          timestamp: FieldValue.serverTimestamp(),
+          timestamp: serverTimestamp(),
         })
         log.success(
           `[TrackOutputs] Created DC loco for device ${deviceId} output ${output}: address ${config.cabAddress}`,
@@ -138,12 +153,11 @@ export async function clearDevicePowerState(deviceId: string): Promise<void> {
   if (!layoutId) return
 
   try {
-    const deviceDoc = await db
-      .collection(`layouts/${layoutId}/devices`)
-      .doc(deviceId)
-      .get()
+    const db = getDb()
+    const deviceRef = doc(db, `layouts/${layoutId}/devices/${deviceId}`)
+    const deviceDoc = await getDoc(deviceRef)
 
-    if (!deviceDoc.exists) return
+    if (!deviceDoc.exists()) return
 
     const trackOutputs = deviceDoc.data()?.trackOutputs as Record<string, TrackOutput> | undefined
     if (!trackOutputs) return
@@ -153,10 +167,7 @@ export async function clearDevicePowerState(deviceId: string): Promise<void> {
       updates[`trackOutputs.${output}.power`] = null
     }
 
-    await db
-      .collection(`layouts/${layoutId}/devices`)
-      .doc(deviceId)
-      .update(updates)
+    await updateDoc(deviceRef, updates)
 
     log.note(`[TrackOutputs] Cleared power states for disconnected device ${deviceId}`)
   } catch (err) {
@@ -175,12 +186,12 @@ export async function writeOutputPowerState(
   if (!layoutId) return
 
   try {
-    await db
-      .collection(`layouts/${layoutId}/devices`)
-      .doc(deviceId)
-      .update({
+    await updateDoc(
+      doc(getDb(), `layouts/${layoutId}/devices/${deviceId}`),
+      {
         [`trackOutputs.${output}.power`]: power,
-      })
+      },
+    )
   } catch (err) {
     log.error(
       `[TrackOutputs] Error writing power state for device ${deviceId} output ${output}:`,
@@ -200,12 +211,11 @@ export async function writeAllOutputsPowerState(
   if (!layoutId) return
 
   try {
-    const deviceDoc = await db
-      .collection(`layouts/${layoutId}/devices`)
-      .doc(deviceId)
-      .get()
+    const db = getDb()
+    const deviceRef = doc(db, `layouts/${layoutId}/devices/${deviceId}`)
+    const deviceDoc = await getDoc(deviceRef)
 
-    if (!deviceDoc.exists) return
+    if (!deviceDoc.exists()) return
 
     const trackOutputs = deviceDoc.data()?.trackOutputs as Record<string, TrackOutput> | undefined
     if (!trackOutputs) return
@@ -215,10 +225,7 @@ export async function writeAllOutputsPowerState(
       updates[`trackOutputs.${output}.power`] = power
     }
 
-    await db
-      .collection(`layouts/${layoutId}/devices`)
-      .doc(deviceId)
-      .update(updates)
+    await updateDoc(deviceRef, updates)
   } catch (err) {
     log.error(
       `[TrackOutputs] Error writing all outputs power for device ${deviceId}:`,

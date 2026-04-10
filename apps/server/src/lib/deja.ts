@@ -1,6 +1,11 @@
 import { SerialPort } from 'serialport'
-import { FieldValue } from 'firebase-admin/firestore'
-import { db, rtdb } from '@repo/firebase-config/firebase-admin-node'
+import {
+  doc,
+  setDoc,
+  serverTimestamp,
+} from 'firebase/firestore'
+import { ref, set, remove } from 'firebase/database'
+import { getDb, getRtdb } from './firebase-client'
 import type { BroadcastMessage } from '../broadcast'
 import { layout } from '../modules/layout'
 import { broadcast } from '../broadcast'
@@ -46,47 +51,63 @@ export async function handleDejaMessages(
   }
   try {
     const { action, payload } = data
+    const db = getDb()
     switch (action) {
       case 'portList':
-        db.collection('layouts').doc(layoutId)
-          .set({ ports: payload }, { merge: true })
-        rtdb.ref(`portList/${layoutId}`).set(payload)
+        setDoc(
+          doc(db, `layouts/${layoutId}`),
+          { ports: payload },
+          { merge: true },
+        )
+        set(ref(getRtdb(), `portList/${layoutId}`), payload)
         break
       case 'status':
       case 'getStatus':
         if (payload.isConnected) {
-          db.collection('layouts').doc(layoutId)
-            .set({
+          setDoc(
+            doc(db, `layouts/${layoutId}`),
+            {
               isConnected: payload.isConnected,
               client: 'dejaJS',
-              timestamp: FieldValue.serverTimestamp(),
-            }, { merge: true })
+              timestamp: serverTimestamp(),
+            },
+            { merge: true },
+          )
         } else {
-          db.collection('layouts').doc(layoutId)
-            .set({
+          setDoc(
+            doc(db, `layouts/${layoutId}`),
+            {
               isConnected: false,
               client: 'dejaJS',
-              timestamp: FieldValue.serverTimestamp(),
-            }, { merge: true })
+              timestamp: serverTimestamp(),
+            },
+            { merge: true },
+          )
         }
         break
       case 'connected':
         log.success('dejaClound.connected!!', data)
         if (payload.device === 'dccex') {
-          db.collection('layouts').doc(layoutId)
-            .set({
+          setDoc(
+            doc(db, `layouts/${layoutId}`),
+            {
               'dccEx.isConnected': true,
-              'dccEx.lastConnected': FieldValue.serverTimestamp(),
+              'dccEx.lastConnected': serverTimestamp(),
               'dccEx.client': 'dejaJS',
-            }, { merge: true })
+            },
+            { merge: true },
+          )
         }
-        db.collection('layouts').doc(layoutId).collection('devices').doc(payload.device)
-          .set({
+        setDoc(
+          doc(db, `layouts/${layoutId}/devices/${payload.device}`),
+          {
             client: 'dejaJS',
             isConnected: true,
-            timestamp: FieldValue.serverTimestamp(),
-          }, { merge: true })
-          
+            timestamp: serverTimestamp(),
+          },
+          { merge: true },
+        )
+
         break
       default:
       //noop
@@ -135,8 +156,7 @@ export async function handleDejaCommands(
     log.fatal('Error handling deja command:', err)
   } finally {
     if (key) {
-      const cmd = rtdb.ref(`dejaCommands/${layoutId}/${key}`)
-      cmd.remove()
+      remove(ref(getRtdb(), `dejaCommands/${layoutId}/${key}`))
     }
   }
 }

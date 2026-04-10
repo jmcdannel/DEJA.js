@@ -1,4 +1,5 @@
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { getDb } from '../lib/firebase-client'
 import { log } from '../utils/logger'
 import { layout } from './layout'
 import type { Device } from '@repo/modules'
@@ -10,10 +11,10 @@ export function startDeviceConfigSync() {
   if (devicesListener) return;
 
   log.info('[LAYOUT] Starting real-time device config sync listener')
-  
-  const devicesRef = db.collection('layouts').doc(layoutId).collection('devices')
-  
-  devicesListener = devicesRef.onSnapshot((snapshot) => {
+
+  const devicesRef = collection(getDb(), `layouts/${layoutId}/devices`)
+
+  devicesListener = onSnapshot(devicesRef, (snapshot) => {
     snapshot.docChanges().forEach((change) => {
       const deviceId = change.doc.id
       const deviceData = change.doc.data() as Device
@@ -42,7 +43,8 @@ export function startDeviceConfigSync() {
         }
       }
     })
-  }, (err) => {
+  },
+  (err) => {
     log.error(`[LAYOUT] Error listening to device changes:`, err)
   })
 }

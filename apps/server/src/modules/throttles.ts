@@ -1,11 +1,12 @@
 import {
   type DocumentData,
+  type DocumentChange,
+  type QuerySnapshot,
   collection,
   onSnapshot,
   getDocs,
-  query,
 } from 'firebase/firestore'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import { getDb } from '../lib/firebase-client.js'
 import type { Loco } from '@repo/modules'
 import { log } from '../utils/logger.js'
 import { dcc, type ThrottlePayload } from '../lib/dcc.js'
@@ -19,29 +20,34 @@ export async function listenToLocoChanges(): Promise<void> {
     return
   }
   log.start('Throttles listening for loco changes on layout: ', layoutId)
-  db.collection(`layouts/${layoutId}/locos`).onSnapshot((snapshot) => {
-    snapshot.docChanges().forEach(async (change) => {
-      const loco = change.doc.data()
-      // log.log('Loco change', change.type, loco)
-      if (change.type === 'added') {
-        locos.push({ ...loco, id: change.doc.id } as Loco)
-      } else if (change.type === 'modified') {
-        const index = locos.findIndex((l) => l.id === change.doc.id)
-        locos[index] = { ...loco, id: change.doc.id } as Loco
-      } else if (change.type === 'removed') {
-        locos = locos.filter((l) => l.id !== change.doc.id)
-      }
-    })
-    // console.log('Locos', JSON.stringify(locos, null, 2))
-  })
+  onSnapshot(
+    collection(getDb(), `layouts/${layoutId}/locos`),
+    (snapshot) => {
+      snapshot.docChanges().forEach(async (change) => {
+        const loco = change.doc.data()
+        // log.log('Loco change', change.type, loco)
+        if (change.type === 'added') {
+          locos.push({ ...loco, id: change.doc.id } as Loco)
+        } else if (change.type === 'modified') {
+          const index = locos.findIndex((l) => l.id === change.doc.id)
+          locos[index] = { ...loco, id: change.doc.id } as Loco
+        } else if (change.type === 'removed') {
+          locos = locos.filter((l) => l.id !== change.doc.id)
+        }
+      })
+      // console.log('Locos', JSON.stringify(locos, null, 2))
+    },
+  )
   // console.log('Throttles listening for loco changes')
 }
 
 async function getLocos(): Promise<Loco[]> {
   try {
     if (locos.length === 0) {
-      const locosData = await db.collection(`layouts/${layoutId}/locos`).get()
-      locos = locosData.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Loco))
+      const locosData = await getDocs(
+        collection(getDb(), `layouts/${layoutId}/locos`),
+      )
+      locos = locosData.docs.map((d) => ({ ...d.data(), id: d.id } as Loco))
     }
     return locos
   } catch (error) {
@@ -73,8 +79,8 @@ function calculateConsistSpeed(baseSpeed: number, trim: number, consistDirection
 
 }
 
-export async function handleThrottleChange(snapshot: DocumentData): Promise<void> {
-  snapshot.docChanges().forEach(async (change: DocumentData) => {
+export async function handleThrottleChange(snapshot: QuerySnapshot<DocumentData>): Promise<void> {
+  snapshot.docChanges().forEach(async (change: DocumentChange<DocumentData>) => {
     const throttleCmd: ThrottlePayload = {
       address: change.doc.data().address,
       speed: change.doc.data().direction

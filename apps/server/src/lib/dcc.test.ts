@@ -2,21 +2,24 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // ---------------------------------------------------------------------------
 // Mock heavy dependencies before importing the module under test so that
-// vitest doesn't try to load Firebase Admin, SerialPort, etc.
+// vitest doesn't try to load Firebase, SerialPort, etc.
 // ---------------------------------------------------------------------------
-vi.mock('@repo/firebase-config/firebase-admin-node', () => ({
-  rtdb: { ref: vi.fn(() => ({ remove: vi.fn() })) },
-  db: {
-    collection: vi.fn(() => ({
-      doc: vi.fn(() => ({
-        set: vi.fn(),
-      })),
-    })),
-  },
+vi.mock('./firebase-client', () => ({
+  getDb: vi.fn(() => ({ __type: 'mock-firestore' })),
+  getRtdb: vi.fn(() => ({ __type: 'mock-rtdb' })),
 }))
 
-vi.mock('firebase-admin/firestore', () => ({
-  FieldValue: { serverTimestamp: vi.fn() },
+vi.mock('firebase/firestore', () => ({
+  doc: vi.fn(),
+  setDoc: vi.fn(),
+  serverTimestamp: vi.fn(),
+}))
+
+vi.mock('firebase/database', () => ({
+  ref: vi.fn(),
+  push: vi.fn(),
+  remove: vi.fn(),
+  serverTimestamp: vi.fn(),
 }))
 
 vi.mock('serialport', () => ({
@@ -24,7 +27,13 @@ vi.mock('serialport', () => ({
 }))
 
 vi.mock('./serial', () => ({
-  serial: { connect: vi.fn(), send: vi.fn(), disconnect: vi.fn(), disconnectAll: vi.fn() },
+  serial: {
+    addDataListener: vi.fn(),
+    connect: vi.fn(),
+    send: vi.fn(),
+    disconnect: vi.fn(),
+    disconnectAll: vi.fn(),
+  },
 }))
 
 vi.mock('../broadcast', () => ({
@@ -49,6 +58,12 @@ vi.mock('../utils/logger', () => ({
 import { isPowerCommand, dcc } from './dcc'
 import { serial } from './serial'
 import { broadcast } from '../broadcast'
+
+// Register a fake device so that broadcastToAll() has a target to dispatch
+// commands to. The actual port object is opaque — serial.send is mocked, so
+// it just needs to be truthy to pass the registry's connectivity check.
+const fakePort = { __type: 'mock-port' } as unknown as any
+dcc.registerDevice('test-device', fakePort)
 
 // ---------------------------------------------------------------------------
 // isPowerCommand — pure function, no mocking needed

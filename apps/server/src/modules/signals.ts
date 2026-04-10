@@ -1,4 +1,4 @@
-import type { DocumentData } from 'firebase-admin/firestore'
+import type { DocumentData, QuerySnapshot, DocumentChange } from 'firebase/firestore'
 import type { Signal } from '@repo/modules/signals'
 import { log } from '../utils/logger.js'
 import { handleEffect } from './effects.js'
@@ -43,8 +43,8 @@ async function applySignalAspect(signal: Signal): Promise<void> {
   await Promise.all(tasks)
 }
 
-export async function handleSignalChange(snapshot: DocumentData): Promise<void> {
-  snapshot.docChanges().forEach(async (change: DocumentData) => {
+export async function handleSignalChange(snapshot: QuerySnapshot<DocumentData>): Promise<void> {
+  snapshot.docChanges().forEach(async (change: DocumentChange<DocumentData>) => {
     const data = change.doc.data() as Signal | undefined
     if (!data) return
 

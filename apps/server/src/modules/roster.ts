@@ -1,6 +1,15 @@
-import { ServerValue } from 'firebase-admin/database'
-import { FieldValue } from 'firebase-admin/firestore'
-import { rtdb, db } from '@repo/firebase-config/firebase-admin-node'
+import {
+  ref,
+  set,
+  serverTimestamp as rtdbServerTimestamp,
+} from 'firebase/database'
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+} from 'firebase/firestore'
+import { getDb, getRtdb } from '../lib/firebase-client.js'
 import { log } from '../utils/logger.js'
 
 const layoutId = process.env.LAYOUT_ID
@@ -34,11 +43,11 @@ async function writeRosterSyncStatus(
 ): Promise<void> {
   try {
     if (!layoutId) return
-    await rtdb.ref(`rosterSync/${layoutId}`).set({
+    await set(ref(getRtdb(), `rosterSync/${layoutId}`), {
       importedCount,
       message,
       status,
-      timestamp: ServerValue.TIMESTAMP,
+      timestamp: rtdbServerTimestamp(),
     })
   } catch (err) {
     log.error('[ROSTER] Failed to write sync status:', err)
@@ -148,19 +157,18 @@ export function createRosterModule(
     const results = await Promise.all(
       collectedEntries.map(async (entry) => {
         try {
-          const docRef = db
-            .collection('layouts')
-            .doc(layoutId!)
-            .collection('locos')
-            .doc(entry.address.toString())
-          const existing = await docRef.get()
-          if (!existing.exists) {
-            await docRef.set({
+          const docRef = doc(
+            getDb(),
+            `layouts/${layoutId!}/locos/${entry.address.toString()}`,
+          )
+          const existing = await getDoc(docRef)
+          if (!existing.exists()) {
+            await setDoc(docRef, {
               address: entry.address,
               hasSound: true,
               meta: {},
               name: entry.name,
-              timestamp: FieldValue.serverTimestamp(),
+              timestamp: serverTimestamp(),
             })
             log.success(`[ROSTER] Imported loco ${entry.address} "${entry.name}"`)
             return 1

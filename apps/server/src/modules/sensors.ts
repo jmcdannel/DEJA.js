@@ -1,5 +1,13 @@
-import { FieldValue, type DocumentData } from 'firebase-admin/firestore'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  type DocumentData,
+  type DocumentChange,
+  type QuerySnapshot,
+} from 'firebase/firestore'
+import { getDb } from '../lib/firebase-client.js'
 import { log } from '../utils/logger'
 import { broadcast } from '../broadcast'
 import { handleMacro } from './effects.js'
@@ -67,11 +75,16 @@ async function handleSensorActivation(sensor: any): Promise<void> {
 
   const state = sensor.invertState ? !sensor.state : sensor.state
 
+  const db = getDb()
+
   // Trigger linked effect
   if (sensor.effectId) {
     try {
-      await db.collection('layouts').doc(layoutId).collection('effects').doc(sensor.effectId)
-        .set({ state, timestamp: FieldValue.serverTimestamp() }, { merge: true })
+      await setDoc(
+        doc(db, `layouts/${layoutId}/effects/${sensor.effectId}`),
+        { state, timestamp: serverTimestamp() },
+        { merge: true },
+      )
       log.success(`[SENSORS] Triggered effect ${sensor.effectId} for sensor ${sensor.id}`)
     } catch (error) {
       log.error(`[SENSORS] Failed to trigger effect for sensor ${sensor.id}:`, error)
@@ -81,9 +94,10 @@ async function handleSensorActivation(sensor: any): Promise<void> {
   // Trigger linked automation
   if (sensor.automationId) {
     try {
-      const automationDoc = await db.collection('layouts').doc(layoutId)
-        .collection('automations').doc(sensor.automationId).get()
-      if (automationDoc.exists) {
+      const automationDoc = await getDoc(
+        doc(db, `layouts/${layoutId}/automations/${sensor.automationId}`),
+      )
+      if (automationDoc.exists()) {
         const automation = { id: automationDoc.id, ...automationDoc.data() }
         await handleSensorAutomation(sensor, automation)
       }
@@ -138,31 +152,46 @@ async function handleSensorAutomation(sensor: any, automation: any): Promise<voi
 async function processAction(action: any): Promise<void> {
   if (!layoutId) return
 
+  const db = getDb()
+
   switch (action.type) {
     case 'effect':
-      await db.collection('layouts').doc(layoutId).collection('effects').doc(action.id)
-        .set({ state: action.state ?? true, timestamp: FieldValue.serverTimestamp() }, { merge: true })
+      await setDoc(
+        doc(db, `layouts/${layoutId}/effects/${action.id}`),
+        { state: action.state ?? true, timestamp: serverTimestamp() },
+        { merge: true },
+      )
       break
     case 'turnout':
-      await db.collection('layouts').doc(layoutId).collection('turnouts').doc(action.id)
-        .set({ state: action.state ?? false, timestamp: FieldValue.serverTimestamp() }, { merge: true })
+      await setDoc(
+        doc(db, `layouts/${layoutId}/turnouts/${action.id}`),
+        { state: action.state ?? false, timestamp: serverTimestamp() },
+        { merge: true },
+      )
       break
     case 'signal':
-      await db.collection('layouts').doc(layoutId).collection('signals').doc(action.id)
-        .set({ aspect: action.aspect ?? null, timestamp: FieldValue.serverTimestamp() }, { merge: true })
+      await setDoc(
+        doc(db, `layouts/${layoutId}/signals/${action.id}`),
+        { aspect: action.aspect ?? null, timestamp: serverTimestamp() },
+        { merge: true },
+      )
       break
     case 'throttle':
-      await db.collection('layouts').doc(layoutId).collection('throttles').doc(action.id)
-        .set({
+      await setDoc(
+        doc(db, `layouts/${layoutId}/throttles/${action.id}`),
+        {
           speed: action.speed ?? 0,
           direction: action.direction ?? true,
-          timestamp: FieldValue.serverTimestamp(),
-        }, { merge: true })
+          timestamp: serverTimestamp(),
+        },
+        { merge: true },
+      )
       break
     case 'route': {
-      const routeDoc = await db.collection('layouts').doc(layoutId)
-        .collection('routes').doc(action.id).get()
-      if (!routeDoc.exists) {
+      const routeDoc = await getDoc(
+        doc(db, `layouts/${layoutId}/routes/${action.id}`),
+      )
+      if (!routeDoc.exists()) {
         log.warn(`[SENSORS] Route ${action.id} not found`)
         break
       }
@@ -170,17 +199,21 @@ async function processAction(action: any): Promise<void> {
       const turnouts: Array<{ id?: string | number; state?: boolean }> = route?.turnouts || []
       for (const turnout of turnouts) {
         if (turnout.id) {
-          await db.collection('layouts').doc(layoutId).collection('turnouts').doc(turnout.id.toString())
-            .set({ state: turnout.state ?? true, timestamp: FieldValue.serverTimestamp() }, { merge: true })
+          await setDoc(
+            doc(db, `layouts/${layoutId}/turnouts/${turnout.id.toString()}`),
+            { state: turnout.state ?? true, timestamp: serverTimestamp() },
+            { merge: true },
+          )
         }
       }
       log.success(`[SENSORS] Executed route ${action.id} (${turnouts.length} turnouts)`)
       break
     }
     case 'macro': {
-      const macroDoc = await db.collection('layouts').doc(layoutId)
-        .collection('effects').doc(action.id).get()
-      if (!macroDoc.exists) {
+      const macroDoc = await getDoc(
+        doc(db, `layouts/${layoutId}/effects/${action.id}`),
+      )
+      if (!macroDoc.exists()) {
         log.warn(`[SENSORS] Macro effect ${action.id} not found`)
         break
       }
@@ -195,7 +228,7 @@ async function processAction(action: any): Promise<void> {
   }
 }
 
-export async function handleSensorChange(snapshot: DocumentData): Promise<void> {
+export async function handleSensorChange(snapshot: QuerySnapshot<DocumentData>): Promise<void> {
   if (!layoutId) {
     log.error('Layout ID is not set')
     return
@@ -205,8 +238,9 @@ export async function handleSensorChange(snapshot: DocumentData): Promise<void> 
     return
   }
 
-  snapshot.docChanges().forEach(async (change: DocumentData) => {
-    const sensor = { id: change.doc.id, ...change.doc.data() }
+  snapshot.docChanges().forEach(async (change: DocumentChange<DocumentData>) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- sensor documents have flexible schema from Firestore
+    const sensor = { id: change.doc.id, ...change.doc.data() } as any
     if (change.type === 'modified') {
       log.log('[SENSORS] Sensor modified', sensor.id, Boolean(sensor.state))
       if (shouldProcess(sensor)) {
