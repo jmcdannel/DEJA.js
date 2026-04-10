@@ -52,7 +52,7 @@ const wiring = (signal: Signal) => signal.commonAnode ? 'Common Anode' : 'Common
       @start="onDragStart"
       @end="onDragEnd"
     >
-      <template #header>
+      <template v-if="$slots.prepend" #header>
         <div>
           <slot name="prepend"></slot>
         </div>

@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useCollection } from 'vuefire'
-import { useStorage } from '@vueuse/core'
 import { usePowerDistricts, useLayout, type Device, type PowerDistrict } from '@repo/modules'
 import { useTrackOutputs, type TrackOutput } from '@repo/dccex'
-import { PowerDistrictCard, PageHeader } from '@repo/ui'
+import { PowerDistrictCard } from '@repo/ui'
 import { useNotification } from '@repo/ui'
+import ListPage from '@/Core/UI/ListPage.vue'
+import EmptyState from '@/Core/UI/EmptyState.vue'
 
-const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
 const { getPowerDistricts, setPowerDistrict, deletePowerDistrict } = usePowerDistricts()
 const { getDevices } = useLayout()
 const { notify } = useNotification()
@@ -82,12 +81,15 @@ async function handleTogglePower(district: PowerDistrict, newState: boolean) {
 </script>
 
 <template>
-  <div class="pa-4">
-    <PageHeader title="Power Districts" icon="mdi-lightning-bolt" />
-
-    <div class="mb-4 d-flex align-center gap-2">
+  <ListPage
+    title="Power Districts"
+    icon="mdi-lightning-bolt"
+    color="violet"
+    :empty="!!districts && districts.length === 0 && !showAddForm"
+  >
+    <template #actions>
       <v-btn
-        color="primary"
+        color="violet"
         variant="flat"
         size="small"
         prepend-icon="mdi-plus"
@@ -95,7 +97,7 @@ async function handleTogglePower(district: PowerDistrict, newState: boolean) {
       >
         Add District
       </v-btn>
-    </div>
+    </template>
 
     <!-- Add District Form -->
     <v-expand-transition>
@@ -164,7 +166,7 @@ async function handleTogglePower(district: PowerDistrict, newState: boolean) {
           </v-col>
           <v-col cols="12" sm="2" class="d-flex align-center">
             <v-btn
-              color="primary"
+              color="violet"
               variant="flat"
               size="small"
               :disabled="!newName || !newDeviceId || !newOutput"
@@ -177,7 +179,7 @@ async function handleTogglePower(district: PowerDistrict, newState: boolean) {
       </v-card>
     </v-expand-transition>
 
-    <!-- District List -->
+    <!-- District list -->
     <div v-if="districts && districts.length > 0">
       <PowerDistrictCard
         v-for="district in districts"
@@ -189,12 +191,21 @@ async function handleTogglePower(district: PowerDistrict, newState: boolean) {
         @delete="handleDeleteDistrict"
       />
     </div>
-    <v-card v-else variant="outlined" class="pa-6 text-center">
-      <v-icon size="48" color="grey" class="mb-2">mdi-lightning-bolt-outline</v-icon>
-      <div class="text-subtitle-1 text-grey">No power districts configured</div>
-      <div class="text-caption text-medium-emphasis">
-        Power districts let you name and control individual track outputs across your command stations.
-      </div>
-    </v-card>
-  </div>
+
+    <template #empty-state>
+      <EmptyState
+        icon="mdi-lightning-bolt"
+        color="violet"
+        title="No Power Districts Yet"
+        description="Power districts let you name and control individual track outputs across your command stations."
+        :use-cases="[
+          { icon: 'mdi-format-list-bulleted', text: 'Name individual track outputs' },
+          { icon: 'mdi-toggle-switch', text: 'Toggle power per district' },
+          { icon: 'mdi-palette', text: 'Color-code your layout' },
+        ]"
+        action-label="Add Your First District"
+        @action="showAddForm = true"
+      />
+    </template>
+  </ListPage>
 </template>

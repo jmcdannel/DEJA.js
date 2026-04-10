@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import DocLink from '../DocLink';
-import PhoneMockup from './PhoneMockup';
 
 const apps = [
   { label: 'Throttle', desc: 'Drive trains, throw turnouts, trigger effects', href: '/throttle', docsHref: '/docs/apps/throttle' },
@@ -62,18 +61,25 @@ export default function AppsSection() {
           </p>
         </motion.div>
 
-        {/* Device mockups with parallax depth */}
+        {/* Device screenshots with parallax depth — no frames */}
         <div className="flex items-end justify-center gap-4">
           <motion.div style={{ y: phoneY, opacity: phoneOpacity }}>
-            <PhoneMockup src="/screenshots/throttle_mobile_throttle.png" alt="Throttle app on mobile" className="w-[140px]" />
+            <Image
+              src="/screenshots/throttle_mobile_throttle.png"
+              alt="Throttle app on mobile"
+              width={260}
+              height={560}
+              className="w-[140px] h-auto rounded-xl shadow-2xl"
+            />
           </motion.div>
           <motion.div style={{ y: tabletY, opacity: tabletOpacity }}>
-            <div className="rounded-2xl border-2 border-gray-700 bg-gray-900 p-2 shadow-2xl w-[280px]">
-              <div className="mx-auto w-8 h-1 bg-gray-800 rounded-full mb-1" />
-              <div className="rounded-xl overflow-hidden">
-                <Image src="/screenshots/cloud_desktop_roster.png" alt="Cloud dashboard" width={560} height={350} className="w-full h-auto" />
-              </div>
-            </div>
+            <Image
+              src="/screenshots/cloud_desktop_roster.png"
+              alt="Cloud dashboard"
+              width={560}
+              height={350}
+              className="w-[280px] h-auto rounded-xl shadow-2xl"
+            />
           </motion.div>
         </div>
       </div>

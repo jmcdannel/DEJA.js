@@ -17,7 +17,7 @@ function handleEdit(item: TrackDiagram) {
 <template>
   <v-container v-if="list?.length">
     <v-row v-auto-animate>
-      <v-col cols="12"><slot name="prepend" /></v-col>
+      <v-col v-if="$slots.prepend" cols="12"><slot name="prepend" /></v-col>
       <v-col
         v-for="item in list"
         :key="item.id"

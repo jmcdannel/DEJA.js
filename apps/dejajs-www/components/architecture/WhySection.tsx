@@ -96,7 +96,7 @@ export default function WhySection() {
       {/* Comparison cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {comparisons.map((comp, i) => (
-          <ComparisonCard key={comp.label} comparison={comp} index={i} scrollProgress={scrollYProgress} />
+          <ComparisonCard key={comp.label} comparison={comp} index={i} />
         ))}
       </div>
     </section>
@@ -130,19 +130,20 @@ function TechCard({
 function ComparisonCard({
   comparison,
   index,
-  scrollProgress,
 }: {
   comparison: (typeof comparisons)[number];
   index: number;
-  scrollProgress: ReturnType<typeof useScroll>['scrollYProgress'];
 }) {
-  const start = 0.55 + index * 0.06;
-  const end = start + 0.1;
-  const opacity = useTransform(scrollProgress, [start, end], [0, 1]);
-  const x = useTransform(scrollProgress, [start, end], [index === 0 ? -32 : 32, 0]);
-
+  // whileInView — the card fires as soon as it enters the viewport so the
+  // animation no longer depends on scroll progress, which can't reach 1 for
+  // the last section on the page.
   return (
-    <motion.div style={{ opacity, x }}>
+    <motion.div
+      initial={{ opacity: 0, x: index === 0 ? -32 : 32 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div className="rounded-xl border border-gray-700/50 bg-gray-800/30 p-6 h-full">
         <p className="text-white font-semibold mb-4">{comparison.label}</p>
         <ul className="space-y-3">
