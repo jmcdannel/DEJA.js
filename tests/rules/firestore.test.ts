@@ -61,3 +61,61 @@ describe('firestore.rules — users/{uid}.subscription', () => {
     })
   })
 })
+
+describe('firestore.rules — layout subcollections', () => {
+  it('denies non-owner access to turnouts', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'layouts/layout-alice'), { ownerUid: 'alice' })
+      await setDoc(doc(ctx.firestore(), 'layouts/layout-alice/turnouts/t1'), { state: 0 })
+    })
+    const bob = testEnv.authenticatedContext('bob', { email: 'bob@test.com' })
+    await assertFails(getDoc(doc(bob.firestore(), 'layouts/layout-alice/turnouts/t1')))
+  })
+
+  it('allows owner to write turnouts', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'layouts/layout-alice'), { ownerUid: 'alice' })
+    })
+    const alice = testEnv.authenticatedContext('alice', { email: 'alice@test.com' })
+    await assertSucceeds(setDoc(doc(alice.firestore(), 'layouts/layout-alice/turnouts/t1'), { state: 1 }))
+  })
+
+  it('denies non-owner access to effects', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'layouts/layout-alice'), { ownerUid: 'alice' })
+      await setDoc(doc(ctx.firestore(), 'layouts/layout-alice/effects/e1'), { state: 'on' })
+    })
+    const bob = testEnv.authenticatedContext('bob', { email: 'bob@test.com' })
+    await assertFails(getDoc(doc(bob.firestore(), 'layouts/layout-alice/effects/e1')))
+  })
+})
+
+describe('firestore.rules — devicePairings', () => {
+  it('denies all client writes', async () => {
+    const alice = testEnv.authenticatedContext('alice', { email: 'alice@test.com' })
+    await assertFails(setDoc(doc(alice.firestore(), 'devicePairings/p1'), { uid: 'alice' }))
+  })
+
+  it('allows user to read their own pairing', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'devicePairings/p1'), { uid: 'alice' })
+    })
+    const alice = testEnv.authenticatedContext('alice', { email: 'alice@test.com' })
+    await assertSucceeds(getDoc(doc(alice.firestore(), 'devicePairings/p1')))
+  })
+
+  it("denies user reading another user's pairing", async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'devicePairings/p1'), { uid: 'alice' })
+    })
+    const bob = testEnv.authenticatedContext('bob', { email: 'bob@test.com' })
+    await assertFails(getDoc(doc(bob.firestore(), 'devicePairings/p1')))
+  })
+})
+
+describe('firestore.rules — layouts/{layoutId} create denial', () => {
+  it('denies all client creates of layouts (must go through /api/layouts/create)', async () => {
+    const alice = testEnv.authenticatedContext('alice', { email: 'alice@test.com' })
+    await assertFails(setDoc(doc(alice.firestore(), 'layouts/new-layout'), { ownerUid: 'alice', name: 'Test' }))
+  })
+})

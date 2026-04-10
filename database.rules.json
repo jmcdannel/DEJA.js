@@ -1,9 +1,15 @@
 {
   "rules": {
+    "layoutOwners": {
+      "$layoutId": {
+        ".read": "auth != null && data.val() === auth.uid",
+        ".write": false
+      }
+    },
     "dccCommands": {
       "$layoutId": {
-        ".read": "auth != null && root.child('layouts').child($layoutId).child('owner').val() === auth.token.email",
-        ".write": "auth != null && root.child('layouts').child($layoutId).child('owner').val() === auth.token.email",
+        ".read": "auth != null && root.child('layoutOwners').child($layoutId).val() === auth.uid",
+        ".write": "auth != null && root.child('layoutOwners').child($layoutId).val() === auth.uid",
         "$commandId": {
           ".validate": "newData.hasChildren(['action']) && newData.child('action').isString() && newData.child('action').val().length < 50 && newData.child('payload').isString() && newData.child('payload').val().length < 500"
         }
@@ -11,11 +17,29 @@
     },
     "dejaCommands": {
       "$layoutId": {
-        ".read": "auth != null && root.child('layouts').child($layoutId).child('owner').val() === auth.token.email",
-        ".write": "auth != null && root.child('layouts').child($layoutId).child('owner').val() === auth.token.email",
+        ".read": "auth != null && root.child('layoutOwners').child($layoutId).val() === auth.uid",
+        ".write": "auth != null && root.child('layoutOwners').child($layoutId).val() === auth.uid",
         "$commandId": {
           ".validate": "newData.hasChildren(['action']) && newData.child('action').isString() && newData.child('action').val().length < 50 && newData.child('payload').isString() && newData.child('payload').val().length < 500"
         }
+      }
+    },
+    "dccLog": {
+      "$layoutId": {
+        ".read": "auth != null && root.child('layoutOwners').child($layoutId).val() === auth.uid",
+        ".write": "auth != null && root.child('layoutOwners').child($layoutId).val() === auth.uid"
+      }
+    },
+    "serverStatus": {
+      "$layoutId": {
+        ".read": "auth != null && root.child('layoutOwners').child($layoutId).val() === auth.uid",
+        ".write": "auth != null && root.child('layoutOwners').child($layoutId).val() === auth.uid"
+      }
+    },
+    "portList": {
+      "$layoutId": {
+        ".read": "auth != null && root.child('layoutOwners').child($layoutId).val() === auth.uid",
+        ".write": "auth != null && root.child('layoutOwners').child($layoutId).val() === auth.uid"
       }
     },
     "$other": {

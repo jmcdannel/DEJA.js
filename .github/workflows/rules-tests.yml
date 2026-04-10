@@ -1,0 +1,49 @@
+name: Firebase Rules Tests
+
+on:
+  pull_request:
+    paths:
+      - 'firestore.rules'
+      - 'database.rules.json'
+      - 'tests/rules/**'
+      - 'firebase.json'
+      - '.github/workflows/rules-tests.yml'
+  push:
+    branches:
+      - main
+      - preview
+    paths:
+      - 'firestore.rules'
+      - 'database.rules.json'
+      - 'tests/rules/**'
+      - 'firebase.json'
+
+jobs:
+  rules-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup Java (for Firebase emulator)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Firebase rules tests
+        working-directory: tests/rules
+        run: pnpm test

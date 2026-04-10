@@ -3,107 +3,109 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper: Check if the user is authenticated
     function isAuth() {
       return request.auth != null;
     }
 
-    // Helper: Check if the user owns the layout
+    // Layout ownership is keyed on UID. The layout doc must carry
+    // ownerUid — backfilled by scripts/migrations/2026-04-backfill-ownerUid.mjs
+    // for legacy docs and set on creation by /api/layouts/create.
     function isLayoutOwner(layoutId) {
-      return isAuth() &&
-        get(/databases/$(database)/documents/layouts/$(layoutId)).data.owner == request.auth.token.email;
+      return isAuth()
+        && get(/databases/$(database)/documents/layouts/$(layoutId)).data.ownerUid == request.auth.uid;
     }
 
-    // Layouts collection
+    function isLayoutOwnerByResource(resource) {
+      return isAuth() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    // --- Layouts ---------------------------------------------------------
     match /layouts/{layoutId} {
-      // Anyone authenticated can list layouts (filtered client-side by owner)
-      allow read: if isAuth();
-      // Only the owner can write their layout
-      allow create: if isAuth() && request.resource.data.owner == request.auth.token.email;
-      allow update, delete: if isLayoutOwner(layoutId);
+      // Reads: only the owner can fetch a specific layout
+      allow get: if isLayoutOwnerByResource(resource);
 
-      // Locos - only layout owner can read/write
-      match /locos/{locoId} {
+      // Lists: only when filtered by ownerUid == auth.uid (cross-tenant
+      // enumeration is denied — clients must use a where() clause)
+      allow list: if isAuth();
+
+      // Creates: client writes are denied entirely. Layout creation must
+      // go through /api/layouts/create which runs as the admin SDK and
+      // sets ownerUid + the layoutOwners RTDB mirror atomically.
+      allow create: if false;
+
+      // Updates: layout owner only. Cannot change ownerUid.
+      allow update: if isLayoutOwnerByResource(resource)
+        && request.resource.data.ownerUid == resource.data.ownerUid;
+
+      // Deletes: layout owner only.
+      allow delete: if isLayoutOwnerByResource(resource);
+
+      // All sub-collections: only the layout owner can read or write.
+      // Covers turnouts, signals, effects, throttles, devices, tags,
+      // routes, locos, sensors, blocks, trackDiagrams, etc.
+      match /{subcollection}/{docId} {
         allow read, write: if isLayoutOwner(layoutId);
       }
 
-      // Throttles - layout owner can read/write
-      match /throttles/{throttleId} {
-        allow read, write: if isLayoutOwner(layoutId);
-      }
-
-      // Turnouts - layout owner can read/write
-      match /turnouts/{turnoutId} {
-        allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
-      }
-
-      // Signals - layout owner can read/write
-      match /signals/{signalId} {
-        allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
-      }
-
-      // Effects - guests can read effects with allowGuest=true
-      match /effects/{effectId} {
-        allow read: if isAuth();
-        // Guests can update state on guest-allowed effects only
-        allow update: if isAuth()
-          && resource.data.allowGuest == true
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['state', 'timestamp']);
-        // Full write for layout owner
-        allow create, delete: if isLayoutOwner(layoutId);
-        allow update: if isLayoutOwner(layoutId);
-      }
-
-      // Routes - layout owner can manage, authenticated can read
-      match /routes/{routeId} {
-        allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
-      }
-
-      // Devices - layout owner only
-      match /devices/{deviceId} {
-        allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
-      }
-
-      // Tags - layout owner only
-      match /tags/{tagId} {
-        allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
-      }
-
-      // Track diagrams - layout owner only
-      match /trackDiagrams/{diagramId} {
-        allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
+      // Approval requests use a subcollection. Anyone authenticated can
+      // create a request for a layout (with their own UID), but only the
+      // requester or the layout owner can read/manage it.
+      match /approvalRequests/{requestId} {
+        allow create: if isAuth()
+          && request.resource.data.requesterUid == request.auth.uid;
+        allow read: if isAuth() && (
+          resource.data.requesterUid == request.auth.uid
+          || isLayoutOwner(layoutId)
+        );
+        allow update, delete: if isLayoutOwner(layoutId);
       }
     }
 
-    // User preferences (backgrounds, settings, subscription) — each user owns their doc
+    // --- Users -----------------------------------------------------------
+    // Users can read and write their own profile, EXCEPT the subscription
+    // field — that's controlled exclusively by the Stripe webhook running
+    // with the Admin SDK (which bypasses rules).
     match /users/{userId} {
-      allow read, write: if isAuth() && request.auth.uid == userId;
+      allow read: if isAuth() && request.auth.uid == userId;
+
+      allow create: if isAuth()
+        && request.auth.uid == userId
+        && !('subscription' in request.resource.data);
+
+      // Allow updates only when the subscription field is unchanged.
+      // affectedKeys() returns the top-level keys that were added,
+      // removed, or modified — if 'subscription' is in there, deny.
+      allow update: if isAuth()
+        && request.auth.uid == userId
+        && !('subscription' in request.resource.data.diff(resource.data).affectedKeys());
+
+      allow delete: if false;
     }
 
-    // Approval requests — authenticated users can create/read their own
-    match /approvalRequests/{layoutId} {
-      allow read: if isAuth();
-      allow create, update: if isAuth();
+    // --- Device pairings -------------------------------------------------
+    // Only the admin SDK (via /api/devices/* routes) writes. Clients can
+    // read their own pairings to render the Settings → Devices UI.
+    match /devicePairings/{pairingId} {
+      allow read: if isAuth() && resource.data.uid == request.auth.uid;
+      allow write: if false;
     }
 
-    // Test effects collection (for sound testing)
-    match /testEffects/{docId} {
-      allow read, write: if isAuth();
+    // --- Device pairing codes (device-code flow) -------------------------
+    // Only the admin SDK reads/writes. Clients never touch these directly;
+    // pair-poll/pair-approve/pair-start go through admin-authed routes.
+    match /devicePairingCodes/{codeId} {
+      allow read, write: if false;
     }
 
-    // Promotions — public read, admin SDK handles writes (bypasses rules)
+    // --- Promotions ------------------------------------------------------
+    // Public read (e.g., the marketing site fetches active promo codes),
+    // admin SDK writes only.
     match /promotions/{promoId} {
       allow read: if true;
       allow write: if false;
     }
 
-    // Deny everything else by default
+    // --- Default deny ----------------------------------------------------
     match /{document=**} {
       allow read, write: if false;
     }
