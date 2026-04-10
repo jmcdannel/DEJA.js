@@ -137,7 +137,7 @@ const trackerStep = computed(() => {
 <template>
   <v-container class="max-w-5xl mx-auto py-8">
     <div class="flex flex-col items-center mb-8">
-      <Logo size="xl" :show-icon="true" variant="cloud" app-title="Cloud" class="mb-2" />
+      <Logo size="xl" mark-style="logo" layout="product" variant="cloud" app-title="Cloud" class="mb-2" />
       <p class="opacity-60 text-sm">
         Time to put the "smart" in your choo-choos. Let's get you on the rails.
       </p>

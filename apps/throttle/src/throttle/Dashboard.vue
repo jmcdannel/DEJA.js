@@ -244,7 +244,7 @@ onBeforeUnmount(() => {
             :color="loco.meta?.roadname ? ROADNAMES.find(r => r.value === loco.meta?.roadname)?.color : undefined"
             size="sm"
           />
-          <ConsistIndicator v-if="loco" :loco="loco" />
+          <ConsistIndicator v-if="loco && showConsist" :loco="loco" />
           <v-spacer class="w-2 md:w-6" />
           <h1 class="text-xl md:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 drop-shadow-lg">
             {{ loco?.name }}

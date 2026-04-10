@@ -1,0 +1,160 @@
+{
+  "title": "Frequently Asked Questions",
+  "sections": [
+    {
+      "heading": "Getting Started",
+      "entries": [
+        {
+          "question": "What is DEJA.js?",
+          "answer": "DEJA.js is a modern, cloud-synced control ecosystem for DCC-EX model railroads. It includes a web-based Throttle, a Cloud app for managing your layout, a local Server that talks to your DCC-EX CommandStation over USB, a Monitor dashboard, a Tour app for automated demos, and the `deja` command-line tool — all backed by real-time sync across every device on your network."
+        },
+        {
+          "question": "How does DEJA.js compare to older software like JMRI?",
+          "answer": "DEJA.js is a ground-up alternative built with modern web technology — Vue 3, TypeScript, WebSocket, and MQTT — with cloud sync at the core. Open the Throttle on your phone, a tablet, and a laptop at the same time and they all stay in sync instantly. No Java, no XML files, no DecoderPro imports. Install in about two minutes with a single command."
+        },
+        {
+          "question": "Where do I start?",
+          "answer": "Three steps: (1) Create a free account at cloud.dejajs.com and complete the onboarding wizard — it creates your layout and gives you a personalized install command. (2) Paste that command into a terminal on the computer connected to your DCC-EX CommandStation. The installer downloads the Server, links your account, and starts it. (3) Open throttle.dejajs.com on any device on your network and start driving."
+        }
+      ]
+    },
+    {
+      "heading": "Server Installation & CLI",
+      "entries": [
+        {
+          "question": "What hardware do I need to run the DEJA Server?",
+          "answer": "Any computer connected to your DCC-EX CommandStation over USB. macOS (Intel or Apple Silicon), Linux (x86_64 or ARM64), and Raspberry Pi 4/5 all work out of the box. Windows is supported through WSL. A Raspberry Pi is the most common choice for a dedicated layout PC."
+        },
+        {
+          "question": "What software do I need installed before running the Server?",
+          "answer": "Just Node.js 20 or later. The installer downloads a pre-built Server bundle and sets up everything else — you don't need pnpm, Git, or any build tools. On Linux and Raspberry Pi, your user may also need to be in the `dialout` group to access the USB serial port; the installer will tell you if it does."
+        },
+        {
+          "question": "How do I install the DEJA Server?",
+          "answer": "One command in a terminal on the computer connected to your CommandStation:\n\ncurl -fsSL https://install.dejajs.com | bash\n\nThe Cloud app also generates a personalized install link under Settings → Install that pre-fills your account and layout IDs, so the Server connects to the right place automatically. Full instructions live at dejajs.com/docs/server/installation."
+        },
+        {
+          "question": "What is the `deja` CLI?",
+          "answer": "`deja` is the command-line tool that manages the local Server. Use it to start and stop the Server (`deja start`, `deja stop`), check its status (`deja status`), tail logs (`deja logs -f`), update to the latest release (`deja update`), deploy firmware to Arduino and Pico W devices (`deja deploy`), and manage a Cloudflare Tunnel for remote access (`deja tunnel`). Running `deja start` opens an interactive terminal UI with live logs and a status bar."
+        },
+        {
+          "question": "How do I update the Server to the latest release?",
+          "answer": "Run `deja update`. It downloads the latest release from GitHub, swaps in the new Server bundle, and keeps your config and account intact. Updates never happen automatically — you stay in control."
+        }
+      ]
+    },
+    {
+      "heading": "Plans & Billing",
+      "entries": [
+        {
+          "question": "What plans does DEJA.js offer?",
+          "answer": "Three plans. Hobbyist is free forever — the Throttle app, a roster of up to 5 locomotives, Firebase onboarding, and docs support. Engineer ($7/month or $67/year) adds 25 locomotives, 2 layout configurations, up to 15 turnouts/signals/effects each, remote monitoring over a secure tunnel, and support tickets. Conductor ($18/month or $173/year) unlocks unlimited locomotives/turnouts/signals/effects, unlimited layouts, the Tour app, advanced automations, priority support, and a monthly setup session. Compare plans at dejajs.com/pricing."
+        },
+        {
+          "question": "Do I need a credit card to try DEJA.js?",
+          "answer": "No. The Hobbyist plan is free forever and doesn't require a credit card. Sign up at cloud.dejajs.com, complete the onboarding wizard, install the Server, and start driving trains. Upgrade anytime from the Cloud app when you want turnouts, signals, effects, or remote access."
+        },
+        {
+          "question": "Can I cancel or change plans anytime?",
+          "answer": "Yes. Upgrade, downgrade, or cancel from the Cloud app under Settings. Annual plans save roughly 20% compared to paying monthly. If you cancel, your account stays active through the end of the billing period and then drops back to the Hobbyist tier — your layout, roster, and devices are preserved."
+        }
+      ]
+    },
+    {
+      "heading": "Hardware & Devices",
+      "entries": [
+        {
+          "question": "What devices can I use as a throttle?",
+          "answer": "Anything with a modern web browser. The Throttle app runs on iPhone, iPad, Android phones and tablets, laptops, and desktops. Just open throttle.dejajs.com — no app install, no pairing. Multiple operators can each use their own device at the same time and everything stays in sync through the Cloud."
+        },
+        {
+          "question": "What microcontrollers are supported for expanding my layout?",
+          "answer": "DEJA.js IO ships with ready-to-deploy firmware for Arduino boards (Mega and compatibles) and CircuitPython boards (Raspberry Pi Pico W). Use them to add lights, sensors, servos, relays, signals, turnouts, and sound effects. Deploy firmware to a device straight from the terminal with `deja deploy`."
+        },
+        {
+          "question": "How does the system physically connect to my layout?",
+          "answer": "The DEJA Server runs on a computer connected to your DCC-EX CommandStation with a USB cable. The Server syncs state with DEJA Cloud (Firebase) in real time, so every Throttle, Cloud, and Monitor session instantly reflects the same layout state. Additional IO devices (Arduinos, Pico W boards) connect to the Server over WebSocket or MQTT on your local network."
+        },
+        {
+          "question": "How difficult is it to configure an Arduino or Pico W for lights, sensors, or servos?",
+          "answer": "Much easier than hand-rolling firmware. In the Cloud app you register the device and map each pin as an input or output. The Cloud generates the config file (`config.h` for Arduino, `settings.toml` + `config.json` for Pico W) and `deja deploy` flashes it to the board for you. No sketch editing, no library hunting."
+        },
+        {
+          "question": "Can DEJA.js generate DCC-EX automation code for my CommandStation?",
+          "answer": "Yes. The Cloud app can generate a `myAutomation.h` file for your DCC-EX CommandStation from your layout's routes, signals, and turnouts. Download it from the Devices page and flash it to your CommandStation to enable on-device automation without hand-writing C++."
+        }
+      ]
+    },
+    {
+      "heading": "Cloud App: Layouts, Locos & Automation",
+      "entries": [
+        {
+          "question": "What is the DEJA.js Cloud App and where do I access it?",
+          "answer": "The Cloud app at cloud.dejajs.com is the central hub for managing your layout — locomotives, turnouts, signals, effects, sensors, routes, power districts, automations, and track diagrams. It's also where you manage your account, subscription, and connected IO devices."
+        },
+        {
+          "question": "How do I create a DEJA Cloud account?",
+          "answer": "Sign up at cloud.dejajs.com with email/password, Google, or GitHub. Accounts are activated immediately — no approval wait. A short onboarding wizard then walks you through naming your layout, choosing a plan, entering payment info if you're upgrading, and installing the Server with a personalized install command."
+        },
+        {
+          "question": "How do I register my DCC-EX CommandStation?",
+          "answer": "Open your layout in the Cloud app, go to Devices, click Add, select \"DCC-EX CommandStation\", choose USB as the connection type, and submit. The device shows as disconnected until you start the local DEJA Server — then it turns green and you're ready to drive."
+        },
+        {
+          "question": "How do I add locomotives so I can drive them?",
+          "answer": "Go to Roster in the Cloud app and click Add Loco. Enter the DCC address, give it a name, and (optionally) pick a color and function labels. As soon as you save, the loco is available in the Throttle app. You can edit speed curves, function mappings, and consist pairings from the same page."
+        },
+        {
+          "question": "What else can I manage through the Cloud App?",
+          "answer": "Everything about your layout: turnouts, signals, routes, sensors, power districts, sound effects, automations, and a visual Track Diagram editor. External IO devices (Arduinos, Pico W boards) are configured here too — the Cloud generates their firmware config and the CLI deploys it."
+        },
+        {
+          "question": "Can I create a visual diagram of my layout?",
+          "answer": "Yes. The Cloud app includes a Track Diagram editor where you drag and connect track nodes, stations, turnouts, and waypoints to build a schematic of your layout. Diagrams sync across devices and can be used as a visual control surface for throwing turnouts and monitoring routes."
+        },
+        {
+          "question": "Can sensors trigger effects or automations automatically?",
+          "answer": "Yes. Register a sensor on a supported IO device, then create an Automation in the Cloud app that links the sensor to one or more actions — throw a turnout, play a sound, trigger a light, or run a route. When the sensor fires, the automation runs in real time. Great for grade crossings, station announcements, and block-occupancy effects."
+        },
+        {
+          "question": "Can the system handle multiple operators at once?",
+          "answer": "Yes. DEJA.js is designed for multi-throttle operation. Club members and guests can each open the Throttle on their own phone or tablet and drive different locomotives at the same time, with every change synced through the Cloud. Ideal for club layouts, exhibitions, and operating sessions."
+        }
+      ]
+    },
+    {
+      "heading": "Throttle & Remote Access",
+      "entries": [
+        {
+          "question": "Is the mobile Throttle app easy to use on small touch screens?",
+          "answer": "Yes. The Throttle was designed mobile-first with big, accessible \"EZ-touch chonky buttons\" and a layout tuned for one-handed operation on a phone while you're walking your layout. It works equally well in landscape on a tablet."
+        },
+        {
+          "question": "Can I access my layout from outside my home?",
+          "answer": "Yes, on the Engineer and Conductor plans. DEJA.js includes secure remote access through a Cloudflare Tunnel — run `deja tunnel start` on the Server machine and you get a secure public URL for the Monitor and other local endpoints. No port forwarding, no router config. Stop it with `deja tunnel stop` whenever you want."
+        },
+        {
+          "question": "Can I automate trains or set up automated demonstrations?",
+          "answer": "Yes. The Tour app (included with Conductor) lets you script guided tours, presets, and automated sequences — perfect for exhibitions and open houses. For simpler automation, use Cloud Automations to trigger effects and routes from sensors, or generate a `myAutomation.h` file for on-device DCC-EX automation."
+        },
+        {
+          "question": "How do I keep track of all my different devices, locos, and turnouts?",
+          "answer": "DEJA.js uses a custom color-coding system across every app. Assign a swatch, tag, or custom color to any loco, turnout, signal, effect, or device in the Cloud app, and that color follows the item everywhere it appears — Throttle, Monitor, Tour, and Cloud — for instant visual identification."
+        }
+      ]
+    },
+    {
+      "heading": "Troubleshooting & Support",
+      "entries": [
+        {
+          "question": "I'm having connectivity or command issues on my layout. How can I debug them?",
+          "answer": "Start with the Monitor app — it shows live WebSocket activity, DCC command traces, serial I/O from the CommandStation, and device telemetry. For Server-side issues, run `deja status` to check the connection and `deja logs -f` to tail the live log. The Troubleshooting guide at dejajs.com/docs/server/troubleshooting walks through common problems (serial port permissions, CommandStation not detected, tunnel not starting)."
+        },
+        {
+          "question": "Where can I get help if I'm stuck?",
+          "answer": "Start with the documentation at dejajs.com/docs and the in-app AI support chatbot — both are available on every plan. Engineer and Conductor subscribers get support tickets (72-hour SLA on Engineer, 24-hour priority on Conductor). Conductor also includes a monthly live setup session with the DEJA team."
+        }
+      ]
+    }
+  ]
+}

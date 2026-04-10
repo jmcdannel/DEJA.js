@@ -6,7 +6,7 @@ import { collection, query, where } from 'firebase/firestore'
 import { useCollection } from 'vuefire'
 import { db } from '@repo/firebase-config'
 import { createLogger } from '@repo/utils'
-import TourLogo from './TourLogo.vue'
+import { Logo } from '@repo/ui'
 
 const log = createLogger('LayoutSelector')
 
@@ -39,8 +39,8 @@ onMounted(() => {
 <template>
   <v-dialog v-model="showDialog" persistent max-width="600">
     <v-card>
-      <v-card-title class="text-h5">
-        <TourLogo class="mr-3" size="small" />
+      <v-card-title class="text-h5 d-flex align-center">
+        <Logo size="sm" variant="tour" class="mr-3" />
         Select Layout
       </v-card-title>
       <v-card-text>

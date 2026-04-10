@@ -392,6 +392,14 @@ export const useSubscription = fn(() => ({
 })).mockName('useSubscription')
 
 // ---------------------------------------------------------------------------
+// useFeatureFlags (from plans module)
+// ---------------------------------------------------------------------------
+export const useFeatureFlags = fn(() => ({
+  isEnabled: fn().mockName('isEnabled').mockReturnValue(true),
+  flags: computed(() => ({})),
+})).mockName('useFeatureFlags')
+
+// ---------------------------------------------------------------------------
 // Plans constants (pass-through)
 // ---------------------------------------------------------------------------
 export const PLAN_LIMITS = {
