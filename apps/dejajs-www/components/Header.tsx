@@ -5,27 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 
-interface SiteSettings {
-  siteName?: string;
-  productNavItems?: Array<{
-    _key: string;
-    label: string;
-    href: string;
-    description?: string;
-    icon?: string;
-    comingSoon?: boolean;
-  }>;
-  docsNavItems?: Array<{
-    _key: string;
-    label: string;
-    href: string;
-    description?: string;
-    comingSoon?: boolean;
-  }>;
-  loginUrl?: string;
-  signupUrl?: string;
-}
-
 interface ProductItem {
   name: string;
   desc: string;
@@ -42,16 +21,16 @@ interface DocItem {
 
 const defaultProducts: ProductItem[] = [
   {
-    name: 'Server',
-    desc: 'Connect to your DCC-EX CommandStation via USB.',
-    logo: '/icon-512.png',
-    href: '/server',
-  },
-  {
     name: 'Throttle',
     desc: 'Precise speed control, consists, and function mapping.',
     logo: '/throttle/icon-512.png',
     href: '/throttle',
+  },
+  {
+    name: 'Server',
+    desc: 'Connect to your DCC-EX CommandStation via USB.',
+    logo: '/server/icon-512.png',
+    href: '/server',
   },
   {
     name: 'Cloud',
@@ -62,8 +41,8 @@ const defaultProducts: ProductItem[] = [
   {
     name: 'IO',
     desc: 'Arduino and Pico W code for layout expansion.',
-    logo: '/icon-512.png',
-    href: '/guides/io',
+    logo: '/io/icon-512.png',
+    href: '/io',
   },
   {
     name: 'Monitor',
@@ -133,31 +112,16 @@ function useDropdown() {
   return { isOpen, open, close, toggle, ref, triggerRef };
 }
 
-export default function Header({ settings }: { settings?: SiteSettings | null }) {
+export default function Header() {
   const pathname = usePathname();
   const guidesDropdown = useDropdown();
   const productsDropdown = useDropdown();
   const docsDropdown = useDropdown();
 
-  const products: ProductItem[] = settings?.productNavItems
-    ? settings.productNavItems.map((item) => ({
-        name: item.label,
-        desc: item.description ?? '',
-        logo: item.icon ?? '/icon-512.png',
-        href: item.href,
-      }))
-    : defaultProducts;
-
-  const docsLinks: DocItem[] = settings?.docsNavItems
-    ? settings.docsNavItems.map((item) => ({
-        name: item.label,
-        href: item.href,
-        comingSoon: item.comingSoon,
-      }))
-    : defaultDocsLinks;
-
-  const loginUrl = settings?.loginUrl ?? 'https://cloud.dejajs.com/';
-  const signupUrl = settings?.signupUrl ?? 'https://cloud.dejajs.com/signup';
+  const products: ProductItem[] = defaultProducts;
+  const docsLinks: DocItem[] = defaultDocsLinks;
+  const loginUrl = 'https://cloud.dejajs.com/';
+  const signupUrl = 'https://cloud.dejajs.com/signup';
 
   const handleMenuKeyDown = (
     e: React.KeyboardEvent,
