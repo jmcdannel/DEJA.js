@@ -9,6 +9,7 @@ import {
   SEQ,
   SequenceOvalTrack,
   SequenceTerminal,
+  StepLabel,
   TapRipple,
 } from './animation-primitives';
 
@@ -28,66 +29,6 @@ import {
 interface ArchitectureHeroProps {
   /** Start the sequence immediately on mount (used by the replay button). */
   autoStart?: boolean;
-}
-
-/**
- * Two-line label that fades in with a subtle slide.
- * - Mobile (< sm): stacks above the graphic, centered.
- * - Desktop (≥ sm): sits beside the graphic (left or right).
- */
-function StepLabel({
-  title,
-  subtitle,
-  color,
-  delay,
-  align = 'left',
-  className = '',
-}: {
-  title: string;
-  subtitle: string;
-  color: string;
-  delay: number;
-  align?: 'left' | 'right';
-  className?: string;
-}) {
-  // Mobile: absolutely position above the graphic, centered horizontally
-  const mobilePos = 'bottom-full left-1/2 -translate-x-1/2 mb-2 text-center';
-  // Desktop: to the side of the graphic, vertically centered
-  const desktopPos =
-    align === 'right'
-      ? 'sm:bottom-auto sm:top-1/2 sm:left-auto sm:right-full sm:mb-0 sm:mr-3 sm:translate-x-0 sm:-translate-y-1/2 sm:text-right'
-      : 'sm:bottom-auto sm:top-1/2 sm:left-full sm:mb-0 sm:ml-3 sm:translate-x-0 sm:-translate-y-1/2 sm:text-left';
-
-  return (
-    <motion.div
-      className={`absolute whitespace-nowrap ${mobilePos} ${desktopPos} ${className}`}
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.35, ease: 'easeOut' }}
-    >
-      <motion.p
-        className="font-mono text-xs sm:text-sm font-semibold"
-        style={{ color }}
-        initial={{ filter: `drop-shadow(0 0 0px ${color}00)` }}
-        animate={{
-          filter: [
-            `drop-shadow(0 0 0px ${color}00)`,
-            `drop-shadow(0 0 14px ${color})`,
-            `drop-shadow(0 0 5px ${color}99)`,
-          ],
-        }}
-        transition={{
-          delay: delay + 0.1,
-          duration: 1.2,
-          times: [0, 0.3, 1],
-          ease: 'easeOut',
-        }}
-      >
-        {title}
-      </motion.p>
-      <p className="text-gray-500 text-[10px] sm:text-xs mt-0.5">{subtitle}</p>
-    </motion.div>
-  );
 }
 
 export default function ArchitectureHero({ autoStart = false }: ArchitectureHeroProps) {
