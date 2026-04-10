@@ -1,4 +1,4 @@
-import { computed, onMounted, onUnmounted, watch, type Ref } from 'vue'
+import { computed, watch, type Ref } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { deleteDoc, doc, setDoc } from 'firebase/firestore'
 import { useDocument } from 'vuefire'
@@ -8,7 +8,6 @@ import { createLogger } from '@repo/utils'
 import { getSignedSpeed } from '@/throttle/utils'
 import type { Throttle } from '@/throttle/types'
 import { useCommandQueue } from '@/composables/useCommandQueue'
-import { wiThrottleService } from '@/services/WiThrottleService'
 
 const log = createLogger('Throttle')
 
@@ -25,27 +24,6 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
   )
 
   log.debug('throttle doc ref:', throttle)
-
-  // Acquire the loco on WiThrottle server when connected
-  async function acquireOnWiThrottle() {
-    const addr = address.value
-    if (addr !== undefined && addr !== null && wiThrottleService.state.value === 'CONNECTED') {
-      await wiThrottleService.acquireLoco(addr)
-    }
-  }
-
-  onMounted(acquireOnWiThrottle)
-
-  // Re-acquire if WiThrottle connects after the throttle is already mounted
-  const stopWiThrottleWatch = watch(() => wiThrottleService.state.value, (state) => {
-    if (state === 'CONNECTED') {
-      acquireOnWiThrottle()
-    }
-  })
-
-  onUnmounted(() => {
-    stopWiThrottleWatch()
-  })
 
   // Derive loco from the locos collection so we use the shared `getLocos` hook
   const locos = getLocos()
@@ -79,7 +57,6 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
   async function releaseThrottle() {
     const addr = address.value
     if (addr === undefined || addr === null) return
-    await wiThrottleService.releaseLoco(addr)
     await enqueue(
       async () => {
         const throttleDoc = doc(db, `layouts/${layoutId.value}/throttles`, addr.toString())
@@ -92,14 +69,41 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
   async function updateSpeed(speed: number) {
     const addr = address.value
     if (addr === undefined || addr === null) return
-    await wiThrottleService.setThrottleSpeed(addr, Math.abs(speed), speed >= 0)
+
+    const newSpeed = Math.abs(speed)
+    const newDirection = speed > 0
+
+    // 🛡️ Dedup guard — skip writes that would not change the server state.
+    // Prevents feedback loops between multiple throttle tabs/browsers watching
+    // the same doc where a local reactive chain bounces echoes back as writes.
+    // At speed 0, direction is meaningless — any speed-0 write with matching speed is a no-op.
+    const current = throttle.value as Throttle | undefined
+    if (current && current.speed === newSpeed) {
+      if (newSpeed === 0 || current.direction === newDirection) return
+    }
+
+    // 🔬 DEBUG INSTRUMENTATION — remove after multi-instance bug is fixed
+    const tabId = ((): string => {
+      const w = window as unknown as { __DEJA_TAB_ID__?: string }
+      if (!w.__DEJA_TAB_ID__) w.__DEJA_TAB_ID__ = Math.random().toString(36).slice(2, 8)
+      return w.__DEJA_TAB_ID__
+    })()
+    const counter = ((): number => {
+      const w = window as unknown as { __DEJA_WRITE_COUNT__?: number }
+      w.__DEJA_WRITE_COUNT__ = (w.__DEJA_WRITE_COUNT__ ?? 0) + 1
+      return w.__DEJA_WRITE_COUNT__
+    })()
+    const stack = new Error('trace').stack?.split('\n').slice(2, 7).join('\n')
+    // eslint-disable-next-line no-console
+    console.warn(`🚨 [tab ${tabId} #${counter}] updateSpeed(addr=${addr} speed=${speed})\n${stack}`)
+
     await enqueue(
       async () => {
         await setDoc(
           doc(db, `layouts/${layoutId.value}/throttles`, addr.toString()),
           {
-            direction: speed > 0,
-            speed: Math.abs(speed),
+            direction: newDirection,
+            speed: newSpeed,
           },
           { merge: true },
         )

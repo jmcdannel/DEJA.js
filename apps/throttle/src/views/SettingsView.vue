@@ -11,7 +11,6 @@ import SelectFavorites from '@/core/Menu/SelectFavorites.vue'
 import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
-import { wiThrottleService } from '@/services/WiThrottleService'
 import { useServerDiscovery } from '@/composables/useServerDiscovery'
 import { useThrottleSettings } from '@/throttle/useThrottleSettings'
 import { useConductorSettings } from '@/conductor/useConductorSettings'
@@ -124,9 +123,6 @@ async function saveLayoutConnectionSettings() {
     await setDoc(doc(db, 'layouts', layoutId), {
       throttleConnection: { type: connectionType.value, host: connectionHost.value, port: connectionPort.value }
     }, { merge: true })
-    // Reconnect with new settings
-    await wiThrottleService.disconnect()
-    await wiThrottleService.connect()
   } catch (e) {
     console.error('Error saving throttle connection:', e)
   }
