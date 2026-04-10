@@ -16,13 +16,14 @@ import { stopAllSounds } from './src/lib/sound.js'
 import { audioCacheService } from './src/lib/AudioCacheService.js'
 
 import { log } from './src/utils/logger.js'
-import { validateSubscription, startPeriodicRecheck, stopPeriodicRecheck, readConfig, SubscriptionError } from './src/lib/subscription.js'
-import type { DejaConfig } from './src/lib/subscription.js'
+import { startPeriodicRecheck, stopPeriodicRecheck } from './src/lib/subscription.js'
+import { bootstrapAuth } from './src/lib/bootstrap-auth.js'
 import { getServerConfig } from './src/lib/server-config.js'
 import type { ServerConfig } from './src/lib/server-config.js'
 import { markServerStarted } from './src/lib/onboarding.js'
 
 let serverConfig: ServerConfig
+let bootstrapOffline = false
 
 const SHUTDOWN_TIMEOUT_MS = 10_000
 
@@ -33,19 +34,12 @@ async function main(): Promise<void> {
   try {
     log.start('Running', '[MAIN]')
 
-    // --- Subscription gate (before any subsystem starts) ---
-    let config: DejaConfig
-    try {
-      await validateSubscription()
-      config = await readConfig()
-      startPeriodicRecheck(config.uid)
-    } catch (error) {
-      if (error instanceof SubscriptionError) {
-        log.fatal(`[SUBSCRIPTION] ${error.message}`)
-        process.exit(1)
-      }
-      throw error
-    }
+    // --- Device auth bootstrap (before any Firebase access) ---
+    // Reads pairing credentials, exchanges them for a Firebase custom token,
+    // and signs in via the Client SDK. All subsequent getDb() / getRtdb()
+    // calls run as the authenticated user with Firestore rules enforced.
+    const auth = await bootstrapAuth()
+    bootstrapOffline = auth.offline
 
     // Load server config from ~/.deja/config.json (with env var fallback).
     // This also bridges values into process.env for module-level reads.
@@ -54,14 +48,25 @@ async function main(): Promise<void> {
     log.note('MQTT', serverConfig.mqtt.enabled ? `ON (${serverConfig.mqtt.broker}:${serverConfig.mqtt.port})` : 'OFF')
     log.note('WebSocket', serverConfig.ws.enabled ? `ON (port ${serverConfig.ws.port})` : 'OFF')
     log.note('DEJA Cloud', serverConfig.cloud.enabled ? 'ON' : 'OFF')
+    if (auth.offline) {
+      log.warn('[MAIN] Running in OFFLINE degraded mode — cloud subsystems disabled')
+    }
 
-    if (serverConfig.cloud.enabled) {
+    // Start periodic subscription re-check only when online (needs Firebase).
+    if (!auth.offline) {
+      startPeriodicRecheck(auth.uid)
+    }
+
+    // DEJA Cloud listeners require Firebase — skip in offline mode.
+    if (serverConfig.cloud.enabled && !auth.offline) {
       try {
         await dejaCloud.connect()
         log.start('DEJA Cloud connected')
       } catch (err) {
         log.error('DEJA Cloud connection failed:', err)
       }
+    } else if (serverConfig.cloud.enabled && auth.offline) {
+      log.warn('[MAIN] DEJA Cloud skipped (offline mode)')
     }
 
     if (serverConfig.mqtt.enabled) {
@@ -83,11 +88,13 @@ async function main(): Promise<void> {
       }
     }
 
-    // Mark onboarding serverStarted (write-once, non-blocking)
-    try {
-      await markServerStarted(config.uid)
-    } catch (err) {
-      log.warn('Failed to mark server as started:', err)
+    // Mark onboarding serverStarted (write-once, non-blocking) — needs Firebase
+    if (!auth.offline) {
+      try {
+        await markServerStarted(auth.uid)
+      } catch (err) {
+        log.warn('Failed to mark server as started:', err)
+      }
     }
 
     log.start('DEJA.js Server is running!')
@@ -136,8 +143,9 @@ async function shutdown(): Promise<void> {
       log.success('[SHUTDOWN] WebSocket server closed')
     }
 
-    // 2. Firebase listeners (Firestore snapshots + RTDB child_added)
-    if (serverConfig?.cloud.enabled) {
+    // 2. Firebase listeners (Firestore snapshots + RTDB child_added) —
+    //    only if we actually connected (skipped in offline grace mode)
+    if (serverConfig?.cloud.enabled && !bootstrapOffline) {
       log.info('[SHUTDOWN] Disconnecting from DEJA Cloud (Firebase listeners)...')
       await dejaCloud.disconnect()
       log.success('[SHUTDOWN] DEJA Cloud disconnected')
