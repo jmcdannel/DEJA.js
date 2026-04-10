@@ -10,6 +10,7 @@ import { useDisplay } from 'vuetify'
 import { PageHeader } from '@repo/ui'
 import LayoutTags from '@/Layout/LayoutTags.vue'
 import PortList from '@/Layout/PortList.vue'
+import DevicesSection from '@/Settings/Devices/DevicesSection.vue'
 
 const user = useCurrentUser()
 const { plan, status, isTrialing, trialDaysLeft, subscription } = useSubscription()
@@ -96,6 +97,7 @@ const sections = [
   { id: 'billing', label: 'Billing', icon: 'mdi-credit-card-outline' },
   { id: 'appearance', label: 'Appearance', icon: 'mdi-palette-outline' },
   { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
+  { id: 'devices', label: 'Devices', icon: 'mdi-devices' },
   { id: 'layout', label: 'Layout', icon: 'mdi-floor-plan' },
   { id: 'backgrounds', label: 'Backgrounds', icon: 'mdi-image-outline' },
 ]
@@ -192,6 +194,15 @@ function scrollTo(id: string) {
             <h2 class="settings-section__title">Server Setup</h2>
           </div>
           <ServerSetupInfo :uid="user?.uid" :layout-id="storedLayoutId" />
+        </div>
+
+        <!-- Devices -->
+        <div id="devices" class="settings-section">
+          <div class="settings-section__header">
+            <v-icon size="20" class="settings-section__icon">mdi-devices</v-icon>
+            <h2 class="settings-section__title">Devices</h2>
+          </div>
+          <DevicesSection />
         </div>
 
         <!-- Layout Configuration -->

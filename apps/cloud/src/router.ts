@@ -292,6 +292,12 @@ const router = createRouter({
       meta: { requireAuth: true, requireOnboarding: true, requireLayout: true },
     },
     {
+      path: '/device',
+      name: 'device-approval',
+      component: () => import('./Device/DeviceApprovalView.vue'),
+      meta: { requireAuth: true },
+    },
+    {
       path: '/settings',
       name: 'Settings',
       component: () => import('./Settings/Settings.vue'),
