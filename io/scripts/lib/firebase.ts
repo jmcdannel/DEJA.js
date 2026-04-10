@@ -3,7 +3,7 @@
 
 import { initializeApp, cert, type ServiceAccount } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
-import type { Device, Effect, Turnout, DeviceConfigInput } from '@repo/modules'
+import type { Device, Effect, Turnout, DeviceConfigInput, Layout } from '@repo/modules'
 
 let initialized = false
 
@@ -53,6 +53,22 @@ export async function getDeviceConfig(layoutId: string, deviceId: string): Promi
   const turnouts = turnoutsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Turnout)
 
   return { device, effects, turnouts }
+}
+
+/**
+ * List all layouts owned by a given email address.
+ * Used by `pnpm build` (no args) to build every layout the caller owns.
+ */
+export async function listLayoutsByOwner(ownerEmail: string): Promise<Layout[]> {
+  initFirebase()
+  const db = getFirestore()
+
+  const snapshot = await db
+    .collection('layouts')
+    .where('owner', '==', ownerEmail)
+    .get()
+
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Layout)
 }
 
 /**

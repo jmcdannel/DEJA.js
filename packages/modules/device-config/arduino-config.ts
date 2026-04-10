@@ -10,8 +10,10 @@ export function generateArduinoConfig(input: ArduinoConfigInput): string {
     .filter(e => e.pin !== undefined && e.pin !== null)
     .map(e => e.pin!)
 
+  // TurnoutPulser is only for kato-type turnouts (solenoid-based with a pulse pin pair).
+  // Servo/tortise/dcc turnouts use entirely different hardware and must not appear here.
   const turnoutPulsers = turnouts
-    .filter(t => t.straight !== undefined && t.divergent !== undefined)
+    .filter(t => t.type === 'kato' && t.straight !== undefined && t.divergent !== undefined)
     .map(t => `TurnoutPulser(${t.straight}, ${t.divergent})`)
 
   const sensorPins = input.sensorPins ?? []
