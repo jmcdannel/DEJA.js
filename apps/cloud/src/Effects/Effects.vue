@@ -41,8 +41,6 @@ const effectsList = computed(() =>
     : []
 )
 
-const hasItems = computed(() => isLoaded.value && effectsList.value.length > 0)
-
 const deviceOptions = computed(() =>
   devices?.value ? devices.value.map((d) => ({ label: d.id, value: d.id })) : []
 )
