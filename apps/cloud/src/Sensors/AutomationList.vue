@@ -26,6 +26,7 @@ function getTriggerLabel(trigger: string): string {
   <v-container v-if="list?.length">
     <v-row>
       <v-col
+        v-if="$slots.prepend"
         cols="12"
         xs="12"
         sm="6"
