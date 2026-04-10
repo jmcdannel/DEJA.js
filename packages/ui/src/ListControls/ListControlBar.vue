@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useDisplay } from 'vuetify'
 import type { ListControlsReturn, ViewOption, SortOption, ListFilter } from './types'
 import ListSearch from './ListSearch.vue'
 import ListViewToggle from './ListViewToggle.vue'
@@ -33,16 +32,15 @@ const props = withDefaults(defineProps<{
   filters: () => [],
 })
 
-const { mdAndUp } = useDisplay()
-
 const showViewSheet = ref(false)
 const showSortSheet = ref(false)
 const showFilterSheet = ref(false)
 </script>
 
 <template>
-  <!-- Desktop: inline controls bar -->
-  <div v-if="mdAndUp">
+  <div class="@container">
+  <!-- Desktop: inline controls bar (shown when container ≥ 640px) -->
+  <div class="hidden @[640px]:block">
     <div class="lcb-bar">
       <ListFilters
         v-if="showFilters && filters.length"
@@ -110,8 +108,8 @@ const showFilterSheet = ref(false)
     </div>
   </div>
 
-  <!-- Mobile: search bar + icon buttons -->
-  <div v-else class="px-2 py-2">
+  <!-- Mobile: search bar + icon buttons (shown when container < 640px) -->
+  <div class="block @[640px]:hidden px-2 py-2">
     <div class="flex items-center gap-2">
       <ListSearch
         v-if="showSearch"
@@ -200,6 +198,7 @@ const showFilterSheet = ref(false)
       @update:active-filters="controls.activeFilters.value = $event"
       :color="color"
     />
+  </div>
   </div>
 </template>
 
