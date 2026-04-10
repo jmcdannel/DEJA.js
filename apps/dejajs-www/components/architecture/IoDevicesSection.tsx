@@ -16,10 +16,69 @@ const peripherals = [
   { label: 'Buttons', icon: '🔘', desc: 'Physical control panels, dispatcher boards' },
 ];
 
-const devices = [
-  { name: 'Arduino', desc: 'USB serial — direct pin control. Great for turnout machines, signals, and panel buttons near the command station.' },
-  { name: 'Pico W', desc: 'WiFi MQTT — wireless placement anywhere on the layout. Perfect for lighting, sound, and sensors in hard-to-reach spots.' },
+type DeviceConnection = 'usb' | 'wifi';
+
+const devices: { name: string; desc: string; connection: DeviceConnection; connectionLabel: string }[] = [
+  {
+    name: 'Arduino',
+    desc: 'USB serial — direct pin control. Great for turnout machines, signals, and panel buttons near the command station.',
+    connection: 'usb',
+    connectionLabel: 'USB serial',
+  },
+  {
+    name: 'Pico W',
+    desc: 'WiFi MQTT — wireless placement anywhere on the layout. Perfect for lighting, sound, and sensors in hard-to-reach spots.',
+    connection: 'wifi',
+    connectionLabel: 'Wi-Fi / MQTT',
+  },
 ];
+
+/** Icon-only indicator showing how a device talks to the DEJA Server. */
+function ConnectionIcon({ type, label }: { type: DeviceConnection; label: string }) {
+  return type === 'usb' ? (
+    // 🔌 USB icon
+    <svg
+      className="w-5 h-5 text-[rgb(234,179,8)]"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      role="img"
+      aria-label={label}
+    >
+      <title>{label}</title>
+      <circle cx="12" cy="20" r="1.5" fill="currentColor" />
+      <path d="M12 18.5V7" />
+      <path d="M12 7L8 11" />
+      <path d="M8 11V13" />
+      <path d="M6 13h4" />
+      <path d="M12 7L16 10" />
+      <rect x="14.5" y="9" width="3" height="3" rx="0.5" />
+      <circle cx="12" cy="4" r="2" />
+    </svg>
+  ) : (
+    // 📶 Wi-Fi icon
+    <svg
+      className="w-5 h-5 text-[rgb(234,179,8)]"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      role="img"
+      aria-label={label}
+    >
+      <title>{label}</title>
+      <path d="M5 12.55a11 11 0 0 1 14 0" />
+      <path d="M1.42 9a16 16 0 0 1 21.16 0" />
+      <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+      <circle cx="12" cy="20" r="1" fill="currentColor" />
+    </svg>
+  );
+}
 
 export default function IoDevicesSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -56,7 +115,10 @@ export default function IoDevicesSection() {
           >
             {devices.map((d) => (
               <div key={d.name} className="rounded-lg border border-[rgb(234,179,8)]/20 bg-[rgb(234,179,8)]/5 p-4">
-                <p className="text-[rgb(234,179,8)] font-semibold mb-1">{d.name}</p>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <p className="text-[rgb(234,179,8)] font-semibold">{d.name}</p>
+                  <ConnectionIcon type={d.connection} label={d.connectionLabel} />
+                </div>
                 <p className="text-gray-400 text-sm">{d.desc}</p>
               </div>
             ))}

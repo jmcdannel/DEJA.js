@@ -3,23 +3,41 @@ import { ref } from 'vue'
 import draggable from 'vuedraggable'
 import { useLayout, type Device } from '@repo/modules'
 import { useSortableList } from '@/Core/composables/useSortableList'
-import { PageHeader } from '@repo/ui'
+import ListPage from '@/Core/UI/ListPage.vue'
 import DeviceListItem from '@/Layout/Devices/DeviceListItem.vue'
 import AddDeviceItem from '@/Layout/Devices/AddDeviceItem.vue'
-import AddTile from '@/Core/UI/AddTile.vue'
 import PortList from '@/Layout/PortList.vue'
 
 const { getLayout, getDevices, updateDevice } = useLayout()
 
 const layout = getLayout()
 const rawDevices = getDevices()
-const { list: devices, onDragStart, onDragEnd } = useSortableList<Device>(rawDevices as any, (id, data) => updateDevice(id, data))
+const { list: devices, onDragStart, onDragEnd } = useSortableList<Device>(
+  rawDevices as any,
+  (id, data) => updateDevice(id, data),
+)
 
 const showAdd = ref(false)
 </script>
+
 <template>
-  <div class="animate-fade-in-up space-y-4">
-    <PageHeader title="Devices" icon="mdi-developer-board" color="cyan" :subtitle="layout?.name" />
+  <ListPage
+    title="Devices"
+    icon="mdi-developer-board"
+    color="cyan"
+    :subtitle="layout?.name"
+  >
+    <template #actions>
+      <v-btn
+        prepend-icon="mdi-plus"
+        color="cyan"
+        variant="flat"
+        size="small"
+        @click="showAdd = true"
+      >
+        Add Device
+      </v-btn>
+    </template>
 
     <draggable
       :list="devices"
@@ -35,17 +53,14 @@ const showAdd = ref(false)
           <DeviceListItem :device="element as Device" :ports="layout?.ports" />
         </div>
       </template>
-      <template #footer>
-        <div>
-          <AddTile v-if="!showAdd" color="cyan" @click="showAdd = !showAdd" />
-        </div>
-      </template>
     </draggable>
-    <AddDeviceItem :show="showAdd" @close="showAdd = false" class="mt-4" />
+
+    <AddDeviceItem :show="showAdd" class="mt-4" @close="showAdd = false" />
 
     <PortList v-if="layout?.ports?.length" :ports="layout.ports" class="mt-6" />
-  </div>
+  </ListPage>
 </template>
+
 <style scoped>
 .ghost {
   opacity: 0.5;

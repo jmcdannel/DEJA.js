@@ -10,13 +10,28 @@ const explainers = [
     color: 'border-deja-cyan/20',
   },
   {
+    question: 'How does authentication work?',
+    answer: 'Every app — Throttle, Cloud, Monitor — signs in with Firebase Authentication. Sessions are backed by signed JWT tokens and verified on every request, and the DEJA Server checks your subscription against Firestore before it will even open a port. You can share a layout with guest operators without handing out your password, and revoking access is instant.',
+    color: 'border-deja-cyan/20',
+  },
+  {
+    question: 'Is my layout data secure?',
+    answer: 'Your roster, routes, turnouts, and effects live in Firestore and Realtime Database, protected by per-layout security rules — only accounts you\'ve granted access can read or write them. All traffic between the apps, the server, and Firebase is TLS-encrypted in transit and encrypted at rest on Google\'s infrastructure. No layout data ever touches a public internet path in plaintext.',
+    color: 'border-blue-400/20',
+  },
+  {
     question: 'How does Firebase work?',
     answer: 'Firebase provides real-time sync between your apps and the server. When you change a throttle setting on your phone, Firebase pushes that change to the server instantly — no polling, no refresh. Your roster, routes, turnout states, and effects are all stored in Firebase so they persist across sessions and devices.',
     color: 'border-blue-400/20',
   },
   {
     question: 'What are Cloudflare Tunnels?',
-    answer: 'Cloudflare Tunnels let you access your layout from anywhere — not just your home WiFi. The DEJA Server creates a secure tunnel to Cloudflare\'s network, giving you a public URL that reaches your command station without opening router ports or configuring firewalls. Control your layout from work, from a friend\'s house, or from a train show.',
+    answer: 'Cloudflare Tunnels let you reach your layout from anywhere without exposing your home network. The DEJA Server opens an outbound-only encrypted tunnel to Cloudflare — there are no inbound router ports to forward, no firewall rules to punch holes in, and no DDNS to maintain. Cloudflare then routes authenticated requests through its global edge, giving you a public HTTPS URL that terminates inside your running server.',
+    color: 'border-purple-400/20',
+  },
+  {
+    question: 'Why Cloudflare on top of auth?',
+    answer: 'Cloudflare sits in front of every request as a second layer of defense. It handles TLS termination, shields the server from DDoS and bot traffic, and can enforce Cloudflare Access policies so only your accounts ever reach the tunnel. Combined with Firebase Auth inside the app, that\'s WAF + identity + subscription validation before any DCC command touches the track.',
     color: 'border-purple-400/20',
   },
   {

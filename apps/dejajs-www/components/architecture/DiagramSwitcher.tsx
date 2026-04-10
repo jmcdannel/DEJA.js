@@ -91,39 +91,44 @@ export default function DiagramSwitcher() {
     </div>
   );
 
-  const diagram = (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={activeId}
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.98 }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <ArchitectureDiagram config={activeId} />
-      </motion.div>
-    </AnimatePresence>
-  );
-
+  // Everything lives inside containerRef so the element that goes
+  // native-fullscreen actually contains the diagram. When expanded, the
+  // SVG is forced to fill its flex cell with `!w-full !h-full`, and its
+  // intrinsic preserveAspectRatio="xMidYMid meet" letterboxes it inside
+  // the viewport — so it fits 100% of the screen without overflowing.
   return (
-    <>
-      {/* Normal inline view */}
-      <div ref={containerRef}>
-        {toggleBar}
-        {!expanded && diagram}
+    <div
+      ref={containerRef}
+      className={
+        expanded
+          ? 'fixed inset-0 z-50 bg-gray-950 flex flex-col p-4 sm:p-6'
+          : ''
+      }
+    >
+      {toggleBar}
+      <div
+        className={
+          expanded
+            ? 'flex-1 min-h-0 min-w-0 flex items-center justify-center'
+            : ''
+        }
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeId}
+            className={expanded ? 'w-full h-full flex items-center justify-center' : 'w-full'}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <ArchitectureDiagram
+              config={activeId}
+              className={expanded ? '!w-full !h-full' : undefined}
+            />
+          </motion.div>
+        </AnimatePresence>
       </div>
-
-      {/* Expanded overlay */}
-      {expanded && (
-        <div className="fixed inset-0 z-50 bg-gray-950 flex flex-col">
-          <div className="p-4">
-            {toggleBar}
-          </div>
-          <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
-            {diagram}
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 }

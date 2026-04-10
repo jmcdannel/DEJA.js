@@ -71,7 +71,7 @@ watch(
     <div class="absolute w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[80px] -bottom-[100px] -right-[200px]"></div>
     <div class="absolute w-[400px] h-[400px] rounded-full bg-violet-500/10 blur-[90px] top-[30%] left-[40%]"></div>
   </div>
-  <div v-if="throttles" class="throttle-list-container">
+  <div v-if="throttles" class="throttle-list-container @container">
     <draggable
       v-model="orderedThrottles"
       item-key="address"
@@ -80,7 +80,7 @@ watch(
       :animation="150"
     >
       <template #item="{ element }">
-        <div class="basis-full md:basis-1/2 p-1">
+        <div class="basis-full @[600px]:basis-1/2 p-1">
           <ThrottleTile v-if="element.address" :address="element.address" />
         </div>
       </template>
@@ -115,8 +115,7 @@ watch(
   inset: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  overflow: auto;
+  overflow-y: auto;
   padding-bottom: 4rem;
 }
 

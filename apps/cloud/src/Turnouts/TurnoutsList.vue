@@ -31,7 +31,7 @@ const list = computed(() => props.filteredList ?? sortableList.value)
           @start="onDragStart"
           @end="onDragEnd"
         >
-          <template #header>
+          <template v-if="$slots.prepend" #header>
             <div>
               <slot name="prepend"></slot>
             </div>

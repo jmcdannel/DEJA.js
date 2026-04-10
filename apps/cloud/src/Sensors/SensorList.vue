@@ -53,7 +53,7 @@ function getInputTypeLabel(inputType: string): string {
       @start="onDragStart"
       @end="onDragEnd"
     >
-      <template #header>
+      <template v-if="$slots.prepend" #header>
         <div>
           <slot name="prepend"></slot>
         </div>
