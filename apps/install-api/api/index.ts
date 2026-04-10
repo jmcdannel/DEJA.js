@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { put, list, head } from '@vercel/blob'
+import { timingSafeEqual } from 'node:crypto'
+import { verifyInstallJwt } from './lib/installJwt.js'
 
 const RELEASES_PREFIX = 'releases'
 
@@ -9,12 +11,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const path = parsedUrl.pathname
 
   try {
-    // GET / — serve install script (optionally with ?uid=...&layout=... to skip prompts)
+    // 🎫 GET /i/:installJwt — tokenized install (device-pairing flow)
+    const installTokenMatch = path.match(/^\/i\/([A-Za-z0-9_\-.]+)$/)
+    if (method === 'GET' && installTokenMatch) {
+      const token = installTokenMatch[1]
+      let payload: ReturnType<typeof verifyInstallJwt> = null
+      try {
+        payload = verifyInstallJwt(token)
+      } catch (err) {
+        // verifyInstallJwt throws if INSTALL_JWT_SECRET is missing — surface as
+        // a bash error so `curl | bash` users get a readable message, not JSON.
+        console.error('verifyInstallJwt threw:', err)
+        res.setHeader('Content-Type', 'text/x-shellscript')
+        return res.status(500).send(
+          `#!/bin/bash\n# 🔐 Install service misconfigured — contact support.\nexit 1\n`,
+        )
+      }
+      if (!payload) {
+        res.setHeader('Content-Type', 'text/x-shellscript')
+        return res
+          .status(401)
+          .send(
+            `#!/bin/bash\n# 🔐 Install token invalid or expired.\n# Get a new one from https://cloud.dejajs.com/settings/devices\nexit 1\n`,
+          )
+      }
+      const script = await generateInstallScript(token)
+      res.setHeader('Content-Type', 'text/x-shellscript')
+      res.setHeader('Cache-Control', 'no-cache')
+      return res.status(200).send(script)
+    }
+
+    // GET / — serve tokenless install script (user must run `deja login` after)
     if (method === 'GET' && (path === '/' || path === '/api')) {
-      const params = parsedUrl.searchParams
-      const uid = params.get('uid') || ''
-      const layoutId = params.get('layout') || ''
-      const script = await generateInstallScript(uid, layoutId)
+      const script = await generateInstallScript(null)
       res.setHeader('Content-Type', 'text/plain')
       res.setHeader('Cache-Control', 'no-cache')
       return res.status(200).send(script)
@@ -51,14 +80,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // POST /releases/:version/upload
     const uploadMatch = path.match(/\/releases\/([^/]+)\/upload/)
     if (method === 'POST' && uploadMatch) {
-      const authHeader = req.headers.authorization
-      if (authHeader !== `Bearer ${process.env.UPLOAD_SECRET}`) {
+      // 🔒 Constant-time Bearer token comparison
+      const expectedAuth = Buffer.from(`Bearer ${process.env.UPLOAD_SECRET ?? ''}`)
+      const providedAuth = Buffer.from(req.headers.authorization ?? '')
+      if (
+        providedAuth.length !== expectedAuth.length ||
+        !timingSafeEqual(providedAuth, expectedAuth)
+      ) {
         return res.status(401).json({ error: 'Unauthorized' })
       }
 
       const version = uploadMatch[1]
-      const filename = req.headers['x-filename'] as string
-      if (!filename) return res.status(400).json({ error: 'x-filename header required' })
+      const filename = req.headers['x-filename'] as string | undefined
+      // 🛡️ Validate filename to prevent path traversal in the Blob key
+      if (!filename || !/^[\w.\-]+$/.test(filename)) {
+        return res.status(400).json({ error: 'x-filename invalid' })
+      }
 
       const contentType = (req.headers['content-type'] as string) || 'application/octet-stream'
       const blobPath = `${RELEASES_PREFIX}/${version}/${filename}`
@@ -79,9 +116,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
-async function generateInstallScript(uid: string, layoutId: string): Promise<string> {
+async function generateInstallScript(installToken: string | null = null): Promise<string> {
   // Fetch install.sh from blob storage (uploaded alongside release assets)
-  const blobUrl = await getReleaseUrl(await getLatestVersion() || '', 'install.sh')
+  const blobUrl = await getReleaseUrl((await getLatestVersion()) || '', 'install.sh')
 
   let script: string
   if (blobUrl) {
@@ -91,6 +128,9 @@ async function generateInstallScript(uid: string, layoutId: string): Promise<str
     return '#!/bin/bash\necho "Error: No install script found. No releases have been published yet."\nexit 1'
   }
 
+  // 🔐 Only public Firebase client config is injected. Admin credentials
+  // (private_key / client_email) are NEVER embedded in the install script —
+  // servers authenticate via the device-pairing flow.
   const replacements: Record<string, string> = {
     '__FIREBASE_API_KEY__': process.env.FIREBASE_API_KEY ?? '',
     '__FIREBASE_AUTH_DOMAIN__': process.env.FIREBASE_AUTH_DOMAIN ?? '',
@@ -99,23 +139,11 @@ async function generateInstallScript(uid: string, layoutId: string): Promise<str
     '__FIREBASE_STORAGE_BUCKET__': process.env.FIREBASE_STORAGE_BUCKET ?? '',
     '__FIREBASE_MESSAGING_SENDER_ID__': process.env.FIREBASE_MESSAGING_SENDER_ID ?? '',
     '__FIREBASE_APP_ID__': process.env.FIREBASE_APP_ID ?? '',
-    '__FIREBASE_CLIENT_EMAIL__': process.env.FIREBASE_CLIENT_EMAIL ?? '',
-    '__FIREBASE_PRIVATE_KEY__': process.env.FIREBASE_PRIVATE_KEY ?? '',
+    '__INSTALL_TOKEN__': installToken ?? '',
   }
 
   for (const [placeholder, value] of Object.entries(replacements)) {
     script = script.replaceAll(placeholder, value)
-  }
-
-  // If uid/layoutId provided via query params, prepend env vars so the script
-  // skips the interactive prompts in link_account()
-  if (uid || layoutId) {
-    const envLines: string[] = []
-    if (uid) envLines.push(`DEJA_UID="${uid}"`)
-    if (layoutId) envLines.push(`DEJA_LAYOUT_ID="${layoutId}"`)
-    // Insert after the shebang line
-    const shebangEnd = script.indexOf('\n')
-    script = script.slice(0, shebangEnd + 1) + envLines.join('\n') + '\n' + script.slice(shebangEnd + 1)
   }
 
   return script

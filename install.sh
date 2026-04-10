@@ -11,6 +11,11 @@
 
 set -euo pipefail
 
+# 🎫 Install token is injected by install-api when the user visits /i/<jwt>
+# Empty (still equal to the placeholder) when the user visits /  — tokenless
+# install; they must run `deja login` afterwards to pair the device.
+DEJA_INSTALL_TOKEN="${DEJA_INSTALL_TOKEN:-__INSTALL_TOKEN__}"
+
 DEJA_DIR="${DEJA_DIR:-$HOME/.deja}"
 DEJA_BIN="${DEJA_DIR}/bin"
 SERVER_DIR="${DEJA_DIR}/server"
@@ -195,34 +200,10 @@ setup_environment() {
     ok "Firebase client config embedded"
   fi
 
-  # Service account credentials — injected by CI at release time
-  local fb_client_email="__FIREBASE_CLIENT_EMAIL__"
-  local fb_private_key="__FIREBASE_PRIVATE_KEY__"
-
-  if [[ "${fb_client_email}" == __* ]]; then
-    warn "Service account not embedded (development build)."
-    info "📄 Download your service account JSON from: ${CYAN}https://cloud.dejajs.com → Settings → Install${NC}"
-    echo ""
-    read -rp "  Path to service account JSON file (or press Enter to skip): " sa_json_path < /dev/tty
-
-    fb_client_email=""
-    fb_private_key=""
-
-    if [ -n "${sa_json_path}" ] && [ -f "${sa_json_path}" ]; then
-      fb_client_email=$(grep -o '"client_email"[[:space:]]*:[[:space:]]*"[^"]*"' "${sa_json_path}" | sed 's/.*"client_email"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
-      fb_private_key=$(grep -o '"private_key"[[:space:]]*:[[:space:]]*"[^"]*"' "${sa_json_path}" | sed 's/.*"private_key"[[:space:]]*:[[:space:]]*"\(.*\)".*/\1/')
-      ok "Service account loaded from ${sa_json_path}"
-    elif [ -n "${sa_json_path}" ]; then
-      err "File not found: ${sa_json_path}"
-      exit 1
-    else
-      warn "Skipping service account setup. Server features requiring admin access will not work."
-      warn "You can add these later to ${ENV_FILE}"
-    fi
-  else
-    ok "Service account config embedded"
-  fi
-
+  # 🔐 Admin credentials are NEVER embedded. The server authenticates via the
+  # device-pairing flow (see `deja login` / `deja install`) which stores a
+  # session secret in ${CONFIG_FILE}. Only the public Firebase client config
+  # belongs in the env file.
   cat > "${ENV_FILE}" <<ENVEOF
 LAYOUT_ID=${layout_id}
 ENABLE_DEJACLOUD=true
@@ -239,8 +220,6 @@ VITE_FIREBASE_DATABASE_URL=${fb_database_url}
 VITE_FIREBASE_STORAGE_BUCKET=${fb_storage_bucket}
 VITE_FIREBASE_MESSAGING_SENDER_ID=${fb_messaging_id}
 VITE_FIREBASE_APP_ID=${fb_app_id}
-FIREBASE_CLIENT_EMAIL=${fb_client_email}
-FIREBASE_PRIVATE_KEY="${fb_private_key}"
 ENVEOF
 
   chmod 600 "${ENV_FILE}"
@@ -437,6 +416,27 @@ install_cli() {
 }
 
 # ======================================================================
+# 🤝 Step 7.5: Device pairing (install token)
+# ======================================================================
+pair_device() {
+  echo ""
+  echo -e "  ${BOLD}🤝 Pairing device...${NC}"
+
+  if [ -n "${DEJA_INSTALL_TOKEN}" ] && [ "${DEJA_INSTALL_TOKEN}" != "__INSTALL_TOKEN__" ]; then
+    info "Configuring device pairing from install token..."
+    if "${DEJA_BIN}/deja" install "${DEJA_INSTALL_TOKEN}"; then
+      ok "Device paired 🎫"
+    else
+      warn "Device pairing failed — run '${CYAN}deja login${NC}' to pair manually."
+    fi
+  else
+    info "No install token provided."
+    info "Run '${CYAN}deja login${NC}' to pair this device, or get a one-click install link:"
+    info "   ${CYAN}https://cloud.dejajs.com/settings/devices${NC}"
+  fi
+}
+
+# ======================================================================
 # 🚀 Step 8: Start and verify
 # ======================================================================
 start_and_verify() {
@@ -482,6 +482,7 @@ main() {
   detect_serial
   install_server
   install_cli
+  pair_device
   start_and_verify
 }
 
