@@ -3,8 +3,9 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTurnouts, type Turnout } from '@repo/modules'
 import { useLayout, type Tag, useSubscription, PLAN_DISPLAY } from '@repo/modules'
-import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
+import { ListControlBar, useListControls } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
+import ListPage from '@/Core/UI/ListPage.vue'
 import TurnoutsList from '@/Turnouts/TurnoutsList.vue'
 import EmptyState from '@/Core/UI/EmptyState.vue'
 
@@ -37,8 +38,6 @@ const turnoutsList = computed(() =>
   turnouts?.value ? (turnouts.value as Turnout[]).map((t) => ({ ...t, id: t.id })) : []
 )
 
-const hasItems = computed(() => isLoaded.value && turnoutsList.value.length > 0)
-
 const deviceOptions = computed(() =>
   devices?.value ? devices.value.map((d) => ({ label: d.id, value: d.id })) : []
 )
@@ -68,55 +67,51 @@ const controls = useListControls('cloud-turnouts', {
 function handleEdit(turnout: Turnout) {
   router.push({ name: 'Edit Turnout', params: { turnoutId: turnout.id } })
 }
-
-function handleAdd() {
-  router.push({ name: 'Add Turnout' })
-}
 </script>
 <template>
-  <!-- 🔄 Loading -->
-  <div v-if="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4">
-    <v-skeleton-loader v-for="n in 6" :key="n" type="card" />
-  </div>
-
-  <!-- ✅ Has items -->
-  <template v-else-if="hasItems">
-    <PageHeader title="Turnouts" icon="mdi-call-split" color="amber" subtitle="Configure and control track switches across your layout.">
-      <template #actions>
-        <v-btn prepend-icon="mdi-plus" color="amber" variant="flat" @click="handleAdd">
-          New Turnout
-        </v-btn>
-      </template>
-      <template #controls>
-        <ListControlBar
-          :controls="controls"
-          color="amber"
-          :sort-options="sortOptions"
-          :filters="filters"
-          :show-view="false"
-          search-placeholder="Search turnouts..."
-        />
-      </template>
-    </PageHeader>
-
-    <TurnoutsList :filtered-list="controls.filteredList.value" :viewAs="controls.viewAs.value" @edit="handleEdit" />
-  </template>
-
-  <!-- 📭 Empty -->
-  <EmptyState
-    v-else
+  <ListPage
+    title="Turnouts"
     icon="mdi-call-split"
     color="amber"
-    title="No Turnouts Yet"
-    :description="isFreePlan
-      ? `Upgrade to ${PLAN_DISPLAY.engineer.name} to add turnouts and manage track switches across your layout.`
-      : 'Define your track switches and control them remotely. Map each turnout to its DCC address for seamless operation.'"
-    :use-cases="[
-      { icon: 'mdi-swap-horizontal', text: 'Yard switching' },
-      { icon: 'mdi-source-fork', text: 'Mainline junctions' },
-      { icon: 'mdi-warehouse', text: 'Staging areas' },
-    ]"
-    :action-label="isFreePlan ? `Upgrade to ${PLAN_DISPLAY.engineer.name}` : 'Add Your First Turnout'"
-    :action-to="isFreePlan ? '/upgrade' : '/turnouts/new'"
-  />
+    subtitle="Configure and control track switches across your layout."
+    :add-to="{ name: 'Add Turnout' }"
+    add-label="New Turnout"
+    :loading="isLoading"
+    :empty="isLoaded && turnoutsList.length === 0"
+  >
+    <template #controls>
+      <ListControlBar
+        :controls="controls"
+        color="amber"
+        :sort-options="sortOptions"
+        :filters="filters"
+        :show-view="false"
+        search-placeholder="Search turnouts..."
+      />
+    </template>
+
+    <TurnoutsList
+      :filtered-list="controls.filteredList.value"
+      :view-as="controls.viewAs.value"
+      @edit="handleEdit"
+    />
+
+    <template #empty-state>
+      <EmptyState
+        icon="mdi-call-split"
+        color="amber"
+        title="No Turnouts Yet"
+        :description="isFreePlan
+          ? `Upgrade to ${PLAN_DISPLAY.engineer.name} to add turnouts and manage track switches across your layout.`
+          : 'Define your track switches and control them remotely. Map each turnout to its DCC address for seamless operation.'"
+        :use-cases="[
+          { icon: 'mdi-swap-horizontal', text: 'Yard switching' },
+          { icon: 'mdi-source-fork', text: 'Mainline junctions' },
+          { icon: 'mdi-warehouse', text: 'Staging areas' },
+        ]"
+        :action-label="isFreePlan ? `Upgrade to ${PLAN_DISPLAY.engineer.name}` : 'Add Your First Turnout'"
+        :action-to="isFreePlan ? '/upgrade' : '/turnouts/new'"
+      />
+    </template>
+  </ListPage>
 </template>

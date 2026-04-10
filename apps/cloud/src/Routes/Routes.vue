@@ -4,8 +4,9 @@ import type { Route } from '@repo/modules'
 import { useRoutes } from '@repo/modules/routes/useRoutes'
 import { useLayout, type Tag, useSubscription, PLAN_DISPLAY } from '@repo/modules'
 import { useRouter } from 'vue-router'
-import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
+import { ListControlBar, useListControls } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
+import ListPage from '@/Core/UI/ListPage.vue'
 import RoutesList from '@/Routes/RoutesList.vue'
 import EmptyState from '@/Core/UI/EmptyState.vue'
 
@@ -37,8 +38,6 @@ const routesList = computed(() =>
   routes?.value ? (routes.value as Route[]).map((r) => ({ ...r, id: r.id })) : []
 )
 
-const hasItems = computed(() => isLoaded.value && routesList.value.length > 0)
-
 const tagOptions = computed(() =>
   layout?.value?.tags
     ? layout.value.tags.map((tag: Tag) => ({ label: tag.name, value: tag.id }))
@@ -63,55 +62,47 @@ const controls = useListControls('cloud-routes', {
 function handleEdit(route: Route) {
   router.push({ name: 'Edit Route', params: { routeId: route.id } })
 }
-
-function handleAdd() {
-  router.push({ name: 'Add Route' })
-}
 </script>
 <template>
-  <!-- 🔄 Loading -->
-  <div v-if="isLoading" class="grid grid-cols-1 gap-3 p-4">
-    <v-skeleton-loader v-for="n in 4" :key="n" type="card" />
-  </div>
-
-  <!-- ✅ Has items -->
-  <template v-else-if="hasItems">
-    <PageHeader title="Routes" icon="mdi-map" color="purple" subtitle="Automated multi-turnout paths for your layout.">
-      <template #actions>
-        <v-btn prepend-icon="mdi-plus" color="purple" variant="flat" @click="handleAdd">
-          New Route
-        </v-btn>
-      </template>
-      <template #controls>
-        <ListControlBar
-          :controls="controls"
-          color="purple"
-          :sort-options="sortOptions"
-          :filters="filters"
-          :show-view="false"
-          search-placeholder="Search routes..."
-        />
-      </template>
-    </PageHeader>
-
-    <RoutesList :filtered-list="controls.filteredList.value" @edit="handleEdit" />
-  </template>
-
-  <!-- 📭 Empty -->
-  <EmptyState
-    v-else
+  <ListPage
+    title="Routes"
     icon="mdi-map"
     color="purple"
-    title="No Routes Yet"
-    :description="isFreePlan
-      ? `Upgrade to ${PLAN_DISPLAY.engineer.name} to create automated routes that throw multiple turnouts in sequence.`
-      : 'Create automated paths that throw multiple turnouts in sequence, making complex track arrangements a single-click operation.'"
-    :use-cases="[
-      { icon: 'mdi-arrow-decision', text: 'Yard entry paths' },
-      { icon: 'mdi-highway', text: 'Mainline bypass' },
-      { icon: 'mdi-format-list-group', text: 'Multi-turnout sequences' },
-    ]"
-    :action-label="isFreePlan ? `Upgrade to ${PLAN_DISPLAY.engineer.name}` : 'Create Your First Route'"
-    :action-to="isFreePlan ? '/upgrade' : '/routes/new'"
-  />
+    subtitle="Automated multi-turnout paths for your layout."
+    :add-to="{ name: 'Add Route' }"
+    add-label="New Route"
+    :loading="isLoading"
+    :empty="isLoaded && routesList.length === 0"
+  >
+    <template #controls>
+      <ListControlBar
+        :controls="controls"
+        color="purple"
+        :sort-options="sortOptions"
+        :filters="filters"
+        :show-view="false"
+        search-placeholder="Search routes..."
+      />
+    </template>
+
+    <RoutesList :filtered-list="controls.filteredList.value" @edit="handleEdit" />
+
+    <template #empty-state>
+      <EmptyState
+        icon="mdi-map"
+        color="purple"
+        title="No Routes Yet"
+        :description="isFreePlan
+          ? `Upgrade to ${PLAN_DISPLAY.engineer.name} to create automated routes that throw multiple turnouts in sequence.`
+          : 'Create automated paths that throw multiple turnouts in sequence, making complex track arrangements a single-click operation.'"
+        :use-cases="[
+          { icon: 'mdi-arrow-decision', text: 'Yard entry paths' },
+          { icon: 'mdi-highway', text: 'Mainline bypass' },
+          { icon: 'mdi-format-list-group', text: 'Multi-turnout sequences' },
+        ]"
+        :action-label="isFreePlan ? `Upgrade to ${PLAN_DISPLAY.engineer.name}` : 'Create Your First Route'"
+        :action-to="isFreePlan ? '/upgrade' : '/routes/new'"
+      />
+    </template>
+  </ListPage>
 </template>
