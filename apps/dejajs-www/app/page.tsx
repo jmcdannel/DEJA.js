@@ -12,7 +12,6 @@ import ComingSoonStrip from '../components/home/ComingSoonStrip';
 import FAQSection from '../components/home/FAQSection';
 import SupportSection from '../components/home/SupportSection';
 import FinalCTA from '../components/home/FinalCTA';
-import PromoHeroSection from '../components/home/PromoHeroSection';
 
 export const metadata: Metadata = {
   title: 'DEJA.js — Run your railroad. From anywhere.',
@@ -30,7 +29,6 @@ export default function Home() {
   return (
     <div>
       <HeroSection />
-      <PromoHeroSection />
       <QuickStartSection />
       <VideoPlaceholder />
       <ThrottleSpotlight />
