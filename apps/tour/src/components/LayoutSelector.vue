@@ -20,8 +20,8 @@ const showDialog = computed(() => {
 // Get layouts for the current user
 const layoutsRef = collection(db, 'layouts')
 const layoutsQuery = computed(() => {
-  return user.value?.email
-    ? query(layoutsRef, where('owner', '==', user.value.email))
+  return user.value?.uid
+    ? query(layoutsRef, where('ownerUid', '==', user.value.uid))
     : null
 })
 const layouts = useCollection(layoutsQuery)

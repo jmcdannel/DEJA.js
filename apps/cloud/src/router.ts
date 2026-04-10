@@ -357,7 +357,7 @@ function checkRequireAuth(
 async function getUserLayouts(user: User) {
   const layoutsQuery = query(
     collection(db, 'layouts'),
-    where('owner', '==', user.email),
+    where('ownerUid', '==', user.uid),
   )
   return getDocs(layoutsQuery)
 }

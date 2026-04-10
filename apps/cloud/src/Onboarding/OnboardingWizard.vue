@@ -20,8 +20,8 @@ const { state: onboardingState, setLayoutNamed, setPlanSelected, setInstallStart
 
 const userLayouts = useCollection(
   computed(() =>
-    user.value?.email
-      ? query(collection(db, 'layouts'), where('owner', '==', user.value.email))
+    user.value?.uid
+      ? query(collection(db, 'layouts'), where('ownerUid', '==', user.value.uid))
       : null,
   ),
 )
