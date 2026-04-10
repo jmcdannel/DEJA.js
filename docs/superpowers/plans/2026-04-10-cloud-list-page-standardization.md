@@ -121,7 +121,7 @@ defineProps<{
 
 - [ ] **Step 2: Type-check and build**
 
-Run: `pnpm --filter=deja-cloud check-types`
+Run: `pnpm --filter=deja-cloud type-check`
 Expected: PASS with no new errors.
 
 Run: `pnpm --filter=deja-cloud build`
@@ -230,7 +230,7 @@ Also remove the now-unused `router` reference if it's not used elsewhere in the 
 
 - [ ] **Step 4: Type-check, lint, build**
 
-Run: `pnpm --filter=deja-cloud check-types`
+Run: `pnpm --filter=deja-cloud type-check`
 Expected: PASS.
 
 Run: `pnpm --filter=deja-cloud lint`
@@ -406,7 +406,7 @@ Keep `handleEditLoco`, `syncToCS`, and `importFromCS` — they're still used.
 
 - [ ] **Step 4: Type-check, lint, build**
 
-Run: `pnpm --filter=deja-cloud check-types`
+Run: `pnpm --filter=deja-cloud type-check`
 Expected: PASS.
 
 Run: `pnpm --filter=deja-cloud lint`
@@ -504,7 +504,7 @@ If `router` is no longer referenced anywhere else in the file, also delete `cons
 
 - [ ] **Step 4: Type-check, lint, build**
 
-Run: `pnpm --filter=deja-cloud check-types && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
+Run: `pnpm --filter=deja-cloud type-check && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -596,7 +596,7 @@ Keep `router` (used by `handleEdit`).
 
 - [ ] **Step 4: Type-check, lint, build**
 
-Run: `pnpm --filter=deja-cloud check-types && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
+Run: `pnpm --filter=deja-cloud type-check && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -686,7 +686,7 @@ function handleAdd() {
 
 - [ ] **Step 4: Type-check, lint, build**
 
-Run: `pnpm --filter=deja-cloud check-types && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
+Run: `pnpm --filter=deja-cloud type-check && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -776,7 +776,7 @@ function handleAdd() {
 
 - [ ] **Step 4: Type-check, lint, build**
 
-Run: `pnpm --filter=deja-cloud check-types && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
+Run: `pnpm --filter=deja-cloud type-check && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -872,7 +872,7 @@ function handleAdd() {
 
 - [ ] **Step 4: Type-check, lint, build**
 
-Run: `pnpm --filter=deja-cloud check-types && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
+Run: `pnpm --filter=deja-cloud type-check && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -939,7 +939,7 @@ function handleAdd() {
 
 - [ ] **Step 4: Type-check, lint, build**
 
-Run: `pnpm --filter=deja-cloud check-types && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
+Run: `pnpm --filter=deja-cloud type-check && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -1001,7 +1001,7 @@ Confirm the icon and color used by `ModuleTitle` when `menu="Track Diagrams"`. U
 
 - [ ] **Step 3: Type-check, lint, build**
 
-Run: `pnpm --filter=deja-cloud check-types && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
+Run: `pnpm --filter=deja-cloud type-check && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
 Expected: PASS.
 
 - [ ] **Step 4: Visual check**
@@ -1108,7 +1108,7 @@ const showAdd = ref(false)
 
 - [ ] **Step 2: Type-check, lint, build**
 
-Run: `pnpm --filter=deja-cloud check-types && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
+Run: `pnpm --filter=deja-cloud type-check && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
 Expected: PASS.
 
 - [ ] **Step 3: Visual check**
@@ -1309,7 +1309,7 @@ only if `layoutId` / `useStorage` is not referenced anywhere else. Verify with g
 
 - [ ] **Step 3: Type-check, lint, build**
 
-Run: `pnpm --filter=deja-cloud check-types && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
+Run: `pnpm --filter=deja-cloud type-check && pnpm --filter=deja-cloud lint && pnpm --filter=deja-cloud build`
 Expected: PASS.
 
 - [ ] **Step 4: Visual check**
@@ -1344,7 +1344,7 @@ If the slash command is not available, run the equivalent manually:
 
 ```bash
 pnpm --filter=deja-cloud lint
-pnpm --filter=deja-cloud check-types
+pnpm --filter=deja-cloud type-check
 pnpm --filter=deja-cloud build
 ```
 
