@@ -7,6 +7,7 @@ import Dashboard from '@/throttle/Dashboard.vue'
 import ThrottleList from '@/throttle/ThrottleList.vue'
 import { TurnoutList } from '@repo/ui'
 import { useThrottleSettings } from '@/throttle/useThrottleSettings'
+import QuickThrottleButton from '@/throttle/QuickThrottleButton.vue'
 
 const { getThrottles } = useLocos()
 const throttles = getThrottles()
@@ -24,6 +25,9 @@ const variantComponent = computed(() => variantMap[variant.value] ?? ButtonsThro
 </script>
   <template>
     <main class="@container relative">
+      <div class="conductor-quick-throttle">
+        <QuickThrottleButton size="small" color="green" />
+      </div>
       <div class="conductor-layout grid grid-cols-1 @[960px]:grid-cols-3 gap-2 w-full">
       <div class="rounded border-1 border-green-500 border-opacity-50 order-2 @[960px]:!order-1 overflow-hidden" style="background: rgba(var(--v-theme-surface), 0.2)">
         <div class="@container h-full overflow-y-auto p-4">
@@ -73,5 +77,12 @@ const variantComponent = computed(() => variantMap[variant.value] ?? ButtonsThro
   .conductor-layout {
     height: calc(100vh - var(--v-layout-bottom) - var(--v-layout-top));
   }
+}
+
+.conductor-quick-throttle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
 }
 </style>
