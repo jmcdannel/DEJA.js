@@ -2,25 +2,30 @@
 // Wraps shared generators from @repo/modules in Vue computed() refs + triggers ZIP download
 
 import { computed, type Ref, type ComputedRef } from 'vue'
-import type { Device, Effect, Turnout } from '@repo/modules'
 import {
   generateArduinoConfig,
+  generateDccExAutomation,
   generatePicoSettings,
   generatePicoConfig,
 } from '@repo/modules'
+import type { Device, Effect, Loco, Turnout } from '@repo/modules'
 
 interface UseDeviceConfigOptions {
   device: Ref<Device | null>
   effects: Ref<Effect[]> | ComputedRef<Effect[]>
   turnouts: Ref<Turnout[]> | ComputedRef<Turnout[]>
+  locos?: Ref<Loco[]> | ComputedRef<Loco[]>
+  layoutId?: Ref<string> | ComputedRef<string>
 }
 
-export function useDeviceConfig({ device, effects, turnouts }: UseDeviceConfigOptions) {
+export function useDeviceConfig({ device, effects, turnouts, locos, layoutId }: UseDeviceConfigOptions) {
   const isArduino = computed(() =>
-    ['dcc-ex', 'deja-arduino', 'deja-arduino-led'].includes(device.value?.type || '')
+    ['deja-arduino', 'deja-arduino-led'].includes(device.value?.type || '')
   )
 
   const isPicoW = computed(() => device.value?.type === 'deja-mqtt')
+
+  const isDccEx = computed(() => device.value?.type === 'dcc-ex')
 
   // 🔧 Arduino config.h
   const arduinoConfigH = computed(() => {
@@ -54,6 +59,16 @@ export function useDeviceConfig({ device, effects, turnouts }: UseDeviceConfigOp
     })
   })
 
+  // 🚂 dcc-ex myAutomation.h
+  const dccExAutomationH = computed(() => {
+    if (!device.value || !isDccEx.value) return ''
+    return generateDccExAutomation({
+      device: device.value,
+      layoutId: layoutId?.value ?? '',
+      locos: locos?.value ?? [],
+    })
+  })
+
   /**
    * 📦 Download a ready-to-deploy ZIP for this device
    */
@@ -79,6 +94,8 @@ export function useDeviceConfig({ device, effects, turnouts }: UseDeviceConfigOp
       })
       folder.file('settings.toml', settings)
       folder.file('config.json', picoConfigJson.value)
+    } else if (isDccEx.value) {
+      folder.file('myAutomation.h', dccExAutomationH.value)
     }
 
     const blob = await zip.generateAsync({ type: 'blob' })
@@ -93,9 +110,11 @@ export function useDeviceConfig({ device, effects, turnouts }: UseDeviceConfigOp
   return {
     isArduino,
     isPicoW,
+    isDccEx,
     arduinoConfigH,
     picoSettingsToml,
     picoConfigJson,
+    dccExAutomationH,
     downloadPackage,
   }
 }

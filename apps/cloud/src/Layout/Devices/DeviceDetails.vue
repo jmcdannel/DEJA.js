@@ -4,9 +4,9 @@ import { useCollection } from 'vuefire'
 import { useRouter } from 'vue-router'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
-import { useStorage } from '@vueuse/core'
+import { useStorage, useClipboard } from '@vueuse/core'
 import { useColors } from '@/Core/UI/useColors'
-import { deviceTypes, useTurnouts, useEfx, useLayout, type Device, type Effect, type Turnout, efxTypes } from '@repo/modules'
+import { deviceTypes, useTurnouts, useEfx, useLayout, useLocos, type Device, type Effect, type Loco, type Turnout, efxTypes } from '@repo/modules'
 import { StatusPulse, TrackOutputConfig } from '@repo/ui'
 import { useTrackOutputs, type TrackOutput } from '@repo/dccex'
 import { useNotification } from '@repo/ui'
@@ -17,6 +17,7 @@ import { useDeviceConfig } from './useDeviceConfig'
 const { getDevice, getDevices } = useLayout()
 const { getTurnoutsByDevice } = useTurnouts()
 const { getEffectsByDevice } = useEfx()
+const { getLocos } = useLocos()
 const { colors, DEFAULT_COLOR } = useColors()
 const { notify } = useNotification()
 
@@ -25,6 +26,7 @@ const deviceIdParam = route.currentRoute.value.params.deviceId || ''
 const deviceId = Array.isArray(deviceIdParam) ? deviceIdParam[0] : deviceIdParam
 const turnouts = useCollection(getTurnoutsByDevice(deviceId))
 const effects = useCollection(getEffectsByDevice(deviceId))
+const locos = getLocos()
 
 const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
 const device = ref(null as Device | null)
@@ -37,7 +39,14 @@ onMounted(async () => {
 })
 
 const deviceType = computed(() => deviceTypes.find((type) => type.value === device.value?.type))
-const isDccEx = computed(() => device.value?.type === 'dcc-ex')
+
+const { isArduino, isPicoW, isDccEx, arduinoConfigH, dccExAutomationH } = useDeviceConfig({
+  device,
+  effects: computed(() => (effects.value ?? []) as Effect[]),
+  turnouts: computed(() => (turnouts.value ?? []) as Turnout[]),
+  locos: computed(() => (locos.value ?? []) as Loco[]),
+  layoutId: computed(() => layoutId.value ?? ''),
+})
 
 // Track outputs composable for reactive updates
 const { trackOutputs, maxOutputs } = useTrackOutputs(() => deviceId)
@@ -67,11 +76,15 @@ async function handleSaveTrackOutputs(outputs: Record<string, TrackOutput>) {
 }
 const color = computed(() => colors[deviceType.value?.color || DEFAULT_COLOR])
 
-const { isArduino, isPicoW, arduinoConfigH } = useDeviceConfig({
-  device,
-  effects: computed(() => (effects.value ?? []) as Effect[]),
-  turnouts: computed(() => (turnouts.value ?? []) as Turnout[]),
+// 📋 Copy myAutomation.h to clipboard
+const { copy: copyAutomationH, copied: automationCopied } = useClipboard({
+  source: dccExAutomationH,
 })
+
+// 🚂 Count ROSTER entries for caption
+const rosterCount = computed(
+  () => (dccExAutomationH.value.match(/^ROSTER\(/gm) || []).length
+)
 
 const effectNames = computed(() => effects.value ? effects.value.map(effect => effect.name) : [])
 const turnoutNames = computed(() => turnouts.value ? turnouts.value.map(turnout => turnout.name) : [])
@@ -323,6 +336,29 @@ function handleBack() {
         </v-expansion-panel>
       </v-expansion-panels>
 
+      <!-- 🚂 dcc-ex myAutomation.h preview -->
+      <v-expansion-panels v-if="isDccEx" class="mt-4">
+        <v-expansion-panel>
+          <v-expansion-panel-title>
+            <v-icon start icon="mdi-file-code-outline" />
+            Generated myAutomation.h
+            <v-spacer />
+            <span class="text-caption text-medium-emphasis mr-2">
+              {{ rosterCount }} ROSTER {{ rosterCount === 1 ? 'entry' : 'entries' }} · {{ locos.length }} {{ locos.length === 1 ? 'loco' : 'locos' }} in this layout
+            </span>
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <div class="d-flex justify-end mb-2">
+              <v-btn size="small" variant="tonal" @click="copyAutomationH()">
+                <v-icon start :icon="automationCopied ? 'mdi-check' : 'mdi-content-copy'" />
+                {{ automationCopied ? 'Copied' : 'Copy' }}
+              </v-btn>
+            </div>
+            <pre class="dccex-preview-code"><code>{{ dccExAutomationH }}</code></pre>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
+
       <!-- 📦 Download Dialog -->
       <DeviceDownload
         v-model="showDownloadDialog"
@@ -356,3 +392,18 @@ function handleBack() {
     </v-card-actions>
   </v-card>
 </template>
+
+<style scoped>
+.dccex-preview-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
+  border-radius: 8px;
+  padding: 12px 16px;
+  max-height: 480px;
+  overflow: auto;
+  white-space: pre;
+  color: rgba(var(--v-theme-on-surface), 0.9);
+}
+</style>

@@ -197,7 +197,7 @@ function escapeCString(s: string): string {
 |---|---|
 | Loco with `functions: undefined` or `[]` | `ROSTER(3,"Eng 3","")` |
 | Functions out of order `[F2, F0, F1]` | Sorted ascending before emit |
-| Function id gaps `[F0, F1, F5]` | `"Light/Bell///Whistle"` (3 empty slots) |
+| Function id gaps `[F0, F1, F5]` | `"Light/Bell////Whistle"` (4 slashes between Bell and Whistle = 3 empty slots, putting Whistle at positional slot 5) |
 | Function with empty/missing `label` | Falls back to `F${id}` so the throttle has *something* to display |
 | `function.isMomentary === true` | `*` prefix on label (`"*Whistle"`) |
 | `loco.name` containing `"` | Escaped as `\"` |
@@ -323,7 +323,7 @@ Each row is one `it(...)` test:
 | single loco, no functions | `ROSTER(3,"Eng 3","")` |
 | single loco, ordered functions | `ROSTER(3,"Eng 3","Light/Bell/Whistle")` |
 | functions out of order | sorted by id before emit |
-| function id gaps (F0, F1, F5) | `"Light/Bell///Whistle"` |
+| function id gaps (F0, F1, F5) | `"Light/Bell////Whistle"` (3 empty slots, Whistle at positional slot 5) |
 | momentary function | `*` prefix |
 | missing/empty function label | falls back to `F${id}` |
 | name with `"` | escaped as `\"` |

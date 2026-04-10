@@ -3,7 +3,7 @@
 
 import { initializeApp, cert, type ServiceAccount } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
-import type { Device, Effect, Turnout, DeviceConfigInput, Layout } from '@repo/modules'
+import type { Device, Effect, Loco, Turnout, DeviceConfigInput, Layout } from '@repo/modules'
 
 let initialized = false
 
@@ -52,7 +52,14 @@ export async function getDeviceConfig(layoutId: string, deviceId: string): Promi
   const effects = effectsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Effect)
   const turnouts = turnoutsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Turnout)
 
-  return { device, effects, turnouts }
+  // dcc-ex devices need the layout-wide loco roster for myAutomation.h generation.
+  let locos: Loco[] | undefined
+  if (device.type === 'dcc-ex') {
+    const locosSnap = await layoutRef.collection('locos').get()
+    locos = locosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Loco)
+  }
+
+  return { device, effects, turnouts, locos }
 }
 
 /**

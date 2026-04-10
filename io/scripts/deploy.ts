@@ -63,7 +63,7 @@ async function deploy() {
   console.log('')
   console.log(`🔥 Fetching config for "${deviceId}"...`)
   const config = await getDeviceConfig(layoutId, deviceId)
-  const { device, effects, turnouts } = config
+  const { device, effects, turnouts, locos } = config
 
   console.log(`   📟 Type: ${device.type}`)
   console.log(`   ⚡ Effects: ${effects.length}`)
@@ -105,6 +105,7 @@ async function deploy() {
     device,
     effects,
     turnouts,
+    locos,
     wifiSsid,
     wifiPassword,
     mqttBroker,

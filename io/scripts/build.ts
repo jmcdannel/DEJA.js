@@ -110,9 +110,9 @@ async function buildForDevice(layoutId: string, deviceId: string) {
   const { getDeviceConfig } = await import('./lib/firebase.js')
 
   console.log(`🔥 Fetching config for device "${deviceId}" in layout "${layoutId}"...`)
-  const { device, effects, turnouts } = await getDeviceConfig(layoutId, deviceId)
+  const { device, effects, turnouts, locos } = await getDeviceConfig(layoutId, deviceId)
 
-  await writeDeviceBundle({ layoutId, device, effects, turnouts })
+  await writeDeviceBundle({ layoutId, device, effects, turnouts, locos })
 }
 
 /**
@@ -155,6 +155,7 @@ async function buildLayoutDevices(
       device: config.device,
       effects: config.effects,
       turnouts: config.turnouts,
+      locos: config.locos,
     })
     built++
   }
