@@ -11,7 +11,10 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const { runEffect } = useEfx()
+// 🎭 Tour guests are not Firebase-authenticated, so they cannot write directly
+// to Firestore under the owner-only rules. Use the runGuestEffect() path which
+// routes through the cloud app's /api/effects/guest-update endpoint.
+const { runGuestEffect } = useEfx()
 const state = ref(props.effect?.state)
 const isRunning = ref(false)
 const efxType = computed(() => efxTypes.find((type) => type.value === props?.effect?.type))
@@ -25,7 +28,12 @@ watch(state, async (newState) => {
   isRunning.value = true
   stop()
   start()
-  await runEffect({...props.effect, state: newState})
+  const ok = await runGuestEffect({ ...props.effect, state: newState })
+  if (!ok) {
+    log.warn('Guest effect update failed; reverting local state')
+    // Revert the optimistic toggle so the UI reflects reality.
+    state.value = !newState
+  }
 })
 </script>
 

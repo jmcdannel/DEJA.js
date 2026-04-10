@@ -206,6 +206,7 @@ export const useEfx = fn(() => ({
   getEfxType: fn().mockName('getEfxType').mockReturnValue(undefined),
   setEfx: fn().mockName('setEfx').mockResolvedValue(true),
   runEffect: fn().mockName('runEffect').mockResolvedValue(undefined),
+  runGuestEffect: fn().mockName('runGuestEffect').mockResolvedValue(true),
 })).mockName('useEfx')
 
 // ---------------------------------------------------------------------------

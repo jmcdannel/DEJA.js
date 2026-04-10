@@ -179,6 +179,48 @@ export const useEfx = () => {
     }
   }
 
+  // 🎭 Guest-mode effect update. Non-owner users (tour guests, open house
+  // visitors) cannot write to Firestore subcollections under the new
+  // owner-only rules. This routes through the cloud app's
+  // /api/effects/guest-update endpoint, which runs as the admin SDK and
+  // validates the effect's `allowGuest: true` flag before writing.
+  //
+  // The cloud API base URL is configured via VITE_BILLING_API_URL (same env
+  // var used by billing portal and other cross-app calls). Falls back to
+  // same-origin if unset (useful when the guest client is served from the
+  // same Vercel project as the API).
+  async function runGuestEffect(efx: Effect): Promise<boolean> {
+    if (!layoutId.value) {
+      log.error('Layout ID is not set')
+      return false
+    }
+    if (!efx || !efx.id) {
+      log.error('Effect data is not provided or invalid')
+      return false
+    }
+    try {
+      const apiBase = import.meta.env.VITE_BILLING_API_URL || ''
+      const res = await fetch(`${apiBase}/api/effects/guest-update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          layoutId: layoutId.value,
+          effectId: efx.id,
+          state: Boolean(efx.state),
+        }),
+      })
+      if (!res.ok) {
+        const body = await res.text().catch(() => '')
+        log.error('runGuestEffect failed:', res.status, body)
+        return false
+      }
+      return true
+    } catch (e) {
+      log.error('runGuestEffect: ', e, efx)
+      return false
+    }
+  }
+
   return {
     deleteEfx,
     efxCol,
@@ -190,6 +232,7 @@ export const useEfx = () => {
     getEfxType,
     setEfx,
     runEffect,
+    runGuestEffect,
   }
 }
 
