@@ -1,7 +1,7 @@
 import type { StructureResolver } from 'sanity/structure'
-import { CogIcon, HomeIcon, HelpCircleIcon, CreditCardIcon, RocketIcon } from '@sanity/icons'
+import { CogIcon, HomeIcon, CreditCardIcon, RocketIcon } from '@sanity/icons'
 
-const SINGLETONS = ['homepage', 'faqPage', 'pricingPage', 'siteSettings']
+const SINGLETONS = ['homepage', 'pricingPage', 'siteSettings']
 
 export const structure: StructureResolver = (S) =>
   S.list()
@@ -25,11 +25,6 @@ export const structure: StructureResolver = (S) =>
         .child(S.documentTypeList('productPage').title('Product Pages')),
 
       S.divider(),
-
-      S.listItem()
-        .title('FAQ')
-        .icon(HelpCircleIcon)
-        .child(S.document().schemaType('faqPage').documentId('faqPage').title('FAQ')),
 
       S.listItem()
         .title('Pricing')

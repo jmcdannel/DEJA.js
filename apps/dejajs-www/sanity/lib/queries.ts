@@ -65,24 +65,6 @@ export const PRODUCT_SLUGS_QUERY = defineQuery(/* groq */ `
   *[_type == "productPage" && defined(slug.current)]{ "slug": slug.current }
 `)
 
-// ─── FAQ ────────────────────────────────────────────────
-export const FAQ_PAGE_QUERY = defineQuery(/* groq */ `
-  *[_id == "faqPage"][0]{
-    title,
-    sections[] {
-      _key,
-      heading,
-      entries[] {
-        _key,
-        question,
-        answer
-      }
-    },
-    seoTitle,
-    seoDescription
-  }
-`)
-
 // ─── Pricing ────────────────────────────────────────────
 export const PRICING_PAGE_QUERY = defineQuery(/* groq */ `
   *[_id == "pricingPage"][0]{
