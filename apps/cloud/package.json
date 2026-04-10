@@ -13,6 +13,8 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "preview": "vite preview",
     "start": "vite --host",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
     "type-check": "vue-tsc --noEmit --composite false --skipLibCheck "
   },
   "dependencies": {
@@ -58,6 +60,7 @@
     "tailwindcss": "^3.4.10",
     "typescript": "*",
     "vite": "^4.4.9",
+    "vitest": "^2.0.5",
     "vue-tsc": "^2.2.12",
     "vue3-icons": "^0.1.13",
     "vuedraggable": "^4.1.0"
