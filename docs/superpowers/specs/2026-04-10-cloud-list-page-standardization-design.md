@@ -10,17 +10,22 @@ Make every list page in the cloud app share the same layout skeleton — title, 
 
 ## Background
 
-Most list pages in `apps/cloud/` already use `PageHeader` from `@repo/ui`, but a handful of pages drifted:
+Most list pages in `apps/cloud/` already use `PageHeader` from `@repo/ui` plus the local `apps/cloud/src/Core/UI/EmptyState.vue` — a richer empty-state component with `color`, `useCases`, `actionLabel`, `actionTo`, and an animated glow treatment. But a handful of pages drifted:
 
-- **TrackDiagram** uses a local `ModuleTitle.vue` (an `h2` in a `v-sheet`) instead of `PageHeader`, and uses an inline `AddTile` instead of a header button.
+- **TrackDiagram (`TrackDiagram.vue`)** uses the local `ModuleTitle.vue` (an `h2` in a `v-sheet`) instead of `PageHeader`, and uses an inline `AddTile` instead of a header button.
 - **Devices (`Layout.vue`)** uses `PageHeader` correctly but also renders an inline `AddTile` for the add action.
-- **PowerDistricts** uses `PageHeader` minimally and rolls a custom inline `v-card` for its empty state instead of `EmptyState`.
-- There are two duplicate components in `apps/cloud/src/Core/UI/`:
-  - `ModuleTitle.vue` — a smaller/older title component, only used by TrackDiagram.
-  - `EmptyState.vue` — a near-duplicate of `@repo/ui/EmptyState`.
-- Loading skeletons use ad-hoc `gap-3 p-4` / `pa-4` classes instead of a shared skeleton.
+- **Sensors/Automations (`Automations.vue`)** uses `AddTile` inline too.
+- **PowerDistricts** uses `PageHeader` minimally and rolls a custom inline `v-card` for its empty state instead of the shared `EmptyState`.
+- Loading skeletons use ad-hoc `grid ... gap-3 p-4` classes duplicated across every page.
+- Every list page duplicates the same `v-if isLoading / v-else-if hasItems / v-else` template scaffold by hand.
 
 Outer page margins are **already correct** — `App.vue` wraps every page in a `v-container` with `pa-6 pa-md-12 max-w-7xl mx-auto`. No global layout changes are needed.
+
+**Not in scope, despite their names suggesting duplication:**
+
+- `@repo/ui/EmptyState` is a 20-line stub with only `icon`/`title`/`description` — a different component with a different API from the local `Core/UI/EmptyState.vue`. It is not used by any cloud list page and is not being touched.
+- `Core/UI/ModuleTitle.vue` is ALSO used by `AddTrackDiagram.vue` and `EditTrackDiagram.vue`, which are form pages and therefore out of scope. The file stays; only `TrackDiagram.vue` (the list page) migrates away from it.
+- `Core/UI/index.ts` has a broken export for a non-existent `PageHeader.vue`. No callers use it; it is dead code and left alone.
 
 ## Non-goals
 
@@ -36,9 +41,15 @@ Outer page margins are **already correct** — `App.vue` wraps every page in a `
 
 ### The `<ListPage>` component
 
-A new cloud-app-specific wrapper component at `apps/cloud/src/Core/UI/ListPage.vue` that encodes the approved layout and composes `@repo/ui/PageHeader` + `@repo/ui/EmptyState`.
+A new cloud-app-specific wrapper component at `apps/cloud/src/Core/UI/ListPage.vue` that encodes the approved layout. It composes `@repo/ui/PageHeader` and the existing local `@/Core/UI/EmptyState.vue`.
 
 **Why a component instead of a documented convention:** a single enforceable surface. New list pages become ~10 lines of template that are hard to get wrong, and any future list page that doesn't use `<ListPage>` stands out in review.
+
+**The three states `<ListPage>` renders internally** (matches current per-page convention):
+
+1. **`loading === true`** → a shared skeleton grid. Replaces every page's hand-written `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4"><v-skeleton-loader ... /></div>`.
+2. **`empty === true`** → renders the `empty-state` slot **alone**, with no `PageHeader` above it. Matches today's behavior where the rich `EmptyState` takes the whole page when the list is empty.
+3. **Otherwise** → renders `PageHeader` (with subtitle / controls / actions slots) followed by the `default` slot.
 
 **Props:**
 
@@ -48,94 +59,129 @@ A new cloud-app-specific wrapper component at `apps/cloud/src/Core/UI/ListPage.v
 | `icon` | `string?` | MDI icon, passed to `PageHeader`. |
 | `color` | `string?` | Accent color, passed to `PageHeader`. |
 | `subtitle` | `string?` | Passed to `PageHeader`. |
-| `addTo` | `RouteLocationRaw?` | Router destination for the "Add" button. When omitted, no button is rendered (read-only / no-add pages like PowerDistricts). |
-| `addLabel` | `string?` | Button label, e.g. `"New Loco"`. Defaults to `"New"`. |
-| `empty` | `boolean?` | When `true`, renders the `empty-state` slot instead of `default`. |
-| `loading` | `boolean?` | When `true`, renders a shared skeleton in place of the body. |
+| `addTo` | `RouteLocationRaw?` | When set, `<ListPage>` renders an "Add" button as the last child of the actions slot. When omitted, no automatic Add button (e.g. PowerDistricts). |
+| `addLabel` | `string?` | Button label. Defaults to `"New"`. |
+| `loading` | `boolean?` | When `true`, renders a shared skeleton in place of everything. |
+| `empty` | `boolean?` | When `true`, renders only the `empty-state` slot. |
 
 **Slots:**
 
-- `controls` — forwarded to `PageHeader`'s `#controls` slot (for `ListControlBar`). Omit entirely when a page does not need controls; the visual rhythm stays consistent because `PageHeader`'s height is the same whether `#controls` is filled or not.
+- `subtitle` — forwarded to `PageHeader`'s `#subtitle` slot (optional; also accepts the `subtitle` prop).
+- `controls` — forwarded to `PageHeader`'s `#controls` slot (for `ListControlBar`). Omit entirely when a page does not need controls.
+- `actions` — forwarded to `PageHeader`'s `#actions` slot. Rendered **before** the auto-generated Add button so extra actions (Roster's Sync/Import) sit next to it.
 - `default` — the list body.
-- `empty-state` — custom empty state. When omitted, `<ListPage>` falls back to a default `<EmptyState>` from `@repo/ui` using `title` and `icon`.
+- `empty-state` — the full-page empty state. Required if `empty` can ever be `true`.
 
 **What `<ListPage>` does NOT do:**
 
-- No outer padding or `max-width`. `App.vue` already applies `pa-6 pa-md-12 max-w-7xl mx-auto` globally, so `<ListPage>` is transparent to page margins. No per-page `pa-*` or `ma-*` classes on the root.
-- It does not render a `ListControlBar` automatically — that stays the page's responsibility, passed through the `controls` slot.
+- No outer padding or `max-width`. `App.vue` already applies `pa-6 pa-md-12 max-w-7xl mx-auto` globally. No per-page `pa-*` or `ma-*` classes on the root.
+- It does not render a `ListControlBar` automatically.
+- It does not know about empty-state content — the page owns the slot so per-page copy, use cases, and action targets stay page-specific.
 
-**Example usage:**
+**Example usage (Effects, the simplest common case):**
 
 ```vue
 <script setup lang="ts">
-import { mdiTrainCar } from '@mdi/js'
 import ListPage from '@/Core/UI/ListPage.vue'
-import ListControlBar from '@repo/ui/ListControlBar'
-import RosterList from './RosterList.vue'
-import { useLocos } from '@repo/modules'
-
-const { locos, loading } = useLocos()
+import { ListControlBar } from '@repo/ui'
+import EmptyState from '@/Core/UI/EmptyState.vue'
+import EffectsList from '@/Effects/EffectsList.vue'
+// ... existing imports and setup ...
 </script>
 
 <template>
   <ListPage
-    title="Roster"
-    :icon="mdiTrainCar"
-    color="pink"
-    subtitle="Your locomotives"
-    :add-to="{ name: 'Add Loco' }"
-    add-label="New Loco"
-    :loading="loading"
-    :empty="!loading && locos.length === 0"
+    title="Effects"
+    icon="mdi-rocket-launch"
+    color="indigo"
+    subtitle="Manage lighting, sound, and special effects for your layout."
+    :add-to="{ name: 'Add Effect' }"
+    add-label="New Effect"
+    :loading="isLoading"
+    :empty="isLoaded && effectsList.length === 0"
   >
     <template #controls>
-      <ListControlBar ... />
+      <ListControlBar
+        :controls="controls"
+        color="indigo"
+        :sort-options="sortOptions"
+        :filters="filters"
+        :show-view="false"
+        search-placeholder="Search effects..."
+      />
     </template>
-    <RosterList :locos="locos" />
+
+    <EffectsList :filtered-list="controls.filteredList.value" @edit="handleEdit" />
+
+    <template #empty-state>
+      <EmptyState
+        icon="mdi-rocket-launch"
+        color="indigo"
+        title="No Effects Yet"
+        :description="isFreePlan ? `Upgrade to ${PLAN_DISPLAY.engineer.name} ...` : 'Create ...'"
+        :use-cases="[
+          { icon: 'mdi-volume-high', text: 'Ambient sounds & audio' },
+          { icon: 'mdi-led-on', text: 'LED animations & lighting' },
+          { icon: 'mdi-play-circle', text: 'Triggered sequences' },
+        ]"
+        :action-label="isFreePlan ? `Upgrade to ${PLAN_DISPLAY.engineer.name}` : 'Create Your First Effect'"
+        :action-to="isFreePlan ? '/upgrade' : '/effects/new'"
+      />
+    </template>
   </ListPage>
 </template>
 ```
 
 ### Agreed conventions (from brainstorming)
 
-1. **Scope:** list pages only (Roster, Sounds, Effects, Routes, Signals, Sensors, Turnouts, TrackDiagram, PowerDistricts, Devices/Layout, and the Sensors/Automations + Turnouts/Labels secondary lists). Settings, forms, and Dashboard are untouched.
-2. **Add button pattern:** one button in `PageHeader`'s `#actions` slot, rendered by `<ListPage>` from `addTo` / `addLabel`. No inline `AddTile`.
+1. **Scope:** list pages only (Roster, Sounds, Effects, Routes, Signals, Sensors, Turnouts, TrackDiagram, PowerDistricts, Devices/Layout, plus Sensors/Automations and Turnouts/Labels secondary lists). Settings, forms, and Dashboard are untouched.
+2. **Add button pattern:** one button in `PageHeader`'s `#actions` slot, rendered by `<ListPage>` from `addTo` / `addLabel`. No inline `AddTile` on list pages.
 3. **ListControlBar:** optional but consistently positioned via the `#controls` slot. Pages that don't need sort/filter/search simply omit it.
-4. **Empty state:** every list page uses `@repo/ui/EmptyState`, either via `<ListPage>`'s default or via the `empty-state` slot.
-5. **Duplicate components deleted** after migration: `Core/UI/ModuleTitle.vue` and `Core/UI/EmptyState.vue`.
+4. **Empty state:** every list page uses the existing local `@/Core/UI/EmptyState.vue`. No new empty-state component is introduced.
+5. **No component deletions in this pass.** `ModuleTitle.vue`, `AddTile.vue`, and `EmptyState.vue` all stay on disk — they have legitimate out-of-scope callers or will simply become unused by list pages. A follow-up pass can clean them up after the form pages are also standardized.
 
 ### Per-page migration
 
+Roster is the most complex migration (it has three `#actions` buttons: Sync, Import, and the new Add). All others are simpler.
+
 | Page | Changes |
 |---|---|
-| **Roster** | Swap `PageHeader` for `<ListPage>`. Keep `ListControlBar` in `#controls`. Move "New Loco" from `#actions` to `add-to` / `add-label`. Remove local `pa-4` on loading skeleton — use `ListPage`'s `loading` prop. |
-| **Sounds** | Swap. No `ListControlBar` (stays that way). `add-to = { name: 'Add Sound' }`. |
+| **Roster** | Swap to `<ListPage>`. Keep `ListControlBar` in `#controls`. Move "New Loco" from `#actions` to `add-to` / `add-label`. Keep Sync/Import in the `actions` slot. Remove the hand-written loading grid — use `loading` prop. |
+| **Sounds** | Swap. No `ListControlBar`. `add-to = { name: 'Add Sound' }`. |
 | **Effects** | Swap. `ListControlBar` → `#controls`. `add-to = { name: 'Add Effect' }`. |
 | **Routes** | Swap. `ListControlBar` → `#controls`. `add-to = { name: 'Add Route' }`. |
 | **Signals** | Swap. `ListControlBar` → `#controls`. `add-to = { name: 'Add Signal' }`. |
 | **Sensors** | Swap. `ListControlBar` → `#controls`. `add-to = { name: 'Add Sensor' }`. |
-| **Sensors/Automations** | Secondary list page. Same pattern. `add-to = { name: 'Add Automation' }`. |
+| **Sensors/Automations** | Swap. **Remove the inline `AddTile`** — replaced by header "New Automation" button. |
 | **Turnouts** | Swap. `ListControlBar` → `#controls`. `add-to = { name: 'Add Turnout' }`. |
-| **Turnouts/Labels** | Secondary list page. Same pattern. |
-| **TrackDiagram** | Replace `ModuleTitle` with `<ListPage>`. **Remove the inline `AddTile`** — replaced by the header "New Track Diagram" button. Body becomes the diagram grid. |
-| **PowerDistricts** | Swap. No `ListControlBar`. **Replace the custom inline empty-state `v-card`** with `<EmptyState>` via the `empty` prop. **No `addTo` prop** — the route does not exist and is out of scope. |
-| **Devices (`Layout.vue`)** | Swap. **Remove the inline `AddTile`** — replaced by header "Add Device" button. Draggable grid stays in the default slot. If drag-and-drop code depended on `AddTile` as a drop target, the dead drag code is removed too (drag feature is unused). |
+| **TrackDiagram** | Replace `ModuleTitle` with `<ListPage>`. **Remove the inline `AddTile`** from `TrackDiagramList`'s `#prepend` slot — replaced by the header "New Track Diagram" button (navigates to the existing `Add Track Diagram` route). Body is `TrackDiagramList`. `ModuleTitle.vue` stays on disk (used by Add/Edit form pages). |
+| **Sensors/Automations** | Swap. No `ListControlBar`. **Remove `AddTile`** from `AutomationList`'s `#prepend` slot — replaced by header "New Automation" button via `add-to`. |
+| **Devices (`Layout.vue`)** | Swap. **Remove the inline `AddTile`** from the draggable footer. Add a header "Add Device" button to the **`actions` slot** (not `addTo`) that toggles the existing `showAdd` ref — `AddDeviceItem` form stays unchanged. Remove the `<div class="animate-fade-in-up space-y-4">` wrapper; `<ListPage>` owns layout. Draggable grid stays in the default slot. |
+| **PowerDistricts** | Swap. No `ListControlBar`. **Replace the custom inline empty-state `v-card`** with the local `EmptyState` via the `empty-state` slot. Remove the double-padding `<div class="pa-4">` wrapper. Keep the existing "Add District" button + inline form via the **`actions` slot** (not `addTo`, since it's a toggle not a route). |
+
+**Excluded from migration:**
+
+- **`Turnouts/TurnoutLabels.vue`** — a print-friendly page with a bare `<h1>` and browser-print instructions. Its minimal chrome is intentional. Not a list page in the UX sense.
 
 ### Files deleted after migration
 
-- `apps/cloud/src/Core/UI/ModuleTitle.vue`
-- `apps/cloud/src/Core/UI/EmptyState.vue`
+**None.** All existing components stay on disk:
 
-Before deleting either, grep the full monorepo for imports to confirm no other callers. If any exist, migrate them first.
+- `Core/UI/ModuleTitle.vue` — still used by `AddTrackDiagram.vue` / `EditTrackDiagram.vue` (form pages, out of scope).
+- `Core/UI/AddTile.vue` — still exported from `Core/UI/index.ts`. Becomes unused by list pages but is not deleted in this pass.
+- `Core/UI/EmptyState.vue` — the canonical local empty state. Actively used on every list page.
+
+Cleanup of unused components (`AddTile`, dead barrel exports) can happen in a follow-up pass after the form-page standardization.
 
 ## Rollout order
 
 1. Build `<ListPage>` in `apps/cloud/src/Core/UI/ListPage.vue`. No callers yet.
-2. Migrate **Roster** as the template. Verify visually.
-3. Migrate the straightforward pages (one commit each or one grouped commit, at the implementer's discretion): Sounds, Effects, Routes, Signals, Sensors, Sensors/Automations, Turnouts, Turnouts/Labels.
-4. Migrate the outliers — one commit per page for easy bisecting: **TrackDiagram**, **Devices**, **PowerDistricts**.
-5. Grep for imports of the duplicate files and delete them if unreferenced.
-6. Run `/verify-changes` (lint + type-check + build).
+2. Migrate **Effects** first — it's the canonical "simple list page" and maps cleanly to the example in this spec. Verify visually.
+3. Migrate **Roster** — the most complex `actions`-slot case. If Roster works, the rest are mechanical.
+4. Migrate the remaining standard pages: Sounds, Routes, Signals, Sensors, Turnouts.
+5. Migrate **Sensors/Automations** (AddTile removal).
+6. Migrate the outliers — one commit per page: **TrackDiagram**, **Devices (Layout)**, **PowerDistricts**.
+7. Run `/verify-changes` (lint + type-check + build).
 
 ## Testing
 
