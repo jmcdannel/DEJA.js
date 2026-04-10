@@ -27,7 +27,8 @@ vi.mock('vuefire', () => ({
 }))
 
 vi.mock('@vueuse/core', () => ({
-  useStorage: (_key: string, initial: unknown) => ({ value: initial === '' ? 'layout-1' : initial }),
+  useStorage: (key: string, initial: unknown) =>
+    key === '@DEJA/layoutId' ? { value: 'layout-1' } : { value: initial },
 }))
 
 vi.mock('@repo/utils', () => ({
@@ -55,10 +56,7 @@ describe('acquireThrottle', () => {
   })
 
   it('preserves existing speed and direction on re-acquire', async () => {
-    getDocMock.mockResolvedValueOnce({
-      exists: () => true,
-      data: () => ({ address: 42, speed: 55, direction: true }),
-    })
+    getDocMock.mockResolvedValueOnce({ exists: () => true })
     const { acquireThrottle } = useLocos()
     await acquireThrottle(42)
 
@@ -67,6 +65,7 @@ describe('acquireThrottle', () => {
     expect(data).toMatchObject({ address: 42 })
     expect(data).not.toHaveProperty('speed')
     expect(data).not.toHaveProperty('direction')
+    expect(data).toHaveProperty('timestamp', 'SERVER_TIMESTAMP')
     expect(options).toEqual({ merge: true })
   })
 
