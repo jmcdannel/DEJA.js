@@ -24,6 +24,12 @@ const meta: Meta<typeof Logo> = {
     showMark: { control: 'boolean' },
     showText: { control: 'boolean' },
     stacked: { control: 'boolean' },
+    layout: {
+      control: 'radio',
+      options: ['inline', 'stacked', 'product'],
+      description:
+        '`inline` (default), `stacked` (wordmark above title), or `product` (small DEJA.JS kicker + huge brand-coloured app title — the product hero treatment).',
+    },
     appTitle: { control: 'text' },
   },
   parameters: {
@@ -93,7 +99,7 @@ export const MarkOnly: Story = {
 export const NoIcon: Story = {
   args: {
     size: 'lg',
-    showIcon: false,
+    showMark: false,
     variant: 'default',
   },
 }
@@ -109,6 +115,40 @@ export const Stacked: Story = {
     appTitle: 'Throttle',
     stacked: true,
   },
+}
+
+export const ProductHero: Story = {
+  name: 'Product Hero Layout',
+  args: {
+    size: 'xl',
+    variant: 'throttle',
+    appTitle: 'Throttle',
+    markStyle: 'logo',
+    layout: 'product',
+  },
+}
+
+export const ProductHeroAllApps: Story = {
+  name: 'Product Hero / All Apps',
+  render: () => ({
+    components: { Logo },
+    setup() {
+      return { APPS, appTitleOf }
+    },
+    template: `
+      <div class="flex flex-col gap-10 p-6">
+        <Logo
+          v-for="a in APPS"
+          :key="a"
+          size="xl"
+          :variant="a"
+          :app-title="appTitleOf(a)"
+          mark-style="logo"
+          layout="product"
+        />
+      </div>
+    `,
+  }),
 }
 
 export const StackedVsInline: Story = {

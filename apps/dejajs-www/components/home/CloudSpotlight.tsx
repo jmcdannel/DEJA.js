@@ -23,7 +23,7 @@ export default function CloudSpotlight() {
       }}
       mainScreenshot={{ src: '/screenshots/cloud_desktop_roster.png', alt: 'DEJA Cloud roster view' }}
       pipScreenshot={{ src: '/screenshots/cloud_desktop_signals.png', alt: 'DEJA Cloud signals view' }}
-      logoPath="/cloud/icon-512.png"
+      logoVariant="cloud"
       ctaHref="/cloud"
       ctaLabel="Learn More"
       docsHref="/docs/cloud"

@@ -11,7 +11,7 @@ const features: Feature[] = [
   {
     icon: '☁️',
     title: 'Cloud Sync',
-    description: 'Roster, turnouts, and settings sync instantly across all devices via Firebase.',
+    description: 'Roster, turnouts, and settings sync instantly across all devices through DEJA Cloud.',
   },
   {
     icon: '📱',
@@ -22,7 +22,7 @@ const features: Feature[] = [
     icon: '🔒',
     title: 'Private Platform',
     description:
-      'Subscription-gated access. Your layout data is yours — secured by Firebase Auth.',
+      'Subscription-gated access. Your layout data is yours — secured end-to-end by DEJA.js.',
   },
   {
     icon: '⚡',

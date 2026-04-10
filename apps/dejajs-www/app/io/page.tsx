@@ -59,11 +59,11 @@ export default function IOPage() {
         heading="MQTT to the server. DCC to the track. Nothing proprietary in between."
         body="Every IO device publishes its state and subscribes to commands over MQTT. The server routes messages to the right Cloud element. You never touch a proprietary module or a locked-down protocol."
         visual={
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 text-sm font-mono text-gray-400 leading-relaxed w-full max-w-lg">
-            <pre>{`IO device ──MQTT──▶ server
-                       │
-                       ├─WebSocket─▶ throttles
-                       └─Firebase──▶ DEJA Cloud`}</pre>
+          <div className="w-full max-w-lg overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-6 font-mono text-[10px] leading-relaxed text-gray-400 sm:text-xs md:text-sm">
+            <pre className="whitespace-pre">{`IO device ──MQTT──▶ server
+             │
+             ├─WebSocket─▶ throttles
+             └──Sync─────▶ DEJA Cloud`}</pre>
           </div>
         }
         accent={accent}
@@ -97,6 +97,7 @@ export default function IOPage() {
         heading="Build the layout you want."
         subheading="Open firmware, open hardware, open protocols. Start with an Arduino or a Pico W."
         accent={accent}
+        productName={ioContent.name}
         primary={ioContent.ctas.primary}
         secondary={ioContent.ctas.secondary}
         guide={ioContent.ctas.guide}

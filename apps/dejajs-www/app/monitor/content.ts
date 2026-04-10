@@ -43,8 +43,13 @@ export const monitorContent: ProductContent = {
       style: 'primary',
     },
     secondary: {
-      label: 'Read the docs',
+      label: 'Monitor Docs',
       href: '/docs/monitor',
+      style: 'secondary',
+    },
+    guide: {
+      label: 'Read the Guide',
+      href: '/guides/monitor',
       style: 'secondary',
     },
   },

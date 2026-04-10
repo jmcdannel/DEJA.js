@@ -4,6 +4,7 @@ import Image from 'next/image';
 import AnimateIn from './AnimateIn';
 import SectionLabel from './SectionLabel';
 import DocLink from '../DocLink';
+import Logo, { type LogoVariant } from '../Logo';
 
 export interface SpotlightFeature {
   icon: string;
@@ -27,7 +28,7 @@ export interface AppSpotlightProps {
   callout: SpotlightCallout;
   mainScreenshot: { src: string; alt: string };
   pipScreenshot: { src: string; alt: string };
-  logoPath: string;
+  logoVariant: LogoVariant;
   ctaHref: string;
   ctaLabel?: string;
   docsHref: string;
@@ -48,7 +49,7 @@ export default function AppSpotlight({
   callout,
   mainScreenshot,
   pipScreenshot,
-  logoPath,
+  logoVariant,
   ctaHref,
   ctaLabel = 'Learn More',
   docsHref,
@@ -62,7 +63,7 @@ export default function AppSpotlight({
     <AnimateIn direction={flip ? 'right' : 'left'} className="flex flex-col gap-6">
       {/* Logo + label row */}
       <div className="flex items-center gap-3">
-        <Image src={logoPath} alt={`${appName} logo`} width={32} height={32} className="w-8 h-8" />
+        <Logo variant={logoVariant} size="2xl" iconShape="circle" showWordmark={false} />
         <SectionLabel color={labelColor}>{label}</SectionLabel>
       </div>
 

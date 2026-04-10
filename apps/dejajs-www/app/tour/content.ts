@@ -43,8 +43,13 @@ export const tourContent: ProductContent = {
       style: 'primary',
     },
     secondary: {
-      label: 'Read the docs',
+      label: 'Tour Docs',
       href: '/docs/tour',
+      style: 'secondary',
+    },
+    guide: {
+      label: 'Read the Guide',
+      href: '/guides/tour',
       style: 'secondary',
     },
   },

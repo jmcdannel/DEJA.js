@@ -12,45 +12,81 @@ export const throttleContent: ProductContent = {
   features: [
     {
       icon: '🎚️',
-      title: 'Precision speed control',
+      title: 'Drive a loco',
       description:
-        'Smooth sliders plus exact ±1 step modifiers. Visual feedback confirms every speed change instantly.',
-    },
-    {
-      icon: '🔗',
-      title: 'EZ Consist',
-      description:
-        'Build a consist visually: pick locos, choose a lead, drive them as one. No CV programming required.',
+        'Pick any loco from your roster and drive it with precise speed control, direction, and all its sound and light functions.',
     },
     {
       icon: '🎛️',
-      title: 'Function mapping',
+      title: 'Multi-throttle console',
       description:
-        'Function buttons map dynamically from your roster. Color-code lights, horns, and bells for instant recognition.',
+        'Run several trains at once from a single screen. Jump between throttles without losing your place.',
+    },
+    {
+      icon: '🎩',
+      title: 'Conductor view',
+      description:
+        'The operating-session dashboard. See every active train, swap between them fast, and keep the whole session flowing.',
+    },
+    {
+      icon: '🚂',
+      title: 'Your loco roster',
+      description:
+        'Browse every locomotive on your layout with color-coded cards, photos, and custom function labels.',
     },
     {
       icon: '🔀',
-      title: 'Turnouts & routes at the throttle',
+      title: 'Throw turnouts',
       description:
-        'Throw switches and trigger routes without leaving the throttle view. Your whole layout is one tap away.',
+        'Flip any switch on the layout from wherever you are standing. No reaching across the benchwork.',
+    },
+    {
+      icon: '🛤️',
+      title: 'Trigger routes',
+      description:
+        'Fire a preset route with one tap and watch a whole series of turnouts line up automatically.',
+    },
+    {
+      icon: '🎬',
+      title: 'Fire effects',
+      description:
+        'Play sounds, trigger lighting scenes, and run layout animations right from your phone.',
+    },
+    {
+      icon: '🚦',
+      title: 'Control signals',
+      description:
+        'Clear a signal, stop a train, or run a full ABS sequence without walking back to the dispatcher panel.',
+    },
+    {
+      icon: '🧪',
+      title: 'Program decoders',
+      description:
+        'Tune CVs, set addresses, and test new locos on the programming track without leaving the app.',
+    },
+    {
+      icon: '⚙️',
+      title: 'Personal settings',
+      description:
+        'Tweak your throttle the way you like it. Preferences stay in sync across every device you sign in from.',
     },
   ],
   ctas: {
     primary: {
-      label: 'Launch throttle.dejajs.com',
+      label: 'Open Throttle App',
       href: 'https://throttle.dejajs.com',
       external: true,
       style: 'primary',
     },
     secondary: {
-      label: 'Read the docs',
+      label: 'Throttle Docs',
       href: '/docs/throttle',
       style: 'secondary',
     },
     guide: {
-      label: 'Follow the guide',
+      label: 'Read the Guide',
       href: '/guides/throttle',
-      style: 'ghost',
+      style: 'secondary',
     },
   },
   seo: {

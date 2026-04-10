@@ -42,14 +42,14 @@ export const ioContent: ProductContent = {
       style: 'primary',
     },
     secondary: {
-      label: 'Read the docs',
+      label: 'IO Docs',
       href: '/docs/io',
       style: 'secondary',
     },
     guide: {
-      label: 'Follow the IO guide',
+      label: 'Read the Guide',
       href: '/guides/io',
-      style: 'ghost',
+      style: 'secondary',
     },
   },
   seo: {

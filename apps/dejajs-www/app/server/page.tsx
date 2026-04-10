@@ -90,14 +90,14 @@ export default function ServerPage() {
       <Showcase
         eyebrow="Architecture"
         heading="The thinnest bridge we could build."
-        body="Your browser talks WebSockets to the server. The server talks serial to DCC-EX, MQTT to your IO devices, and Firebase to your cloud roster. That's it. No proprietary protocols. No lock-in."
+        body="Your browser talks WebSockets to the server. The server talks serial to DCC-EX, MQTT to your IO devices, and syncs everything to DEJA Cloud. That's it. No proprietary protocols. No lock-in."
         visual={
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 text-sm font-mono text-gray-400 leading-relaxed w-full max-w-lg">
-            <pre>{`browser ──WebSocket──▶ server
-                        │
-                        ├─Serial──▶ DCC-EX CommandStation
-                        ├─MQTT────▶ IO devices
-                        └─Firebase▶ DEJA Cloud`}</pre>
+          <div className="w-full max-w-lg overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-6 font-mono text-[10px] leading-relaxed text-gray-400 sm:text-xs md:text-sm">
+            <pre className="whitespace-pre">{`browser ──WebSocket──▶ server
+           │
+           ├─Serial──▶ DCC-EX
+           ├─MQTT────▶ IO devices
+           └──Sync───▶ DEJA Cloud`}</pre>
           </div>
         }
         accent={accent}
@@ -112,6 +112,7 @@ export default function ServerPage() {
         heading="Bridge your layout to the browser in under a minute."
         subheading="Paste the install command. Plug in USB. You're live."
         accent={accent}
+        productName={serverContent.name}
         primary={serverContent.ctas.primary}
         secondary={serverContent.ctas.secondary}
         guide={serverContent.ctas.guide}

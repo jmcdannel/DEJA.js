@@ -1,16 +1,17 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import {
   ProductHero,
   FeatureGrid,
   Showcase,
   ScreenshotCarousel,
-  DeviceMockup,
   EzConsistStory,
   PlatformBreadth,
   FreeToTryBanner,
   ProductCTA,
   getAccent,
 } from '../../components/products';
+import ThrottleLaunchQR from '../../components/home/ThrottleLaunchQR';
 import { throttleContent, throttleScreenshots } from './content';
 
 const accent = getAccent('throttle');
@@ -41,11 +42,17 @@ export default function ThrottlePage() {
         secondaryCta={throttleContent.ctas.secondary}
         guideCta={throttleContent.ctas.guide}
         heroVisual={
-          <DeviceMockup
-            variant="phone"
-            src="/screenshots/throttle_mobile_throttle.png"
-            alt="Throttle running on a phone"
-          />
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <Image
+              src="/screenshots/throttle_mobile_throttle.png"
+              alt="Throttle running on a phone"
+              width={320}
+              height={640}
+              className="w-auto h-auto max-h-[640px] drop-shadow-2xl"
+              priority
+            />
+            <ThrottleLaunchQR size={140} label="Scan to launch on any phone" />
+          </div>
         }
       />
 
@@ -70,10 +77,12 @@ export default function ThrottlePage() {
         heading="Open a URL. You're driving."
         body="No app store review. No sideloaded APKs. No Java install. Throttle is a web app, so every phone, tablet, and laptop on your network is ready to drive the moment you share the link."
         visual={
-          <DeviceMockup
-            variant="phone"
+          <Image
             src="/screenshots/throttle_mobile_home.png"
             alt="Throttle home screen on a phone"
+            width={320}
+            height={640}
+            className="w-auto h-auto max-h-[640px] drop-shadow-2xl"
           />
         }
         accent={accent}
@@ -92,6 +101,7 @@ export default function ThrottlePage() {
         heading="Start driving in under a minute."
         subheading="No install. No configuration. Just open the link on your phone."
         accent={accent}
+        productName={throttleContent.name}
         primary={throttleContent.ctas.primary}
         secondary={throttleContent.ctas.secondary}
         guide={throttleContent.ctas.guide}

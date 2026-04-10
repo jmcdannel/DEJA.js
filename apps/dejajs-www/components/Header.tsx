@@ -3,12 +3,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import Image from 'next/image';
+import Logo from './Logo';
+import type { ProductSlug } from './products/types';
 
 interface ProductItem {
   name: string;
   desc: string;
-  logo: string;
+  slug: ProductSlug;
   href: string;
 }
 
@@ -23,37 +24,37 @@ const defaultProducts: ProductItem[] = [
   {
     name: 'Throttle',
     desc: 'Precise speed control, consists, and function mapping.',
-    logo: '/throttle/icon-512.png',
+    slug: 'throttle',
     href: '/throttle',
   },
   {
     name: 'Server',
     desc: 'Connect to your DCC-EX CommandStation via USB.',
-    logo: '/server/icon-512.png',
+    slug: 'server',
     href: '/server',
   },
   {
     name: 'Cloud',
     desc: 'Manage roster, devices, turnouts, and effects.',
-    logo: '/cloud/icon-512.png',
+    slug: 'cloud',
     href: '/cloud',
   },
   {
     name: 'IO',
     desc: 'Arduino and Pico W code for layout expansion.',
-    logo: '/io/icon-512.png',
+    slug: 'io',
     href: '/io',
   },
   {
     name: 'Monitor',
     desc: 'Live telemetry, events, and command traces.',
-    logo: '/monitor/icon-512.png',
+    slug: 'monitor',
     href: '/monitor',
   },
   {
     name: 'Tour',
     desc: 'Guided presets to automate layout sequences.',
-    logo: '/tour/icon-512.png',
+    slug: 'tour',
     href: '/tour',
   },
 ];
@@ -117,11 +118,37 @@ export default function Header() {
   const guidesDropdown = useDropdown();
   const productsDropdown = useDropdown();
   const docsDropdown = useDropdown();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const products: ProductItem[] = defaultProducts;
   const docsLinks: DocItem[] = defaultDocsLinks;
   const loginUrl = 'https://cloud.dejajs.com/';
   const signupUrl = 'https://cloud.dejajs.com/signup';
+
+  // 📱 Close mobile nav on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // 🔒 Lock body scroll while mobile nav is open
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
+
+  // ⎋ Close mobile nav on Escape
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileOpen(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [mobileOpen]);
 
   const handleMenuKeyDown = (
     e: React.KeyboardEvent,
@@ -161,9 +188,8 @@ export default function Header() {
   return (
     <header className="w-full border-b border-gray-800/60 bg-gray-950/90 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 pt-7 pb-4 flex items-center justify-between gap-6">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/icon-512.png" alt="DEJA.js" width={40} height={40} className="rounded-xl w-10 h-10 flex-shrink-0" />
-          <span className="sr-only">DEJA.js Home</span>
+        <Link href="/" className="flex items-center gap-2" aria-label="DEJA.js Home">
+          <Logo variant="default" size="lg" />
         </Link>
         <nav className="hidden md:flex flex-1 items-center gap-8 ml-6" aria-label="Main navigation">
           {/* Guides Dropdown */}
@@ -263,7 +289,7 @@ export default function Header() {
                         aria-current={pathname === product.href ? 'page' : undefined}
                         className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group/item"
                       >
-                        <Image src={product.logo} alt="" width={40} height={40} className="h-10 w-10 flex-shrink-0" />
+                        <Logo variant={product.slug} iconShape="circle" showWordmark={false} size="lg" />
                         <div className="min-w-0">
                           <div className="font-medium text-slate-900 dark:text-white group-hover/item:text-cyan-400 transition-colors">
                             {product.name}
@@ -351,11 +377,132 @@ export default function Header() {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-4 text-[0.875rem]">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 text-[0.875rem]">
           <a href={loginUrl} className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors hidden sm:block tracking-[0.06em] font-mono text-[0.8rem]">Log in</a>
-          <a href={signupUrl} className="px-5 py-2 border border-deja-lime text-deja-lime hover:bg-deja-lime/10 rounded-lg transition-colors text-center whitespace-nowrap font-bold tracking-[0.06em] font-mono text-[0.8rem]">Sign up</a>
+          <a href={signupUrl} className="inline-flex px-5 py-2 border border-deja-lime text-deja-lime hover:bg-deja-lime/10 rounded-lg transition-colors text-center whitespace-nowrap font-bold tracking-[0.06em] font-mono text-[0.8rem]">Sign up</a>
+
+          {/* 🍔 Mobile menu toggle */}
+          <button
+            type="button"
+            onClick={() => setMobileOpen((o) => !o)}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-nav"
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            className="md:hidden inline-flex items-center justify-center w-11 h-11 -mr-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
+          >
+            {mobileOpen ? (
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M6 18L18 6" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
+
+      {/* 📱 Mobile nav panel */}
+      {mobileOpen && (
+        <div
+          id="mobile-nav"
+          className="md:hidden border-t border-gray-800/60 bg-gray-950/95 backdrop-blur-md max-h-[calc(100vh-4rem)] overflow-y-auto"
+        >
+          <nav
+            aria-label="Mobile navigation"
+            className="max-w-7xl mx-auto px-6 py-6 flex flex-col gap-8"
+          >
+            <MobileSection title="Guides" pathname={pathname}>
+              {defaultGuidesLinks.map((link) => (
+                <MobileLink key={link.name} link={link} pathname={pathname} />
+              ))}
+            </MobileSection>
+
+            <MobileSection title="Products" pathname={pathname}>
+              {products.map((p) => (
+                <MobileLink
+                  key={p.name}
+                  link={{ name: p.name, href: p.href }}
+                  pathname={pathname}
+                />
+              ))}
+            </MobileSection>
+
+            <MobileSection title="Docs" pathname={pathname}>
+              {docsLinks.map((link) => (
+                <MobileLink key={link.name} link={link} pathname={pathname} />
+              ))}
+            </MobileSection>
+
+            <div className="flex flex-col">
+              <Link
+                href="/pricing"
+                className={`py-3 border-t border-gray-800/60 font-mono text-sm tracking-[0.06em] text-gray-300 hover:text-white transition-colors ${pathname === '/pricing' ? 'text-white' : ''}`}
+              >
+                Pricing
+              </Link>
+              <Link
+                href="/faq"
+                className={`py-3 border-t border-gray-800/60 font-mono text-sm tracking-[0.06em] text-gray-300 hover:text-white transition-colors ${pathname === '/faq' ? 'text-white' : ''}`}
+              >
+                FAQ
+              </Link>
+            </div>
+
+          </nav>
+        </div>
+      )}
     </header>
+  );
+}
+
+function MobileSection({
+  title,
+  children,
+}: {
+  title: string;
+  pathname: string | null;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="text-[0.7rem] font-mono uppercase tracking-[0.2em] text-gray-500">
+        {title}
+      </div>
+      <div className="flex flex-col">{children}</div>
+    </div>
+  );
+}
+
+function MobileLink({
+  link,
+  pathname,
+}: {
+  link: DocItem;
+  pathname: string | null;
+}) {
+  const active = !link.comingSoon && pathname === link.href;
+  if (link.comingSoon) {
+    return (
+      <span
+        aria-disabled="true"
+        className="py-3 flex items-center justify-between text-gray-500 font-mono text-sm"
+      >
+        <span>{link.name}</span>
+        <span className="text-[10px] uppercase tracking-wider font-semibold text-gray-500">
+          Soon
+        </span>
+      </span>
+    );
+  }
+  return (
+    <Link
+      href={link.href}
+      aria-current={active ? 'page' : undefined}
+      className={`py-3 font-mono text-sm tracking-[0.02em] transition-colors ${active ? 'text-white' : 'text-gray-300 hover:text-white'}`}
+    >
+      {link.name}
+    </Link>
   );
 }

@@ -11,6 +11,7 @@ export const appIcons = {
 } as const
 
 export const appLogos = {
+  deja: new URL('../logos/deja.svg', import.meta.url).href,
   io: new URL('../logos/io.svg', import.meta.url).href,
   throttle: new URL('../logos/throttle.svg', import.meta.url).href,
   cloud: new URL('../logos/cloud.svg', import.meta.url).href,

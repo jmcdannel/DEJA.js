@@ -16,6 +16,30 @@ export const isValidCabAddress = fn((addr: unknown) => {
   return Number.isInteger(n) && n >= 1 && n <= 10293
 }).mockName('isValidCabAddress')
 
+// 🚂 Stub for trackConstants.requiresCabAddress — DC modes need a cab address.
+const DC_MODES = ['DC', 'DCX']
+export const requiresCabAddress = fn((mode: unknown) =>
+  typeof mode === 'string' && DC_MODES.includes(mode),
+).mockName('requiresCabAddress')
+
+// 🚂 Track output letter constants — keep in sync with packages/dccex/trackConstants.ts
+export const TRACK_OUTPUT_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] as const
+
+export const TRACK_MODES = [
+  { value: 'MAIN', label: 'Main', description: 'DCC main track' },
+  { value: 'MAIN_INV', label: 'Main (Inverted)', description: 'DCC main track, inverted signal' },
+  { value: 'MAIN_AUTO', label: 'Main (Auto-reverse)', description: 'DCC main track with auto-reverser' },
+  { value: 'PROG', label: 'Programming', description: 'DCC programming track' },
+  { value: 'DC', label: 'DC', description: 'DC analog output (requires cab address)' },
+  { value: 'DCX', label: 'DC (Inverted)', description: 'DC analog output, inverted polarity' },
+  { value: 'BOOST', label: 'Booster', description: 'DCC booster output (ESP32 only)' },
+  { value: 'BOOST_INV', label: 'Booster (Inverted)', description: 'DCC booster, inverted (ESP32 only)' },
+  { value: 'BOOST_AUTO', label: 'Booster (Auto-reverse)', description: 'DCC booster with auto-reverser (ESP32 only)' },
+  { value: 'NONE', label: 'Disabled', description: 'Output disabled' },
+] as const
+
+export const DEFAULT_MAX_OUTPUTS = 2
+
 export const defaultCommands = {
   powerOn: { action: 'dcc', payload: { command: '1' } },
   powerOff: { action: 'dcc', payload: { command: '0' } },

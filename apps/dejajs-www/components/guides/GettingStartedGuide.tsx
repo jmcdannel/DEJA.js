@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { mdiCellphoneLink, mdiLaptop, mdiUsb } from '@mdi/js';
 import ThrottleLaunchQR from '../home/ThrottleLaunchQR';
+import Logo from '../Logo';
 import { Callout, CommandBlock, Step, MdiIcon, VideoPlaceholder } from './shared';
 
 function AppIcon({ src, alt, bgColor, borderColor }: { src: string; alt: string; bgColor: string; borderColor: string }) {
@@ -25,7 +26,7 @@ function ArchitectureDiagram() {
         </div>
         <div className="text-gray-600 text-xl md:rotate-0 rotate-90">⟷</div>
         <div className="flex flex-col items-center gap-2">
-          <AppIcon src="/cloud/icon-512.png" alt="DEJA Cloud" bgColor="bg-deja-cyan/10" borderColor="border-deja-cyan/30" />
+          <Logo variant="cloud" iconShape="circle" showWordmark={false} size="lg" />
           <p className="text-white font-semibold text-sm">DEJA Cloud</p>
           <p className="text-gray-500 text-xs">Real-time sync</p>
         </div>

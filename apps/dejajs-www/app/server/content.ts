@@ -24,9 +24,9 @@ export const serverContent: ProductContent = {
     },
     {
       icon: '🔌',
-      title: 'WebSocket + MQTT + Firebase',
+      title: 'Bridges every protocol',
       description:
-        'Bridges your browser, your layout devices, and your cloud roster over the right protocol for each job.',
+        'Connects your browser, your layout devices, and your DEJA Cloud roster over the right channel for each job.',
     },
     {
       icon: '🛡️',
@@ -42,14 +42,14 @@ export const serverContent: ProductContent = {
       style: 'primary',
     },
     secondary: {
-      label: 'Read the docs',
+      label: 'Server Docs',
       href: '/docs/server',
       style: 'secondary',
     },
     guide: {
-      label: 'Follow the guide',
+      label: 'Read the Guide',
       href: '/guides/server',
-      style: 'ghost',
+      style: 'secondary',
     },
   },
   seo: {

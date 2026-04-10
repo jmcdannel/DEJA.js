@@ -11,28 +11,76 @@ export const cloudContent: ProductContent = {
   heroKicker: 'The hub for your whole layout',
   features: [
     {
-      icon: '🔄',
-      title: 'Live multi-device sync',
+      icon: '📊',
+      title: 'Layout dashboard',
       description:
-        'Rename a loco on your laptop and every throttle in the room updates instantly. No file imports, no CSV syncs.',
+        'Your whole layout at a glance. See what is powered on, who is running, and what needs attention the moment you log in.',
     },
     {
-      icon: '🎨',
-      title: 'Color-coded everything',
+      icon: '🚂',
+      title: 'Loco roster',
       description:
-        'Pick a color for a loco, turnout, or effect in Cloud and that color follows the item into Throttle and Monitor. 🚦',
+        'Organize every engine on your railroad with photos, custom colors, function labels, and notes your operators will actually read.',
     },
     {
-      icon: '🔐',
-      title: 'Secure layout access',
+      icon: '🔊',
+      title: 'Sound library',
       description:
-        'Manage your connected hardware with secure per-device access. Authorize throttles and keep strangers off your track.',
+        'Upload horn blasts, bell dings, and background ambience once and make them playable from every throttle in the room.',
     },
     {
-      icon: '🌐',
-      title: 'Multiple layout spaces',
+      icon: '🎬',
+      title: 'Effects manager',
       description:
-        'Run your home layout, your club layout, and a test bench from one account. Switch between them in one tap.',
+        'Design lighting scenes, animations, and sound cues, then drop them on any throttle with a tap.',
+    },
+    {
+      icon: '🛤️',
+      title: 'Preset routes',
+      description:
+        'Save your favorite sequences of turnouts as named routes so operators can line up a whole yard lead in one tap.',
+    },
+    {
+      icon: '🚦',
+      title: 'Signal wiring',
+      description:
+        'Configure signal heads, aspects, and logic without touching a wire. Tie them to blocks and watch them come alive.',
+    },
+    {
+      icon: '📡',
+      title: 'Sensors and automation',
+      description:
+        'Hook up block detectors and build simple if-this-then-that rules to automate your railroad without a line of code.',
+    },
+    {
+      icon: '🔀',
+      title: 'Turnout manager',
+      description:
+        'Name every switch on the layout, group them, and label them so new operators can find the right one the first time.',
+    },
+    {
+      icon: '🧭',
+      title: 'Track diagrams',
+      description:
+        'Draw a clickable schematic of your railroad that mirrors reality and makes dispatching a whole lot easier.',
+    },
+    {
+      icon: '⚡',
+      title: 'Power districts',
+      description:
+        'Map out your track power zones so you can kill power to one yard without bringing the whole railroad down.',
+    },
+    {
+      icon: '💻',
+      title: 'DCC-EX console',
+      description:
+        'Talk directly to your command station when you need to. Send commands, inspect responses, and troubleshoot in plain text.',
+    },
+    {
+      icon: '🔌',
+      title: 'Device management',
+      description:
+        'Pair throttles, command stations, and IO devices to your layout and see exactly what is online right now.',
     },
   ],
   ctas: {
@@ -43,14 +91,14 @@ export const cloudContent: ProductContent = {
       style: 'primary',
     },
     secondary: {
-      label: 'Read the docs',
+      label: 'Cloud Docs',
       href: '/docs/cloud',
       style: 'secondary',
     },
     guide: {
-      label: 'Follow the guide',
+      label: 'Read the Guide',
       href: '/guides/cloud',
-      style: 'ghost',
+      style: 'secondary',
     },
   },
   seo: {

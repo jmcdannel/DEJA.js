@@ -82,6 +82,7 @@ export default function MonitorPage() {
         heading="See what your layout is doing."
         subheading="Monitor ships with every DEJA.js install. Open it on any device."
         accent={accent}
+        productName={monitorContent.name}
         primary={monitorContent.ctas.primary}
         secondary={monitorContent.ctas.secondary}
       />

@@ -1,12 +1,14 @@
 // 🎯 Final call-to-action strip with primary, secondary, and optional guide buttons.
 
-import Link from 'next/link';
+import DocLink from '../DocLink';
+import CtaLink, { GuideIcon } from './CtaLink';
 import type { CTAAction, ProductAccent } from './types';
 
 interface ProductCTAProps {
   heading: string;
   subheading?: string;
   accent: ProductAccent;
+  productName: string;
   primary: CTAAction;
   secondary?: CTAAction;
   guide?: CTAAction;
@@ -16,6 +18,7 @@ export default function ProductCTA({
   heading,
   subheading,
   accent,
+  productName,
   primary,
   secondary,
   guide,
@@ -27,43 +30,20 @@ export default function ProductCTA({
           {heading}
         </h2>
         {subheading && <p className="text-xl text-gray-400 max-w-2xl">{subheading}</p>}
-        <div className="flex flex-wrap justify-center gap-3">
-          <CtaButton cta={primary} accent={accent} variant="primary" />
-          {secondary && <CtaButton cta={secondary} accent={accent} variant="secondary" />}
-          {guide && <CtaButton cta={guide} accent={accent} variant="ghost" />}
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <CtaLink cta={primary} accent={accent} variant="primary" />
+            {guide && (
+              <CtaLink cta={guide} accent={accent} variant="secondary" icon={<GuideIcon />} />
+            )}
+          </div>
+          {secondary && (
+            <div>
+              <DocLink href={secondary.href}>{productName}</DocLink>
+            </div>
+          )}
         </div>
       </div>
     </section>
-  );
-}
-
-function CtaButton({
-  cta,
-  accent,
-  variant,
-}: {
-  cta: CTAAction;
-  accent: ProductAccent;
-  variant: 'primary' | 'secondary' | 'ghost';
-}) {
-  const base =
-    'inline-flex items-center gap-2 px-6 py-3 rounded-lg font-bold tracking-wide font-mono text-sm transition-colors';
-  const classes =
-    variant === 'primary'
-      ? `${base} ${accent.bgClass} text-gray-950 hover:opacity-90 ${accent.glowClass}`
-      : variant === 'secondary'
-        ? `${base} border ${accent.borderClass} ${accent.textClass} hover:bg-white/5`
-        : `${base} ${accent.textClass} hover:opacity-80`;
-  if (cta.external) {
-    return (
-      <a href={cta.href} target="_blank" rel="noopener noreferrer" className={classes}>
-        {cta.label}
-      </a>
-    );
-  }
-  return (
-    <Link href={cta.href} className={classes}>
-      {cta.label}
-    </Link>
   );
 }

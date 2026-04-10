@@ -106,6 +106,7 @@ export default function CloudPage() {
         heading="Your layout. Everywhere."
         subheading="Create an account, add a loco, and every throttle in the room syncs instantly."
         accent={accent}
+        productName={cloudContent.name}
         primary={cloudContent.ctas.primary}
         secondary={cloudContent.ctas.secondary}
         guide={cloudContent.ctas.guide}
