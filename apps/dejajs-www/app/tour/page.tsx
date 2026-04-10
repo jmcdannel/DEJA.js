@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { client } from '../../sanity/lib/client';
-import { PRODUCT_PAGE_QUERY } from '../../sanity/lib/queries';
 
 export const metadata: Metadata = {
   title: 'DEJA.js Tour & IO - Automation & Expansion',
@@ -32,19 +30,12 @@ const defaultFeatures = [
   { icon: '🔄', title: 'Protocol Agnostic', description: 'Communicate over direct serial USB, local WebSocket, or remote MQTT. Connect microcontrollers exactly how your specific layout geometry demands.' },
 ];
 
-export default async function TourPage() {
-  let product: any = null;
-  try {
-    if (client) product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'tour' });
-  } catch {
-    // Fall back to hardcoded content
-  }
-
-  const title = product?.title || 'DEJA.js Tour & IO';
-  const tagline = product?.tagline || 'Automate and expand. Leverage structured presets and plug-and-play code to push your layout beyond basic throttle control.';
-  const features = product?.features?.length ? product.features : defaultFeatures;
-  const ctaLabel = product?.cta?.label || 'View Tour Docs';
-  const ctaHref = product?.cta?.href || '/docs/tour';
+export default function TourPage() {
+  const title = 'DEJA.js Tour & IO';
+  const tagline = 'Automate and expand. Leverage structured presets and plug-and-play code to push your layout beyond basic throttle control.';
+  const features = defaultFeatures;
+  const ctaLabel = 'View Tour Docs';
+  const ctaHref = '/docs/tour';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
@@ -63,8 +54,8 @@ export default async function TourPage() {
       <section className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-slate-800">
         <h2 className="text-2xl font-bold mb-6 text-slate-900 dark:text-white border-b border-gray-200 dark:border-slate-800 pb-4">Core Capabilities</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {features.map((feature: any, idx: number) => (
-            <div key={feature._key || idx}>
+          {features.map((feature, idx) => (
+            <div key={idx}>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
                 <span className="text-cyan-500">{feature.icon}</span> {feature.title}
               </h3>

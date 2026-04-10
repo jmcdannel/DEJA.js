@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { client } from '../../sanity/lib/client';
-import { PRODUCT_PAGE_QUERY } from '../../sanity/lib/queries';
 
 export const metadata: Metadata = {
   title: 'DEJA.js Throttle - Precision Mobile Control',
@@ -32,19 +30,12 @@ const defaultFeatures = [
   { icon: '🔀', title: 'Turnout & Route Access', description: 'Access your designated turnouts directly from the throttle context. Throw switches without switching apps or physical controllers.' },
 ];
 
-export default async function ThrottlePage() {
-  let product: any = null;
-  try {
-    if (client) product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'throttle' });
-  } catch {
-    // Fall back to hardcoded content
-  }
-
-  const title = product?.title || 'DEJA.js Throttle';
-  const tagline = product?.tagline || 'Tactile, responsive, clear. The modern driver experience designed primarily for touch interfaces and mobile devices.';
-  const features = product?.features?.length ? product.features : defaultFeatures;
-  const ctaLabel = product?.cta?.label || 'Launch Throttle Web App';
-  const ctaHref = product?.cta?.href || '/docs/throttle';
+export default function ThrottlePage() {
+  const title = 'DEJA.js Throttle';
+  const tagline = 'Tactile, responsive, clear. The modern driver experience designed primarily for touch interfaces and mobile devices.';
+  const features = defaultFeatures;
+  const ctaLabel = 'Launch Throttle Web App';
+  const ctaHref = '/docs/throttle';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
@@ -63,8 +54,8 @@ export default async function ThrottlePage() {
       <section className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-slate-800">
         <h2 className="text-2xl font-bold mb-6 text-slate-900 dark:text-white border-b border-gray-200 dark:border-slate-800 pb-4">Core Capabilities</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {features.map((feature: any, idx: number) => (
-            <div key={feature._key || idx}>
+          {features.map((feature, idx) => (
+            <div key={idx}>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
                 <span className="text-lime-500">{feature.icon}</span> {feature.title}
               </h3>
