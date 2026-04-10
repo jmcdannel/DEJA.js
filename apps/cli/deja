@@ -721,6 +721,10 @@ cmd_help() {
   echo -e "    ${CYAN}logs${NC} [-f]      📋 View server logs (-f to follow)"
   echo -e "    ${CYAN}update${NC}         ⬇️  Update to the latest version"
   echo ""
+  echo -e "  ${BOLD}🤝 Device Pairing${NC}"
+  echo -e "    ${CYAN}login${NC}          🔑 Pair this device via short code flow"
+  echo -e "    ${CYAN}install <token>${NC} 🎟️  Apply an install token from the dashboard"
+  echo ""
   echo -e "  ${BOLD}📟 Device Deployment${NC}"
   echo -e "    ${CYAN}deploy${NC}         📟 Deploy firmware to Arduino or Pico W device"
   echo ""
@@ -747,6 +751,8 @@ cmd_help() {
 # 🚂 Main
 # ======================================================================
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 case "${1:-}" in
   start)    shift; cmd_start "$@" ;;
   stop)     shift; cmd_stop "$@" ;;
@@ -756,6 +762,8 @@ case "${1:-}" in
   update)   shift; cmd_update "$@" ;;
   tunnel)   shift; cmd_tunnel "$@" ;;
   deploy)   shift; cmd_deploy "$@" ;;
+  login)    shift; exec node "${SCRIPT_DIR}/login.mjs" "$@" ;;
+  install)  shift; exec node "${SCRIPT_DIR}/install.mjs" "$@" ;;
   --version|-v)
     echo "🚂 deja $(get_version)"
     ;;

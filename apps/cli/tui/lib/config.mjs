@@ -3,9 +3,16 @@
  * Environment loading, path constants, and config helpers.
  */
 
-import { readFileSync, writeFileSync } from 'node:fs'
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from 'node:fs'
 import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
 // ── Load env ───────────────────────────────────────────────────────────────────
 
@@ -42,9 +49,39 @@ export function readConfig() {
   catch { return {} }
 }
 
-export function writeConfig(updates) {
+/**
+ * 🔐 Atomically write config with 0600 permissions.
+ * Matches the semantics of apps/server/src/lib/config-store.ts — ensures
+ * directory exists with 0700, writes to a temp file with 0600, then renames.
+ * Throws on failure so callers can handle errors explicitly.
+ */
+export function writeConfigAtomic(config) {
+  const dir = dirname(CONFIG_FILE)
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true, mode: 0o700 })
+  const tmp = `${CONFIG_FILE}.tmp`
+  writeFileSync(tmp, JSON.stringify(config, null, 2), { mode: 0o600 })
+  chmodSync(tmp, 0o600)
+  renameSync(tmp, CONFIG_FILE)
+}
+
+/**
+ * 🔄 Shallow-merge partial updates into the existing config and persist atomically.
+ * This is the preferred API for all config writes — replaces the old best-effort
+ * writeConfig() helper.
+ */
+export function updateConfig(updates) {
   const existing = readConfig()
-  try { writeFileSync(CONFIG_FILE, JSON.stringify({ ...existing, ...updates }, null, 2)) }
+  const next = { ...existing, ...updates }
+  writeConfigAtomic(next)
+  return next
+}
+
+/**
+ * @deprecated Use {@link updateConfig} instead. Retained for backward compatibility
+ * with existing TUI callers; now performs an atomic + 0600 write.
+ */
+export function writeConfig(updates) {
+  try { updateConfig(updates) }
   catch {}
 }
 
