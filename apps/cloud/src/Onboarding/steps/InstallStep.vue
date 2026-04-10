@@ -5,7 +5,8 @@ import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { useStorage } from '@vueuse/core'
 import { ServerSetupInfo } from '@repo/ui'
-import { useOnboarding, useLayout, INSTALL_TIPS } from '@repo/modules'
+import { useOnboarding, INSTALL_TIPS } from '@repo/modules'
+import { createLayout } from '@/Layout/createLayout'
 
 const props = defineProps<{
   uid?: string | null
@@ -18,7 +19,6 @@ const emit = defineEmits<{
 }>()
 
 const { state: onboardingState, setLayoutCreated, setInstallStarted } = useOnboarding()
-const { createLayout } = useLayout()
 const layoutCreating = ref(false)
 const layoutCreateError = ref<string | null>(null)
 const storedLayoutId = useStorage('@DEJA/layoutId', '')
@@ -53,8 +53,10 @@ onMounted(async () => {
 
   layoutCreating.value = true
   try {
-    await createLayout(lid, { name: lname, id: lid })
-    storedLayoutId.value = lid
+    // 🆔 lid may be a user-picked slug or the stored layoutId from a previous step.
+    // If lid is empty, the API generates one; otherwise we pass it as the slug.
+    const { layoutId: createdId } = await createLayout({ name: lname, slug: lid || undefined })
+    storedLayoutId.value = createdId
     setLayoutCreated()
     setInstallStarted()
   } catch (err: unknown) {
