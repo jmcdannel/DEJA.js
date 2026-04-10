@@ -48,6 +48,13 @@ describe('useQuickThrottle.open', () => {
     expect(pushMock).not.toHaveBeenCalled()
   })
 
+  it('rejects NaN', async () => {
+    const { open } = useQuickThrottle()
+    await open(Number.NaN)
+    expect(acquireThrottleMock).not.toHaveBeenCalled()
+    expect(pushMock).not.toHaveBeenCalled()
+  })
+
   it('propagates acquire errors and does not navigate', async () => {
     acquireThrottleMock.mockRejectedValueOnce(new Error('firestore down'))
     const { open } = useQuickThrottle()
@@ -62,5 +69,14 @@ describe('useQuickThrottle.openGlobal', () => {
     globalDialogOpen.value = false
     openGlobal()
     expect(globalDialogOpen.value).toBe(true)
+  })
+})
+
+describe('useQuickThrottle.closeGlobal', () => {
+  it('flips globalDialogOpen to false', () => {
+    const { closeGlobal, globalDialogOpen } = useQuickThrottle()
+    globalDialogOpen.value = true
+    closeGlobal()
+    expect(globalDialogOpen.value).toBe(false)
   })
 })
