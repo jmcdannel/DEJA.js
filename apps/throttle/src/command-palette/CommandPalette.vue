@@ -4,18 +4,18 @@ import { useRouter } from 'vue-router'
 import { useLocos, type Loco } from '@repo/modules/locos'
 import { createLogger } from '@repo/utils'
 import { useCommandPalette } from './useCommandPalette'
-import { useCommands } from './useCommands'
+import { useCommands, useBrowseCommands } from './useCommands'
 import { filterCommands, buildNumericShortcut } from './fuzzyMatch'
-import type { Command, CommandCategory } from './types'
-import MiniThrottleInPalette from './MiniThrottleInPalette.vue'
+import type { Command, CommandCategory, CommandAction } from './types'
+import QuickMenuThrottles from '@/quick-menu/QuickMenuThrottles.vue'
 
 const log = createLogger('CommandPalette')
 const router = useRouter()
-const { isOpen, query, activeIndex, stack, currentLevelTitle: headerLabel, close, push } = useCommandPalette()
+const { isOpen, query, activeIndex, stack, currentLevelTitle: headerLabel, close, push, pop } = useCommandPalette()
 const allCommands = useCommands()
-const { getLocos, getThrottles, acquireThrottle } = useLocos()
+const browseCommands = useBrowseCommands()
+const { getLocos, acquireThrottle } = useLocos()
 const locos = getLocos() as unknown as { value: Loco[] }
-const throttles = getThrottles() as unknown as { value: Array<{ address: number; speed: number; direction: boolean }> }
 
 const inputRef = ref<HTMLInputElement | null>(null)
 const errorText = ref<string | null>(null)
@@ -40,104 +40,19 @@ const FLAT_SEARCH_THRESHOLD = 3
 const rootViewCommands = computed<Command[]>(() => {
   const list = allCommands.value
   const nav = list.filter((c) => c.category === 'navigation')
-  const throttleLocos = list.filter((c) => c.category === 'throttle' && c.id !== 'throttle.stop-all')
   const stopAll = list.find((c) => c.id === 'throttle.stop-all')
-  const turnouts = list.filter((c) => c.category === 'turnout')
-  const effects = list.filter((c) => c.category === 'effect')
-  const signals = list.filter((c) => c.category === 'signal')
   const settings = list.filter((c) => c.category === 'settings')
 
-  const root: Command[] = [...nav]
-
-  const running = throttles.value || []
-  if (running.length > 0) {
-    root.push({
-      id: 'browse.running',
-      title: 'Running throttles',
-      description: `${running.length} active`,
-      icon: 'mdi-speedometer',
-      category: 'browse',
-      run: () => {},
-      children: {
-        title: 'Running throttles',
-        commands: running.map((t) => {
-          const locoMatch = (locos.value || []).find((l: Loco) => l.address === t.address)
-          const name = locoMatch?.name || `Loco ${t.address}`
-          const signed = t.direction ? t.speed : -t.speed
-          return {
-            id: `running.${t.address}`,
-            title: name,
-            description: `#${t.address} · ${signed >= 0 ? '+' : ''}${signed}`,
-            icon: 'mdi-train',
-            category: 'throttle' as const,
-            run: () => {},
-            children: {
-              title: `Throttle #${t.address} — ${name}`,
-              commands: [],
-              component: MiniThrottleInPalette,
-              componentProps: { address: t.address },
-            },
-          }
-        }),
-      },
-    })
-  }
-
-  if (throttleLocos.length > 0) {
-    root.push({
-      id: 'browse.throttles',
-      title: 'Locos',
-      description: `${throttleLocos.length} in roster`,
-      icon: 'mdi-train',
-      category: 'browse',
-      run: () => {},
-      children: { title: 'Locos', commands: throttleLocos },
-    })
-  }
-  if (turnouts.length > 0) {
-    root.push({
-      id: 'browse.turnouts',
-      title: 'Turnouts',
-      description: `${turnouts.length / 2} turnouts`,
-      icon: 'mdi-call-split',
-      category: 'browse',
-      run: () => {},
-      children: { title: 'Turnouts', commands: turnouts },
-    })
-  }
-  if (effects.length > 0) {
-    root.push({
-      id: 'browse.effects',
-      title: 'Effects',
-      description: `${effects.length} effects`,
-      icon: 'mdi-rocket-launch',
-      category: 'browse',
-      run: () => {},
-      children: { title: 'Effects', commands: effects },
-    })
-  }
-  if (signals.length > 0) {
-    root.push({
-      id: 'browse.signals',
-      title: 'Signals',
-      description: `${signals.length} signals`,
-      icon: 'mdi-traffic-light',
-      category: 'browse',
-      run: () => {},
-      children: { title: 'Signals', commands: signals },
-    })
-  }
-  if (settings.length > 0) {
-    root.push({
-      id: 'browse.settings',
-      title: 'Settings',
-      description: `${settings.length} options`,
-      icon: 'mdi-cog',
-      category: 'browse',
-      run: () => {},
-      children: { title: 'Settings', commands: settings },
-    })
-  }
+  // Section order at root:
+  //   inlined <QuickMenuThrottles /> (rendered in template)
+  //   → Browse (drill-down cards, one per domain)
+  //   → Settings (contextual)
+  //   → Navigation (+ stopAll)
+  const root: Command[] = [
+    ...browseCommands.value,
+    ...settings,
+    ...nav,
+  ]
 
   if (stopAll) root.push(stopAll)
 
@@ -169,7 +84,9 @@ const displayedCommands = computed<Command[]>(() => {
 
 const stackTop = computed(() => stack.value.length > 0 ? stack.value[stack.value.length - 1] : null)
 
-const CATEGORY_ORDER: CommandCategory[] = ['browse', 'navigation', 'throttle', 'turnout', 'effect', 'signal', 'settings']
+const CATEGORY_ORDER: CommandCategory[] = ['browse', 'settings', 'navigation', 'throttle', 'turnout', 'effect', 'signal']
+
+const showInlineThrottles = computed(() => stack.value.length === 0 && !query.value.trim())
 const CATEGORY_LABELS: Record<CommandCategory, string> = {
   navigation: 'Navigation',
   browse:     'Browse',
@@ -229,11 +146,31 @@ async function runCommand(cmd: Command) {
   errorText.value = null
   try {
     await cmd.run()
-    close()
+    // 🔁 Toggle-style commands (turnouts, effects, signal rows) keep the
+    // palette open so the user can flip multiple in a row.
+    if (!cmd.keepOpen) {
+      close()
+    }
   } catch (err) {
     log.error('Command failed', err)
     errorText.value = err instanceof Error ? err.message : 'Command failed'
   }
+}
+
+async function runAction(cmd: Command, action: CommandAction) {
+  errorText.value = null
+  try {
+    await action.run()
+    // 🔁 Inline action dots always keep the palette open.
+  } catch (err) {
+    log.error('Action failed', err)
+    errorText.value = err instanceof Error ? err.message : 'Action failed'
+  }
+}
+
+async function onNavigateToThrottle(address: number) {
+  await router.push({ name: 'throttle', params: { address } })
+  close()
 }
 
 function setActiveIndex(idx: number) {
@@ -252,6 +189,22 @@ function onKeydown(e: KeyboardEvent) {
   if (e.key === 'ArrowUp') {
     e.preventDefault()
     activeIndex.value = Math.max(activeIndex.value - 1, 0)
+    return
+  }
+  // ⬅️ Left arrow always pops one drill-down level.
+  if (e.key === 'ArrowLeft') {
+    if (stack.value.length > 0) {
+      e.preventDefault()
+      pop()
+    }
+    return
+  }
+  // ⌫ Backspace pops only when the input is empty — otherwise it deletes text.
+  if (e.key === 'Backspace') {
+    if (!query.value && stack.value.length > 0) {
+      e.preventDefault()
+      pop()
+    }
     return
   }
   if (e.key === 'Enter') {
@@ -297,6 +250,10 @@ function onDialogUpdate(v: boolean) {
           v-bind="stackTop.componentProps"
         />
         <template v-else>
+          <template v-if="showInlineThrottles">
+            <div class="cp-group-label">Throttles</div>
+            <QuickMenuThrottles @navigate="onNavigateToThrottle" />
+          </template>
           <template v-for="group in grouped" :key="group.category">
             <div class="cp-group-label">{{ CATEGORY_LABELS[group.category] }}</div>
             <div
@@ -314,6 +271,17 @@ function onDialogUpdate(v: boolean) {
               <span v-if="cmd.description" class="cp-result__description">{{ cmd.description }}</span>
               <span v-if="cmd.shortcut" class="cp-result__shortcut">
                 <kbd v-for="k in cmd.shortcut" :key="k">{{ k }}</kbd>
+              </span>
+              <span v-if="cmd.actions && cmd.actions.length" class="cp-result__actions">
+                <button
+                  v-for="action in cmd.actions"
+                  :key="action.id"
+                  type="button"
+                  class="cp-action-dot"
+                  :style="{ '--dot': action.color }"
+                  :title="action.label"
+                  @click.stop="runAction(cmd, action)"
+                >{{ action.label }}</button>
               </span>
             </div>
           </template>
@@ -431,6 +399,36 @@ function onDialogUpdate(v: boolean) {
   font-family: ui-monospace, monospace;
   font-size: 9px;
   color: rgba(226, 232, 240, 0.7);
+}
+
+.cp-result__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+}
+.cp-action-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(var(--dot-rgb, 148, 163, 184), 0.15);
+  color: var(--dot, #cbd5e1);
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 100ms ease, transform 80ms ease, border-color 100ms ease;
+  padding: 0;
+}
+.cp-action-dot:hover {
+  background: var(--dot, #cbd5e1);
+  color: #0a0f1c;
+  border-color: var(--dot, #cbd5e1);
+  transform: scale(1.05);
 }
 
 .cp-empty {

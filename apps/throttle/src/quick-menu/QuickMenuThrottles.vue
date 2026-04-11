@@ -12,6 +12,14 @@ const locos = getLocos()
 const throttles = getThrottles()
 const { stop, adjustSpeed, park } = useQuickThrottleActions()
 
+const emit = defineEmits<{
+  navigate: [address: number]
+}>()
+
+function handleRowClick(address: number) {
+  emit('navigate', address)
+}
+
 const showRoster = ref(false)
 
 interface ThrottleWithLoco {
@@ -75,17 +83,26 @@ async function handleAcquire(address: number) {
     <!-- Active throttles -->
     <template v-if="!showRoster">
       <template v-if="activeThrottles.length > 0">
-        <MiniThrottleControl
+        <div
           v-for="t in activeThrottles"
           :key="t.address"
-          :name="t.name"
-          :address="t.address"
-          :speed="t.speed"
-          @stop="handleStop"
-          @speed-up="handleSpeedUp"
-          @speed-down="handleSpeedDown"
-          @park="handlePark"
-        />
+          class="quick-throttles__row"
+          role="button"
+          tabindex="0"
+          @click="handleRowClick(t.address)"
+          @keydown.enter="handleRowClick(t.address)"
+          @keydown.space.prevent="handleRowClick(t.address)"
+        >
+          <MiniThrottleControl
+            :name="t.name"
+            :address="t.address"
+            :speed="t.speed"
+            @stop="handleStop"
+            @speed-up="handleSpeedUp"
+            @speed-down="handleSpeedDown"
+            @park="handlePark"
+          />
+        </div>
       </template>
       <div v-else class="quick-throttles__empty">
         <v-icon size="24" class="opacity-20 mb-1">mdi-speedometer</v-icon>
@@ -131,6 +148,19 @@ async function handleAcquire(address: number) {
   padding: 8px;
   max-height: 220px;
   overflow-y: auto;
+}
+
+.quick-throttles__row {
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 120ms ease;
+  outline: none;
+}
+.quick-throttles__row:focus-visible {
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.6);
+}
+.quick-throttles__row:hover {
+  background: rgba(var(--v-theme-on-surface), 0.04);
 }
 
 /* Empty state */
