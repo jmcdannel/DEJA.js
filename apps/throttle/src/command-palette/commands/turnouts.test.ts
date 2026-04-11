@@ -49,9 +49,13 @@ describe('useTurnoutCommands', () => {
     ]
     const commands = useTurnoutCommands().value
     expect(commands).toHaveLength(2)
-    // Titles reflect the next action (live state).
-    expect(commands.find((c) => c.id === 'turnout.toggle.t1')!.title).toBe('Throw Main Yard')
-    expect(commands.find((c) => c.id === 'turnout.toggle.t2')!.title).toBe('Close East Siding')
+    // Titles are just the entity name; state is reflected by toggleState.
+    const t1 = commands.find((c) => c.id === 'turnout.toggle.t1')!
+    const t2 = commands.find((c) => c.id === 'turnout.toggle.t2')!
+    expect(t1.title).toBe('Main Yard')
+    expect(t1.toggleState).toBe(false)
+    expect(t2.title).toBe('East Siding')
+    expect(t2.toggleState).toBe(true)
   })
 
   it('toggle command sets keepOpen and flips state on run', async () => {
@@ -76,7 +80,8 @@ describe('useTurnoutCommands', () => {
   it('falls back to id when name is missing', () => {
     turnoutsRef.value = [{ id: 't99', device: 'dccex-1', state: false, type: 'kato' } as unknown as Turnout]
     const cmd = useTurnoutCommands().value[0]
-    expect(cmd.title).toBe('Throw t99')
+    expect(cmd.title).toBe('t99')
+    expect(cmd.toggleState).toBe(false)
   })
 
   it('keywords include name, id, device, and tags', () => {
@@ -144,7 +149,8 @@ describe('useTurnoutBrowseCommand', () => {
     const viewAll = cmd.children!.commands.find((c) => c.id === 'browse.turnouts.all')!
     const leaf = viewAll.children!.commands[0]
     expect(leaf.keepOpen).toBe(true)
-    expect(leaf.title).toBe('Throw Main')
+    expect(leaf.title).toBe('Main')
+    expect(leaf.toggleState).toBe(false)
     await leaf.run()
     expect(setTurnoutMock).toHaveBeenCalledWith('t1', { state: true })
   })

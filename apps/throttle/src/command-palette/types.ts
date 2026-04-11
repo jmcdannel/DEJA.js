@@ -14,6 +14,31 @@ export interface CommandStack {
   componentProps?: Record<string, unknown>
 }
 
+/**
+ * 🎛️ Inline control variants for settings rows. Commands that carry a
+ * `control` render directly inside the palette (no drill-down) and are
+ * driven by ← / → / Enter on the active row.
+ */
+export interface ToggleControl {
+  kind: 'toggle'
+  value: boolean
+  set: (next: boolean) => void | Promise<void>
+}
+
+export interface CycleControl<T = string> {
+  kind: 'cycle'
+  options: Array<{ value: T; label: string }>
+  value: T
+  set: (next: T) => void | Promise<void>
+}
+
+// 💡 `SettingControl` uses `CycleControl<any>` so the `Command.control`
+// field accepts any concrete parameterisation (ThemeMode, ThrottleVariant,
+// …). The runtime handling in `CommandPalette.vue` treats option values
+// opaquely — it only cares about identity + index for cycling.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- intentional heterogeneous cycle-control union
+export type SettingControl = ToggleControl | CycleControl<any>
+
 export interface Command {
   /** Unique stable identifier. Used for Vue keys and future recent-command tracking. */
   id: string
@@ -49,6 +74,18 @@ export interface Command {
    * close the palette.
    */
   actions?: CommandAction[]
+  /**
+   * 🏷️ Toggle-state hint for list rows that represent an on/off entity
+   * (turnouts, effects). When present, the palette renders a trailing
+   * status pill ("ON" / "OFF") next to the row title.
+   */
+  toggleState?: boolean
+  /**
+   * 🎛️ Inline setting control rendered directly on the row. When present,
+   * ← / → / Enter on the active row drive the control instead of running
+   * or drilling. Commands with a control implicitly keep the palette open.
+   */
+  control?: SettingControl
 }
 
 export interface CommandAction {

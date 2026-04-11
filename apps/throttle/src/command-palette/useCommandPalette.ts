@@ -1,22 +1,26 @@
-import { ref, computed, type Ref } from 'vue'
-import type { CommandStack } from './types'
+import { ref, type Ref } from 'vue'
 
 interface CommandPaletteState {
   isOpen: Ref<boolean>
   query: Ref<string>
   activeIndex: Ref<number>
-  stack: Ref<CommandStack[]>
-  currentLevelTitle: Ref<string | null>
+  /**
+   * 🧭 Drill-down path of command ids. Each entry is the id of the command
+   * whose children form the next level. Resolution happens in
+   * `CommandPalette.vue` against the live `rootViewCommands` tree so that
+   * a state flip on a leaf (turnout, effect, …) re-renders in place.
+   */
+  stack: Ref<string[]>
   open: (initialQuery?: string) => void
   close: () => void
-  push: (level: CommandStack) => void
+  push: (id: string) => void
   pop: () => void
 }
 
 const isOpen = ref(false)
 const query = ref('')
 const activeIndex = ref(0)
-const stack = ref<CommandStack[]>([])
+const stack = ref<string[]>([])
 
 export function useCommandPalette(): CommandPaletteState {
   function open(initialQuery = '') {
@@ -33,8 +37,8 @@ export function useCommandPalette(): CommandPaletteState {
     stack.value = []
   }
 
-  function push(level: CommandStack) {
-    stack.value.push(level)
+  function push(id: string) {
+    stack.value.push(id)
     query.value = ''
     activeIndex.value = 0
   }
@@ -45,9 +49,5 @@ export function useCommandPalette(): CommandPaletteState {
     activeIndex.value = 0
   }
 
-  const currentLevelTitle = computed(() =>
-    stack.value.length > 0 ? stack.value[stack.value.length - 1].title : null,
-  )
-
-  return { isOpen, query, activeIndex, stack, currentLevelTitle, open, close, push, pop }
+  return { isOpen, query, activeIndex, stack, open, close, push, pop }
 }

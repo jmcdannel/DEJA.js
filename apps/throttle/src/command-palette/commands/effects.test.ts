@@ -49,15 +49,18 @@ describe('useEffectCommands', () => {
     ]
     const commands = useEffectCommands().value
     expect(commands).toHaveLength(2)
-    expect(commands[0].title).toBe('Turn on Flicker Campfire')
+    expect(commands[0].title).toBe('Flicker Campfire')
+    expect(commands[0].toggleState).toBe(false)
     expect(commands[0].keepOpen).toBe(true)
-    expect(commands[1].title).toBe('Turn off Station Lights')
+    expect(commands[1].title).toBe('Station Lights')
+    expect(commands[1].toggleState).toBe(true)
   })
 
   it('falls back to id when name is missing', () => {
     effectsRef.value = [{ id: 'e99', type: 'onoff', state: false } as Effect]
     const cmd = useEffectCommands().value[0]
-    expect(cmd.title).toBe('Turn on e99')
+    expect(cmd.title).toBe('e99')
+    expect(cmd.toggleState).toBe(false)
   })
 
   it('running an effect command calls runEffect with flipped state', async () => {

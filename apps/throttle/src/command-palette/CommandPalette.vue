@@ -6,12 +6,19 @@ import { createLogger } from '@repo/utils'
 import { useCommandPalette } from './useCommandPalette'
 import { useCommands, useBrowseCommands } from './useCommands'
 import { filterCommands, buildNumericShortcut } from './fuzzyMatch'
-import type { Command, CommandCategory, CommandAction } from './types'
+import type {
+  Command,
+  CommandCategory,
+  CommandAction,
+  CommandStack,
+  CycleControl,
+  ToggleControl,
+} from './types'
 import QuickMenuThrottles from '@/quick-menu/QuickMenuThrottles.vue'
 
 const log = createLogger('CommandPalette')
 const router = useRouter()
-const { isOpen, query, activeIndex, stack, currentLevelTitle: headerLabel, close, push, pop } = useCommandPalette()
+const { isOpen, query, activeIndex, stack, close, push, pop } = useCommandPalette()
 const allCommands = useCommands()
 const browseCommands = useBrowseCommands()
 const { getLocos, acquireThrottle } = useLocos()
@@ -59,12 +66,43 @@ const rootViewCommands = computed<Command[]>(() => {
   return root
 })
 
+/**
+ * 🧭 Walk the id-based drill stack against the LIVE root command tree.
+ * Returns an array of resolved levels. Any id that fails to resolve (no
+ * match, or the matched command has no children) gracefully terminates
+ * the walk — the trail so far is what renders.
+ *
+ * This is the fix for the stale-drilldown bug: stack used to snapshot a
+ * full `CommandStack` at push time, so state flips on leaf commands
+ * never re-rendered. With live resolution, any reactive source that
+ * rebuilds the tree (turnouts/effects/signals/…) flows straight through.
+ */
+const resolvedStack = computed<CommandStack[]>(() => {
+  const levels: CommandStack[] = []
+  let currentCommands = rootViewCommands.value
+  for (const id of stack.value) {
+    const match = currentCommands.find((c) => c.id === id)
+    if (!match || !match.children) break
+    levels.push(match.children)
+    currentCommands = match.children.commands
+  }
+  return levels
+})
+
+const stackTop = computed<CommandStack | null>(() =>
+  resolvedStack.value.length > 0
+    ? resolvedStack.value[resolvedStack.value.length - 1]
+    : null,
+)
+
+const headerLabel = computed<string | null>(() => stackTop.value?.title ?? null)
+
 const displayedCommands = computed<Command[]>(() => {
   const trimmedQuery = query.value.trim()
 
   // Inside a drilled-in level: filter within that level only.
-  if (stack.value.length > 0) {
-    const levelCommands = stack.value[stack.value.length - 1].commands
+  if (resolvedStack.value.length > 0) {
+    const levelCommands = stackTop.value?.commands ?? []
     return filterCommands(levelCommands, trimmedQuery)
   }
 
@@ -81,8 +119,6 @@ const displayedCommands = computed<Command[]>(() => {
   const filtered = filterCommands(allCommands.value, trimmedQuery)
   return synthetic ? [synthetic, ...filtered] : filtered
 })
-
-const stackTop = computed(() => stack.value.length > 0 ? stack.value[stack.value.length - 1] : null)
 
 const CATEGORY_ORDER: CommandCategory[] = ['browse', 'settings', 'navigation', 'throttle', 'turnout', 'effect', 'signal']
 
@@ -137,8 +173,14 @@ watch(isOpen, async (open) => {
 })
 
 async function runCommand(cmd: Command) {
+  // 🎛️ Rows with an inline control are driven by ← / → / Enter — treat
+  // Enter as "cycle next / toggle on" and keep the palette open.
+  if (cmd.control) {
+    await applyControl(cmd, 'next')
+    return
+  }
   if (cmd.children) {
-    push(cmd.children)
+    push(cmd.id)
     await nextTick()
     inputRef.value?.focus()
     return
@@ -168,6 +210,34 @@ async function runAction(cmd: Command, action: CommandAction) {
   }
 }
 
+/**
+ * 🎛️ Step an inline control forward or backward. For cycle controls this
+ * wraps around the options array; for toggle controls either direction
+ * flips. Errors are captured on `errorText` — the palette stays open.
+ */
+async function applyControl(cmd: Command, direction: 'prev' | 'next') {
+  const control = cmd.control
+  if (!control) return
+  errorText.value = null
+  try {
+    if (control.kind === 'toggle') {
+      await control.set(!control.value)
+      return
+    }
+    // cycle
+    const { options, value } = control
+    if (options.length === 0) return
+    const idx = options.findIndex((o) => o.value === value)
+    const nextIdx = direction === 'next'
+      ? (idx + 1) % options.length
+      : (idx - 1 + options.length) % options.length
+    await control.set(options[nextIdx].value)
+  } catch (err) {
+    log.error('Control step failed', err)
+    errorText.value = err instanceof Error ? err.message : 'Control step failed'
+  }
+}
+
 async function onNavigateToThrottle(address: number) {
   await router.push({ name: 'throttle', params: { address } })
   close()
@@ -191,11 +261,27 @@ function onKeydown(e: KeyboardEvent) {
     activeIndex.value = Math.max(activeIndex.value - 1, 0)
     return
   }
-  // ⬅️ Left arrow always pops one drill-down level.
+  // ⬅️ Left arrow: if the active row has an inline control, step it back.
+  // Otherwise, pop a drill-down level.
   if (e.key === 'ArrowLeft') {
+    const cmd = displayedCommands.value[activeIndex.value]
+    if (cmd?.control) {
+      e.preventDefault()
+      applyControl(cmd, 'prev')
+      return
+    }
     if (stack.value.length > 0) {
       e.preventDefault()
       pop()
+    }
+    return
+  }
+  // ➡️ Right arrow: if the active row has an inline control, step it forward.
+  if (e.key === 'ArrowRight') {
+    const cmd = displayedCommands.value[activeIndex.value]
+    if (cmd?.control) {
+      e.preventDefault()
+      applyControl(cmd, 'next')
     }
     return
   }
@@ -216,6 +302,27 @@ function onKeydown(e: KeyboardEvent) {
 
 function onDialogUpdate(v: boolean) {
   if (!v) close()
+}
+
+// 🎨 Helpers for rendering inline controls.
+const INLINE_CYCLE_CHIP_LIMIT = 4
+
+function asToggleControl(cmd: Command): ToggleControl | null {
+  return cmd.control && cmd.control.kind === 'toggle' ? cmd.control : null
+}
+
+function asCycleControl(cmd: Command): CycleControl | null {
+  return cmd.control && cmd.control.kind === 'cycle' ? cmd.control : null
+}
+
+function cycleCurrentLabel(control: CycleControl): string {
+  const match = control.options.find((o) => o.value === control.value)
+  return match?.label ?? String(control.value)
+}
+
+function cycleCurrentIndex(control: CycleControl): number {
+  const idx = control.options.findIndex((o) => o.value === control.value)
+  return idx < 0 ? 0 : idx
 }
 </script>
 
@@ -272,6 +379,56 @@ function onDialogUpdate(v: boolean) {
               <span v-if="cmd.shortcut" class="cp-result__shortcut">
                 <kbd v-for="k in cmd.shortcut" :key="k">{{ k }}</kbd>
               </span>
+              <!-- 🏷️ Turnout / effect on-off status pill -->
+              <span
+                v-if="cmd.toggleState !== undefined"
+                class="cp-result__toggle"
+                :class="{ 'cp-result__toggle--on': cmd.toggleState }"
+              >{{ cmd.toggleState ? 'ON' : 'OFF' }}</span>
+              <!-- 🎛️ Inline toggle control (settings) -->
+              <span
+                v-if="asToggleControl(cmd)"
+                class="cp-result__toggle cp-result__toggle--control"
+                :class="{ 'cp-result__toggle--on': asToggleControl(cmd)!.value }"
+                @click.stop="applyControl(cmd, 'next')"
+              >{{ asToggleControl(cmd)!.value ? 'ON' : 'OFF' }}</span>
+              <!-- 🎛️ Inline cycle control (settings) -->
+              <span
+                v-if="asCycleControl(cmd) && asCycleControl(cmd)!.options.length <= INLINE_CYCLE_CHIP_LIMIT"
+                class="cp-result__cycle"
+              >
+                <button
+                  v-for="opt in asCycleControl(cmd)!.options"
+                  :key="String(opt.value)"
+                  type="button"
+                  class="cp-cycle-chip"
+                  :class="{ 'cp-cycle-chip--active': opt.value === asCycleControl(cmd)!.value }"
+                  @click.stop="asCycleControl(cmd)!.set(opt.value)"
+                >{{ opt.label }}</button>
+              </span>
+              <span
+                v-else-if="asCycleControl(cmd)"
+                class="cp-result__cycle cp-result__cycle--arrows"
+              >
+                <button
+                  type="button"
+                  class="cp-cycle-arrow"
+                  aria-label="Previous"
+                  @click.stop="applyControl(cmd, 'prev')"
+                >‹</button>
+                <span class="cp-cycle-label">
+                  {{ cycleCurrentLabel(asCycleControl(cmd)!) }}
+                  <span class="cp-cycle-index">
+                    {{ cycleCurrentIndex(asCycleControl(cmd)!) + 1 }}/{{ asCycleControl(cmd)!.options.length }}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  class="cp-cycle-arrow"
+                  aria-label="Next"
+                  @click.stop="applyControl(cmd, 'next')"
+                >›</button>
+              </span>
               <span v-if="cmd.actions && cmd.actions.length" class="cp-result__actions">
                 <button
                   v-for="action in cmd.actions"
@@ -295,6 +452,7 @@ function onDialogUpdate(v: boolean) {
 
       <div class="cp-footer">
         <span><kbd>↑↓</kbd> navigate</span>
+        <span><kbd>←→</kbd> adjust</span>
         <span><kbd>↵</kbd> run</span>
         <span><kbd>esc</kbd> close</span>
       </div>
@@ -399,6 +557,81 @@ function onDialogUpdate(v: boolean) {
   font-family: ui-monospace, monospace;
   font-size: 9px;
   color: rgba(226, 232, 240, 0.7);
+}
+
+/* 🏷️ Status / toggle pill (turnouts, effects, inline toggle control) */
+.cp-result__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: rgba(148, 163, 184, 0.75);
+}
+.cp-result__toggle--on {
+  background: rgba(34, 197, 94, 0.18);
+  border-color: rgba(34, 197, 94, 0.5);
+  color: #86efac;
+}
+.cp-result__toggle--control { cursor: pointer; }
+
+/* 🎛️ Segmented cycle control */
+.cp-result__cycle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+}
+.cp-cycle-chip {
+  padding: 3px 10px;
+  border: none;
+  background: transparent;
+  color: rgba(226, 232, 240, 0.7);
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 100ms ease, color 100ms ease;
+}
+.cp-cycle-chip:hover { color: #dbeafe; }
+.cp-cycle-chip--active {
+  background: rgba(96, 165, 250, 0.22);
+  color: #dbeafe;
+}
+.cp-result__cycle--arrows { padding: 2px 4px; }
+.cp-cycle-arrow {
+  border: none;
+  background: transparent;
+  color: rgba(148, 163, 184, 0.85);
+  font-size: 14px;
+  font-family: ui-monospace, monospace;
+  padding: 0 6px;
+  cursor: pointer;
+}
+.cp-cycle-arrow:hover { color: #dbeafe; }
+.cp-cycle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  color: #dbeafe;
+  white-space: nowrap;
+}
+.cp-cycle-index {
+  font-size: 9px;
+  color: rgba(148, 163, 184, 0.6);
 }
 
 .cp-result__actions {

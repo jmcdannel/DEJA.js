@@ -1,133 +1,49 @@
-import { computed, type ComputedRef, type Ref } from 'vue'
+import { computed, type ComputedRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { backgrounds, useThemeSwitcher, type ThemeMode } from '@repo/ui'
 import { useUserPreferences } from '@repo/modules'
-import type { Command } from '../types'
+import type { Command, CycleControl, ToggleControl } from '../types'
 import { useThrottleSettings } from '@/throttle/useThrottleSettings'
 import { useConductorSettings } from '@/conductor/useConductorSettings'
 import { useQuickMenu } from '@/quick-menu/useQuickMenu'
 
 const APP_NAME = 'throttle'
 
-const THEME_OPTIONS: Array<{ id: ThemeMode; title: string; icon: string }> = [
-  { id: 'dark', title: 'Dark', icon: 'mdi-weather-night' },
-  { id: 'light', title: 'Light', icon: 'mdi-weather-sunny' },
-  { id: 'high-contrast', title: 'High Contrast', icon: 'mdi-contrast-circle' },
+type ThrottleVariant = 'buttons' | 'slider' | 'dashboard'
+type ConductorRightPanel =
+  | 'turnouts'
+  | 'effects'
+  | 'signals'
+  | 'devices'
+  | 'routes'
+
+const THEME_OPTIONS: CycleControl<ThemeMode>['options'] = [
+  { value: 'dark', label: 'Dark' },
+  { value: 'light', label: 'Light' },
+  { value: 'high-contrast', label: 'High Contrast' },
+]
+
+const VARIANT_OPTIONS: CycleControl<ThrottleVariant>['options'] = [
+  { value: 'buttons', label: 'Buttons' },
+  { value: 'slider', label: 'Slider' },
+  { value: 'dashboard', label: 'Dashboard' },
+]
+
+const RIGHT_PANEL_OPTIONS: CycleControl<ConductorRightPanel>['options'] = [
+  { value: 'turnouts', label: 'Turnouts' },
+  { value: 'effects', label: 'Effects' },
+  { value: 'signals', label: 'Signals' },
+  { value: 'devices', label: 'Devices' },
+  { value: 'routes', label: 'Routes' },
 ]
 
 /**
- * 🎨 Build the Theme drill-down command (always visible).
- */
-function buildThemeCommand(
-  themePreference: Ref<ThemeMode> | ComputedRef<ThemeMode>,
-  setTheme: (mode: ThemeMode) => void,
-): Command {
-  const children: Command[] = THEME_OPTIONS.map(({ id, title, icon }) => ({
-    id: `settings.theme.${id}`,
-    title,
-    description: themePreference.value === id ? 'currently selected' : undefined,
-    icon,
-    category: 'settings',
-    run: () => setTheme(id),
-  }))
-
-  return {
-    id: 'settings.theme',
-    title: 'Theme',
-    icon: 'mdi-palette',
-    category: 'settings',
-    keywords: ['dark', 'light', 'high contrast', 'appearance'],
-    run: () => {},
-    children: {
-      title: 'Theme',
-      commands: children,
-    },
-  }
-}
-
-/**
- * 🖼️ Build the Background drill-down command (always visible).
- */
-function buildBackgroundCommand(
-  currentBackgroundId: string,
-  setAppBackground: (appName: string, id: string) => Promise<void>,
-): Command {
-  const noneChild: Command = {
-    id: 'settings.background.none',
-    title: 'None',
-    description: currentBackgroundId === 'none' ? 'currently selected' : undefined,
-    icon: 'mdi-close-circle-outline',
-    category: 'settings',
-    run: async () => {
-      await setAppBackground(APP_NAME, 'none')
-    },
-  }
-
-  const bgChildren: Command[] = backgrounds.map((bg) => ({
-    id: `settings.background.${bg.id}`,
-    title: bg.name,
-    description: currentBackgroundId === bg.id ? 'currently selected' : undefined,
-    icon: bg.type === 'effect' ? 'mdi-auto-fix' : 'mdi-image',
-    category: 'settings',
-    keywords: [bg.category, bg.type],
-    run: async () => {
-      await setAppBackground(APP_NAME, bg.id)
-    },
-  }))
-
-  return {
-    id: 'settings.background',
-    title: 'Background',
-    icon: 'mdi-image-multiple',
-    category: 'settings',
-    keywords: ['wallpaper', 'scene', 'backdrop'],
-    run: () => {},
-    children: {
-      title: 'Background',
-      commands: [noneChild, ...bgChildren],
-    },
-  }
-}
-
-/**
- * 🏎️ Build the throttle-variant drill-down (Buttons / Slider / Dashboard).
- */
-function buildVariantCommand(
-  id: string,
-  title: string,
-  current: Ref<'buttons' | 'slider' | 'dashboard'> | ComputedRef<'buttons' | 'slider' | 'dashboard'>,
-  setVariant: (v: 'buttons' | 'slider' | 'dashboard') => Promise<void> | void,
-): Command {
-  const options: Array<{ value: 'buttons' | 'slider' | 'dashboard'; title: string; icon: string }> = [
-    { value: 'buttons', title: 'Buttons', icon: 'mdi-gesture-tap-button' },
-    { value: 'slider', title: 'Slider', icon: 'mdi-tune-vertical' },
-    { value: 'dashboard', title: 'Dashboard', icon: 'mdi-view-dashboard' },
-  ]
-
-  const children: Command[] = options.map(({ value, title: label, icon }) => ({
-    id: `${id}.${value}`,
-    title: label,
-    description: current.value === value ? 'currently selected' : undefined,
-    icon,
-    category: 'settings',
-    run: () => setVariant(value),
-  }))
-
-  return {
-    id,
-    title,
-    icon: 'mdi-view-dashboard-variant',
-    category: 'settings',
-    run: () => {},
-    children: { title, commands: children },
-  }
-}
-
-/**
  * 🧭 useSettingsCommands — returns a contextual list of settings commands
- * based on the current route. Always includes Theme, Background and
- * "Open Settings page"; additional items are appended for throttle /
- * conductor routes. Returns an empty list on the Settings page itself.
+ * based on the current route. Every setting is a single Command with an
+ * inline `control` (cycle or toggle) so users can flip values with ← / →
+ * without drilling in. Always includes Theme, Background and "Open
+ * Settings page"; additional items are appended for throttle / conductor
+ * routes. Returns an empty list on the Settings page itself.
  */
 export function useSettingsCommands(): ComputedRef<Command[]> {
   const router = useRouter()
@@ -160,6 +76,96 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
 
   const { quickMenuVisible } = useQuickMenu()
 
+  function buildThemeCommand(): Command {
+    const control: CycleControl<ThemeMode> = {
+      kind: 'cycle',
+      options: THEME_OPTIONS,
+      value: themePreference.value,
+      set: (next) => setTheme(next),
+    }
+    return {
+      id: 'settings.theme',
+      title: 'Theme',
+      icon: 'mdi-palette',
+      category: 'settings',
+      keywords: ['dark', 'light', 'high contrast', 'appearance'],
+      keepOpen: true,
+      run: () => {},
+      control,
+    }
+  }
+
+  function buildBackgroundCommand(): Command {
+    const options: CycleControl<string>['options'] = [
+      { value: 'none', label: 'None' },
+      ...backgrounds.map((bg) => ({ value: bg.id, label: bg.name })),
+    ]
+    const control: CycleControl<string> = {
+      kind: 'cycle',
+      options,
+      value: currentBackground.value || 'none',
+      set: async (next) => {
+        await setAppBackground(APP_NAME, next)
+      },
+    }
+    return {
+      id: 'settings.background',
+      title: 'Background',
+      icon: 'mdi-image-multiple',
+      category: 'settings',
+      keywords: ['wallpaper', 'scene', 'backdrop'],
+      keepOpen: true,
+      run: () => {},
+      control,
+    }
+  }
+
+  function buildVariantCommand(
+    id: string,
+    title: string,
+    value: ThrottleVariant,
+    setter: (v: ThrottleVariant) => Promise<void> | void,
+  ): Command {
+    const control: CycleControl<ThrottleVariant> = {
+      kind: 'cycle',
+      options: VARIANT_OPTIONS,
+      value,
+      set: (next) => setter(next),
+    }
+    return {
+      id,
+      title,
+      icon: 'mdi-view-dashboard-variant',
+      category: 'settings',
+      keepOpen: true,
+      run: () => {},
+      control,
+    }
+  }
+
+  function buildToggleCommand(
+    id: string,
+    title: string,
+    icon: string,
+    value: boolean,
+    setter: (v: boolean) => Promise<void> | void,
+  ): Command {
+    const control: ToggleControl = {
+      kind: 'toggle',
+      value,
+      set: (next) => setter(next),
+    }
+    return {
+      id,
+      title,
+      icon,
+      category: 'settings',
+      keepOpen: true,
+      run: () => {},
+      control,
+    }
+  }
+
   return computed<Command[]>(() => {
     const routeName = route.name
 
@@ -171,10 +177,7 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
     const commands: Command[] = []
 
     // 🎨 Always-visible core items
-    commands.push(
-      buildThemeCommand(themePreference as Ref<ThemeMode>, setTheme),
-      buildBackgroundCommand(currentBackground.value, setAppBackground),
-    )
+    commands.push(buildThemeCommand(), buildBackgroundCommand())
 
     // 🏎️ Throttle-route contextual items
     if (routeName === 'throttle' || routeName === 'throttles') {
@@ -182,43 +185,39 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
         buildVariantCommand(
           'settings.throttle.variant',
           'Throttle variant',
-          throttleVariant,
+          throttleVariant.value,
           setThrottleVariant,
         ),
-        {
-          id: 'settings.toggle.functions',
-          title: `Show functions: ${showFunctions.value ? 'on' : 'off'}`,
-          description: 'toggle',
-          icon: 'mdi-function-variant',
-          category: 'settings',
-          run: () => setShowFunctions(!showFunctions.value),
-        },
-        {
-          id: 'settings.toggle.speedometer',
-          title: `Show speedometer: ${showSpeedometer.value ? 'on' : 'off'}`,
-          description: 'toggle',
-          icon: 'mdi-speedometer',
-          category: 'settings',
-          run: () => setShowSpeedometer(!showSpeedometer.value),
-        },
-        {
-          id: 'settings.toggle.consist',
-          title: `Show consist: ${showConsist.value ? 'on' : 'off'}`,
-          description: 'toggle',
-          icon: 'mdi-train-car-flatbed-car',
-          category: 'settings',
-          run: () => setShowConsist(!showConsist.value),
-        },
-        {
-          id: 'settings.toggle.quickMenu',
-          title: `Quick menu: ${quickMenuVisible.value ? 'visible' : 'hidden'}`,
-          description: 'toggle',
-          icon: 'mdi-menu',
-          category: 'settings',
-          run: () => {
-            quickMenuVisible.value = !quickMenuVisible.value
+        buildToggleCommand(
+          'settings.toggle.functions',
+          'Show functions',
+          'mdi-function-variant',
+          showFunctions.value,
+          setShowFunctions,
+        ),
+        buildToggleCommand(
+          'settings.toggle.speedometer',
+          'Show speedometer',
+          'mdi-speedometer',
+          showSpeedometer.value,
+          setShowSpeedometer,
+        ),
+        buildToggleCommand(
+          'settings.toggle.consist',
+          'Show consist',
+          'mdi-train-car-flatbed-car',
+          showConsist.value,
+          setShowConsist,
+        ),
+        buildToggleCommand(
+          'settings.toggle.quickMenu',
+          'Quick menu visible',
+          'mdi-menu',
+          quickMenuVisible.value,
+          (next) => {
+            quickMenuVisible.value = next
           },
-        },
+        ),
       )
     }
 
@@ -228,47 +227,29 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
         buildVariantCommand(
           'settings.conductor.variant',
           'Conductor variant',
-          conductorVariant,
+          conductorVariant.value,
           setConductorVariant,
         ),
-      )
-
-      const rightPanelOptions: Array<{
-        value: 'turnouts' | 'effects' | 'signals' | 'devices' | 'routes'
-        title: string
-        icon: string
-      }> = [
-        { value: 'turnouts', title: 'Turnouts', icon: 'mdi-call-split' },
-        { value: 'effects', title: 'Effects', icon: 'mdi-rocket-launch' },
-        { value: 'signals', title: 'Signals', icon: 'mdi-traffic-light' },
-        { value: 'devices', title: 'Devices', icon: 'mdi-chip' },
-        { value: 'routes', title: 'Routes', icon: 'mdi-routes' },
-      ]
-
-      commands.push({
-        id: 'settings.conductor.rightPanel',
-        title: 'Right panel',
-        icon: 'mdi-dock-right',
-        category: 'settings',
-        run: () => {},
-        children: {
+        {
+          id: 'settings.conductor.rightPanel',
           title: 'Right panel',
-          commands: rightPanelOptions.map(({ value, title, icon }) => ({
-            id: `settings.conductor.rightPanel.${value}`,
-            title,
-            description:
-              conductorRightPanel.value === value ? 'currently selected' : undefined,
-            icon,
-            category: 'settings',
-            run: () => setConductorRightPanel(value),
-          })),
+          icon: 'mdi-dock-right',
+          category: 'settings',
+          keepOpen: true,
+          run: () => {},
+          control: {
+            kind: 'cycle',
+            options: RIGHT_PANEL_OPTIONS,
+            value: conductorRightPanel.value,
+            set: (next) => setConductorRightPanel(next),
+          } as CycleControl<ConductorRightPanel>,
         },
-      })
+      )
     }
 
     // 🗂️ turnouts / effects / signals / roster — no extra items
 
-    // ⚙️ Open Settings page (always last)
+    // ⚙️ Open Settings page (always last, plain command — no control)
     commands.push({
       id: 'settings.open-page',
       title: 'Open Settings page',

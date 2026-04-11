@@ -1,14 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useCommandPalette } from './useCommandPalette'
-import type { Command, CommandStack } from './types'
-
-const makeCommand = (id: string): Command => ({
-  id,
-  title: id,
-  category: 'navigation',
-  icon: 'mdi-star',
-  run: () => {},
-})
 
 describe('useCommandPalette', () => {
   beforeEach(() => {
@@ -49,45 +40,39 @@ describe('useCommandPalette', () => {
     expect(stack.value).toEqual([])
   })
 
-  it('push() adds a level, clears query and activeIndex', () => {
+  it('push() adds an id to the stack and resets query + activeIndex', () => {
     const { open, push, query, activeIndex, stack } = useCommandPalette()
     open('signal block west')
-    const level: CommandStack = {
-      title: 'Set Block West ▸ aspect',
-      commands: [makeCommand('red'), makeCommand('yellow')],
-    }
-    push(level)
-    expect(stack.value).toHaveLength(1)
-    expect(stack.value[0].title).toBe('Set Block West ▸ aspect')
+    push('browse.signals')
+    expect(stack.value).toEqual(['browse.signals'])
     expect(query.value).toBe('')
     expect(activeIndex.value).toBe(0)
   })
 
-  it('pop() removes the top level and resets query/activeIndex', () => {
+  it('pop() removes the top id and resets query/activeIndex', () => {
     const { open, push, pop, query, activeIndex, stack } = useCommandPalette()
     open()
-    push({ title: 'level 1', commands: [] })
-    push({ title: 'level 2', commands: [] })
-    expect(stack.value).toHaveLength(2)
+    push('browse.turnouts')
+    push('browse.turnouts.all')
+    expect(stack.value).toEqual(['browse.turnouts', 'browse.turnouts.all'])
     pop()
-    expect(stack.value).toHaveLength(1)
-    expect(stack.value[0].title).toBe('level 1')
+    expect(stack.value).toEqual(['browse.turnouts'])
     expect(query.value).toBe('')
     expect(activeIndex.value).toBe(0)
   })
 
-  it('currentLevelTitle reflects the top of stack or null', () => {
-    const { open, push, pop, currentLevelTitle } = useCommandPalette()
+  it('stack reflects the drill-down path in order', () => {
+    const { open, push, pop, stack } = useCommandPalette()
     open()
-    expect(currentLevelTitle.value).toBeNull()
-    push({ title: 'one', commands: [] })
-    expect(currentLevelTitle.value).toBe('one')
-    push({ title: 'two', commands: [] })
-    expect(currentLevelTitle.value).toBe('two')
+    expect(stack.value).toEqual([])
+    push('one')
+    expect(stack.value).toEqual(['one'])
+    push('two')
+    expect(stack.value).toEqual(['one', 'two'])
     pop()
-    expect(currentLevelTitle.value).toBe('one')
+    expect(stack.value).toEqual(['one'])
     pop()
-    expect(currentLevelTitle.value).toBeNull()
+    expect(stack.value).toEqual([])
   })
 
   it('state is shared across calls (module-scoped)', () => {

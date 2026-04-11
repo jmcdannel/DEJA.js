@@ -15,16 +15,16 @@ function effectToggleCommand(
   const extra = e.type
     ? `${e.type}${e.device ? ` · ${e.device}` : ''}`
     : e.device
-  const description = [isOn ? 'on' : 'off', extra].filter(Boolean).join(' · ') || undefined
   return {
     id: `${idPrefix}.${e.id}`,
-    // 👀 Title reflects the action the click will perform.
-    title: isOn ? `Turn off ${name}` : `Turn on ${name}`,
-    description,
-    icon: isOn ? 'mdi-toggle-switch' : 'mdi-toggle-switch-off-outline',
+    // 🏷️ Title is the effect name only. The trailing pill shows ON/OFF.
+    title: name,
+    description: extra || undefined,
+    icon: 'mdi-toggle-switch-outline',
     category: 'effect',
     keywords: [name, e.id, e.type || '', e.device || '', ...(e.tags || [])].filter(Boolean),
     keepOpen: true,
+    toggleState: isOn,
     run: async () => {
       await runEffect({ ...e, state: !isOn } as Effect)
     },

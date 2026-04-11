@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import type { CycleControl, ToggleControl } from '../types'
 import { useSettingsCommands } from './settings'
 
 // 🎭 Hoisted mock state so vi.mock factories can reference it.
@@ -140,6 +141,22 @@ vi.mock('@/quick-menu/useQuickMenu', () => ({
   }),
 }))
 
+function asCycle<T = string>(cmd: { control?: unknown }): CycleControl<T> {
+  const c = cmd.control as CycleControl<T> | undefined
+  if (!c || c.kind !== 'cycle') {
+    throw new Error('Expected cycle control')
+  }
+  return c
+}
+
+function asToggle(cmd: { control?: unknown }): ToggleControl {
+  const c = cmd.control as ToggleControl | undefined
+  if (!c || c.kind !== 'toggle') {
+    throw new Error('Expected toggle control')
+  }
+  return c
+}
+
 describe('useSettingsCommands', () => {
   beforeEach(() => {
     // 🔁 Reset all mocks + refs to a generic, non-route-specific baseline.
@@ -226,115 +243,96 @@ describe('useSettingsCommands', () => {
     ])
   })
 
-  it('theme drill children call setTheme with the right mode', async () => {
-    const commands = useSettingsCommands().value
-    const theme = commands.find((c) => c.id === 'settings.theme')!
-    expect(theme.children).toBeDefined()
-    const themeChildren = theme.children!.commands
-    expect(themeChildren.map((c) => c.id)).toEqual([
-      'settings.theme.dark',
-      'settings.theme.light',
-      'settings.theme.high-contrast',
+  it('no settings command has `children` — all drill-downs replaced by inline controls', () => {
+    mocks.routeName.value = 'throttle'
+    const throttleCommands = useSettingsCommands().value
+    expect(throttleCommands.every((c) => !c.children)).toBe(true)
+    mocks.routeName.value = 'conductor'
+    const conductorCommands = useSettingsCommands().value
+    expect(conductorCommands.every((c) => !c.children)).toBe(true)
+  })
+
+  it('theme cycle control has 3 options and calls setTheme on set', async () => {
+    const theme = useSettingsCommands().value.find(
+      (c) => c.id === 'settings.theme',
+    )!
+    const control = asCycle<'dark' | 'light' | 'high-contrast'>(theme)
+    expect(control.options.map((o) => o.value)).toEqual([
+      'dark',
+      'light',
+      'high-contrast',
     ])
-
-    await themeChildren.find((c) => c.id === 'settings.theme.dark')!.run()
-    expect(mocks.setThemeMock).toHaveBeenCalledWith('dark')
-
-    await themeChildren.find((c) => c.id === 'settings.theme.light')!.run()
+    expect(control.value).toBe('dark')
+    await control.set('light')
     expect(mocks.setThemeMock).toHaveBeenCalledWith('light')
-
-    await themeChildren
-      .find((c) => c.id === 'settings.theme.high-contrast')!
-      .run()
+    await control.set('high-contrast')
     expect(mocks.setThemeMock).toHaveBeenCalledWith('high-contrast')
   })
 
-  it('marks the currently-selected theme with a description', () => {
+  it('theme control value tracks themePreference', () => {
     mocks.themePreferenceRef.value = 'light'
-    const commands = useSettingsCommands().value
-    const theme = commands.find((c) => c.id === 'settings.theme')!
-    const lightChild = theme.children!.commands.find(
-      (c) => c.id === 'settings.theme.light',
+    const theme = useSettingsCommands().value.find(
+      (c) => c.id === 'settings.theme',
     )!
-    const darkChild = theme.children!.commands.find(
-      (c) => c.id === 'settings.theme.dark',
-    )!
-    expect(lightChild.description).toBe('currently selected')
-    expect(darkChild.description).toBeUndefined()
+    expect(asCycle(theme).value).toBe('light')
   })
 
-  it('background drill places None first, then registry entries, and calls setAppBackground', async () => {
-    const commands = useSettingsCommands().value
-    const bg = commands.find((c) => c.id === 'settings.background')!
-    const children = bg.children!.commands
-    expect(children[0].id).toBe('settings.background.none')
-    expect(children.slice(1).map((c) => c.id)).toEqual([
-      'settings.background.northernlights',
-      'settings.background.tracks',
+  it('background cycle control starts with None, then registry entries, and calls setAppBackground', async () => {
+    const bg = useSettingsCommands().value.find(
+      (c) => c.id === 'settings.background',
+    )!
+    const control = asCycle<string>(bg)
+    expect(control.options[0]).toEqual({ value: 'none', label: 'None' })
+    expect(control.options.slice(1).map((o) => o.value)).toEqual([
+      'northernlights',
+      'tracks',
     ])
-
-    await children.find((c) => c.id === 'settings.background.none')!.run()
+    expect(control.value).toBe('none')
+    await control.set('none')
     expect(mocks.setAppBackgroundMock).toHaveBeenCalledWith('throttle', 'none')
-
-    await children
-      .find((c) => c.id === 'settings.background.northernlights')!
-      .run()
+    await control.set('northernlights')
     expect(mocks.setAppBackgroundMock).toHaveBeenCalledWith(
       'throttle',
       'northernlights',
     )
-
-    await children.find((c) => c.id === 'settings.background.tracks')!.run()
+    await control.set('tracks')
     expect(mocks.setAppBackgroundMock).toHaveBeenCalledWith('throttle', 'tracks')
   })
 
-  it('marks the currently-selected background with a description', () => {
+  it('background control value tracks currentBackground', () => {
     mocks.currentBackgroundRef.value = 'tracks'
-    const commands = useSettingsCommands().value
-    const bg = commands.find((c) => c.id === 'settings.background')!
-    const tracksChild = bg.children!.commands.find(
-      (c) => c.id === 'settings.background.tracks',
+    const bg = useSettingsCommands().value.find(
+      (c) => c.id === 'settings.background',
     )!
-    const noneChild = bg.children!.commands.find(
-      (c) => c.id === 'settings.background.none',
-    )!
-    expect(tracksChild.description).toBe('currently selected')
-    expect(noneChild.description).toBeUndefined()
+    expect(asCycle(bg).value).toBe('tracks')
   })
 
-  it('Open Settings command pushes { name: "settings" }', async () => {
+  it('Open Settings command pushes { name: "settings" } and has no control', async () => {
     const commands = useSettingsCommands().value
     const open = commands.find((c) => c.id === 'settings.open-page')!
+    expect(open.control).toBeUndefined()
     await open.run()
     expect(mocks.pushMock).toHaveBeenCalledWith({ name: 'settings' })
   })
 
-  it('throttle-variant drill children call setVariant with each value', async () => {
+  it('throttle-variant cycle control calls setVariant with each value', async () => {
     mocks.routeName.value = 'throttle'
-    const commands = useSettingsCommands().value
-    const variant = commands.find(
+    const variant = useSettingsCommands().value.find(
       (c) => c.id === 'settings.throttle.variant',
     )!
-    expect(variant.children).toBeDefined()
-    const children = variant.children!.commands
-    expect(children.map((c) => c.id)).toEqual([
-      'settings.throttle.variant.buttons',
-      'settings.throttle.variant.slider',
-      'settings.throttle.variant.dashboard',
+    const control = asCycle<'buttons' | 'slider' | 'dashboard'>(variant)
+    expect(control.options.map((o) => o.value)).toEqual([
+      'buttons',
+      'slider',
+      'dashboard',
     ])
-
-    await children
-      .find((c) => c.id === 'settings.throttle.variant.slider')!
-      .run()
+    await control.set('slider')
     expect(mocks.setThrottleVariantMock).toHaveBeenCalledWith('slider')
-
-    await children
-      .find((c) => c.id === 'settings.throttle.variant.dashboard')!
-      .run()
+    await control.set('dashboard')
     expect(mocks.setThrottleVariantMock).toHaveBeenCalledWith('dashboard')
   })
 
-  it('throttle toggle commands flip their underlying ref via the setters', async () => {
+  it('throttle toggle controls flip via their underlying setters', async () => {
     mocks.routeName.value = 'throttle'
     mocks.showFunctionsRef.value = true
     mocks.showSpeedometerRef.value = false
@@ -345,58 +343,62 @@ describe('useSettingsCommands', () => {
     const functionsCmd = commands.find(
       (c) => c.id === 'settings.toggle.functions',
     )!
-    await functionsCmd.run()
+    const fToggle = asToggle(functionsCmd)
+    expect(fToggle.value).toBe(true)
+    await fToggle.set(!fToggle.value)
     expect(mocks.setShowFunctionsMock).toHaveBeenCalledWith(false)
 
     const speedometerCmd = commands.find(
       (c) => c.id === 'settings.toggle.speedometer',
     )!
-    await speedometerCmd.run()
+    const sToggle = asToggle(speedometerCmd)
+    expect(sToggle.value).toBe(false)
+    await sToggle.set(!sToggle.value)
     expect(mocks.setShowSpeedometerMock).toHaveBeenCalledWith(true)
 
     const consistCmd = commands.find(
       (c) => c.id === 'settings.toggle.consist',
     )!
-    await consistCmd.run()
+    const cToggle = asToggle(consistCmd)
+    await cToggle.set(!cToggle.value)
     expect(mocks.setShowConsistMock).toHaveBeenCalledWith(false)
   })
 
-  it('quickMenu toggle command flips quickMenuVisible directly', async () => {
+  it('quickMenu toggle control flips quickMenuVisible directly', async () => {
     mocks.routeName.value = 'throttle'
     mocks.quickMenuVisibleRef.value = true
     const commands = useSettingsCommands().value
     const qm = commands.find((c) => c.id === 'settings.toggle.quickMenu')!
-    await qm.run()
+    const qmToggle = asToggle(qm)
+    expect(qmToggle.value).toBe(true)
+    await qmToggle.set(false)
     expect(mocks.quickMenuVisibleRef.value).toBe(false)
-
-    // flipping again restores it
-    await qm.run()
+    // Grab a fresh snapshot because the control captured the old value.
+    const qm2 = useSettingsCommands().value.find(
+      (c) => c.id === 'settings.toggle.quickMenu',
+    )!
+    await asToggle(qm2).set(true)
     expect(mocks.quickMenuVisibleRef.value).toBe(true)
   })
 
-  it('conductor right-panel drill children call setRightPanel with each value', async () => {
+  it('conductor right-panel cycle control calls setRightPanel with each value', async () => {
     mocks.routeName.value = 'conductor'
-    const commands = useSettingsCommands().value
-    const rightPanel = commands.find(
+    const rightPanel = useSettingsCommands().value.find(
       (c) => c.id === 'settings.conductor.rightPanel',
     )!
-    const children = rightPanel.children!.commands
-    expect(children.map((c) => c.id)).toEqual([
-      'settings.conductor.rightPanel.turnouts',
-      'settings.conductor.rightPanel.effects',
-      'settings.conductor.rightPanel.signals',
-      'settings.conductor.rightPanel.devices',
-      'settings.conductor.rightPanel.routes',
+    const control = asCycle<
+      'turnouts' | 'effects' | 'signals' | 'devices' | 'routes'
+    >(rightPanel)
+    expect(control.options.map((o) => o.value)).toEqual([
+      'turnouts',
+      'effects',
+      'signals',
+      'devices',
+      'routes',
     ])
-
-    await children
-      .find((c) => c.id === 'settings.conductor.rightPanel.effects')!
-      .run()
+    await control.set('effects')
     expect(mocks.setConductorRightPanelMock).toHaveBeenCalledWith('effects')
-
-    await children
-      .find((c) => c.id === 'settings.conductor.rightPanel.devices')!
-      .run()
+    await control.set('devices')
     expect(mocks.setConductorRightPanelMock).toHaveBeenCalledWith('devices')
   })
 

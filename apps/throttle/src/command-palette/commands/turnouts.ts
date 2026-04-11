@@ -15,13 +15,14 @@ function turnoutToggleCommand(
   const keywords = [name, t.id, t.device || '', ...(t.tags || [])].filter(Boolean)
   return {
     id: `${idPrefix}.${t.id}`,
-    // 👀 Title reflects the action that will happen next (live state).
-    title: isThrown ? `Close ${name}` : `Throw ${name}`,
-    description: isThrown ? 'currently thrown' : 'currently closed',
-    icon: isThrown ? 'mdi-call-merge' : 'mdi-call-split',
+    // 🏷️ Title is the entity name only. The trailing pill (ON/OFF) tells
+    // the user the current state — clicking flips it.
+    title: name,
+    icon: 'mdi-call-split',
     category: 'turnout',
     keywords,
     keepOpen: true,
+    toggleState: isThrown,
     run: async () => {
       await setTurnout(t.id, { state: !isThrown })
     },
