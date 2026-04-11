@@ -3,6 +3,7 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import RosterQuickAdd from './RosterQuickAdd.vue'
 
 const setDocMock = vi.fn(async () => undefined)
 
@@ -29,8 +30,6 @@ vi.mock('@vueuse/core', () => ({
 vi.mock('@repo/utils', () => ({
   createLogger: () => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }),
 }))
-
-import RosterQuickAdd from './RosterQuickAdd.vue'
 
 const vuetify = createVuetify({ components, directives })
 

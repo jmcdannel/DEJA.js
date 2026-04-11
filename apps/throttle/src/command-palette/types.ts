@@ -1,5 +1,10 @@
 export type CommandCategory = 'navigation' | 'throttle' | 'turnout' | 'effect' | 'signal'
 
+export interface CommandStack {
+  title: string
+  commands: Command[]
+}
+
 export interface Command {
   /** Unique stable identifier. Used for Vue keys and future recent-command tracking. */
   id: string
@@ -21,13 +26,5 @@ export interface Command {
    * If present, running the command pushes a new palette level instead of closing.
    * The children are displayed as the new result set with a fresh input and a breadcrumb header.
    */
-  children?: {
-    title: string
-    commands: Command[]
-  }
-}
-
-export interface CommandStack {
-  title: string
-  commands: Command[]
+  children?: CommandStack
 }

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent } from 'vue'
+import { useGlobalKeybindings, chordKey } from './useGlobalKeybindings'
 
 const pushMock = vi.fn()
 const paletteOpenMock = vi.fn()
@@ -23,8 +24,6 @@ vi.mock('./useCommandPalette', () => ({
   }),
 }))
 
-import { useGlobalKeybindings, chordKey } from './useGlobalKeybindings'
-
 const Host = defineComponent({
   setup() {
     useGlobalKeybindings()
@@ -39,10 +38,10 @@ function dispatchKey(
 ) {
   const ev = new KeyboardEvent('keydown', {
     key,
-    metaKey: !!mods.meta,
-    ctrlKey: !!mods.ctrl,
-    altKey: !!mods.alt,
-    shiftKey: !!mods.shift,
+    metaKey: Boolean(mods.meta),
+    ctrlKey: Boolean(mods.ctrl),
+    altKey: Boolean(mods.alt),
+    shiftKey: Boolean(mods.shift),
     bubbles: true,
     cancelable: true,
   })

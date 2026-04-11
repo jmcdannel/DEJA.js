@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref } from 'vue'
 import type { Loco, Throttle } from '@repo/modules/locos'
+import { useThrottleCommands } from './throttles'
 
 const pushMock = vi.fn()
 const acquireThrottleMock = vi.fn(async () => {})
@@ -35,8 +36,6 @@ vi.mock('firebase/firestore', () => ({
 }))
 
 vi.mock('@repo/firebase-config', () => ({ db: { __type: 'db' } }))
-
-import { useThrottleCommands } from './throttles'
 
 describe('useThrottleCommands', () => {
   beforeEach(() => {

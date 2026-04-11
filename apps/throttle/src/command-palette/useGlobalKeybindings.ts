@@ -4,21 +4,23 @@ import { useCommandPalette } from './useCommandPalette'
 
 const CHORD_TIMEOUT_MS = 1000
 
-// 🎹 Module-scoped ref so the chord indicator chip can import it directly
+// Module-scoped so the chord indicator chip can import chordKey and so the
+// timer stays paired with chordKey even if useGlobalKeybindings is ever
+// called from more than one place.
 export const chordKey = ref<string | null>(null)
+let chordTimer: ReturnType<typeof setTimeout> | null = null
+
+function clearChord() {
+  chordKey.value = null
+  if (chordTimer !== null) {
+    clearTimeout(chordTimer)
+    chordTimer = null
+  }
+}
 
 export function useGlobalKeybindings() {
   const router = useRouter()
   const palette = useCommandPalette()
-  let chordTimer: ReturnType<typeof setTimeout> | null = null
-
-  function clearChord() {
-    chordKey.value = null
-    if (chordTimer !== null) {
-      clearTimeout(chordTimer)
-      chordTimer = null
-    }
-  }
 
   function runChord(first: string, second: string): boolean {
     if (first !== 'g') return false
@@ -57,7 +59,6 @@ export function useGlobalKeybindings() {
   }
 
   function handler(e: KeyboardEvent) {
-    // ⌘K / Ctrl+K — always active, even in inputs
     if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
       e.preventDefault()
       palette.open()
@@ -65,7 +66,6 @@ export function useGlobalKeybindings() {
       return
     }
 
-    // Escape — close palette or pop stack (only when open)
     if (e.key === 'Escape' && palette.isOpen.value) {
       e.preventDefault()
       if (palette.stack.value.length > 0) {
@@ -76,11 +76,9 @@ export function useGlobalKeybindings() {
       return
     }
 
-    // All other shortcuts suppressed in editable elements or with modifiers
     if (isEditable(e.target)) return
     if (e.metaKey || e.ctrlKey || e.altKey) return
 
-    // Chord second key
     if (chordKey.value) {
       const ran = runChord(chordKey.value, e.key)
       clearChord()
@@ -88,11 +86,9 @@ export function useGlobalKeybindings() {
       return
     }
 
-    // Start a chord on 'g'
     if (e.key === 'g') {
       chordKey.value = 'g'
       chordTimer = setTimeout(clearChord, CHORD_TIMEOUT_MS)
-      return
     }
   }
 

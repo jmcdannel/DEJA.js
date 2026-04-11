@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref } from 'vue'
 import type { Signal } from '@repo/modules/signals'
+import { useSignalCommands } from './signals'
 
 const setSignalAspectMock = vi.fn(async () => {})
 const signalsRef = ref<Signal[]>([])
@@ -11,8 +12,6 @@ vi.mock('@repo/modules/signals', () => ({
     setSignalAspect: setSignalAspectMock,
   }),
 }))
-
-import { useSignalCommands } from './signals'
 
 describe('useSignalCommands', () => {
   beforeEach(() => {

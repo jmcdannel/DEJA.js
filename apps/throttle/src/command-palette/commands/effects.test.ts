@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref } from 'vue'
 import type { Effect } from '@repo/modules/effects'
+import { useEffectCommands } from './effects'
 
 const runEffectMock = vi.fn(async () => {})
 const effectsRef = ref<Effect[]>([])
@@ -11,8 +12,6 @@ vi.mock('@repo/modules/effects', () => ({
     runEffect: runEffectMock,
   }),
 }))
-
-import { useEffectCommands } from './effects'
 
 describe('useEffectCommands', () => {
   beforeEach(() => {

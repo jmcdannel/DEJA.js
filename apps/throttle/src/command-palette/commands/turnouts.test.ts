@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref } from 'vue'
 import type { Turnout } from '@repo/modules/turnouts'
+import { useTurnoutCommands } from './turnouts'
 
 const setTurnoutMock = vi.fn(async () => true)
 const turnoutsRef = ref<Turnout[]>([])
@@ -11,8 +12,6 @@ vi.mock('@repo/modules/turnouts', () => ({
     setTurnout: setTurnoutMock,
   }),
 }))
-
-import { useTurnoutCommands } from './turnouts'
 
 describe('useTurnoutCommands', () => {
   beforeEach(() => {

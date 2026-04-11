@@ -10,7 +10,7 @@ import type { Command, CommandCategory } from './types'
 
 const log = createLogger('CommandPalette')
 const router = useRouter()
-const { isOpen, query, activeIndex, stack, close, push } = useCommandPalette()
+const { isOpen, query, activeIndex, stack, currentLevelTitle: headerLabel, close, push } = useCommandPalette()
 const allCommands = useCommands()
 const { getLocos, acquireThrottle } = useLocos()
 const locos = getLocos() as unknown as { value: Loco[] }
@@ -84,7 +84,7 @@ const flatIndexFor = computed<Map<string, number>>(() => {
 })
 
 watch(displayedCommands, () => {
-  if (activeIndex.value >= displayedCommands.value.length) {
+  if (activeIndex.value >= displayedCommands.value.length && activeIndex.value !== 0) {
     activeIndex.value = 0
   }
 })
@@ -139,10 +139,6 @@ function onKeydown(e: KeyboardEvent) {
     if (cmd) runCommand(cmd)
   }
 }
-
-const headerLabel = computed(() =>
-  stack.value.length > 0 ? stack.value[stack.value.length - 1].title : null,
-)
 
 function onDialogUpdate(v: boolean) {
   if (!v) close()
