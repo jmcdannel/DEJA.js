@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { useLocos, ROADNAMES, type Loco } from '@repo/modules/locos'
 import { LocoRoster, PageHeader, ListControlBar, useListControls } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
-import QuickThrottleButton from '@/throttle/QuickThrottleButton.vue'
 
 const router = useRouter()
 const { getLocos } = useLocos()
@@ -59,18 +58,15 @@ function handleLocoSelect(loco: Loco) {
   <main class="@container min-h-screen overflow-auto">
     <PageHeader title="Roster" icon="mdi-train" color="pink">
       <template #controls>
-        <div class="flex items-center gap-2">
-          <ListControlBar
-            :controls="rosterControls"
-            color="pink"
-            :sort-options="sortOptions"
-            :filters="filters"
-            :show-view="true"
-            :view-options="viewOptions"
-            :show-search="false"
-          />
-          <QuickThrottleButton size="small" color="pink" />
-        </div>
+        <ListControlBar
+          :controls="rosterControls"
+          color="pink"
+          :sort-options="sortOptions"
+          :filters="filters"
+          :show-view="true"
+          :view-options="viewOptions"
+          :show-search="false"
+        />
       </template>
     </PageHeader>
 

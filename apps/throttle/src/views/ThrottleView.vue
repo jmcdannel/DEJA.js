@@ -8,7 +8,6 @@ import ButtonsThrottle from '@/throttle/ButtonsThrottle.vue'
 import SliderThrottle from '@/throttle/SliderThrottle.vue'
 import Dashboard from '@/throttle/Dashboard.vue'
 import { useThrottleSettings } from '@/throttle/useThrottleSettings'
-import QuickThrottleButton from '@/throttle/QuickThrottleButton.vue'
 import SaveToRosterChip from '@/throttle/SaveToRosterChip.vue'
 
 const route = useRoute()
@@ -87,20 +86,16 @@ function handleSelect(newAddress: number) {
       <SaveToRosterChip v-if="!Number.isNaN(routeAddr)" :address="routeAddr" />
     </div>
     <component :is="variantComponent" :address="routeAddr" v-bind="settingsProps" class="flex-1 min-h-0" />
-    <div class="throttle-footer flex items-center gap-2 px-2">
-      <QuickThrottleButton size="small" color="primary" />
-      <v-slide-group
-        selected-class="bg-success"
-        show-arrows
-        class="flex-1"
+    <v-slide-group
+      selected-class="bg-success"
+      show-arrows
+    >
+      <v-slide-group-item
+        v-for="item in throttles"
+        :key="item.id"
       >
-        <v-slide-group-item
-          v-for="item in throttles"
-          :key="item.id"
-        >
-          <ThrottleNavItem v-if="item.address" :address="item.address" @select="handleSelect(item.address)" />
-        </v-slide-group-item>
-      </v-slide-group>
-    </div>
+        <ThrottleNavItem v-if="item.address" :address="item.address" @select="handleSelect(item.address)" />
+      </v-slide-group-item>
+    </v-slide-group>
   </div>
 </template>
