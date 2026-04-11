@@ -75,7 +75,7 @@ void loop()
     handleInput();
   }
 
-  static unsigned long lastChangeTime[sizeof(SENSORPINS) / sizeof(SENSORPINS[0])] = {0}; // Array to store last change times
+#if ENABLE_SENSORS
   unsigned long currentTime = millis();
 
   for (int i = 0; i < (sizeof(SENSORPINS) / sizeof(SENSORPINS[0])); i++)
@@ -92,6 +92,7 @@ void loop()
       lastChangeTime[i] = currentTime;   // Update last change time
     }
   }
+#endif
 }
 
 void handleInput()
