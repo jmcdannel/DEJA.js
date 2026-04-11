@@ -125,15 +125,17 @@ export const useSensors = () => {
   }
 
   function getSensorsByDevice(deviceId: string) {
-    if (!layoutId.value) return null
-    return useCollection<Sensor>(
-      query(
+    // ⚠️ Don't add orderBy — composite (device + sortField) index isn't deployed.
+    // Caller sorts client-side.
+    // 🔁 Use a reactive getter so VueFire re-evaluates when layoutId hydrates from localStorage.
+    const colGetter = () => {
+      if (!layoutId.value) return null
+      return query(
         collection(db, `layouts/${layoutId.value}/sensors`),
         where('device', '==', deviceId),
-        orderBy('index'),
-      ),
-      { ssrKey: `sensors-device-${deviceId}` },
-    )
+      )
+    }
+    return useCollection<Sensor>(colGetter, { ssrKey: `sensors-device-${deviceId}` })
   }
 
   return {

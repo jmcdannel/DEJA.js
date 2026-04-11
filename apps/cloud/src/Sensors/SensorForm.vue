@@ -249,6 +249,8 @@ async function submit() {
           <v-select
             v-model="type"
             :items="sensorTypes"
+            item-title="label"
+            item-value="value"
             variant="outlined"
             density="compact"
             color="teal"
@@ -261,6 +263,10 @@ async function submit() {
           <v-select
             v-model="inputType"
             :items="sensorInputTypes"
+            item-title="label"
+            item-value="value"
+            :rules="[(v) => !!v || 'Input type is required']"
+            required
             variant="outlined"
             density="compact"
             color="teal"
