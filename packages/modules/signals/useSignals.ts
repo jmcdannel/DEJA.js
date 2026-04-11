@@ -7,6 +7,7 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  where,
 } from 'firebase/firestore'
 import { useStorage } from '@vueuse/core'
 import { useCollection } from 'vuefire'
@@ -132,10 +133,25 @@ export const useSignals = () => {
     }
   }
 
+  function getSignalsByDevice(deviceId: string) {
+    // ⚠️ Don't add orderBy — composite (device + sortField) index isn't deployed.
+    // Caller sorts client-side.
+    // 🔁 Use a reactive getter so VueFire re-evaluates when layoutId hydrates from localStorage.
+    const colGetter = () => {
+      if (!layoutId.value) return null
+      return query(
+        collection(db, `layouts/${layoutId.value}/signals`),
+        where('device', '==', deviceId),
+      )
+    }
+    return useCollection<Signal>(colGetter, { ssrKey: `signals-device-${deviceId}` })
+  }
+
   return {
     deleteSignal,
     getSignal,
     getSignals,
+    getSignalsByDevice,
     setSignal,
     setSignalAspect,
     signalsCol,

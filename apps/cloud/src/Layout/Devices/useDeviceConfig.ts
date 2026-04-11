@@ -8,17 +8,19 @@ import {
   generatePicoSettings,
   generatePicoConfig,
 } from '@repo/modules'
-import type { Device, Effect, Loco, Turnout } from '@repo/modules'
+import type { Device, Effect, Loco, Turnout, Sensor, Signal } from '@repo/modules'
 
 interface UseDeviceConfigOptions {
   device: Ref<Device | null>
   effects: Ref<Effect[]> | ComputedRef<Effect[]>
   turnouts: Ref<Turnout[]> | ComputedRef<Turnout[]>
+  sensors?: Ref<Sensor[]> | ComputedRef<Sensor[]>
+  signals?: Ref<Signal[]> | ComputedRef<Signal[]>
   locos?: Ref<Loco[]> | ComputedRef<Loco[]>
   layoutId?: Ref<string> | ComputedRef<string>
 }
 
-export function useDeviceConfig({ device, effects, turnouts, locos, layoutId }: UseDeviceConfigOptions) {
+export function useDeviceConfig({ device, effects, turnouts, sensors, signals, locos, layoutId }: UseDeviceConfigOptions) {
   const isArduino = computed(() =>
     ['deja-arduino', 'deja-arduino-led'].includes(device.value?.type || '')
   )
@@ -27,6 +29,23 @@ export function useDeviceConfig({ device, effects, turnouts, locos, layoutId }: 
 
   const isDccEx = computed(() => device.value?.type === 'dcc-ex')
 
+  // 🛰 Sensor/signal pin arrays for Arduino config.h
+  const sensorPins = computed<string[]>(() =>
+    (sensors?.value ?? [])
+      .filter((s) => s.pin !== undefined && s.pin !== null)
+      .map((s) => String(s.pin))
+  )
+
+  const signalPins = computed<number[]>(() => {
+    const pins: number[] = []
+    for (const sig of signals?.value ?? []) {
+      if (typeof sig.red === 'number') pins.push(sig.red)
+      if (typeof sig.yellow === 'number') pins.push(sig.yellow)
+      if (typeof sig.green === 'number') pins.push(sig.green)
+    }
+    return pins
+  })
+
   // 🔧 Arduino config.h
   const arduinoConfigH = computed(() => {
     if (!device.value) return ''
@@ -34,6 +53,8 @@ export function useDeviceConfig({ device, effects, turnouts, locos, layoutId }: 
       device: device.value,
       effects: effects.value,
       turnouts: turnouts.value,
+      sensorPins: sensorPins.value,
+      signalPins: signalPins.value,
     })
   })
 

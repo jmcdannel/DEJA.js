@@ -6,7 +6,7 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { useStorage, useClipboard } from '@vueuse/core'
 import { useColors } from '@/Core/UI/useColors'
-import { deviceTypes, useTurnouts, useEfx, useLayout, useLocos, type Device, type Effect, type Loco, type Turnout, efxTypes } from '@repo/modules'
+import { deviceTypes, useTurnouts, useEfx, useLayout, useLocos, useSignals, useSensors, type Device, type Effect, type Loco, type Turnout, type Signal, type Sensor, efxTypes } from '@repo/modules'
 import { StatusPulse, TrackOutputConfig } from '@repo/ui'
 import { useTrackOutputs, type TrackOutput } from '@repo/dccex'
 import { useNotification } from '@repo/ui'
@@ -15,6 +15,8 @@ import { useDeviceConfig } from './useDeviceConfig'
 const { getDevice, getDevices } = useLayout()
 const { getTurnoutsByDevice } = useTurnouts()
 const { getEffectsByDevice } = useEfx()
+const { getSensorsByDevice } = useSensors()
+const { getSignalsByDevice } = useSignals()
 const { getLocos } = useLocos()
 const { colors, DEFAULT_COLOR } = useColors()
 const { notify } = useNotification()
@@ -24,6 +26,8 @@ const deviceIdParam = route.currentRoute.value.params.deviceId || ''
 const deviceId = Array.isArray(deviceIdParam) ? deviceIdParam[0] : deviceIdParam
 const turnouts = useCollection(getTurnoutsByDevice(deviceId))
 const effects = useCollection(getEffectsByDevice(deviceId))
+const sensors = getSensorsByDevice(deviceId)
+const signals = getSignalsByDevice(deviceId)
 const locos = getLocos()
 
 const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
@@ -37,10 +41,20 @@ onMounted(async () => {
 
 const deviceType = computed(() => deviceTypes.find((type) => type.value === device.value?.type))
 
+// 🔀 Client-side sorting (Firestore composite indexes aren't deployed for these)
+const sortedSensors = computed<Sensor[]>(() =>
+  [...((sensors?.value ?? []) as Sensor[])].sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
+)
+const sortedSignals = computed<Signal[]>(() =>
+  [...((signals?.value ?? []) as Signal[])].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+)
+
 const { isArduino, isPicoW, isDccEx, arduinoConfigH, picoConfigJson, dccExAutomationH } = useDeviceConfig({
   device,
   effects: computed(() => (effects.value ?? []) as Effect[]),
   turnouts: computed(() => (turnouts.value ?? []) as Turnout[]),
+  sensors: sortedSensors,
+  signals: sortedSignals,
   locos: computed(() => (locos.value ?? []) as Loco[]),
   layoutId: computed(() => layoutId.value ?? ''),
 })
@@ -370,7 +384,7 @@ function handleBack() {
               {{ effects ? effects.length : 0 }}
             </v-chip>
           </div>
-          
+
           <v-table density="compact" hover v-if="effects && effects.length > 0" class="border rounded text-caption">
             <thead class="bg-grey-darken-4">
               <tr>
@@ -396,6 +410,90 @@ function handleBack() {
           </v-table>
           <div v-else class="text-caption text-grey italic pa-2 border rounded bg-white/5">
             No effects configured.
+          </div>
+        </v-col>
+
+        <!-- Sensors List -->
+        <v-col cols="12" md="6">
+          <div class="d-flex align-center mb-3">
+            <v-icon icon="mdi-radar" class="mr-2 text-cyan"></v-icon>
+            <h3 class="text-h6 font-weight-medium">Sensors</h3>
+            <v-chip size="x-small" class="ml-2" variant="tonal" color="cyan">
+              {{ sortedSensors.length }}
+            </v-chip>
+          </div>
+
+          <v-table density="compact" hover v-if="sortedSensors.length > 0" class="border rounded text-caption">
+            <thead class="bg-grey-darken-4">
+              <tr>
+                <th class="text-left py-1 px-2 font-weight-bold">Idx</th>
+                <th class="text-left py-1 px-2 font-weight-bold">Name</th>
+                <th class="text-center py-1 px-2 font-weight-bold">Pin</th>
+                <th class="text-center py-1 px-2 font-weight-bold">Type</th>
+                <th class="text-center py-1 px-2 font-weight-bold">State</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="sensor in sortedSensors" :key="sensor?.id" class="cursor-pointer hover:bg-white/5">
+                <td class="font-mono text-grey py-1 px-2">{{ sensor?.index ?? '--' }}</td>
+                <td class="font-weight-medium py-1 px-2 truncate max-w-[120px]" :title="sensor?.name">{{ sensor?.name || 'Unnamed' }}</td>
+                <td class="text-center font-mono text-grey-lighten-1 py-1 px-2">{{ sensor?.pin ?? '--' }}</td>
+                <td class="text-center py-1 px-2">
+                  <v-chip size="x-small" variant="tonal" class="text-uppercase">{{ sensor?.type || '--' }}</v-chip>
+                </td>
+                <td class="text-center py-1 px-2">
+                  <v-icon
+                    :color="sensor?.state ? 'green' : 'grey'"
+                    size="small"
+                  >
+                    {{ sensor?.state ? 'mdi-checkbox-marked-circle' : 'mdi-circle-outline' }}
+                  </v-icon>
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+          <div v-else class="text-caption text-grey italic pa-2 border rounded bg-white/5">
+            No sensors configured.
+          </div>
+        </v-col>
+
+        <!-- Signals List -->
+        <v-col cols="12" md="6">
+          <div class="d-flex align-center mb-3">
+            <v-icon icon="mdi-traffic-light" class="mr-2 text-red"></v-icon>
+            <h3 class="text-h6 font-weight-medium">Signals</h3>
+            <v-chip size="x-small" class="ml-2" variant="tonal" color="red">
+              {{ sortedSignals.length }}
+            </v-chip>
+          </div>
+
+          <v-table density="compact" hover v-if="sortedSignals.length > 0" class="border rounded text-caption">
+            <thead class="bg-grey-darken-4">
+              <tr>
+                <th class="text-left py-1 px-2 font-weight-bold">Name</th>
+                <th class="text-center py-1 px-2 font-weight-bold">Pins (R/Y/G)</th>
+                <th class="text-center py-1 px-2 font-weight-bold">Aspect</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="signal in sortedSignals" :key="signal?.id" class="cursor-pointer hover:bg-white/5">
+                <td class="font-weight-medium py-1 px-2 truncate max-w-[140px]" :title="signal?.name">{{ signal?.name || 'Unnamed' }}</td>
+                <td class="text-center py-1 px-2 font-mono text-grey-lighten-1">
+                  <span class="text-red-lighten-2">{{ signal?.red ?? '-' }}</span>/<span class="text-yellow-lighten-2">{{ signal?.yellow ?? '-' }}</span>/<span class="text-green-lighten-2">{{ signal?.green ?? '-' }}</span>
+                </td>
+                <td class="text-center py-1 px-2">
+                  <v-icon
+                    size="small"
+                    :color="signal?.aspect === 'red' ? 'red' : signal?.aspect === 'yellow' ? 'yellow' : signal?.aspect === 'green' ? 'green' : 'grey'"
+                  >
+                    mdi-circle
+                  </v-icon>
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+          <div v-else class="text-caption text-grey italic pa-2 border rounded bg-white/5">
+            No signals configured.
           </div>
         </v-col>
       </v-row>
