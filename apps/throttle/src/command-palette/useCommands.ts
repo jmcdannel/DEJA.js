@@ -5,6 +5,7 @@ import { useThrottleCommands } from './commands/throttles'
 import { useTurnoutCommands } from './commands/turnouts'
 import { useEffectCommands } from './commands/effects'
 import { useSignalCommands } from './commands/signals'
+import { useSettingsCommands } from './commands/settings'
 
 export function useCommands(): ComputedRef<Command[]> {
   const nav = useNavigationCommands()
@@ -12,6 +13,7 @@ export function useCommands(): ComputedRef<Command[]> {
   const tur = useTurnoutCommands()
   const efx = useEffectCommands()
   const sig = useSignalCommands()
+  const set = useSettingsCommands()
 
   return computed(() => [
     ...nav.value,
@@ -19,5 +21,6 @@ export function useCommands(): ComputedRef<Command[]> {
     ...tur.value,
     ...efx.value,
     ...sig.value,
+    ...set.value,
   ])
 }

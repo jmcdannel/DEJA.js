@@ -43,6 +43,7 @@ const rootViewCommands = computed<Command[]>(() => {
   const turnouts = list.filter((c) => c.category === 'turnout')
   const effects = list.filter((c) => c.category === 'effect')
   const signals = list.filter((c) => c.category === 'signal')
+  const settings = list.filter((c) => c.category === 'settings')
 
   const root: Command[] = [...nav]
 
@@ -90,6 +91,17 @@ const rootViewCommands = computed<Command[]>(() => {
       children: { title: 'Signals', commands: signals },
     })
   }
+  if (settings.length > 0) {
+    root.push({
+      id: 'browse.settings',
+      title: 'Settings',
+      description: `${settings.length} options`,
+      icon: 'mdi-cog',
+      category: 'browse',
+      run: () => {},
+      children: { title: 'Settings', commands: settings },
+    })
+  }
 
   if (stopAll) root.push(stopAll)
 
@@ -119,7 +131,7 @@ const displayedCommands = computed<Command[]>(() => {
   return synthetic ? [synthetic, ...filtered] : filtered
 })
 
-const CATEGORY_ORDER: CommandCategory[] = ['browse', 'navigation', 'throttle', 'turnout', 'effect', 'signal']
+const CATEGORY_ORDER: CommandCategory[] = ['browse', 'navigation', 'throttle', 'turnout', 'effect', 'signal', 'settings']
 const CATEGORY_LABELS: Record<CommandCategory, string> = {
   navigation: 'Navigation',
   browse:     'Browse',
@@ -127,6 +139,7 @@ const CATEGORY_LABELS: Record<CommandCategory, string> = {
   turnout:    'Turnouts',
   effect:     'Effects',
   signal:     'Signals',
+  settings:   'Settings',
 }
 
 interface Group { category: CommandCategory; commands: Command[] }
