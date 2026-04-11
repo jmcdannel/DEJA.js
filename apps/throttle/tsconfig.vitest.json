@@ -1,5 +1,6 @@
 {
   "extends": "./tsconfig.app.json",
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "../../packages/**/*", "vitest.setup.ts"],
   "exclude": ["../../packages/**/*.stories.*"],
   "compilerOptions": {
     "allowJs": true,
