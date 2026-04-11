@@ -339,7 +339,6 @@ function cycleCurrentIndex(control: CycleControl): number {
         <v-icon size="20" class="cp-chevron">mdi-chevron-right</v-icon>
         <div v-if="headerLabel" class="cp-breadcrumb">{{ headerLabel }}</div>
         <input
-          v-if="!stackTop?.component"
           ref="inputRef"
           v-model="query"
           type="text"
@@ -347,17 +346,10 @@ function cycleCurrentIndex(control: CycleControl): number {
           placeholder="Search or type #42 to open throttle…"
           @keydown="onKeydown"
         />
-        <span v-else class="cp-widget-hint">Keyboard: W ↑  S ↓  X stop  A ←  D →</span>
         <span class="cp-esc-hint">Esc</span>
       </div>
 
       <div class="cp-results" role="listbox">
-        <component
-          v-if="stackTop?.component"
-          :is="stackTop.component"
-          v-bind="stackTop.componentProps"
-        />
-        <template v-else>
           <template v-if="showInlineThrottles">
             <div class="cp-group-label">Throttles</div>
             <QuickMenuThrottles @navigate="onNavigateToThrottle" />
@@ -464,7 +456,6 @@ function cycleCurrentIndex(control: CycleControl): number {
           <div v-if="displayedCommands.length === 0" class="cp-empty">
             No matches
           </div>
-        </template>
       </div>
 
       <div v-if="errorText" class="cp-error">{{ errorText }}</div>
@@ -733,11 +724,4 @@ function cycleCurrentIndex(control: CycleControl): number {
   color: rgba(226, 232, 240, 0.7);
 }
 
-.cp-widget-hint {
-  flex: 1;
-  font-family: ui-monospace, monospace;
-  font-size: 11px;
-  color: rgba(148, 163, 184, 0.55);
-  letter-spacing: 0.02em;
-}
 </style>
