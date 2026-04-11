@@ -10,8 +10,6 @@ import { deviceTypes, useTurnouts, useEfx, useLayout, useLocos, type Device, typ
 import { StatusPulse, TrackOutputConfig } from '@repo/ui'
 import { useTrackOutputs, type TrackOutput } from '@repo/dccex'
 import { useNotification } from '@repo/ui'
-import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
-import DeviceDownload from './DeviceDownload.vue'
 import { useDeviceConfig } from './useDeviceConfig'
 
 const { getDevice, getDevices } = useLayout()
@@ -30,7 +28,6 @@ const locos = getLocos()
 
 const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
 const device = ref(null as Device | null)
-const showDownloadDialog = ref(false)
 
 onMounted(async () => {
   if (deviceId) {
@@ -40,12 +37,20 @@ onMounted(async () => {
 
 const deviceType = computed(() => deviceTypes.find((type) => type.value === device.value?.type))
 
-const { isArduino, isPicoW, isDccEx, arduinoConfigH, dccExAutomationH } = useDeviceConfig({
+const { isArduino, isPicoW, isDccEx, arduinoConfigH, picoConfigJson, dccExAutomationH } = useDeviceConfig({
   device,
   effects: computed(() => (effects.value ?? []) as Effect[]),
   turnouts: computed(() => (turnouts.value ?? []) as Turnout[]),
   locos: computed(() => (locos.value ?? []) as Loco[]),
   layoutId: computed(() => layoutId.value ?? ''),
+})
+
+// 📄 The single config file this device needs for manual install
+const deploymentConfig = computed<{ filename: string; content: string; language: string } | null>(() => {
+  if (isArduino.value) return { filename: 'config.h', content: arduinoConfigH.value, language: 'cpp' }
+  if (isPicoW.value) return { filename: 'config.json', content: picoConfigJson.value, language: 'json' }
+  if (isDccEx.value) return { filename: 'myAutomation.h', content: dccExAutomationH.value, language: 'cpp' }
+  return null
 })
 
 // Track outputs composable for reactive updates
@@ -76,20 +81,39 @@ async function handleSaveTrackOutputs(outputs: Record<string, TrackOutput>) {
 }
 const color = computed(() => colors[deviceType.value?.color || DEFAULT_COLOR])
 
-// 📋 Copy myAutomation.h to clipboard
-const { copy: copyAutomationH, copied: automationCopied } = useClipboard({
-  source: dccExAutomationH,
+// 📋 Copy the active deployment config to clipboard (for manual installs)
+const configSource = computed(() => deploymentConfig.value?.content ?? '')
+const { copy: copyConfig, copied: configCopied } = useClipboard({ source: configSource })
+
+// 💾 Direct single-file download for users who prefer manual install over the guided flow
+function handleDownloadConfigFile() {
+  if (!deploymentConfig.value) return
+  const { filename, content } = deploymentConfig.value
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+// 📘 Deep link into the deploy docs
+const DEPLOY_DOCS_URL = 'https://dejajs.com/docs/io/deploy'
+
+// 💻 `deja deploy` command preview, tailored to the device id so users can copy-run it
+const dejaDeployCommand = computed(() => device.value?.id ? `deja deploy ${device.value.id}` : 'deja deploy')
+
+// 📋 Copy the `deja deploy` command to clipboard
+const { copy: copyDejaCmd, copied: dejaCmdCopied } = useClipboard({ source: dejaDeployCommand })
+
+// 📝 Per-device-type manual install hint (where to put the file after download)
+const manualInstallHint = computed(() => {
+  if (isArduino.value) return 'Save into your Arduino sketch folder next to deja-arduino.ino, then upload via Arduino IDE.'
+  if (isPicoW.value) return 'Copy onto the CIRCUITPY drive on your Pico W — it reboots automatically.'
+  if (isDccEx.value) return 'Save into your CommandStation EX sketch folder next to CommandStation-EX.ino, then upload via Arduino IDE.'
+  return ''
 })
-
-// 🚂 Count ROSTER entries for caption
-const rosterCount = computed(
-  () => (dccExAutomationH.value.match(/^ROSTER\(/gm) || []).length
-)
-
-const effectNames = computed(() => effects.value ? effects.value.map(effect => effect.name) : [])
-const turnoutNames = computed(() => turnouts.value ? turnouts.value.map(turnout => turnout.name) : [])
-const turnoutPins = computed(() => turnouts.value ? turnouts.value.map(turnout => `${turnout.straight}, ${turnout.divergent}`) : [])
-const turnoutPulsers = computed(() => turnouts.value ? turnouts.value.map(turnout => `TurnoutPulser(${turnout.straight}, ${turnout.divergent})`) : [])
 
 function getEffectDetails(type: string | undefined) {
   const def = efxTypes.find(t => t.value === type)
@@ -189,6 +213,106 @@ function handleBack() {
         @save="handleSaveTrackOutputs"
       />
 
+      <!-- 📦 Deployment — always visible, above the Turnouts/Effects lists -->
+      <div v-if="deploymentConfig" class="mb-6 border rounded bg-grey-darken-4/60 pa-4">
+        <div class="d-flex align-center flex-wrap gap-2 mb-3">
+          <v-icon icon="mdi-package-down" class="mr-1" :color="color.value" />
+          <h3 class="text-h6 font-weight-medium">Deployment</h3>
+          <v-chip size="x-small" variant="tonal" color="green" class="ml-1 font-mono">
+            {{ deploymentConfig.filename }}
+          </v-chip>
+          <v-spacer />
+          <v-btn
+            size="small"
+            variant="text"
+            color="blue-lighten-2"
+            :href="DEPLOY_DOCS_URL"
+            target="_blank"
+            rel="noopener noreferrer"
+            prepend-icon="mdi-book-open-variant"
+            append-icon="mdi-open-in-new"
+          >
+            Deployment docs
+          </v-btn>
+        </div>
+
+        <!-- Two paths: recommended (deja CLI) + manual -->
+        <v-row dense>
+          <!-- ⚡ Recommended: deja deploy -->
+          <v-col cols="12" md="6">
+            <div class="border border-green-lighten-2/30 rounded pa-3 h-full bg-black/30">
+              <div class="d-flex align-center mb-2">
+                <v-icon icon="mdi-rocket-launch" color="green-lighten-2" size="small" class="mr-2" />
+                <span class="text-body-2 font-weight-bold text-green-lighten-2">Recommended · deja CLI</span>
+              </div>
+              <p class="text-caption text-grey-lighten-1 mb-2">
+                Generates <code class="text-green-lighten-2">{{ deploymentConfig.filename }}</code> from this device&apos;s live Firebase config and flashes it to the connected board.
+              </p>
+              <div class="d-flex align-center gap-2 bg-black/60 rounded pa-2 ring-1 ring-white/10 font-mono text-caption text-green-lighten-2">
+                <span class="text-grey mr-1">$</span>
+                <span class="flex-grow-1 overflow-x-auto">{{ dejaDeployCommand }}</span>
+                <v-btn
+                  size="x-small"
+                  variant="text"
+                  :icon="dejaCmdCopied ? 'mdi-check' : 'mdi-content-copy'"
+                  :color="dejaCmdCopied ? 'green' : 'grey-lighten-1'"
+                  @click="copyDejaCmd()"
+                />
+              </div>
+              <p class="text-caption text-grey mt-2 mb-0">
+                Don&apos;t have the CLI? See <a :href="DEPLOY_DOCS_URL" target="_blank" rel="noopener noreferrer" class="text-blue-lighten-2">deployment docs</a> for install instructions.
+              </p>
+            </div>
+          </v-col>
+
+          <!-- 🛠 Manual install -->
+          <v-col cols="12" md="6">
+            <div class="border border-white/10 rounded pa-3 h-full bg-black/30">
+              <div class="d-flex align-center mb-2">
+                <v-icon icon="mdi-wrench" color="grey-lighten-1" size="small" class="mr-2" />
+                <span class="text-body-2 font-weight-bold">Manual install</span>
+              </div>
+              <p class="text-caption text-grey-lighten-1 mb-2">
+                {{ manualInstallHint }}
+              </p>
+              <div class="d-flex gap-2 flex-wrap">
+                <v-btn
+                  size="small"
+                  variant="tonal"
+                  color="green"
+                  :prepend-icon="configCopied ? 'mdi-check' : 'mdi-content-copy'"
+                  @click="copyConfig()"
+                >
+                  {{ configCopied ? 'Copied' : `Copy ${deploymentConfig.filename}` }}
+                </v-btn>
+                <v-btn
+                  size="small"
+                  variant="elevated"
+                  :color="color.value"
+                  prepend-icon="mdi-download"
+                  @click="handleDownloadConfigFile"
+                >
+                  Download {{ deploymentConfig.filename }}
+                </v-btn>
+              </div>
+            </div>
+          </v-col>
+        </v-row>
+
+        <!-- Config preview, collapsed by default -->
+        <v-expansion-panels variant="accordion" class="mt-3">
+          <v-expansion-panel bg-color="grey-darken-4">
+            <v-expansion-panel-title class="text-caption font-weight-medium">
+              <v-icon icon="mdi-file-code-outline" size="small" class="mr-2" />
+              Preview {{ deploymentConfig.filename }}
+            </v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <pre class="overflow-x-auto text-caption font-mono text-grey-lighten-1 bg-black/40 pa-3 ring-1 ring-white/10 rounded-md" style="max-height: 480px;">{{ deploymentConfig.content }}</pre>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </div>
+
       <!-- Condensed Lists -->
       <v-row>
         <!-- Turnouts List -->
@@ -222,8 +346,11 @@ function handleBack() {
                   <v-chip size="x-small" variant="tonal" class="text-uppercase">{{ turnout?.type || 'DEFAULT' }}</v-chip>
                 </td>
                 <td class="text-center py-1 px-2">
-                  <v-icon :color="turnout?.state === 1 ? 'green' : 'orange'" size="small">
-                    {{ turnout?.state === 1 ? 'mdi-arrow-up' : turnout?.state === 0 ? 'mdi-arrow-bottom-right' : 'mdi-help' }}
+                  <v-icon
+                    :color="turnout?.state === true ? 'green' : turnout?.state === false ? 'orange' : 'grey'"
+                    size="small"
+                  >
+                    {{ turnout?.state === true ? 'mdi-arrow-up' : turnout?.state === false ? 'mdi-arrow-bottom-right' : 'mdi-help' }}
                   </v-icon>
                 </td>
               </tr>
@@ -273,101 +400,8 @@ function handleBack() {
         </v-col>
       </v-row>
 
-      <v-divider class="my-6"></v-divider>
-
-      <!-- Developer Configuration Section -->
-      <v-expansion-panels v-if="isArduino || isPicoW" variant="accordion" class="border rounded">
-        <v-expansion-panel bg-color="grey-darken-4">
-          <v-expansion-panel-title class="font-weight-medium text-green-lighten-2">
-            <v-icon icon="mdi-code-braces" class="mr-2"></v-icon> Developer Configuration
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
-            <!-- 🔧 Arduino config.h preview -->
-            <div v-if="isArduino" class="mb-4 relative bg-surface-variant p-3 ring-1 ring-current/10 rounded-md shadow-inner">
-              <h4 class="text-body-2 mb-2 text-green-lighten-2 font-mono">config.h</h4>
-              <pre class="overflow-x-auto text-caption font-mono text-grey-lighten-1">{{ arduinoConfigH }}</pre>
-            </div>
-
-            <!-- 🍓 Pico W config preview -->
-            <div v-if="isPicoW" class="mb-4 relative bg-black/40 p-3 ring-1 ring-white/10 rounded-md shadow-inner">
-              <h4 class="text-body-2 mb-2 text-blue-lighten-2 font-mono">config.json (pin mapping)</h4>
-              <pre class="overflow-x-auto text-caption font-mono text-grey-lighten-1">{{ JSON.stringify({ pins: Object.fromEntries(effects.filter(e => e.pin != null).map(e => [String(e.pin), `GP${e.pin}`])) }, null, 2) }}</pre>
-            </div>
-
-            <v-row class="mt-2">
-              <v-col cols="12" md="6" v-if="turnoutPulsers.length > 0">
-                <LcdDisplay
-                  :content="turnoutPulsers"
-                  title="PULSER CODE"
-                  color="blue"
-                  size="sm"
-                  :max-lines="10"
-                />
-              </v-col>
-              <v-col cols="12" md="6" v-if="turnoutPins.length > 0">
-                <LcdDisplay
-                  :content="turnoutPins"
-                  title="PIN CONFIG"
-                  color="green"
-                  size="sm"
-                  :max-lines="8"
-                />
-              </v-col>
-              <v-col cols="12" md="6" v-if="turnoutNames.length > 0">
-                <LcdDisplay
-                  :content="turnoutNames"
-                  title="TURNOUT LABELS"
-                  color="blue"
-                  size="sm"
-                  :max-lines="turnoutNames.length"
-                />
-              </v-col>
-              <v-col cols="12" md="6" v-if="effectNames.length > 0">
-                <LcdDisplay
-                  :content="effectNames"
-                  title="EFFECT LABELS"
-                  color="blue"
-                  size="sm"
-                  :max-lines="effectNames.length"
-                />
-              </v-col>
-            </v-row>
-          </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
-
-      <!-- 🚂 dcc-ex myAutomation.h preview -->
-      <v-expansion-panels v-if="isDccEx" class="mt-4">
-        <v-expansion-panel>
-          <v-expansion-panel-title>
-            <v-icon start icon="mdi-file-code-outline" />
-            Generated myAutomation.h
-            <v-spacer />
-            <span class="text-caption text-medium-emphasis mr-2">
-              {{ rosterCount }} ROSTER {{ rosterCount === 1 ? 'entry' : 'entries' }} · {{ locos.length }} {{ locos.length === 1 ? 'loco' : 'locos' }} in this layout
-            </span>
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
-            <div class="d-flex justify-end mb-2">
-              <v-btn size="small" variant="tonal" @click="copyAutomationH()">
-                <v-icon start :icon="automationCopied ? 'mdi-check' : 'mdi-content-copy'" />
-                {{ automationCopied ? 'Copied' : 'Copy' }}
-              </v-btn>
-            </div>
-            <pre class="dccex-preview-code"><code>{{ dccExAutomationH }}</code></pre>
-          </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
-
-      <!-- 📦 Download Dialog -->
-      <DeviceDownload
-        v-model="showDownloadDialog"
-        :device="device"
-        :effects="(effects ?? [])"
-        :turnouts="(turnouts ?? [])"
-      />
     </v-card-text>
-    
+
     <v-divider></v-divider>
     <!-- Footer Actions -->
     <v-card-actions class="pa-4 bg-grey-darken-4">
@@ -381,29 +415,7 @@ function handleBack() {
         Back to Devices
       </v-btn>
       <v-spacer></v-spacer>
-      <v-btn
-        v-if="isArduino || isPicoW"
-        text="Deploy Code"
-        :color="color.value"
-        variant="elevated"
-        :prepend-icon="isPicoW ? 'mdi-wifi' : 'mdi-usb'"
-        @click="showDownloadDialog = true"
-      ></v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
-<style scoped>
-.dccex-preview-code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.8125rem;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
-  border-radius: 8px;
-  padding: 12px 16px;
-  max-height: 480px;
-  overflow: auto;
-  white-space: pre;
-  color: rgba(var(--v-theme-on-surface), 0.9);
-}
-</style>

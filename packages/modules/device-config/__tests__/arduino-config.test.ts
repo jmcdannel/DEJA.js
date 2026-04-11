@@ -105,6 +105,40 @@ describe('generateArduinoConfig', () => {
     expect(result).not.toContain('TurnoutPulser(1, 0)')
   })
 
+  it('sorts kato TurnoutPulser entries by turnoutIdx so array position matches index', () => {
+    // TurnoutPulser[i] on the device is addressed by its array index, so Firestore
+    // insertion order must not decide the final order — turnoutIdx must.
+    const input: ArduinoConfigInput = {
+      device: makeDevice(),
+      effects: [],
+      turnouts: [
+        makeTurnout({ id: 'c', type: 'kato', straight: 30, divergent: 31, turnoutIdx: 3 }),
+        makeTurnout({ id: 'a', type: 'kato', straight: 10, divergent: 11, turnoutIdx: 1 }),
+        makeTurnout({ id: 'b', type: 'kato', straight: 20, divergent: 21, turnoutIdx: 2 }),
+      ],
+    }
+    const result = generateArduinoConfig(input)
+    expect(result).toContain(
+      'TurnoutPulser turnouts[] = { TurnoutPulser(10, 11), TurnoutPulser(20, 21), TurnoutPulser(30, 31) };'
+    )
+  })
+
+  it('places kato turnouts without a turnoutIdx after those that have one', () => {
+    const input: ArduinoConfigInput = {
+      device: makeDevice(),
+      effects: [],
+      turnouts: [
+        makeTurnout({ id: 'x', type: 'kato', straight: 99, divergent: 98 }),
+        makeTurnout({ id: 'a', type: 'kato', straight: 10, divergent: 11, turnoutIdx: 1 }),
+        makeTurnout({ id: 'b', type: 'kato', straight: 20, divergent: 21, turnoutIdx: 2 }),
+      ],
+    }
+    const result = generateArduinoConfig(input)
+    expect(result).toContain(
+      'TurnoutPulser turnouts[] = { TurnoutPulser(10, 11), TurnoutPulser(20, 21), TurnoutPulser(99, 98) };'
+    )
+  })
+
   it('produces empty TurnoutPulser array when only servo turnouts are present', () => {
     const input: ArduinoConfigInput = {
       device: makeDevice(),
@@ -115,7 +149,53 @@ describe('generateArduinoConfig', () => {
     }
     const result = generateArduinoConfig(input)
     expect(result).toContain('TurnoutPulser turnouts[] = {};')
-    expect(result).toContain('#define ENABLE_TURNOUTS false')
+    // ENABLE_TURNOUTS reflects any turnout on the device (kato or servo), not just TurnoutPulser entries
+    expect(result).toContain('#define ENABLE_TURNOUTS true')
+  })
+
+  it('auto-enables PWM when any servo turnout exists on the device', () => {
+    const input: ArduinoConfigInput = {
+      device: makeDevice(),
+      effects: [],
+      turnouts: [
+        makeTurnout({ type: 'kato', straight: 22, divergent: 23 }),
+        makeTurnout({ id: 's1', type: 'servo' }),
+      ],
+    }
+    const result = generateArduinoConfig(input)
+    expect(result).toContain('#define ENABLE_PWM true')
+  })
+
+  it('leaves PWM disabled when no servo turnouts are present', () => {
+    const input: ArduinoConfigInput = {
+      device: makeDevice(),
+      effects: [],
+      turnouts: [makeTurnout({ type: 'kato', straight: 22, divergent: 23 })],
+    }
+    const result = generateArduinoConfig(input)
+    expect(result).toContain('#define ENABLE_PWM false')
+  })
+
+  it('honors explicit enablePwm override even without servo turnouts', () => {
+    const input: ArduinoConfigInput = {
+      device: makeDevice(),
+      effects: [],
+      turnouts: [],
+      enablePwm: true,
+    }
+    const result = generateArduinoConfig(input)
+    expect(result).toContain('#define ENABLE_PWM true')
+  })
+
+  it('sets ENABLE_TURNOUTS true for servo-only devices even though TurnoutPulser[] is empty', () => {
+    const input: ArduinoConfigInput = {
+      device: makeDevice(),
+      effects: [],
+      turnouts: [makeTurnout({ type: 'servo' })],
+    }
+    const result = generateArduinoConfig(input)
+    expect(result).toContain('#define ENABLE_TURNOUTS true')
+    expect(result).toContain('TurnoutPulser turnouts[] = {};')
   })
 
   it('sets enable flags from explicit inputs', () => {
