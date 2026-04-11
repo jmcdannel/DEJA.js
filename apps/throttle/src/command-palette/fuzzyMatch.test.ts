@@ -135,4 +135,29 @@ describe('buildNumericShortcut', () => {
     await cmd!.run()
     expect(openThrottle).toHaveBeenCalledWith(42)
   })
+
+  it('accepts leading # prefix', () => {
+    const cmd = buildNumericShortcut('#42', noLookup, openThrottle)
+    expect(cmd).not.toBeNull()
+    expect(cmd!.id).toBe('throttle.numeric.42')
+    expect(cmd!.title).toBe('Open throttle #42')
+  })
+
+  it('accepts # prefix with single digit', () => {
+    const cmd = buildNumericShortcut('#3', noLookup, openThrottle)
+    expect(cmd).not.toBeNull()
+    expect(cmd!.id).toBe('throttle.numeric.3')
+  })
+
+  it('rejects # alone', () => {
+    expect(buildNumericShortcut('#', noLookup, openThrottle)).toBeNull()
+  })
+
+  it('rejects # followed by non-digits', () => {
+    expect(buildNumericShortcut('#abc', noLookup, openThrottle)).toBeNull()
+  })
+
+  it('rejects # followed by out-of-range address', () => {
+    expect(buildNumericShortcut('#10000', noLookup, openThrottle)).toBeNull()
+  })
 })

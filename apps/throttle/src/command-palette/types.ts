@@ -1,4 +1,4 @@
-export type CommandCategory = 'navigation' | 'throttle' | 'turnout' | 'effect' | 'signal'
+export type CommandCategory = 'navigation' | 'browse' | 'throttle' | 'turnout' | 'effect' | 'signal'
 
 export interface CommandStack {
   title: string

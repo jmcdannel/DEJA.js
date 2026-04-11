@@ -49,7 +49,7 @@ export function buildNumericShortcut(
   locoLookup: (address: number) => { name?: string; roadname?: string } | null,
   openThrottle: (address: number) => Promise<void>,
 ): Command | null {
-  const q = query.trim()
+  const q = query.trim().replace(/^#/, '')
   if (!/^\d+$/.test(q)) return null
   const n = Number(q)
   if (!Number.isInteger(n) || n < 1 || n > 9999) return null

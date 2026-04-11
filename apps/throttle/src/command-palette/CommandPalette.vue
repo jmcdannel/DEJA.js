@@ -29,30 +29,100 @@ async function openThrottleByAddress(address: number) {
   await router.push({ name: 'throttle', params: { address } })
 }
 
-const currentCommands = computed<Command[]>(() => {
-  if (stack.value.length > 0) {
-    return stack.value[stack.value.length - 1].commands
+const FLAT_SEARCH_THRESHOLD = 3
+
+// Below the flat-search threshold at the root level, the palette shows a
+// curated set of navigation shortcuts + category "browse" cards that drill
+// into the full list for each domain. Above the threshold, it flat-searches
+// everything. Inside a drilled-in stack level, it always filters that level.
+const rootViewCommands = computed<Command[]>(() => {
+  const list = allCommands.value
+  const nav = list.filter((c) => c.category === 'navigation')
+  const throttleLocos = list.filter((c) => c.category === 'throttle' && c.id !== 'throttle.stop-all')
+  const stopAll = list.find((c) => c.id === 'throttle.stop-all')
+  const turnouts = list.filter((c) => c.category === 'turnout')
+  const effects = list.filter((c) => c.category === 'effect')
+  const signals = list.filter((c) => c.category === 'signal')
+
+  const root: Command[] = [...nav]
+
+  if (throttleLocos.length > 0) {
+    root.push({
+      id: 'browse.throttles',
+      title: 'Locos',
+      description: `${throttleLocos.length} in roster`,
+      icon: 'mdi-train',
+      category: 'browse',
+      run: () => {},
+      children: { title: 'Locos', commands: throttleLocos },
+    })
   }
-  return allCommands.value
+  if (turnouts.length > 0) {
+    root.push({
+      id: 'browse.turnouts',
+      title: 'Turnouts',
+      description: `${turnouts.length / 2} turnouts`,
+      icon: 'mdi-call-split',
+      category: 'browse',
+      run: () => {},
+      children: { title: 'Turnouts', commands: turnouts },
+    })
+  }
+  if (effects.length > 0) {
+    root.push({
+      id: 'browse.effects',
+      title: 'Effects',
+      description: `${effects.length} effects`,
+      icon: 'mdi-rocket-launch',
+      category: 'browse',
+      run: () => {},
+      children: { title: 'Effects', commands: effects },
+    })
+  }
+  if (signals.length > 0) {
+    root.push({
+      id: 'browse.signals',
+      title: 'Signals',
+      description: `${signals.length} signals`,
+      icon: 'mdi-traffic-light',
+      category: 'browse',
+      run: () => {},
+      children: { title: 'Signals', commands: signals },
+    })
+  }
+
+  if (stopAll) root.push(stopAll)
+
+  return root
 })
 
 const displayedCommands = computed<Command[]>(() => {
-  const base = filterCommands(currentCommands.value, query.value)
-  // Only prepend numeric shortcut at the root level (no stack)
-  if (stack.value.length === 0) {
-    const synthetic = buildNumericShortcut(
-      query.value,
-      locoLookup,
-      openThrottleByAddress,
-    )
-    if (synthetic) return [synthetic, ...base]
+  const trimmedQuery = query.value.trim()
+
+  // Inside a drilled-in level: filter within that level only.
+  if (stack.value.length > 0) {
+    const levelCommands = stack.value[stack.value.length - 1].commands
+    return filterCommands(levelCommands, trimmedQuery)
   }
-  return base
+
+  // At root, build a numeric shortcut from bare digits or `#<digits>` —
+  // always active so users can open a throttle without waiting for the
+  // flat-search threshold.
+  const synthetic = buildNumericShortcut(trimmedQuery, locoLookup, openThrottleByAddress)
+
+  if (trimmedQuery.length < FLAT_SEARCH_THRESHOLD) {
+    const root = rootViewCommands.value
+    return synthetic ? [synthetic, ...root] : root
+  }
+
+  const filtered = filterCommands(allCommands.value, trimmedQuery)
+  return synthetic ? [synthetic, ...filtered] : filtered
 })
 
-const CATEGORY_ORDER: CommandCategory[] = ['navigation', 'throttle', 'turnout', 'effect', 'signal']
+const CATEGORY_ORDER: CommandCategory[] = ['navigation', 'browse', 'throttle', 'turnout', 'effect', 'signal']
 const CATEGORY_LABELS: Record<CommandCategory, string> = {
   navigation: 'Navigation',
+  browse:     'Browse',
   throttle:   'Throttles',
   turnout:    'Turnouts',
   effect:     'Effects',
@@ -161,7 +231,7 @@ function onDialogUpdate(v: boolean) {
           v-model="query"
           type="text"
           class="cp-input"
-          placeholder="Type a command or DCC address…"
+          placeholder="Search or type #42 to open throttle…"
           @keydown="onKeydown"
         />
         <span class="cp-esc-hint">Esc</span>
