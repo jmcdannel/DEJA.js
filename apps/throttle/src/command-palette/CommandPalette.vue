@@ -7,13 +7,15 @@ import { useCommandPalette } from './useCommandPalette'
 import { useCommands } from './useCommands'
 import { filterCommands, buildNumericShortcut } from './fuzzyMatch'
 import type { Command, CommandCategory } from './types'
+import MiniThrottleInPalette from './MiniThrottleInPalette.vue'
 
 const log = createLogger('CommandPalette')
 const router = useRouter()
 const { isOpen, query, activeIndex, stack, currentLevelTitle: headerLabel, close, push } = useCommandPalette()
 const allCommands = useCommands()
-const { getLocos, acquireThrottle } = useLocos()
+const { getLocos, getThrottles, acquireThrottle } = useLocos()
 const locos = getLocos() as unknown as { value: Loco[] }
+const throttles = getThrottles() as unknown as { value: Array<{ address: number; speed: number; direction: boolean }> }
 
 const inputRef = ref<HTMLInputElement | null>(null)
 const errorText = ref<string | null>(null)
@@ -46,6 +48,40 @@ const rootViewCommands = computed<Command[]>(() => {
   const settings = list.filter((c) => c.category === 'settings')
 
   const root: Command[] = [...nav]
+
+  const running = throttles.value || []
+  if (running.length > 0) {
+    root.push({
+      id: 'browse.running',
+      title: 'Running throttles',
+      description: `${running.length} active`,
+      icon: 'mdi-speedometer',
+      category: 'browse',
+      run: () => {},
+      children: {
+        title: 'Running throttles',
+        commands: running.map((t) => {
+          const locoMatch = (locos.value || []).find((l: Loco) => l.address === t.address)
+          const name = locoMatch?.name || `Loco ${t.address}`
+          const signed = t.direction ? t.speed : -t.speed
+          return {
+            id: `running.${t.address}`,
+            title: name,
+            description: `#${t.address} · ${signed >= 0 ? '+' : ''}${signed}`,
+            icon: 'mdi-train',
+            category: 'throttle' as const,
+            run: () => {},
+            children: {
+              title: `Throttle #${t.address} — ${name}`,
+              commands: [],
+              component: MiniThrottleInPalette,
+              componentProps: { address: t.address },
+            },
+          }
+        }),
+      },
+    })
+  }
 
   if (throttleLocos.length > 0) {
     root.push({
@@ -130,6 +166,8 @@ const displayedCommands = computed<Command[]>(() => {
   const filtered = filterCommands(allCommands.value, trimmedQuery)
   return synthetic ? [synthetic, ...filtered] : filtered
 })
+
+const stackTop = computed(() => stack.value.length > 0 ? stack.value[stack.value.length - 1] : null)
 
 const CATEGORY_ORDER: CommandCategory[] = ['browse', 'navigation', 'throttle', 'turnout', 'effect', 'signal', 'settings']
 const CATEGORY_LABELS: Record<CommandCategory, string> = {
@@ -240,6 +278,7 @@ function onDialogUpdate(v: boolean) {
         <v-icon size="20" class="cp-chevron">mdi-chevron-right</v-icon>
         <div v-if="headerLabel" class="cp-breadcrumb">{{ headerLabel }}</div>
         <input
+          v-if="!stackTop?.component"
           ref="inputRef"
           v-model="query"
           type="text"
@@ -247,33 +286,41 @@ function onDialogUpdate(v: boolean) {
           placeholder="Search or type #42 to open throttle…"
           @keydown="onKeydown"
         />
+        <span v-else class="cp-widget-hint">Keyboard: W ↑  S ↓  X stop  A ←  D →</span>
         <span class="cp-esc-hint">Esc</span>
       </div>
 
       <div class="cp-results" role="listbox">
-        <template v-for="group in grouped" :key="group.category">
-          <div class="cp-group-label">{{ CATEGORY_LABELS[group.category] }}</div>
-          <div
-            v-for="cmd in group.commands"
-            :key="cmd.id"
-            role="option"
-            :aria-selected="flatIndexFor.get(cmd.id) === activeIndex"
-            class="cp-result"
-            :class="{ 'cp-result--active': flatIndexFor.get(cmd.id) === activeIndex }"
-            @click="runCommand(cmd)"
-            @mouseenter="setActiveIndex(flatIndexFor.get(cmd.id) ?? 0)"
-          >
-            <v-icon size="16" class="cp-result__icon">{{ cmd.icon }}</v-icon>
-            <span class="cp-result__title">{{ cmd.title }}</span>
-            <span v-if="cmd.description" class="cp-result__description">{{ cmd.description }}</span>
-            <span v-if="cmd.shortcut" class="cp-result__shortcut">
-              <kbd v-for="k in cmd.shortcut" :key="k">{{ k }}</kbd>
-            </span>
+        <component
+          v-if="stackTop?.component"
+          :is="stackTop.component"
+          v-bind="stackTop.componentProps"
+        />
+        <template v-else>
+          <template v-for="group in grouped" :key="group.category">
+            <div class="cp-group-label">{{ CATEGORY_LABELS[group.category] }}</div>
+            <div
+              v-for="cmd in group.commands"
+              :key="cmd.id"
+              role="option"
+              :aria-selected="flatIndexFor.get(cmd.id) === activeIndex"
+              class="cp-result"
+              :class="{ 'cp-result--active': flatIndexFor.get(cmd.id) === activeIndex }"
+              @click="runCommand(cmd)"
+              @mouseenter="setActiveIndex(flatIndexFor.get(cmd.id) ?? 0)"
+            >
+              <v-icon size="16" class="cp-result__icon">{{ cmd.icon }}</v-icon>
+              <span class="cp-result__title">{{ cmd.title }}</span>
+              <span v-if="cmd.description" class="cp-result__description">{{ cmd.description }}</span>
+              <span v-if="cmd.shortcut" class="cp-result__shortcut">
+                <kbd v-for="k in cmd.shortcut" :key="k">{{ k }}</kbd>
+              </span>
+            </div>
+          </template>
+          <div v-if="displayedCommands.length === 0" class="cp-empty">
+            No matches
           </div>
         </template>
-        <div v-if="displayedCommands.length === 0" class="cp-empty">
-          No matches
-        </div>
       </div>
 
       <div v-if="errorText" class="cp-error">{{ errorText }}</div>
@@ -417,5 +464,13 @@ function onDialogUpdate(v: boolean) {
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 3px;
   color: rgba(226, 232, 240, 0.7);
+}
+
+.cp-widget-hint {
+  flex: 1;
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  color: rgba(148, 163, 184, 0.55);
+  letter-spacing: 0.02em;
 }
 </style>

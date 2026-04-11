@@ -1,8 +1,17 @@
+import type { Component } from 'vue'
+
 export type CommandCategory = 'navigation' | 'browse' | 'throttle' | 'turnout' | 'effect' | 'signal' | 'settings'
 
 export interface CommandStack {
   title: string
   commands: Command[]
+  /**
+   * If present, the palette renders this component in place of the
+   * command results list. Used for custom widgets like the mini
+   * throttle controller.
+   */
+  component?: Component
+  componentProps?: Record<string, unknown>
 }
 
 export interface Command {

@@ -1,12 +1,24 @@
-import { ref, computed } from 'vue'
+import { ref, computed, type Ref } from 'vue'
 import type { CommandStack } from './types'
+
+interface CommandPaletteState {
+  isOpen: Ref<boolean>
+  query: Ref<string>
+  activeIndex: Ref<number>
+  stack: Ref<CommandStack[]>
+  currentLevelTitle: Ref<string | null>
+  open: (initialQuery?: string) => void
+  close: () => void
+  push: (level: CommandStack) => void
+  pop: () => void
+}
 
 const isOpen = ref(false)
 const query = ref('')
 const activeIndex = ref(0)
 const stack = ref<CommandStack[]>([])
 
-export function useCommandPalette() {
+export function useCommandPalette(): CommandPaletteState {
   function open(initialQuery = '') {
     query.value = initialQuery
     activeIndex.value = 0
