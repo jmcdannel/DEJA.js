@@ -12,9 +12,17 @@ export interface ThrottleSettings {
   showConsist: boolean
 }
 
+export type ConductorRightPanel = 'turnouts' | 'effects' | 'signals' | 'devices' | 'routes'
+
+export interface ConductorSettings {
+  variant: ThrottleVariant
+  rightPanel: ConductorRightPanel
+}
+
 export interface UserPreferences {
   backgrounds: {
     [appName: string]: AppBackgroundPrefs
   }
   throttleSettings?: ThrottleSettings
+  conductorSettings?: ConductorSettings
 }

@@ -1,99 +1,119 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
-import Link from 'next/link';
-import { client } from '../../sanity/lib/client';
-import { PRODUCT_PAGE_QUERY } from '../../sanity/lib/queries';
+import {
+  ProductHero,
+  FeatureGrid,
+  Showcase,
+  PlatformBreadth,
+  FreeToTryBanner,
+  ProductCTA,
+  getAccent,
+} from '../../components/products';
+import TerminalBlock from '../../components/home/TerminalBlock';
+import { serverContent } from './content';
+
+const accent = getAccent('server');
 
 export const metadata: Metadata = {
-  title: 'DEJA.js Server - The DCC-EX Bridge',
-  description:
-    'Connect your DCC-EX CommandStation to the DEJA software ecosystem securely via USB or Network. Real-time telemetry, WebSocket API, and hardware expansion.',
+  title: serverContent.seo.title,
+  description: serverContent.seo.description,
   openGraph: {
-    title: 'DEJA.js Server - The DCC-EX Bridge',
-    description:
-      'Connect your DCC-EX CommandStation to the DEJA software ecosystem securely via USB or Network.',
+    title: serverContent.seo.title,
+    description: serverContent.seo.description,
     url: 'https://dejajs.com/server',
+    images: [
+      { url: serverContent.icon, width: 512, height: 512, alt: 'DEJA.js Server' },
+    ],
   },
 };
 
-// Hardcoded fallback features
-const defaultFeatures = [
-  { icon: '🔌', title: 'USB Connectivity', description: 'Maintains a stable, high-speed serial connection to your DCC-EX CommandStation. Handles rapid command dispatch without dropping packets.' },
-  { icon: '🔄', title: 'Real-time Telemetry', description: 'Parses raw DCC-EX responses instantly. Broadcasts layout state changes (turnouts, sensors, current draw) to connected apps with minimal latency.' },
-  { icon: '📡', title: 'Network Gateway', description: 'Exposes a robust WebSocket API. Allows Throttle, Monitor, and Cloud applications to interface securely from any device on your local network.' },
-  { icon: '⚡', title: 'Hardware Expansion', description: 'Automatically detects and manages secondary Arduino and Pico W devices connected via USB for expanded IO control.' },
-];
-
-export default async function ServerPage() {
-  let product: any = null;
-  try {
-    if (client) product = await client.fetch(PRODUCT_PAGE_QUERY, { slug: 'server' });
-  } catch {
-    // Fall back to hardcoded content
-  }
-
-  const title = product?.title || 'DEJA.js Server';
-  const tagline = product?.tagline || 'The essential bridge. Connect your DCC-EX CommandStation to the DEJA software ecosystem safely and securely.';
-  const features = product?.features?.length ? product.features : defaultFeatures;
-  const ctaLabel = product?.cta?.label || 'Install Server';
-  const ctaHref = product?.cta?.href || '/docs/server';
-
+export default function ServerPage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
-      <section className="text-center space-y-6 flex flex-col items-center">
-        <div className="flex justify-center mb-4">
-          <Image src="/icon-512.png" alt="DEJA.js Server Logo" width={128} height={128} className="h-32 w-32 drop-shadow-lg" />
-        </div>
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">
-          <span className="text-cyan-500">{title}</span>
-        </h1>
-        <p className="max-w-2xl text-lg md:text-xl text-gray-500 dark:text-gray-400 mx-auto">
-          {tagline}
-        </p>
-      </section>
+    <>
+      <ProductHero
+        tagline={serverContent.tagline}
+        kicker={serverContent.heroKicker}
+        accent={accent}
+        primaryCta={serverContent.ctas.primary}
+        secondaryCta={serverContent.ctas.secondary}
+        guideCta={serverContent.ctas.guide}
+        heroVisual={
+          <div className="w-full max-w-lg">
+            <TerminalBlock
+              title="install.dejajs.com"
+              lines={[
+                { type: 'command', text: 'curl -fsSL https://install.dejajs.com | bash' },
+                { type: 'output',  text: 'Installing DEJA.js Server...' },
+                { type: 'success', text: 'Installed to ~/.deja' },
+                { type: 'command', text: 'deja start' },
+                { type: 'success', text: 'Server running on ws://localhost:8082' },
+              ]}
+            />
+          </div>
+        }
+      />
 
-      <section className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-slate-800">
-        <h2 className="text-2xl font-bold mb-6 text-slate-900 dark:text-white border-b border-gray-200 dark:border-slate-800 pb-4">Core Capabilities</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {features.map((feature: any, idx: number) => (
-            <div key={feature._key || idx}>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-                <span className="text-cyan-500">{feature.icon}</span> {feature.title}
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                {feature.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <FeatureGrid
+        eyebrow="Capabilities"
+        heading="Small footprint. Big responsibilities."
+        features={serverContent.features}
+        accent={accent}
+      />
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div className="space-y-4">
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Built for Reliability</h2>
-          <p className="text-gray-500 dark:text-gray-400">
-            The DEJA.js Server is built on Node.js for cross-platform compatibility. It runs headless on Windows, Mac, Linux, or a dedicated Raspberry Pi placed near your layout. It guarantees command delivery sequence and manages throttle heartbeats automatically.
-          </p>
-        </div>
-        <div className="bg-slate-900 rounded-xl p-6 border border-slate-800 shadow-lg font-mono text-sm text-cyan-500">
-          $ npm install -g dejajs-server<br/>
-          $ dejajs-server start<br/>
-          <span className="text-gray-500 dark:text-gray-400 mt-4 block">
-            [INFO] Server listening on port 8080<br/>
-            [INFO] DCC-EX detected on /dev/ttyUSB0<br/>
-            [INFO] Connection established.
-          </span>
-        </div>
-      </section>
+      <Showcase
+        eyebrow="Install"
+        heading="One command. Running in seconds."
+        body="DEJA.js Server installs into ~/.deja/ as a self-contained Node.js process. No Docker, no system-level packages, and nothing you need sudo to remove."
+        visual={
+          <div className="w-full max-w-lg">
+            <TerminalBlock
+              title="terminal"
+              lines={[
+                { type: 'command', text: 'curl -fsSL https://install.dejajs.com | bash' },
+                { type: 'success', text: 'Installed to ~/.deja' },
+                { type: 'command', text: 'deja start' },
+                { type: 'output',  text: 'Detected DCC-EX on /dev/ttyUSB0' },
+                { type: 'success', text: 'Server running on ws://localhost:8082' },
+              ]}
+            />
+          </div>
+        }
+        accent={accent}
+        bullets={[
+          'Installs under ~/.deja/ — no root required',
+          'Connects to your DCC-EX serial port',
+          'Managed with the `deja` CLI: start, stop, status, update',
+        ]}
+      />
 
-      <div className="flex justify-center pb-8">
-        <Link
-          href={ctaHref}
-          className="px-8 py-4 bg-cyan-500 text-gray-950 rounded-lg font-bold hover:bg-cyan-400 transition shadow-lg"
-        >
-          {ctaLabel}
-        </Link>
-      </div>
-    </div>
+      <Showcase
+        eyebrow="Architecture"
+        heading="The thinnest bridge we could build."
+        body="Your browser talks WebSockets to the server. The server talks serial to DCC-EX, MQTT to your IO devices, and syncs everything to DEJA Cloud. That's it. No proprietary protocols. No lock-in."
+        visual={
+          <div className="w-full max-w-lg overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-6 font-mono text-[10px] leading-relaxed text-gray-400 sm:text-xs md:text-sm">
+            <pre className="whitespace-pre">{`browser ──WebSocket──▶ server
+           │
+           ├─Serial──▶ DCC-EX
+           ├─MQTT────▶ IO devices
+           └──Sync───▶ DEJA Cloud`}</pre>
+          </div>
+        }
+        accent={accent}
+        reversed
+      />
+
+      <PlatformBreadth currentSlug="server" />
+
+      <FreeToTryBanner />
+
+      <ProductCTA
+        heading="Bridge your layout to the browser in under a minute."
+        subheading="Paste the install command. Plug in USB. You're live."
+        accent={accent}
+        primary={serverContent.ctas.primary}
+        secondary={serverContent.ctas.secondary}
+        guide={serverContent.ctas.guide}
+      />
+    </>
   );
 }

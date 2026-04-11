@@ -5,7 +5,7 @@ import TerminalBlock from './TerminalBlock';
 const features = [
   { icon: '🔌', text: 'USB serial bridge to DCC-EX CommandStation at 115,200 baud' },
   { icon: '🌐', text: 'WebSocket server for real-time browser ↔ hardware communication' },
-  { icon: '☁️', text: 'Firebase sync — layout commands flow from cloud to track instantly' },
+  { icon: '☁️', text: 'DEJA Cloud sync — layout commands flow from cloud to track instantly' },
   { icon: '🔄', text: 'Self-updating via deja update — always on the latest version' },
 ];
 

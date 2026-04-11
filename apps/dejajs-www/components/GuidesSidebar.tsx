@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import Logo from './Logo';
 import { guides } from './guides-list';
 
 export default function GuidesSidebar() {
@@ -45,7 +45,7 @@ export default function GuidesSidebar() {
       >
         <div className="mb-4">
           <Link href="/guides" className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
-            <Image src="/icon-192.png" alt="DEJA.js" width={24} height={24} className="h-6 w-6" />
+            <Logo variant="default" size="xs" showWordmark={false} />
             <span>Guides</span>
           </Link>
         </div>

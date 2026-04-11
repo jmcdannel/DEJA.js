@@ -11,9 +11,9 @@ import SelectFavorites from '@/core/Menu/SelectFavorites.vue'
 import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
-import { wiThrottleService } from '@/services/WiThrottleService'
 import { useServerDiscovery } from '@/composables/useServerDiscovery'
 import { useThrottleSettings } from '@/throttle/useThrottleSettings'
+import { useConductorSettings } from '@/conductor/useConductorSettings'
 import { useQuickMenu } from '@/quick-menu/useQuickMenu'
 
 const user = useCurrentUser()
@@ -25,6 +25,13 @@ const {
   variant, showFunctions, showSpeedometer, showConsist,
   setVariant, setShowFunctions, setShowSpeedometer, setShowConsist,
 } = useThrottleSettings()
+
+const {
+  variant: conductorVariant,
+  rightPanel: conductorRightPanel,
+  setVariant: setConductorVariant,
+  setRightPanel: setConductorRightPanel,
+} = useConductorSettings()
 
 const { quickMenuVisible } = useQuickMenu()
 
@@ -116,9 +123,6 @@ async function saveLayoutConnectionSettings() {
     await setDoc(doc(db, 'layouts', layoutId), {
       throttleConnection: { type: connectionType.value, host: connectionHost.value, port: connectionPort.value }
     }, { merge: true })
-    // Reconnect with new settings
-    await wiThrottleService.disconnect()
-    await wiThrottleService.connect()
   } catch (e) {
     console.error('Error saving throttle connection:', e)
   }
@@ -138,6 +142,7 @@ const sections = [
   { id: 'billing', label: 'Billing', icon: 'mdi-credit-card-outline' },
   { id: 'appearance', label: 'Appearance', icon: 'mdi-palette-outline' },
   { id: 'throttle', label: 'Throttle & Quick Menu', icon: 'mdi-speedometer' },
+  { id: 'conductor', label: 'Conductor', icon: 'mdi-account-hard-hat' },
   { id: 'connection', label: 'Connection', icon: 'mdi-server-network' },
   { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'favorites', label: 'Favorites', icon: 'mdi-star-outline' },
@@ -302,6 +307,66 @@ const backgroundPages = [
             </div>
             <div class="settings-row__value">
               <v-switch v-model="quickMenuVisible" color="primary" density="compact" hide-details />
+            </div>
+          </div>
+        </div>
+
+        <!-- Conductor -->
+        <div id="conductor" class="settings-section">
+          <div class="settings-section__header">
+            <v-icon size="20" class="settings-section__icon">mdi-account-hard-hat</v-icon>
+            <h2 class="settings-section__title">Conductor</h2>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row__label">
+              <span class="settings-row__name">Throttle Style</span>
+              <span class="settings-row__desc">Throttle control style used inside the Conductor view</span>
+            </div>
+            <div class="settings-row__value">
+              <v-btn-toggle :model-value="conductorVariant" @update:model-value="(v) => setConductorVariant(v)" mandatory divided density="compact" variant="outlined" color="primary">
+                <v-btn value="buttons" size="small" class="text-none">
+                  <v-icon start size="16">mdi-gesture-tap-button</v-icon>
+                  <span class="hidden sm:inline">Buttons</span>
+                </v-btn>
+                <v-btn value="slider" size="small" class="text-none">
+                  <v-icon start size="16">mdi-tune-vertical</v-icon>
+                  <span class="hidden sm:inline">Slider</span>
+                </v-btn>
+                <v-btn value="dashboard" size="small" class="text-none">
+                  <v-icon start size="16">mdi-train</v-icon>
+                  <span class="hidden sm:inline">Dashboard</span>
+                </v-btn>
+              </v-btn-toggle>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row__label">
+              <span class="settings-row__name">Right Panel</span>
+              <span class="settings-row__desc">Which component to load in the Conductor's right column</span>
+            </div>
+            <div class="settings-row__value">
+              <v-btn-toggle :model-value="conductorRightPanel" @update:model-value="(v) => setConductorRightPanel(v)" mandatory divided density="compact" variant="outlined" color="primary">
+                <v-btn value="turnouts" size="small" class="text-none">
+                  <v-icon start size="16">mdi-directions-fork</v-icon>
+                  <span class="hidden sm:inline">Turnouts</span>
+                </v-btn>
+                <v-btn value="effects" size="small" class="text-none">
+                  <v-icon start size="16">mdi-auto-fix</v-icon>
+                  <span class="hidden sm:inline">Effects</span>
+                </v-btn>
+                <v-btn value="signals" size="small" class="text-none">
+                  <v-icon start size="16">mdi-traffic-light</v-icon>
+                  <span class="hidden sm:inline">Signals</span>
+                </v-btn>
+                <v-btn value="devices" size="small" class="text-none">
+                  <v-icon start size="16">mdi-chip</v-icon>
+                  <span class="hidden sm:inline">Devices</span>
+                </v-btn>
+                <v-btn value="routes" size="small" class="text-none">
+                  <v-icon start size="16">mdi-map-marker-path</v-icon>
+                  <span class="hidden sm:inline">Routes</span>
+                </v-btn>
+              </v-btn-toggle>
             </div>
           </div>
         </div>
