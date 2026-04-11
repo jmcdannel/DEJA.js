@@ -119,7 +119,7 @@ const displayedCommands = computed<Command[]>(() => {
   return synthetic ? [synthetic, ...filtered] : filtered
 })
 
-const CATEGORY_ORDER: CommandCategory[] = ['navigation', 'browse', 'throttle', 'turnout', 'effect', 'signal']
+const CATEGORY_ORDER: CommandCategory[] = ['browse', 'navigation', 'throttle', 'turnout', 'effect', 'signal']
 const CATEGORY_LABELS: Record<CommandCategory, string> = {
   navigation: 'Navigation',
   browse:     'Browse',
