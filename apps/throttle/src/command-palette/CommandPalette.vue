@@ -15,6 +15,7 @@ import type {
   ToggleControl,
 } from './types'
 import QuickMenuThrottles from '@/quick-menu/QuickMenuThrottles.vue'
+import { BackgroundThumbnail } from '@repo/ui'
 
 const log = createLogger('CommandPalette')
 const router = useRouter()
@@ -363,9 +364,8 @@ function cycleCurrentIndex(control: CycleControl): number {
           </template>
           <template v-for="group in grouped" :key="group.category">
             <div class="cp-group-label">{{ CATEGORY_LABELS[group.category] }}</div>
+            <template v-for="cmd in group.commands" :key="cmd.id">
             <div
-              v-for="cmd in group.commands"
-              :key="cmd.id"
               role="option"
               :aria-selected="flatIndexFor.get(cmd.id) === activeIndex"
               class="cp-result"
@@ -441,6 +441,25 @@ function cycleCurrentIndex(control: CycleControl): number {
                 >{{ action.label }}</button>
               </span>
             </div>
+            <!-- 🖼️ Background preview strip — expands under the active Background row -->
+            <div
+              v-if="cmd.id === 'settings.background' && flatIndexFor.get(cmd.id) === activeIndex && asCycleControl(cmd)"
+              class="cp-bg-preview"
+            >
+              <button
+                v-for="opt in asCycleControl(cmd)!.options"
+                :key="String(opt.value)"
+                type="button"
+                class="cp-bg-thumb"
+                @click.stop="asCycleControl(cmd)!.set(opt.value)"
+              >
+                <BackgroundThumbnail
+                  :background-id="String(opt.value)"
+                  :selected="opt.value === asCycleControl(cmd)!.value"
+                />
+              </button>
+            </div>
+            </template>
           </template>
           <div v-if="displayedCommands.length === 0" class="cp-empty">
             No matches
@@ -669,6 +688,23 @@ function cycleCurrentIndex(control: CycleControl): number {
   text-align: center;
   font-size: 12px;
   color: rgba(148, 163, 184, 0.5);
+}
+
+/* 🖼️ Background preview strip — expanded inline when the Background row is active */
+.cp-bg-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 18px 14px;
+  background: rgba(96, 165, 250, 0.04);
+  border-top: 1px dashed rgba(148, 163, 184, 0.15);
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.15);
+}
+.cp-bg-thumb {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 
 .cp-error {
