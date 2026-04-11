@@ -56,12 +56,12 @@ Navigate to the generated folder and use whatever tool you prefer:
 cd dist/<layout-id>/arduino/<device-id>
 
 # Option A: PlatformIO
-platformio run -e nanoatmega328
-platformio run -e nanoatmega328 --target upload
+platformio run -e megaatmega2560
+platformio run -e megaatmega2560 --target upload
 
 # Option B: Arduino CLI
-arduino-cli compile --fqbn arduino:avr:nano:cpu=atmega328p deja-arduino
-arduino-cli upload -p /dev/cu.usbserial-* --fqbn arduino:avr:nano:cpu=atmega328p deja-arduino
+arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 deja-arduino
+arduino-cli upload -p /dev/cu.usbserial-* --fqbn arduino:avr:mega:cpu=atmega2560 deja-arduino
 
 # Option C: Arduino IDE
 # Just open deja-arduino/deja-arduino.ino directly
@@ -72,10 +72,10 @@ arduino-cli upload -p /dev/cu.usbserial-* --fqbn arduino:avr:nano:cpu=atmega328p
 ## 🔧 Files Generated
 
 ### `platformio.ini`
-- Board: Arduino Nano (ATmega328P)
+- Board: Arduino Mega 2560 (ATmega2560)
 - Libraries: Adafruit PWM Servo Driver, ArduinoJson
 - Serial: 115200 baud
-- Upload speed: 57600 baud
+- Upload speed: 115200 baud
 
 ### `.arduino-cli.yaml`
 - User directory configured to project root

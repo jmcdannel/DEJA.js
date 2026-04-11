@@ -20,6 +20,7 @@ import {
   promptWifiCredentials,
   promptDeployMethod,
   promptSerialPort,
+  promptArduinoBoard,
 } from './lib/prompts.js'
 
 const args = process.argv.slice(2)
@@ -133,7 +134,7 @@ async function deploy() {
   if (isArduino) {
     const boards = findArduinoBoards()
     const port = await promptSerialPort(boards)
-    const board = boardOverride || 'arduino:avr:mega:cpu=atmega2560'
+    const board = boardOverride || (await promptArduinoBoard())
     console.log('')
     await compileAndUpload({
       sketchPath: sketchDir, // nested deja-arduino/ folder that Arduino IDE expects

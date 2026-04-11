@@ -13,8 +13,7 @@
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #endif
 
-const size_t capacity = 20 * JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(3) + 60;
-DynamicJsonDocument doc(capacity);
+StaticJsonDocument<256> doc;
 
 #if ENABLE_SENSORS
 static int lastSensorValues[sizeof(SENSORPINS) / sizeof(SENSORPINS[0])] = {HIGH};      // Store last states, initialized to HIGH
@@ -49,10 +48,12 @@ void setup()
   }
 #endif
 
+#if ENABLE_TURNOUTS
   for (int idx = 0; idx < (sizeof(turnouts) / sizeof(turnouts[0])); idx++)
   {
     turnouts[idx].begin();
   }
+#endif
 
 #if ENABLE_PWM
   pwm.begin();
@@ -65,13 +66,28 @@ void setup()
 void loop()
 {
 
+#if ENABLE_TURNOUTS
   for (int idx = 0; idx < (sizeof(turnouts) / sizeof(turnouts[0])); idx++)
   {
     turnouts[idx].loop();
   }
+#endif
+
+  // 💓 Heartbeat: every 2s print loop-is-alive + Serial.available()
+  static unsigned long lastHeartbeat = 0;
+  if (millis() - lastHeartbeat >= 2000)
+  {
+    lastHeartbeat = millis();
+    Serial.print("[hb] t=");
+    Serial.print(millis());
+    Serial.print(" avail=");
+    Serial.println(Serial.available());
+  }
+
   if (Serial.available() > 0)
   {
-    Serial.println("handleInput");
+    Serial.print("[rx] available=");
+    Serial.println(Serial.available());
     handleInput();
   }
 
@@ -97,10 +113,25 @@ void loop()
 
 void handleInput()
 {
-  String input = Serial.readString();
+  char input[256];
+  int len = Serial.readBytes(input, sizeof(input) - 1);
+  input[len] = '\0';
+  Serial.print("[rx] len=");
+  Serial.print(len);
+  Serial.print(" raw=");
   Serial.println(input);
-  deserializeJson(doc, input);
+
+  DeserializationError err = deserializeJson(doc, input);
+  if (err)
+  {
+    Serial.print("[rx] JSON parse error: ");
+    Serial.println(err.c_str());
+    return;
+  }
+
   JsonArray array = doc.as<JsonArray>();
+  Serial.print("[rx] array size=");
+  Serial.println(array.size());
   for (JsonVariant v : array)
   {
     handleAction(v);
