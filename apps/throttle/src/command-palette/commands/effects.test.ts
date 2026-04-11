@@ -55,7 +55,7 @@ describe('useEffectCommands', () => {
     const cmd = useEffectCommands().value[0]
     await cmd.run()
     expect(runEffectMock).toHaveBeenCalledTimes(1)
-    const arg = runEffectMock.mock.calls[0][0] as Effect
+    const arg = (runEffectMock.mock.calls[0] as unknown as [Effect])[0]
     expect(arg.id).toBe('e1')
     expect(arg.state).toBe(true)
   })

@@ -87,7 +87,7 @@ describe('useThrottleCommands', () => {
     const stopAll = commands.find((c) => c.id === 'throttle.stop-all')!
     await stopAll.run()
     expect(setDocMock).toHaveBeenCalledTimes(2)
-    const payloads = setDocMock.mock.calls.map((c) => c[1])
+    const payloads = (setDocMock.mock.calls as unknown as Array<[unknown, Record<string, unknown>, unknown]>).map((c) => c[1])
     for (const p of payloads) {
       expect(p).toMatchObject({ speed: 0, direction: false, timestamp: 'SERVER_TIMESTAMP' })
     }
