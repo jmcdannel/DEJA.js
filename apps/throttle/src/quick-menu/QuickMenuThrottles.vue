@@ -5,7 +5,7 @@ import type { Throttle } from '@/throttle/types'
 import { getSignedSpeed } from '@/throttle/utils'
 import MiniThrottleControl from './MiniThrottleControl.vue'
 import { useQuickThrottleActions } from './useQuickThrottleActions'
-import QuickThrottleButton from '@/throttle/QuickThrottleButton.vue'
+
 
 const { getLocos, getThrottles, acquireThrottle } = useLocos()
 const locos = getLocos()
@@ -92,13 +92,10 @@ async function handleAcquire(address: number) {
         <span class="quick-throttles__empty-title">No locos running</span>
         <span class="quick-throttles__empty-hint">Tap + to add a loco</span>
       </div>
-      <div class="quick-throttles__actions">
-        <button class="quick-throttles__add" @click="showRoster = true">
-          <v-icon size="14">mdi-plus</v-icon>
-          <span>Add Loco</span>
-        </button>
-        <QuickThrottleButton size="x-small" color="primary" />
-      </div>
+      <button class="quick-throttles__add" @click="showRoster = true">
+        <v-icon size="14">mdi-plus</v-icon>
+        <span>Add Loco</span>
+      </button>
     </template>
 
     <!-- Roster picker -->
@@ -246,14 +243,5 @@ async function handleAcquire(address: number) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.quick-throttles__actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.quick-throttles__actions .quick-throttles__add {
-  flex: 1;
 }
 </style>
