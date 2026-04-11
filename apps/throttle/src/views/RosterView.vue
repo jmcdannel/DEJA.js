@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLocos, ROADNAMES, type Loco } from '@repo/modules/locos'
 import { LocoRoster, PageHeader, ListControlBar, useListControls } from '@repo/ui'
+import RosterQuickAdd from '@/roster/RosterQuickAdd.vue'
 import type { ListFilter } from '@repo/ui'
 
 const router = useRouter()
@@ -69,6 +70,8 @@ function handleLocoSelect(loco: Loco) {
         />
       </template>
     </PageHeader>
+
+    <RosterQuickAdd class="mx-4 mt-4" />
 
     <LocoRoster
       :locos="rosterControls.filteredList.value"
