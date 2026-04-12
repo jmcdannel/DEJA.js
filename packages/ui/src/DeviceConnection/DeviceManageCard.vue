@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { Device } from '@repo/modules'
-import { useLayout, useServerStatus } from '@repo/modules'
+import { isArduinoFamilyType, useLayout, useServerStatus } from '@repo/modules'
 import StatusPulse from '../animations/StatusPulse.vue'
 
 // ── Props & Emits ──────────────────────────────────────────────────
@@ -22,7 +22,7 @@ const emit = defineEmits<DeviceManageCardEmits>()
 
 // ── Composables ────────────────────────────────────────────────────
 
-const { deviceTypes, autoConnectDevice } = useLayout()
+const { deviceTypes, autoConnectDevice, updateDevice } = useLayout()
 const { serverStatus } = useServerStatus()
 
 // ── Local State ────────────────────────────────────────────────────
@@ -49,8 +49,7 @@ const isUsbDevice = computed(
     !isDejaServer.value &&
     (props.device?.connection === 'usb' ||
       props.device?.type === 'dcc-ex' ||
-      props.device?.type === 'deja-arduino' ||
-      props.device?.type === 'deja-arduino-led'),
+      isArduinoFamilyType(props.device?.type)),
 )
 
 const isMqttDevice = computed(
@@ -75,6 +74,12 @@ function handleConnect() {
 
 function handleDisconnect() {
   emit('disconnect', props.device.id)
+}
+
+async function handleClearPort() {
+  if (props.device?.id) {
+    await updateDevice(props.device.id, { port: '' })
+  }
 }
 
 async function handleAutoConnect(checked: boolean | null) {
@@ -222,6 +227,8 @@ async function handleAutoConnect(checked: boolean | null) {
         density="compact"
         :items="ports || []"
         :disabled="isConnected"
+        clearable
+        @click:clear="handleClearPort"
       />
 
       <!-- ⚡ Auto-connect toggle -->

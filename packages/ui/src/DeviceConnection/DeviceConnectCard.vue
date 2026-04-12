@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import type { Device } from '@repo/modules'
-import { useLayout, useServerStatus } from '@repo/modules'
+import { isArduinoFamilyType, useLayout, useServerStatus } from '@repo/modules'
 import StatusPulse from '../animations/StatusPulse.vue'
 
 interface DeviceConnectCardProps {
@@ -87,8 +87,7 @@ const isUsbDevice = computed(
     !isDejaServer.value &&
     (props.device.connection === 'usb' ||
       props.device.type === 'dcc-ex' ||
-      props.device.type === 'deja-arduino' ||
-      props.device.type === 'deja-arduino-led'),
+      isArduinoFamilyType(props.device.type)),
 )
 
 // 📡 MQTT/WiFi device check

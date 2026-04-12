@@ -7,6 +7,7 @@ import {
   generateDccExAutomation,
   generatePicoSettings,
   generatePicoConfig,
+  isArduinoFamilyType,
 } from '@repo/modules'
 import type { Device, Effect, Loco, Turnout, Sensor, Signal } from '@repo/modules'
 
@@ -21,9 +22,7 @@ interface UseDeviceConfigOptions {
 }
 
 export function useDeviceConfig({ device, effects, turnouts, sensors, signals, locos, layoutId }: UseDeviceConfigOptions) {
-  const isArduino = computed(() =>
-    ['deja-arduino', 'deja-arduino-led'].includes(device.value?.type || '')
-  )
+  const isArduino = computed(() => isArduinoFamilyType(device.value?.type))
 
   const isPicoW = computed(() => device.value?.type === 'deja-mqtt')
 
