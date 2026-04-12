@@ -1,4 +1,12 @@
-import type { LayoutDefaultSound } from './types'
+import type { Device, LayoutDefaultSound } from './types'
+
+/** Device types that use Arduino-family firmware (compile via arduino-cli or PlatformIO). */
+export const ARDUINO_FAMILY_TYPES: Device['type'][] = ['deja-arduino', 'deja-arduino-led', 'deja-esp32']
+
+/** Check whether a device type uses Arduino-family firmware. */
+export function isArduinoFamilyType(type: string | undefined): boolean {
+  return ARDUINO_FAMILY_TYPES.includes(type as Device['type'])
+}
 
 export const deviceTypes = [
   {
@@ -10,7 +18,7 @@ export const deviceTypes = [
   },
   {
     value: 'deja-arduino',
-    label: 'DJEA Adrduino (MEGA)',
+    label: 'DEJA Arduino (MEGA)',
     icon: 'mdi-usb',
     color: 'lime',
   },
@@ -19,6 +27,12 @@ export const deviceTypes = [
     label: 'DEJA LED Arduino',
     icon: 'mdi-led-strip',
     color: 'teal',
+  },
+  {
+    value: 'deja-esp32',
+    label: 'DEJA ESP32',
+    icon: 'mdi-chip',
+    color: 'orange',
   },
   {
     value: 'deja-mqtt',

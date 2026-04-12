@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import draggable from 'vuedraggable'
-import { useLayout, type Device } from '@repo/modules'
+import { useLayout, useServerStatus, type Device } from '@repo/modules'
+import { useDejaJS } from '@repo/deja'
+import { DeviceManageCard } from '@repo/ui'
 import { useSortableList } from '@/Core/composables/useSortableList'
 import ListPage from '@/Core/UI/ListPage.vue'
-import DeviceListItem from '@/Layout/Devices/DeviceListItem.vue'
 import AddDeviceItem from '@/Layout/Devices/AddDeviceItem.vue'
 import PortList from '@/Layout/PortList.vue'
 
-const { getLayout, getDevices, updateDevice } = useLayout()
+const router = useRouter()
+const { getLayout, getDevices, updateDevice, connectDevice, disconnectDevice } = useLayout()
+const { serverStatus } = useServerStatus()
+const { sendDejaCommand } = useDejaJS()
 
 const layout = getLayout()
 const rawDevices = getDevices()
@@ -18,6 +23,20 @@ const { list: devices, onDragStart, onDragEnd } = useSortableList<Device>(
 )
 
 const showAdd = ref(false)
+
+async function handleConnect(deviceId: string, serial?: string, topic?: string) {
+  const device = rawDevices.value?.find((d: Device) => d.id === deviceId)
+  if (!device) return
+  await connectDevice(device, serial, topic)
+}
+
+async function handleDisconnect(deviceId: string) {
+  await disconnectDevice(deviceId)
+}
+
+function navigateToDevice(deviceId: string) {
+  router.push({ name: 'DeviceDetails', params: { deviceId } })
+}
 </script>
 
 <template>
@@ -28,6 +47,15 @@ const showAdd = ref(false)
     :subtitle="layout?.name"
   >
     <template #actions>
+      <v-btn
+        variant="tonal"
+        size="small"
+        :disabled="!serverStatus?.online"
+        @click="sendDejaCommand({ action: 'listPorts', payload: {} })"
+      >
+        <v-icon start icon="mdi-refresh" />
+        Refresh Ports
+      </v-btn>
       <v-btn
         prepend-icon="mdi-plus"
         color="cyan"
@@ -50,7 +78,13 @@ const showAdd = ref(false)
     >
       <template #item="{ element }">
         <div>
-          <DeviceListItem :device="element as Device" :ports="layout?.ports" />
+          <DeviceManageCard
+            :device="element as Device"
+            :ports="layout?.ports"
+            @connect="handleConnect"
+            @disconnect="handleDisconnect"
+            @navigate="navigateToDevice"
+          />
         </div>
       </template>
     </draggable>

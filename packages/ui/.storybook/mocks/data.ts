@@ -235,7 +235,7 @@ export interface Device {
   tags?: Tag[]
   timestamp?: Date
   topic?: string
-  type: 'dcc-ex' | 'deja-arduino' | 'deja-arduino-led' | 'deja-mqtt' | 'deja-server'
+  type: 'dcc-ex' | 'deja-arduino' | 'deja-arduino-led' | 'deja-esp32' | 'deja-mqtt' | 'deja-server'
 }
 
 export interface RouteTurnoutConfig {
@@ -649,7 +649,7 @@ export function createRoutes(count: number): Route[] {
 }
 
 export function createDevices(count: number): Device[] {
-  const deviceTypes: Array<Device['type']> = ['dcc-ex', 'deja-arduino', 'deja-arduino-led', 'deja-mqtt']
+  const deviceTypes: Array<Device['type']> = ['dcc-ex', 'deja-arduino', 'deja-arduino-led', 'deja-esp32', 'deja-mqtt']
   return Array.from({ length: count }, (_, i) =>
     createDevice({
       name: `Device ${i + 1}`,
