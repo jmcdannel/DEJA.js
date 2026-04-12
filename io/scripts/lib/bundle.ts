@@ -56,6 +56,11 @@ export function resolveBoardConfig(deviceType: string): BoardConfig | undefined 
   return BOARD_CONFIGS[deviceType]
 }
 
+/** Resolve a full board config from a raw FQBN, so `--board` overrides pick up flags like C++17. */
+export function resolveBoardConfigByFqbn(fqbn: string): BoardConfig | undefined {
+  return Object.values(BOARD_CONFIGS).find(c => c.fqbn === fqbn)
+}
+
 export interface WriteBundleOptions {
   layoutId: string
   device: Device
