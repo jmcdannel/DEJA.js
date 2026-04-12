@@ -32,11 +32,7 @@ export interface CycleControl<T = string> {
   set: (next: T) => void | Promise<void>
 }
 
-// 💡 `SettingControl` uses `CycleControl<any>` so the `Command.control`
-// field accepts any concrete parameterisation (ThemeMode, ThrottleVariant,
-// …). The runtime handling in `CommandPalette.vue` treats option values
-// opaquely — it only cares about identity + index for cycling.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- intentional heterogeneous cycle-control union
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- CycleControl<T>.set is contravariant in T; `any` is required for the heterogeneous union
 export type SettingControl = ToggleControl | CycleControl<any>
 
 export interface Command {

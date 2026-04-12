@@ -44,7 +44,7 @@ export function useTurnoutCommands(): ComputedRef<Command[]> {
 export function useTurnoutBrowseCommand(): ComputedRef<Command | null> {
   const { getTurnouts, setTurnout } = useTurnouts()
   const turnouts = getTurnouts() as unknown as Ref<Turnout[]>
-  const { turnoutsByDevice, turnoutsByTag, turnoutLabels, filterByDevice, filterByTag } =
+  const { turnoutsByDevice, turnoutsByTag, turnoutsByType, filterByDevice, filterByTag } =
     useBrowseGroups()
 
   return computed<Command | null>(() => {
@@ -104,13 +104,13 @@ export function useTurnoutBrowseCommand(): ComputedRef<Command | null> {
     const labels: Command = {
       id: 'browse.turnouts.labels',
       title: 'Labels',
-      description: `${turnoutLabels.value.length} types`,
+      description: `${turnoutsByType.value.length} types`,
       icon: 'mdi-label-outline',
       category: 'browse',
       run: () => {},
       children: {
         title: 'Turnouts ▸ Labels',
-        commands: turnoutLabels.value.map<Command>((group) => ({
+        commands: turnoutsByType.value.map<Command>((group) => ({
           id: `browse.turnouts.labels.${group.id}`,
           title: group.label,
           description: `${group.count} turnouts`,

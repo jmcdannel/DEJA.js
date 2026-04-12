@@ -120,15 +120,16 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
     }
   }
 
-  function buildVariantCommand(
+  function buildVariantCommand<T extends string>(
     id: string,
     title: string,
-    value: ThrottleVariant,
-    setter: (v: ThrottleVariant) => Promise<void> | void,
+    options: CycleControl<T>['options'],
+    value: T,
+    setter: (v: T) => Promise<void> | void,
   ): Command {
-    const control: CycleControl<ThrottleVariant> = {
+    const control: CycleControl<T> = {
       kind: 'cycle',
-      options: VARIANT_OPTIONS,
+      options,
       value,
       set: (next) => setter(next),
     }
@@ -185,6 +186,7 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
         buildVariantCommand(
           'settings.throttle.variant',
           'Throttle variant',
+          VARIANT_OPTIONS,
           throttleVariant.value,
           setThrottleVariant,
         ),
@@ -227,6 +229,7 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
         buildVariantCommand(
           'settings.conductor.variant',
           'Conductor variant',
+          VARIANT_OPTIONS,
           conductorVariant.value,
           setConductorVariant,
         ),

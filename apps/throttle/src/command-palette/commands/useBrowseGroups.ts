@@ -38,30 +38,30 @@ function collectTags<T extends { tags?: string[] }>(items: T[]): GroupItem[] {
 }
 
 export interface BrowseGroups {
-  // raw refs for filtering at leaf level
   effects: Ref<Effect[]>
   turnouts: Ref<Turnout[]>
   signals: Ref<Signal[]>
   locos: Ref<Loco[]>
   throttles: Ref<Array<{ address: number }>>
-  // grouped data
   effectsByDevice: Ref<GroupItem[]>
   effectsByType: Ref<GroupItem[]>
   effectsByTag: Ref<GroupItem[]>
   turnoutsByDevice: Ref<GroupItem[]>
   turnoutsByTag: Ref<GroupItem[]>
-  turnoutLabels: Ref<GroupItem[]>
+  turnoutsByType: Ref<GroupItem[]>
   signalsByDevice: Ref<GroupItem[]>
   signalsByAspect: Ref<GroupItem[]>
   signalsByTag: Ref<GroupItem[]>
   locosByRoadname: Ref<GroupItem[]>
-  // filter helpers
   filterByDevice: <T extends { device?: string }>(items: T[], deviceId: string) => T[]
   filterByTag: <T extends { tags?: string[] }>(items: T[], tag: string) => T[]
   resolveDeviceLabel: (deviceId: string) => string
 }
 
+let _instance: BrowseGroups | null = null
+
 export function useBrowseGroups(): BrowseGroups {
+  if (_instance) return _instance
   const efx = useEfx()
   const effects = efx.getEffects() as unknown as Ref<Effect[]>
 
@@ -101,7 +101,7 @@ export function useBrowseGroups(): BrowseGroups {
 
   const turnoutsByDevice = computed(() => deviceGroups(turnouts.value || []))
   const turnoutsByTag = computed(() => collectTags(turnouts.value || []))
-  const turnoutLabels = computed(() => groupBy(turnouts.value || [], (t) => t.type))
+  const turnoutsByType = computed(() => groupBy(turnouts.value || [], (t) => t.type))
 
   const signalsByDevice = computed(() => deviceGroups(signals.value || []))
   const signalsByAspect = computed(() =>
@@ -121,7 +121,7 @@ export function useBrowseGroups(): BrowseGroups {
     return items.filter((i) => i.tags?.includes(tag))
   }
 
-  return {
+  _instance = {
     effects,
     turnouts,
     signals,
@@ -132,7 +132,7 @@ export function useBrowseGroups(): BrowseGroups {
     effectsByTag,
     turnoutsByDevice,
     turnoutsByTag,
-    turnoutLabels,
+    turnoutsByType,
     signalsByDevice,
     signalsByAspect,
     signalsByTag,
@@ -141,4 +141,5 @@ export function useBrowseGroups(): BrowseGroups {
     filterByTag,
     resolveDeviceLabel,
   }
+  return _instance
 }
