@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
-import { DeviceConnectionList, StatusPulse, OnboardingBanner } from '@repo/ui'
+import { DeviceConnectionList, StatusPulse, OnboardingBanner, DEJA_APPS } from '@repo/ui'
 import { useOnboarding } from '@repo/modules'
 import Speedometer from '@/throttle/Speedometer.vue'
 import {
@@ -96,7 +96,7 @@ function handleLayoutDisconnect() {
 }
 
 function openCloudSetup() {
-  window.open('https://cloud.dejajs.com', '_blank')
+  window.open(DEJA_APPS.cloud.href, '_blank')
 }
 
 const navItems = [

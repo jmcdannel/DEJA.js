@@ -4,7 +4,7 @@ import { useCollection } from 'vuefire'
 import type { TrackDiagram } from '@repo/modules'
 import { useTrackDiagrams } from '@repo/modules/trackDiagrams/useTrackDiagrams'
 import TrackDiagramListItem from '@/TrackDiagram/TrackDiagramListItem.vue'
-import EmptyState from '@/Core/UI/EmptyState.vue'
+import { EmptyState } from '@repo/ui'
 
 const emit = defineEmits(['edit'])
 const { trackDiagramsCol } = useTrackDiagrams()

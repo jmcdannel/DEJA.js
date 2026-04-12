@@ -88,8 +88,8 @@ function arrowColor(cloco: ConsistLoco): string {
         <span class="text-[8px] font-semibold tracking-wide mr-0.5" style="color: #7c3aed">EZ</span>
         <!-- Lead -->
         <div class="flex items-center gap-px rounded-full py-px pl-1 pr-0.5" style="background: rgba(124,58,237,0.3)">
-          <span class="text-[8px]" style="color: #c4b5fd">◀</span>
-          <div class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white" style="background: #7c3aed">{{ loco.address }}</div>
+          <span class="text-[8px] leading-none" style="color: #c4b5fd">◀</span>
+          <div class="h-4 min-w-4 px-1 rounded-full flex items-center justify-center text-[8px] font-bold text-white tabular-nums tracking-tight" style="background: #7c3aed">{{ loco.address }}</div>
         </div>
         <!-- Members -->
         <div
@@ -99,9 +99,9 @@ function arrowColor(cloco: ConsistLoco): string {
           :class="cloco.direction ? 'pl-1 pr-0.5' : 'pl-0.5 pr-1'"
           :style="{ background: badgeBg(cloco) }"
         >
-          <span v-if="cloco.direction" class="text-[8px]" :style="{ color: arrowColor(cloco) }">◀</span>
-          <div class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-semibold text-white" :style="{ background: badgeColor(cloco) }">{{ cloco.address }}</div>
-          <span v-if="!cloco.direction" class="text-[8px]" :style="{ color: arrowColor(cloco) }">▶</span>
+          <span v-if="cloco.direction" class="text-[8px] leading-none" :style="{ color: arrowColor(cloco) }">◀</span>
+          <div class="h-4 min-w-4 px-1 rounded-full flex items-center justify-center text-[8px] font-semibold text-white tabular-nums tracking-tight" :style="{ background: badgeColor(cloco) }">{{ cloco.address }}</div>
+          <span v-if="!cloco.direction" class="text-[8px] leading-none" :style="{ color: arrowColor(cloco) }">▶</span>
         </div>
       </div>
     </div>
