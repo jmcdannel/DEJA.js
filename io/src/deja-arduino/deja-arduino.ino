@@ -73,17 +73,6 @@ void loop()
   }
 #endif
 
-  // 💓 Heartbeat: every 2s print loop-is-alive + Serial.available()
-  static unsigned long lastHeartbeat = 0;
-  if (millis() - lastHeartbeat >= 2000)
-  {
-    lastHeartbeat = millis();
-    Serial.print("[hb] t=");
-    Serial.print(millis());
-    Serial.print(" avail=");
-    Serial.println(Serial.available());
-  }
-
   if (Serial.available() > 0)
   {
     Serial.print("[rx] available=");

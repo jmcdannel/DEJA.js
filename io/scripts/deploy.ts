@@ -70,11 +70,13 @@ async function deploy() {
   console.log('')
   console.log(`🔥 Fetching config for "${deviceId}"...`)
   const config = await getDeviceConfig(layoutId, deviceId)
-  const { device, effects, turnouts, locos } = config
+  const { device, effects, turnouts, locos, sensors, signals } = config
 
   console.log(`   📟 Type: ${device.type}`)
   console.log(`   ⚡ Effects: ${effects.length}`)
   console.log(`   🔀 Turnouts: ${turnouts.length}`)
+  if (sensors) console.log(`   📡 Sensors: ${sensors.length}`)
+  if (signals) console.log(`   🚦 Signals: ${signals.length}`)
 
   // Reject device types that have their own firmware source
   if (isExcludedDeviceType(device.type)) {
@@ -113,6 +115,8 @@ async function deploy() {
     effects,
     turnouts,
     locos,
+    sensors,
+    signals,
     wifiSsid,
     wifiPassword,
     mqttBroker,
