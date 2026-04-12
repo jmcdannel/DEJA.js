@@ -52,10 +52,10 @@ export { default as DeviceStatusItem } from './DeviceStatus/DeviceStatusItem.vue
 export { default as DeviceStatusList } from './DeviceStatus/DeviceStatusList.vue'
 
 // Device Connection
-export { DeviceConnectionCard, DeviceConnectionList } from './DeviceConnection'
+export { DeviceConnectCard, DeviceConnectionList, DeviceManageCard } from './DeviceConnection'
 
 // Dashboard widgets
-export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart, DeviceTile, QuickConnectPanel, LayoutInfoCard, DashboardEmptyState } from './Dashboard'
+export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart, LayoutInfoCard, DashboardEmptyState } from './Dashboard'
 
 // DejaTracker — SVG railroad progress tracker
 export { DejaTracker } from './DejaTracker'

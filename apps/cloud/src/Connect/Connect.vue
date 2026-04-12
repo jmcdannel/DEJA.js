@@ -157,8 +157,8 @@ function scrollTo(id: string) {
               <DeviceConnectionList
                 :devices="devices ?? []"
                 :available-ports="ports"
-                link-mode="modal"
                 :show-header="false"
+                :server-online="serverStatus?.online ?? false"
                 @connect="handleConnect"
                 @disconnect="handleDisconnect"
                 @navigate="openDeviceModal"
