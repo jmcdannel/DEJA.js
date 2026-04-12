@@ -26,6 +26,7 @@ const emit = defineEmits<{
   disconnect: [deviceId: string]
   navigate: [deviceId: string]
   addDevice: []
+  trackPowerToggle: [deviceId: string, newState: boolean]
 }>()
 
 const { getLayout } = useLayout()
@@ -142,6 +143,7 @@ function getEffectCount(deviceId: string): number {
       @connect="(id, serial, topic) => emit('connect', id, serial, topic)"
       @disconnect="(id) => emit('disconnect', id)"
       @navigate="(id) => emit('navigate', id)"
+      @track-power-toggle="(id, state) => emit('trackPowerToggle', id, state)"
     />
 
     <!-- Empty state -->

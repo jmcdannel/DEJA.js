@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
+import { useDisplay } from 'vuetify'
+import { useCurrentUser } from 'vuefire'
 import { useRouter } from 'vue-router'
 import { useLocos, type Loco } from '@repo/modules/locos'
+import { useLayout, useServerStatus } from '@repo/modules'
 import { createLogger } from '@repo/utils'
 import { useCommandPalette } from './useCommandPalette'
 import { useCommands, useBrowseCommands } from './useCommands'
@@ -15,7 +18,11 @@ import type {
   ToggleControl,
 } from './types'
 import QuickMenuThrottles from '@/quick-menu/QuickMenuThrottles.vue'
-import { BackgroundThumbnail } from '@repo/ui'
+import QuickMenuFavorites from '@/quick-menu/QuickMenuFavorites.vue'
+import { BackgroundThumbnail, ConnectionStatus, UserProfile, TrackPower } from '@repo/ui'
+import { useDcc, DCC_POWER_ON, DCC_POWER_OFF } from '@repo/dccex'
+import { DEFAULT_MENU_CONFIG } from '@/core/Menu/useMenu'
+import { useStorage } from '@vueuse/core'
 
 const log = createLogger('CommandPalette')
 const router = useRouter()
@@ -24,6 +31,27 @@ const allCommands = useCommands()
 const browseCommands = useBrowseCommands()
 const { getLocos, acquireThrottle } = useLocos()
 const locos = getLocos() as unknown as { value: Loco[] }
+
+const { mdAndUp } = useDisplay()
+const user = useCurrentUser()
+const layoutId = useStorage('@DEJA/layoutId', '')
+const { getLayouts, getDevices } = useLayout()
+const { serverStatus } = useServerStatus()
+const cpEmail = computed(() => user.value?.email ?? null)
+const cpLayouts = getLayouts(cpEmail)
+const cpDevices = getDevices()
+const cpCurrentLayout = computed(() =>
+  cpLayouts?.value
+    ? cpLayouts.value.find(l => l.id === layoutId.value)
+    : { id: layoutId.value, name: layoutId.value }
+)
+const showMobileStatus = computed(() => !mdAndUp.value && !!user.value)
+const showPaletteControls = computed(() => !!user.value && !!layoutId.value)
+
+const { sendDccCommand: sendPaletteDcc } = useDcc()
+async function paletteTrackPowerToggle(newState: boolean) {
+  await sendPaletteDcc({ action: 'dcc', payload: newState ? DCC_POWER_ON : DCC_POWER_OFF })
+}
 
 const inputRef = ref<HTMLInputElement | null>(null)
 const errorText = ref<string | null>(null)
@@ -47,19 +75,12 @@ const FLAT_SEARCH_THRESHOLD = 3
 // everything. Inside a drilled-in stack level, it always filters that level.
 const rootViewCommands = computed<Command[]>(() => {
   const list = allCommands.value
-  const nav = list.filter((c) => c.category === 'navigation')
   const stopAll = list.find((c) => c.id === 'throttle.stop-all')
   const settings = list.filter((c) => c.category === 'settings')
 
-  // Section order at root:
-  //   inlined <QuickMenuThrottles /> (rendered in template)
-  //   → Browse (drill-down cards, one per domain)
-  //   → Settings (contextual)
-  //   → Navigation (+ stopAll)
   const root: Command[] = [
     ...browseCommands.value,
     ...settings,
-    ...nav,
   ]
 
   if (stopAll) root.push(stopAll)
@@ -244,6 +265,17 @@ async function onNavigateToThrottle(address: number) {
   close()
 }
 
+const lastThrottleAddress = useStorage<number>('@DEJA/lastThrottleAddress', 3)
+
+function navigateToMenuItem(item: { name: string }) {
+  const params: Record<string, number> = {}
+  if (item.name === 'throttle') {
+    params.address = lastThrottleAddress.value
+  }
+  router.push({ name: item.name, params })
+  close()
+}
+
 function setActiveIndex(idx: number) {
   activeIndex.value = idx
 }
@@ -335,6 +367,33 @@ function cycleCurrentIndex(control: CycleControl): number {
     @update:model-value="onDialogUpdate"
   >
     <v-card class="cp-card pa-0">
+      <!-- 📱 Mobile-only connection status -->
+      <div v-if="showMobileStatus" class="cp-mobile-status">
+        <ConnectionStatus
+          expanded
+          :layout-name="cpCurrentLayout?.name"
+          :layout-id="layoutId"
+          :server-status="serverStatus"
+          :devices="cpDevices"
+          @navigate="() => { router.push('/connect'); close() }"
+        />
+      </div>
+      <div v-if="showPaletteControls" class="cp-controls">
+        <UserProfile />
+        <TrackPower @toggle="paletteTrackPowerToggle" />
+      </div>
+      <!-- 🧭 Quick nav grid — always visible at root level -->
+      <div v-if="showInlineThrottles" class="cp-nav-grid">
+        <button
+          v-for="item in DEFAULT_MENU_CONFIG"
+          :key="item.name"
+          class="cp-nav-item"
+          @click="navigateToMenuItem(item)"
+        >
+          <v-icon size="22" :class="`text-${item.color}-400`">{{ item.icon }}</v-icon>
+          <span class="cp-nav-item__label">{{ item.label }}</span>
+        </button>
+      </div>
       <div class="cp-input-row">
         <v-icon size="20" class="cp-chevron">mdi-chevron-right</v-icon>
         <div v-if="headerLabel" class="cp-breadcrumb">{{ headerLabel }}</div>
@@ -353,6 +412,8 @@ function cycleCurrentIndex(control: CycleControl): number {
           <template v-if="showInlineThrottles">
             <div class="cp-group-label">Throttles</div>
             <QuickMenuThrottles @navigate="onNavigateToThrottle" />
+            <div class="cp-group-label">Favorites</div>
+            <QuickMenuFavorites />
           </template>
           <template v-for="group in grouped" :key="group.category">
             <div class="cp-group-label">{{ CATEGORY_LABELS[group.category] }}</div>
@@ -479,6 +540,79 @@ function cycleCurrentIndex(control: CycleControl): number {
   max-height: 70vh;
   display: flex;
   flex-direction: column;
+}
+
+.cp-mobile-status {
+  display: flex;
+  justify-content: center;
+  padding: 14px 16px 10px;
+}
+.cp-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.cp-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+.cp-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+.cp-nav-item:hover {
+  background: rgba(148, 163, 184, 0.15);
+  border-color: rgba(148, 163, 184, 0.25);
+  transform: translateY(-1px);
+}
+.cp-nav-item__label {
+  font-size: 10px;
+  color: rgba(226, 232, 240, 0.7);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* 📱 Mobile: tight compact nav grid */
+@media (max-width: 959px) {
+  .cp-mobile-status {
+    padding: 10px 12px 4px;
+  }
+  .cp-controls {
+    padding: 8px 12px;
+    gap: 12px;
+  }
+  .cp-nav-grid {
+    gap: 4px;
+    padding: 8px 10px;
+  }
+  .cp-nav-item {
+    padding: 6px 2px;
+    gap: 2px;
+    border-radius: 8px;
+  }
+  .cp-nav-item :deep(.v-icon) {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+  .cp-nav-item__label {
+    font-size: 9px;
+  }
 }
 
 .cp-input-row {

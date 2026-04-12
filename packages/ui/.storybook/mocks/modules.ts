@@ -160,7 +160,7 @@ export const deviceTypes = [
   { value: 'deja-arduino-led', label: 'DEJA LED Arduino', icon: 'mdi-led-strip', color: 'teal' },
   { value: 'deja-esp32', label: 'DEJA ESP32', icon: 'mdi-chip', color: 'orange' },
   { value: 'deja-mqtt', label: 'DEJA MQTT (Pico W)', icon: 'mdi-wifi', color: 'blue' },
-  { value: 'deja-server', label: 'DEJA Server', icon: 'mdi-server', color: 'purple' },
+  { value: 'deja-server', label: 'DEJA Server', icon: 'mdi-console', color: 'purple' },
 ]
 
 export const ARDUINO_FAMILY_TYPES = ['deja-arduino', 'deja-arduino-led', 'deja-esp32'] as const
@@ -277,7 +277,7 @@ export const useLayout = fn(() => ({
     { value: 'deja-arduino', label: 'DEJA Arduino (MEGA)', icon: 'mdi-usb', color: 'lime' },
     { value: 'deja-arduino-led', label: 'DEJA LED Arduino', icon: 'mdi-led-strip', color: 'teal' },
     { value: 'deja-mqtt', label: 'DEJA MQTT (Pico W)', icon: 'mdi-wifi', color: 'blue' },
-    { value: 'deja-server', label: 'DEJA Server', icon: 'mdi-laptop', color: 'purple' },
+    { value: 'deja-server', label: 'DEJA Server', icon: 'mdi-console', color: 'purple' },
   ],
   connectDevice: fn().mockName('connectDevice').mockResolvedValue(undefined),
   disconnectDevice: fn().mockName('disconnectDevice').mockResolvedValue(undefined),
