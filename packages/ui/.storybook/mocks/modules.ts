@@ -63,6 +63,32 @@ export const routeType = {
   color: 'purple',
 } as const
 
+// Promotions constants (from packages/modules/promotions/constants.ts)
+export const PROMO_SLOTS = {
+  BANNER_TOP: 'banner-top',
+  HERO_SECTION: 'hero-section',
+} as const
+export type PromoSlot = (typeof PROMO_SLOTS)[keyof typeof PROMO_SLOTS]
+
+export const VARIANT_COLORS: Record<string, string> = {
+  info: 'info',
+  success: 'success',
+  launch: 'success',
+  warning: 'warning',
+} as const
+
+export interface Promotion {
+  id: string
+  title?: string
+  description?: string
+  variant?: string
+  slot?: PromoSlot
+}
+
+export const usePromotions = fn(() => ({
+  promotions: ref([] as Promotion[]),
+})).mockName('usePromotions')
+
 // Re-export effect type constants
 export const efxTypes = [
   { value: 'ialed', label: 'IALED', icon: 'mdi-led-strip-variant', color: 'teal', require: ['device', 'strip', 'pattern', 'range', 'config'] },

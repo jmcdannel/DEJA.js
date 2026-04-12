@@ -11,7 +11,7 @@ import { useDcc } from '@repo/dccex'
 import { ListControlBar, useListControls, LocoRoster, ThrottleLaunchQR } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
 import ListPage from '@/Core/UI/ListPage.vue'
-import EmptyState from '@/Core/UI/EmptyState.vue'
+import { EmptyState } from '@repo/ui'
 
 const router = useRouter()
 const layoutId = useStorage('@DEJA/layoutId', '')

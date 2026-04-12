@@ -4,7 +4,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { useStorage } from '@vueuse/core'
-import { ServerSetupInfo } from '@repo/ui'
+import { ServerSetupInfo, DEJA_APPS } from '@repo/ui'
 import { useOnboarding, useLayout, INSTALL_TIPS } from '@repo/modules'
 
 const props = defineProps<{
@@ -143,7 +143,7 @@ function handleComplete() {
           block
           class="text-none font-weight-bold mb-3"
           prepend-icon="mdi-speedometer"
-          href="https://throttle.dejajs.com"
+          :href="DEJA_APPS.throttle.href"
           target="_blank"
         >
           🚂 Open Throttle

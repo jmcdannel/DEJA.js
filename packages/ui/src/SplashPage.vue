@@ -3,6 +3,7 @@ import Logo from './Logo.vue'
 import BackgroundStarfield from './BackgroundStarfield.vue'
 import BackgroundAurora from './BackgroundAurora.vue'
 import { backgroundUrls } from './backgrounds/blob-urls'
+import { appColors } from './assets/icons'
 import { computed } from 'vue'
 
 export type SplashBackground = 'starfield' | 'nebula' | 'milkyway' | 'neon' | 'aurora' | 'railroad-night' | 'dark-tracks' | 'steam-locomotive' | 'train-station'
@@ -21,11 +22,11 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   background: 'starfield',
   apps: () => [
-    { label: 'Server', icon: 'mdi-server', color: '#FF0000' },
-    { label: 'Throttle', icon: 'mdi-gamepad-variant', color: '#84CC16' },
-    { label: 'Cloud', icon: 'mdi-cloud', color: '#D946EF' },
-    { label: 'Monitor', icon: 'mdi-monitor', color: '#EF4444' },
-    { label: 'Tour', icon: 'mdi-account-tie-hat', color: '#8B5CF6' },
+    { label: 'Server', icon: 'mdi-server', color: appColors.server },
+    { label: 'Throttle', icon: 'mdi-gamepad-variant', color: appColors.throttle },
+    { label: 'Cloud', icon: 'mdi-cloud', color: appColors.cloud },
+    { label: 'Monitor', icon: 'mdi-monitor', color: appColors.monitor },
+    { label: 'Tour', icon: 'mdi-account-tie-hat', color: appColors.tour },
   ],
 })
 

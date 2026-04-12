@@ -2,7 +2,8 @@
 import { computed } from 'vue'
 import { useDisplay } from 'vuetify'
 import { useRoute } from 'vue-router'
-import type { MenuItem, SuiteApp } from './types'
+import type { MenuItem } from './types'
+import AppSwitcher from '../AppSwitcher.vue'
 
 const props = defineProps<{
   drawer: boolean
@@ -58,15 +59,6 @@ const ungroupedItems = computed(() =>
   props.menu?.filter(item => !item.section) ?? []
 )
 
-// Pinned footer: icon-only links to other DEJA apps
-// Colors match each app's brand color from dejajs.com
-// Monitor has no production URL — it runs locally alongside the server
-const DEJA_SUITE_APPS = [
-  { label: 'Cloud',    icon: 'mdi-cloud',             href: 'https://cloud.dejajs.com/',    color: 'text-fuchsia-500' },
-  { label: 'Throttle', icon: 'mdi-train-variant',     href: 'https://throttle.dejajs.com/', color: 'text-lime-500' },
-  { label: 'Monitor',  icon: 'mdi-monitor-dashboard', href: 'http://localhost:4014/',        color: 'text-red-500' },
-  { label: 'Tour',     icon: 'mdi-map-marker-path',   href: 'https://www.dejajs.com/',      color: 'text-cyan-400' },
-]
 </script>
 
 <template>
@@ -139,26 +131,8 @@ const DEJA_SUITE_APPS = [
       <!-- Pinned app switcher footer -->
       <div>
         <v-divider class="menu-divider" />
-        <div class="flex justify-around px-2 py-2">
-          <v-tooltip
-            v-for="app in DEJA_SUITE_APPS"
-            :key="app.label"
-            :text="app.label"
-            location="end"
-          >
-            <template #activator="{ props: tooltipProps }">
-              <v-btn
-                v-bind="tooltipProps"
-                variant="text"
-                :href="app.href"
-                target="_blank"
-                size="small"
-                :class="app.color"
-              >
-                <v-icon size="20">{{ app.icon }}</v-icon>
-              </v-btn>
-            </template>
-          </v-tooltip>
+        <div class="px-2 py-2">
+          <AppSwitcher />
         </div>
       </div>
     </div>

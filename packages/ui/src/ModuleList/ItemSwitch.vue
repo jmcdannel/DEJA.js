@@ -1,57 +1,105 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { DocumentData } from 'firebase/firestore'
 
 interface Props {
   item: DocumentData
-  isRunning: boolean,
+  isRunning: boolean
 }
 
-defineProps<Props>()
-const state = defineModel('state', {
-  type: Boolean
-})
+const props = defineProps<Props>()
+const state = defineModel('state', { type: Boolean })
 
+const icon = computed(() => props.item?.icon || 'mdi-help')
+const accent = computed(() => props.item?.color || 'primary')
 </script>
+
 <template>
-  <v-card 
-    class="shadow-xl my-1 p-[1px] rounded-full"
-    :class="isRunning ? 'bg-gradient-to-r from-indigo-400 to-pink-900 ' : ''"
-    :color="item?.color || 'primary'"
+  <v-card
+    :color="accent"
+    variant="tonal"
+    rounded="pill"
+    class="module-switch"
+    :class="{ 'module-switch--running': isRunning }"
   >
-    <v-card-title 
-      class="flex flex-row items-center gap-4 justify-between rounded-full px-2 efx-switch-inner"
-      :class="isRunning ? 'shadow-inner shadow-pink-500' : ''"
->
-      <v-icon
-        :icon="item?.icon || 'mdi-help'"
-        class="text-5xl m-3"></v-icon>
-      <h4 class="text-md font-bold mr-2">
-        {{item?.name}}
-        <span class="hidden md:inline text-sm font-normal ml-2 opacity-60">
-          <br />
-          <v-chip 
-            v-if="item?.device" 
-            class="ml-2 text-xs"
-            prepend-icon="mdi-memory"
-            variant="outlined"
-          >
-            {{item?.device}}
-          </v-chip>
-        </span>
-      </h4>
-      <v-switch 
-        v-model="state" 
-        :color="item?.color || 'primary'" 
-        :disabled="isRunning" 
-        :loading="isRunning" 
-        hide-details 
-      />
-    </v-card-title>
+    <v-icon :icon="icon" :color="accent" size="22" />
+
+    <div class="module-switch__text">
+      <div class="module-switch__name">{{ item?.name }}</div>
+      <div v-if="item?.device" class="module-switch__device">
+        <v-icon icon="mdi-memory" size="10" class="mr-0.5" />{{ item.device }}
+      </div>
+    </div>
+
+    <v-switch
+      v-model="state"
+      :color="accent"
+      :disabled="isRunning"
+      :loading="isRunning"
+      density="compact"
+      hide-details
+      inset
+      class="module-switch__control"
+    />
   </v-card>
 </template>
 
 <style scoped>
-.efx-switch-inner {
-  background: rgba(var(--v-theme-surface), 0.85);
+.module-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 6px 16px !important;
+  border: 1px solid currentColor;
+  transition: box-shadow 150ms ease, transform 150ms ease;
+}
+.module-switch:hover {
+  box-shadow: 0 0 0 1px currentColor, 0 0 12px -2px currentColor;
+}
+
+.module-switch__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.15;
+}
+.module-switch__name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.module-switch__device {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6875rem;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.module-switch__control {
+  flex-shrink: 0;
+  margin-right: -6px;
+}
+.module-switch__control :deep(.v-selection-control) {
+  min-height: 0;
+}
+
+/* Running / transitioning — pulsing accent glow. */
+.module-switch--running {
+  box-shadow: 0 0 0 1.5px currentColor, 0 0 16px -2px currentColor;
+  animation: module-switch-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes module-switch-pulse {
+  0%, 100% { box-shadow: 0 0 0 1.5px currentColor, 0 0 18px -2px currentColor; }
+  50%      { box-shadow: 0 0 0 1.5px currentColor, 0 0  6px -2px currentColor; }
 }
 </style>

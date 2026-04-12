@@ -32,11 +32,6 @@ const themes = createVuetifyThemes({
   light: {
     primary: '#00B8D4',
   },
-  custom: {
-    light: { 'device-connected': '#2E7D32', 'device-disconnected': '#C62828', 'stat-card': '#E8EDF2' },
-    dark: { 'device-connected': '#66BB6A', 'device-disconnected': '#EF5350', 'stat-card': '#1A2332' },
-    'high-contrast': { 'device-connected': '#00FF00', 'device-disconnected': '#FF0000', 'stat-card': '#000000' },
-  },
 })
 
 const vuetify = createVuetify({

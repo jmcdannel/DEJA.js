@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import ServerSetupInfo from '../ServerSetupInfo.vue'
+import { DEJA_APPS } from '../appConfig'
 
 interface Props {
   completed?: number[]
@@ -190,7 +191,7 @@ const ctaLinks = [
                   color="primary"
                   variant="flat"
                   size="small"
-                  href="https://throttle.dejajs.com"
+                  :href="DEJA_APPS.throttle.href"
                   target="_blank"
                   prepend-icon="mdi-speedometer"
                 >

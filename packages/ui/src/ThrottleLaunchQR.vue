@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import QRCode from 'qrcode'
+import { DEJA_APPS } from './appConfig'
 
 interface Props {
   url?: string
@@ -9,7 +10,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  url: 'https://throttle.dejajs.com',
+  url: DEJA_APPS.throttle.href,
   size: 160,
   label: 'Scan to open Throttle',
 })
