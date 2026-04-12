@@ -6,6 +6,7 @@ import { useStorage } from '@vueuse/core'
 import { rtdb } from '@repo/firebase-config'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { useLayout, useServerStatus, type Device } from '@repo/modules'
+import { useDcc, DCC_POWER_ON, DCC_POWER_OFF } from '@repo/dccex'
 import { DeviceConnectionList, StatusPulse, SelectLayout } from '@repo/ui'
 import { useDisplay } from 'vuetify'
 
@@ -65,6 +66,11 @@ async function handleDisconnect(deviceId: string) {
 
 function openDeviceInCloud(deviceId: string) {
   window.open(`https://cloud.dejajs.com/devices/${deviceId}`, 'deja-cloud')
+}
+
+const { sendDccCommand } = useDcc()
+async function handleTrackPowerToggle(_deviceId: string, newState: boolean) {
+  await sendDccCommand({ action: 'dcc', payload: newState ? DCC_POWER_ON : DCC_POWER_OFF })
 }
 
 // Jump-to sections
@@ -153,6 +159,7 @@ function scrollTo(id: string) {
                 @connect="handleConnect"
                 @disconnect="handleDisconnect"
                 @navigate="openDeviceInCloud"
+                @track-power-toggle="handleTrackPowerToggle"
               />
             </div>
           </div>

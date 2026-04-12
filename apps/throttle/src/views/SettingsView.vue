@@ -400,7 +400,7 @@ const backgroundPages = [
             <div class="flex flex-col sm:flex-row gap-3 mb-3">
               <div
                 v-for="opt in [
-                  { value: 'deja-server', label: 'DEJA.js Server', desc: 'USB-connected to your DCC-EX Command Station', icon: 'mdi-usb' },
+                  { value: 'deja-server', label: 'DEJA.js Server', desc: 'USB-connected to your DCC-EX Command Station', icon: 'mdi-console' },
                   { value: 'withrottle', label: 'WiThrottle Server', desc: 'Existing WiThrottle on your network', icon: 'mdi-wifi' },
                 ]"
                 :key="opt.value"

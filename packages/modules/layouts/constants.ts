@@ -43,7 +43,7 @@ export const deviceTypes = [
   {
     value: 'deja-server',
     label: 'DEJA Server',
-    icon: 'mdi-server',
+    icon: 'mdi-console',
     color: 'purple',
   },
 ]

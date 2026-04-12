@@ -1,3 +1,7 @@
+export const DCC_POWER_ON = '1 MAIN'
+export const DCC_POWER_OFF = '0'
+export const DCC_EMERGENCY_STOP = '!'
+
 export const defaultCommands = [
   {
     id: 'p',

@@ -52,7 +52,7 @@ export const useLayout = () => {
     {
       value: 'deja-server',
       label: 'DEJA Server',
-      icon: 'mdi-laptop',
+      icon: 'mdi-console',
       color: 'purple',
     },
   ]

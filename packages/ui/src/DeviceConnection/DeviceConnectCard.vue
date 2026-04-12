@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import type { Device } from '@repo/modules'
 import { isArduinoFamilyType, useLayout, useServerStatus } from '@repo/modules'
 import StatusPulse from '../animations/StatusPulse.vue'
+import TrackPower from '../TrackPower.vue'
 
 interface DeviceConnectCardProps {
   device: Device
@@ -37,6 +38,7 @@ const emit = defineEmits<{
   connect: [deviceId: string, serial?: string, topic?: string]
   disconnect: [deviceId: string]
   navigate: [deviceId: string]
+  trackPowerToggle: [deviceId: string, newState: boolean]
 }>()
 
 const { deviceTypes } = useLayout()
@@ -362,18 +364,16 @@ async function copyDejaStart() {
             >
               {{ effectCount }} effects
             </v-chip>
-            <v-chip
-              v-if="device.type === 'dcc-ex' && trackPower !== null"
-              size="x-small"
-              variant="tonal"
-              :color="trackPower ? 'warning' : 'surface-variant'"
-            >
-              Track: {{ trackPower ? 'ON' : 'OFF' }}
-            </v-chip>
           </div>
 
           <!-- Actions -->
-          <div class="d-flex ga-2">
+          <div class="d-flex align-center ga-2">
+            <TrackPower
+              v-if="device.type === 'dcc-ex'"
+              :power-state="trackPower ?? undefined"
+              :is-connected="true"
+              @toggle="(newState) => emit('trackPowerToggle', device.id, newState)"
+            />
             <v-btn
               size="small"
               variant="tonal"
