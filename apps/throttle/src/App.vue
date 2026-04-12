@@ -11,12 +11,17 @@ import useMenu from '@/core/Menu/useMenu'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { usePageSwipe } from '@/composables/usePageSwipe'
 import QuickMenu from '@/quick-menu/QuickMenu.vue'
+import CommandPalette from '@/command-palette/CommandPalette.vue'
+import CommandPaletteTrigger from '@/command-palette/CommandPaletteTrigger.vue'
+import CommandPaletteChordChip from '@/command-palette/CommandPaletteChordChip.vue'
+import { useGlobalKeybindings } from '@/command-palette/useGlobalKeybindings'
 import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useFeedbackUser } from '@repo/modules/feedback'
 import { usePromotions, PROMO_SLOTS } from '@repo/modules'
 import * as Sentry from '@sentry/vue'
 
 provideNotifications()
+useGlobalKeybindings()
 const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
 
 const { feedbackUser } = useFeedbackUser()
@@ -76,7 +81,9 @@ const throttleDefaults: AppBackgroundPrefs = {
           :show-emergency-stop="true"
           :show-user-profile="true"
           @drawer-toggle="drawer = !drawer"
-        />
+        >
+          <CommandPaletteTrigger />
+        </AppHeader>
         <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="menuConfig" @handle-menu="handleMenu" />
         <v-main>
           <!-- Normal (non-fullscreen) layout -->
@@ -118,6 +125,8 @@ const throttleDefaults: AppBackgroundPrefs = {
         </v-main>
         <Footer v-if="!isFullscreen" />
         <QuickMenu v-if="!isFullscreen" />
+        <CommandPalette v-if="!isFullscreen" />
+        <CommandPaletteChordChip v-if="!isFullscreen" />
         <ConnectionStatusBanner v-if="!isFullscreen" />
         <NotificationContainer />
       </PageBackground>
