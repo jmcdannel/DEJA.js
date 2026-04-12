@@ -10,7 +10,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '../.env') })
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
 import { getDeviceConfig, listDevices } from './lib/firebase.js'
-import { isExcludedDeviceType, resolvePlatform, writeDeviceBundle } from './lib/bundle.js'
+import { isExcludedDeviceType, resolveBoardConfig, resolvePlatform, writeDeviceBundle } from './lib/bundle.js'
 import { findArduinoBoards, findCircuitPyMount } from './lib/detect.js'
 import { compileAndUpload } from './lib/deploy-arduino.js'
 import { copyToCircuitPy } from './lib/deploy-pico.js'
@@ -133,12 +133,20 @@ async function deploy() {
   if (isArduino) {
     const boards = findArduinoBoards()
     const port = await promptSerialPort(boards)
-    const board = boardOverride || 'arduino:avr:mega:cpu=atmega2560'
+    const defaultBoardConfig = resolveBoardConfig(device.type) ?? {
+      fqbn: 'arduino:avr:mega:cpu=atmega2560',
+      pioPlatform: 'atmelavr',
+      pioBoard: 'megaatmega2560',
+      needsCpp17: false,
+    }
+    const boardConfig = boardOverride
+      ? { ...defaultBoardConfig, fqbn: boardOverride }
+      : defaultBoardConfig
     console.log('')
     await compileAndUpload({
-      sketchPath: sketchDir, // nested deja-arduino/ folder that Arduino IDE expects
+      sketchPath: sketchDir,
       port,
-      board,
+      boardConfig,
     })
   } else if (isPicoW) {
     const mount = findCircuitPyMount()

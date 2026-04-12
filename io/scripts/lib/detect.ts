@@ -51,6 +51,8 @@ export function isArduinoCliInstalled(): boolean {
   }
 }
 
+const ESP32_BOARD_URL = 'https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json'
+
 /**
  * Auto-install arduino-cli if not present.
  * Returns true if arduino-cli is available after this call.
@@ -96,6 +98,38 @@ export async function ensureArduinoCli(): Promise<boolean> {
   }
 
   return false
+}
+
+/**
+ * Ensure the ESP32 board manager URL is registered and the core is installed.
+ * No-op if the core is already present.
+ */
+export function ensureEsp32Core(): void {
+  if (!isArduinoCliInstalled()) return
+
+  try {
+    const output = execSync('arduino-cli core list --format json', { stdio: 'pipe', encoding: 'utf-8' })
+    const cores = JSON.parse(output)
+    const hasEsp32 = (Array.isArray(cores) ? cores : []).some(
+      (c: { id?: string }) => c.id === 'esp32:esp32'
+    )
+    if (hasEsp32) return
+  } catch {
+    // Can't check — try installing anyway
+  }
+
+  console.log('📦 Installing ESP32 board support...')
+  try {
+    execSync(`arduino-cli config set board_manager.additional_urls ${ESP32_BOARD_URL}`, { stdio: 'pipe' })
+    execSync('arduino-cli core update-index', { stdio: 'inherit' })
+    execSync('arduino-cli core install esp32:esp32', { stdio: 'inherit' })
+    console.log('✅ ESP32 core installed!')
+  } catch {
+    console.error('❌ Failed to install ESP32 core. Install manually:')
+    console.error(`   arduino-cli config set board_manager.additional_urls ${ESP32_BOARD_URL}`)
+    console.error('   arduino-cli core update-index')
+    console.error('   arduino-cli core install esp32:esp32')
+  }
 }
 
 /**

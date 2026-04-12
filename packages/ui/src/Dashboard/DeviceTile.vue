@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import type { Device } from '@repo/modules'
-import { useLayout, useServerStatus } from '@repo/modules'
+import { isArduinoFamilyType, useLayout, useServerStatus } from '@repo/modules'
 import StatusPulse from '../animations/StatusPulse.vue'
 
 interface Props {
@@ -204,8 +204,8 @@ function handleConnect() {
           </div>
         </template>
 
-        <!-- deja-arduino / deja-arduino-led stats -->
-        <template v-else-if="device.type === 'deja-arduino' || device.type === 'deja-arduino-led'">
+        <!-- Arduino-family device stats -->
+        <template v-else-if="isArduinoFamilyType(device.type)">
           <div class="device-tile__stat">
             <div class="device-tile__stat-label">Effects</div>
             <div class="device-tile__stat-value">{{ effectCount }}</div>
