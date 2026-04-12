@@ -10,7 +10,13 @@ dotenv.config({ path: path.resolve(process.cwd(), '../.env') })
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
 import { getDeviceConfig, listDevices } from './lib/firebase.js'
-import { isExcludedDeviceType, resolveBoardConfig, resolvePlatform, writeDeviceBundle } from './lib/bundle.js'
+import {
+  isExcludedDeviceType,
+  resolveBoardConfig,
+  resolveBoardConfigByFqbn,
+  resolvePlatform,
+  writeDeviceBundle,
+} from './lib/bundle.js'
 import { findArduinoBoards, findCircuitPyMount } from './lib/detect.js'
 import { compileAndUpload } from './lib/deploy-arduino.js'
 import { copyToCircuitPy } from './lib/deploy-pico.js'
@@ -64,11 +70,13 @@ async function deploy() {
   console.log('')
   console.log(`🔥 Fetching config for "${deviceId}"...`)
   const config = await getDeviceConfig(layoutId, deviceId)
-  const { device, effects, turnouts, locos } = config
+  const { device, effects, turnouts, locos, sensors, signals } = config
 
   console.log(`   📟 Type: ${device.type}`)
   console.log(`   ⚡ Effects: ${effects.length}`)
   console.log(`   🔀 Turnouts: ${turnouts.length}`)
+  if (sensors) console.log(`   📡 Sensors: ${sensors.length}`)
+  if (signals) console.log(`   🚦 Signals: ${signals.length}`)
 
   // Reject device types that have their own firmware source
   if (isExcludedDeviceType(device.type)) {
@@ -107,6 +115,8 @@ async function deploy() {
     effects,
     turnouts,
     locos,
+    sensors,
+    signals,
     wifiSsid,
     wifiPassword,
     mqttBroker,
@@ -141,8 +151,10 @@ async function deploy() {
       needsCpp17: false,
     }
     const fqbnOverride = boardOverride || (!resolveBoardConfig(device.type) ? await promptArduinoBoard() : undefined)
+    // 🎯 When --board is passed, look up the full config by FQBN so flags like
+    // needsCpp17 and uploadSpeed apply — spreading defaultBoardConfig alone loses them.
     const boardConfig = fqbnOverride
-      ? { ...defaultBoardConfig, fqbn: fqbnOverride }
+      ? resolveBoardConfigByFqbn(fqbnOverride) ?? { ...defaultBoardConfig, fqbn: fqbnOverride }
       : defaultBoardConfig
     console.log('')
     await compileAndUpload({

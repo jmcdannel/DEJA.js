@@ -28,6 +28,7 @@ const debounceMs = ref<number | string | undefined>(props.sensor?.debounceMs)
 const cooldownMs = ref<number | string | undefined>(props.sensor?.cooldownMs)
 const maxRetries = ref<number | string | undefined>(props.sensor?.maxRetries)
 const retryWindowMs = ref<number | string | undefined>(props.sensor?.retryWindowMs)
+const enabled = ref(props.sensor?.enabled ?? true)
 const invertState = ref(Boolean(props.sensor?.invertState))
 const pullup = ref(Boolean(props.sensor?.pullup))
 const analogThreshold = ref<number | string | undefined>(props.sensor?.analogThreshold)
@@ -54,6 +55,7 @@ watch(() => props.sensor, (next) => {
   cooldownMs.value = next?.cooldownMs
   maxRetries.value = next?.maxRetries
   retryWindowMs.value = next?.retryWindowMs
+  enabled.value = next?.enabled ?? true
   invertState.value = Boolean(next?.invertState)
   pullup.value = Boolean(next?.pullup)
   analogThreshold.value = next?.analogThreshold
@@ -99,6 +101,7 @@ async function submit() {
       device: device.value,
       type: type.value,
       inputType: inputType.value,
+      enabled: enabled.value,
       invertState: invertState.value,
       pullup: pullup.value,
     }
@@ -333,6 +336,14 @@ async function submit() {
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
+      </div>
+
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Enabled</span>
+          <span class="form-section__row-desc">Process state changes and trigger linked effects / automations</span>
+        </div>
+        <v-switch v-model="enabled" color="teal" hide-details density="compact" />
       </div>
 
       <div class="form-section__row">

@@ -3,6 +3,8 @@
 import type { Device } from '../layouts/types'
 import type { Effect } from '../effects/types'
 import type { Loco } from '../locos/types'
+import type { Sensor } from '../sensors/types'
+import type { Signal } from '../signals/types'
 import type { Turnout } from '../turnouts/types'
 
 /**
@@ -11,12 +13,15 @@ import type { Turnout } from '../turnouts/types'
  *
  * `locos` is layout-wide (not device-bound) and is only populated for
  * dcc-ex devices, which need the full roster to generate `myAutomation.h`.
+ * `sensors` and `signals` are device-bound; only Arduino-family builds need them.
  */
 export interface DeviceConfigInput {
   device: Device
   effects: Effect[]
   turnouts: Turnout[]
   locos?: Loco[]
+  sensors?: Sensor[]
+  signals?: Signal[]
 }
 
 /**

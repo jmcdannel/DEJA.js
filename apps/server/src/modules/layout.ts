@@ -363,8 +363,40 @@ async function connectMqttDevice(device: Device): Promise<void> {
 
 async function handleSerialMessage(payload: string, device: Device): Promise<void> {
   try {
+    // 📡 Sensor state updates from Arduino-family firmware.
+    // Format: { "sensor": <index>, "state": <0|1> } where index maps to the
+    // position in the firmware's SENSORPINS[] array. We look up the sensor doc
+    // by device + index and write its state — the Firestore listener in
+    // sensors.ts handles debounce, linked effects, automations, and broadcast.
     if (payload?.startsWith('{ "sensor')) {
-      // Sensor handling omitted
+      let parsed: { sensor?: number; state?: number }
+      try {
+        parsed = JSON.parse(payload)
+      } catch (err) {
+        log.error('[SENSORS] Failed to parse sensor payload:', payload, err)
+        return
+      }
+      const index = parsed.sensor
+      if (typeof index !== 'number') {
+        log.warn('[SENSORS] Missing sensor index in payload:', payload)
+        return
+      }
+      const state = Boolean(parsed.state)
+      const snap = await db
+        .collection('layouts').doc(layoutId)
+        .collection('sensors')
+        .where('device', '==', device.id)
+        .where('index', '==', index)
+        .limit(1)
+        .get()
+      if (snap.empty) {
+        log.warn(`[SENSORS] No sensor found for device "${device.id}" at index ${index}`)
+        return
+      }
+      const doc = snap.docs[0]
+      if (!doc) return
+      log.log(`[SENSORS] ${device.id}[${index}] → ${state ? 'active' : 'inactive'} (${doc.id})`)
+      await doc.ref.update({ state, timestamp: FieldValue.serverTimestamp() })
       return
     }
 

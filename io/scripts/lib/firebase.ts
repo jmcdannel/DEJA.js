@@ -3,7 +3,17 @@
 
 import { initializeApp, cert, type ServiceAccount } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
-import type { Device, Effect, Loco, Turnout, DeviceConfigInput, Layout } from '@repo/modules'
+import type {
+  Device,
+  DeviceConfigInput,
+  Effect,
+  Layout,
+  Loco,
+  Sensor,
+  Signal,
+  Turnout,
+} from '@repo/modules'
+import { isArduinoFamilyType } from '@repo/modules'
 
 let initialized = false
 
@@ -30,7 +40,9 @@ function initFirebase() {
 }
 
 /**
- * Fetch device config + effects + turnouts for a specific device
+ * Fetch device config + effects + turnouts for a specific device.
+ * Arduino-family devices additionally get their sensors + signals so that
+ * `config.h` can populate SENSORPINS / SIGNALPINS and the ENABLE_* flags.
  */
 export async function getDeviceConfig(layoutId: string, deviceId: string): Promise<DeviceConfigInput> {
   initFirebase()
@@ -59,7 +71,19 @@ export async function getDeviceConfig(layoutId: string, deviceId: string): Promi
     locos = locosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Loco)
   }
 
-  return { device, effects, turnouts, locos }
+  // Arduino-family config.h needs device-bound sensors + signals.
+  let sensors: Sensor[] | undefined
+  let signals: Signal[] | undefined
+  if (isArduinoFamilyType(device.type)) {
+    const [sensorsSnap, signalsSnap] = await Promise.all([
+      layoutRef.collection('sensors').where('device', '==', deviceId).get(),
+      layoutRef.collection('signals').where('device', '==', deviceId).get(),
+    ])
+    sensors = sensorsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Sensor)
+    signals = signalsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Signal)
+  }
+
+  return { device, effects, turnouts, locos, sensors, signals }
 }
 
 /**
