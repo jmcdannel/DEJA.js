@@ -90,6 +90,37 @@ export async function promptDeployMethod(deviceType: 'arduino' | 'pico'): Promis
 }
 
 /**
+ * Prompt to select which Arduino board FQBN to compile/upload for.
+ * Defaults to Arduino Mega 2560. Custom lets the user paste any FQBN.
+ */
+export async function promptArduinoBoard(defaultFqbn?: string): Promise<string> {
+  const CUSTOM = '__custom__'
+  const choices = [
+    { name: '🟢 Arduino Mega 2560 (ATmega2560) — default', value: 'arduino:avr:mega:cpu=atmega2560' },
+    { name: '🔵 Arduino Uno (ATmega328P)', value: 'arduino:avr:uno' },
+    { name: '🟡 Arduino Nano — new bootloader (ATmega328P)', value: 'arduino:avr:nano:cpu=atmega328' },
+    { name: '🟠 Arduino Nano — old bootloader (ATmega328P)', value: 'arduino:avr:nano:cpu=atmega328old' },
+    { name: '🟣 Arduino Leonardo (ATmega32u4)', value: 'arduino:avr:leonardo' },
+    { name: '✏️  Custom FQBN…', value: CUSTOM },
+  ]
+
+  const selected = await select({
+    message: '🧩 Select Arduino board:',
+    choices,
+    default: defaultFqbn || 'arduino:avr:mega:cpu=atmega2560',
+  })
+
+  if (selected === CUSTOM) {
+    return input({
+      message: '🧩 Enter FQBN (e.g. arduino:avr:mega:cpu=atmega2560):',
+      validate: (val) => val.trim().length > 0 || 'FQBN is required',
+    })
+  }
+
+  return selected
+}
+
+/**
  * Prompt to select a serial port from detected Arduino boards
  */
 export async function promptSerialPort(boards: ArduinoBoard[]): Promise<string> {

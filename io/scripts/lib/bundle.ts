@@ -252,10 +252,10 @@ Effects: ${effects.length} | Turnouts: ${turnouts.length}
 pip install platformio
 
 # Build
-platformio run -e nanoatmega328
+platformio run -e megaatmega2560
 
 # Upload
-platformio run -e nanoatmega328 --target upload --upload-port /dev/cu.usbserial-*
+platformio run -e megaatmega2560 --target upload --upload-port /dev/cu.usbserial-*
 
 # Monitor
 platformio device monitor --port /dev/cu.usbserial-*
@@ -277,10 +277,10 @@ arduino-cli lib install "Adafruit PWM Servo Driver Library"
 arduino-cli lib install "ArduinoJson"
 
 # Build
-arduino-cli compile --fqbn arduino:avr:nano:cpu=atmega328p ${ARDUINO_SKETCH_NAME}/${ARDUINO_SKETCH_NAME}.ino
+arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 ${ARDUINO_SKETCH_NAME}/${ARDUINO_SKETCH_NAME}.ino
 
 # Upload
-arduino-cli upload -p /dev/cu.usbserial-* --fqbn arduino:avr:nano:cpu=atmega328p ${ARDUINO_SKETCH_NAME}/${ARDUINO_SKETCH_NAME}.ino
+arduino-cli upload -p /dev/cu.usbserial-* --fqbn arduino:avr:mega:cpu=atmega2560 ${ARDUINO_SKETCH_NAME}/${ARDUINO_SKETCH_NAME}.ino
 \`\`\`
 
 ### Option C: Arduino IDE
@@ -291,8 +291,8 @@ arduino-cli upload -p /dev/cu.usbserial-* --fqbn arduino:avr:nano:cpu=atmega328p
    - \`Adafruit PWM Servo Driver Library\`
    - \`ArduinoJson\`
 4. **File → Open → \`${ARDUINO_SKETCH_NAME}/${ARDUINO_SKETCH_NAME}.ino\`**
-5. **Tools → Board → Arduino AVR Boards → Arduino Nano**
-6. **Tools → Processor → ATmega328P**
+5. **Tools → Board → Arduino AVR Boards → Arduino Mega or Mega 2560**
+6. **Tools → Processor → ATmega2560 (Mega 2560)**
 7. **Tools → Port → \`/dev/cu.usbserial-*\`**
 8. Click **Upload** button
 
@@ -335,7 +335,7 @@ export async function writeDeviceBundle(options: WriteBundleOptions): Promise<Wr
   const platform = resolvePlatform(device.type)
   if (!platform) {
     throw new Error(
-      \`Unknown device type "\${device.type}" for device "\${device.id}" — expected Arduino or Pico W\`
+      `Unknown device type "${device.type}" for device "${device.id}" — expected Arduino or Pico W`
     )
   }
 
@@ -355,9 +355,9 @@ export async function writeDeviceBundle(options: WriteBundleOptions): Promise<Wr
     // Generate cross-platform deployment files
     await generateArduinoCrossPlatformFiles(outDir, device.id, device.type, effects, turnouts)
 
-    console.log(\`✅ arduino "\${device.id}" → \${relativeDir}/\${ARDUINO_SKETCH_NAME}/\`)
-    console.log(\`   📄 \${ARDUINO_SKETCH_NAME}.ino + config.h (\${effects.length} effects, \${turnouts.length} turnouts)\`)
-    console.log(\`   ⚙️  platformio.ini, .arduino-cli.yaml, DEPLOYMENT.md\`)
+    console.log(`✅ arduino "${device.id}" → ${relativeDir}/${ARDUINO_SKETCH_NAME}/`)
+    console.log(`   📄 ${ARDUINO_SKETCH_NAME}.ino + config.h (${effects.length} effects, ${turnouts.length} turnouts)`)
+    console.log(`   ⚙️  platformio.ini, .arduino-cli.yaml, DEPLOYMENT.md`)
   } else if (platform === 'pico') {
     await fs.copy(path.join(rootDir, 'src/deja-pico-w'), outDir)
 

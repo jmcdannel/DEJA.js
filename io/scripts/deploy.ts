@@ -20,6 +20,7 @@ import {
   promptWifiCredentials,
   promptDeployMethod,
   promptSerialPort,
+  promptArduinoBoard,
 } from './lib/prompts.js'
 
 const args = process.argv.slice(2)
@@ -139,8 +140,9 @@ async function deploy() {
       pioBoard: 'megaatmega2560',
       needsCpp17: false,
     }
-    const boardConfig = boardOverride
-      ? { ...defaultBoardConfig, fqbn: boardOverride }
+    const fqbnOverride = boardOverride || (!resolveBoardConfig(device.type) ? await promptArduinoBoard() : undefined)
+    const boardConfig = fqbnOverride
+      ? { ...defaultBoardConfig, fqbn: fqbnOverride }
       : defaultBoardConfig
     console.log('')
     await compileAndUpload({
