@@ -121,7 +121,7 @@ const displayedCommands = computed<Command[]>(() => {
   return synthetic ? [synthetic, ...filtered] : filtered
 })
 
-const CATEGORY_ORDER: CommandCategory[] = ['browse', 'settings', 'navigation', 'throttle', 'turnout', 'effect', 'signal']
+const CATEGORY_ORDER: CommandCategory[] = ['browse', 'navigation', 'settings', 'throttle', 'turnout', 'effect', 'signal']
 
 const showInlineThrottles = computed(() => stack.value.length === 0 && !query.value.trim())
 const CATEGORY_LABELS: Record<CommandCategory, string> = {
