@@ -5,7 +5,7 @@ import { deviceTypes, useLayout, useServerStatus, type Device } from '@repo/modu
 import { useTurnouts } from '@repo/modules'
 import { StatusPulse } from '@repo/ui'
 
-const { connectDevice, autoConnectDevice } = useLayout()
+const { connectDevice, autoConnectDevice, updateDevice } = useLayout()
 const { getTurnouts } = useTurnouts()
 const { colors, DEFAULT_COLOR } = useColors()
 const { serverStatus } = useServerStatus()
@@ -128,6 +128,8 @@ async function handleDisconnect () {
         density="compact"
         :items="ports || []"
         :disabled="effectiveConnected"
+        clearable
+        @click:clear="updateDevice(device.id, { port: '' })"
       />
 
       <v-switch
