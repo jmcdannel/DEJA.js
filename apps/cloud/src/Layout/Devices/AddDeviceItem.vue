@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { deviceTypes, useLayout, type Device } from '@repo/modules'
+import { ref, watch } from 'vue'
+import { deviceTypes, isWifiDeviceType, useLayout, type Device } from '@repo/modules'
 import { createLogger } from '@repo/utils'
 
 const log = createLogger('AddDeviceItem')
@@ -19,7 +19,19 @@ const props = defineProps({
 const reveal = ref(false)
 const loading = ref(false)
 const connection = ref<'usb' | 'wifi' | null>(null)
-const deviceType = ref(null)
+const deviceType = ref<Device['type'] | null>(null)
+
+// 📡 Auto-default connection based on device type — WiFi devices (Pico W, ESP32 WiFi)
+// must use connection: 'wifi' so the server's MQTT publish branch is used.
+// Server modules in apps/server/src/modules/effects.ts gate WiFi publish on
+// `connection === 'wifi'`, so this default is load-bearing.
+watch(deviceType, (newType) => {
+  if (isWifiDeviceType(newType ?? undefined)) {
+    connection.value = 'wifi'
+  } else if (newType) {
+    connection.value = 'usb'
+  }
+})
 const deviceId = ref('')
 const topic = ref('')
 const autoConnect = ref(false)

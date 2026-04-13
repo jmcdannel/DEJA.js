@@ -133,9 +133,61 @@ function handleOffline(): void {
 function handleMessage(topic: string, message: Buffer): void {
   try {
     log.log('[MQTT] Message received:', topic, message.toString())
+
+    // 📡 Device → server event topic: DEJA/{layoutId}/{deviceId}/messages
+    // WiFi firmware (Pico W, ESP32) publishes sensor state changes here.
+    // Today we only handle sensor payloads; other event types will be added later.
+    if (topic.endsWith('/messages')) {
+      handleDeviceEventMessage(topic, message).catch((err) => {
+        log.error('[MQTT] Error handling device event message:', err)
+      })
+      return
+    }
   } catch (error) {
     log.error('[MQTT] Error in onMessage:', error)
   }
+}
+
+interface SensorEventPayload {
+  sensor?: unknown
+  state?: unknown
+}
+
+async function handleDeviceEventMessage(topic: string, message: Buffer): Promise<void> {
+  // Topic shape: DEJA/{layoutId}/{deviceId}/messages
+  const parts = topic.split('/')
+  const deviceId = parts.length >= 4 ? parts[parts.length - 2] : undefined
+  if (!deviceId) {
+    log.warn('[MQTT] Could not extract deviceId from event topic:', topic)
+    return
+  }
+
+  let parsed: SensorEventPayload
+  try {
+    parsed = JSON.parse(message.toString()) as SensorEventPayload
+  } catch (err) {
+    log.warn('[MQTT] Failed to parse device event payload:', topic, err)
+    return
+  }
+
+  const sensorIndex = parsed.sensor
+  const stateValue = parsed.state
+  if (
+    typeof sensorIndex === 'number' &&
+    (stateValue === 0 || stateValue === 1 || typeof stateValue === 'boolean')
+  ) {
+    // Dynamic import avoids the layout.ts ↔ mqtt.ts circular dependency:
+    // layout.ts already imports `dejaMqtt` from this file at module init.
+    const { writeSensorState } = await import('../modules/layout')
+    await writeSensorState({
+      deviceId,
+      index: sensorIndex,
+      state: Boolean(stateValue),
+    })
+    return
+  }
+
+  log.debug('[MQTT] Unrecognized device event payload (no sensor shape):', topic, parsed)
 }
 
 /**

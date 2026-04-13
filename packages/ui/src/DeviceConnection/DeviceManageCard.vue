@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { Device } from '@repo/modules'
-import { isArduinoFamilyType, useLayout, useServerStatus } from '@repo/modules'
+import { isArduinoFamilyType, isWifiDeviceType, useLayout, useServerStatus } from '@repo/modules'
 import StatusPulse from '../animations/StatusPulse.vue'
 
 // ── Props & Emits ──────────────────────────────────────────────────
@@ -44,9 +44,14 @@ const isConnected = computed(() =>
     : props.device?.isConnected ?? false,
 )
 
+// 🛜 ESP32 WiFi is a member of the Arduino family but connects over WiFi/MQTT —
+// so a 'deja-esp32-wifi' device with connection: 'wifi' must be treated as MQTT,
+// not USB. The connection field wins over the firmware-family classification.
 const isUsbDevice = computed(
   () =>
     !isDejaServer.value &&
+    props.device?.connection !== 'wifi' &&
+    !isWifiDeviceType(props.device?.type) &&
     (props.device?.connection === 'usb' ||
       props.device?.type === 'dcc-ex' ||
       isArduinoFamilyType(props.device?.type)),
@@ -55,7 +60,7 @@ const isUsbDevice = computed(
 const isMqttDevice = computed(
   () =>
     !isDejaServer.value &&
-    (props.device?.connection === 'wifi' || props.device?.type === 'deja-mqtt'),
+    (props.device?.connection === 'wifi' || isWifiDeviceType(props.device?.type)),
 )
 
 const serverIp = computed(() => serverStatus.value?.ip ?? null)

@@ -47,3 +47,24 @@ export interface PicoConfigInput extends DeviceConfigInput {
   topicId?: string
   layoutId: string
 }
+
+/**
+ * ESP32 WiFi+MQTT config.h generator input.
+ * Combines Arduino-style hardware feature flags (sensors, signals, servo PWM)
+ * with WiFi/MQTT connection details baked into the firmware at build time.
+ */
+export interface Esp32WifiConfigInput extends DeviceConfigInput {
+  enablePwm?: boolean
+  enableSignals?: boolean
+  enableSensors?: boolean
+  sensorPins?: string[]
+  signalPins?: number[]
+  layoutId: string
+  wifiSsid?: string
+  wifiPassword?: string
+  mqttBroker?: string
+  mqttPort?: number
+  mqttUsername?: string
+  mqttPassword?: string
+  topicId?: string
+}

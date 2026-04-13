@@ -93,13 +93,14 @@ async function deploy() {
   }
   const isArduino = platform === 'arduino'
   const isPicoW = platform === 'pico'
+  const isEsp32Wifi = device.type === 'deja-esp32-wifi'
 
-  // 4. Pico W: prompt for WiFi credentials
+  // 4. Pico W and deja-esp32-wifi: prompt for WiFi credentials
   let wifiSsid = ''
   let wifiPassword = ''
   let mqttBroker = ''
 
-  if (isPicoW) {
+  if (isPicoW || isEsp32Wifi) {
     console.log('')
     const wifi = await promptWifiCredentials()
     wifiSsid = wifi.ssid
@@ -121,7 +122,8 @@ async function deploy() {
     wifiPassword,
     mqttBroker,
   })
-  console.log(`📦 Built ${isArduino ? 'Arduino' : 'Pico W'} package → ${relativeDir}/`)
+  const platformLabel = isEsp32Wifi ? 'ESP32 WiFi' : isArduino ? 'Arduino' : 'Pico W'
+  console.log(`📦 Built ${platformLabel} package → ${relativeDir}/`)
 
   // 6. Prompt for deploy method
   console.log('')

@@ -1,52 +1,60 @@
 ---
 title: IO Devices
-description: Extend your layout with wireless lights, servos, sensors, and animations using Arduino and Raspberry Pi Pico W hardware devices.
+description: Extend your layout with wireless lights, servos, sensors, and animations using Arduino, ESP32, and Raspberry Pi Pico W hardware devices.
 section: io
 order: 8
 ---
 
-# IO Devices
+# 🔌 IO Devices
 
 IO devices extend your layout beyond what the DCC-EX CommandStation handles directly. They control effects like lighting, servo-driven turnouts, sensors, and animated elements — anything that isn't powered through the DCC track bus.
 
-DEJA IO supports three communication protocols — **Serial USB**, **MQTT over WiFi**, and **WebSocket** — so you can pick the one that fits your layout. See the [IO Guide](/guides/io) for the full platform overview.
+DEJA IO supports **four firmware targets** across two transports — **USB serial** and **MQTT over WiFi** — plus a generic **WebSocket** API for custom integrations. Pick the device type that fits your hardware and how you want it connected. See the [IO Guide](/guides/io) for the full platform overview.
 
-## Supported Hardware
+## 🎯 Supported Device Types
 
-### Arduino (USB Serial)
+| Device type | Hardware | Transport | Sketch / Runtime | Setup guide |
+|---|---|---|---|---|
+| 🟢 `deja-arduino` | Arduino Mega 2560 (or compatible AVR) | USB serial @ 115200 | `io/src/deja-arduino/` (Arduino sketch) | [Arduino & ESP32 Setup](/docs/io/arduino-setup) |
+| 🟠 `deja-esp32` | ESP32 Dev Module | USB serial @ 115200 | `io/src/deja-arduino/` (shared sketch) | [Arduino & ESP32 Setup](/docs/io/arduino-setup) |
+| 🛜 `deja-esp32-wifi` | ESP32 Dev Module | WiFi + MQTT | `io/src/deja-esp32-wifi/` (Arduino sketch) | [Arduino & ESP32 Setup](/docs/io/arduino-setup) |
+| 🍓 `deja-mqtt` | Raspberry Pi Pico W | WiFi + MQTT | `io/src/deja-pico-w/` (CircuitPython) | [Pico W Setup](/docs/io/pico-w-setup) |
 
-Standard Arduino boards (Uno, Mega, Nano) connect to the DEJA Server via USB. They can drive:
+> 🤝 `deja-arduino` and `deja-esp32` share the **same sketch** — the only difference is the FQBN (Mega vs ESP32) and the upload speed. Same JSON-over-serial protocol, same handlers, same config file.
+>
+> 🛜 `deja-esp32-wifi` and `deja-mqtt` share the **same MQTT topology** — same topic scheme (`{TOPIC_ID}/{LAYOUT_ID}/{DEVICE_ID}`), same single-object command format, same publish/subscribe semantics. Pick the one that matches your hardware.
 
-- **PWM servos** via an Adafruit PCA9685 16-channel servo driver board — for turnout motors and animated elements
-- **Digital outputs** — for LEDs, relays, and on/off devices
-- **Signal heads** — for model railroad signal aspects
-- **Sensors** — for detecting train presence (block detection, occupancy)
+## 🛠️ What These Devices Can Do
 
-Arduino devices communicate over serial at 115200 baud. See [Arduino Setup](/docs/io/arduino-setup) for full instructions.
+All four firmware targets share the same capabilities:
 
-### Raspberry Pi Pico W (WiFi / MQTT)
+- 🎛️ **PWM servos** via an Adafruit PCA9685 16-channel servo driver — for turnout motors and animated elements
+- 💡 **Digital outputs** — for LEDs, relays, and on/off devices
+- 🚦 **Signal heads** — for model railroad signal aspects
+- 📡 **Sensors** — for detecting train presence (block detection, occupancy)
+- 🔧 **Servo-driven turnouts** via `TurnoutPulser`
 
-The Pico W connects to your layout wirelessly over WiFi and communicates via MQTT. This is ideal for devices placed inside scenery or buildings where running USB cables is impractical.
+The handlers are identical regardless of transport — the same `pin` / `servo` / `turnout` / `effects` / `ialed` actions work whether the message arrives over serial or MQTT.
 
-Pico W devices support:
+## 📡 Picking a Transport
 
-- **Digital pin control** — LEDs, relays, and other outputs
-- **PWM servo control** — via Adafruit ServoKit over I2C
+- **USB serial** (`deja-arduino`, `deja-esp32`) — simplest setup, no networking, lowest latency. Ideal when the board lives next to the DEJA Server.
+- **WiFi + MQTT** (`deja-esp32-wifi`, `deja-mqtt`) — wireless, ideal for boards mounted inside scenery, under benchwork, or anywhere a USB cable is impractical. Requires an MQTT broker (Mosquitto recommended) on the same network as the server.
 
-See [Pico W Setup](/docs/io/pico-w-setup) for full instructions.
+## 🚀 Setting Up a Device
 
-## Setting Up a Device
-
-1. **Register the device** — In the [Cloud app](https://cloud.dejajs.com), go to your layout's **Devices** section and add a new device entry with a unique device ID.
-2. **Flash the firmware** — See [Arduino Setup](/docs/io/arduino-setup) or [Pico W Setup](/docs/io/pico-w-setup).
-3. **Deploy configuration** — Run the [deploy script](/docs/io/deploy) to push your Cloud configuration to the device.
+1. **Register the device** — In the [Cloud app](https://cloud.dejajs.com), go to your layout's **Devices** section and add a new device with a unique device ID and the matching device type.
+2. **Flash the firmware** — See [Arduino & ESP32 Setup](/docs/io/arduino-setup) (for `deja-arduino`, `deja-esp32`, `deja-esp32-wifi`) or [Pico W Setup](/docs/io/pico-w-setup) (for `deja-mqtt`).
+3. **Deploy configuration** — Run the [deploy script](/docs/io/deploy) to push your Cloud configuration to the device. The wizard prompts for WiFi/MQTT credentials when needed.
 4. **Verify** — Open the [Monitor app](https://monitor.dejajs.com) to see your device appear and respond to commands.
 
-## Reference
+## 📚 Reference
 
-- [Command Reference](/docs/io/command-reference) — JSON command format for all device actions
-- [Protocol Details](/docs/io/protocols) — Serial, MQTT, and WebSocket connection specs
-- [Configuration Reference](/docs/io/configuration) — All config file formats
-- [Deploy to Devices](/docs/io/deploy) — Push configs from Cloud to hardware
-- [Building Custom Devices](/docs/io/custom-devices) — Build your own MQTT or WebSocket devices
-- [WebSocket Integration](/docs/io/websocket-integration) — Connect scripts and apps to the DEJA Server
+- 🔧 [Arduino & ESP32 Setup](/docs/io/arduino-setup) — flash Mega, ESP32 USB, or ESP32 WiFi firmware
+- 🍓 [Pico W Setup](/docs/io/pico-w-setup) — flash CircuitPython firmware to a Raspberry Pi Pico W
+- 🚀 [Deploy to Devices](/docs/io/deploy) — push configs from Cloud to hardware
+- 📋 [Command Reference](/docs/io/command-reference) — JSON command format for all device actions
+- 📡 [Protocol Details](/docs/io/protocols) — Serial, MQTT, and WebSocket connection specs
+- ⚙️ [Configuration Reference](/docs/io/configuration) — All config file formats per device type
+- 🔧 [Building Custom Devices](/docs/io/custom-devices) — Build your own MQTT or WebSocket devices
+- 🌐 [WebSocket Integration](/docs/io/websocket-integration) — Connect scripts and apps to the DEJA Server

@@ -335,7 +335,13 @@ async function connectMqttDevice(device: Device): Promise<void> {
       })
     } else {
       const topic = `DEJA/${layoutId}/${device.id}`
+      const messagesTopic = `${topic}/messages`
+      // 📡 Subscribe to both the command topic (server → device) and the
+      // events topic (device → server) used by WiFi firmware (Pico W, ESP32)
+      // to publish sensor state changes and other event payloads.
       mqtt.subscribe(topic)
+      mqtt.subscribe(messagesTopic)
+      log.note('[LAYOUT] MQTT device subscribed:', { command: topic, events: messagesTopic })
 
       db.doc(`layouts/${layoutId}/devices/${device.id}`)
         .set(
@@ -361,13 +367,45 @@ async function connectMqttDevice(device: Device): Promise<void> {
   }
 }
 
+/**
+ * 📡 Write a sensor state to Firestore by looking up the sensor doc that
+ * matches `deviceId` + `index`. Used by both the serial-message path
+ * (Arduino-family firmware) and the MQTT-message path (WiFi-connected
+ * devices like Pico W and ESP32). The Firestore listener in sensors.ts
+ * handles debounce, linked effects, automations, and broadcast downstream.
+ */
+export async function writeSensorState({
+  deviceId,
+  index,
+  state,
+}: {
+  deviceId: string
+  index: number
+  state: boolean
+}): Promise<void> {
+  const snap = await db
+    .collection('layouts').doc(layoutId)
+    .collection('sensors')
+    .where('device', '==', deviceId)
+    .where('index', '==', index)
+    .limit(1)
+    .get()
+  if (snap.empty) {
+    log.warn(`[SENSORS] No sensor found for device "${deviceId}" at index ${index}`)
+    return
+  }
+  const doc = snap.docs[0]
+  if (!doc) return
+  log.log(`[SENSORS] ${deviceId}[${index}] → ${state ? 'active' : 'inactive'} (${doc.id})`)
+  await doc.ref.update({ state, timestamp: FieldValue.serverTimestamp() })
+}
+
 async function handleSerialMessage(payload: string, device: Device): Promise<void> {
   try {
     // 📡 Sensor state updates from Arduino-family firmware.
     // Format: { "sensor": <index>, "state": <0|1> } where index maps to the
-    // position in the firmware's SENSORPINS[] array. We look up the sensor doc
-    // by device + index and write its state — the Firestore listener in
-    // sensors.ts handles debounce, linked effects, automations, and broadcast.
+    // position in the firmware's SENSORPINS[] array. We delegate the lookup
+    // and Firestore write to the shared writeSensorState helper.
     if (payload?.startsWith('{ "sensor')) {
       let parsed: { sensor?: number; state?: number }
       try {
@@ -382,21 +420,7 @@ async function handleSerialMessage(payload: string, device: Device): Promise<voi
         return
       }
       const state = Boolean(parsed.state)
-      const snap = await db
-        .collection('layouts').doc(layoutId)
-        .collection('sensors')
-        .where('device', '==', device.id)
-        .where('index', '==', index)
-        .limit(1)
-        .get()
-      if (snap.empty) {
-        log.warn(`[SENSORS] No sensor found for device "${device.id}" at index ${index}`)
-        return
-      }
-      const doc = snap.docs[0]
-      if (!doc) return
-      log.log(`[SENSORS] ${device.id}[${index}] → ${state ? 'active' : 'inactive'} (${doc.id})`)
-      await doc.ref.update({ state, timestamp: FieldValue.serverTimestamp() })
+      await writeSensorState({ deviceId: device.id, index, state })
       return
     }
 

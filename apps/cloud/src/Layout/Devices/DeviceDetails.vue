@@ -6,7 +6,7 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { useStorage, useClipboard } from '@vueuse/core'
 import { useColors } from '@/Core/UI/useColors'
-import { deviceTypes, useTurnouts, useEfx, useLayout, useLocos, useSignals, useSensors, type Device, type Effect, type Loco, type Turnout, type Signal, type Sensor, efxTypes } from '@repo/modules'
+import { deviceTypes, getCliDeployCommands, useTurnouts, useEfx, useLayout, useLocos, useSignals, useSensors, type CliDeployCommands, type Device, type Effect, type Loco, type Turnout, type Signal, type Sensor, efxTypes } from '@repo/modules'
 import { StatusPulse, TrackOutputConfig } from '@repo/ui'
 import { useTrackOutputs, type TrackOutput } from '@repo/dccex'
 import { useNotification } from '@repo/ui'
@@ -49,7 +49,7 @@ const sortedSignals = computed<Signal[]>(() =>
   [...((signals?.value ?? []) as Signal[])].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
 )
 
-const { isArduino, isPicoW, isDccEx, arduinoConfigH, picoConfigJson, dccExAutomationH } = useDeviceConfig({
+const { isArduino, isPicoW, isEsp32Wifi, isDccEx, arduinoConfigH, esp32WifiConfigH, picoConfigJson, dccExAutomationH } = useDeviceConfig({
   device,
   effects: computed(() => (effects.value ?? []) as Effect[]),
   turnouts: computed(() => (turnouts.value ?? []) as Turnout[]),
@@ -60,7 +60,10 @@ const { isArduino, isPicoW, isDccEx, arduinoConfigH, picoConfigJson, dccExAutoma
 })
 
 // 📄 The single config file this device needs for manual install
+// 🛜 isEsp32Wifi is checked first because deja-esp32-wifi is also a member of the
+// Arduino family — it needs the WiFi-aware generator, not generateArduinoConfig.
 const deploymentConfig = computed<{ filename: string; content: string; language: string } | null>(() => {
+  if (isEsp32Wifi.value) return { filename: 'config.h', content: esp32WifiConfigH.value, language: 'cpp' }
   if (isArduino.value) return { filename: 'config.h', content: arduinoConfigH.value, language: 'cpp' }
   if (isPicoW.value) return { filename: 'config.json', content: picoConfigJson.value, language: 'json' }
   if (isDccEx.value) return { filename: 'myAutomation.h', content: dccExAutomationH.value, language: 'cpp' }
@@ -121,8 +124,33 @@ const dejaDeployCommand = computed(() => device.value?.id ? `deja deploy ${devic
 // 📋 Copy the `deja deploy` command to clipboard
 const { copy: copyDejaCmd, copied: dejaCmdCopied } = useClipboard({ source: dejaDeployCommand })
 
+// 🛠️ Manual CLI deploy commands (PlatformIO + arduino-cli) — single source of
+// truth lives in @repo/modules/device-config/cli-commands.ts so the same FQBN /
+// sketch folder / upload speed are shown here, in each bundle's DEPLOYMENT.md,
+// and used by the actual `pnpm run deploy` pipeline. Returns null for non-
+// Arduino-family device types (Pico W, dcc-ex).
+const cliCommands = computed<CliDeployCommands | null>(() => {
+  if (!device.value || !layoutId.value) return null
+  return getCliDeployCommands({
+    deviceType: device.value.type,
+    deviceId: device.value.id,
+    layoutId: layoutId.value,
+  })
+})
+
+// 📋 Per-line copy buttons for each CLI command
+const cliBuildSrc = computed(() => cliCommands.value?.build ?? '')
+const cliCdSrc = computed(() => cliCommands.value?.cd ?? '')
+const cliPioSrc = computed(() => cliCommands.value?.platformio ?? '')
+const cliArduinoSrc = computed(() => cliCommands.value?.arduinoCli ?? '')
+const { copy: copyCliBuild, copied: cliBuildCopied } = useClipboard({ source: cliBuildSrc })
+const { copy: copyCliCd, copied: cliCdCopied } = useClipboard({ source: cliCdSrc })
+const { copy: copyCliPio, copied: cliPioCopied } = useClipboard({ source: cliPioSrc })
+const { copy: copyCliArduino, copied: cliArduinoCopied } = useClipboard({ source: cliArduinoSrc })
+
 // 📝 Per-device-type manual install hint (where to put the file after download)
 const manualInstallHint = computed(() => {
+  if (isEsp32Wifi.value) return 'Save into your deja-esp32-wifi sketch folder next to deja-esp32-wifi.ino, then upload via Arduino IDE (ESP32 board).'
   if (isArduino.value) return 'Save into your Arduino sketch folder next to deja-arduino.ino, then upload via Arduino IDE.'
   if (isPicoW.value) return 'Copy onto the CIRCUITPY drive on your Pico W — it reboots automatically.'
   if (isDccEx.value) return 'Save into your CommandStation EX sketch folder next to CommandStation-EX.ino, then upload via Arduino IDE.'
@@ -312,6 +340,76 @@ function handleBack() {
             </div>
           </v-col>
         </v-row>
+
+        <!-- 🛠️ Manual CLI deploy — PlatformIO + arduino-cli (Arduino-family only) -->
+        <div v-if="cliCommands" class="border border-white/10 rounded pa-3 bg-black/30 mt-3">
+          <div class="d-flex align-center mb-2">
+            <v-icon icon="mdi-console" color="grey-lighten-1" size="small" class="mr-2" />
+            <span class="text-body-2 font-weight-bold">Build &amp; flash from source</span>
+            <v-chip size="x-small" variant="tonal" color="grey-lighten-2" class="ml-2 font-mono">
+              {{ cliCommands.fqbn }}
+            </v-chip>
+          </div>
+          <p class="text-caption text-grey-lighten-1 mb-3">
+            Build the bundle from the monorepo, then flash with PlatformIO or arduino-cli — the same commands the <code class="text-green-lighten-2">deja deploy</code> CLI runs under the hood.
+          </p>
+
+          <!-- Step 1: build -->
+          <div class="text-caption font-weight-medium text-grey-lighten-2 mb-1">1. Build the bundle</div>
+          <div class="d-flex align-center gap-2 bg-black/60 rounded pa-2 ring-1 ring-white/10 font-mono text-caption text-grey-lighten-1 mb-3">
+            <span class="text-grey mr-1">$</span>
+            <span class="flex-grow-1 overflow-x-auto">{{ cliCommands.build }}</span>
+            <v-btn
+              size="x-small"
+              variant="text"
+              :icon="cliBuildCopied ? 'mdi-check' : 'mdi-content-copy'"
+              :color="cliBuildCopied ? 'green' : 'grey-lighten-1'"
+              @click="copyCliBuild()"
+            />
+          </div>
+
+          <!-- Step 2: cd -->
+          <div class="text-caption font-weight-medium text-grey-lighten-2 mb-1">2. Enter the bundle directory</div>
+          <div class="d-flex align-center gap-2 bg-black/60 rounded pa-2 ring-1 ring-white/10 font-mono text-caption text-grey-lighten-1 mb-3">
+            <span class="text-grey mr-1">$</span>
+            <span class="flex-grow-1 overflow-x-auto">{{ cliCommands.cd }}</span>
+            <v-btn
+              size="x-small"
+              variant="text"
+              :icon="cliCdCopied ? 'mdi-check' : 'mdi-content-copy'"
+              :color="cliCdCopied ? 'green' : 'grey-lighten-1'"
+              @click="copyCliCd()"
+            />
+          </div>
+
+          <!-- Step 3a: PlatformIO -->
+          <div class="text-caption font-weight-medium text-grey-lighten-2 mb-1">3a. Upload via PlatformIO</div>
+          <div class="d-flex align-center gap-2 bg-black/60 rounded pa-2 ring-1 ring-white/10 font-mono text-caption text-blue-lighten-2 mb-3">
+            <span class="text-grey mr-1">$</span>
+            <span class="flex-grow-1 overflow-x-auto">{{ cliCommands.platformio }}</span>
+            <v-btn
+              size="x-small"
+              variant="text"
+              :icon="cliPioCopied ? 'mdi-check' : 'mdi-content-copy'"
+              :color="cliPioCopied ? 'green' : 'grey-lighten-1'"
+              @click="copyCliPio()"
+            />
+          </div>
+
+          <!-- Step 3b: arduino-cli -->
+          <div class="text-caption font-weight-medium text-grey-lighten-2 mb-1">3b. Or upload via arduino-cli</div>
+          <div class="d-flex align-center gap-2 bg-black/60 rounded pa-2 ring-1 ring-white/10 font-mono text-caption text-blue-lighten-2">
+            <span class="text-grey mr-1">$</span>
+            <span class="flex-grow-1 overflow-x-auto">{{ cliCommands.arduinoCli }}</span>
+            <v-btn
+              size="x-small"
+              variant="text"
+              :icon="cliArduinoCopied ? 'mdi-check' : 'mdi-content-copy'"
+              :color="cliArduinoCopied ? 'green' : 'grey-lighten-1'"
+              @click="copyCliArduino()"
+            />
+          </div>
+        </div>
 
         <!-- Config preview, collapsed by default -->
         <v-expansion-panels variant="accordion" class="mt-3">
