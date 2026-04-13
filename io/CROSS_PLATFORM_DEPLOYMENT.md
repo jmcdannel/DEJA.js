@@ -1,174 +1,196 @@
-📚 # Cross-Platform Arduino Deployment System
+# 📚 Cross-Platform Arduino Deployment
 
-## 🎯 What Changed
-
-The `io` workspace now automatically generates **cross-platform deployment files** whenever you run `pnpm build` or `pnpm deploy`, enabling seamless Arduino deployment across:
-- ✅ PlatformIO
-- ✅ Arduino CLI  
-- ✅ Arduino IDE
+The `io` workspace generates **cross-platform deployment bundles** for every Arduino-family device on your layout. Each bundle is a self-contained directory you can flash with **PlatformIO**, **Arduino CLI**, **Arduino IDE**, or the guided `deja deploy` CLI — your choice.
 
 ---
 
-## 📁 Generated Structure
+## 🎯 Supported firmware targets
 
-When you build or deploy an Arduino device, each device gets this structure:
+DEJA.js ships three Arduino-family firmware variants. Each has its own sketch source, FQBN, and PlatformIO env, all wired through the same `io/scripts/lib/bundle.ts` builder:
+
+| Device type | Sketch source | Transport | FQBN | PIO env |
+|---|---|---|---|---|
+| `deja-arduino` | `io/src/deja-arduino/` | USB serial @ 115200 | `arduino:avr:mega:cpu=atmega2560` | `megaatmega2560` |
+| `deja-esp32` | `io/src/deja-arduino/` (same sketch, ESP32 board) | USB serial @ 115200 | `esp32:esp32:esp32` (uploads at 460800) | `esp32dev` |
+| `deja-esp32-wifi` | `io/src/deja-esp32-wifi/` | WiFi + MQTT | `esp32:esp32:esp32` (uploads at 460800) | `esp32dev` |
+
+> 🛜 `deja-esp32-wifi` is the wireless variant — same ESP32 hardware, but WiFi/MQTT instead of USB serial. Configured via `WIFI_*` and `MQTT_*` defines that the build wizard prompts for and bakes into `config.h` at build time.
+
+Pico W (`deja-mqtt`) and DCC-EX (`dcc-ex`) bundles use different toolchains and are documented separately in the `deja-pico-w/` and DCC-EX upstream docs.
+
+---
+
+## 📁 Generated structure
+
+When you build any Arduino-family device, you get this layout:
 
 ```
-dist/<layoutId>/arduino/<deviceId>/
-├── deja-arduino/                    # Arduino IDE expects .ino in matching folder
-│   ├── deja-arduino.ino             # Main sketch
-│   ├── config.h                     # Generated configuration
+io/dist/<layoutId>/arduino/<deviceId>/
+├── <sketchName>/                    # Arduino IDE expects .ino in matching folder
+│   ├── <sketchName>.ino             # Main sketch
+│   ├── config.h                     # Generated configuration (gitignored)
 │   └── config.default.h             # Fallback defaults
 ├── platformio.ini                   # ⭐ PlatformIO configuration
 ├── .arduino-cli.yaml                # ⭐ Arduino CLI configuration
-├── .gitignore                       # Proper git ignores for all three tools
-└── DEPLOYMENT.md                    # ⭐ User-friendly deployment guide
+├── .gitignore                       # Build artifacts excluded
+└── DEPLOYMENT.md                    # ⭐ Per-device deployment guide
 ```
+
+`<sketchName>` is `deja-arduino` for both `deja-arduino` and `deja-esp32` (they share the sketch), and `deja-esp32-wifi` for the WiFi variant.
 
 ---
 
-## 🚀 Deployment Workflow
+## 🚀 Building a bundle
 
-### 1️⃣ Build (Generates Everything)
+### Option 1: Interactive wizard (recommended)
 
 ```bash
 cd io
-
-# Build device for a layout
-pnpm build -- --layout <layout-id>
-
-# Or build with deploy prompt
 pnpm deploy
 ```
 
-**Output:**
-```
-✅ arduino "device-id" → dist/<layout-id>/arduino/<device-id>/deja-arduino/
-   📄 deja-arduino.ino + config.h (5 effects, 2 turnouts)
-   ⚙️  platformio.ini, .arduino-cli.yaml, DEPLOYMENT.md
-```
+The wizard walks you through:
+1. 🗺️ Pick a layout
+2. 📟 Pick a device (auto-filtered to Arduino-family types)
+3. 📶 For `deja-mqtt` and `deja-esp32-wifi`: enter WiFi SSID, password, and MQTT broker IP
+4. 📦 Build the bundle
+5. 🚀 Optionally compile + upload via arduino-cli (auto-installs the right core, libraries, and toolchain)
 
-### 2️⃣ Deploy From Any Location
-
-Navigate to the generated folder and use whatever tool you prefer:
+### Option 2: Non-interactive build
 
 ```bash
-cd dist/<layout-id>/arduino/<device-id>
+cd io
+pnpm build -- --layout <layoutId> --device <deviceId>
+```
+
+Builds the bundle without prompts. Skips WiFi/MQTT credential entry — those defaults come from `MQTT_BROKER` env var or stay empty (you'll need to edit `config.h` before flashing).
+
+---
+
+## 🔨 Flashing — three CLI options per device
+
+Once the bundle is built at `io/dist/<layoutId>/arduino/<deviceId>/`, navigate into it and pick your tool. The exact command depends on which firmware target you're flashing — these are the same commands the `deja deploy` CLI runs under the hood, and the same commands shown on the **Cloud app device details page**.
+
+### 🟢 deja-arduino (Arduino Mega)
+
+```bash
+cd io/dist/<layoutId>/arduino/<deviceId>
 
 # Option A: PlatformIO
-platformio run -e megaatmega2560
-platformio run -e megaatmega2560 --target upload
+platformio run -e megaatmega2560 --target upload --upload-port /dev/cu.usbserial-*
 
 # Option B: Arduino CLI
-arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 deja-arduino
-arduino-cli upload -p /dev/cu.usbserial-* --fqbn arduino:avr:mega:cpu=atmega2560 deja-arduino
+arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 deja-arduino && \
+  arduino-cli upload -p /dev/cu.usbserial-* --fqbn arduino:avr:mega:cpu=atmega2560 deja-arduino
 
 # Option C: Arduino IDE
-# Just open deja-arduino/deja-arduino.ino directly
+# File → Open → deja-arduino/deja-arduino.ino
+# Tools → Board → Arduino AVR Boards → Arduino Mega or Mega 2560
+# Tools → Processor → ATmega2560 (Mega 2560)
 ```
+
+### 🟠 deja-esp32 (ESP32 over USB)
+
+```bash
+cd io/dist/<layoutId>/arduino/<deviceId>
+
+# Option A: PlatformIO
+platformio run -e esp32dev --target upload --upload-port /dev/cu.usbserial-*
+
+# Option B: Arduino CLI
+arduino-cli compile --fqbn esp32:esp32:esp32 \
+  --build-property "compiler.cpp.extra_flags=-std=c++17" deja-arduino && \
+  arduino-cli upload -p /dev/cu.usbserial-* \
+  --fqbn esp32:esp32:esp32:UploadSpeed=460800 deja-arduino
+
+# Option C: Arduino IDE
+# File → Open → deja-arduino/deja-arduino.ino
+# Tools → Board → ESP32 Arduino → ESP32 Dev Module
+# Tools → Upload Speed → 460800
+```
+
+> 🤝 Note: `deja-esp32` reuses the `deja-arduino` sketch — same JSON-over-serial protocol, just compiled for ESP32 hardware.
+
+### 🛜 deja-esp32-wifi (ESP32 over WiFi/MQTT)
+
+```bash
+cd io/dist/<layoutId>/arduino/<deviceId>
+
+# Option A: PlatformIO
+platformio run -e esp32dev --target upload --upload-port /dev/cu.usbserial-*
+
+# Option B: Arduino CLI
+arduino-cli compile --fqbn esp32:esp32:esp32 \
+  --build-property "compiler.cpp.extra_flags=-std=c++17" deja-esp32-wifi && \
+  arduino-cli upload -p /dev/cu.usbserial-* \
+  --fqbn esp32:esp32:esp32:UploadSpeed=460800 deja-esp32-wifi
+
+# Option C: Arduino IDE
+# File → Open → deja-esp32-wifi/deja-esp32-wifi.ino
+# Tools → Board → ESP32 Arduino → ESP32 Dev Module
+# Tools → Upload Speed → 460800
+```
+
+> 🛜 Before flashing: confirm `WIFI_SSID`, `WIFI_PASSWORD`, `MQTT_BROKER`, `DEVICE_ID`, `LAYOUT_ID`, and `TOPIC_ID` are set correctly in `deja-esp32-wifi/config.h`. The `deja deploy` wizard prompts for these and bakes them in automatically; if you ran `pnpm build` non-interactively you'll need to edit `config.h` by hand.
 
 ---
 
-## 🔧 Files Generated
+## 📦 Library dependencies
+
+All three firmware targets share the same library list, declared in `io/scripts/lib/bundle.ts` `ARDUINO_LIB_DEPS`:
+
+| Library | Used by | Purpose |
+|---|---|---|
+| `Adafruit PWM Servo Driver Library` | All Arduino-family | PCA9685 servo control (gated on `ENABLE_PWM`) |
+| `ArduinoJson` | All Arduino-family | Parse incoming JSON commands |
+| `TurnoutPulser` | All Arduino-family | Servo-driven turnouts (gated on `ENABLE_TURNOUTS`) |
+| `PubSubClient` | `deja-esp32-wifi` only | MQTT client over WiFi |
+
+The `deja deploy` CLI runs `arduino-cli lib install` for any missing libs automatically. PlatformIO picks them up from `lib_deps` in `platformio.ini`. If you're using Arduino IDE, install them manually via **Sketch → Include Library → Manage Libraries**.
+
+---
+
+## 🔧 Generated files explained
 
 ### `platformio.ini`
-- Board: Arduino Mega 2560 (ATmega2560)
-- Libraries: Adafruit PWM Servo Driver, ArduinoJson
-- Serial: 115200 baud
-- Upload speed: 115200 baud
+- `default_envs` set to the device's primary platform (`megaatmega2560` or `esp32dev`)
+- For `deja-esp32-wifi`: only emits the `[env:esp32dev]` env (no Mega target)
+- For `deja-arduino` / `deja-esp32`: emits both `[env:megaatmega2560]` and `[env:esp32dev]` so you can swap targets without rebuilding the bundle
+- Shared `lib_deps` block includes all four libraries above
+- Serial monitor at 115200 baud
 
 ### `.arduino-cli.yaml`
-- User directory configured to project root
-- Board manager URLs for ESP8266 and Adafruit boards
-- Logging and metric settings
+- Adds the ESP32, ESP8266, and Adafruit board manager URLs so `arduino-cli core install esp32:esp32` works without extra flags
+- Standard logging + metric defaults
 
 ### `.gitignore`
-- Build artifacts (.pio/, build/, *.hex, *.elf, etc.)
-- IDE files (.vscode/, .DS_Store)
-- Generated config.h (but keeps config.default.h in git)
+- Excludes build artifacts (`*.hex`, `*.elf`, `.pio/`, `build/`)
+- Excludes `config.h` (per-device, generated) but keeps `config.default.h` (template, gitignored elsewhere)
+- IDE noise excluded too (`.vscode/`, `.DS_Store`, `*.swp`)
 
 ### `DEPLOYMENT.md`
-- Quick start for all three tools
-- Serial communication format (JSON)
-- Generated stats (effects, turnouts)
-- Troubleshooting tips
+- Auto-generated per device with the exact CLI commands for that device's FQBN + sketch folder
+- Lists effects/turnouts/sensors/signals counts for the bundle
+- For `deja-esp32-wifi`: documents the MQTT subscribe/publish topics
 
 ---
 
-## 📦 Library Management
+## 💡 Single source of truth
 
-All three tools automatically find libraries because they're specified in `platformio.ini`:
+Every place that emits an Arduino CLI command (`bundle.ts` → `DEPLOYMENT.md`, the Cloud app's device-details page, this README) pulls from `packages/modules/device-config/cli-commands.ts` `getCliDeployCommands()`. If you ever need to change a FQBN, upload speed, or sketch folder name, change it there once and every consumer picks it up.
 
-```ini
-lib_deps =
-    adafruit/Adafruit PWM Servo Driver Library @ ^2.4.1
-    bblanchon/ArduinoJson @ ^7.0.0
-```
-
-**Manual library installation (if needed):**
-
-```bash
-# Arduino CLI
-arduino-cli lib install "Adafruit PWM Servo Driver Library"
-arduino-cli lib install "ArduinoJson"
-
-# Arduino IDE: Sketch → Include Library → Manage Libraries (search for each)
-```
+The actual board configs that the deploy pipeline runs at compile time live in `io/scripts/lib/bundle.ts` `BOARD_CONFIGS` — `cli-commands.ts` mirrors those values exactly. Keep them in sync; future hardening could collapse them into one shared map.
 
 ---
 
-## 💡 Implementation Details
+## ✅ Cross-platform support matrix
 
-### In `scripts/lib/bundle.ts`:
+| Tool | `deja-arduino` | `deja-esp32` | `deja-esp32-wifi` |
+|---|---|---|---|
+| `deja deploy` (interactive CLI) | ✅ | ✅ | ✅ |
+| `pnpm build` (non-interactive) | ✅ | ✅ | ✅ |
+| PlatformIO | ✅ | ✅ | ✅ |
+| Arduino CLI | ✅ | ✅ | ✅ |
+| Arduino IDE | ✅ | ✅ | ✅ |
 
-1. **New function:** `generateArduinoCrossPlatformFiles()`
-   - Generates all four files (platformio.ini, .arduino-cli.yaml, .gitignore, DEPLOYMENT.md)
-   - Called automatically during Arduino bundle write
-
-2. **Modified:** `writeDeviceBundle()` for Arduino
-   - After copying source files, calls the new generator
-   - Logs confirmation of cross-platform file generation
-
-### Design Advantages:
-
-✨ **Single source of truth** — config generated once, used by all tools  
-✨ **No duplication** — shared platformio.ini, not per-tool variants  
-✨ **Reproducible** — every build generates identical configs  
-✨ **Documented** — DEPLOYMENT.md auto-generated with device-specific stats  
-✨ **Git-friendly** — proper .gitignore prevents build artifacts leaking into version control  
-
----
-
-## 🔄 Next Build/Deploy
-
-```bash
-cd ~/TTT/DEJA.js.git/preview/io
-
-# Build specific device
-pnpm build -- --layout my-layout --device my-device
-
-# Or interactive deploy
-pnpm deploy
-
-# Device outputs to:
-# dist/my-layout/arduino/my-device/
-# ├── deja-arduino/
-# ├── platformio.ini ← Ready for any tool
-# ├── .arduino-cli.yaml ← Ready for any tool
-# ├── .gitignore
-# └── DEPLOYMENT.md ← User guide
-```
-
----
-
-## ✅ Cross-Platform Ready
-
-Each generated device folder is now **deployment-ready** for:
-
-| Tool | Command | Works |
-|------|---------|-------|
-| PlatformIO | `platformio run` | ✅ |
-| Arduino CLI | `arduino-cli compile` | ✅ |
-| Arduino IDE | File → Open → .ino | ✅ |
-
-No additional setup needed! 🎉
+No additional setup needed — every bundle drops out ready to flash. 🎉

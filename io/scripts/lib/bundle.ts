@@ -13,6 +13,7 @@ import {
   generateEsp32WifiConfig,
   generatePicoConfig,
   generatePicoSettings,
+  getCliDeployCommands,
   type Device,
   type Effect,
   type Loco,
@@ -141,6 +142,7 @@ async function generateArduinoCrossPlatformFiles(
   outDir: string,
   deviceId: string,
   deviceType: string,
+  layoutId: string,
   effects: Effect[],
   turnouts: Turnout[],
   sketchName: string = ARDUINO_SKETCH_NAME
@@ -261,12 +263,28 @@ config.h
 
   await fs.writeFile(path.join(outDir, '.gitignore'), gitignore)
 
-  // 📖 DEPLOYMENT.md
+  // 📖 DEPLOYMENT.md — pulls CLI commands from the @repo/modules helper so this
+  // template, the Cloud UI device-details panel, and the actual `pnpm run deploy`
+  // pipeline all show the same FQBN / sketch folder / upload speed for each
+  // device type. Without the helper this file used to hardcode the AVR Mega
+  // FQBN even for esp32 devices.
+  const cli = getCliDeployCommands({ deviceType, deviceId, layoutId })
+  const ideBoardLine = isEsp32Wifi || deviceType === 'deja-esp32'
+    ? '**Tools → Board → ESP32 Arduino → ESP32 Dev Module**'
+    : '**Tools → Board → Arduino AVR Boards → Arduino Mega or Mega 2560**'
+  const ideExtraLine = isEsp32Wifi || deviceType === 'deja-esp32'
+    ? '6. **Tools → Upload Speed → 460800**'
+    : '6. **Tools → Processor → ATmega2560 (Mega 2560)**'
+  const libraryList = ARDUINO_LIB_DEPS.map(l => `   - \`${l.name}\``).join('\n')
+  const libInstallLines = ARDUINO_LIB_DEPS.map(l => `arduino-cli lib install "${l.name}"`).join('\n')
+
   const deploymentMd = `# 🚀 ${deviceId} - Cross-Platform Deployment Guide
 
-This Arduino firmware package is configured to deploy seamlessly across **PlatformIO**, **Arduino CLI**, and **Arduino IDE**.
+This firmware package is configured to deploy seamlessly across **PlatformIO**, **Arduino CLI**, and **Arduino IDE**.
 
-Generated: ${new Date().toISOString()}  
+Device type: \`${deviceType}\` · Sketch: \`${sketchName}\` · FQBN: \`${cli?.fqbn ?? 'unknown'}\`
+
+Generated: ${new Date().toISOString()}
 Effects: ${effects.length} | Turnouts: ${turnouts.length}
 
 ## 📁 Project Structure
@@ -285,76 +303,78 @@ Effects: ${effects.length} | Turnouts: ${turnouts.length}
 
 ## 🚀 Quick Start
 
+> All commands below assume you have already \`cd\`d into this bundle directory.
+
 ### Option A: PlatformIO (⭐ Recommended)
 
 \`\`\`bash
 # Install
 pip install platformio
 
-# Build
-platformio run -e megaatmega2560
-
-# Upload
-platformio run -e megaatmega2560 --target upload --upload-port /dev/cu.usbserial-*
-
-# Monitor
+# Build + upload + monitor (env: ${cli?.pioEnv ?? 'unknown'})
+${cli?.platformio ?? 'platformio run --target upload'}
 platformio device monitor --port /dev/cu.usbserial-*
 \`\`\`
 
 ### Option B: Arduino CLI
 
 \`\`\`bash
-# Install CLI
+# Install CLI (one time)
 brew install arduino-cli
-
-# Initialize
 arduino-cli config init --overwrite
 arduino-cli update
-arduino-cli core install arduino:avr
+${isEsp32Wifi || deviceType === 'deja-esp32'
+  ? 'arduino-cli core install esp32:esp32'
+  : 'arduino-cli core install arduino:avr'}
 
-# Install libraries
-arduino-cli lib install "Adafruit PWM Servo Driver Library"
-arduino-cli lib install "ArduinoJson"
+# Install libraries (one time)
+${libInstallLines}
 
-# Build
-arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 ${sketchName}/${sketchName}.ino
-
-# Upload
-arduino-cli upload -p /dev/cu.usbserial-* --fqbn arduino:avr:mega:cpu=atmega2560 ${sketchName}/${sketchName}.ino
+# Compile + upload (FQBN: ${cli?.fqbn ?? 'unknown'})
+${cli?.arduinoCli ?? 'arduino-cli compile && arduino-cli upload'}
 \`\`\`
 
 ### Option C: Arduino IDE
 
 1. Open **Arduino IDE**
-2. Go to **Sketch → Include Library → Manage Libraries**
-3. Install:
-   - \`Adafruit PWM Servo Driver Library\`
-   - \`ArduinoJson\`
-4. **File → Open → \`${sketchName}/${sketchName}.ino\`**
-5. **Tools → Board → Arduino AVR Boards → Arduino Mega or Mega 2560**
-6. **Tools → Processor → ATmega2560 (Mega 2560)**
-7. **Tools → Port → \`/dev/cu.usbserial-*\`**
-8. Click **Upload** button
+2. Go to **Sketch → Include Library → Manage Libraries** and install:
+${libraryList}
+3. **File → Open → \`${sketchName}/${sketchName}.ino\`**
+4. ${ideBoardLine}
+5. ${ideExtraLine}
+6. **Tools → Port → \`/dev/cu.usbserial-*\`**
+7. Click **Upload** button
 
 ## 📦 Generated Configuration
 
-**Effects:** ${effects.length}  
+**Effects:** ${effects.length}
 **Turnouts:** ${turnouts.length}
 
 See \`${sketchName}/config.h\` for detailed pin mappings and feature flags.
 
-## 🔌 Serial Communication
+## 🔌 Communication
 
-**Baud Rate:** 115200
+${
+  isEsp32Wifi
+    ? `**Transport:** WiFi + MQTT
+**Subscribe topic:** \`DEJA/<layoutId>/<deviceId>\` — server publishes commands here
+**Publish topic:** \`DEJA/<layoutId>/<deviceId>/messages\` — device publishes sensor events here
 
-**Command Format:**
+**Command format (single object, JSON):**
+\`\`\`json
+{ "action": "pin", "device": "${deviceId}", "payload": { "pin": 42, "state": true } }
+\`\`\``
+    : `**Transport:** USB serial @ 115200 baud
+
+**Command format (JSON array):**
 \`\`\`json
 [
   { "action": "pin", "payload": { "pin": 42, "state": true } },
   { "action": "servo", "payload": { "servo": 0, "value": 90, "current": 45 } },
   { "action": "turnout", "payload": { "turnout": 0, "state": true } }
 ]
-\`\`\`
+\`\`\``
+}
 
 ---
 
@@ -421,6 +441,7 @@ export async function writeDeviceBundle(options: WriteBundleOptions): Promise<Wr
         outDir,
         device.id,
         device.type,
+        layoutId,
         effects,
         turnouts,
         ARDUINO_ESP32_WIFI_SKETCH_NAME
@@ -452,7 +473,7 @@ export async function writeDeviceBundle(options: WriteBundleOptions): Promise<Wr
       await fs.writeFile(path.join(sketchDir, 'config.h'), configH)
 
       // Generate cross-platform deployment files
-      await generateArduinoCrossPlatformFiles(outDir, device.id, device.type, effects, turnouts)
+      await generateArduinoCrossPlatformFiles(outDir, device.id, device.type, layoutId, effects, turnouts)
 
       console.log(`✅ arduino "${device.id}" → ${relativeDir}/${ARDUINO_SKETCH_NAME}/`)
       console.log(
