@@ -1,88 +1,32 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+// 🌙 DEJA.js is a dark-first brand. This provider used to support light/dark/
+// system modes via localStorage + matchMedia, but the site was never tested
+// against the light theme (which has bugs) and the brand voice is dark-only.
+// We now hardcode dark mode regardless of OS preference — the `dark` class is
+// already baked into <html> in app/layout.tsx, so this provider is just a thin
+// HeroUIProvider wrapper plus a no-op useTheme() hook for any caller that might
+// still reach for it.
+
 import { HeroUIProvider } from '@heroui/react';
 
-type ThemeValue = 'light' | 'dark' | 'system';
-type ResolvedTheme = 'light' | 'dark';
-
-type ThemeContextValue = {
-  theme: ThemeValue;
-  resolvedTheme: ResolvedTheme;
-  setTheme: (value: ThemeValue) => void;
-};
-
-const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
-
-const getStoredTheme = (): ThemeValue | null => {
-  if (typeof window === 'undefined') return null;
-  const stored = window.localStorage.getItem('theme');
-
-  if (stored === 'light' || stored === 'dark' || stored === 'system') {
-    return stored;
-  }
-
-  return null;
-};
-
-const getSystemTheme = (): ResolvedTheme => {
-  if (typeof window === 'undefined') return 'dark';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+const THEME_VALUE = {
+  theme: 'dark' as const,
+  resolvedTheme: 'dark' as const,
+  setTheme: () => {
+    /* no-op — DEJA.js is dark-only */
+  },
 };
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<ThemeValue>('dark');
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('dark');
-
-  useEffect(() => {
-    const storedTheme = getStoredTheme();
-    setTheme(storedTheme ?? 'dark');
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const nextResolved = theme === 'system' ? getSystemTheme() : theme;
-    setResolvedTheme(nextResolved);
-    document.documentElement.classList.toggle('dark', nextResolved === 'dark');
-    window.localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || theme !== 'system') return;
-
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => {
-      const systemTheme = media.matches ? 'dark' : 'light';
-      setResolvedTheme(systemTheme);
-      document.documentElement.classList.toggle('dark', systemTheme === 'dark');
-    };
-
-    handleChange();
-    media.addEventListener('change', handleChange);
-    return () => media.removeEventListener('change', handleChange);
-  }, [theme]);
-
-  const value = useMemo(
-    () => ({ theme, resolvedTheme, setTheme }),
-    [theme, resolvedTheme]
-  );
-
-  return (
-    <ThemeContext.Provider value={value}>
-      <HeroUIProvider>
-        {children}
-      </HeroUIProvider>
-    </ThemeContext.Provider>
-  );
+  return <HeroUIProvider>{children}</HeroUIProvider>;
 }
 
+/**
+ * 🪝 Legacy hook preserved so any straggling consumer compiles — always
+ * returns `'dark'`. If you need a theme toggle, design it as a standalone
+ * preview feature; don't re-introduce light mode to the main site.
+ */
 export function useTheme() {
-  const context = useContext(ThemeContext);
-
-  if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-
-  return context;
+  return THEME_VALUE;
 }
