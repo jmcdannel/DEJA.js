@@ -10,10 +10,12 @@ import * as path from 'path'
 import {
   generateArduinoConfig,
   generateDccExAutomation,
+  generateDccExConfig,
   generateEsp32WifiConfig,
   generatePicoConfig,
   generatePicoSettings,
   getCliDeployCommands,
+  type DccExMotorShield,
   type Device,
   type Effect,
   type Loco,
@@ -62,6 +64,13 @@ const BOARD_CONFIGS: Record<string, BoardConfig> = {
     needsCpp17: true,
     uploadSpeed: 460800,
   },
+  // 🚂 DCC-EX on Arduino Mega — only combo we support out of the box.
+  'dcc-ex': {
+    fqbn: 'arduino:avr:mega:cpu=atmega2560',
+    pioPlatform: 'atmelavr',
+    pioBoard: 'megaatmega2560',
+    needsCpp17: false,
+  },
 }
 
 /** Resolve the board config for a device type, or undefined if not an Arduino-family device. */
@@ -89,6 +98,15 @@ export interface WriteBundleOptions {
   wifiSsid?: string
   wifiPassword?: string
   mqttBroker?: string
+  /**
+   * Absolute path to a local DCC-EX CommandStation-EX checkout. Required when
+   * bundling a `dcc-ex` device — the entire source tree is copied into the
+   * dist so arduino-cli can compile it with our generated config.h/myAutomation.h
+   * on top.
+   */
+  dccExSourcePath?: string
+  /** Motor shield choice for DCC-EX builds. Defaults to 'standard'. */
+  dccExMotorShield?: DccExMotorShield
   /** Root of the io package — defaults to process.cwd() (i.e. `io/`). */
   rootDir?: string
 }
@@ -110,6 +128,8 @@ export interface WriteBundleResult {
 const ARDUINO_SKETCH_NAME = 'deja-arduino'
 /** Name of the deja-esp32-wifi sketch folder (must match the .ino filename without extension). */
 const ARDUINO_ESP32_WIFI_SKETCH_NAME = 'deja-esp32-wifi'
+/** Upstream DCC-EX sketch folder name — must match CommandStation-EX.ino. */
+const DCC_EX_SKETCH_NAME = 'CommandStation-EX'
 
 /**
  * Device types intentionally excluded from the io/ build.
@@ -135,6 +155,85 @@ export function resolvePlatform(deviceType: string): Platform | null {
   if (deviceType === 'deja-mqtt') return 'pico'
   if (deviceType === 'dcc-ex') return 'dcc-ex'
   return null
+}
+
+/** True if this device type needs WiFi/MQTT credentials baked into its bundle. */
+export function isWifiDevice(deviceType: string): boolean {
+  return deviceType === 'deja-esp32-wifi' || deviceType === 'deja-mqtt'
+}
+
+/** True if this device type compiles with arduino-cli (shares the Arduino deploy path). */
+export function isArduinoCompilable(deviceType: string): boolean {
+  return (
+    deviceType === 'deja-arduino' ||
+    deviceType === 'deja-esp32' ||
+    deviceType === 'deja-esp32-wifi' ||
+    deviceType === 'dcc-ex'
+  )
+}
+
+export interface ExistingWifiCreds {
+  ssid: string
+  password: string
+  broker: string
+}
+
+/**
+ * Try to read WiFi/MQTT creds out of an already-built bundle so that a
+ * subsequent deploy can preserve user edits without re-prompting. Returns
+ * `null` if nothing usable was found (file missing, or SSID is blank).
+ *
+ * The parsing is intentionally loose — it matches the shapes emitted by
+ * `generatePicoSettings` / `generateEsp32WifiConfig`, plus any hand-edited
+ * values using the same key names.
+ */
+export async function readExistingWifiCreds(
+  layoutId: string,
+  device: Device,
+  rootDir: string = process.cwd(),
+): Promise<ExistingWifiCreds | null> {
+  const platform = resolvePlatform(device.type)
+  if (!platform) return null
+
+  const outDir = path.join(rootDir, 'dist', layoutId, platform, device.id)
+
+  if (device.type === 'deja-mqtt') {
+    const tomlPath = path.join(outDir, 'settings.toml')
+    if (!(await fs.pathExists(tomlPath))) return null
+    const raw = await fs.readFile(tomlPath, 'utf8')
+    const creds: ExistingWifiCreds = {
+      ssid: matchTomlString(raw, 'CIRCUITPY_WIFI_SSID'),
+      password: matchTomlString(raw, 'CIRCUITPY_WIFI_PASSWORD'),
+      broker: matchTomlString(raw, 'MQTT_BROKER'),
+    }
+    return creds.ssid ? creds : null
+  }
+
+  if (device.type === 'deja-esp32-wifi') {
+    const configPath = path.join(outDir, ARDUINO_ESP32_WIFI_SKETCH_NAME, 'config.h')
+    if (!(await fs.pathExists(configPath))) return null
+    const raw = await fs.readFile(configPath, 'utf8')
+    const creds: ExistingWifiCreds = {
+      ssid: matchCDefineString(raw, 'WIFI_SSID'),
+      password: matchCDefineString(raw, 'WIFI_PASSWORD'),
+      broker: matchCDefineString(raw, 'MQTT_BROKER'),
+    }
+    return creds.ssid ? creds : null
+  }
+
+  return null
+}
+
+/** Extract `KEY = "value"` from TOML text. Returns empty string when missing. */
+function matchTomlString(text: string, key: string): string {
+  const re = new RegExp(`^\\s*${key}\\s*=\\s*"([^"]*)"`, 'm')
+  return text.match(re)?.[1] ?? ''
+}
+
+/** Extract `#define KEY "value"` from C header text. Returns empty when missing. */
+function matchCDefineString(text: string, key: string): string {
+  const re = new RegExp(`^\\s*#define\\s+${key}\\s+"([^"]*)"`, 'm')
+  return text.match(re)?.[1] ?? ''
 }
 
 /** Generate cross-platform deployment files for Arduino bundles. */
@@ -454,7 +553,10 @@ export async function writeDeviceBundle(options: WriteBundleOptions): Promise<Wr
       if (wifiSsid) {
         console.log(`   📶 WiFi: ${wifiSsid}, MQTT: ${resolvedBroker || '(empty — edit before flash)'}`)
       } else {
-        console.log(`   📶 WiFi/MQTT creds empty — edit config.h before flashing`)
+        const configPath = path.join(relativeDir, ARDUINO_ESP32_WIFI_SKETCH_NAME, 'config.h')
+        console.log(`   ⚠️  WiFi/MQTT skipped — edit before flashing:`)
+        console.log(`      ${configPath}`)
+        console.log(`      Fields: WIFI_SSID, WIFI_PASSWORD, MQTT_BROKER_HOST`)
       }
       console.log(`   ⚙️  platformio.ini, .arduino-cli.yaml, DEPLOYMENT.md`)
     } else {
@@ -500,32 +602,81 @@ export async function writeDeviceBundle(options: WriteBundleOptions): Promise<Wr
     })
     await fs.writeFile(path.join(outDir, 'settings.toml'), settingsToml)
 
+    const servoTurnoutCount = turnouts.filter(t => t.type === 'servo').length
     console.log(`✅ pico "${device.id}" → ${relativeDir}/`)
-    console.log(`   📄 config.json (${effects.length} effects)`)
+    console.log(
+      `   📄 config.json (${effects.length} effects, ${turnouts.length} turnouts${
+        servoTurnoutCount > 0 ? `, ${servoTurnoutCount} servo → PWM auto-enabled` : ''
+      })`
+    )
     if (wifiSsid) {
       console.log(`   📄 settings.toml (WiFi: ${wifiSsid})`)
     } else {
-      console.log(`   📄 settings.toml (WiFi creds empty — edit before deploying)`)
+      const tomlPath = path.join(relativeDir, 'settings.toml')
+      console.log(`   ⚠️  WiFi/MQTT skipped — edit before deploying:`)
+      console.log(`      ${tomlPath}`)
+      console.log(`      Fields: CIRCUITPY_WIFI_SSID, CIRCUITPY_WIFI_PASSWORD, MQTT_BROKER`)
     }
   } else if (platform === 'dcc-ex') {
-    // dcc-ex has no sketch to copy — DCC-EX maintains the upstream sketch.
-    // We only emit the EXRAIL config that the user copies into their sketch folder.
+    // 🚂 DCC-EX bundle: copy the user's local CommandStation-EX checkout into
+    // dist, then write our generated config.h + myAutomation.h on top. The
+    // resulting sketch folder is arduino-cli-compilable via the standard flow.
     if (!options.locos) {
       throw new Error(
         `dcc-ex device "${device.id}" requires locos in WriteBundleOptions — ` +
           `did io/scripts/lib/firebase.ts forget to fetch them?`
       )
     }
+    if (!options.dccExSourcePath) {
+      throw new Error(
+        `dcc-ex device "${device.id}" requires dccExSourcePath in WriteBundleOptions — ` +
+          `pass the path to your local CommandStation-EX checkout (via prompt, ` +
+          `--dcc-ex-source, or DCC_EX_SOURCE env var).`
+      )
+    }
+    if (!(await fs.pathExists(options.dccExSourcePath))) {
+      throw new Error(
+        `DCC-EX source path does not exist: ${options.dccExSourcePath}`
+      )
+    }
+    const upstreamIno = path.join(options.dccExSourcePath, 'CommandStation-EX.ino')
+    if (!(await fs.pathExists(upstreamIno))) {
+      throw new Error(
+        `DCC-EX source path is missing CommandStation-EX.ino: ${options.dccExSourcePath}`
+      )
+    }
+
+    sketchDir = path.join(outDir, DCC_EX_SKETCH_NAME)
+
+    // Copy the entire upstream checkout into our sketch folder, skipping
+    // VCS metadata and build artifacts so fs.copy stays fast.
+    await fs.copy(options.dccExSourcePath, sketchDir, {
+      filter: (src: string) => {
+        const name = path.basename(src)
+        if (name === '.git') return false
+        if (name === 'node_modules') return false
+        if (name === '.vscode') return false
+        if (name === 'build') return false
+        return true
+      },
+    })
+
+    const motorShield: DccExMotorShield = options.dccExMotorShield ?? 'standard'
+    const configH = generateDccExConfig({ device, layoutId, motorShield })
+    await fs.writeFile(path.join(sketchDir, 'config.h'), configH)
+
     const automationH = generateDccExAutomation({
       device,
       layoutId,
       locos: options.locos,
     })
-    await fs.writeFile(path.join(outDir, 'myAutomation.h'), automationH)
+    await fs.writeFile(path.join(sketchDir, 'myAutomation.h'), automationH)
 
     const rosterCount = (automationH.match(/^ROSTER\(/gm) || []).length
-    console.log(`✅ dcc-ex "${device.id}" → ${relativeDir}/`)
+    console.log(`✅ dcc-ex "${device.id}" → ${relativeDir}/${DCC_EX_SKETCH_NAME}/`)
+    console.log(`   📄 config.h (motor shield: ${motorShield})`)
     console.log(`   📄 myAutomation.h (${rosterCount} ROSTER entries)`)
+    console.log(`   📂 Upstream source copied from: ${options.dccExSourcePath}`)
   } else {
     throw new Error(`Platform "${platform}" build is not yet implemented for device "${device.id}"`)
   }

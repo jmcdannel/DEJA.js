@@ -303,17 +303,21 @@ const sendSpeed = async ({
   await broadcastToAll(cmd)
 }
 
-const sendTurnout = async ({
-  turnoutIdx,
-  state,
-}: TurnoutPayload): Promise<void> => {
+const sendTurnout = async (
+  { turnoutIdx, state }: TurnoutPayload,
+  deviceId?: string,
+): Promise<void> => {
   if (!isFiniteNumber(turnoutIdx) || typeof state !== 'boolean') {
     log.error('[DCC] Rejected invalid turnout payload:', { turnoutIdx, state })
     return
   }
-  log.star('Turnout', turnoutIdx, state)
+  log.star('Turnout', turnoutIdx, state, deviceId ? `→ ${deviceId}` : '→ all')
   const cmd = `T ${turnoutIdx} ${state ? 1 : 0}`
-  await broadcastToAll(cmd)
+  if (deviceId) {
+    await sendToDevice(deviceId, cmd)
+  } else {
+    await broadcastToAll(cmd)
+  }
 }
 
 const sendFunction = async ({
@@ -330,14 +334,18 @@ const sendFunction = async ({
   await broadcastToAll(cmd)
 }
 
-const sendOutput = async (payload: OutputPayload) => {
+const sendOutput = async (payload: OutputPayload, deviceId?: string) => {
   if (!isFiniteNumber(payload.pin) || typeof payload.state !== 'boolean') {
     log.error('[DCC] Rejected invalid output payload:', payload)
     return
   }
-  log.star('Output', payload)
-  const cmd = `Z ${payload.pin} ${payload.state ? 1 : 0}`
-  await broadcastToAll(cmd)
+  log.star('Output', payload, deviceId ? `→ ${deviceId}` : '→ all')
+  const cmd = `z ${payload.state ? payload.pin : -payload.pin}`
+  if (deviceId) {
+    await sendToDevice(deviceId, cmd)
+  } else {
+    await broadcastToAll(cmd)
+  }
 }
 
 interface SensorDefinition {

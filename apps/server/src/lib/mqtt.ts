@@ -162,11 +162,21 @@ async function handleDeviceEventMessage(topic: string, message: Buffer): Promise
     return
   }
 
+  // Devices publish two kinds of things on /messages:
+  //   1. Structured sensor events as JSON, e.g. { sensor: 3, state: 1 }
+  //   2. Free-form log/status strings, e.g. "Toggled pin 28 to value False"
+  // Only (1) needs parsing — treat anything that isn't JSON as a plain log line.
+  const raw = message.toString().trim()
+  if (!raw.startsWith('{') && !raw.startsWith('[')) {
+    log.debug(`[MQTT] ${deviceId}: ${raw}`)
+    return
+  }
+
   let parsed: SensorEventPayload
   try {
-    parsed = JSON.parse(message.toString()) as SensorEventPayload
-  } catch (err) {
-    log.warn('[MQTT] Failed to parse device event payload:', topic, err)
+    parsed = JSON.parse(raw) as SensorEventPayload
+  } catch {
+    log.debug(`[MQTT] ${deviceId}: ${raw}`)
     return
   }
 
