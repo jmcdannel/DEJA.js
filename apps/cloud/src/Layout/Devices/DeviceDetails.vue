@@ -49,7 +49,7 @@ const sortedSignals = computed<Signal[]>(() =>
   [...((signals?.value ?? []) as Signal[])].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
 )
 
-const { isArduino, isPicoW, isDccEx, arduinoConfigH, picoConfigJson, dccExAutomationH } = useDeviceConfig({
+const { isArduino, isPicoW, isEsp32Wifi, isDccEx, arduinoConfigH, esp32WifiConfigH, picoConfigJson, dccExAutomationH } = useDeviceConfig({
   device,
   effects: computed(() => (effects.value ?? []) as Effect[]),
   turnouts: computed(() => (turnouts.value ?? []) as Turnout[]),
@@ -60,7 +60,10 @@ const { isArduino, isPicoW, isDccEx, arduinoConfigH, picoConfigJson, dccExAutoma
 })
 
 // 📄 The single config file this device needs for manual install
+// 🛜 isEsp32Wifi is checked first because deja-esp32-wifi is also a member of the
+// Arduino family — it needs the WiFi-aware generator, not generateArduinoConfig.
 const deploymentConfig = computed<{ filename: string; content: string; language: string } | null>(() => {
+  if (isEsp32Wifi.value) return { filename: 'config.h', content: esp32WifiConfigH.value, language: 'cpp' }
   if (isArduino.value) return { filename: 'config.h', content: arduinoConfigH.value, language: 'cpp' }
   if (isPicoW.value) return { filename: 'config.json', content: picoConfigJson.value, language: 'json' }
   if (isDccEx.value) return { filename: 'myAutomation.h', content: dccExAutomationH.value, language: 'cpp' }
@@ -123,6 +126,7 @@ const { copy: copyDejaCmd, copied: dejaCmdCopied } = useClipboard({ source: deja
 
 // 📝 Per-device-type manual install hint (where to put the file after download)
 const manualInstallHint = computed(() => {
+  if (isEsp32Wifi.value) return 'Save into your deja-esp32-wifi sketch folder next to deja-esp32-wifi.ino, then upload via Arduino IDE (ESP32 board).'
   if (isArduino.value) return 'Save into your Arduino sketch folder next to deja-arduino.ino, then upload via Arduino IDE.'
   if (isPicoW.value) return 'Copy onto the CIRCUITPY drive on your Pico W — it reboots automatically.'
   if (isDccEx.value) return 'Save into your CommandStation EX sketch folder next to CommandStation-EX.ino, then upload via Arduino IDE.'

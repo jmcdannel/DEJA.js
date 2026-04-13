@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import type { Device } from '@repo/modules'
-import { isArduinoFamilyType, useLayout, useServerStatus } from '@repo/modules'
+import { isArduinoFamilyType, isWifiDeviceType, useLayout, useServerStatus } from '@repo/modules'
 import StatusPulse from '../animations/StatusPulse.vue'
 import TrackPower from '../TrackPower.vue'
 
@@ -83,20 +83,25 @@ const isConnected = computed(() => {
   return props.device.isConnected ?? false
 })
 
-// 🔌 USB device check
+// 🔌 USB device check — 🛜 deja-esp32-wifi is a member of ARDUINO_FAMILY_TYPES but
+// connects over WiFi/MQTT, so the type-based WiFi check must short-circuit the
+// firmware-family branch. Explicit `connection: 'wifi'` also wins over stale
+// defaults, so devices saved before the auto-default watcher render correctly.
 const isUsbDevice = computed(
   () =>
     !isDejaServer.value &&
+    props.device.connection !== 'wifi' &&
+    !isWifiDeviceType(props.device.type) &&
     (props.device.connection === 'usb' ||
       props.device.type === 'dcc-ex' ||
       isArduinoFamilyType(props.device.type)),
 )
 
-// 📡 MQTT/WiFi device check
+// 📡 MQTT/WiFi device check — any WiFi device type OR explicit wifi connection.
 const isMqttDevice = computed(
   () =>
     !isDejaServer.value &&
-    (props.device.connection === 'wifi' || props.device.type === 'deja-mqtt'),
+    (props.device.connection === 'wifi' || isWifiDeviceType(props.device.type)),
 )
 
 // 🏷️ Human-readable connection type label

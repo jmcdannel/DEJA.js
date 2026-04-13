@@ -24,6 +24,8 @@ export async function promptDeviceSelection(devices: Device[]): Promise<Device> 
     'dcc-ex': '🖥️',
     'deja-arduino': '🔧',
     'deja-arduino-led': '💡',
+    'deja-esp32': '🛠️',
+    'deja-esp32-wifi': '🛜',
     'deja-mqtt': '🍓',
     'deja-server': '🌐',
   }

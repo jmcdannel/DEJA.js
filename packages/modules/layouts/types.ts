@@ -78,7 +78,14 @@ export interface Device {
   timestamp?: Date
   topic?: string
   trackOutputs?: Record<string, import('@repo/dccex').TrackOutput>
-  type: 'dcc-ex' | 'deja-arduino' | 'deja-arduino-led' | 'deja-esp32' | 'deja-mqtt' | 'deja-server'
+  type:
+    | 'dcc-ex'
+    | 'deja-arduino'
+    | 'deja-arduino-led'
+    | 'deja-esp32'
+    | 'deja-esp32-wifi'
+    | 'deja-mqtt'
+    | 'deja-server'
   order?: number
 }
 
