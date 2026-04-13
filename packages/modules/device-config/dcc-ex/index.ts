@@ -37,3 +37,9 @@ export function generateDccExAutomation(
 export { rosterSection } from './roster'
 export { wrapSection } from './markers'
 export type { DccExConfigInput, DccExSection } from './types'
+export {
+  generateDccExConfig,
+  DCC_EX_MOTOR_SHIELD_MACROS,
+  DCC_EX_MOTOR_SHIELD_LABELS,
+} from './config'
+export type { DccExMotorShield, DccExConfigHInput } from './config'

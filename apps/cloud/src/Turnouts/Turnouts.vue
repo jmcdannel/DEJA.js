@@ -53,7 +53,6 @@ const filters = computed<ListFilter[]>(() => [
 ])
 
 const sortOptions = [
-  { value: 'order', label: 'Default' },
   { value: 'name', label: 'Name' },
   { value: 'device', label: 'Device' },
 ]

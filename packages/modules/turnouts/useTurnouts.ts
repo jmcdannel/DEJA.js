@@ -18,8 +18,13 @@ import type { Turnout } from './types'
 
 const log = createLogger('Turnouts')
 
-const VALID_TURNOUT_SORT_FIELDS = new Set(['order', 'name', 'device', 'turnoutIdx', 'state', 'type'])
-const DEFAULT_TURNOUT_SORT = 'order'
+// 🚨 `order` is intentionally NOT in the valid sort fields: Firestore's
+// orderBy excludes documents that don't have the field, and turnouts only
+// receive an `order` value when the user explicitly drag-sorts them. Sorting
+// by `order` would hide every newly-added turnout. If we ever want drag-sort
+// back, it has to be a client-side sort after fetching all docs.
+const VALID_TURNOUT_SORT_FIELDS = new Set(['name', 'device', 'turnoutIdx', 'state', 'type'])
+const DEFAULT_TURNOUT_SORT = 'name'
 
 function validTurnoutSortField(field: string | undefined): string {
   return field && VALID_TURNOUT_SORT_FIELDS.has(field) ? field : DEFAULT_TURNOUT_SORT
@@ -27,9 +32,10 @@ function validTurnoutSortField(field: string | undefined): string {
 
 export function useTurnouts() {
   const layoutId = useStorage('@DEJA/layoutId', '')
-  const sortBy = useStorage<string[]>('@DEJA/prefs/turnouts/Sort', ['order'])
+  const sortBy = useStorage<string[]>('@DEJA/prefs/turnouts/Sort', ['name'])
   const filterBy = useStorage<string[]>('@DEJA/prefs/turnouts/Filter', [])
-  const colRef = collection(db, `layouts/${layoutId.value}/turnouts`)
+  /** Lazy collection ref — avoids the [VueFire SSR] warning when layoutId is empty at setup time. */
+  const getColRef = () => collection(db, `layouts/${layoutId.value}/turnouts`)
 
   const turnoutsCol = () => {
     const whereClauses: QueryConstraint[] = []
@@ -42,8 +48,7 @@ export function useTurnouts() {
       })
     }
     log.debug('sortby', sortBy.value)
-    let queryRef = query(collection(db, `layouts/${layoutId.value}/turnouts`), orderBy(validTurnoutSortField(sortBy.value[0])))
-    // let queryRef = query(colRef, orderBy(sortBy.value[0])) // TODO: debug this, getting error: [VueFire SSR]: Could not get the path of the data source]
+    let queryRef = query(getColRef(), orderBy(validTurnoutSortField(sortBy.value[0])))
     whereClauses.forEach((clause) => {
       log.debug(clause)
       queryRef = query(queryRef, clause)
@@ -63,7 +68,7 @@ export function useTurnouts() {
     try {
       log.debug('getTurnoutsByDevice', deviceId)
       return query(
-        colRef,
+        getColRef(),
         where('device', '==', deviceId),
       )
     } catch (error) {
@@ -79,15 +84,15 @@ export function useTurnouts() {
         return null
       }
       if (turnoutIds.length === 0) {
-        return colRef
+        return getColRef()
       } else if (turnoutIds.length === 1) {
-        return query(colRef, where('__name__', '==', turnoutIds[0]))
+        return query(getColRef(), where('__name__', '==', turnoutIds[0]))
       } else if (turnoutIds.length > 10) {
         log.warn('Too many turnout ids for "in" query; returning all turnouts instead')
-        return colRef
+        return getColRef()
       }
       return query(
-        colRef,
+        getColRef(),
         where('__name__', 'in', turnoutIds),
       )
     } catch (error) {

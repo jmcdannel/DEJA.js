@@ -21,7 +21,7 @@ layoutId = os.getenv('LAYOUT_ID')
 deviceId = os.getenv('DEVICE_ID')
 topicId = os.getenv('TOPIC_ID')
 stopic = topicId
-ptopic = topicId + "/messages"
+ptopic = stopic + "/messages"
 pins = {}
 
 def loadConfig():

@@ -16,7 +16,7 @@ export const FEATURE_FLAGS: Record<FeatureName, FeatureStage> = {
   sounds: 'dev',
   trackDiagrams: 'dev',
   routes: 'dev',
-  sensors: 'dev',
+  sensors: 'ga',
   tourApp: 'dev',
   quickMenuFavorites: 'dev',
 }

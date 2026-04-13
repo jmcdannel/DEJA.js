@@ -19,12 +19,15 @@ export async function handleTurnout(turnout: Turnout): Promise<void> {
 
     const layoutDevice = layout.devices()?.find(({ id }) => id === turnout.device)
 
-    // DCC-EX: send directly via serial, no command object needed
+    // DCC-EX: send directly via serial, targeted to the turnout's device
     if (layoutDevice?.type === 'dcc-ex') {
-      await dcc.sendTurnout({
-        state: turnout.state,
-        turnoutIdx: turnout.turnoutIdx,
-      } as TurnoutPayload)
+      await dcc.sendTurnout(
+        {
+          state: turnout.state,
+          turnoutIdx: turnout.turnoutIdx,
+        } as TurnoutPayload,
+        turnout.device,
+      )
       return
     }
 

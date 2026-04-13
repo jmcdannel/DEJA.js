@@ -84,7 +84,7 @@ const { state: onboardingState, isComplete: onboardingComplete } = useOnboarding
 const locosQuery = computed(() =>
   layoutId.value ? query(collection(db, `layouts/${layoutId.value}/locos`)) : null
 )
-const locos = useCollection(locosQuery)
+const locos = useCollection(locosQuery, { ssrKey: 'app-locos-count' })
 const locoCount = computed(() => locos.value?.length ?? 0)
 const dismissedOnboarding = useStorage('@DEJA/dismissedOnboardingBanner', false)
 
