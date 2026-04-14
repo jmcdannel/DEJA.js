@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { useEfx, efxTypes, type Effect } from '@repo/modules'
-
-const { runEffect } = useEfx()
+import { computed } from 'vue'
+import { efxTypes, type Effect } from '@repo/modules'
+import ListItemCard from '../DeviceConfig/ListItemCard.vue'
 
 interface Props {
   effect: Effect,
@@ -17,78 +16,84 @@ const emit = defineEmits<{
 const state = defineModel('state', {
   type: Boolean
 })
-const efxType = computed(() => efxTypes.find((type) => type.value === props?.effect?.type))
-const deviceColor = computed(() => props.effect?.color || 'primary')
 
+const efxType = computed(() =>
+  efxTypes.find((type) => type.value === props?.effect?.type),
+)
+const accentColor = computed(
+  () => props.effect?.color || efxType.value?.color || 'purple',
+)
+const icon = computed(() => efxType.value?.icon || 'mdi-lightbulb')
 </script>
 
 <template>
-  <v-card
-    class="m-1 shadow-xl"
-    :disabled="isRunning"
+  <ListItemCard
+    :item-id="effect?.id"
+    :device-id="effect?.device"
+    :color="accentColor"
     :loading="isRunning"
+    :disabled="isRunning"
   >
-    <v-card-title class="flex flex-row items-center gap-4">
-      <v-icon :icon="efxType?.icon || 'mdi-help'" :color="deviceColor" />
-      <h4 class="text-md font-bold">{{ effect?.name }}</h4>
-      <v-spacer />
+    <template #header-leading>
+      <v-avatar :color="accentColor" variant="tonal" size="32" rounded="lg">
+        <v-icon :icon="icon" :color="accentColor" size="18" />
+      </v-avatar>
+    </template>
+
+    <template #title>
+      <span class="text-sm font-semibold text-[#f8fafc] truncate">
+        {{ effect?.name || effect?.id }}
+      </span>
+    </template>
+
+    <template #subtitle>
+      {{ effect?.type || 'effect' }}
+    </template>
+
+    <template #status>
       <v-icon
         :icon="state ? 'mdi-circle' : 'mdi-circle-outline'"
         :color="state ? 'green' : 'grey'"
-        size="small"
+        size="14"
       />
-    </v-card-title>
-    <v-card-text class="text-sm">
-      <p class="my-4">{{ effect?.name }}</p>
-      <div class="flex flex-wrap gap-2">
-        <v-btn
-          v-if="effect?.device"
-          size="small"
-          variant="outlined"
-          :color="deviceColor"
-          prepend-icon="mdi-memory"
-        >
-          {{ effect?.device }}
-        </v-btn>
-        <v-chip
-          v-if="effect?.type"
-          class="text-xs"
-          prepend-icon="mdi-electric-switch"
-          variant="outlined"
-        >
-          {{ effect?.type }}
-        </v-chip>
-        <v-chip
-          v-for="tag in effect?.tags"
-          :key="tag"
-          class="text-xs"
-          prepend-icon="mdi-tag"
-          variant="outlined"
-        >
-          {{ tag }}
-        </v-chip>
-        <v-chip
-          v-if="effect?.allowGuest"
-          class="text-xs"
-          prepend-icon="mdi-account-check"
-          variant="outlined"
-          color="success"
-        >
-          Guest Access
-        </v-chip>
-      </div>
-    </v-card-text>
-    <v-card-actions class="flex justify-end">
+    </template>
+
+    <div class="flex items-center gap-2 flex-wrap">
       <v-switch
         v-model="state"
-        :color="deviceColor"
-        :disabled="isRunning"
-        :loading="isRunning"
+        :color="accentColor"
         hide-details
+        density="compact"
       />
-    </v-card-actions>
-    <v-divider />
-    <div class="flex justify-between pa-1" style="background: rgba(var(--v-theme-on-surface), 0.04)">
+      <v-spacer />
+      <v-chip
+        v-if="effect?.allowGuest"
+        size="x-small"
+        variant="tonal"
+        color="success"
+        prepend-icon="mdi-account-check"
+      >
+        Guest
+      </v-chip>
+    </div>
+
+    <div
+      v-if="(effect?.tags?.length ?? 0) > 0"
+      class="flex flex-wrap gap-1"
+    >
+      <v-chip
+        v-for="tag in effect?.tags"
+        :key="tag"
+        class="text-xs"
+        prepend-icon="mdi-tag"
+        variant="outlined"
+        size="x-small"
+      >
+        {{ tag }}
+      </v-chip>
+    </div>
+
+    <template #footer>
       <v-btn
         icon="mdi-delete-outline"
         variant="text"
@@ -96,13 +101,14 @@ const deviceColor = computed(() => props.effect?.color || 'primary')
         size="small"
         @click="emit('delete', effect)"
       />
+      <v-spacer />
       <v-btn
         icon="mdi-pencil-outline"
         variant="text"
-        :color="deviceColor"
+        :color="accentColor"
         size="small"
         @click="emit('edit', effect)"
       />
-    </div>
-  </v-card>
+    </template>
+  </ListItemCard>
 </template>

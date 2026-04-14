@@ -3,6 +3,7 @@ import { computed, ref, type PropType } from 'vue'
 import draggable from 'vuedraggable'
 import { useSignals, type Signal, type SignalAspect } from '@repo/modules/signals'
 import { useSortableList } from '@/Core/composables/useSortableList'
+import SignalCard from './SignalCard.vue'
 
 defineEmits(['edit'])
 const props = defineProps({
@@ -59,94 +60,17 @@ const wiring = (signal: Signal) => signal.commonAnode ? 'Common Anode' : 'Common
       </template>
       <template #item="{ element: item }">
         <div>
-          <v-card
-            class="mx-auto w-full h-full justify-between flex flex-col"
+          <SignalCard
+            :signal="item"
             :color="color"
-            variant="tonal"
-            density="compact">
-            <v-card-title class="flex items-center justify-between text-sm py-1">
-              <div class="flex items-center gap-1">
-                <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100" size="small">mdi-drag</v-icon>
-                <span>{{ item.name || item.id }}</span>
-              </div>
-            </v-card-title>
-            <v-card-text class="py-2">
-              <div class="flex flex-wrap gap-4 items-center">
-                <div class="flex items-center gap-3">
-                  <div class="flex flex-col items-center p-2 rounded-lg bg-neutral-900 border border-neutral-700" style="width: 64px;">
-                    <v-btn
-                      icon="mdi-circle"
-                      size="x-small"
-                      :color="item.aspect === 'red' ? 'red-darken-1' : 'red'"
-                      :variant="item.aspect === 'red' ? 'flat' : 'tonal'"
-                      :disabled="!canToggle(item, 'red')"
-                      @click="toggleAspect(item, 'red')"
-                    />
-                    <v-btn
-                      icon="mdi-circle"
-                      class="my-1"
-                      size="x-small"
-                      :color="item.aspect === 'yellow' ? 'amber-darken-2' : 'amber'"
-                      :variant="item.aspect === 'yellow' ? 'flat' : 'tonal'"
-                      :disabled="!canToggle(item, 'yellow')"
-                      @click="toggleAspect(item, 'yellow')"
-                    />
-                    <v-btn
-                      icon="mdi-circle"
-                      size="x-small"
-                      :color="item.aspect === 'green' ? 'green-darken-2' : 'green'"
-                      :variant="item.aspect === 'green' ? 'flat' : 'tonal'"
-                      :disabled="!canToggle(item, 'green')"
-                      @click="toggleAspect(item, 'green')"
-                    />
-                  </div>
-                  <div>
-                    <div class="text-xs opacity-70">Pins</div>
-                    <ul class="text-xs m-0 p-0 space-y-0.5">
-                      <li>R: {{ item.red ?? '-' }}</li>
-                      <li>Y: {{ item.yellow ?? '-' }}</li>
-                      <li>G: {{ item.green ?? '-' }}</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </v-card-text>
-            <v-divider />
-            <div class="flex items-center pa-1" style="background: rgba(var(--v-theme-on-surface), 0.04)">
-              <v-btn
-                v-if="confirmDelete !== item?.id"
-                icon="mdi-delete-outline"
-                variant="text"
-                color="error"
-                size="small"
-                @click="confirmDelete = item?.id"
-              />
-              <template v-else>
-                <v-btn
-                  text="Cancel"
-                  variant="outlined"
-                  size="small"
-                  @click="confirmDelete = ''"
-                />
-                <v-btn
-                  text="Confirm"
-                  variant="tonal"
-                  color="error"
-                  size="small"
-                  prepend-icon="mdi-delete"
-                  @click="deleteSignal(item?.id)"
-                />
-              </template>
-              <v-spacer />
-              <v-btn
-                icon="mdi-pencil-outline"
-                variant="text"
-                :color="color"
-                size="small"
-                @click="$emit('edit', item)"
-              />
-            </div>
-          </v-card>
+            :confirming="confirmDelete === item?.id"
+            :can-toggle="canToggle"
+            @toggle-aspect="toggleAspect"
+            @request-delete="confirmDelete = item?.id"
+            @cancel-delete="confirmDelete = ''"
+            @confirm-delete="deleteSignal"
+            @edit="$emit('edit', $event)"
+          />
         </div>
       </template>
     </draggable>

@@ -8,7 +8,6 @@ import TrackPower from '../TrackPower.vue'
 interface DeviceConnectCardProps {
   device: Device
   availablePorts: string[]
-  availableTopics?: string[]
   serverOnline: boolean
   showDetailsLink?: boolean
   // Server stats (deja-server only)
@@ -23,7 +22,6 @@ interface DeviceConnectCardProps {
 }
 
 const props = withDefaults(defineProps<DeviceConnectCardProps>(), {
-  availableTopics: () => [],
   showDetailsLink: true,
   serverUptime: '',
   connectedDeviceCount: 0,
@@ -45,7 +43,6 @@ const { deviceTypes } = useLayout()
 const { serverStatus } = useServerStatus()
 
 const selectedPort = defineModel<string>('selectedPort', { default: '' })
-const selectedTopic = defineModel<string>('selectedTopic', { default: '' })
 
 const copied = ref(false)
 
@@ -55,17 +52,6 @@ watch(
   (ports) => {
     if (!selectedPort.value && props.device.port && ports.includes(props.device.port)) {
       selectedPort.value = props.device.port
-    }
-  },
-  { immediate: true },
-)
-
-// 📡 Prepopulate topic from saved device value
-watch(
-  () => props.device.topic,
-  (topic) => {
-    if (!selectedTopic.value && topic) {
-      selectedTopic.value = topic
     }
   },
   { immediate: true },
@@ -130,12 +116,12 @@ const borderColor = computed(() =>
 // 🚫 Non-server devices are dimmed when server is offline
 const isDimmed = computed(() => !isDejaServer.value && !props.serverOnline)
 
-// 🔗 Connect handler — dispatches USB serial or MQTT topic
+// 🔗 Connect handler — USB passes serial port; MQTT topic is server-generated.
 function handleConnect() {
   if (isUsbDevice.value) {
     emit('connect', props.device.id, selectedPort.value, undefined)
   } else {
-    emit('connect', props.device.id, undefined, selectedTopic.value || props.device.topic)
+    emit('connect', props.device.id, undefined, undefined)
   }
 }
 
@@ -457,18 +443,6 @@ async function copyDejaStart() {
             hide-details
             class="device-connect-card__port-select"
             no-data-text="No ports found — click Refresh Ports"
-          />
-
-          <!-- 📡 WiFi/MQTT: topic text field -->
-          <v-text-field
-            v-else-if="isMqttDevice"
-            v-model="selectedTopic"
-            :placeholder="device.topic || 'Enter MQTT topic...'"
-            label="MQTT topic"
-            density="compact"
-            variant="outlined"
-            hide-details
-            class="device-connect-card__port-select"
           />
 
           <!-- Action buttons -->

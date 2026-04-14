@@ -1,125 +1,139 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useEfx, efxTypes } from '@repo/modules'
+import { useRouter } from 'vue-router'
+import { useEfx, efxTypes, type Effect } from '@repo/modules'
 import { createLogger } from '@repo/utils'
+import { ListItemCard } from '@repo/ui'
 import { useColors } from '@/Core/UI/useColors'
 
 const log = createLogger('EffectListItem')
 
 const { DEFAULT_COLOR } = useColors()
 const { runEffect, deleteEfx } = useEfx()
+const router = useRouter()
 
-const props = defineProps({
-  efx: Object,
-  efxId: String,
-})
+const emit = defineEmits<{
+  edit: [effect: Effect]
+}>()
+
+function handleEdit() {
+  if (props.efx) emit('edit', props.efx)
+}
+
+const props = defineProps<{
+  efx?: Effect
+  efxId?: string
+}>()
 
 const confirmDelete = ref(false)
 const internalState = ref(props.efx?.state ?? false)
 
 const efxType = computed(() => efxTypes.find((type) => type.value === props?.efx?.type))
-const color = ref(props.efx?.color || efxType.value?.color || DEFAULT_COLOR)
+const accentColor = computed(
+  () => props.efx?.color || efxType.value?.color || DEFAULT_COLOR,
+)
+const icon = computed(() => efxType.value?.icon || 'mdi-help')
+
+// `duration` is an optional untyped custom field used by some effects;
+// cast locally so the template can safely read it without TS errors.
+const durationSeconds = computed<number | undefined>(
+  () => (props.efx as (Effect & { duration?: number }) | undefined)?.duration,
+)
 
 function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600)
   const m = Math.floor((seconds % 3600) / 60)
   const s = Math.floor(seconds % 60)
   const parts = []
-  if (h > 0) {
-    parts.push(`${h}h`)
-  }
-  if (m > 0) {
-    parts.push(`${m}m`)
-  }
-  if (s > 0 || parts.length === 0) {
-    parts.push(`${s}s`)
-  }
+  if (h > 0) parts.push(`${h}h`)
+  if (m > 0) parts.push(`${m}m`)
+  if (s > 0 || parts.length === 0) parts.push(`${s}s`)
   return parts.join('')
 }
 
-async function handleEfx () {
+async function handleEfx() {
   log.debug('handleEfx', props.efx, props.efx?.id, internalState.value)
-  props?.efx && props?.efxId && await runEffect({
-      ...props.efx,
-      id: props.efxId,
-      type: props.efx.type || '',
-      state: internalState.value
+  if (!props.efx || !props.efxId) return
+  await runEffect({
+    ...props.efx,
+    id: props.efxId,
+    type: props.efx.type || '',
+    state: internalState.value,
   })
 }
 
+function goToEdit() {
+  if (!props.efxId) return
+  router.push({ name: 'Edit Effect', params: { effectId: props.efxId } })
+}
 </script>
+
 <template>
-  <v-card
-    class="mx-auto w-full h-full justify-between flex flex-col"
-    density="compact"
+  <ListItemCard
+    :item-id="efxId"
+    :device-id="efx?.device"
+    :color="accentColor"
   >
-    <v-card-title class="flex flex-nowrap items-center gap-3 !overflow-visible">
-      <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100" size="small">mdi-drag</v-icon>
-      <router-link :to="{ name: 'Edit Effect', params: { effectId: efxId } }" class="flex items-center gap-3 min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
-        <v-tooltip :text="efxId" location="top">
-          <template #activator="{ props: tooltipProps }">
-            <v-icon :icon="efxType?.icon || 'mdi-help'" :color="color" v-bind="tooltipProps" class="flex-shrink-0" />
-          </template>
-        </v-tooltip>
-        <span class="truncate">{{ efx?.name }}</span>
-      </router-link>
-      <v-spacer />
+    <template #header-leading>
+      <v-avatar :color="accentColor" variant="tonal" size="32" rounded="lg">
+        <v-icon :icon="icon" :color="accentColor" size="18" />
+      </v-avatar>
+    </template>
+
+    <template #title>
+      <button
+        type="button"
+        class="text-sm font-semibold text-[#f8fafc] truncate text-left hover:opacity-80 transition-opacity"
+        @click="goToEdit"
+      >
+        {{ efx?.name || efxId }}
+      </button>
+    </template>
+
+    <template #subtitle>
+      {{ efxType?.label || efx?.type || 'effect' }}
+    </template>
+
+    <template #status>
       <v-icon
         v-if="efx?.allowGuest"
         icon="mdi-account-check"
         color="success"
-        size="small"
+        size="14"
         class="flex-shrink-0"
       />
       <v-switch
         v-model="internalState"
         hide-details
         density="compact"
-        :color="color"
-        @change="handleEfx"
+        :color="accentColor"
         class="flex-shrink-0"
+        @change="handleEfx"
       />
-    </v-card-title>
-    <v-card-text class="min-h-8 flex py-2">
-      <div class="flex justify-between w-full items-start">
-        <v-chip-group column>
-          <v-chip
-            size="small"
-            variant="outlined"
-          >{{ efxType?.label || 'Effect' }}</v-chip>
+    </template>
 
-          <v-chip
-            v-if="efx?.duration"
-            size="small"
-            variant="outlined"
-            prepend-icon="mdi-timer-outline"
-          >
-            {{ formatDuration(efx.duration) }}
-          </v-chip>
-        </v-chip-group>
-        <v-btn
-          v-if="efx?.device"
-          size="small"
-          variant="outlined"
-          :color="color"
-          prepend-icon="mdi-memory"
-        >
-          {{ efx?.device }}
-        </v-btn>
-      </div>
-    </v-card-text>
-    <v-spacer />
-    <v-divider />
-    <div class="flex items-center pa-1" style="background: rgba(var(--v-theme-on-surface), 0.04)">
-      <v-btn
-        v-if="!confirmDelete"
-        icon="mdi-delete-outline"
-        variant="text"
-        color="error"
-        size="small"
-        @click="confirmDelete = true"
-      />
-      <template v-else>
+    <div class="flex flex-wrap gap-1 items-center">
+      <v-chip
+        v-if="durationSeconds"
+        size="x-small"
+        variant="outlined"
+        prepend-icon="mdi-timer-outline"
+      >
+        {{ formatDuration(durationSeconds) }}
+      </v-chip>
+      <v-chip
+        v-for="tag in efx?.tags"
+        :key="tag"
+        size="x-small"
+        variant="outlined"
+        prepend-icon="mdi-tag"
+      >
+        {{ tag }}
+      </v-chip>
+    </div>
+
+    <template #footer>
+      <template v-if="confirmDelete">
         <v-btn
           text="Cancel"
           variant="outlined"
@@ -132,17 +146,25 @@ async function handleEfx () {
           color="error"
           size="small"
           prepend-icon="mdi-delete"
-          @click="deleteEfx(efx?.id)"
+          @click="deleteEfx(efx?.id ?? '')"
         />
       </template>
+      <v-btn
+        v-else
+        icon="mdi-delete-outline"
+        variant="text"
+        color="error"
+        size="small"
+        @click="confirmDelete = true"
+      />
       <v-spacer />
       <v-btn
         icon="mdi-pencil-outline"
         variant="text"
-        :color="color"
+        :color="accentColor"
         size="small"
-        @click="$emit('edit', efx)"
+        @click="handleEdit"
       />
-    </div>
-  </v-card>
+    </template>
+  </ListItemCard>
 </template>

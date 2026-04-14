@@ -1,7 +1,53 @@
 // 🔧 Arduino config.h generator
 // Generates a complete config.h from device, effects, and turnout data
 
+import type { ArduinoAdvancedConfig } from '../layouts/types'
 import type { ArduinoConfigInput } from './types'
+
+/**
+ * 📐 Defaults baked into the stock `deja-arduino` firmware. Any override in
+ * `device.config.arduino` wins; missing fields fall back here, so untouched
+ * devices keep producing byte-identical config.h output.
+ */
+export const ARDUINO_CONFIG_DEFAULTS = {
+  baudRate: 115_200,
+  servoMin: 150,
+  servoMax: 600,
+  minPulseWidth: 650,
+  maxPulseWidth: 2350,
+  usMin: 600,
+  usMax: 2400,
+  servoFreq: 50,
+  servoCount: 16,
+  pwmOscillatorFreq: 27_000_000,
+  pca9685Address: 0x40,
+  sensorDebounceMs: 500,
+} as const
+
+/**
+ * 🔗 Merge a device's saved Arduino advanced config over the defaults.
+ * Shared between the Arduino and ESP32 WiFi generators so both variants honor
+ * the same user-editable tuning values.
+ */
+export function resolveArduinoConfig(adv: ArduinoAdvancedConfig | undefined) {
+  const a = adv ?? {}
+  return {
+    baudRate: a.baudRate ?? ARDUINO_CONFIG_DEFAULTS.baudRate,
+    servoMin: a.servoMin ?? ARDUINO_CONFIG_DEFAULTS.servoMin,
+    servoMax: a.servoMax ?? ARDUINO_CONFIG_DEFAULTS.servoMax,
+    minPulseWidth: a.minPulseWidth ?? ARDUINO_CONFIG_DEFAULTS.minPulseWidth,
+    maxPulseWidth: a.maxPulseWidth ?? ARDUINO_CONFIG_DEFAULTS.maxPulseWidth,
+    usMin: a.usMin ?? ARDUINO_CONFIG_DEFAULTS.usMin,
+    usMax: a.usMax ?? ARDUINO_CONFIG_DEFAULTS.usMax,
+    servoFreq: a.servoFreq ?? ARDUINO_CONFIG_DEFAULTS.servoFreq,
+    servoCount: a.servoCount ?? ARDUINO_CONFIG_DEFAULTS.servoCount,
+    pwmOscillatorFreq: a.pwmOscillatorFreq ?? ARDUINO_CONFIG_DEFAULTS.pwmOscillatorFreq,
+    pca9685Address: a.pca9685Address ?? ARDUINO_CONFIG_DEFAULTS.pca9685Address,
+    sensorDebounceMs: a.sensorDebounceMs ?? ARDUINO_CONFIG_DEFAULTS.sensorDebounceMs,
+    pca9685SdaPin: a.pca9685SdaPin,
+    pca9685SclPin: a.pca9685SclPin,
+  }
+}
 
 export function generateArduinoConfig(input: ArduinoConfigInput): string {
   const { device, effects, turnouts } = input
@@ -44,6 +90,24 @@ export function generateArduinoConfig(input: ArduinoConfigInput): string {
   const hasSignals = signalPins.length > 0
   const enablePwm = input.enablePwm ?? hasServoTurnouts
 
+  // 🛠️ Merge user overrides over defaults. `ArduinoAdvancedConfig` fields are
+  // intentionally all-optional so a device with no saved config produces the
+  // stock values and a byte-identical header.
+  const cfg = resolveArduinoConfig(device.config?.arduino)
+
+  // 🧭 Custom PCA9685 I²C pins (optional). Only emitted when both SDA and SCL
+  // are set — leaves the firmware on the board default (Wire.begin()) otherwise.
+  // The `.ino` guards the `Wire.begin(SDA, SCL)` 2-arg signature behind an
+  // ESP32/RP2040 compile check so classic AVR boards still compile.
+  const hasCustomI2cPins =
+    typeof cfg.pca9685SdaPin === 'number' && typeof cfg.pca9685SclPin === 'number'
+
+  const pca9685PinDefines = hasCustomI2cPins
+    ? `#define PCA9685_SDA_PIN ${cfg.pca9685SdaPin}
+#define PCA9685_SCL_PIN ${cfg.pca9685SclPin}
+`
+    : ''
+
   return `#include <TurnoutPulser.h>
 
 #define DEVICE_ID "${device.id}"
@@ -53,14 +117,19 @@ export function generateArduinoConfig(input: ArduinoConfigInput): string {
 #define ENABLE_TURNOUTS ${hasTurnouts}
 #define ENABLE_SENSORS ${hasSensors}
 
-#define SERVOMIN 150 // This is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX 600 // This is the 'maximum' pulse length count (out of 4096)
-#define MIN_PULSE_WIDTH 650
-#define MAX_PULSE_WIDTH 2350
-#define USMIN 600     // This is the rounded 'minimum' microsecond length based on the minimum pulse of 150
-#define USMAX 2400    // This is the rounded 'maximum' microsecond length based on the maximum pulse of 600
-#define SERVO_FREQ 50 // Analog servos run at ~50 Hz updates
-#define SERVO_COUNT 16
+#define BAUD_RATE ${cfg.baudRate}
+
+#define SERVOMIN ${cfg.servoMin} // This is the 'minimum' pulse length count (out of 4096)
+#define SERVOMAX ${cfg.servoMax} // This is the 'maximum' pulse length count (out of 4096)
+#define MIN_PULSE_WIDTH ${cfg.minPulseWidth}
+#define MAX_PULSE_WIDTH ${cfg.maxPulseWidth}
+#define USMIN ${cfg.usMin}     // This is the rounded 'minimum' microsecond length based on the minimum pulse of 150
+#define USMAX ${cfg.usMax}    // This is the rounded 'maximum' microsecond length based on the maximum pulse of 600
+#define SERVO_FREQ ${cfg.servoFreq} // Analog servos run at ~50 Hz updates
+#define SERVO_COUNT ${cfg.servoCount}
+#define PWM_OSCILLATOR_FREQ ${cfg.pwmOscillatorFreq}L
+#define PCA9685_ADDRESS 0x${cfg.pca9685Address.toString(16).toUpperCase()}
+${pca9685PinDefines}#define SENSOR_DEBOUNCE_MS ${cfg.sensorDebounceMs}
 
 int OUTPINS[] = {${outPins.length > 0 ? ' ' + outPins.join(', ') + ' ' : ''}};
 int SIGNALPINS[] = {${signalPins.length > 0 ? ' ' + signalPins.join(', ') + ' ' : ''}};

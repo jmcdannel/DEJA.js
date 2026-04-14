@@ -8,14 +8,12 @@ import DeviceConnectCard from './DeviceConnectCard.vue'
 interface Props {
   devices: Device[]
   availablePorts: string[]
-  availableTopics?: string[]
   showHeader?: boolean
   showDetailsLink?: boolean
   serverOnline?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  availableTopics: () => [],
   showHeader: true,
   showDetailsLink: true,
   serverOnline: false,
@@ -134,7 +132,6 @@ function getEffectCount(deviceId: string): number {
       class="mb-2"
       :device="device"
       :available-ports="availablePorts"
-      :available-topics="availableTopics"
       :server-online="serverOnline"
       :show-details-link="showDetailsLink"
       :turnout-count="getTurnoutCount(device.id)"
