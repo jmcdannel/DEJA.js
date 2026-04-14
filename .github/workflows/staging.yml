@@ -75,8 +75,6 @@ jobs:
           echo "Staging domains updated:"
           echo "  https://staging-throttle.dejajs.com"
           echo "  https://staging-cloud.dejajs.com"
-          echo "  https://staging-monitor.dejajs.com"
-          echo "  https://staging.dejajs.com"
 
           # Note: merging main back into preview (sync step) also triggers this workflow.
           # That re-aliasing is harmless — staging domains will correctly reflect preview.
