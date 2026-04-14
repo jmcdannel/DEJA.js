@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "tsx ./scripts/build.ts",
+    "build:firmware": "tsx ./scripts/build.ts",
     "deploy": "tsx ./scripts/deploy.ts"
   },
   "dependencies": {

@@ -81,7 +81,7 @@ export function getCliDeployCommands(
     pioEnv,
     fqbn,
     uploadFqbn,
-    build: `pnpm --filter=@deja/io build -- --layout ${input.layoutId} --device ${input.deviceId}`,
+    build: `pnpm --filter=@deja/io build:firmware -- --layout ${input.layoutId} --device ${input.deviceId}`,
     cd: `cd io/dist/${input.layoutId}/arduino/${input.deviceId}`,
     platformio: `platformio run -e ${pioEnv} --target upload --upload-port /dev/cu.usbserial-*`,
     arduinoCli: `arduino-cli compile --fqbn ${fqbn}${cppFlags} ${sketchName} && arduino-cli upload -p /dev/cu.usbserial-* --fqbn ${uploadFqbn} ${sketchName}`,
