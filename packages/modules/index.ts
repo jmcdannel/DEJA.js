@@ -10,6 +10,7 @@ export * from './effects/constants'
 export { default as useLayout } from './layouts/useLayout'
 export * from './layouts/types'
 export * from './layouts/useServerStatus'
+export * from './layouts/useDeviceStatus'
 export * from './layouts/constants'
 
 // Locos module

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useTurnouts, type Turnout } from '@repo/modules'
+import { useTurnouts, type Device, type Turnout } from '@repo/modules'
 import { useLayout } from '@repo/modules'
+import { DevicePickerChip, DevicePickerGrid } from '@repo/ui'
 // import { useEfx } from '@repo/modules/effects'
 import { slugify, createLogger } from '@repo/utils'
 import TurnoutTypePicker from '@/Turnouts/TurnoutTypePicker.vue'
@@ -46,6 +47,9 @@ const color = ref(props.turnout?.color || 'yellow')
 const tags = ref<string[]>(props.turnout?.tags || [])
 const turnoutType = ref(props.turnout?.type || DEFAULT_TYPE)
 const loading = ref(false)
+
+// 📦 Add-vs-edit drives the device picker presentation.
+const isEdit = computed(() => !!props.turnout)
 const rules: ValidationRules = {
   required: [(val: unknown) => (val === 0 || !!val) || 'Required.']
 }
@@ -184,16 +188,26 @@ const title = computed(() => props.turnout ? `Edit Turnout: ${props.turnout.name
           </div>
         </div>
 
-        <!-- Device -->
-        <div class="form-section__row">
-          <div class="form-section__row-label">
-            <span class="form-section__row-name">Device</span>
-            <span class="form-section__row-desc">Controller device</span>
-          </div>
-          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer" style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)" @click="editDevice = true">
-            <span class="text-sm text-white/60">{{ device }}</span>
-            <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
-          </div>
+        <!-- Device — grid inline for add, compact chip → dialog for edit -->
+        <div class="form-section__row" :class="{ 'form-section__row--block': !isEdit }">
+          <template v-if="!isEdit">
+            <div class="form-section__row-label mb-2">
+              <span class="form-section__row-name">Device</span>
+              <span class="form-section__row-desc">Controller device</span>
+            </div>
+            <DevicePickerGrid
+              v-model="device"
+              :devices="(devices ?? []) as Device[]"
+            />
+          </template>
+          <DevicePickerChip
+            v-else
+            :device-id="device"
+            :devices="(devices ?? []) as Device[]"
+            label="Device"
+            description="Controller device"
+            @click="editDevice = true"
+          />
         </div>
 
         <!-- Effect -->

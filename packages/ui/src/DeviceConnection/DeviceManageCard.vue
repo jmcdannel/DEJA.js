@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch, onBeforeUnmount } from 'vue'
 import type { Device } from '@repo/modules'
 import { isArduinoFamilyType, isWifiDeviceType, useLayout, useServerStatus } from '@repo/modules'
 import StatusPulse from '../animations/StatusPulse.vue'
@@ -9,6 +9,8 @@ import StatusPulse from '../animations/StatusPulse.vue'
 interface DeviceManageCardProps {
   device: Device
   ports: string[] | null | undefined
+  /** How long to wait for a connect before flagging it as failed (ms) */
+  connectTimeoutMs?: number
 }
 
 interface DeviceManageCardEmits {
@@ -17,7 +19,9 @@ interface DeviceManageCardEmits {
   navigate: [deviceId: string]
 }
 
-const props = defineProps<DeviceManageCardProps>()
+const props = withDefaults(defineProps<DeviceManageCardProps>(), {
+  connectTimeoutMs: 10_000,
+})
 const emit = defineEmits<DeviceManageCardEmits>()
 
 // ── Composables ────────────────────────────────────────────────────
@@ -29,6 +33,33 @@ const { serverStatus } = useServerStatus()
 
 const serial = ref(props.device?.port || '')
 const autoConnect = ref(props.device?.autoConnect || false)
+
+/** 'idle' | 'connecting' | 'error' — drives button + error state */
+const connectState = ref<'idle' | 'connecting' | 'error'>('idle')
+const connectError = ref<string | null>(null)
+let connectTimer: ReturnType<typeof setTimeout> | null = null
+
+function clearConnectTimer() {
+  if (connectTimer) {
+    clearTimeout(connectTimer)
+    connectTimer = null
+  }
+}
+
+// Keep local state in sync if the upstream device doc changes (e.g. auto-connect
+// flipped elsewhere, or port saved by another session).
+watch(
+  () => props.device?.autoConnect,
+  (val) => {
+    autoConnect.value = val ?? false
+  },
+)
+watch(
+  () => props.device?.port,
+  (val) => {
+    if (val && !serial.value) serial.value = val
+  },
+)
 
 // ── Computed ───────────────────────────────────────────────────────
 
@@ -63,26 +94,112 @@ const isMqttDevice = computed(
     (props.device?.connection === 'wifi' || isWifiDeviceType(props.device?.type)),
 )
 
-const serverIp = computed(() => serverStatus.value?.ip ?? null)
-
 const deviceColor = computed(() => deviceType.value?.color ?? 'grey')
+
+// 🖥️ Non-server devices can't be connected unless the DEJA server is online —
+// the server is the process that actually opens the serial port / subscribes
+// to MQTT on behalf of the device. Gate the Connect button on it so users
+// don't try to connect into a black hole.
+const serverOnline = computed(() => serverStatus.value?.online ?? false)
+const canConnect = computed(() => {
+  if (isDejaServer.value) return false
+  if (!serverOnline.value) return false
+  if (isUsbDevice.value && !serial.value) return false
+  return true
+})
+const connectDisabledReason = computed(() => {
+  if (!serverOnline.value) {
+    return 'Start the DEJA server (deja start) before connecting devices.'
+  }
+  if (isUsbDevice.value && !serial.value) {
+    return 'Select a USB port to connect.'
+  }
+  return ''
+})
+
+const connectionLabel = computed(() => {
+  if (isDejaServer.value) return 'Server'
+  if (isUsbDevice.value) return 'USB'
+  if (isMqttDevice.value) return 'WiFi'
+  return props.device?.connection || 'Device'
+})
+
+const connectionIcon = computed(() => {
+  if (isDejaServer.value) return 'mdi-server'
+  if (isUsbDevice.value) return 'mdi-usb-port'
+  if (isMqttDevice.value) return 'mdi-wifi'
+  return 'mdi-devices'
+})
+
+/** The path/topic/IP to display under the status line — read-only. */
+const connectionPath = computed(() => {
+  if (isDejaServer.value) return serverStatus.value?.ip ?? null
+  if (isUsbDevice.value) return props.device?.port || null
+  if (isMqttDevice.value) return props.device?.topic || null
+  return null
+})
+
+const statusLabel = computed(() => {
+  if (connectState.value === 'connecting') return 'Connecting…'
+  if (connectState.value === 'error') return 'Connection failed'
+  return isConnected.value ? 'Connected' : 'Disconnected'
+})
+
+const statusClass = computed(() => {
+  if (connectState.value === 'error') return 'text-red-400'
+  if (connectState.value === 'connecting') return 'text-amber-400'
+  return isConnected.value ? 'text-green-400' : 'text-red-400'
+})
+
+// ── Watchers for connect lifecycle ─────────────────────────────────
+
+// When the device actually flips to connected, clear any pending error/timer.
+watch(
+  () => props.device?.isConnected,
+  (connected) => {
+    if (connected) {
+      clearConnectTimer()
+      connectState.value = 'idle'
+      connectError.value = null
+    }
+  },
+)
+
+onBeforeUnmount(clearConnectTimer)
 
 // ── Handlers ───────────────────────────────────────────────────────
 
 function handleConnect() {
+  connectError.value = null
+  connectState.value = 'connecting'
+
   if (isUsbDevice.value) {
     emit('connect', props.device.id, serial.value, undefined)
   } else {
-    emit('connect', props.device.id, undefined, props.device?.topic)
+    // 🔕 topic is server-generated — always pass undefined
+    emit('connect', props.device.id, undefined, undefined)
   }
+
+  clearConnectTimer()
+  connectTimer = setTimeout(() => {
+    if (!props.device?.isConnected) {
+      connectState.value = 'error'
+      connectError.value =
+        'Connection timed out. Check the server logs (`deja logs`) for details.'
+    }
+  }, props.connectTimeoutMs)
 }
 
 function handleDisconnect() {
+  clearConnectTimer()
+  connectState.value = 'idle'
+  connectError.value = null
   emit('disconnect', props.device.id)
 }
 
 async function handleClearPort() {
   if (props.device?.id) {
+    serial.value = ''
     await updateDevice(props.device.id, { port: '' })
   }
 }
@@ -96,20 +213,21 @@ async function handleAutoConnect(checked: boolean | null) {
 
 <template>
   <v-card
-    class="device-manage-card mx-auto w-full h-full justify-between flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-    density="compact"
+    class="device-manage-card w-full h-full flex flex-col transition-all duration-200 hover:-translate-y-0.5"
+    :class="{ 'device-manage-card--connected': isConnected }"
+    variant="flat"
   >
-    <!-- ── Title Row ──────────────────────────────────────────── -->
-    <v-card-title class="flex flex-nowrap items-center gap-3 !overflow-visible">
+    <!-- ── Header ──────────────────────────────────────────────── -->
+    <div class="device-manage-card__header">
       <v-icon
-        class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 flex-shrink-0"
+        class="drag-handle cursor-grab active:cursor-grabbing opacity-30 hover:opacity-80 flex-shrink-0"
         size="small"
       >
         mdi-drag
       </v-icon>
 
       <div
-        class="flex items-center gap-3 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+        class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer hover:opacity-90 transition-opacity"
         @click="emit('navigate', device.id)"
       >
         <v-avatar :color="deviceColor" variant="tonal" size="36" rounded="lg">
@@ -117,7 +235,7 @@ async function handleAutoConnect(checked: boolean | null) {
             v-if="deviceType?.image"
             :src="deviceType.image"
             alt=""
-            class="w-8 h-8"
+            class="w-7 h-7"
           />
           <v-icon
             v-else
@@ -127,132 +245,103 @@ async function handleAutoConnect(checked: boolean | null) {
         </v-avatar>
 
         <div class="flex flex-col min-w-0">
-          <span class="device-manage-card__id text-sm font-bold truncate">
+          <span class="device-manage-card__id text-sm font-semibold truncate">
             {{ device?.id }}
           </span>
-          <span class="text-xs opacity-70 uppercase tracking-wider">
+          <span
+            class="text-[0.65rem] opacity-55 uppercase tracking-[0.12em] truncate"
+          >
             {{ deviceType?.label || device?.type || 'Device' }}
           </span>
         </div>
       </div>
 
-      <v-spacer />
-
       <v-icon
         :icon="isConnected ? 'mdi-circle' : 'mdi-circle-outline'"
         :color="isConnected ? 'green' : 'grey'"
-        size="small"
+        size="10"
         class="flex-shrink-0"
       />
-    </v-card-title>
+    </div>
 
-    <!-- ── Card Body ──────────────────────────────────────────── -->
-    <v-card-text>
-      <!-- Chip group: connection type -->
-      <div class="flex justify-between w-full items-start mb-3">
-        <v-chip-group>
-          <v-chip
-            v-if="isUsbDevice"
-            size="small"
-            variant="outlined"
-            prepend-icon="mdi-usb"
-          >
-            USB
-          </v-chip>
-          <v-chip
-            v-else-if="isMqttDevice"
-            size="small"
-            variant="outlined"
-            prepend-icon="mdi-wifi"
-          >
-            WiFi
-          </v-chip>
-          <v-chip
-            v-else
-            size="small"
-            variant="outlined"
-            prepend-icon="mdi-devices"
-          >
-            {{ device?.connection || 'Device' }}
-          </v-chip>
+    <v-divider class="opacity-40" />
 
-          <!-- 🌐 Server IP chip -->
-          <v-chip
-            v-if="isDejaServer && isConnected && serverIp"
-            size="small"
-            variant="outlined"
-            prepend-icon="mdi-ip-network"
-          >
-            {{ serverIp }}
-          </v-chip>
-        </v-chip-group>
-
-        <!-- Port / topic badge -->
-        <v-btn
-          v-if="device?.port"
-          size="small"
-          variant="outlined"
-          :color="deviceColor"
-          prepend-icon="mdi-memory"
-        >
-          {{ device.port }}
-        </v-btn>
-        <v-btn
-          v-else-if="device?.topic"
-          size="small"
-          variant="outlined"
-          :color="deviceColor"
-          prepend-icon="mdi-wifi"
-        >
-          {{ device.topic }}
-        </v-btn>
-      </div>
-
-      <!-- Status indicator -->
-      <div class="flex items-center gap-2 mb-3">
+    <!-- ── Body ────────────────────────────────────────────────── -->
+    <v-card-text class="flex-1 !py-4 !px-4 space-y-3">
+      <!-- Status line -->
+      <div class="flex items-center gap-2">
         <StatusPulse
-          :status="isConnected ? 'connected' : 'disconnected'"
+          :status="
+            connectState === 'connecting'
+              ? 'disconnected'
+              : isConnected
+                ? 'connected'
+                : 'disconnected'
+          "
           size="sm"
         />
-        <span
-          class="text-xs"
-          :class="isConnected ? 'text-green-400' : 'text-red-400'"
-        >
-          {{ isConnected ? 'Connected' : 'Disconnected' }}
+        <span class="text-xs font-medium" :class="statusClass">
+          {{ statusLabel }}
         </span>
+        <v-spacer />
+        <div class="flex items-center gap-1 text-[0.65rem] opacity-50">
+          <v-icon :icon="connectionIcon" size="12" />
+          <span class="uppercase tracking-wider">{{ connectionLabel }}</span>
+        </div>
       </div>
 
-      <!-- 🔌 USB port combobox (disconnected USB devices only, not deja-server) -->
+      <!-- Path / topic — plain mono text, not a button/chip -->
+      <div
+        v-if="connectionPath"
+        class="device-manage-card__path text-[0.72rem] text-slate-400 truncate"
+        :title="connectionPath"
+      >
+        {{ connectionPath }}
+      </div>
+
+      <!-- 🔌 USB port picker (only when disconnected USB device) -->
       <v-combobox
         v-if="!isDejaServer && !isConnected && isUsbDevice"
         v-model="serial"
         label="USB Port"
         variant="outlined"
-        item-title="label"
         density="compact"
+        item-title="label"
         :items="ports || []"
-        :disabled="isConnected"
+        :disabled="connectState === 'connecting'"
         clearable
+        hide-details
         @click:clear="handleClearPort"
       />
 
-      <!-- ⚡ Auto-connect toggle -->
+      <!-- ⚠️ Connection error / timeout message -->
+      <v-alert
+        v-if="connectError"
+        type="error"
+        variant="tonal"
+        density="compact"
+        class="text-xs"
+      >
+        {{ connectError }}
+      </v-alert>
+
+      <!-- ⚡ Auto-connect -->
       <v-switch
-        v-if="!isDejaServer && (isConnected || device?.autoConnect)"
+        v-if="!isDejaServer"
         v-model="autoConnect"
         color="green"
         label="Auto Connect"
         hide-details
         density="compact"
+        class="mt-0"
         @update:model-value="handleAutoConnect"
       />
     </v-card-text>
 
-    <!-- ── Footer ─────────────────────────────────────────────── -->
-    <v-divider />
+    <!-- ── Footer ──────────────────────────────────────────────── -->
     <div class="device-manage-card__footer">
       <v-btn
-        variant="tonal"
+        variant="text"
         :color="deviceColor"
         size="small"
         @click="emit('navigate', device.id)"
@@ -263,39 +352,42 @@ async function handleAutoConnect(checked: boolean | null) {
 
       <v-spacer />
 
-      <!-- deja-server: online / offline chip -->
       <template v-if="isDejaServer">
         <v-chip
-          v-if="isConnected"
-          color="success"
+          :color="isConnected ? 'success' : 'error'"
           size="x-small"
           variant="tonal"
-          prepend-icon="mdi-check-circle"
+          :prepend-icon="isConnected ? 'mdi-check-circle' : 'mdi-alert-circle'"
         >
-          Online
-        </v-chip>
-        <v-chip
-          v-else
-          color="error"
-          size="x-small"
-          variant="tonal"
-          prepend-icon="mdi-alert-circle"
-        >
-          Offline
+          {{ isConnected ? 'Online' : 'Offline' }}
         </v-chip>
       </template>
 
-      <!-- Other devices: connect / disconnect -->
       <template v-else>
-        <v-btn
+        <v-tooltip
           v-if="!isConnected"
-          text="Connect"
-          :color="deviceColor"
-          variant="tonal"
-          size="small"
-          prepend-icon="mdi-power-plug"
-          @click="handleConnect"
-        />
+          :disabled="canConnect || connectState === 'connecting'"
+          location="top"
+          :text="connectDisabledReason"
+        >
+          <template #activator="{ props: tipProps }">
+            <!-- Tooltip needs to wrap the button even when disabled, so we
+                 bind tipProps via a span wrapper (v-btn :disabled swallows
+                 pointer events on Safari). -->
+            <span v-bind="tipProps">
+              <v-btn
+                :text="connectState === 'connecting' ? 'Connecting…' : 'Connect'"
+                :color="deviceColor"
+                variant="tonal"
+                size="small"
+                prepend-icon="mdi-power-plug"
+                :loading="connectState === 'connecting'"
+                :disabled="!canConnect"
+                @click="handleConnect"
+              />
+            </span>
+          </template>
+        </v-tooltip>
         <v-btn
           v-else
           text="Disconnect"
@@ -311,15 +403,41 @@ async function handleAutoConnect(checked: boolean | null) {
 </template>
 
 <style scoped>
+.device-manage-card {
+  background: rgba(15, 23, 42, 0.55) !important;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 12px 30px -24px rgba(56, 189, 248, 0.35);
+}
+
+.device-manage-card--connected {
+  border-color: rgba(56, 189, 248, 0.28);
+  box-shadow: 0 18px 40px -28px rgba(56, 189, 248, 0.55);
+}
+
+.device-manage-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+}
+
 .device-manage-card__id {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   letter-spacing: 0.01em;
 }
 
+.device-manage-card__path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
 .device-manage-card__footer {
   display: flex;
   align-items: center;
-  padding: 4px;
-  background: rgba(var(--v-theme-on-surface), 0.04);
+  gap: 0.25rem;
+  padding: 0.35rem 0.5rem 0.35rem 0.75rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  background: rgba(148, 163, 184, 0.04);
 }
 </style>

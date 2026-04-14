@@ -181,18 +181,26 @@ export default defineConfig(({ mode }) => {
       __APP_VERSION__: JSON.stringify(pkg.version),
     },
     optimizeDeps: {
-      include: [
+      // 🚫 Workspace packages must NOT be pre-bundled in dev — Vite's
+      // optimizeDeps cache is keyed by package.json / lockfile, so when an
+      // internal package adds a new export, the cached bundle is stale and
+      // dynamic imports fail with
+      //   "does not provide an export named <Foo>"
+      // until the dev server is restarted with a wiped .vite cache. Excluding
+      // them lets Vite serve workspace code directly from source so HMR picks
+      // up export changes automatically.
+      exclude: [
+        'dotenv',
         '@repo/firebase-config',
+        '@repo/modules',
         '@repo/modules/effects',
         '@repo/modules/layouts',
         '@repo/modules/locos',
-        '@repo/modules',
         '@repo/dccex',
         '@repo/deja',
         '@repo/utils',
         '@repo/ui',
       ],
-      exclude: ['dotenv']
     },
     build: {
       commonjsOptions: {

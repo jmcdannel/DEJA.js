@@ -9,7 +9,10 @@ interface ValidationRules {
   required: ((val: unknown) => boolean | string)[];
 }
 
-const emit = defineEmits(['close'])
+const emit = defineEmits<{
+  close: []
+  created: [device: Device]
+}>()
 const props = defineProps({
   show: {
     type: Boolean,
@@ -33,7 +36,6 @@ watch(deviceType, (newType) => {
   }
 })
 const deviceId = ref('')
-const topic = ref('')
 const autoConnect = ref(false)
 const rules:ValidationRules = {
   required: [(val) => !!val || 'Required.']
@@ -42,6 +44,13 @@ const rules:ValidationRules = {
 const { createDevice } = useLayout()
 
 const connectionTypes = ['usb', 'wifi']
+
+function resetForm() {
+  deviceType.value = null
+  connection.value = null
+  deviceId.value = ''
+  autoConnect.value = false
+}
 
 async function submit (e: Event) {
   loading.value = true
@@ -54,15 +63,21 @@ async function submit (e: Event) {
       name: deviceId.value,
       type: deviceType.value,
       autoConnect: autoConnect.value,
-      ...(connection.value === 'wifi' && topic.value ? { topic: topic.value } : {}),
     }
-    await createDevice(deviceId.value, device)
+    const ok = await createDevice(deviceId.value, device)
+    if (ok) {
+      emit('created', device)
+      resetForm()
+      reveal.value = false
+      emit('close')
+    }
   }
 
   loading.value = false
 }
 
 function handleClose() {
+  resetForm()
   reveal.value = false
   emit('close')
 }
@@ -108,16 +123,6 @@ log.debug('deviceTypes', deviceTypes)
             variant="outlined"
             density="compact"
             :rules="rules.required"
-          ></v-text-field>
-          <v-text-field
-            v-if="connection === 'wifi'"
-            v-model="topic"
-            label="MQTT Topic"
-            variant="outlined"
-            density="compact"
-            placeholder="deja/layout/device"
-            hint="MQTT topic this device subscribes to"
-            persistent-hint
           ></v-text-field>
           <v-switch
             v-model="autoConnect"
