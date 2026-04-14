@@ -196,13 +196,13 @@ export async function initialize(): Promise<Layout | undefined> {
 async function autoConnect(devices: Device[]): Promise<void> {
   devices.forEach((device) => {
     if (device.autoConnect && device.port) {
-      log.start('Auto connect device', device.autoConnect, {
+      log.start('[LAYOUT] Auto connect device', device.autoConnect, {
         device: device.id,
         serial: device.port,
       })
       connectDevice({ device: device.id, serial: device.port, topic: device.topic })
-    } else if (device.autoConnect && device.connection === 'wifi' && device.topic) {  
-      log.start('Auto connect device', device.autoConnect, {
+    } else if (device.autoConnect && device.connection === 'wifi' && device.topic) {
+      log.start('[LAYOUT] Auto connect device', device.autoConnect, {
         device: device.id,
         topic: device.topic,
       })
@@ -221,12 +221,12 @@ async function loadLayout(): Promise<Layout | undefined> {
     const layoutData = await db.collection('layouts').doc(layoutId).get()
     const layoutDoc = layoutData.exists ? layoutData.data() : undefined
     if (layoutDoc) {
-      log.complete('Layout loaded', layoutId)
+      log.complete('[LAYOUT] Layout loaded', layoutId)
       return { ...layoutDoc, id: layoutData.id } as Layout
     }
-    log.error('No such layout found!', layoutId)
+    log.error('[LAYOUT] No such layout found!', layoutId)
   } catch (error) {
-    log.error('Error loading layout', error)
+    log.error('[LAYOUT] Error loading layout', error)
   }
 }
 
@@ -236,7 +236,7 @@ async function loadDevices(): Promise<Device[]> {
     const devices = devicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Device))
     return devices
   } catch (error) {
-    log.error('Error loading devices', error)
+    log.error('[LAYOUT] Error loading devices', error)
     return []
   }
 }
@@ -247,7 +247,7 @@ async function loadSensors(): Promise<LayoutSensor[]> {
     const sensors = sensorsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LayoutSensor))
     return sensors
   } catch (error) {
-    log.error('Error loading sensors', error)
+    log.error('[LAYOUT] Error loading sensors', error)
     return []
   }
 }
@@ -262,10 +262,10 @@ export async function connectDevice({
   topic?: string
 }): Promise<void> {
   try {
-    log.start('Connecting device', serial, deviceId)
+    log.start('[LAYOUT] Connecting device', serial, deviceId)
     const device = _devices.find((d) => d.id === deviceId)
     if (!device) {
-      log.error('Device not found', device)
+      log.error('[LAYOUT] Device not found', device)
       return
     }
     if (device.connection === 'usb' && serial) {
@@ -275,7 +275,7 @@ export async function connectDevice({
       await connectMqttDevice(device)
     }
   } catch (err) {
-    log.fatal('Error connectDevice: ', err)
+    log.fatal('[LAYOUT] Error connectDevice: ', err)
   }
 }
 
@@ -321,7 +321,7 @@ async function connectUsbDevice(
       await configureTrackOutputs(device.id)
     }
   } catch (err) {
-    log.fatal('Error connectUsbDevice: ', err)
+    log.fatal('[LAYOUT] Error connectUsbDevice: ', err)
     return undefined
   }
 }
@@ -363,7 +363,7 @@ async function connectMqttDevice(device: Device): Promise<void> {
       }
     }
   } catch (err) {
-    log.fatal('Error connectMqttDevice: ', err)
+    log.fatal('[LAYOUT] Error connectMqttDevice: ', err)
   }
 }
 
