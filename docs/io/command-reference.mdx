@@ -1,0 +1,122 @@
+---
+title: Command Reference
+description: Complete JSON command specification for all DEJA IO device actions.
+section: io
+order: 13
+---
+
+# 📋 Command Reference
+
+All DEJA IO devices receive JSON commands with an `action` and `payload`. The **same handlers** run on every device type — `pin`, `servo`, `turnout`, `effects`, and `ialed` work identically whether the message arrives over USB serial or MQTT. Only the wrapping format differs:
+
+- 🟢🟠 **USB serial** (`deja-arduino`, `deja-esp32`) — JSON **array** of commands
+- 🛜🍓 **MQTT** (`deja-esp32-wifi`, `deja-mqtt`) — single JSON **object** with a `device` field for filtering
+
+## Actions
+
+### `pin` — Digital Output
+
+Toggle a digital GPIO pin on or off.
+
+```json
+{
+  "action": "pin",
+  "payload": { "pin": 8, "state": 1 }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `pin` | number | GPIO pin number (must match device config) |
+| `state` | number | `1` = on (HIGH), `0` = off (LOW) |
+
+### `servo` — Servo Position
+
+Set a PCA9685 servo channel to a specific angle.
+
+```json
+{
+  "action": "servo",
+  "payload": { "servo": 0, "value": 90, "current": 45 }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `servo` | number | PCA9685 channel (0–15) |
+| `value` | number | Target angle in degrees |
+| `current` | number | Current angle (Arduino only — used for smooth transition) |
+
+### `turnout` — Turnout Control
+
+Throw or close a configured turnout.
+
+```json
+{
+  "action": "turnout",
+  "payload": { "turnout": 0, "state": true }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `turnout` | number | Turnout index (matches device config array position) |
+| `state` | boolean | `true` = thrown, `false` = closed |
+
+### `ialed` — Addressable LED Strip (Planned)
+
+Control individually addressable LED strips.
+
+```json
+{
+  "action": "ialed",
+  "payload": { "strip": 0, "pattern": 0, "r": 255, "g": 0, "b": 0 }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `strip` | number | LED strip index |
+| `pattern` | number | Animation pattern ID |
+| `r`, `g`, `b` | number | RGB color values (0–255) |
+
+> This action is defined in the Arduino firmware but not yet fully implemented.
+
+## 📦 Format Differences
+
+### 🟢🟠 USB Serial (`deja-arduino` / `deja-esp32`)
+
+Commands are sent as a **JSON array** over serial at 115200 baud. Both device types share the same `io/src/deja-arduino/` sketch, so they accept the same wire format:
+
+```json
+[
+  { "action": "pin", "payload": { "pin": 8, "state": 1 } },
+  { "action": "servo", "payload": { "servo": 0, "value": 90, "current": 45 } }
+]
+```
+
+Multiple commands can be batched in a single array.
+
+### 🛜🍓 MQTT (`deja-esp32-wifi` / `deja-mqtt`)
+
+Commands are sent as a **single JSON object** with a `device` field for filtering. Both wireless device types share the same MQTT topology and accept the same format:
+
+```json
+{
+  "action": "pin",
+  "payload": { "pin": 8, "state": 1 },
+  "device": "my-wifi-device"
+}
+```
+
+The `device` field is required — devices ignore messages that don't match their own `DEVICE_ID`. The `deja-esp32-wifi` firmware also accepts the JSON-array shape used by the deja-arduino sketch as a convenience, so the same handlers work for both transports.
+
+## 📡 Sensor Responses
+
+USB-serial devices (`deja-arduino`, `deja-esp32`) send sensor state changes back over serial:
+
+```json
+{ "sensor": 0, "state": 1 }
+```
+
+MQTT devices (`deja-esp32-wifi`, `deja-mqtt`) publish equivalent sensor events to their `…/messages` topic. Either way, sensor data is debounced (500ms minimum between state changes) and routed through the same `writeSensorState()` helper on the DEJA Server.

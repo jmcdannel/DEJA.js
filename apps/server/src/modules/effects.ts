@@ -213,7 +213,7 @@ export async function handleEffect(payload: Effect): Promise<void> {
   const layoutDevice = layout.devices().find(({ id }) => id === payload.device)
   if (
     layoutDevice?.connection === 'usb' &&
-    layoutDevice?.type === 'deja-arduino' &&
+    (layoutDevice?.type === 'deja-arduino' || layoutDevice?.type === 'deja-esp32') &&
     conn.send &&
     conn.port
   ) {
@@ -236,8 +236,7 @@ export async function handleEffect(payload: Effect): Promise<void> {
       pin: parseInt((command as EffectCommand).payload.pin?.toString() || '0'),
       state: Boolean((command as EffectCommand).payload.state),
     }
-    // log.log('dcc sendOutput', outputCommand)
-    await dcc.sendOutput(outputCommand)
+    await dcc.sendOutput(outputCommand, payload.device)
   }
 }
 

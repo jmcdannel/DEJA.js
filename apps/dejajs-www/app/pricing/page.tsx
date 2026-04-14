@@ -96,7 +96,7 @@ export default function PricingPage() {
           <ul className="flex flex-col gap-3 mb-8 list-none">
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> WiThrottle + DCC-EX throttle</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Limited cloud account <LimitTag>5 locos</LimitTag></li>
-            <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Firebase onboarding flow</li>
+            <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Guided onboarding flow</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed"><Check type="yes" /> Docs & AI support chatbot</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed text-gray-500"><Check type="no" /> Turnouts & signals</li>
             <li className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed text-gray-500"><Check type="no" /> Effects & sounds</li>
@@ -276,7 +276,7 @@ export default function PricingPage() {
               {/* Cloud & Data */}
               <tr><td colSpan={4} className="font-mono text-[0.65rem] tracking-[0.12em] uppercase text-cyan-400 pt-6 border-b-0">{'// Cloud & Data'}</td></tr>
               <tr className="hover:bg-white/[0.02]">
-                <td className="py-3.5 border-b border-white/7">Firebase cloud sync</td>
+                <td className="py-3.5 border-b border-white/7">DEJA Cloud sync</td>
                 <td className="py-3.5 border-b border-white/7 text-center"><TableCheck type="p" text="Limited" /></td>
                 <td className="py-3.5 border-b border-white/7 text-center"><TableCheck type="y" /></td>
                 <td className="py-3.5 border-b border-white/7 text-center"><TableCheck type="y" /></td>

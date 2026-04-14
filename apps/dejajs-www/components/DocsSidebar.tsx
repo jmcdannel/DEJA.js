@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import Logo from './Logo';
 import type { DocNavItem } from '../lib/generate-docs-nav';
 
 function NavItem({ item, pathname, depth = 0 }: { item: DocNavItem; pathname: string; depth?: number }) {
@@ -94,7 +94,7 @@ export default function DocsSidebar({ nav }: { nav: DocNavItem[] }) {
       >
         <div className="mb-4">
           <Link href="/docs" className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
-            <Image src="/icon-192.png" alt="DEJA.js" width={24} height={24} className="h-6 w-6" />
+            <Logo variant="default" size="xs" showWordmark={false} />
             <span>Documentation</span>
           </Link>
         </div>
@@ -111,14 +111,6 @@ export default function DocsSidebar({ nav }: { nav: DocNavItem[] }) {
           >
             Back to Home
           </Link>
-          <a
-            href="https://github.com/jmcdannel/DEJA.js"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          >
-            GitHub
-          </a>
         </div>
       </nav>
     </>

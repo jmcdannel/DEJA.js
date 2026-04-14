@@ -1,133 +1,161 @@
 // 🔧 Device config composable for cloud app
-// Generates config strings from Vuefire-loaded data + triggers ZIP download
+// Wraps shared generators from @repo/modules in Vue computed() refs + triggers ZIP download
 
 import { computed, type Ref, type ComputedRef } from 'vue'
-import type { Device, Effect, Turnout } from '@repo/modules'
+import {
+  generateArduinoConfig,
+  generateDccExAutomation,
+  generateEsp32WifiConfig,
+  generatePicoSettings,
+  generatePicoConfig,
+  isArduinoFamilyType,
+} from '@repo/modules'
+import type { Device, Effect, Loco, Turnout, Sensor, Signal } from '@repo/modules'
 
 interface UseDeviceConfigOptions {
   device: Ref<Device | null>
   effects: Ref<Effect[]> | ComputedRef<Effect[]>
   turnouts: Ref<Turnout[]> | ComputedRef<Turnout[]>
+  sensors?: Ref<Sensor[]> | ComputedRef<Sensor[]>
+  signals?: Ref<Signal[]> | ComputedRef<Signal[]>
+  locos?: Ref<Loco[]> | ComputedRef<Loco[]>
+  layoutId?: Ref<string> | ComputedRef<string>
 }
 
-export function useDeviceConfig({ device, effects, turnouts }: UseDeviceConfigOptions) {
-  const isArduino = computed(() =>
-    ['dcc-ex', 'deja-arduino', 'deja-arduino-led'].includes(device.value?.type || '')
-  )
+export function useDeviceConfig({ device, effects, turnouts, sensors, signals, locos, layoutId }: UseDeviceConfigOptions) {
+  const isArduino = computed(() => isArduinoFamilyType(device.value?.type))
 
   const isPicoW = computed(() => device.value?.type === 'deja-mqtt')
 
-  // 🔧 Arduino config.h — fixes bugs in previous inline template:
-  // ✅ Inserts turnoutPulsers into TurnoutPulser turnouts[]
-  // ✅ Generates SENSORPINS[] from device sensor data (not hardcoded)
-  // ✅ Includes OUTPINS[] from effects with pins
-  // ✅ Sets ENABLE_* flags dynamically
-  const arduinoConfigH = computed(() => {
-    if (!device.value) return ''
+  // 🛜 ESP32 WiFi is a member of ARDUINO_FAMILY_TYPES (so isArduino is also true),
+  // but it has its own generator that bakes in WiFi/MQTT credentials at build time.
+  const isEsp32Wifi = computed(() => device.value?.type === 'deja-esp32-wifi')
 
-    const outPins = effects.value
-      .filter(e => e.pin !== undefined && e.pin !== null)
-      .map(e => e.pin!)
+  const isDccEx = computed(() => device.value?.type === 'dcc-ex')
 
-    const turnoutPulsers = turnouts.value
-      .filter(t => t.straight !== undefined && t.divergent !== undefined)
-      .map(t => `TurnoutPulser(${t.straight}, ${t.divergent})`)
+  // 🛰 Sensor/signal pin arrays for Arduino config.h
+  const sensorPins = computed<string[]>(() =>
+    (sensors?.value ?? [])
+      .filter((s) => s.pin !== undefined && s.pin !== null)
+      .map((s) => String(s.pin))
+  )
 
-    const hasOutputs = outPins.length > 0
-    const hasTurnouts = turnoutPulsers.length > 0
-
-    return `#include <TurnoutPulser.h>
-
-#define DEVICE_ID "${device.value.id}"
-#define ENABLE_PWM false
-#define ENABLE_OUTPUTS ${hasOutputs}
-#define ENABLE_SIGNALS false
-#define ENABLE_TURNOUTS ${hasTurnouts}
-#define ENABLE_SENSORS false
-
-#define SERVOMIN 150
-#define SERVOMAX 600
-#define MIN_PULSE_WIDTH 650
-#define MAX_PULSE_WIDTH 2350
-#define USMIN 600
-#define USMAX 2400
-#define SERVO_FREQ 50
-#define SERVO_COUNT 16
-
-int OUTPINS[] = {${outPins.length > 0 ? ' ' + outPins.join(', ') + ' ' : ''}};
-int SIGNALPINS[] = {};
-int SENSORPINS[] = {};
-
-TurnoutPulser turnouts[] = {${turnoutPulsers.length > 0 ? ' ' + turnoutPulsers.join(', ') + ' ' : ''}};`
+  const signalPins = computed<number[]>(() => {
+    const pins: number[] = []
+    for (const sig of signals?.value ?? []) {
+      if (typeof sig.red === 'number') pins.push(sig.red)
+      if (typeof sig.yellow === 'number') pins.push(sig.yellow)
+      if (typeof sig.green === 'number') pins.push(sig.green)
+    }
+    return pins
   })
 
-  // 🍓 Pico W settings.toml
+  // 🔧 Arduino config.h
+  const arduinoConfigH = computed(() => {
+    if (!device.value) return ''
+    return generateArduinoConfig({
+      device: device.value,
+      effects: effects.value,
+      turnouts: turnouts.value,
+      sensorPins: sensorPins.value,
+      signalPins: signalPins.value,
+    })
+  })
+
+  // 🛜 ESP32 WiFi config.h preview (WiFi/MQTT creds left empty — filled at download time)
+  const esp32WifiConfigH = computed(() => {
+    if (!device.value) return ''
+    return generateEsp32WifiConfig({
+      device: device.value,
+      effects: effects.value,
+      turnouts: turnouts.value,
+      sensorPins: sensorPins.value,
+      signalPins: signalPins.value,
+      layoutId: layoutId?.value ?? '',
+    })
+  })
+
+  // 🍓 Pico W settings.toml (WiFi creds left empty — filled at download time)
   const picoSettingsToml = computed(() => {
     if (!device.value) return ''
-
-    return `# 🍓 DEJA.js Pico W Configuration
-# Generated for device: ${device.value.id}
-
-CIRCUITPY_WIFI_SSID = ""
-CIRCUITPY_WIFI_PASSWORD = ""
-
-ENABLE_CONFIG = "true"
-ENABLE_PWM = "false"
-ENABLE_MQTT = "true"
-
-MQTT_BROKER = ""
-LAYOUT_ID = ""
-DEVICE_ID = "${device.value.id}"
-TOPIC_ID = "${device.value.topic || 'deja'}"`
+    return generatePicoSettings({
+      device: device.value,
+      effects: effects.value,
+      turnouts: turnouts.value,
+      layoutId: '',
+    })
   })
 
   // 🍓 Pico W config.json (pin → GP mapping from effects)
   const picoConfigJson = computed(() => {
-    const pins: Record<string, string> = {}
-    for (const effect of effects.value) {
-      if (effect.pin !== undefined && effect.pin !== null) {
-        pins[String(effect.pin)] = `GP${effect.pin}`
-      }
-    }
-    return JSON.stringify({ pins }, null, 2)
+    if (!device.value) return ''
+    return generatePicoConfig({
+      device: device.value,
+      effects: effects.value,
+      turnouts: turnouts.value,
+      layoutId: '',
+    })
+  })
+
+  // 🚂 dcc-ex myAutomation.h
+  const dccExAutomationH = computed(() => {
+    if (!device.value || !isDccEx.value) return ''
+    return generateDccExAutomation({
+      device: device.value,
+      layoutId: layoutId?.value ?? '',
+      locos: locos?.value ?? [],
+    })
   })
 
   /**
    * 📦 Download a ready-to-deploy ZIP for this device
    */
   async function downloadPackage(wifiSsid?: string, wifiPassword?: string, mqttBroker?: string, layoutId?: string) {
+    if (!device.value) return
+
     const JSZip = (await import('jszip')).default
     const zip = new JSZip()
-    const folder = zip.folder(device.value?.id || 'device')!
+    const folder = zip.folder(device.value.id)!
 
-    if (isArduino.value) {
+    if (isEsp32Wifi.value) {
+      // 🛜 ESP32 WiFi: bake WiFi/MQTT creds into config.h at download time so the
+      // sketch flashes with everything it needs to join the network.
+      const esp32Config = generateEsp32WifiConfig({
+        device: device.value,
+        effects: effects.value,
+        turnouts: turnouts.value,
+        sensorPins: sensorPins.value,
+        signalPins: signalPins.value,
+        layoutId: layoutId ?? '',
+        wifiSsid,
+        wifiPassword,
+        mqttBroker,
+      })
+      folder.file('config.h', esp32Config)
+    } else if (isArduino.value) {
       folder.file('config.h', arduinoConfigH.value)
     } else if (isPicoW.value) {
       // Generate settings.toml with user-provided WiFi creds
-      const settings = `# 🍓 DEJA.js Pico W Configuration
-# Generated for device: ${device.value?.id}
-
-CIRCUITPY_WIFI_SSID = "${wifiSsid || ''}"
-CIRCUITPY_WIFI_PASSWORD = "${wifiPassword || ''}"
-
-ENABLE_CONFIG = "true"
-ENABLE_PWM = "false"
-ENABLE_MQTT = "true"
-
-MQTT_BROKER = "${mqttBroker || ''}"
-LAYOUT_ID = "${layoutId || ''}"
-DEVICE_ID = "${device.value?.id}"
-TOPIC_ID = "${device.value?.topic || 'deja'}"`
-
+      const settings = generatePicoSettings({
+        device: device.value,
+        effects: effects.value,
+        turnouts: turnouts.value,
+        layoutId: layoutId ?? '',
+        wifiSsid,
+        wifiPassword,
+        mqttBroker,
+      })
       folder.file('settings.toml', settings)
       folder.file('config.json', picoConfigJson.value)
+    } else if (isDccEx.value) {
+      folder.file('myAutomation.h', dccExAutomationH.value)
     }
 
     const blob = await zip.generateAsync({ type: 'blob' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `${device.value?.id || 'device'}-firmware.zip`
+    a.download = `${device.value.id}-firmware.zip`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -135,9 +163,13 @@ TOPIC_ID = "${device.value?.topic || 'deja'}"`
   return {
     isArduino,
     isPicoW,
+    isEsp32Wifi,
+    isDccEx,
     arduinoConfigH,
+    esp32WifiConfigH,
     picoSettingsToml,
     picoConfigJson,
+    dccExAutomationH,
     downloadPackage,
   }
 }

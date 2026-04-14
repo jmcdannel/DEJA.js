@@ -10,19 +10,30 @@ dotenv.config({ path: path.resolve(process.cwd(), '../.env') })
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
 import { getDeviceConfig, listDevices } from './lib/firebase.js'
-import { generateArduinoConfig } from './lib/config-arduino.js'
-import { generatePicoSettings, generatePicoConfig } from './lib/config-pico.js'
+import {
+  isArduinoCompilable,
+  isExcludedDeviceType,
+  readExistingWifiCreds,
+  resolveBoardConfig,
+  resolveBoardConfigByFqbn,
+  resolvePlatform,
+  writeDeviceBundle,
+} from './lib/bundle.js'
 import { findArduinoBoards, findCircuitPyMount } from './lib/detect.js'
 import { compileAndUpload } from './lib/deploy-arduino.js'
 import { copyToCircuitPy } from './lib/deploy-pico.js'
+import type { DccExMotorShield } from '@repo/modules'
 import {
+  promptDccExMotorShield,
+  promptDccExSourcePath,
   promptLayoutId,
   promptDeviceSelection,
-  promptWifiCredentials,
+  promptDeployWifiStrategy,
   promptDeployMethod,
   promptSerialPort,
+  promptArduinoBoard,
+  promptWifiCredentials,
 } from './lib/prompts.js'
-import * as fs from 'fs-extra'
 
 const args = process.argv.slice(2)
 const dryRun = args.includes('--dry-run')
@@ -65,66 +76,158 @@ async function deploy() {
   console.log('')
   console.log(`🔥 Fetching config for "${deviceId}"...`)
   const config = await getDeviceConfig(layoutId, deviceId)
-  const { device, effects, turnouts } = config
-
-  const isArduino = ['dcc-ex', 'deja-arduino', 'deja-arduino-led'].includes(device.type)
-  const isPicoW = device.type === 'deja-mqtt'
+  const { device, effects, turnouts, locos, sensors, signals } = config
 
   console.log(`   📟 Type: ${device.type}`)
   console.log(`   ⚡ Effects: ${effects.length}`)
   console.log(`   🔀 Turnouts: ${turnouts.length}`)
+  if (sensors) console.log(`   📡 Sensors: ${sensors.length}`)
+  if (signals) console.log(`   🚦 Signals: ${signals.length}`)
 
-  // 4. Pico W: prompt for WiFi credentials
+  // Reject device types that have their own firmware source
+  if (isExcludedDeviceType(device.type)) {
+    console.error(
+      `❌ "${device.type}" devices have their own firmware source and cannot be deployed from this tool.`
+    )
+    process.exit(1)
+  }
+
+  const platform = resolvePlatform(device.type)
+  if (!platform) {
+    console.error(`❌ Unsupported device type: "${device.type}"`)
+    process.exit(1)
+  }
+  const isArduino = platform === 'arduino'
+  const isPicoW = platform === 'pico'
+  const isEsp32Wifi = device.type === 'deja-esp32-wifi'
+  const isDccEx = device.type === 'dcc-ex'
+  // Both plain Arduino and DCC-EX ride the arduino-cli compile+upload path.
+  const useArduinoDeploy = isArduinoCompilable(device.type)
+
+  // 4. Pico W and deja-esp32-wifi: resolve WiFi credentials.
+  //    Precedence: CLI flags > env vars > existing bundle > interactive prompt.
+  //    This lets `pnpm deploy` preserve settings.toml / config.h edits made
+  //    after a previous build without re-typing SSID/password every time.
   let wifiSsid = ''
   let wifiPassword = ''
   let mqttBroker = ''
 
-  if (isPicoW) {
-    console.log('')
-    const wifi = await promptWifiCredentials()
-    wifiSsid = wifi.ssid
-    wifiPassword = wifi.password
-    mqttBroker = wifi.broker
+  if (isPicoW || isEsp32Wifi) {
+    // Flag overrides take priority — scripted deploys bypass the prompt.
+    const flagSsid = getArg(args, '--wifi-ssid') || process.env.WIFI_SSID || ''
+    const flagPwd = getArg(args, '--wifi-password') || process.env.WIFI_PASSWORD || ''
+    const flagBroker =
+      getArg(args, '--mqtt-broker') ||
+      process.env.MQTT_BROKER ||
+      process.env.VITE_MQTT_BROKER ||
+      ''
+
+    if (flagSsid) {
+      wifiSsid = flagSsid
+      wifiPassword = flagPwd
+      mqttBroker = flagBroker
+    } else {
+      // Read any existing creds from a previous build so "keep" is an option.
+      const existing = await readExistingWifiCreds(layoutId, device)
+      const noPrompt = args.includes('--no-wifi-prompt')
+      const interactive = !noPrompt && process.stdin.isTTY
+
+      if (!interactive) {
+        // Non-interactive: silently preserve existing creds if we found them,
+        // otherwise fall back to env vars (flagBroker) or empty.
+        if (existing) {
+          wifiSsid = existing.ssid
+          wifiPassword = existing.password
+          mqttBroker = existing.broker || flagBroker
+          console.log('')
+          console.log(`♻️  Reusing existing WiFi creds from prior build (SSID: ${existing.ssid})`)
+        } else {
+          wifiSsid = ''
+          wifiPassword = ''
+          mqttBroker = flagBroker
+          console.log('')
+          console.log('⚠️  No WiFi credentials found. Run `pnpm build` first or pass')
+          console.log('   --wifi-ssid / --wifi-password / --mqtt-broker to this command.')
+        }
+      } else {
+        console.log('')
+        const strategy = await promptDeployWifiStrategy(existing?.ssid)
+        if (strategy === 'keep' && existing) {
+          wifiSsid = existing.ssid
+          wifiPassword = existing.password
+          mqttBroker = existing.broker
+        } else if (strategy === 'enter') {
+          const wifi = await promptWifiCredentials()
+          wifiSsid = wifi.ssid
+          wifiPassword = wifi.password
+          mqttBroker = wifi.broker
+        }
+        // 'skip' → leave all three empty; bundle writer prints the edit path.
+      }
+    }
   }
 
-  // 5. Build firmware package
-  const outDir = path.resolve('dist', deviceId)
-  await fs.ensureDir(outDir)
+  // 4b. DCC-EX: resolve path to local CommandStation-EX source + motor shield.
+  //     Precedence: CLI flags > env vars > interactive prompt.
+  let dccExSourcePath: string | undefined
+  let dccExMotorShield: DccExMotorShield | undefined
 
-  if (isArduino) {
-    await fs.copy('./src/deja-arduino/', outDir)
-    const configH = generateArduinoConfig({ device, effects, turnouts })
-    await fs.writeFile(path.join(outDir, 'config.h'), configH)
-    console.log('')
-    console.log(`📦 Built Arduino package → dist/${deviceId}/`)
-  } else if (isPicoW) {
-    await fs.copy('./src/deja-pico-w/', outDir)
-    const configJson = generatePicoConfig({ device, effects, turnouts, layoutId })
-    await fs.writeFile(path.join(outDir, 'config.json'), configJson)
-    const settingsToml = generatePicoSettings({
-      device,
-      effects,
-      turnouts,
-      layoutId,
-      wifiSsid,
-      wifiPassword,
-      mqttBroker,
-    })
-    await fs.writeFile(path.join(outDir, 'settings.toml'), settingsToml)
-    console.log('')
-    console.log(`📦 Built Pico W package → dist/${deviceId}/`)
-  } else {
-    console.error(`❌ Unsupported device type: "${device.type}"`)
-    process.exit(1)
+  if (isDccEx) {
+    const flagSource = getArg(args, '--dcc-ex-source') || process.env.DCC_EX_SOURCE || ''
+    const flagShieldRaw =
+      getArg(args, '--dcc-ex-shield') || process.env.DCC_EX_MOTOR_SHIELD || ''
+    const flagShield =
+      flagShieldRaw === 'standard' || flagShieldRaw === 'ex8874'
+        ? (flagShieldRaw as DccExMotorShield)
+        : undefined
+
+    if (flagSource && flagShield) {
+      dccExSourcePath = flagSource
+      dccExMotorShield = flagShield
+    } else if (!process.stdin.isTTY) {
+      console.error('❌ DCC-EX deploy requires --dcc-ex-source and --dcc-ex-shield in non-interactive mode.')
+      console.error('   Or set DCC_EX_SOURCE and DCC_EX_MOTOR_SHIELD env vars.')
+      process.exit(1)
+    } else {
+      console.log('')
+      console.log('🚂 DCC-EX build settings')
+      dccExSourcePath = flagSource || (await promptDccExSourcePath())
+      dccExMotorShield = flagShield || (await promptDccExMotorShield())
+    }
   }
+
+  // 5. Build firmware package (shared with `pnpm build` via lib/bundle.ts)
+  console.log('')
+  const { outDir, sketchDir, relativeDir } = await writeDeviceBundle({
+    layoutId,
+    device,
+    effects,
+    turnouts,
+    locos,
+    sensors,
+    signals,
+    wifiSsid,
+    wifiPassword,
+    mqttBroker,
+    dccExSourcePath,
+    dccExMotorShield,
+  })
+  const platformLabel = isDccEx
+    ? 'DCC-EX'
+    : isEsp32Wifi
+      ? 'ESP32 WiFi'
+      : isArduino
+        ? 'Arduino'
+        : 'Pico W'
+  console.log(`📦 Built ${platformLabel} package → ${relativeDir}/`)
 
   // 6. Prompt for deploy method
   console.log('')
-  const method = await promptDeployMethod(isArduino ? 'arduino' : 'pico')
+  const method = await promptDeployMethod(useArduinoDeploy ? 'arduino' : 'pico')
 
   if (method === 'build-only') {
     console.log('')
-    console.log(`✅ Done! Firmware package is at: dist/${deviceId}/`)
+    console.log(`✅ Done! Firmware package is at: ${relativeDir}/`)
     return
   }
 
@@ -132,19 +235,33 @@ async function deploy() {
   if (dryRun) {
     console.log('')
     console.log('🏜️  Dry run — skipping actual deployment')
-    console.log(`   Would deploy dist/${deviceId}/ to device`)
+    console.log(`   Would deploy ${relativeDir}/ to device`)
     return
   }
 
-  if (isArduino) {
+  if (useArduinoDeploy) {
     const boards = findArduinoBoards()
     const port = await promptSerialPort(boards)
-    const board = boardOverride || 'arduino:avr:mega:cpu=atmega2560'
+    const defaultBoardConfig = resolveBoardConfig(device.type) ?? {
+      fqbn: 'arduino:avr:mega:cpu=atmega2560',
+      pioPlatform: 'atmelavr',
+      pioBoard: 'megaatmega2560',
+      needsCpp17: false,
+    }
+    // 🚂 For DCC-EX, we lock to Mega + motor shield. No board picker.
+    const fqbnOverride = isDccEx
+      ? undefined
+      : boardOverride || (!resolveBoardConfig(device.type) ? await promptArduinoBoard() : undefined)
+    // 🎯 When --board is passed, look up the full config by FQBN so flags like
+    // needsCpp17 and uploadSpeed apply — spreading defaultBoardConfig alone loses them.
+    const boardConfig = fqbnOverride
+      ? resolveBoardConfigByFqbn(fqbnOverride) ?? { ...defaultBoardConfig, fqbn: fqbnOverride }
+      : defaultBoardConfig
     console.log('')
-    compileAndUpload({
-      sketchPath: outDir,
+    await compileAndUpload({
+      sketchPath: sketchDir,
       port,
-      board,
+      boardConfig,
     })
   } else if (isPicoW) {
     const mount = findCircuitPyMount()

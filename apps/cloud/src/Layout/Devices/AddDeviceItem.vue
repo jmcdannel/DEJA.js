@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { deviceTypes, useLayout, type Device } from '@repo/modules'
+import { ref, watch } from 'vue'
+import { deviceTypes, isWifiDeviceType, useLayout, type Device } from '@repo/modules'
 import { createLogger } from '@repo/utils'
 
 const log = createLogger('AddDeviceItem')
@@ -18,27 +18,43 @@ const props = defineProps({
 })
 const reveal = ref(false)
 const loading = ref(false)
-const connection = ref(null)
-const deviceType = ref(null)
+const connection = ref<'usb' | 'wifi' | null>(null)
+const deviceType = ref<Device['type'] | null>(null)
+
+// 📡 Auto-default connection based on device type — WiFi devices (Pico W, ESP32 WiFi)
+// must use connection: 'wifi' so the server's MQTT publish branch is used.
+// Server modules in apps/server/src/modules/effects.ts gate WiFi publish on
+// `connection === 'wifi'`, so this default is load-bearing.
+watch(deviceType, (newType) => {
+  if (isWifiDeviceType(newType ?? undefined)) {
+    connection.value = 'wifi'
+  } else if (newType) {
+    connection.value = 'usb'
+  }
+})
 const deviceId = ref('')
+const topic = ref('')
+const autoConnect = ref(false)
 const rules:ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
 
 const { createDevice } = useLayout()
 
-const connectionTypes = ['usb', 'wifi', 'bluetooth']
+const connectionTypes = ['usb', 'wifi']
 
 async function submit (e: Event) {
   loading.value = true
   const form = e.target as HTMLFormElement
-  
+
   if (form.checkValidity() && connection.value && deviceType.value && deviceId.value) {
     const device: Device = {
       connection: connection.value,
       id: deviceId.value,
       name: deviceId.value,
-      ['type']: deviceType.value
+      type: deviceType.value,
+      autoConnect: autoConnect.value,
+      ...(connection.value === 'wifi' && topic.value ? { topic: topic.value } : {}),
     }
     await createDevice(deviceId.value, device)
   }
@@ -93,8 +109,24 @@ log.debug('deviceTypes', deviceTypes)
             density="compact"
             :rules="rules.required"
           ></v-text-field>
-          <div class="grid grid-cols-2 gap-8 my-4">
-          </div>
+          <v-text-field
+            v-if="connection === 'wifi'"
+            v-model="topic"
+            label="MQTT Topic"
+            variant="outlined"
+            density="compact"
+            placeholder="deja/layout/device"
+            hint="MQTT topic this device subscribes to"
+            persistent-hint
+          ></v-text-field>
+          <v-switch
+            v-model="autoConnect"
+            color="cyan"
+            label="Auto Connect"
+            hide-details
+            density="compact"
+            class="mb-2"
+          />
       </v-card-text>
       <v-card-actions>
         <v-btn

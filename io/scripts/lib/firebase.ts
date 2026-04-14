@@ -3,7 +3,17 @@
 
 import { initializeApp, cert, type ServiceAccount } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
-import type { Device, Effect, Turnout, DeviceConfig } from './types.js'
+import type {
+  Device,
+  DeviceConfigInput,
+  Effect,
+  Layout,
+  Loco,
+  Sensor,
+  Signal,
+  Turnout,
+} from '@repo/modules'
+import { isArduinoFamilyType } from '@repo/modules'
 
 let initialized = false
 
@@ -30,9 +40,11 @@ function initFirebase() {
 }
 
 /**
- * Fetch device config + effects + turnouts for a specific device
+ * Fetch device config + effects + turnouts for a specific device.
+ * Arduino-family devices additionally get their sensors + signals so that
+ * `config.h` can populate SENSORPINS / SIGNALPINS and the ENABLE_* flags.
  */
-export async function getDeviceConfig(layoutId: string, deviceId: string): Promise<DeviceConfig> {
+export async function getDeviceConfig(layoutId: string, deviceId: string): Promise<DeviceConfigInput> {
   initFirebase()
   const db = getFirestore()
 
@@ -52,7 +64,42 @@ export async function getDeviceConfig(layoutId: string, deviceId: string): Promi
   const effects = effectsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Effect)
   const turnouts = turnoutsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Turnout)
 
-  return { device, effects, turnouts }
+  // dcc-ex devices need the layout-wide loco roster for myAutomation.h generation.
+  let locos: Loco[] | undefined
+  if (device.type === 'dcc-ex') {
+    const locosSnap = await layoutRef.collection('locos').get()
+    locos = locosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Loco)
+  }
+
+  // Arduino-family config.h needs device-bound sensors + signals.
+  let sensors: Sensor[] | undefined
+  let signals: Signal[] | undefined
+  if (isArduinoFamilyType(device.type)) {
+    const [sensorsSnap, signalsSnap] = await Promise.all([
+      layoutRef.collection('sensors').where('device', '==', deviceId).get(),
+      layoutRef.collection('signals').where('device', '==', deviceId).get(),
+    ])
+    sensors = sensorsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Sensor)
+    signals = signalsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Signal)
+  }
+
+  return { device, effects, turnouts, locos, sensors, signals }
+}
+
+/**
+ * List all layouts owned by a given email address.
+ * Used by `pnpm build` (no args) to build every layout the caller owns.
+ */
+export async function listLayoutsByOwner(ownerEmail: string): Promise<Layout[]> {
+  initFirebase()
+  const db = getFirestore()
+
+  const snapshot = await db
+    .collection('layouts')
+    .where('owner', '==', ownerEmail)
+    .get()
+
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Layout)
 }
 
 /**

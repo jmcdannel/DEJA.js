@@ -1,8 +1,7 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import AnimateIn from './AnimateIn';
-import SectionLabel from './SectionLabel';
 import Logo from '../Logo';
+import HomepageHeroAnimation from './HomepageHeroAnimation';
 
 export default function HeroSection() {
   return (
@@ -25,22 +24,18 @@ export default function HeroSection() {
 
       {/* Main content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 pt-24 pb-16 flex-1 flex flex-col justify-center">
-        {/* Announcement badge */}
-        <AnimateIn delay={0} className="flex justify-center mb-12">
-          <SectionLabel color="magenta">Private Beta — Now Available</SectionLabel>
-        </AnimateIn>
-
-        {/* Two-column layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12">
+        {/* Two-column layout — animation gets the larger share on lg+ to
+            leave room for the step labels flanking the right-column pipeline. */}
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] items-center gap-12">
           {/* Left: text column */}
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-6">
             <AnimateIn delay={0.1}>
               <Logo size="2xl" />
             </AnimateIn>
 
             <AnimateIn delay={0.2}>
               <h1
-                className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-none tracking-tight text-white"
+                className="text-3xl sm:text-4xl lg:text-5xl leading-none tracking-tight text-white"
                 style={{ fontFamily: 'var(--font-bebas-neue)' }}
               >
                 Simple to start. Built to grow.
@@ -50,12 +45,10 @@ export default function HeroSection() {
             </AnimateIn>
 
             <AnimateIn delay={0.3}>
-              <p className="text-lg sm:text-xl text-gray-400 leading-relaxed max-w-lg">
+              <p className="text-base sm:text-lg text-gray-400 leading-relaxed max-w-md">
                 DEJA.js connects your DCC-EX CommandStation to every device on
                 your network. Throttle, manage, and automate your layout from
-                any browser — no app store required. Our cloud platform is built
-                to grow with your layout and expand your masterpiece into an
-                immersive experience.
+                any browser — no app store required.
               </p>
             </AnimateIn>
 
@@ -80,30 +73,9 @@ export default function HeroSection() {
             </AnimateIn>
           </div>
 
-          {/* Right: visual column */}
+          {/* Right: animated architecture sequence */}
           <AnimateIn delay={0.3} direction="right" className="flex justify-center lg:justify-end">
-            <div className="relative aspect-square w-full max-w-[480px]">
-              {/* Architecture SVG background */}
-              <Image
-                src="/ttt-architecture.svg"
-                alt="DEJA.js architecture diagram"
-                fill
-                className="object-contain opacity-40"
-              />
-
-              {/* Phone mockup overlay */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="relative w-[160px] sm:w-[200px] glow-cyan rounded-3xl border border-deja-cyan/30 overflow-hidden">
-                  <Image
-                    src="/screenshots/throttle_mobile_home.png"
-                    alt="DEJA.js Throttle app on mobile"
-                    width={200}
-                    height={430}
-                    className="w-full h-auto"
-                  />
-                </div>
-              </div>
-            </div>
+            <HomepageHeroAnimation />
           </AnimateIn>
         </div>
       </div>

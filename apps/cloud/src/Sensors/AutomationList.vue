@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useAutomations, type SensorAutomation } from '@repo/modules/sensors'
-import EmptyState from '@/Core/UI/EmptyState.vue'
+import { EmptyState } from '@repo/ui'
 
 defineEmits(['edit'])
 
@@ -26,6 +26,7 @@ function getTriggerLabel(trigger: string): string {
   <v-container v-if="list?.length">
     <v-row>
       <v-col
+        v-if="$slots.prepend"
         cols="12"
         xs="12"
         sm="6"

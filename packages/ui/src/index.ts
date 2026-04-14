@@ -1,9 +1,17 @@
 export { default as AppHeader } from './AppHeader.vue'
+export { default as AppSwitcher } from './AppSwitcher.vue'
+export { DEJA_APPS } from './appConfig'
+export type { DejaAppKey } from './appConfig'
+export { default as StatusIndicator } from './StatusIndicator.vue'
+export type { IndicatorStatus } from './StatusIndicator.vue'
+export { default as ConnectionStatus } from './ConnectionStatus.vue'
 export { default as ThrottleLaunchQR } from './ThrottleLaunchQR.vue'
 export { default as Logo } from './Logo.vue'
 export { default as SplashPage } from './SplashPage.vue'
 export { default as NotFoundPage } from './NotFoundPage.vue'
-export { default as LocoAvatar } from './LocoAvatar.vue'
+// Roster components
+export { LocoNumberPlate, LocoCard, LocoListRow, LocoRoster, ROADNAME_MEDIA, getRoadnameMedia } from './Roster'
+export type { RoadnameMedia } from './Roster'
 export { default as ConsistIndicator } from './Consist/ConsistIndicator.vue'
 export { default as ConsistEditor } from './Consist/ConsistEditor.vue'
 export { default as Functions } from './Functions/Functions.vue'
@@ -22,6 +30,10 @@ export { default as TurnoutButton } from './Turnouts/TurnoutButton.vue'
 export { default as TurnoutRaw } from './Turnouts/TurnoutRaw.vue'
 export { default as TurnoutTable } from './Turnouts/TurnoutTable.vue'
 export { default as TrackPower } from './TrackPower.vue'
+export { default as Power } from './Power.vue'
+export { default as EmergencyStop } from './EmergencyStop.vue'
+export { default as TrackOutputConfig } from './TrackOutputs/TrackOutputConfig.vue'
+export { default as PowerDistrictCard } from './TrackOutputs/PowerDistrictCard.vue'
 export { default as SignalList } from './SignalList.vue'
 export { default as TurnoutLabels } from './Print/TurnoutLabels.vue'
 export { default as EffectList } from './Effects/EffectList.vue'
@@ -47,17 +59,22 @@ export { default as DeviceStatusItem } from './DeviceStatus/DeviceStatusItem.vue
 export { default as DeviceStatusList } from './DeviceStatus/DeviceStatusList.vue'
 
 // Device Connection
-export { DeviceConnectionCard, DeviceConnectionList } from './DeviceConnection'
+export { DeviceConnectCard, DeviceConnectionList, DeviceManageCard } from './DeviceConnection'
 
 // Dashboard widgets
-export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart, DeviceTile, QuickConnectPanel, LayoutInfoCard, DashboardEmptyState } from './Dashboard'
+export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart, LayoutInfoCard, DashboardEmptyState } from './Dashboard'
+
+// DejaTracker — SVG railroad progress tracker
+export { DejaTracker } from './DejaTracker'
 export { default as EmptyState } from './EmptyState/EmptyState.vue'
 export { default as ModuleList } from './ModuleList/List.vue'
-export { default as LocoList } from './Locos/LocoList.vue'
+
 export { default as Menu } from './Menu/Menu.vue'
 export { default as NotificationContainer } from './Notifications/NotificationContainer.vue'
 export { useNotification, provideNotifications } from './Notifications/useNotification'
 export type { Notification, NotificationType, NotifyMethods } from './Notifications/useNotification'
+export { OnboardingBanner } from './OnboardingBanner/index'
+export { PizzaTracker } from './PizzaTracker/index'
 export { default as PromoBanner } from './Promotions/PromoBanner.vue'
 export { default as SensorList } from './Sensors/SensorList.vue'
 export { default as SensorItem } from './Sensors/SensorItem.vue'
@@ -98,3 +115,7 @@ export type { ViewOption, SortOption, FilterOption, ListFilter, ListControlsRetu
 // Onboarding
 export { default as OnboardingProgress } from './onboarding/OnboardingProgress.vue'
 export type { OnboardingStep } from './onboarding/trackPath'
+
+// LocoFront — SVG locomotive front-face illustrations by roadname
+export { LocoFront, LocoFrontGallery, getLocoFrontDesign, LOCO_FRONT_DESIGNS, DEFAULT_DESIGN } from './LocoFront'
+export type { LocoFrontDesign } from './LocoFront'

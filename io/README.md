@@ -2,7 +2,7 @@
 
 The `io/` directory contains firmware for physical hardware devices that extend your layout beyond what the DCC-EX CommandStation handles directly. These devices control effects like lighting, servo-driven turnouts, sensors, and animated elements. They communicate with the DEJA.js server over MQTT or USB serial.
 
-> ⚠️ This directory is **not part of the pnpm workspace** -- it contains embedded firmware, not Node.js packages.
+> 📦 This directory is part of the **pnpm workspace** and imports shared config generators from `@repo/modules`.
 >
 > 📐 See [ARCHITECTURE.md](../ARCHITECTURE.md) for how IO devices fit into the overall system communication layers.
 
@@ -10,24 +10,96 @@ The `io/` directory contains firmware for physical hardware devices that extend 
 
 ```
 io/
-|-- src/
-|   |-- deja-arduino/       🔧 Arduino sketch (.ino) for IO effect boards
-|   |-- deja-pico-w/        🍓 CircuitPython code for Raspberry Pi Pico W
-|       |-- code.py          📄 Main application entry point
-|       |-- config.json       ⚙️ Pin mapping configuration
-|       |-- lib/              📚 Adafruit libraries (MQTT, servo, bus device)
-|-- layouts/
-    |-- tam/                 🏔️ Tamarack Junction layout configs
-        |-- deja-pico-w/
-            |-- tj-eagle-nest-pico/config.json
-            |-- tj-thunder-city-pico/config.json
+├── scripts/
+│   ├── build.ts              🔧 Build firmware packages
+│   ├── deploy.ts             🚀 Interactive deploy wizard
+│   └── lib/
+│       ├── detect.ts          🔍 Device and mount detection, arduino-cli auto-install
+│       ├── deploy-arduino.ts  ⬆️ Arduino compile & upload via arduino-cli
+│       ├── deploy-pico.ts     🍓 Pico W copy-to-CIRCUITPY
+│       ├── firebase.ts        🔥 Fetch device config from Firestore
+│       └── prompts.ts         💬 Interactive CLI prompts
+├── src/
+│   ├── deja-arduino/          🔧 Arduino sketch (.ino) — used by deja-arduino (Mega) AND deja-esp32 (USB)
+│   ├── deja-esp32-wifi/       🛜 ESP32 WiFi+MQTT sketch (.ino) — used by deja-esp32-wifi
+│   └── deja-pico-w/           🍓 CircuitPython code for Raspberry Pi Pico W
+│       ├── code.py             📄 Main application entry point
+│       ├── config.json          ⚙️ Pin mapping configuration
+│       └── lib/                 📚 Adafruit libraries (MQTT, servo, bus device)
+├── tests/
+│   └── esp01-wifi-test/       🛜 ESP-01 WiFi connectivity test (PlatformIO)
+└── dist/                      📦 Build output (gitignored)
 ```
 
 ---
 
-## 🔧 Arduino Firmware (`deja-arduino`)
+## 🚀 Deploy Firmware
 
-The Arduino sketch runs on standard Arduino boards (Uno, Mega, Nano, etc.) and provides:
+The easiest way to deploy firmware to a device:
+
+### Option 1: `deja deploy` (recommended)
+
+```bash
+deja deploy
+```
+
+This launches the interactive deploy wizard:
+1. 🗺️ Select your layout
+2. 📟 Select a device
+3. 🔐 Enter WiFi credentials + MQTT broker (`deja-mqtt` and `deja-esp32-wifi` only)
+4. 📦 Build firmware package
+5. ⬆️ Auto-detect USB and deploy
+
+`arduino-cli` and the `esp32:esp32` core are **auto-installed** if not found on your system. Required Arduino libraries (`Adafruit PWM Servo Driver Library`, `ArduinoJson`, `TurnoutPulser`, `PubSubClient`) are also auto-installed.
+
+### Option 2: Cloud App Download
+
+1. Configure your device in the **Cloud app** (assign effects, turnouts, pins)
+2. Click **Download Firmware** → get a ZIP with `config.h` (Arduino) or `settings.toml` + `config.json` (Pico W)
+3. Flash manually using Arduino IDE or copy to CIRCUITPY drive
+
+### Option 3: Build scripts (developer)
+
+```bash
+# Interactive deploy
+pnpm --filter=@deja/io deploy
+
+# Build only (no deploy)
+pnpm --filter=@deja/io build -- --layout tam --device my-mega
+```
+
+---
+
+## 🔧 Shared Config Generation
+
+Device configurations are generated from Firebase data using shared pure functions in `@repo/modules/device-config`:
+
+| Function | Output | Platform |
+|----------|--------|----------|
+| `generateArduinoConfig()` | `config.h` (C++ preprocessor directives, pin arrays, feature flags) | `deja-arduino`, `deja-esp32` |
+| `generateEsp32WifiConfig()` | `config.h` with baked WiFi/MQTT credentials + pin arrays | `deja-esp32-wifi` |
+| `generatePicoSettings()` | `settings.toml` (WiFi, MQTT, device ID) | `deja-mqtt` (Pico W) |
+| `generatePicoConfig()` | `config.json` (pin → GPIO mapping) | `deja-mqtt` (Pico W) |
+| `generateDccExAutomation()` | `myAutomation.h` (EXRAIL roster + automation) | `dcc-ex` |
+| `getCliDeployCommands()` | `{ build, cd, platformio, arduinoCli }` command strings | All Arduino-family |
+
+These generators are shared between:
+- **Cloud app** — wraps them in Vue `computed()` for preview + ZIP download + CLI command display on the device details page
+- **IO build/deploy scripts** — calls them directly for automated builds and per-bundle `DEPLOYMENT.md` generation
+- **deja deploy CLI** — uses them for CLI-based deployment
+
+> 🛠️ `getCliDeployCommands()` is the single source of truth for the platformio + arduino-cli commands shown in `io/dist/<layoutId>/arduino/<deviceId>/DEPLOYMENT.md` and on the Cloud app device details page. See [CROSS_PLATFORM_DEPLOYMENT.md](./CROSS_PLATFORM_DEPLOYMENT.md) for the full per-device-type command matrix.
+
+---
+
+## 🔧 Arduino Firmware (`deja-arduino` / `deja-esp32`)
+
+The same Arduino sketch in `src/deja-arduino/` powers two device types:
+
+- **`deja-arduino`** — runs on Arduino boards (Mega 2560 and friends), connected via USB serial
+- **`deja-esp32`** — runs on ESP32 boards, also connected via USB serial. Same JSON-over-serial protocol; the only differences are the FQBN (`esp32:esp32:esp32`) and a faster upload speed (460800 baud)
+
+The sketch provides:
 
 - 🎛️ **PWM servo control** via an Adafruit PCA9685 16-channel servo driver board. Used for servo-driven turnout motors and animated elements.
 - 💡 **Digital outputs** for LEDs, relays, and other on/off devices.
@@ -40,7 +112,7 @@ The sketch communicates over serial at **115200 baud**. It receives JSON-formatt
 
 ### 🏗️ Config Flags
 
-Feature flags in `config.h` (or `config.default.h`) control which subsystems are compiled:
+Feature flags in `config.h` control which subsystems are compiled:
 
 | Flag | Purpose |
 |------|---------|
@@ -51,17 +123,57 @@ Feature flags in `config.h` (or `config.default.h`) control which subsystems are
 
 Pin arrays (`OUTPINS`, `SIGNALPINS`, `SENSORPINS`) and the `DEVICE_ID` are defined in the config header. Each device has a unique ID that the server uses to route commands.
 
-### 🚀 Startup Sequence
+---
 
-On startup, the sketch:
+## 🛜 ESP32 WiFi Firmware (`deja-esp32-wifi`)
 
-1. 📡 Initializes serial communication at 115200 baud.
-2. 🏷️ Prints its `DEVICE_ID` for identification.
-3. 📌 Configures output, signal, and sensor pins.
-4. 🔀 Initializes turnout servos.
-5. 🎛️ Starts the PWM servo driver (if enabled).
+The `src/deja-esp32-wifi/` sketch runs on ESP32 boards and connects to your WiFi network instead of using USB serial. Use it when you need wireless connectivity — for example, an ESP32 mounted inside scenery or under benchwork where USB cabling is impractical. Functionally equivalent to the Pico W path but on ESP32 hardware with the C++/Arduino toolchain.
 
-The main loop processes incoming serial commands and updates turnout servo positions.
+### ✨ Features
+
+- 📶 **WiFi connectivity** via the ESP32 core's built-in `WiFi.h`
+- 📬 **MQTT client** via `PubSubClient` for subscribing to commands and publishing sensor events
+- 💡 **Digital outputs** for LEDs, relays, and on/off devices
+- 🎛️ **PWM servo control** via Adafruit PCA9685 (gated on `ENABLE_PWM`)
+- 🚦 **Signal outputs** for model railroad signal heads
+- 📡 **Sensor inputs** with debounced state changes published over MQTT
+- 🔧 **Servo-driven turnouts** via `TurnoutPulser` (gated on `ENABLE_TURNOUTS`)
+
+### 📬 MQTT Topics
+
+Same convention as Pico W — the DEJA.js server treats both device types identically on the wire:
+
+- **Subscribe:** `{TOPIC_ID}/{LAYOUT_ID}/{DEVICE_ID}` — receives commands from the server
+- **Publish:** `{TOPIC_ID}/{LAYOUT_ID}/{DEVICE_ID}/messages` — publishes sensor events back to the server
+
+The default `TOPIC_ID` is `DEJA`, which matches the topic the server hardcodes in `apps/server/src/modules/layout.ts`. Sensor events flow through the same Firestore pipeline as USB serial sensors via the server's `writeSensorState()` helper.
+
+### 🔐 Configuration (`config.h`)
+
+Unlike the Pico W (which reads `settings.toml` at runtime), the ESP32 WiFi firmware bakes credentials into `config.h` at build time. The `deja deploy` wizard prompts for these and `generateEsp32WifiConfig()` writes them in:
+
+| Define | Description |
+|--------|-------------|
+| `WIFI_SSID` | 📶 WiFi network name |
+| `WIFI_PASSWORD` | 🔑 WiFi password |
+| `MQTT_BROKER` | 🌐 MQTT broker IP / hostname |
+| `MQTT_PORT` | 📡 MQTT broker port (default 1883) |
+| `MQTT_USERNAME` | 🔐 Optional MQTT username |
+| `MQTT_PASSWORD` | 🔐 Optional MQTT password |
+| `DEVICE_ID` | 🏷️ Unique device identifier (matches the Firestore device doc) |
+| `LAYOUT_ID` | 🗺️ Layout identifier |
+| `TOPIC_ID` | 📡 MQTT topic prefix (default `DEJA`) |
+| `ENABLE_PWM` / `ENABLE_OUTPUTS` / `ENABLE_SIGNALS` / `ENABLE_SENSORS` / `ENABLE_TURNOUTS` | Feature flags — same semantics as the deja-arduino sketch |
+
+### 📨 Command Format
+
+Single JSON object per MQTT message, matching the Pico W format the server publishes:
+
+```json
+{ "action": "pin", "device": "betatrack-esp-wifi", "payload": { "pin": 18, "state": 1 } }
+```
+
+The firmware filters by the `device` field and ignores messages intended for other devices on the same topic. Supported actions: `pin`, `servo`, `turnout`/`turnouts`, `ialed`/`effects`. The firmware also accepts the JSON-array shape used by the deja-arduino sketch (`[{ action, payload }, ...]`) so the same handlers work for both transports.
 
 ---
 
@@ -116,34 +228,26 @@ The firmware checks the `device` field against its own `DEVICE_ID` and ignores m
 
 ---
 
-## 🗺️ Per-Layout Device Configurations
+## 🛜 Tests (`io/tests/`)
 
-The `io/layouts/` directory contains per-layout, per-device JSON configuration files. These files define the pin mapping for each device in a specific layout installation.
+### ESP-01 WiFi Test
 
-For example, the Eagle Nest Pico W device for the Tamarack Junction layout (`io/layouts/tam/deja-pico-w/tj-eagle-nest-pico/config.json`) maps logical pin numbers to physical GPIO pins:
+PlatformIO project for testing ESP-01 WiFi connectivity from an Arduino Nano via SoftwareSerial. Runs a full diagnostic sequence: AT check → firmware info → station mode → WiFi connect → IP address → HTTP GET.
 
-```json
-{
-  "pins": {
-    "6": "GP6",
-    "7": "GP7",
-    "8": "GP8",
-    "9": "GP9"
-  }
-}
+```bash
+cd io/tests/esp01-wifi-test
+pio run --target upload
 ```
-
-The default config (`io/src/deja-pico-w/config.json`) provides a broader set of pins (GP8 through GP17) that can be customized per installation.
-
-To deploy a device, copy the appropriate layout config to the device filesystem as `config.json` before flashing.
 
 ---
 
 ## ➕ Adding a New Device
 
-1. 🔧 **Choose the hardware platform** -- Arduino or Pico W.
-2. 📄 **Create a config file** in `io/layouts/{layoutId}/deja-{platform}/{deviceId}/config.json` with the pin mapping for your device.
-3. 🔧 **For Arduino:** Set the `DEVICE_ID` and pin arrays in `config.h`.
-4. 🍓 **For Pico W:** Set environment variables in `settings.toml` on the device and copy the config file.
-5. 🔥 **Register the device** in Firestore under `layouts/{layoutId}/devices` so the server and Monitor app can track its connection status.
-6. 📬 **Enable MQTT** on the server (`ENABLE_MQTT=true`) if using Pico W devices.
+1. 🔥 **Register the device** in the Cloud app under your layout's Devices section. Pick the device type that matches your hardware:
+   - `deja-arduino` — Arduino Mega 2560 over USB serial
+   - `deja-esp32` — ESP32 board over USB serial
+   - `deja-esp32-wifi` — ESP32 board over WiFi/MQTT
+   - `deja-mqtt` — Raspberry Pi Pico W over WiFi/MQTT
+2. ⚡ **Assign effects, turnouts, sensors, and signals** to the device in the Cloud app. The Cloud form auto-defaults the connection type (`usb` or `wifi`) based on the device type, and surfaces WiFi/MQTT credential fields for `deja-mqtt` and `deja-esp32-wifi`.
+3. 📟 **Deploy firmware** with `deja deploy` — the wizard auto-fetches sensors/signals from Firestore, prompts for WiFi/MQTT credentials when needed, generates `config.h`/`config.json`/`settings.toml`, and compiles + uploads via arduino-cli.
+4. 📬 **Enable MQTT** on the server (`ENABLE_MQTT=true`) if using any wifi-connected devices (`deja-mqtt` or `deja-esp32-wifi`).

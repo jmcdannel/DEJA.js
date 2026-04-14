@@ -20,8 +20,8 @@ broker = os.getenv('MQTT_BROKER')
 layoutId = os.getenv('LAYOUT_ID')
 deviceId = os.getenv('DEVICE_ID')
 topicId = os.getenv('TOPIC_ID')
-stopic = topicId + "/" + layoutId + "/" + deviceId
-ptopic = topicId + "/" + layoutId + "/" + deviceId + "/messages"
+stopic = topicId
+ptopic = stopic + "/messages"
 pins = {}
 
 def loadConfig():
@@ -42,8 +42,12 @@ def loadConfig():
 # Initialize the ServoKit with 16 channels
 if enablePwm == "true":
     print("PWM is enabled")
-    i2c = busio.I2C(scl=board.GP1, sda=board.GP0)
-    kit = ServoKit(channels=16, i2c=i2c)
+    try:
+        i2c = busio.I2C(scl=board.GP1, sda=board.GP0)
+        kit = ServoKit(channels=16, i2c=i2c)
+    except Exception as e:
+        print("PWM initialization failed:", e)
+        kit = None
 else:
     print("PWM is disabled")
     kit = None

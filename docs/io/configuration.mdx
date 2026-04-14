@@ -1,0 +1,139 @@
+---
+title: Configuration Reference
+description: All configuration file formats for DEJA IO devices — Arduino config.h, ESP32 WiFi config.h, Pico W settings.toml, and config.json.
+section: io
+order: 14
+---
+
+# ⚙️ Configuration Reference
+
+DEJA IO devices use different configuration formats depending on the device type and transport. This reference covers all of them.
+
+| Device type | Config file(s) | Generator |
+|---|---|---|
+| 🟢 `deja-arduino` | `config.h` (compile-time) | `generateArduinoConfig()` |
+| 🟠 `deja-esp32` | `config.h` (compile-time) | `generateArduinoConfig()` |
+| 🛜 `deja-esp32-wifi` | `config.h` (compile-time, with baked WiFi/MQTT) | `generateEsp32WifiConfig()` |
+| 🍓 `deja-mqtt` (Pico W) | `settings.toml` + `config.json` (runtime) | `generatePicoSettings()` + `generatePicoConfig()` |
+
+All generators live in `@repo/modules/device-config` and are shared between the Cloud app, the IO build/deploy scripts, and the `deja deploy` CLI.
+
+---
+
+## 🟢🟠 Arduino & ESP32 USB — `config.h`
+
+Compile-time configuration shared by `deja-arduino` and `deja-esp32`. The Arduino firmware reads these values at build time. Located at `io/src/deja-arduino/config.h` (copy from `config.default.h` if it doesn't exist).
+
+### 🚦 Feature Flags
+
+| Flag | Type | Default | Description |
+|---|---|---|---|
+| `DEVICE_ID` | string | `"deja-arduino"` | Unique device identifier — must match your Cloud device entry |
+| `ENABLE_PWM` | bool | `true` | 🎛️ Enable PCA9685 servo driver support |
+| `ENABLE_OUTPUTS` | bool | `true` | 💡 Enable digital GPIO outputs |
+| `ENABLE_SIGNALS` | bool | `true` | 🚦 Enable signal head control |
+| `ENABLE_SENSORS` | bool | `true` | 📡 Enable sensor input reading |
+| `ENABLE_TURNOUTS` | bool | `true` | 🔧 Enable servo-driven turnouts |
+
+### 🪛 Pin Arrays
+
+```cpp
+int OUTPINS[] = {8, 9, 10, 11};       // Digital output GPIO pins
+int SIGNALPINS[] = {4, 5, 6, 7};      // Signal head GPIO pins
+int SENSORPINS[] = {A0, A1, A2};      // Sensor input pins (analog or digital)
+```
+
+### 🔧 Turnout Definitions
+
+```cpp
+TurnoutPulser turnouts[] = {
+  TurnoutPulser(channel, closedAngle, thrownAngle),
+};
+```
+
+- `channel` — PCA9685 servo channel (0–15)
+- `closedAngle` — servo angle for closed position (degrees)
+- `thrownAngle` — servo angle for thrown position (degrees)
+
+---
+
+## 🛜 ESP32 WiFi — `config.h`
+
+Compile-time configuration for `deja-esp32-wifi`. The sketch lives at `io/src/deja-esp32-wifi/`. Unlike the Pico W (which reads `settings.toml` at runtime), the ESP32 WiFi firmware bakes WiFi and MQTT credentials in at build time. The `deja deploy` wizard prompts for these and writes them in via `generateEsp32WifiConfig()`.
+
+### 📶 WiFi Settings
+
+| Define | Type | Required | Description |
+|---|---|---|---|
+| `WIFI_SSID` | string | ✅ | WiFi network name |
+| `WIFI_PASSWORD` | string | ✅ | WiFi password |
+
+### 📬 MQTT Settings
+
+| Define | Type | Required | Description |
+|---|---|---|---|
+| `MQTT_BROKER` | string | ✅ | MQTT broker IP / hostname |
+| `MQTT_PORT` | int | ✅ | MQTT broker port (default `1883`) |
+| `MQTT_USERNAME` | string | optional | MQTT username (leave empty for anonymous) |
+| `MQTT_PASSWORD` | string | optional | MQTT password |
+
+### 🏷️ Device Identity
+
+| Define | Type | Required | Description |
+|---|---|---|---|
+| `DEVICE_ID` | string | ✅ | Unique device identifier (matches the Firestore device doc) |
+| `LAYOUT_ID` | string | ✅ | Layout identifier |
+| `TOPIC_ID` | string | ✅ | MQTT topic prefix (default `"DEJA"`) |
+
+### 🚦 Feature Flags & Pin Arrays
+
+`ENABLE_PWM` / `ENABLE_OUTPUTS` / `ENABLE_SIGNALS` / `ENABLE_SENSORS` / `ENABLE_TURNOUTS` and the `OUTPINS` / `SIGNALPINS` / `SENSORPINS` / `TurnoutPulser` definitions all use the **same semantics** as the `deja-arduino` config above.
+
+> 🛜 If you change WiFi or MQTT credentials, you have to re-flash the device — the values are compiled in.
+
+---
+
+## 🍓 Pico W — `settings.toml`
+
+Runtime environment configuration for `deja-mqtt`. Loaded by CircuitPython at boot.
+
+| Variable | Required | Description |
+|---|---|---|
+| `CIRCUITPY_WIFI_SSID` | ✅ | 📶 WiFi network name |
+| `CIRCUITPY_WIFI_PASSWORD` | ✅ | 🔑 WiFi password |
+| `MQTT_BROKER` | ✅ | 🌐 MQTT broker IP address |
+| `LAYOUT_ID` | ✅ | 🗺️ Your layout ID in DEJA Cloud |
+| `DEVICE_ID` | ✅ | 🏷️ Unique device identifier |
+| `TOPIC_ID` | No | 📡 MQTT topic prefix (default: `"DEJA"`) |
+| `ENABLE_CONFIG` | No | ⚙️ Load pin mapping from config.json (default: `"true"`) |
+| `ENABLE_PWM` | No | 🎛️ Enable PCA9685 servo support (default: `"true"`) |
+| `ENABLE_MQTT` | No | 📬 Enable MQTT communication (default: `"true"`) |
+
+## 🍓 Pico W — `config.json`
+
+Pin mapping from logical pin numbers to physical CircuitPython GPIO names.
+
+```json
+{
+  "pins": {
+    "6": "GP6",
+    "7": "GP7",
+    "8": "GP8",
+    "9": "GP9"
+  }
+}
+```
+
+Keys are the logical pin numbers used in commands (`"pin": 8`). Values are CircuitPython GPIO names (`"GP8"`).
+
+---
+
+## 🗂️ Layout-Specific Overrides
+
+Per-layout configs live under:
+
+```
+io/layouts/{layoutId}/deja-pico-w/{deviceId}/config.json
+```
+
+When the deploy script runs, it uses the layout-specific config instead of the default `io/src/deja-pico-w/config.json`.

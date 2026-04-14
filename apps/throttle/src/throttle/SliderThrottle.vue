@@ -2,12 +2,13 @@
 import { ref, toRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDebounce } from '@vueuse/core'
-import type { Loco } from '@repo/modules/locos'
+import CurrentSpeed from '@/throttle/CurrentSpeed.vue'
 import Speedometer from '@/throttle/Speedometer.vue'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
 import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
-import { Consist, LocoAvatar, MiniConsist, FunctionsSpeedDial } from '@repo/ui'
+import { ConsistIndicator, LocoNumberPlate, FunctionsSpeedDial } from '@repo/ui'
+import { ROADNAMES } from '@repo/modules'
 import { useThrottle } from '@/throttle/useThrottle'
 
 const props = defineProps({
@@ -47,8 +48,8 @@ watch(debouncedSpeed, (speed) => {
   setSpeed(signedSpeed)
 })
 
-function toggleDirection(val: any) {
-  isForward.value = !!val
+function toggleDirection(val: boolean | null) {
+  isForward.value = val ?? true
   if (sliderVal.value !== 0) {
     const signedSpeed = isForward.value ? sliderVal.value : -sliderVal.value
     setSpeed(signedSpeed)
@@ -63,41 +64,59 @@ async function clearLoco() {
 </script>
 
 <template>
-  <main v-if="throttle" class="flex flex-col gap-2 p-2 overflow-hidden w-full h-full flex-1 shadow-xl relative">
-    <ThrottleHeader class="bg-gradient-to-r from-purple-300/10 to-pink-600/10 text-purple-400/10">
+  <main v-if="throttle" class="@container flex flex-col gap-2 p-2 overflow-hidden w-full h-full flex-1 shadow-xl relative">
+    <ThrottleHeader class="bg-gradient-to-r from-slate-700/20 to-blue-900/20">
       <template v-slot:left>
         <div class="flex flex-row items-center justify-center gap-1 px-4" style="background: rgba(var(--v-theme-surface), 0.6)">
-          <LocoAvatar v-if="loco" :loco="loco as Loco" :size="48" @park="clearLoco" @stop="handleStop" variant="flat" />
-          <MiniConsist v-if="loco" :loco="loco" />
+          <LocoNumberPlate
+            v-if="loco"
+            :address="loco.address"
+            :color="loco.meta?.roadname ? ROADNAMES.find(r => r.value === loco.meta?.roadname)?.color : undefined"
+            size="sm"
+          />
+          <ConsistIndicator v-if="loco && showConsist" :loco="loco" />
           <v-spacer class="w-2 md:w-6" />
-          <h1 class="text-xl md:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600 drop-shadow-lg">
+          <h1 class="text-xl md:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 drop-shadow-lg">
             {{ loco?.name }}
           </h1>
-          <v-spacer class="w-2 md:w-6" />
-          <RoadnameLogo class="hidden sm:flex" v-if="loco" :roadname="loco.meta?.roadname" size="md" />
         </div>
       </template>
       <template v-slot:right>
-        <v-btn color="red" variant="tonal" size="small" class="text-none mr-2" prepend-icon="mdi-alert-octagon" @click="handleStop">E-Stop</v-btn>
         <ThrottleActionMenu @park="clearLoco" />
       </template>
     </ThrottleHeader>
 
-    <section class="w-full h-full flex flex-col sm:flex-row sm:items-center justify-around flex-grow relative z-10">
-      <!-- Column 1: Speedometer + Consist + Logo (desktop) -->
-      <section v-if="loco" class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-center flex-1 overflow-visible">
+    <section class="w-full h-full flex flex-col @[640px]:flex-row @[640px]:items-center justify-around flex-grow relative z-10">
+      <!-- Desktop left: Consist + Speedometer -->
+      <section v-if="loco" class="hidden @[640px]:flex flex-col gap-4 items-center justify-center flex-1">
+        <ConsistIndicator v-if="showConsist" :loco="loco" />
         <Speedometer v-if="showSpeedometer" :speed="currentSpeed" :address="address" :size="200" :show-label="false" />
-        <Consist v-if="showConsist" :loco="loco" />
-        <RoadnameLogo :roadname="loco.meta?.roadname" size="xl" />
+        <div v-if="showConsist && loco.consist?.length" class="grid grid-cols-2 gap-3">
+          <Speedometer
+            v-for="cloco in loco.consist"
+            :key="cloco.address"
+            :speed="currentSpeed"
+            :address="cloco.address"
+            :size="120"
+            :show-label="true"
+          />
+        </div>
       </section>
 
-      <!-- Column 2: Functions (desktop) -->
-      <section v-if="loco && showFunctions" class="hidden sm:flex flex-col gap-2 mb-2 items-center justify-center flex-1">
-        <FunctionsSpeedDial :loco="loco" />
+      <!-- Desktop center: Logo + Functions -->
+      <section v-if="loco" class="hidden @[640px]:flex flex-col gap-2 items-center justify-center flex-1">
+        <RoadnameLogo :roadname="loco.meta?.roadname" size="2xl" />
+        <FunctionsSpeedDial v-if="showFunctions" :loco="loco" />
       </section>
 
-      <!-- Column 3: Vertical slider + direction toggle -->
+      <!-- Mobile: Consist -->
+      <div v-if="loco && showConsist" class="flex @[640px]:hidden justify-center">
+        <ConsistIndicator :loco="loco" />
+      </div>
+
+      <!-- Slider + speed + direction -->
       <section class="flex flex-col items-center justify-center flex-1 py-2" style="height: 100%; min-height: 0;">
+        <CurrentSpeed :speed="currentSpeed" />
         <v-slider
           v-model="sliderVal"
           direction="vertical"
@@ -125,11 +144,21 @@ async function clearLoco() {
           />
           <span class="text-xs font-bold" :class="isForward ? 'text-green-400' : 'opacity-40'">FWD</span>
         </div>
+        <v-btn
+          icon="mdi-stop-circle-outline"
+          color="red"
+          size="large"
+          variant="tonal"
+          class="mt-3"
+          aria-label="Stop"
+          @click="handleStop"
+        />
       </section>
 
-      <!-- Mobile-only optional sections -->
-      <section v-if="loco" class="flex sm:hidden flex-col gap-2 items-center">
+      <!-- Mobile: Functions + Logo -->
+      <section v-if="loco" class="flex @[640px]:hidden flex-col gap-2 items-center">
         <FunctionsSpeedDial v-if="showFunctions" :loco="loco" />
+        <RoadnameLogo :roadname="loco.meta?.roadname" size="xl" />
       </section>
     </section>
   </main>

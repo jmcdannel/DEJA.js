@@ -12,9 +12,11 @@ export interface Loco {
   functions?: LocoFunction[]
   hasSound?: boolean
   id: string
+  isDcTrack?: boolean
   meta?: {
     color?: string
     roadname?: string
+    imageUrl?: string
   }
   order?: number
 }

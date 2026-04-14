@@ -3,7 +3,6 @@ import { computed, ref, type PropType } from 'vue'
 import draggable from 'vuedraggable'
 import { useSignals, type Signal, type SignalAspect } from '@repo/modules/signals'
 import { useSortableList } from '@/Core/composables/useSortableList'
-import EmptyState from '@/Core/UI/EmptyState.vue'
 
 defineEmits(['edit'])
 const props = defineProps({
@@ -53,7 +52,7 @@ const wiring = (signal: Signal) => signal.commonAnode ? 'Common Anode' : 'Common
       @start="onDragStart"
       @end="onDragEnd"
     >
-      <template #header>
+      <template v-if="$slots.prepend" #header>
         <div>
           <slot name="prepend"></slot>
         </div>
@@ -112,55 +111,50 @@ const wiring = (signal: Signal) => signal.commonAnode ? 'Common Anode' : 'Common
                 </div>
               </div>
             </v-card-text>
-            <v-card-actions class="py-1">
-              <template v-if="confirmDelete === item?.id">
+            <v-divider />
+            <div class="flex items-center pa-1" style="background: rgba(var(--v-theme-on-surface), 0.04)">
+              <v-btn
+                v-if="confirmDelete !== item?.id"
+                icon="mdi-delete-outline"
+                variant="text"
+                color="error"
+                size="small"
+                @click="confirmDelete = item?.id"
+              />
+              <template v-else>
                 <v-btn
-                  class="ma-1"
                   text="Cancel"
                   variant="outlined"
-                  size="x-small"
-                  @click="confirmDelete = ''" />
+                  size="small"
+                  @click="confirmDelete = ''"
+                />
                 <v-btn
-                  class="ma-1"
                   text="Confirm"
                   variant="tonal"
-                  size="x-small"
+                  color="error"
+                  size="small"
                   prepend-icon="mdi-delete"
-                  @click="deleteSignal(item?.id)" />
+                  @click="deleteSignal(item?.id)"
+                />
               </template>
+              <v-spacer />
               <v-btn
-                v-else
-                class="ma-1"
-                icon="mdi-delete"
-                variant="tonal"
-                size="x-small"
-                @click="confirmDelete = item?.id"
-              ></v-btn>
-              <v-spacer></v-spacer>
-
-              <v-btn
-                text="Edit"
-                variant="tonal"
-                prepend-icon="mdi-pencil"
-                size="x-small"
+                icon="mdi-pencil-outline"
+                variant="text"
+                :color="color"
+                size="small"
                 @click="$emit('edit', item)"
-              ></v-btn>
-            </v-card-actions>
+              />
+            </div>
           </v-card>
         </div>
       </template>
     </draggable>
   </v-container>
-  <EmptyState
-    v-if="!list?.length"
-    icon="mdi-traffic-light"
-    color="emerald"
-    title="No Signals Yet"
-    description="Configure signal heads with red, yellow, and green aspects to manage block protection and interlocking on your layout."
-    :use-cases="[{ icon: 'mdi-shield-check', text: 'Block signal protection' }, { icon: 'mdi-lock', text: 'Interlocking control' }, { icon: 'mdi-lightbulb-on', text: 'Approach lighting' }]"
-    action-label="Add Your First Signal"
-    action-to="/signals/new"
-  />
+  <div v-if="!list?.length" class="flex flex-col items-center justify-center py-12 px-4">
+    <v-icon size="48" class="opacity-30 mb-3">mdi-magnify-close</v-icon>
+    <p class="text-sm opacity-60">No signals match your filters.</p>
+  </div>
 </template>
 <style scoped>
 .ghost {

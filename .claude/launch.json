@@ -3,40 +3,47 @@
   "configurations": [
     {
       "name": "throttle",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter=deja-throttle", "dev"],
+      "runtimeExecutable": "/bin/zsh",
+      "runtimeArgs": ["-ic", "pnpm --filter=deja-throttle dev"],
       "port": 3041
     },
     {
       "name": "cloud",
-      "runtimeExecutable": "pnpm",
+      "runtimeExecutable": "/Users/joshmcdannel/.nvm/versions/node/v22.13.1/bin/pnpm",
       "runtimeArgs": ["--filter=deja-cloud", "dev"],
-      "port": 3011
+      "port": 5174,
+      "autoPort": true
     },
     {
       "name": "monitor",
-      "runtimeExecutable": "pnpm",
+      "runtimeExecutable": "/Users/joshmcdannel/.nvm/versions/node/v22.13.1/bin/pnpm",
       "runtimeArgs": ["--filter=deja-monitor", "dev"],
       "port": 3021
     },
     {
       "name": "tour",
-      "runtimeExecutable": "pnpm",
+      "runtimeExecutable": "/Users/joshmcdannel/.nvm/versions/node/v22.13.1/bin/pnpm",
       "runtimeArgs": ["--filter=deja-tour", "dev"],
       "port": 3031,
       "autoPort": true
     },
     {
       "name": "server",
-      "runtimeExecutable": "pnpm",
+      "runtimeExecutable": "/Users/joshmcdannel/.nvm/versions/node/v22.13.1/bin/pnpm",
       "runtimeArgs": ["--filter=deja-serverts", "dev"],
       "port": 8082
     },
     {
       "name": "www",
-      "runtimeExecutable": "pnpm",
+      "runtimeExecutable": "/Users/joshmcdannel/.nvm/versions/node/v22.13.1/bin/pnpm",
       "runtimeArgs": ["--filter=dejajs-www", "dev"],
       "port": 3051
+    },
+    {
+      "name": "ui-storybook",
+      "runtimeExecutable": "/Users/joshmcdannel/.nvm/versions/node/v22.13.1/bin/pnpm",
+      "runtimeArgs": ["--filter=@repo/ui", "storybook"],
+      "port": 6006
     }
   ]
 }

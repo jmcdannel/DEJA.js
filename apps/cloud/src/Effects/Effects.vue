@@ -1,23 +1,43 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import type { Effect } from '@repo/modules'
 import { efxTypes, useEfx } from '@repo/modules/effects'
-import { useLayout, type Tag } from '@repo/modules'
+import { useLayout, type Tag, useSubscription, PLAN_DISPLAY } from '@repo/modules'
 import { useRouter } from 'vue-router'
-import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
+import { ListControlBar, useListControls } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
 import EffectsList from '@/Effects/EffectsList.vue'
+import ListPage from '@/Core/UI/ListPage.vue'
+import { EmptyState } from '@repo/ui'
 
 const router = useRouter()
 const { getEffects } = useEfx()
 const { getDevices, getLayout } = useLayout()
+const { plan } = useSubscription()
 const devices = getDevices()
 const layout = getLayout()
 const effects = getEffects()
 
+// 🔄 Loading state
+const isLoaded = ref(false)
+let loadingTimeout: ReturnType<typeof setTimeout> | undefined
+onMounted(async () => {
+  loadingTimeout = setTimeout(() => { isLoaded.value = true }, 3000)
+  try {
+    await (effects as any).promise
+  } finally {
+    clearTimeout(loadingTimeout)
+    isLoaded.value = true
+  }
+})
+onUnmounted(() => clearTimeout(loadingTimeout))
+
+const isLoading = computed(() => !isLoaded.value)
+const isFreePlan = computed(() => plan.value === 'hobbyist')
+
 const effectsList = computed(() =>
   effects?.value
-    ? effects.value.map((effect) => ({ ...effect, id: effect.id }))
+    ? (effects.value as Effect[]).map((effect) => ({ ...effect, id: effect.id }))
     : []
 )
 
@@ -53,23 +73,18 @@ const controls = useListControls('effects', {
 function handleEdit(effect: Effect) {
   router.push({ name: 'Edit Effect', params: { effectId: effect.id } })
 }
-
-function handleAdd() {
-  router.push({ name: 'Add Effect' })
-}
 </script>
 <template>
-  <PageHeader title="Effects" icon="mdi-rocket-launch" color="indigo" subtitle="Manage lighting, sound, and special effects for your layout.">
-    <template #actions>
-      <v-btn
-        prepend-icon="mdi-plus"
-        color="indigo"
-        variant="flat"
-        @click="handleAdd"
-      >
-        New Effect
-      </v-btn>
-    </template>
+  <ListPage
+    title="Effects"
+    icon="mdi-rocket-launch"
+    color="indigo"
+    subtitle="Manage lighting, sound, and special effects for your layout."
+    :add-to="{ name: 'Add Effect' }"
+    add-label="New Effect"
+    :loading="isLoading"
+    :empty="isLoaded && effectsList.length === 0"
+  >
     <template #controls>
       <ListControlBar
         :controls="controls"
@@ -80,7 +95,25 @@ function handleAdd() {
         search-placeholder="Search effects..."
       />
     </template>
-  </PageHeader>
 
-  <EffectsList :filtered-list="controls.filteredList.value" @edit="handleEdit" />
+    <EffectsList :filtered-list="controls.filteredList.value" @edit="handleEdit" />
+
+    <template #empty-state>
+      <EmptyState
+        icon="mdi-rocket-launch"
+        color="indigo"
+        title="No Effects Yet"
+        :description="isFreePlan
+          ? `Upgrade to ${PLAN_DISPLAY.engineer.name} to create lighting, sound, and animation effects for your layout.`
+          : 'Create lighting, sound, and animation effects to bring your layout to life with immersive scenery and interactive elements.'"
+        :use-cases="[
+          { icon: 'mdi-volume-high', text: 'Ambient sounds & audio' },
+          { icon: 'mdi-led-on', text: 'LED animations & lighting' },
+          { icon: 'mdi-play-circle', text: 'Triggered sequences' },
+        ]"
+        :action-label="isFreePlan ? `Upgrade to ${PLAN_DISPLAY.engineer.name}` : 'Create Your First Effect'"
+        :action-to="isFreePlan ? '/upgrade' : '/effects/new'"
+      />
+    </template>
+  </ListPage>
 </template>

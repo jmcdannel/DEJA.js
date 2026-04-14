@@ -4,7 +4,7 @@ import { useCollection } from 'vuefire'
 import type { TrackDiagram } from '@repo/modules'
 import { useTrackDiagrams } from '@repo/modules/trackDiagrams/useTrackDiagrams'
 import TrackDiagramListItem from '@/TrackDiagram/TrackDiagramListItem.vue'
-import EmptyState from '@/Core/UI/EmptyState.vue'
+import { EmptyState } from '@repo/ui'
 
 const emit = defineEmits(['edit'])
 const { trackDiagramsCol } = useTrackDiagrams()
@@ -17,7 +17,7 @@ function handleEdit(item: TrackDiagram) {
 <template>
   <v-container v-if="list?.length">
     <v-row v-auto-animate>
-      <v-col cols="12"><slot name="prepend" /></v-col>
+      <v-col v-if="$slots.prepend" cols="12"><slot name="prepend" /></v-col>
       <v-col
         v-for="item in list"
         :key="item.id"

@@ -8,11 +8,13 @@ user_invocable: true
 
 Capture screenshots of DEJA.js app views using Playwright MCP (headless browser).
 
+> 🌙 **Dark mode is mandatory.** Every screenshot must render in the dark theme regardless of the OS `prefers-color-scheme` setting — DEJA.js is a dark-first brand and mixed-theme screenshots look broken in docs and marketing. Step 3 of the Procedure below seeds `localStorage`, overrides `matchMedia`, and forces the Tailwind `.dark` class before any capture runs. Do not skip it.
+
 ## Prerequisites
 
 - `.claude/launch.json` must exist (dev server configs)
 - `.env` must be available in the working directory (symlink if in worktree)
-- `VITE_DEV_AUTO_LOGIN=true` should be set in `.env` for auth bypass, OR `CLAUDE_TEST_EMAIL` and `CLAUDE_TEST_PASSWORD` for real login
+- `VITE_DEMO_MODE=true` should be set in `.env` for auth bypass, OR `VITE_DEMO_EMAIL` and `VITE_DEMO_PASSWORD` for real login
 - Playwright MCP server must be configured (`claude mcp add playwright -- npx @playwright/mcp@latest --headless`)
 
 ## Usage
@@ -33,8 +35,8 @@ Capture screenshots of DEJA.js app views using Playwright MCP (headless browser)
 If in a git worktree (check if `.git` is a file, not a directory):
 ```bash
 # Symlink .env from preview worktree if not present
-if [ ! -f .env ] && [ -f /Users/jmcdannel/TTT/worktrees/preview/.env ]; then
-  ln -sf /Users/jmcdannel/TTT/worktrees/preview/.env .env
+if [ ! -f .env ] && [ -f /Users/jmcdannel/TTT/DEJA.js.git/preview/.env ]; then
+  ln -sf /Users/jmcdannel/TTT/DEJA.js.git/preview/.env .env
 fi
 ```
 
@@ -61,12 +63,50 @@ Navigate to the app's root URL first:
 mcp__playwright__browser_navigate({ url: "http://localhost:<port>" })
 ```
 
-Then set localStorage values using `mcp__playwright__browser_evaluate`:
+Then set localStorage values using `mcp__playwright__browser_evaluate`. **Seed the theme to `dark` in the same call as the layout — dark mode is mandatory for every screenshot, regardless of the OS `prefers-color-scheme`:**
+
 ```javascript
-mcp__playwright__browser_evaluate({ function: "() => { localStorage.setItem('@DEJA/layoutId', '<layout-id>') }" })
+mcp__playwright__browser_evaluate({ function: `() => {
+  // 🗺️ Layout ID — used by every DEJA app
+  localStorage.setItem('@DEJA/layoutId', '<layout-id>');
+
+  // 🌙 Force dark mode across every DEJA app, regardless of OS preference.
+  // Different apps read from different keys — seed them all:
+  localStorage.setItem('@DEJA/theme', 'dark');           // Vuetify apps (throttle/cloud/monitor/tour) via useStorage
+  localStorage.setItem('theme', 'dark');                 // dejajs-www (Next.js)
+  localStorage.setItem('vuetify:theme', 'dark');         // Vuetify default persistence key
+  localStorage.setItem('darkMode', 'true');              // legacy fallback
+
+  // 🎨 Tailwind dark variant: add the class to <html> so utilities like
+  // dark:bg-gray-950 render correctly before Vue/React hydrates.
+  document.documentElement.classList.add('dark');
+  document.documentElement.classList.remove('light');
+
+  // 🖥️ Override window.matchMedia so any '(prefers-color-scheme: dark)'
+  // query resolves to true and '(prefers-color-scheme: light)' to false.
+  // This wins over the OS setting for the rest of the session.
+  const origMatchMedia = window.matchMedia.bind(window);
+  window.matchMedia = (query) => {
+    if (query.includes('prefers-color-scheme: dark')) {
+      return { matches: true, media: query, onchange: null, addListener: () => {}, removeListener: () => {}, addEventListener: () => {}, removeEventListener: () => {}, dispatchEvent: () => false };
+    }
+    if (query.includes('prefers-color-scheme: light')) {
+      return { matches: false, media: query, onchange: null, addListener: () => {}, removeListener: () => {}, addEventListener: () => {}, removeEventListener: () => {}, dispatchEvent: () => false };
+    }
+    return origMatchMedia(query);
+  };
+}` })
 ```
 
-If using email/password login (not DEV_AUTO_LOGIN):
+After seeding, **reload the page once** so the app reads the fresh localStorage on boot (some stores only read on init, not on the fly):
+
+```
+mcp__playwright__browser_navigate({ url: "http://localhost:<port>" })
+```
+
+> 🌙 **Why this matters:** the DEJA brand is dark-first. Marketing screenshots and docs must always show the dark theme so the site renders consistently no matter who runs the skill. The four localStorage keys + `matchMedia` override + `.dark` class cover every theme mechanism used across the monorepo (Vuetify, Next.js, and direct Tailwind variants).
+
+If using email/password login (not DEMO_MODE):
 1. Navigate to `/login`
 2. Use `mcp__playwright__browser_snapshot` to get form field refs
 3. Use `mcp__playwright__browser_fill_form` to enter credentials
@@ -219,6 +259,6 @@ After capturing, report:
 - PNG format via Playwright MCP `browser_take_screenshot`
 - Desktop viewport: 1280x800, Mobile viewport: 375x812
 - Allow 2-3 seconds after navigation for Vue components to render
-- Some views require `requireDccEx` or `requireLayout` guards -- DEV_AUTO_LOGIN bypasses all guards
+- Some views require `requireDccEx` or `requireLayout` guards -- DEMO_MODE bypasses all guards
 - Monitor dashboard requires `window.__DEJA_MOCK__.seedAll()` call before capture (dev mode only)
 - Dev server must be started via Bash before using Playwright tools (Playwright navigates to the running server)

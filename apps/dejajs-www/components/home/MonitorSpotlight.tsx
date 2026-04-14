@@ -31,7 +31,7 @@ export default function MonitorSpotlight() {
       }}
       mainScreenshot={{ src: '/screenshots/monitor_desktop_dashboard.png', alt: 'DEJA Monitor dashboard' }}
       pipScreenshot={{ src: '/screenshots/monitor_mobile_dashboard.png', alt: 'DEJA Monitor mobile view' }}
-      logoPath="/monitor/icon-512.png"
+      logoVariant="monitor"
       ctaHref="/monitor"
       ctaLabel="Learn More"
       docsHref="/docs/monitor"

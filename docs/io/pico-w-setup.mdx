@@ -1,0 +1,111 @@
+---
+title: Pico W Setup
+description: Deploy DEJA IO firmware to a Raspberry Pi Pico W for wireless MQTT control.
+section: io
+order: 12
+---
+
+# 🍓 Pico W Setup
+
+The Raspberry Pi Pico W (`deja-mqtt`) connects to your layout wirelessly over WiFi and communicates via MQTT — ideal for devices placed inside scenery or buildings.
+
+> 🛜 **See also:** [`deja-esp32-wifi`](/docs/io/arduino-setup) — the ESP32-based WiFi/MQTT alternative. It uses the **same MQTT topology** (`{TOPIC_ID}/{LAYOUT_ID}/{DEVICE_ID}` for commands, `…/messages` for sensor events) and the **same single-object command format** as the Pico W. Pick whichever hardware you have on hand: Pico W if you prefer CircuitPython and a smaller board, ESP32 if you prefer the Arduino C++ toolchain and more GPIOs.
+
+## Hardware Requirements
+
+- **Raspberry Pi Pico W** (~$6)
+- **USB-C cable** for initial setup and power
+- **Adafruit PCA9685 16-Channel PWM Servo Driver** (optional, for servos)
+- **WiFi network** on the same network as your DEJA Server
+- **MQTT broker** (Mosquitto recommended, running on the server machine)
+
+### Wiring the PCA9685
+
+| PCA9685 Pin | Pico W Pin |
+|---|---|
+| VCC | 3V3 |
+| GND | GND |
+| SDA | GP0 |
+| SCL | GP1 |
+
+## Installing CircuitPython
+
+1. Download CircuitPython for Pico W from [circuitpython.org](https://circuitpython.org/board/raspberry_pi_pico_w/)
+2. Hold the **BOOTSEL** button on the Pico W while plugging in USB
+3. Drag the `.uf2` file onto the **RPI-RP2** drive that appears
+4. The Pico W reboots and mounts as **CIRCUITPY**
+
+## Configuration
+
+### WiFi and MQTT — `settings.toml`
+
+Create `settings.toml` on the CIRCUITPY drive:
+
+```toml
+CIRCUITPY_WIFI_SSID = "YourWiFiNetwork"
+CIRCUITPY_WIFI_PASSWORD = "YourWiFiPassword"
+ENABLE_CONFIG = "true"
+ENABLE_PWM = "true"
+ENABLE_MQTT = "true"
+MQTT_BROKER = "192.168.1.100"
+LAYOUT_ID = "your-layout-id"
+DEVICE_ID = "my-pico-device"
+TOPIC_ID = "DEJA"
+```
+
+### Pin Mapping — `config.json`
+
+Create `config.json` to map logical pin numbers to physical GPIO names:
+
+```json
+{
+  "pins": {
+    "8": "GP8",
+    "9": "GP9",
+    "10": "GP10",
+    "11": "GP11"
+  }
+}
+```
+
+## Deploying the Firmware
+
+Copy all files from `io/src/deja-pico-w/` to the CIRCUITPY drive:
+
+- `code.py` — main application
+- `config.json` — pin mapping
+- `lib/` — Adafruit libraries (MQTT, motor, servo, LED animation)
+
+Or use the DEJA deploy script:
+
+```bash
+cd io
+pnpm deploy
+```
+
+The script generates `settings.toml` and `config.json` from your Cloud device configuration and copies everything to the mounted Pico W.
+
+## MQTT Topics
+
+Your Pico W subscribes and publishes to topics based on its identity:
+
+- **Subscribe:** `DEJA/{layoutId}/{deviceId}` — receives commands
+- **Publish:** `DEJA/{layoutId}/{deviceId}/messages` — sends status
+
+## Command Format
+
+Pico W devices receive JSON objects over MQTT:
+
+```json
+{
+  "action": "pin",
+  "payload": { "pin": 8, "state": 1 },
+  "device": "my-pico-device"
+}
+```
+
+The `device` field filters messages — only commands matching this device's ID are processed. See the [Command Reference](/docs/io/command-reference) for all supported actions.
+
+## Layout-Specific Configs
+
+Store per-layout device configs under `io/layouts/{layoutId}/deja-pico-w/{deviceId}/config.json`. The deploy script uses these instead of the default config when deploying to a specific layout.

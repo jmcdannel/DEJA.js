@@ -79,6 +79,24 @@ service cloud.firestore {
         allow read: if isAuth();
         allow write: if isLayoutOwner(layoutId);
       }
+
+      // Sensors - layout owner only
+      match /sensors/{sensorId} {
+        allow read: if isAuth();
+        allow write: if isLayoutOwner(layoutId);
+      }
+
+      // Blocks - layout owner only
+      match /blocks/{blockId} {
+        allow read: if isAuth();
+        allow write: if isLayoutOwner(layoutId);
+      }
+
+      // Automations - layout owner only
+      match /automations/{automationId} {
+        allow read: if isAuth();
+        allow write: if isLayoutOwner(layoutId);
+      }
     }
 
     // User preferences (backgrounds, settings, subscription) — each user owns their doc

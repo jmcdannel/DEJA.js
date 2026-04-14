@@ -32,6 +32,31 @@ const SEMANTIC_COLORS: Record<ThemeMode, Record<string, string>> = {
 }
 
 /**
+ * Shared device-status and stat-card colors used across DEJA apps.
+ *
+ * These are registered as Vuetify theme colors so components can reference them
+ * via `color="device-connected"`, `bg-device-connected`, etc. Apps can still
+ * override any of these by passing matching keys in their `custom` config.
+ */
+const DEVICE_STATUS_COLORS: Record<ThemeMode, Record<string, string>> = {
+  light: {
+    'device-connected': '#2E7D32',
+    'device-disconnected': '#C62828',
+    'stat-card': '#E8EDF2',
+  },
+  dark: {
+    'device-connected': '#66BB6A',
+    'device-disconnected': '#EF5350',
+    'stat-card': '#1A2332',
+  },
+  'high-contrast': {
+    'device-connected': '#00FF00',
+    'device-disconnected': '#FF0000',
+    'stat-card': '#000000',
+  },
+}
+
+/**
  * Generate all registered Vuetify themes from an app's identity colors.
  *
  * ✨ Automatically adjusts colors to meet WCAG AA contrast ratios:
@@ -105,9 +130,11 @@ export function createVuetifyThemes(
         accent,
         // 4. Semantic colors (already tuned per mode)
         ...semantics,
-        // 5. Per-mode overrides from app config (identity overrides already folded in for light)
+        // 5. Shared device-status & stat-card defaults (apps can override via `custom`)
+        ...DEVICE_STATUS_COLORS[mode],
+        // 6. Per-mode overrides from app config (identity overrides already folded in for light)
         ...(modeDef.dark ? modeOverrides : omitKeys(modeOverrides, ['primary', 'secondary', 'accent'])),
-        // 6. Custom colors for this mode (preserved as-is — user controls these)
+        // 7. Custom colors for this mode (preserved as-is — user controls these)
         ...customColors,
       },
       variables: {

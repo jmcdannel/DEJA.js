@@ -161,12 +161,12 @@ describe('dcc.sendOutput', () => {
 
   it('sends output on command', async () => {
     await dcc.sendOutput({ pin: 4, state: true })
-    expect(serial.send).toHaveBeenCalledWith(expect.anything(), '<Z 4 1>\n')
+    expect(serial.send).toHaveBeenCalledWith(expect.anything(), '<z 4>\n')
   })
 
   it('sends output off command', async () => {
     await dcc.sendOutput({ pin: 4, state: false })
-    expect(serial.send).toHaveBeenCalledWith(expect.anything(), '<Z 4 0>\n')
+    expect(serial.send).toHaveBeenCalledWith(expect.anything(), '<z -4>\n')
   })
 })
 

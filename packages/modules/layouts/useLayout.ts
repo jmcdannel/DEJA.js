@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, type Ref, type ComputedRef, isRef } from 'vue'
 import {
   doc,
   collection,
@@ -18,45 +18,11 @@ import { db } from '@repo/firebase-config'
 import { createLogger } from '@repo/utils'
 import type { Device, Layout, Tag } from './types'
 import { useDejaJS } from '@repo/deja'
-import { defaultLayoutSounds } from './constants'
+import { defaultLayoutSounds, deviceTypes } from './constants'
 
 const log = createLogger('Layout')
 
 export const useLayout = () => {
-  const deviceTypes = [
-    {
-      value: 'dcc-ex',
-      label: 'DCC-EX CommandStation',
-      icon: 'mdi-memory',
-      image: '/dcc-ex/android-chrome-192x192.png',
-      color: 'pink',
-    },
-    {
-      value: 'deja-arduino',
-      label: 'DEJA Arduino (MEGA)',
-      icon: 'mdi-usb',
-      color: 'lime',
-    },
-    {
-      value: 'deja-arduino-led',
-      label: 'DEJA LED Arduino',
-      icon: 'mdi-led-strip',
-      color: 'teal',
-    },
-    {
-      value: 'deja-mqtt',
-      label: 'DEJA MQTT (Pico W)',
-      icon: 'mdi-wifi',
-      color: 'blue',
-    },
-    {
-      value: 'deja-server',
-      label: 'DEJA Server',
-      icon: 'mdi-laptop',
-      color: 'purple',
-    },
-  ]
-
   const { sendDejaCommand } = useDejaJS()
   const layoutId = useStorage('@DEJA/layoutId', null)
 
@@ -73,7 +39,16 @@ export const useLayout = () => {
     return layout
   }
 
-  function getLayouts(email: string | null = null) {
+  function getLayouts(email: string | null | Ref<string | null> | ComputedRef<string | null> = null) {
+    // Support reactive email refs so the query re-runs when auth resolves
+    if (isRef(email)) {
+      const queryRef = computed(() =>
+        email.value
+          ? query(collection(db, 'layouts'), where('owner', '==', email.value))
+          : null
+      )
+      return useCollection(queryRef, { ssrKey: 'layouts' })
+    }
     return email
       ? useCollection(query(collection(db, 'layouts'), where('owner', '==', email)), { ssrKey: 'layouts' })
       : null

@@ -2,16 +2,14 @@
 import { ref, watch, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
 import { useTourStore } from './stores/tour'
-import TourLogo from './components/TourLogo.vue'
 import LayoutSelector from './components/LayoutSelector.vue'
 import TourUserProfile from './components/TourUserProfile.vue'
-import { PageBackground, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
+import { Logo, PageBackground, TransitionFade, NotificationContainer, provideNotifications } from '@repo/ui'
 
 provideNotifications()
 const drawer = ref(false)
 const theme = useTheme()
 const tourStore = useTourStore()
-const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
 
 const navigationItems = [
   { title: 'Home', icon: 'mdi-home', to: '/' },
@@ -36,32 +34,11 @@ onMounted(() => {
     <PageBackground app-name="tour">
     <v-app-bar color="black" elevation="2">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <TourLogo />
-      <v-app-bar-title class=" sm:block">        
+      <v-app-bar-title>
         <router-link to="/" class="flex items-center" aria-label="Home">
-          <span
-            class="font-bold drop-shadow-sm text-sm lg:text-xl bg-gradient-to-r from-blue-500 to-cyan-400 text-transparent bg-clip-text"
-          >
-            DEJA
-          </span>
-          <span
-            class="ml-1 font-bold drop-shadow-sm text-sm lg:text-xl"
-          >
-            Tour App
-          </span>
+          <Logo size="md" variant="tour" app-title="Tour" />
         </router-link>
       </v-app-bar-title>
-      
-      <!-- Demo Mode Indicator -->
-      <v-chip 
-        v-if="isDemoMode" 
-        color="warning" 
-        size="small" 
-        class="mr-4"
-      >
-        <v-icon icon="mdi-test-tube" class="mr-1"></v-icon>
-        Demo Mode
-      </v-chip>
       
       <v-spacer></v-spacer>
       

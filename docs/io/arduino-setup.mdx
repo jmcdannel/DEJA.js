@@ -1,0 +1,264 @@
+---
+title: Arduino & ESP32 Setup
+description: Flash DEJA IO firmware to an Arduino Mega, ESP32 (USB), or ESP32 (WiFi/MQTT) board and connect it to your DEJA Server.
+section: io
+order: 11
+---
+
+# 🔧 Arduino & ESP32 Setup
+
+DEJA.js ships **three Arduino-family firmware variants** that all share the same `io/scripts/lib/bundle.ts` builder, the same C++ command handlers, and the same DEJA Cloud configuration pipeline. Pick the variant that matches your hardware:
+
+| Device type | Board | Transport | Sketch source |
+|---|---|---|---|
+| 🟢 `deja-arduino` | Arduino Mega 2560 (or compatible AVR) | USB serial @ 115200 | `io/src/deja-arduino/` |
+| 🟠 `deja-esp32` | ESP32 Dev Module | USB serial @ 115200 | `io/src/deja-arduino/` (shared sketch) |
+| 🛜 `deja-esp32-wifi` | ESP32 Dev Module | WiFi + MQTT | `io/src/deja-esp32-wifi/` |
+
+> 🤝 `deja-esp32` reuses the `deja-arduino` sketch — same JSON-over-serial protocol, just compiled for ESP32 hardware with a different FQBN and a faster upload speed (460800 baud).
+>
+> 🛜 `deja-esp32-wifi` is the wireless variant — same ESP32 hardware, but it talks to the DEJA Server over MQTT instead of USB serial. See [Pico W Setup](/docs/io/pico-w-setup) for the Raspberry Pi Pico W equivalent (`deja-mqtt`), which uses the same MQTT topology.
+
+---
+
+## 🛠️ Hardware Requirements
+
+### 🟢 deja-arduino (Arduino Mega)
+
+- **Arduino Uno, Mega, or Nano** (any ATmega-based board — Mega 2560 recommended for higher pin counts)
+- **USB cable** (Type-A to Type-B for Uno/Mega, Mini-USB for Nano)
+- **Adafruit PCA9685 16-Channel PWM Servo Driver** (optional, for servo-driven turnouts)
+- **Jumper wires** for connecting outputs and sensors
+
+### 🟠 deja-esp32 (ESP32 over USB)
+
+- **ESP32 Dev Module** (any standard ESP32 dev board with USB)
+- **USB cable** (typically USB-C or Micro-USB depending on the board)
+- **Adafruit PCA9685** (optional, for servos)
+
+### 🛜 deja-esp32-wifi (ESP32 over WiFi/MQTT)
+
+- **ESP32 Dev Module** (same hardware as `deja-esp32`)
+- **WiFi network** reachable from the device
+- **MQTT broker** (Mosquitto recommended) running somewhere on the same network as the DEJA Server
+- USB cable for the initial flash — after that the board can run on any 5V power source
+
+### 🔌 Wiring the PCA9685
+
+If you're using servo-driven turnouts, connect the PCA9685 to your board over I2C:
+
+| PCA9685 Pin | Arduino Mega | ESP32 (default) |
+|---|---|---|
+| VCC | 5V | 3V3 |
+| GND | GND | GND |
+| SDA | 20 | GPIO 21 |
+| SCL | 21 | GPIO 22 |
+
+Power the servo rail separately with a 5–6V power supply — do not power servos from the board's onboard regulator.
+
+---
+
+## ⚙️ Firmware Configuration
+
+The `deja deploy` wizard generates `config.h` from your DEJA Cloud device entry, but you can also create one by hand from `config.default.h`. The shape differs slightly between the USB-serial variants and the WiFi variant.
+
+### 🟢🟠 deja-arduino / deja-esp32 — `io/src/deja-arduino/config.h`
+
+```cpp
+// 🏷️ Device identity
+#define DEVICE_ID "my-arduino-device"
+
+// 🚦 Feature toggles — enable what your hardware supports
+#define ENABLE_PWM true        // 🎛️ PCA9685 servo driver
+#define ENABLE_OUTPUTS true    // 💡 Digital output pins
+#define ENABLE_SIGNALS true    // 🚦 Signal head outputs
+#define ENABLE_SENSORS true    // 📡 Sensor input pins
+#define ENABLE_TURNOUTS true   // 🔧 Servo-driven turnouts
+
+// 🪛 Pin assignments
+int OUTPINS[] = {8, 9, 10, 11};           // GPIO pins for digital outputs
+int SIGNALPINS[] = {4, 5, 6, 7};          // GPIO pins for signal heads
+int SENSORPINS[] = {A0, A1, A2};          // GPIO pins for sensors
+```
+
+### 🛜 deja-esp32-wifi — `io/src/deja-esp32-wifi/config.h`
+
+The WiFi variant adds WiFi/MQTT credentials that get baked in at build time. The `deja deploy` wizard prompts for these and `generateEsp32WifiConfig()` writes them in:
+
+```cpp
+// 📶 WiFi credentials
+#define WIFI_SSID "YourNetwork"
+#define WIFI_PASSWORD "YourPassword"
+
+// 📬 MQTT broker
+#define MQTT_BROKER "192.168.1.100"
+#define MQTT_PORT 1883
+#define MQTT_USERNAME ""
+#define MQTT_PASSWORD ""
+
+// 🏷️ Device identity
+#define DEVICE_ID "my-esp32-wifi"
+#define LAYOUT_ID "tamarack"
+#define TOPIC_ID "DEJA"
+
+// 🚦 Feature toggles — same semantics as deja-arduino
+#define ENABLE_PWM true
+#define ENABLE_OUTPUTS true
+#define ENABLE_SIGNALS true
+#define ENABLE_SENSORS true
+#define ENABLE_TURNOUTS true
+
+// 🪛 Pin assignments
+int OUTPINS[] = {18, 19, 21, 22};
+int SIGNALPINS[] = {25, 26, 27, 32};
+int SENSORPINS[] = {34, 35, 36, 39};
+```
+
+> 🛜 Unlike the Pico W (which reads `settings.toml` at runtime), the ESP32 WiFi firmware bakes credentials into `config.h` at compile time. If you change WiFi or MQTT credentials, you have to re-flash the device.
+
+### 🔧 Turnout Configuration
+
+Turnouts are defined as `TurnoutPulser` objects with a servo channel, closed angle, and thrown angle. This is identical for all three Arduino-family variants:
+
+```cpp
+TurnoutPulser turnouts[] = {
+  TurnoutPulser(0, 45, 135),   // 🔧 Servo channel 0: 45° closed, 135° thrown
+  TurnoutPulser(1, 50, 130),   // 🔧 Servo channel 1: 50° closed, 130° thrown
+};
+```
+
+See [Configuration Reference](/docs/io/configuration) for the full list of `config.h` fields per variant.
+
+---
+
+## 🚀 Flashing the Firmware
+
+The easiest path is the [deploy wizard](/docs/io/deploy):
+
+```bash
+cd io
+pnpm deploy
+```
+
+The wizard auto-detects connected boards, fetches your device config from Firebase, generates `config.h`, and uses `arduino-cli` to compile and upload. For `deja-esp32-wifi` and `deja-mqtt` it also prompts for WiFi/MQTT credentials.
+
+If you'd rather flash by hand, every bundle drops out a self-contained directory at `io/dist/<layoutId>/arduino/<deviceId>/` that works with **PlatformIO**, **Arduino CLI**, or the **Arduino IDE**. The exact CLI commands depend on the device type — these match `getCliDeployCommands()` in `packages/modules/device-config/cli-commands.ts` (the single source of truth shown in `DEPLOYMENT.md` and the Cloud app device details page):
+
+### 🟢 deja-arduino
+
+```bash
+cd io/dist/<layoutId>/arduino/<deviceId>
+
+# Option A: PlatformIO
+platformio run -e megaatmega2560 --target upload --upload-port /dev/cu.usbserial-*
+
+# Option B: Arduino CLI
+arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 deja-arduino && \
+  arduino-cli upload -p /dev/cu.usbserial-* --fqbn arduino:avr:mega:cpu=atmega2560 deja-arduino
+
+# Option C: Arduino IDE
+# File → Open → deja-arduino/deja-arduino.ino
+# Tools → Board → Arduino AVR Boards → Arduino Mega or Mega 2560
+# Tools → Processor → ATmega2560 (Mega 2560)
+```
+
+### 🟠 deja-esp32
+
+```bash
+cd io/dist/<layoutId>/arduino/<deviceId>
+
+# Option A: PlatformIO
+platformio run -e esp32dev --target upload --upload-port /dev/cu.usbserial-*
+
+# Option B: Arduino CLI
+arduino-cli compile --fqbn esp32:esp32:esp32 \
+  --build-property "compiler.cpp.extra_flags=-std=c++17" deja-arduino && \
+  arduino-cli upload -p /dev/cu.usbserial-* \
+  --fqbn esp32:esp32:esp32:UploadSpeed=460800 deja-arduino
+
+# Option C: Arduino IDE
+# File → Open → deja-arduino/deja-arduino.ino
+# Tools → Board → ESP32 Arduino → ESP32 Dev Module
+# Tools → Upload Speed → 460800
+```
+
+### 🛜 deja-esp32-wifi
+
+```bash
+cd io/dist/<layoutId>/arduino/<deviceId>
+
+# Option A: PlatformIO
+platformio run -e esp32dev --target upload --upload-port /dev/cu.usbserial-*
+
+# Option B: Arduino CLI
+arduino-cli compile --fqbn esp32:esp32:esp32 \
+  --build-property "compiler.cpp.extra_flags=-std=c++17" deja-esp32-wifi && \
+  arduino-cli upload -p /dev/cu.usbserial-* \
+  --fqbn esp32:esp32:esp32:UploadSpeed=460800 deja-esp32-wifi
+
+# Option C: Arduino IDE
+# File → Open → deja-esp32-wifi/deja-esp32-wifi.ino
+# Tools → Board → ESP32 Arduino → ESP32 Dev Module
+# Tools → Upload Speed → 460800
+```
+
+> 🛜 Before flashing `deja-esp32-wifi` by hand: confirm `WIFI_SSID`, `WIFI_PASSWORD`, `MQTT_BROKER`, `DEVICE_ID`, `LAYOUT_ID`, and `TOPIC_ID` are set correctly in `deja-esp32-wifi/config.h`. The deploy wizard bakes these in automatically; non-interactive `pnpm build:firmware` runs leave them empty.
+
+---
+
+## 🔌 Connecting to the Server
+
+### 🟢🟠 USB-serial variants (deja-arduino / deja-esp32)
+
+1. Plug the board into the server machine via USB
+2. In the [Cloud app](https://cloud.dejajs.com), register a device with the matching type (`deja-arduino` or `deja-esp32`) and your `DEVICE_ID`
+3. The DEJA Server auto-detects the serial port and connects at 115200 baud
+4. Open the [Monitor app](https://monitor.dejajs.com) to verify the device appears and responds to commands
+
+### 🛜 deja-esp32-wifi
+
+1. Make sure your MQTT broker is running and reachable on the IP you set in `config.h`
+2. Make sure the DEJA Server has `ENABLE_MQTT=true` in its `.env`
+3. Power on the ESP32 — it connects to WiFi, subscribes to `DEJA/{layoutId}/{deviceId}`, and publishes a status message to `…/messages`
+4. In the [Cloud app](https://cloud.dejajs.com), register a device with type `deja-esp32-wifi` and the matching `DEVICE_ID`
+5. Open the [Monitor app](https://monitor.dejajs.com) to verify the device shows as connected
+
+---
+
+## 📨 Command Format
+
+### 🟢🟠 USB-serial variants
+
+`deja-arduino` and `deja-esp32` receive **JSON arrays** over serial at 115200 baud:
+
+```json
+[
+  { "action": "pin", "payload": { "pin": 8, "state": 1 } },
+  { "action": "servo", "payload": { "servo": 0, "value": 90, "current": 45 } },
+  { "action": "turnout", "payload": { "turnout": 0, "state": true } }
+]
+```
+
+### 🛜 deja-esp32-wifi
+
+`deja-esp32-wifi` receives **single JSON objects** over MQTT, matching the Pico W (`deja-mqtt`) format:
+
+```json
+{
+  "action": "pin",
+  "device": "my-esp32-wifi",
+  "payload": { "pin": 18, "state": 1 }
+}
+```
+
+The firmware filters by the `device` field and ignores messages intended for other devices on the same topic. The same `pin` / `servo` / `turnout` / `effects` handlers run regardless of transport — see the [Command Reference](/docs/io/command-reference) for all supported actions.
+
+---
+
+## 📚 Next Steps
+
+- 🚀 [Deploy to Devices](/docs/io/deploy) — full walkthrough of the `deja deploy` wizard
+- 📋 [Configuration Reference](/docs/io/configuration) — every `config.h` / `settings.toml` field per variant
+- 📡 [Protocol Details](/docs/io/protocols) — serial + MQTT wire formats
+- 🍓 [Pico W Setup](/docs/io/pico-w-setup) — the CircuitPython MQTT alternative to `deja-esp32-wifi`
+- 🔧 [Building Custom Devices](/docs/io/custom-devices) — bring your own MQTT hardware

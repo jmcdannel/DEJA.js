@@ -6,8 +6,9 @@ import { useLocos } from '@repo/modules/locos'
 import ThrottleNavItem from '@/throttle/ThrottleNavItem.vue'
 import ButtonsThrottle from '@/throttle/ButtonsThrottle.vue'
 import SliderThrottle from '@/throttle/SliderThrottle.vue'
-import ProtoThrottle from '@/throttle/ProtoThrottle.vue'
+import Dashboard from '@/throttle/Dashboard.vue'
 import { useThrottleSettings } from '@/throttle/useThrottleSettings'
+import SaveToRosterChip from '@/throttle/SaveToRosterChip.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -52,7 +53,7 @@ const { variant, showFunctions, showSpeedometer, showConsist } = useThrottleSett
 const variantMap = {
   buttons: ButtonsThrottle,
   slider: SliderThrottle,
-  protothrottle: ProtoThrottle,
+  dashboard: Dashboard,
 } as const
 
 const variantComponent = computed(() => variantMap[variant.value] ?? ButtonsThrottle)
@@ -81,17 +82,20 @@ function handleSelect(newAddress: number) {
       <div class="absolute w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[80px] -bottom-[100px] -right-[200px]"></div>
       <div class="absolute w-[400px] h-[400px] rounded-full bg-violet-500/10 blur-[90px] top-[30%] left-[40%]"></div>
     </div>
+    <div class="absolute top-2 left-2 z-10">
+      <SaveToRosterChip v-if="!Number.isNaN(routeAddr)" :address="routeAddr" />
+    </div>
     <component :is="variantComponent" :address="routeAddr" v-bind="settingsProps" class="flex-1 min-h-0" />
     <v-slide-group
-      
       selected-class="bg-success"
       show-arrows
     >
-    <v-slide-group-item 
-      v-for="item in throttles"
-      :key="item.id">
-      <ThrottleNavItem v-if="item.address" :address="item.address" @select="handleSelect(item.address)" />
-    </v-slide-group-item>
-  </v-slide-group>
+      <v-slide-group-item
+        v-for="item in throttles"
+        :key="item.id"
+      >
+        <ThrottleNavItem v-if="item.address" :address="item.address" @select="handleSelect(item.address)" />
+      </v-slide-group-item>
+    </v-slide-group>
   </div>
 </template>

@@ -1,27 +1,14 @@
 import type { MetadataRoute } from 'next';
 import { getAllMdxFiles, getSlugFromFile } from '../lib/docs-utils';
-import { client } from '../sanity/lib/client';
-import { PRODUCT_SLUGS_QUERY } from '../sanity/lib/queries';
 
-const defaultProductSlugs = ['server', 'throttle', 'cloud', 'monitor', 'tour'];
+const productSlugs = ['throttle', 'server', 'cloud', 'io', 'monitor', 'tour'];
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://dejajs.com';
-
-  let productSlugs = defaultProductSlugs;
-  try {
-    if (client) {
-      const sanityProducts = await client.fetch(PRODUCT_SLUGS_QUERY);
-      if (sanityProducts?.length) {
-        productSlugs = sanityProducts.map((p: { slug: string }) => p.slug);
-      }
-    }
-  } catch {
-    // Fall back to hardcoded slugs
-  }
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
+    { url: `${baseUrl}/pricing`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/faq`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
   ];
 

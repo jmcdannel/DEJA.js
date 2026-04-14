@@ -32,7 +32,7 @@ function handleUpdateState(item: DocumentData, newState: boolean) {
 </script>
 
 <template>
-  <div class="w-full p-4">
+  <div class="@container w-full p-4">
     <v-row v-if="loading">
       <v-col v-for="n in 6" :key="n" :cols="cols.xs" :sm="cols.sm" :md="cols.md" :lg="cols.lg" :xl="cols.xl" :xxl="cols.xxl">
         <v-skeleton-loader type="card" />

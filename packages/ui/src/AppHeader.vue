@@ -9,9 +9,9 @@ import UserProfile from './UserProfile.vue'
 import TrackPower from './TrackPower.vue'
 import Power from './Power.vue'
 import EmergencyStop from './EmergencyStop.vue'
-import SelectLayout from './SelectLayout.vue'
+import ConnectionStatus from './ConnectionStatus.vue'
 import { useLayout, useServerStatus } from '@repo/modules'
-import { useDcc } from '@repo/dccex'
+import { useDcc, DCC_POWER_ON, DCC_POWER_OFF, DCC_EMERGENCY_STOP } from '@repo/dccex'
 import { createLogger } from '@repo/utils'
 import { WI_THROTTLE_EVENTS } from './constants/wiThrottleEvents'
 
@@ -31,9 +31,8 @@ const props = defineProps<{
   showLayoutPower?: boolean
   showEmergencyStop?: boolean
   showUserProfile?: boolean
-  showDeviceStatus?: boolean
-  showDeviceStatusLabel?: boolean
-  deviceStatusCompact?: boolean
+  showNavDrawer?: boolean
+  mobileLayout?: 'compact' | 'expanded'
   color?: string
   dark?: boolean
   layoutPowerState?: boolean
@@ -48,26 +47,26 @@ const router = useRouter()
 const { mdAndUp } = useDisplay()
 
 const { serverStatus } = useServerStatus()
+const stackedLogo = computed(() => !mdAndUp.value)
 
-const layouts = getLayouts(user.value?.email)
+const showExtension = computed(() =>
+  props.mobileLayout === 'expanded'
+)
+
+const email = computed(() => user.value?.email ?? null)
+const layouts = getLayouts(email)
 const devices = getDevices()
 
-const isLayoutModalOpen = ref(false)
-const isDeviceModalOpen = ref(false)
 const wiThrottlePower = ref<0 | 1 | 2>(2) // 0=off, 1=on, 2=unknown
 const wiThrottleConnected = ref(false)
 
 
-// Event handlers
 async function handleTrackPowerToggle(newState: boolean) {
   if (wiThrottleConnected.value) {
-    // WiThrottle power command: PPA1 for on, PPA0 for off
     window.dispatchEvent(new CustomEvent(WI_THROTTLE_EVENTS.SEND, { detail: `PPA${newState ? '1' : '0'}` }))
     return
   }
-  const DEFAULT_ON = '1 MAIN'
-  const DEFAULT_OFF = '0'
-  await sendDccCommand({ action: 'dcc', payload: newState ? DEFAULT_ON : DEFAULT_OFF })
+  await sendDccCommand({ action: 'dcc', payload: newState ? DCC_POWER_ON : DCC_POWER_OFF })
 }
 
 function handleLayoutPowerToggle(newState: boolean) {
@@ -84,30 +83,11 @@ async function handleEmergencyStop() {
     window.dispatchEvent(new CustomEvent(WI_THROTTLE_EVENTS.ESTOP))
     return
   }
-  await sendDccCommand({ action: 'dcc', payload: '!' })
-}
-
-function handleDeviceSelect(deviceId: string) {
-  log.debug('Device selected:', deviceId)
-  // Handle device selection if needed
-}
-
-function handleLayoutSelect(selectedLayoutId: string) {
-  layoutId.value = selectedLayoutId
-  router.push({ name: 'home' })
-  isLayoutModalOpen.value = false
+  await sendDccCommand({ action: 'dcc', payload: DCC_EMERGENCY_STOP })
 }
 
 function handleLogoClick() {
   router.push({ path: '/' })
-}
-
-function openLayoutModal() {
-  isLayoutModalOpen.value = true
-}
-
-function openDeviceModal() {
-  isDeviceModalOpen.value = true
 }
 
 function handleWiThrottlePowerState(event: Event) {
@@ -133,9 +113,6 @@ function handleDrawerToggle() {
   emit('drawerToggle', !(props.drawer ?? false))
 }
 
-const allConnected = computed(() => devices.value.every(device => device.isConnected))
-const hasDevices = computed(() => devices.value.length > 0)
-const connectedDevicesCount = computed(() => devices.value.filter(d => d.isConnected).length)
 const dccexConnected = computed(() => {
   if (wiThrottleConnected.value) return true
   const dccexDevice = devices.value.find(device => device.type === 'dcc-ex')
@@ -156,6 +133,14 @@ const effectiveTrackPower = computed<boolean>(() => {
   return props.layoutPowerState ?? false
 })
 
+// 📱 Mini status indicators for mobile
+const serverDotColor = computed(() =>
+  serverStatus.value?.online ? '#22c55e' : '#ef4444'
+)
+const trackPowerDotColor = computed(() =>
+  effectiveTrackPower.value ? '#22c55e' : '#6b7280'
+)
+
 const defaultProps = {
   appName: 'DEJA',
   appIcon: 'mdi-train',
@@ -164,9 +149,6 @@ const defaultProps = {
   showLayoutPower: true,
   showEmergencyStop: true,
   showUserProfile: true,
-  showDeviceStatus: true,
-  showDeviceStatusLabel: true,
-  deviceStatusCompact: false,
   dark: true,
   layoutPowerState: false,
 }
@@ -174,138 +156,87 @@ const defaultProps = {
 
 <template>
   <v-app-bar
-    class="header-gradient relative overflow-hidden flex flex-col"
+    class="header-gradient relative overflow-hidden"
+    :height="showExtension ? (mdAndUp ? 88 : 64) : undefined"
     :dark="dark !== undefined ? dark : defaultProps.dark">
     <BackgroundDecor variant="blurred-bubbles-1" />
-    <template v-slot:prepend>
+    <template v-if="showNavDrawer !== false" v-slot:prepend>
       <v-app-bar-nav-icon variant="text" @click.stop="handleDrawerToggle" class="!h-10 !w-10 ml-4"></v-app-bar-nav-icon>
     </template>
     <template v-slot:title>
-      <Logo
-        :size="mdAndUp ? 'md' : 'sm'"
-        :app-title="appName || defaultProps.appName"
-        :variant="variant || defaultProps.variant"
-        @click="handleLogoClick"
-        class="cursor-pointer"
-      />
+      <div class="header-brand">
+        <Logo
+          :size="mdAndUp ? 'md' : 'sm'"
+          :stacked="stackedLogo"
+          :app-title="appName || defaultProps.appName"
+          :variant="variant || defaultProps.variant"
+          @click="handleLogoClick"
+          class="cursor-pointer"
+        />
+        <ConnectionStatus
+          v-if="showExtension && user && mdAndUp"
+          class="header-brand__status"
+          :layout-name="currentLayout?.name"
+          :layout-id="layoutId"
+          :server-status="serverStatus"
+          :devices="devices"
+          @navigate="router.push('/connect')"
+        />
+      </div>
     </template>
+    <!-- 📱 Mobile mini-status: server + track power dots, left of Menu -->
+    <button
+      v-if="showExtension && user && !mdAndUp"
+      type="button"
+      class="mini-status"
+      aria-label="Connection status"
+      @click="router.push('/connect')"
+    >
+      <span class="mini-status__item">
+        <v-icon size="12">mdi-console</v-icon>
+        <span class="mini-status__dot" :style="{ background: serverDotColor }" />
+      </span>
+      <span class="mini-status__divider" />
+      <span class="mini-status__item">
+        <v-icon size="12">mdi-fence-electric</v-icon>
+        <span class="mini-status__dot" :style="{ background: trackPowerDotColor }" />
+      </span>
+    </button>
     <slot></slot>
     <template v-slot:append>
-      <!-- User Profile - always on the far right --> 
-      <template v-if="mdAndUp">
-        <v-chip v-if="user" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-home" :color="layoutId ? 'success' : 'error'"
-          variant="elevated" @click="openLayoutModal">
-          <template #append>
-            <span v-if="layoutId" class="status-dot success-dot"></span>
-            <span v-else class="status-dot error-dot"></span>
-          </template>
-          <span class="font-medium">{{ currentLayout?.name || 'No Layout' }}</span>
-        </v-chip>
-        <v-chip v-if="showDeviceStatus && hasDevices" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-devices"
-          :color="allConnected ? 'success' : 'warning'" variant="elevated" @click="openDeviceModal">
-          <template #append>
-            <span v-if="allConnected" class="status-dot success-dot"></span>
-            <span v-else class="status-dot warning-dot"></span>
-          </template>
-          <span v-if="showDeviceStatusLabel" class="font-medium">
-            {{ connectedDevicesCount }}/{{ devices.length }}
-          </span>
-        </v-chip>
-        
-        <v-chip v-if="user" size="small" class="ma-1 status-chip clickable-chip" prepend-icon="mdi-server-network"
-          :color="serverStatus?.online ? 'success' : 'error'" variant="elevated"
-          @click="router.push({ name: 'Devices' })">
-          <template #append>
-            <span v-if="serverStatus?.online" class="status-dot success-dot"></span>
-            <span v-else class="status-dot error-dot"></span>
-          </template>
-          <span class="font-medium hidden sm:inline-block">Server</span>
-        </v-chip>
-
-        <v-spacer class="ma-2"></v-spacer>
+      <!-- Expanded: 2×2 grid on desktop, e-stop only on mobile -->
+      <template v-if="showExtension && layoutId && user">
+        <!-- Desktop: full 2×2 grid -->
+        <div v-if="mdAndUp" class="header-button-grid">
+          <UserProfile v-if="showUserProfile !== false" />
+          <EmergencyStop v-if="showEmergencyStop !== false" @stop="handleEmergencyStop" />
+          <TrackPower :power-state="effectiveTrackPower" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
+          <Power v-if="showLayoutPower" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />
+        </div>
+        <!-- Mobile: just emergency stop -->
+        <EmergencyStop v-else-if="showEmergencyStop !== false" class="ml-2" @stop="handleEmergencyStop" />
       </template>
-      <UserProfile v-if="showUserProfile !== false && user" class="mx-2" />
-      <template v-if="layoutId && user">
-        <TrackPower class="ma-1" :power-state="effectiveTrackPower" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
-        <Power class="ma-1" v-if="showLayoutPower" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />
-        <EmergencyStop class="ma-1" v-if="showEmergencyStop" @stop="handleEmergencyStop" />
+      <!-- Standard layout: all controls in one row -->
+      <template v-else-if="!showExtension">
+        <ConnectionStatus
+          v-if="user"
+          class="ma-1"
+          :layout-name="currentLayout?.name"
+          :layout-id="layoutId"
+          :server-status="serverStatus"
+          :devices="devices"
+          @navigate="router.push('/connect')"
+        />
+        <v-spacer v-if="mdAndUp" class="ma-2" />
+        <UserProfile v-if="showUserProfile !== false && user" class="mx-2" />
+        <template v-if="layoutId && user">
+          <TrackPower class="ma-1" :power-state="effectiveTrackPower" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
+          <Power class="ma-1" v-if="showLayoutPower" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />
+          <EmergencyStop class="ma-1" v-if="showEmergencyStop" @stop="handleEmergencyStop" />
+        </template>
       </template>
     </template>
   </v-app-bar>
-  <!-- <v-app-bar class="header-gradient2 elative overflow-hidden"
-    :dark="dark !== undefined ? dark : defaultProps.dark">
-    <BackgroundDecor variant="blurred-bubbles-1" />
-    <template v-slot:prepend>
-      
-    </template>
-    <template v-slot:append>
-
-    </template>
-  </v-app-bar> -->
-
-    <!-- Layout Selection Modal -->
-    <v-dialog v-model="isLayoutModalOpen" max-width="600px">
-      <v-card>
-        <v-card-title class="flex items-center gap-2">
-          <v-icon>mdi-home</v-icon>
-          Select Layout
-        </v-card-title>
-        <v-card-text>
-          <SelectLayout @select="isLayoutModalOpen = false" />
-        </v-card-text>
-        <v-card-actions class="justify-end">
-          <v-btn variant="text" @click="isLayoutModalOpen = false">Close</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- Device Selection Modal -->
-    <v-dialog v-model="isDeviceModalOpen" max-width="600px">
-      <v-card>
-        <v-card-title class="flex items-center gap-2">
-          <v-icon>mdi-devices</v-icon>
-          Device Status
-        </v-card-title>
-        <v-card-text>
-          <div v-if="hasDevices" class="space-y-3">
-            <div v-for="device in devices" :key="device.id" 
-              class="p-4 rounded-lg border cursor-pointer transition-all"
-              :class="{ 'border-green-500': device.isConnected, 'border-red-500': !device.isConnected }"
-              @click="handleDeviceSelect(device.id)">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <v-icon :color="device.isConnected ? 'success' : 'error'">
-                    {{ device.type === 'dcc-ex' || device.connection === 'usb' ? 'mdi-memory' : device.connection === 'wifi' ? 'mdi-wifi' : 'mdi-bluetooth' }}
-                  </v-icon>
-                  <div>
-                    <h4 class="font-medium">{{ device.id }}</h4>
-                    <div class="flex gap-2 text-sm opacity-60">
-                      <span>{{ device.connection }}</span>
-                      <span v-if="device.port">{{ device.port }}</span>
-                      <span v-if="device.topic">{{ device.topic }}</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="status-dot" :class="device.isConnected ? 'success-dot' : 'error-dot'"></span>
-                  <span class="text-sm font-medium" :class="device.isConnected ? 'text-green-600' : 'text-red-600'">
-                    {{ device.isConnected ? 'Connected' : 'Disconnected' }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div v-else class="text-center py-8">
-            <v-icon size="48" color="grey">mdi-devices-outline</v-icon>
-            <h3 class="text-lg font-medium mt-2">No Devices Available</h3>
-            <p class="opacity-60">There are currently no devices configured.</p>
-          </div>
-        </v-card-text>
-        <v-card-actions class="justify-end">
-          <v-btn variant="text" @click="isDeviceModalOpen = false">Close</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
 </template>
 
 <style scoped>
@@ -356,6 +287,93 @@ const defaultProps = {
 
 .header-controls {
   gap: 8px;
+}
+
+/* 2×2 button grid for expanded header layout */
+.header-button-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-left: 16px;
+}
+
+/* Brand block: logo stacked above connection chip */
+.header-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+}
+.header-brand__status {
+  align-self: flex-start;
+}
+
+/* Mini status — compact mobile-only indicator for server + track power */
+.mini-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px;
+  margin: 0 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 150ms ease;
+}
+.mini-status:hover {
+  opacity: 1;
+}
+.mini-status__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(226, 232, 240, 0.75);
+}
+.mini-status__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  box-shadow: 0 0 4px currentColor;
+}
+.mini-status__divider {
+  width: 1px;
+  height: 10px;
+  background: rgba(148, 163, 184, 0.3);
+}
+
+/* Padded header edges */
+:deep(.v-app-bar .v-toolbar__content) {
+  padding-left: 20px;
+  padding-right: 20px;
+  gap: 16px;
+}
+
+/* Nudge the Menu button away from the grid */
+:deep(.v-toolbar__content) > button.cp-trigger {
+  margin-right: 4px;
+}
+
+/* 📱 Mobile: tighten everything */
+@media (max-width: 959px) {
+  :deep(.v-app-bar .v-toolbar__content) {
+    padding-left: 8px;
+    padding-right: 8px;
+    gap: 6px;
+  }
+  .header-button-grid {
+    margin-left: 4px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .header-brand {
+    gap: 4px;
+    padding: 4px 0;
+  }
+  :deep(.v-toolbar__content) > button.cp-trigger {
+    margin-right: 0;
+  }
 }
 
 /* ═══════════════════════════════════════════════

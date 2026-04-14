@@ -1,51 +1,37 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { collection, query, where } from 'firebase/firestore'
 import { useRouter } from 'vue-router'
-import { useCollection, useCurrentUser } from 'vuefire'
+import { useCurrentUser } from 'vuefire'
 import { useStorage } from '@vueuse/core'
-import { db, rtdb } from '@repo/firebase-config'
+import { rtdb } from '@repo/firebase-config'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
-import { createLogger, formatUptime } from '@repo/utils'
 import { useLayout, useServerStatus, type Device } from '@repo/modules'
-import { DeviceConnectionList, DeviceStatusItem, StatusPulse } from '@repo/ui'
-
-const log = createLogger('Connect')
+import { useDcc, DCC_POWER_ON, DCC_POWER_OFF } from '@repo/dccex'
+import { DeviceConnectionList, StatusPulse, SelectLayout } from '@repo/ui'
+import { useDisplay } from 'vuetify'
 
 const user = useCurrentUser()
 const router = useRouter()
-log.debug('Loading LayoutsList.vue', user.value)
-
-// Create a computed property for the layouts query that only runs when user is available
-const layoutsQuery = computed(() => {
-  if (!user.value?.email) {
-    // Return null if no user email, which will prevent the query from running
-    return null
-  }
-
-  const layoutsRef = collection(db, 'layouts')
-  return query(layoutsRef, where('owner', '==', user.value.email))
-})
-
-// Use the computed query, but only when it's not null
-const layouts = useCollection(layoutsQuery)
+const { mdAndUp } = useDisplay()
 
 const layoutId = useStorage('@DEJA/layoutId', '')
 
 function handleLayoutSelect(selectedLayoutId: string) {
-  log.debug('Selected layout ID:', selectedLayoutId)
   if (selectedLayoutId) {
     layoutId.value = selectedLayoutId
     router.push({ name: 'home' })
   }
 }
 
-// Server status (auto-detect, same as header chip)
+// Server status
 const { serverStatus } = useServerStatus()
-
 const serverUptime = computed(() => {
   if (!serverStatus.value?.online || !serverStatus.value?.lastSeen) return ''
-  return formatUptime(serverStatus.value.lastSeen)
+  const elapsed = Date.now() - Number(serverStatus.value.lastSeen)
+  const mins = Math.floor(elapsed / 60000)
+  const hrs = Math.floor(mins / 60)
+  if (hrs > 0) return `${hrs}h ${mins % 60}m`
+  return `${mins}m`
 })
 
 // Device connection management
@@ -55,25 +41,19 @@ const devices = getDevices()
 const ports = ref<string[]>([])
 let unsubPorts: (() => void) | null = null
 
-// Listen to RTDB portList when layout is selected
 watch(layoutId, (id) => {
-  // Clean up previous listener
   unsubPorts?.()
   unsubPorts = null
-
   if (id) {
     const portRef = rtdbRef(rtdb, `portList/${id}`)
     onValue(portRef, (snapshot) => {
       const val = snapshot.val()
-      if (Array.isArray(val)) {
-        ports.value = val
-      }
+      if (Array.isArray(val)) ports.value = val
     })
     unsubPorts = () => off(portRef)
   }
 }, { immediate: true })
 
-// Device event handlers
 async function handleConnect(deviceId: string, serial?: string, topic?: string) {
   const device = devices.value?.find((d: Device) => d.id === deviceId)
   if (!device) return
@@ -84,127 +64,211 @@ async function handleDisconnect(deviceId: string) {
   await disconnectDevice(deviceId)
 }
 
-// Device detail modal
-const selectedDeviceId = ref<string | null>(null)
-const showDeviceModal = ref(false)
-
-function openDeviceModal(deviceId: string) {
-  selectedDeviceId.value = deviceId
-  showDeviceModal.value = true
+function openDeviceInCloud(deviceId: string) {
+  window.open(`https://cloud.dejajs.com/devices/${deviceId}`, 'deja-cloud')
 }
 
-const selectedDevice = computed(() => {
-  if (!selectedDeviceId.value || !devices.value) return null
-  return devices.value.find((d: Device) => d.id === selectedDeviceId.value) ?? null
+const { sendDccCommand } = useDcc()
+async function handleTrackPowerToggle(_deviceId: string, newState: boolean) {
+  await sendDccCommand({ action: 'dcc', payload: newState ? DCC_POWER_ON : DCC_POWER_OFF })
+}
+
+// Jump-to sections
+const sections = computed(() => {
+  const items = [
+    { id: 'layout', label: 'Layout', icon: 'mdi-home-city-outline' },
+  ]
+  if (layoutId.value) {
+    items.push(
+      { id: 'server', label: 'Server', icon: 'mdi-server-network' },
+      { id: 'devices', label: 'Devices', icon: 'mdi-devices' },
+    )
+  }
+  return items
 })
+
+function scrollTo(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 </script>
 
 <template>
-  <main class="flex flex-col flex-grow p-8 w-full overflow-auto">
-    <v-card
-      class="mx-auto my-8"
-      max-width="400"
-    >
-      <v-card-text>
-        <h2 class="text-h6 mb-2">Your Layouts</h2>
-        <div v-for="layout in layouts" :key="layout.id"
-          class="p-4 rounded-lg border cursor-pointer transition-all my-2"
-          :style="{
-            borderColor: layout.id === layoutId ? 'rgb(var(--v-theme-success))' : 'rgba(var(--v-theme-on-surface), 0.12)',
-            background: layout.id === layoutId ? 'rgba(var(--v-theme-success), 0.12)' : 'rgba(var(--v-theme-surface), 0.6)',
-          }"
-          @click="handleLayoutSelect(layout.id)">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <v-icon :color="layout.id === layoutId ? 'green' : 'grey'">mdi-home</v-icon>
-              <div>
-                <h4 class="font-medium">{{ layout.name }}</h4>
-                <p v-if="layout.description" class="text-sm opacity-60">{{ layout.description }}</p>
-              </div>
-            </div>
-            <v-icon v-if="layout.id === layoutId" color="green">mdi-check-circle</v-icon>
+  <v-container class="py-6">
+    <div class="settings-layout">
+      <!-- Content -->
+      <div class="settings-content">
+        <!-- Layout Selection -->
+        <div id="layout" class="settings-section">
+          <div class="settings-section__header">
+            <v-icon size="20" class="settings-section__icon">mdi-home-city-outline</v-icon>
+            <h2 class="settings-section__title">Layout</h2>
+          </div>
+          <div class="settings-row settings-row--block">
+            <SelectLayout
+              variant="compact"
+              :layout-id="layoutId"
+              @selected="handleLayoutSelect"
+            />
           </div>
         </div>
-      </v-card-text>
-    </v-card>
 
-    <!-- DEJA Server Status (auto-detect) -->
-    <v-card
-      v-if="layoutId"
-      class="mx-auto mt-6"
-      max-width="600"
-      :style="{
-        borderLeftColor: serverStatus?.online
-          ? 'rgb(var(--v-theme-success))'
-          : 'rgb(var(--v-theme-error))',
-        borderLeftWidth: '4px',
-        borderLeftStyle: 'solid',
-      }"
-      variant="tonal"
-    >
-      <v-card-text class="pa-4">
-        <div class="d-flex justify-space-between align-center">
-          <div class="d-flex align-center ga-3">
-            <v-avatar
-              :color="serverStatus?.online ? 'success' : 'error'"
-              variant="tonal"
-              size="40"
-              rounded="lg"
-            >
-              <v-icon icon="mdi-server-network" />
-            </v-avatar>
-            <div>
-              <div
-                class="text-subtitle-1 font-weight-bold"
-                :class="serverStatus?.online ? 'text-success' : 'text-error'"
-              >
-                DEJA Server
+        <!-- Server Status -->
+        <template v-if="layoutId">
+          <div id="server" class="settings-section">
+            <div class="settings-section__header">
+              <v-icon size="20" class="settings-section__icon">mdi-server-network</v-icon>
+              <h2 class="settings-section__title">DEJA Server</h2>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row__label">
+                <span class="settings-row__name">Status</span>
+                <span v-if="serverStatus?.version" class="settings-row__desc">v{{ serverStatus.version }}</span>
               </div>
-              <div v-if="serverStatus?.version" class="text-caption text-medium-emphasis">
-                v{{ serverStatus.version }}
+              <div class="settings-row__value flex items-center gap-3">
+                <StatusPulse :status="serverStatus?.online ? 'connected' : 'disconnected'" size="sm" />
+                <v-chip
+                  :color="serverStatus?.online ? 'success' : 'error'"
+                  size="small"
+                  variant="tonal"
+                >
+                  {{ serverStatus?.online ? 'Online' : 'Offline' }}
+                </v-chip>
               </div>
             </div>
-          </div>
-          <div class="text-right">
-            <div class="d-flex align-center ga-1">
-              <StatusPulse :status="serverStatus?.online ? 'connected' : 'disconnected'" size="sm" />
-              <span class="text-caption" :class="serverStatus?.online ? 'text-success' : 'text-error'">
-                {{ serverStatus?.online ? 'Online' : 'Offline' }}
-              </span>
-            </div>
-            <div v-if="serverUptime" class="text-caption text-medium-emphasis">
-              uptime {{ serverUptime }}
+            <div v-if="serverUptime" class="settings-row">
+              <div class="settings-row__label">
+                <span class="settings-row__name">Uptime</span>
+              </div>
+              <div class="settings-row__value opacity-60">{{ serverUptime }}</div>
             </div>
           </div>
+
+          <!-- Devices -->
+          <div id="devices" class="settings-section">
+            <div class="settings-section__header">
+              <v-icon size="20" class="settings-section__icon">mdi-devices</v-icon>
+              <h2 class="settings-section__title">Devices</h2>
+            </div>
+            <div class="settings-row settings-row--block">
+              <DeviceConnectionList
+                :devices="devices ?? []"
+                :available-ports="ports"
+                :show-header="false"
+                :show-details-link="false"
+                :server-online="serverStatus?.online ?? false"
+                @connect="handleConnect"
+                @disconnect="handleDisconnect"
+                @navigate="openDeviceInCloud"
+                @track-power-toggle="handleTrackPowerToggle"
+              />
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- Jump-to nav (desktop only) -->
+      <nav v-if="mdAndUp" class="settings-nav">
+        <div class="settings-nav__inner">
+          <p class="text-xs opacity-40 uppercase tracking-widest font-medium mb-3">Connect</p>
+          <button
+            v-for="s in sections"
+            :key="s.id"
+            class="settings-nav__item"
+            @click="scrollTo(s.id)"
+          >
+            <v-icon size="16">{{ s.icon }}</v-icon>
+            {{ s.label }}
+          </button>
         </div>
-      </v-card-text>
-    </v-card>
-
-    <!-- Device Connection List (shown after layout is selected) -->
-    <div v-if="layoutId" class="mt-6 mx-auto w-full" style="max-width: 600px">
-      <DeviceConnectionList
-        :devices="devices ?? []"
-        :available-ports="ports"
-        link-mode="modal"
-        :show-header="false"
-        @connect="handleConnect"
-        @disconnect="handleDisconnect"
-        @navigate="openDeviceModal"
-      />
+      </nav>
     </div>
 
-    <!-- Device Detail Modal -->
-    <v-dialog v-model="showDeviceModal" max-width="600">
-      <v-card v-if="selectedDevice">
-        <v-card-title>Device Details</v-card-title>
-        <v-card-text>
-          <DeviceStatusItem :device="selectedDevice" />
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn @click="showDeviceModal = false">Close</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </main>
+  </v-container>
 </template>
+
+<style scoped>
+.settings-layout {
+  display: flex;
+  gap: 32px;
+  max-width: 1100px;
+}
+
+.settings-nav {
+  flex-shrink: 0;
+  width: 180px;
+  position: sticky;
+  top: 80px;
+  align-self: flex-start;
+}
+
+.settings-nav__inner {
+  padding: 16px 0;
+}
+
+.settings-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: rgba(var(--v-theme-on-surface), 0.5);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: left;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.settings-nav__item:hover {
+  color: rgb(var(--v-theme-on-surface));
+  background: rgba(var(--v-theme-primary), 0.08);
+}
+
+.settings-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-section {
+  background: rgba(var(--v-theme-surface), 0.45);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: clip;
+}
+
+.settings-section__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+}
+
+.settings-section__icon { color: rgb(var(--v-theme-primary)); }
+
+.settings-section__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06);
+  gap: 16px;
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row--block { flex-direction: column; align-items: stretch; }
+
+.settings-row__label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.settings-row__name { font-size: 0.875rem; font-weight: 500; color: rgba(var(--v-theme-on-surface), 0.8); }
+.settings-row__desc { font-size: 0.75rem; color: rgba(var(--v-theme-on-surface), 0.45); }
+.settings-row__value { flex-shrink: 0; }
+</style>

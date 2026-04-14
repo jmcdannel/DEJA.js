@@ -1,42 +1,49 @@
 // 🔧 Arduino compile & upload via arduino-cli
 
 import { execSync } from 'child_process'
-import { isArduinoCliInstalled } from './detect.js'
-
-const DEFAULT_BOARD = 'arduino:avr:mega:cpu=atmega2560'
+import { ensureArduinoCli, ensureArduinoLibs, ensureEsp32Core } from './detect.js'
+import { ARDUINO_LIB_DEPS, type BoardConfig } from './bundle.js'
 
 export interface ArduinoDeployOptions {
   sketchPath: string
   port: string
-  board?: string
+  boardConfig: BoardConfig
 }
 
 /**
- * Compile and upload Arduino sketch via arduino-cli
+ * Compile and upload Arduino sketch via arduino-cli.
+ * Automatically installs the correct core and libraries for the target board.
  */
-export function compileAndUpload(options: ArduinoDeployOptions): void {
-  const { sketchPath, port, board = DEFAULT_BOARD } = options
+export async function compileAndUpload(options: ArduinoDeployOptions): Promise<void> {
+  const { sketchPath, port, boardConfig } = options
+  const { fqbn, needsCpp17, uploadSpeed } = boardConfig
 
-  if (!isArduinoCliInstalled()) {
-    console.error('❌ arduino-cli is not installed.')
-    console.error('')
-    console.error('📦 Install it:')
-    console.error('   macOS:  brew install arduino-cli')
-    console.error('   Linux:  curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh')
-    console.error('   Docs:   https://arduino.github.io/arduino-cli/latest/installation/')
-    console.error('')
-    console.error('After installing, run:')
-    console.error('   arduino-cli core install arduino:avr')
+  const available = await ensureArduinoCli()
+  if (!available) {
     process.exit(1)
   }
 
+  if (fqbn.startsWith('esp32:')) {
+    ensureEsp32Core()
+  }
+
+  ensureArduinoLibs(ARDUINO_LIB_DEPS.map(l => l.name))
+
+  // 🎯 ESP32 upload baud rate is passed as a board option suffix on the FQBN,
+  // e.g. `esp32:esp32:esp32:UploadSpeed=460800`. Many USB-serial adapters
+  // (CH340/CP2102 clones) can't sustain the 921600 default and fail mid-flash.
+  const uploadFqbn =
+    uploadSpeed && fqbn.startsWith('esp32:') ? `${fqbn}:UploadSpeed=${uploadSpeed}` : fqbn
+
   console.log(`🔨 Compiling sketch at ${sketchPath}...`)
-  console.log(`   Board: ${board}`)
+  console.log(`   Board: ${fqbn}`)
   console.log(`   Port:  ${port}`)
   console.log('')
 
+  const cppFlags = needsCpp17 ? ' --build-property "compiler.cpp.extra_flags=-std=c++17"' : ''
+
   try {
-    execSync(`arduino-cli compile --fqbn ${board} "${sketchPath}"`, {
+    execSync(`arduino-cli compile --fqbn ${fqbn}${cppFlags} "${sketchPath}"`, {
       stdio: 'inherit',
     })
     console.log('')
@@ -47,10 +54,10 @@ export function compileAndUpload(options: ArduinoDeployOptions): void {
   }
 
   console.log('')
-  console.log(`⬆️ Uploading to ${port}...`)
+  console.log(`⬆️ Uploading to ${port}${uploadSpeed ? ` @ ${uploadSpeed} baud` : ''}...`)
 
   try {
-    execSync(`arduino-cli upload --fqbn ${board} --port ${port} "${sketchPath}"`, {
+    execSync(`arduino-cli upload --fqbn ${uploadFqbn} --port ${port} "${sketchPath}"`, {
       stdio: 'inherit',
     })
     console.log('')

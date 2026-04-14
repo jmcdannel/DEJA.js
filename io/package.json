@@ -5,10 +5,11 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "tsx ./scripts/build.ts",
+    "build:firmware": "tsx ./scripts/build.ts",
     "deploy": "tsx ./scripts/deploy.ts"
   },
   "dependencies": {
+    "@repo/modules": "workspace:*",
     "dotenv": "^16.4.7",
     "firebase-admin": "^13.4.0",
     "@inquirer/prompts": "^7.3.2"

@@ -7,7 +7,6 @@ import { useDejaJS } from '@repo/deja'
 import {
   DeviceConnectionList,
   CommandActivityChart,
-  QuickConnectPanel,
   LayoutInfoCard,
   DashboardEmptyState,
   ThrottleLaunchQR,
@@ -16,7 +15,7 @@ import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
 import { useStorage } from '@vueuse/core'
 import { formatUptime } from '@repo/utils'
-import { useCommandActivity } from '@/composables/useCommandActivity'
+import { useCommandActivity } from '@/DCCEX/composables/useCommandActivity'
 
 const router = useRouter()
 const user = useCurrentUser()
@@ -67,9 +66,6 @@ const serverUptime = computed(() => {
 
 const trackPower = computed(() => layout?.value?.dccEx?.power ?? null)
 const connectedCount = computed(() => devices.value?.filter((d) => d.isConnected).length ?? 0)
-const totalCommandCount = computed(() =>
-  commandActivity.value.reduce((sum, b) => sum + b.count, 0),
-)
 
 // Loading state — use VueFire's built-in pending ref
 const devicesLoaded = computed(() => !devices.pending.value)
@@ -93,21 +89,8 @@ async function handleDisconnect(deviceId: string) {
   await disconnectDevice(deviceId)
 }
 
-async function handleReconnect(deviceId: string) {
-  const device = devices.value?.find((d) => d.id === deviceId)
-  if (!device) return
-  await disconnectDevice(deviceId)
-  setTimeout(async () => {
-    await connectDevice(device, device.port, device.topic)
-  }, 1000)
-}
-
 function navigateToDevice(deviceId: string) {
   router.push({ name: 'DeviceDetails', params: { deviceId } })
-}
-
-function refreshPorts() {
-  sendDejaCommand({ action: 'listPorts', payload: {} })
 }
 
 function navigateToAddDevice() {
@@ -151,30 +134,16 @@ async function handleAddLoco(address: number, name: string) {
         <DeviceConnectionList
           :devices="devices ?? []"
           :available-ports="ports"
-          tile-mode
-          link-mode="page"
-          :server-uptime="serverUptime"
-          :connected-device-count="connectedCount"
-          :total-device-count="devices?.length ?? 0"
-          :command-count="totalCommandCount"
+          :server-online="serverStatus?.online ?? false"
           @connect="handleConnect"
           @disconnect="handleDisconnect"
-          @reconnect="handleReconnect"
           @navigate="navigateToDevice"
-          @refresh-ports="refreshPorts"
           @add-device="navigateToAddDevice"
         />
       </v-col>
 
       <!-- Right Column: Sidebar -->
       <v-col cols="12" md="4" class="d-flex flex-column ga-3">
-        <QuickConnectPanel
-          :devices="devices ?? []"
-          :available-ports="ports"
-          @connect="handleConnect"
-          @navigate="navigateToDevice"
-        />
-
         <LayoutInfoCard
           :layout-name="layout?.name"
           :layout-id="layoutId"

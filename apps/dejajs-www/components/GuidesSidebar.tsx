@@ -3,42 +3,39 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-
-interface GuideItem {
-  title: string;
-  href: string;
-  desc: string;
-  comingSoon?: boolean;
-}
-
-const guides: GuideItem[] = [
-  { title: 'Getting Started', href: '/guides/getting-started', desc: 'From zero to driving trains' },
-  { title: 'Architecture', href: '/guides/architecture', desc: 'How the platform works' },
-  { title: 'Throttle', href: '/guides/throttle', desc: 'Train control & functions' },
-  { title: 'Cloud', href: '/guides/cloud', desc: 'Roster, turnouts & effects', comingSoon: true },
-  { title: 'Monitor', href: '/guides/monitor', desc: 'Diagnostics & logging', comingSoon: true },
-  { title: 'Server', href: '/guides/server', desc: 'Installation & CLI reference', comingSoon: true },
-  { title: 'IO', href: '/guides/io', desc: 'Hardware expansion & MQTT', comingSoon: true },
-];
+import Logo from './Logo';
+import { guides } from './guides-list';
 
 export default function GuidesSidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const currentGuide = guides.find((g) => g.href === pathname);
+  const currentTitle = currentGuide?.title ?? 'Guides';
+
   return (
     <>
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden flex items-center gap-2 px-3 py-2 mb-4 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
+        className="lg:hidden flex items-center justify-between w-full gap-3 px-4 py-3 mb-4 rounded-lg text-left bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
         aria-expanded={mobileOpen}
         aria-controls="guides-sidebar-nav"
-        aria-label="Toggle guides navigation"
+        aria-label={`Current guide: ${currentTitle}. Toggle guides navigation`}
       >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d={mobileOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} />
-        </svg>
-        Menu
+        <span className="flex flex-col min-w-0">
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-gray-500 dark:text-gray-400">
+            Guide
+          </span>
+          <span className="text-base font-semibold text-gray-900 dark:text-white truncate">
+            {currentTitle}
+          </span>
+        </span>
+        <span className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d={mobileOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} />
+          </svg>
+          {mobileOpen ? 'Close' : 'Menu'}
+        </span>
       </button>
 
       <nav
@@ -48,7 +45,7 @@ export default function GuidesSidebar() {
       >
         <div className="mb-4">
           <Link href="/guides" className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
-            <Image src="/icon-192.png" alt="DEJA.js" width={24} height={24} className="h-6 w-6" />
+            <Logo variant="default" size="xs" showWordmark={false} />
             <span>Guides</span>
           </Link>
         </div>

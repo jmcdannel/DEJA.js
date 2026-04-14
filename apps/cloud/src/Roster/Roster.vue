@@ -5,25 +5,84 @@ import { onValue, ref as dbRef } from 'firebase/database'
 import { useStorage } from '@vueuse/core'
 import { rtdb } from '@repo/firebase-config'
 import type { Loco } from '@repo/modules/locos'
-import { useLocos } from '@repo/modules/locos'
+import { useLocos, ROADNAMES } from '@repo/modules/locos'
+import { useLayout, useServerStatus, useSubscription, PLAN_DISPLAY } from '@repo/modules'
 import { useDcc } from '@repo/dccex'
-import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
-import RosterList from '@/Roster/RosterList.vue'
-import AddTile from '@/Core/UI/AddTile.vue'
-import { ThrottleLaunchQR } from '@repo/ui'
+import { ListControlBar, useListControls, LocoRoster, ThrottleLaunchQR } from '@repo/ui'
+import type { ListFilter } from '@repo/ui'
+import ListPage from '@/Core/UI/ListPage.vue'
+import { EmptyState } from '@repo/ui'
 
 const router = useRouter()
 const layoutId = useStorage('@DEJA/layoutId', '')
 const { getLocos } = useLocos()
 const { syncAllRoster, importRoster } = useDcc()
+const { getDevices } = useLayout()
+const { serverStatus } = useServerStatus()
+const { plan } = useSubscription()
 
 const locos = getLocos()
+const devices = getDevices()
+
+// 🔄 Loading state
+const isLoaded = ref(false)
+let loadingTimeout: ReturnType<typeof setTimeout> | undefined
+onMounted(async () => {
+  loadingTimeout = setTimeout(() => { isLoaded.value = true }, 3000)
+  try {
+    await (locos as any).promise
+  } finally {
+    clearTimeout(loadingTimeout)
+    isLoaded.value = true
+  }
+})
+
+const isLoading = computed(() => !isLoaded.value)
+const isFreePlan = computed(() => plan.value === 'hobbyist')
+
+const isDisconnected = computed(() => {
+  const serverOffline = !serverStatus.value?.online
+  const noDccExConnected = !devices.value?.some(
+    (d) => d.type === 'dcc-ex' && d.isConnected
+  )
+  return serverOffline || noDccExConnected
+})
 
 const rosterList = computed(() =>
-  locos?.value ? locos.value.map((l) => ({ ...l, id: l.address })) : []
+  locos?.value ? (locos.value as Loco[]).map((l) => ({
+    ...l,
+    id: String(l.address),
+    roadname: l.meta?.roadname || '',
+    locoType: l.consist?.length ? 'consist' : 'single',
+  })) : []
 )
-const rosterControls = useListControls('cloud-roster', { list: rosterList })
 
+// 🔍 Filter & sort options
+const roadnameOptions = ROADNAMES.map((r) => ({ label: r.label, value: r.value }))
+
+const typeOptions = [
+  { label: 'Consist', value: 'consist' },
+  { label: 'Single', value: 'single' },
+]
+
+const filters = computed<ListFilter[]>(() => [
+  { type: 'roadname', label: 'Road', options: roadnameOptions },
+  { type: 'locoType', label: 'Type', options: typeOptions },
+])
+
+const sortOptions = [
+  { value: 'order', label: 'Default' },
+  { value: 'name', label: 'Name' },
+  { value: 'address', label: 'Address' },
+]
+
+const rosterControls = useListControls('cloud-roster', {
+  list: rosterList,
+  filters: filters.value,
+  sortOptions,
+})
+
+// 📡 Roster sync status
 interface RosterSyncStatus {
   status: 'syncing' | 'success' | 'error' | 'importing'
   message: string
@@ -64,15 +123,12 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  clearTimeout(loadingTimeout)
   if (unsubscribeStatus) unsubscribeStatus()
 })
 
 function handleEditLoco(loco: Loco) {
   router.push({ name: 'Edit Loco', params: { address: loco.address } })
-}
-
-function handleAddLoco() {
-  router.push({ name: 'Add Loco' })
 }
 
 async function syncToCS() {
@@ -86,24 +142,45 @@ async function importFromCS() {
 </script>
 
 <template>
-  <PageHeader title="Roster" icon="mdi-train" color="pink">
+  <ListPage
+    title="Roster"
+    icon="mdi-train"
+    color="pink"
+    :add-to="{ name: 'Add Loco' }"
+    add-label="New Loco"
+    :loading="isLoading"
+    :empty="isLoaded && rosterList.length === 0"
+  >
+    <template #subtitle>
+      <span class="hidden sm:inline">Manage your locomotive fleet and decoder configurations.</span>
+    </template>
+
     <template #controls>
       <ListControlBar
         :controls="rosterControls"
         color="pink"
-        :show-filters="false"
-        :show-view="false"
-        :show-sort="false"
-        search-placeholder="Search roster..."
+        :sort-options="sortOptions"
+        :filters="filters"
+        :show-view="true"
+        :show-search="false"
+        :view-options="[
+          { value: 'cab', icon: 'mdi-train', label: 'Cab' },
+          { value: 'avatar', icon: 'mdi-circle-outline', label: 'Avatar' },
+          { value: 'plate', icon: 'mdi-card-text-outline', label: 'Plate' },
+          { value: 'card', icon: 'mdi-view-grid-outline', label: 'Card' },
+          { value: 'table', icon: 'mdi-table', label: 'Table' },
+          { value: 'raw', icon: 'mdi-code-json', label: 'Raw' },
+        ]"
       />
     </template>
+
     <template #actions>
       <v-btn
         :loading="rosterSyncStatus?.status === 'syncing'"
-        :disabled="isSyncing"
+        :disabled="isSyncing || isDisconnected"
         prepend-icon="mdi-sync"
         variant="tonal"
-        color="primary"
+        color="pink"
         size="small"
         @click="syncToCS"
       >
@@ -111,28 +188,46 @@ async function importFromCS() {
       </v-btn>
       <v-btn
         :loading="rosterSyncStatus?.status === 'importing'"
-        :disabled="isSyncing"
+        :disabled="isSyncing || isDisconnected"
         prepend-icon="mdi-download"
         variant="tonal"
-        color="secondary"
+        color="pink"
         size="small"
         @click="importFromCS"
       >
         Import from DCC-EX
       </v-btn>
     </template>
-  </PageHeader>
 
-  <RosterList @edit="handleEditLoco">
-    <template #prepend>
-      <AddTile @click="handleAddLoco" />
+    <LocoRoster
+      :locos="rosterControls.filteredList.value"
+      default-view="card"
+      module-name="cloud-roster"
+      @select="handleEditLoco"
+    />
+
+    <v-card variant="outlined" class="d-flex flex-column align-center justify-center pa-4 text-center mt-4" min-height="120">
+      <ThrottleLaunchQR :size="100" label="Open Throttle on phone" />
+    </v-card>
+
+    <template #empty-state>
+      <EmptyState
+        icon="mdi-train"
+        color="pink"
+        title="No Locomotives Yet"
+        :description="isFreePlan
+          ? `Upgrade to ${PLAN_DISPLAY.engineer.name} to unlock the full roster experience with up to 25 locomotives and advanced features.`
+          : 'Build your digital roster by adding locomotives with their DCC addresses, decoder functions, and custom configurations.'"
+        :use-cases="[
+          { icon: 'mdi-memory', text: 'Program DCC decoders' },
+          { icon: 'mdi-tune', text: 'Configure functions & lights' },
+          { icon: 'mdi-train-car', text: 'Build consists' },
+        ]"
+        :action-label="isFreePlan ? `Upgrade to ${PLAN_DISPLAY.engineer.name}` : 'Add Your First Loco'"
+        :action-to="isFreePlan ? '/upgrade' : '/locos/new'"
+      />
     </template>
-    <template #append>
-      <v-card variant="outlined" class="d-flex flex-column align-center justify-center pa-4 text-center" min-height="120">
-        <ThrottleLaunchQR :size="100" label="Open Throttle on phone" />
-      </v-card>
-    </template>
-  </RosterList>
+  </ListPage>
 
   <v-snackbar
     v-model="snackbarOpen"

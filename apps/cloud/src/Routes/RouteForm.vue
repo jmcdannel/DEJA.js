@@ -5,7 +5,7 @@ import { useRoutes } from '@repo/modules/routes/useRoutes'
 import { createLogger } from '@repo/utils'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import RouteTurnoutForm from '@/Routes/RouteTurnoutForm.vue'
-import ColorPicker from '@/Common/Color/ColorPicker.vue'
+import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import { slugify } from '@repo/utils/slugify'
 
@@ -23,8 +23,6 @@ const props = defineProps<{
 const emit = defineEmits(['close'])
 
 const { setRoute, runRoute } = useRoutes()
-
-const editColor = ref(false)
 
 const name = ref(props.route?.name || '')
 const point1 = ref(props.route?.point1)
@@ -89,96 +87,106 @@ function runCurrentRoute() {
 </script>
 <template>
   <v-form validate-on="submit lazy" @submit.prevent="submit">
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <div class="flex items-center justify-between">
-      <v-label class="m-2 text-4xl">
-        <v-icon :icon="routeType.icon" :color="color" class="w-16 h-16 stoke-none mr-4"></v-icon>
-        {{ isEditing ? 'Edit' : 'Add'}} Route
-      </v-label>
-      <v-chip class="m-2" :color="color" size="x-large">
-        <v-icon :icon="routeType.icon" class="mr-2"></v-icon>
-        {{ routeType.label }}
-      </v-chip>
-    </div>
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
+    <!-- ═══ IDENTITY SECTION ═══ -->
+    <div class="form-section" :style="{ '--form-accent': color }">
+      <div class="form-section__header">
+        <v-icon size="18" class="form-section__header-icon">mdi-tag-outline</v-icon>
+        <span class="form-section__title">{{ isEditing ? 'Edit' : 'New' }} Route</span>
+      </div>
 
-    <!-- name, points -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <v-text-field
-        v-model="name"
-        label="Name"
-        variant="outlined"
-        :rules="rules.required"
-      ></v-text-field>
-      <div class="grid grid-cols-2 gap-4">
-        <v-text-field
+      <!-- Name + Points grid -->
+      <div class="form-section__grid" style="grid-template-columns: 1fr 1fr 1fr">
+        <div>
+          <label class="form-section__input-label">Name</label>
+          <v-text-field
+            v-model="name"
+            variant="outlined"
+            density="compact"
+            color="purple"
+            :rules="rules.required"
+            hide-details="auto"
+            placeholder="Main Line"
+          />
+          <div class="form-section__input-hint">Display name for this route</div>
+        </div>
+        <div>
+          <label class="form-section__input-label">Point 1</label>
+          <v-text-field
             v-model="point1"
-            label="Point 1"
             variant="outlined"
-            min-width="100"
-            max-width="200"
-          >
-        </v-text-field>
-        <v-text-field
+            density="compact"
+            color="purple"
+            hide-details="auto"
+            placeholder="Yard"
+          />
+          <div class="form-section__input-hint">Starting endpoint</div>
+        </div>
+        <div>
+          <label class="form-section__input-label">Point 2</label>
+          <v-text-field
             v-model="point2"
-            label="Point 2"
             variant="outlined"
-            min-width="100"
-            max-width="200"
-          >
-        </v-text-field>
+            density="compact"
+            color="purple"
+            hide-details="auto"
+            placeholder="Station"
+          />
+          <div class="form-section__input-hint">Ending endpoint</div>
+        </div>
+      </div>
+
+      <ColorPickerRow v-model="color" :default-color="props.route?.color ?? 'purple'" description="Theme color for this route" />
+
+      <!-- Tags row -->
+      <div class="form-section__row form-section__row--block">
+        <span class="form-section__row-name mb-2">Tags</span>
+        <TagPicker v-model="tags" />
       </div>
     </div>
 
+    <!-- ═══ CONFIGURATION SECTION ═══ -->
+    <div class="form-section mt-4" :style="{ '--form-accent': color }">
+      <div class="form-section__header">
+        <v-icon size="18" class="form-section__header-icon">mdi-directions-fork</v-icon>
+        <span class="form-section__title">Configuration</span>
+      </div>
+      <div class="px-5 py-3">
+        <RouteTurnoutForm @change="handleTurnouts" :turnouts="turnouts" />
+      </div>
 
-    <RouteTurnoutForm @change="handleTurnouts" :turnouts="turnouts"></RouteTurnoutForm>
-
-
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <v-sheet class="p-4">
-      <v-btn text="Run Route" @click="runCurrentRoute" variant="flat" :color="color" prepend-icon="mdi-rocket-launch">
-        Run Route
-      </v-btn>
-    </v-sheet>
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-    <!-- color -->
-    <section class="h-auto  my-4">
-      <v-btn
-        class="min-h-48 min-w-48 border flex"
-        :color="color"
-        @click="editColor = true" >
-        <div class="relative flex flex-col justify-center items-center">
-          <v-icon size="64">mdi-palette</v-icon>
-          <div class="mt-4">Color [{{ color }}]</div>
+      <!-- Run route row -->
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Run Route</span>
+          <span class="form-section__row-desc">Throw all turnouts to their configured positions</span>
         </div>
-      </v-btn>
-    </section>
-    <v-dialog max-width="80vw" v-model="editColor">
-      <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = props.route?.color ?? routeType.color"></ColorPicker>
-    </v-dialog>
+        <v-btn
+          variant="tonal"
+          color="purple"
+          size="small"
+          class="text-none"
+          prepend-icon="mdi-rocket-launch"
+          @click="runCurrentRoute"
+        >
+          Run
+        </v-btn>
+      </div>
 
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-
-    <TagPicker class="my-4 " v-model="tags"></TagPicker>
-
-    <v-divider class="my-4 border-opacity-100" :color="color"></v-divider>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 my-4">
-      <v-btn
-        class="mt-2"
-        text="Close"
-        type="button"
-        variant="tonal"
-        @click="$emit('close')"
-      ></v-btn>
-      <v-btn
-        :loading="loading"
-        class="mt-2"
-        text="Submit"
-        type="submit"
-        :color="color"
-      ></v-btn>
+      <div class="form-section__footer">
+        <v-btn variant="tonal" size="small" class="text-none" @click="$emit('close')">Cancel</v-btn>
+        <v-btn
+          :loading="loading"
+          variant="tonal"
+          color="purple"
+          size="small"
+          type="submit"
+          class="text-none"
+        >
+          Save
+        </v-btn>
+      </div>
     </div>
+
     <ViewJson :json="route" label="Route" />
   </v-form>
 </template>

@@ -89,17 +89,16 @@ export function useLocos() {
         log.warn('No throttle address provided for acquisition')
         return
       }
-      const data = {
-        address,
-        speed: 0,
-        direction: false,
-        timestamp: serverTimestamp(),
-      }
-      const newThrottleDoc = await setDoc(
-        doc(db, `layouts/${layoutId.value}/throttles`, address.toString()),
-        data
+      const throttleRef = doc(
+        db,
+        `layouts/${layoutId.value}/throttles`,
+        address.toString(),
       )
-      return newThrottleDoc
+      const existing = await getDoc(throttleRef)
+      const data = existing.exists()
+        ? { address, timestamp: serverTimestamp() }
+        : { address, speed: 0, direction: false, timestamp: serverTimestamp() }
+      await setDoc(throttleRef, data, { merge: true })
     } catch (e) {
       log.error('Error adding throttle: ', e)
     }

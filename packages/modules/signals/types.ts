@@ -11,6 +11,7 @@ export interface Signal {
   green?: number
   aspect?: SignalAspect
   commonAnode?: boolean
+  color?: string
   description?: string
   order?: number
   tags?: string[]

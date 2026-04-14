@@ -1,5 +1,6 @@
 # 🚂 DEJA.js — DCC-EX JavaScript API
 
+<!-- trigger deploy 5 -->
 <p align="center">
   <img src="https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D" />
   <img src="https://img.shields.io/badge/Node.js-5FA04E?style=for-the-badge&logo=nodedotjs&logoColor=white" />
@@ -53,6 +54,18 @@ The system communicates over USB serial, Firebase (Firestore + RTDB), WebSocket,
 
 ---
 
+## 🚂 User Install
+
+If you just want to run the DEJA Server (no source code needed):
+
+```bash
+curl -fsSL https://install.dejajs.com | bash
+```
+
+This downloads the server, installs it to `~/.deja/`, and starts it. No GitHub access required. See the [Quick Start](https://dejajs.com/docs/quick-start) guide for the full walkthrough.
+
+---
+
 ## 🚀 Quick Dev Setup
 
 ```bash
@@ -66,6 +79,8 @@ pnpm dev
 
 Copy `.env.example` to `.env` at the root and fill in your Firebase credentials. See [CONTRIBUTING.md](CONTRIBUTING.md) for full environment setup.
 
+To test the production CLI from local source: `./install.sh --dev` (builds with tsup and installs to `~/.deja/`).
+
 ---
 
 ## 🛠️ Key Commands
@@ -78,6 +93,9 @@ pnpm format             # 💄 Format all .ts, .tsx, .md files (Prettier)
 pnpm check-types        # 🔬 TypeScript type checking across the monorepo
 
 pnpm deja               # ⚙️📊 Start Server + Monitor together
+pnpm layout             # 🚂 Show current LAYOUT_ID
+pnpm layout <id>        # 🚂 Switch layout across .env + ~/.deja/config.json
+pnpm layout --list      # 🚂 List available layouts from Firebase
 
 pnpm deps:check         # 📋 List dependency version mismatches (syncpack)
 pnpm deps:fix           # 🔧 Auto-fix dependency mismatches

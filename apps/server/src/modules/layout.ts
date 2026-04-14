@@ -1,12 +1,19 @@
 import { FieldValue } from 'firebase-admin/firestore'
 import type { SerialPort } from 'serialport'
 import type { Layout, Device, LayoutSensor } from '@repo/modules'
+import { parseTrackState, parsePowerState } from '@repo/dccex'
 import { db } from '@repo/firebase-config/firebase-admin-node'
 import { serial as serialLib } from '../lib/serial'
 import { log } from '../utils/logger'
 import { dcc } from '../lib/dcc'
 import { dejaMqtt as mqtt } from '../lib/mqtt'
 import { broadcast } from '../broadcast'
+import {
+  configureDevice as configureTrackOutputs,
+  clearDevicePowerState,
+  writeOutputPowerState,
+  writeAllOutputsPowerState,
+} from './trackOutputs.js'
 
 // Command pooling state for each connection
 interface CommandPool {
@@ -189,13 +196,13 @@ export async function initialize(): Promise<Layout | undefined> {
 async function autoConnect(devices: Device[]): Promise<void> {
   devices.forEach((device) => {
     if (device.autoConnect && device.port) {
-      log.start('Auto connect device', device.autoConnect, {
+      log.start('[LAYOUT] Auto connect device', device.autoConnect, {
         device: device.id,
         serial: device.port,
       })
       connectDevice({ device: device.id, serial: device.port, topic: device.topic })
-    } else if (device.autoConnect && device.connection === 'wifi' && device.topic) {  
-      log.start('Auto connect device', device.autoConnect, {
+    } else if (device.autoConnect && device.connection === 'wifi' && device.topic) {
+      log.start('[LAYOUT] Auto connect device', device.autoConnect, {
         device: device.id,
         topic: device.topic,
       })
@@ -214,12 +221,12 @@ async function loadLayout(): Promise<Layout | undefined> {
     const layoutData = await db.collection('layouts').doc(layoutId).get()
     const layoutDoc = layoutData.exists ? layoutData.data() : undefined
     if (layoutDoc) {
-      log.complete('Layout loaded', layoutId)
+      log.complete('[LAYOUT] Layout loaded', layoutId)
       return { ...layoutDoc, id: layoutData.id } as Layout
     }
-    log.error('No such layout found!', layoutId)
+    log.error('[LAYOUT] No such layout found!', layoutId)
   } catch (error) {
-    log.error('Error loading layout', error)
+    log.error('[LAYOUT] Error loading layout', error)
   }
 }
 
@@ -229,7 +236,7 @@ async function loadDevices(): Promise<Device[]> {
     const devices = devicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Device))
     return devices
   } catch (error) {
-    log.error('Error loading devices', error)
+    log.error('[LAYOUT] Error loading devices', error)
     return []
   }
 }
@@ -240,7 +247,7 @@ async function loadSensors(): Promise<LayoutSensor[]> {
     const sensors = sensorsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LayoutSensor))
     return sensors
   } catch (error) {
-    log.error('Error loading sensors', error)
+    log.error('[LAYOUT] Error loading sensors', error)
     return []
   }
 }
@@ -255,10 +262,10 @@ export async function connectDevice({
   topic?: string
 }): Promise<void> {
   try {
-    log.start('Connecting device', serial, deviceId)
+    log.start('[LAYOUT] Connecting device', serial, deviceId)
     const device = _devices.find((d) => d.id === deviceId)
     if (!device) {
-      log.error('Device not found', device)
+      log.error('[LAYOUT] Device not found', device)
       return
     }
     if (device.connection === 'usb' && serial) {
@@ -268,7 +275,7 @@ export async function connectDevice({
       await connectMqttDevice(device)
     }
   } catch (err) {
-    log.fatal('Error connectDevice: ', err)
+    log.fatal('[LAYOUT] Error connectDevice: ', err)
   }
 }
 
@@ -309,10 +316,12 @@ async function connectUsbDevice(
     }
     _connections[device.id] = connection
     if (device.type === 'dcc-ex' && port) {
-      dcc.setConnection(port)
+      dcc.registerDevice(device.id, port)
+      // Configure track outputs after device registration
+      await configureTrackOutputs(device.id)
     }
   } catch (err) {
-    log.fatal('Error connectUsbDevice: ', err)
+    log.fatal('[LAYOUT] Error connectUsbDevice: ', err)
     return undefined
   }
 }
@@ -326,7 +335,13 @@ async function connectMqttDevice(device: Device): Promise<void> {
       })
     } else {
       const topic = `DEJA/${layoutId}/${device.id}`
+      const messagesTopic = `${topic}/messages`
+      // 📡 Subscribe to both the command topic (server → device) and the
+      // events topic (device → server) used by WiFi firmware (Pico W, ESP32)
+      // to publish sensor state changes and other event payloads.
       mqtt.subscribe(topic)
+      mqtt.subscribe(messagesTopic)
+      log.note('[LAYOUT] MQTT device subscribed:', { command: topic, events: messagesTopic })
 
       db.doc(`layouts/${layoutId}/devices/${device.id}`)
         .set(
@@ -348,65 +363,123 @@ async function connectMqttDevice(device: Device): Promise<void> {
       }
     }
   } catch (err) {
-    log.fatal('Error connectMqttDevice: ', err)
+    log.fatal('[LAYOUT] Error connectMqttDevice: ', err)
   }
+}
+
+/**
+ * 📡 Write a sensor state to Firestore by looking up the sensor doc that
+ * matches `deviceId` + `index`. Used by both the serial-message path
+ * (Arduino-family firmware) and the MQTT-message path (WiFi-connected
+ * devices like Pico W and ESP32). The Firestore listener in sensors.ts
+ * handles debounce, linked effects, automations, and broadcast downstream.
+ */
+export async function writeSensorState({
+  deviceId,
+  index,
+  state,
+}: {
+  deviceId: string
+  index: number
+  state: boolean
+}): Promise<void> {
+  const snap = await db
+    .collection('layouts').doc(layoutId)
+    .collection('sensors')
+    .where('device', '==', deviceId)
+    .where('index', '==', index)
+    .limit(1)
+    .get()
+  if (snap.empty) {
+    log.warn(`[SENSORS] No sensor found for device "${deviceId}" at index ${index}`)
+    return
+  }
+  const doc = snap.docs[0]
+  if (!doc) return
+  log.log(`[SENSORS] ${deviceId}[${index}] → ${state ? 'active' : 'inactive'} (${doc.id})`)
+  await doc.ref.update({ state, timestamp: FieldValue.serverTimestamp() })
 }
 
 async function handleSerialMessage(payload: string, device: Device): Promise<void> {
   try {
+    // 📡 Sensor state updates from Arduino-family firmware.
+    // Format: { "sensor": <index>, "state": <0|1> } where index maps to the
+    // position in the firmware's SENSORPINS[] array. We delegate the lookup
+    // and Firestore write to the shared writeSensorState helper.
     if (payload?.startsWith('{ "sensor')) {
-      const data = JSON.parse(payload)
-      // Sensor handling omitted
-    } else {
-      // Parse DCC-EX status lines for power and tracks
-      const text = payload.replace(/[<>]/g, '').trim()
-      const updates: Record<string, any> = { timestamp: FieldValue.serverTimestamp(), client: 'dejaJS' }
-
-      // Track A/B lines like "= A MAIN" or "= B PROG"
-      const trackMatch = text.match(/^=\s([AB])\s(.+)$/)
-      if (trackMatch) {
-        const line = trackMatch[1] === 'A' ? 'trackA' : 'trackB'
-        updates[`${line}`] = trackMatch[2].trim()
+      let parsed: { sensor?: number; state?: number }
+      try {
+        parsed = JSON.parse(payload)
+      } catch (err) {
+        log.error('[SENSORS] Failed to parse sensor payload:', payload, err)
+        return
       }
-
-      // Pattern: @ 0 2 "Power On|Off" (quoted form)
-      const powerQuotedMatch = text.match(/@\s*\d+\s*\d+\s*"Power\s+(On|Off)"/i)
-      if (powerQuotedMatch && powerQuotedMatch[1]) {
-        updates['power'] = /on/i.test(powerQuotedMatch[1])
+      const index = parsed.sensor
+      if (typeof index !== 'number') {
+        log.warn('[SENSORS] Missing sensor index in payload:', payload)
+        return
       }
-
-      // const lcd2Match = text.match(/@\s*\d+\s*\d+\s*"Power\s+(SC|On|Off)"/i)
-      // if (lcd2Match) {
-      //   const lcd2Text = lcd2Match[1].trim()
-      //   updates['dccEx.LCD2'] = lcd2Text
-      //   if (/power\s*off/i.test(lcd2Text)) {
-      //     updates['dccEx.power'] = false
-      //   } else if (/\s*off/i.test(lcd2Text)) {
-      //     updates['dccEx.power'] = false
-      //   } else if (/power\s*on/i.test(lcd2Text)) {
-      //     updates['dccEx.power'] = true
-      //   } else if (/power\s*sc/i.test(lcd2Text)) {
-      //     updates['dccEx.power'] = true
-      //   } else if (/\s*sc/i.test(lcd2Text)) {
-      //     updates['dccEx.power'] = true
-      //   } else if (/\s*on/i.test(lcd2Text)) {
-      //     updates['dccEx.power'] = true
-      //   }
-      // }
-
-      // Version line e.g. "iDCC-EX V-5.0.9 / MEGA / ..."
-      if (/^iDCC-EX\s/i.test(text)) {
-        updates['version'] = text
-      }
-
-      // If any updates were collected other than timestamp/client, persist them
-      const hasStateUpdate = Object.keys(updates).some(k => k !== 'timestamp' && k !== 'client')
-      if (hasStateUpdate) {
-        await db.collection('layouts').doc(layoutId).set({ dccEx: updates }, { merge: true })
-      }
-
-      await broadcast({ action: 'serial', payload: { payload } })
+      const state = Boolean(parsed.state)
+      await writeSensorState({ deviceId: device.id, index, state })
+      return
     }
+
+    // Parse DCC-EX status lines for power and tracks
+    const text = payload.replace(/[<>]/g, '').trim()
+    const dccExUpdates: Record<string, any> = { timestamp: FieldValue.serverTimestamp(), client: 'dejaJS' }
+
+    // Track state lines (A-H): "= A MAIN", "= B PROG", "= C DC 45"
+    const trackState = parseTrackState(text)
+    if (trackState && device.type === 'dcc-ex') {
+      // Write to per-device trackOutputs in Firestore
+      await db.doc(`layouts/${layoutId}/devices/${device.id}`).update({
+        [`trackOutputs.${trackState.output}.mode`]: trackState.mode,
+        ...(trackState.cabAddress != null
+          ? { [`trackOutputs.${trackState.output}.cabAddress`]: trackState.cabAddress }
+          : {}),
+      })
+      // Also write to layout.dccEx for backward compat (A/B only)
+      if (trackState.output === 'A' || trackState.output === 'B') {
+        const line = trackState.output === 'A' ? 'trackA' : 'trackB'
+        dccExUpdates[line] = trackState.cabAddress
+          ? `${trackState.mode} ${trackState.cabAddress}`
+          : trackState.mode
+      }
+    }
+
+    // Per-output power state: "p1 A", "p0 B"
+    const powerState = parsePowerState(text)
+    if (powerState && device.type === 'dcc-ex') {
+      await writeOutputPowerState(device.id, powerState.output, powerState.power)
+    }
+
+    // Global power responses: "p1" (all on), "p0" (all off)
+    const globalPowerMatch = text.match(/^p([01])$/)
+    if (globalPowerMatch && device.type === 'dcc-ex') {
+      const power = globalPowerMatch[1] === '1'
+      dccExUpdates['power'] = power
+      // Update all outputs on this device
+      await writeAllOutputsPowerState(device.id, power)
+    }
+
+    // Pattern: @ 0 2 "Power On|Off" (quoted form)
+    const powerQuotedMatch = text.match(/@\s*\d+\s*\d+\s*"Power\s+(On|Off)"/i)
+    if (powerQuotedMatch && powerQuotedMatch[1]) {
+      dccExUpdates['power'] = /on/i.test(powerQuotedMatch[1])
+    }
+
+    // Version line e.g. "iDCC-EX V-5.0.9 / MEGA / ..."
+    if (/^iDCC-EX\s/i.test(text)) {
+      dccExUpdates['version'] = text
+    }
+
+    // If any updates were collected other than timestamp/client, persist to layout.dccEx
+    const hasStateUpdate = Object.keys(dccExUpdates).some(k => k !== 'timestamp' && k !== 'client')
+    if (hasStateUpdate) {
+      await db.collection('layouts').doc(layoutId).set({ dccEx: dccExUpdates }, { merge: true })
+    }
+
+    await broadcast({ action: 'serial', payload: { payload } })
   } catch (err) {
     log.fatal('Error handling serial message:', err)
   }
@@ -426,6 +499,13 @@ export async function disconnectDevice(deviceId: string): Promise<void> {
       // Stop the command pool timer
       stopCommandPoolTimer(connection)
 
+      // Unregister from DCC multi-device registry
+      if (connection.deviceType === 'dcc-ex') {
+        dcc.unregisterDevice(deviceId)
+        // Set all track output power states to null (unknown)
+        await clearDevicePowerState(deviceId)
+      }
+
       // Disconnect the port if it exists
       if (connection.port) {
         serialLib.disconnect(connection.port)
@@ -433,9 +513,8 @@ export async function disconnectDevice(deviceId: string): Promise<void> {
 
       // Remove the connection
       delete _connections[deviceId]
-
     }
-      
+
     // Update the device status in the database
     db.doc(`layouts/${layoutId}/devices/${deviceId}`)
       .set(

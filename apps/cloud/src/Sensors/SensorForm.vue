@@ -4,7 +4,7 @@ import { useLayout } from '@repo/modules'
 import { useSensors, type Sensor, sensorTypes, sensorInputTypes } from '@repo/modules/sensors'
 import { createLogger } from '@repo/utils'
 import { useNotification } from '@repo/ui'
-import ColorPicker from '@/Common/Color/ColorPicker.vue'
+import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 
 const log = createLogger('SensorForm')
@@ -18,7 +18,6 @@ const { notify } = useNotification()
 
 const devices = getDevices()
 
-const editColor = ref(false)
 const name = ref(props.sensor?.name ?? '')
 const device = ref(props.sensor?.device ?? '')
 const index = ref<number | string | undefined>(props.sensor?.index)
@@ -29,6 +28,7 @@ const debounceMs = ref<number | string | undefined>(props.sensor?.debounceMs)
 const cooldownMs = ref<number | string | undefined>(props.sensor?.cooldownMs)
 const maxRetries = ref<number | string | undefined>(props.sensor?.maxRetries)
 const retryWindowMs = ref<number | string | undefined>(props.sensor?.retryWindowMs)
+const enabled = ref(props.sensor?.enabled ?? true)
 const invertState = ref(Boolean(props.sensor?.invertState))
 const pullup = ref(Boolean(props.sensor?.pullup))
 const analogThreshold = ref<number | string | undefined>(props.sensor?.analogThreshold)
@@ -55,6 +55,7 @@ watch(() => props.sensor, (next) => {
   cooldownMs.value = next?.cooldownMs
   maxRetries.value = next?.maxRetries
   retryWindowMs.value = next?.retryWindowMs
+  enabled.value = next?.enabled ?? true
   invertState.value = Boolean(next?.invertState)
   pullup.value = Boolean(next?.pullup)
   analogThreshold.value = next?.analogThreshold
@@ -75,6 +76,8 @@ watch(devices, (list) => {
 }, { immediate: true })
 
 const isAnalog = computed(() => type.value === 'analog')
+
+const sensorColor = computed(() => (props.sensor as Sensor & { color?: string })?.color ?? 'teal')
 
 async function submit() {
   loading.value = true
@@ -98,6 +101,7 @@ async function submit() {
       device: device.value,
       type: type.value,
       inputType: inputType.value,
+      enabled: enabled.value,
       invertState: invertState.value,
       pullup: pullup.value,
     }
@@ -151,225 +155,267 @@ async function submit() {
 </script>
 
 <template>
-  <div class="p-6">
-    <v-form @submit.prevent="submit">
-      <v-label class="m-2 text-4xl">
-        {{ sensor ? 'Edit' : 'Add'}} Sensor
-      </v-label>
-      <v-divider class="my-4 border-opacity-100" color="teal"></v-divider>
-      <v-label class="m-2">
-        Device
-      </v-label>
-      <v-divider class="my-4 border-opacity-100" color="teal"></v-divider>
-      <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large" :rules="deviceRules">
-          <v-btn v-for="deviceOpt in devices" :value="deviceOpt.id" :key="deviceOpt.id"
-            class="min-h-24 min-w-48 border"
-            color="teal" >
-              {{ deviceOpt.id }}
-          </v-btn>
-      </v-btn-toggle>
-      <v-divider class="my-4 border-opacity-100" color="teal"></v-divider>
-      <v-row>
-        <v-col cols="12" md="6">
+  <v-form @submit.prevent="submit">
+    <!-- ═══ IDENTITY SECTION ═══ -->
+    <div class="form-section mb-4" :style="{ '--form-accent': sensorColor }">
+      <div class="form-section__header">
+        <v-icon size="18" class="form-section__header-icon">mdi-label</v-icon>
+        <span class="form-section__title">Identity</span>
+      </div>
+
+      <div class="form-section__grid" style="grid-template-columns: 1fr 120px 120px">
+        <div>
+          <label class="form-section__input-label">Sensor Name</label>
           <v-text-field
             v-model="name"
-            label="Sensor name"
-            required
             variant="outlined"
+            density="compact"
+            color="teal"
+            hide-details="auto"
+            required
           />
-        </v-col>
-        <v-col cols="12" md="3">
+          <div class="form-section__input-hint">Display name for this sensor</div>
+        </div>
+        <div>
+          <label class="form-section__input-label">Index</label>
           <v-text-field
             v-model="index"
-            label="Index"
             type="number"
             variant="outlined"
-            hint="Sensor index on the device"
+            density="compact"
+            color="teal"
+            hide-details="auto"
           />
-        </v-col>
-        <v-col cols="12" md="3">
+          <div class="form-section__input-hint">Sensor index on the device</div>
+        </div>
+        <div>
+          <label class="form-section__input-label">Pin</label>
           <v-text-field
             v-model="pin"
-            label="Pin"
             type="number"
             variant="outlined"
-            hint="GPIO pin number"
+            density="compact"
+            color="teal"
+            hide-details="auto"
           />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" md="6">
+          <div class="form-section__input-hint">GPIO pin number</div>
+        </div>
+      </div>
+
+      <div class="form-section__row--block px-5 pb-4">
+        <label class="form-section__input-label">Description</label>
+        <v-textarea
+          v-model="description"
+          rows="3"
+          auto-grow
+          variant="outlined"
+          density="compact"
+          color="teal"
+          hide-details="auto"
+        />
+      </div>
+
+      <ColorPickerRow v-model="color" :default-color="(props.sensor as any)?.color ?? 'teal'" description="Theme color for this sensor" />
+
+      <div class="form-section__row--block px-5 pb-4">
+        <label class="form-section__input-label mb-2">Tags</label>
+        <TagPicker v-model="tags" />
+      </div>
+    </div>
+
+    <!-- ═══ CONFIGURATION SECTION ═══ -->
+    <div class="form-section mb-4" :style="{ '--form-accent': sensorColor }">
+      <div class="form-section__header">
+        <v-icon size="18" class="form-section__header-icon">mdi-tune</v-icon>
+        <span class="form-section__title">Configuration</span>
+      </div>
+
+      <div class="px-5 py-4">
+        <label class="form-section__input-label">Select Device</label>
+        <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large" :rules="deviceRules">
+          <v-btn
+            v-for="deviceOpt in devices"
+            :value="deviceOpt.id"
+            :key="deviceOpt.id"
+            class="min-h-24 min-w-48 border"
+            color="teal"
+          >
+            {{ deviceOpt.id }}
+          </v-btn>
+        </v-btn-toggle>
+        <div class="form-section__input-hint">Select the hardware device that reads this sensor</div>
+      </div>
+
+      <div class="form-section__grid" style="grid-template-columns: 1fr 1fr">
+        <div>
+          <label class="form-section__input-label">Sensor Type</label>
           <v-select
             v-model="type"
             :items="sensorTypes"
-            label="Sensor type"
+            item-title="label"
+            item-value="value"
             variant="outlined"
-            hint="Type of sensor hardware"
-            persistent-hint
+            density="compact"
+            color="teal"
+            hide-details="auto"
           />
-        </v-col>
-        <v-col cols="12" md="6">
+          <div class="form-section__input-hint">Type of sensor hardware</div>
+        </div>
+        <div>
+          <label class="form-section__input-label">Input Type</label>
           <v-select
             v-model="inputType"
             :items="sensorInputTypes"
-            label="Input type"
+            item-title="label"
+            item-value="value"
+            :rules="[(v) => !!v || 'Input type is required']"
+            required
             variant="outlined"
-            hint="Electrical input configuration"
-            persistent-hint
+            density="compact"
+            color="teal"
+            hide-details="auto"
           />
-        </v-col>
-      </v-row>
+          <div class="form-section__input-hint">Electrical input configuration</div>
+        </div>
+      </div>
 
-      <v-divider class="my-4 border-opacity-100" color="teal"></v-divider>
-      <v-expansion-panels variant="accordion" class="mb-4">
-        <v-expansion-panel title="Advanced Configuration">
-          <v-expansion-panel-text>
-            <v-row>
-              <v-col cols="12" md="3">
-                <v-text-field
-                  v-model="debounceMs"
-                  label="Debounce (ms)"
-                  type="number"
-                  variant="outlined"
-                  hint="Debounce interval in milliseconds"
-                />
-              </v-col>
-              <v-col cols="12" md="3">
-                <v-text-field
-                  v-model="cooldownMs"
-                  label="Cooldown (ms)"
-                  type="number"
-                  variant="outlined"
-                  hint="Cooldown period after activation"
-                />
-              </v-col>
-              <v-col cols="12" md="3">
-                <v-text-field
-                  v-model="maxRetries"
-                  label="Max retries"
-                  type="number"
-                  variant="outlined"
-                  hint="Maximum retry attempts"
-                />
-              </v-col>
-              <v-col cols="12" md="3">
-                <v-text-field
-                  v-model="retryWindowMs"
-                  label="Retry window (ms)"
-                  type="number"
-                  variant="outlined"
-                  hint="Time window for retries"
-                />
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="12" md="4">
-                <v-switch
-                  v-model="invertState"
-                  color="teal"
-                  label="Invert state"
-                  hint="Swap active/inactive readings"
-                  persistent-hint
-                  density="comfortable"
-                />
-              </v-col>
-              <v-col cols="12" md="4">
-                <v-switch
-                  v-model="pullup"
-                  color="teal"
-                  label="Internal pullup"
-                  hint="Enable internal pull-up resistor"
-                  persistent-hint
-                  density="comfortable"
-                />
-              </v-col>
-              <v-col v-if="isAnalog" cols="12" md="4">
-                <v-text-field
-                  v-model="analogThreshold"
-                  label="Analog threshold"
-                  type="number"
-                  variant="outlined"
-                  hint="Activation threshold for analog input"
-                />
-              </v-col>
-            </v-row>
-          </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
+      <div class="form-section__row--block px-5 pt-2 pb-0">
+        <v-expansion-panels variant="accordion">
+          <v-expansion-panel title="Timing &amp; Retries">
+            <v-expansion-panel-text>
+              <div class="form-section__grid" style="grid-template-columns: 1fr 1fr 1fr 1fr">
+                <div>
+                  <label class="form-section__input-label">Debounce (ms)</label>
+                  <v-text-field
+                    v-model="debounceMs"
+                    type="number"
+                    variant="outlined"
+                    density="compact"
+                    color="teal"
+                    hide-details="auto"
+                  />
+                  <div class="form-section__input-hint">Debounce interval</div>
+                </div>
+                <div>
+                  <label class="form-section__input-label">Cooldown (ms)</label>
+                  <v-text-field
+                    v-model="cooldownMs"
+                    type="number"
+                    variant="outlined"
+                    density="compact"
+                    color="teal"
+                    hide-details="auto"
+                  />
+                  <div class="form-section__input-hint">Cooldown after activation</div>
+                </div>
+                <div>
+                  <label class="form-section__input-label">Max Retries</label>
+                  <v-text-field
+                    v-model="maxRetries"
+                    type="number"
+                    variant="outlined"
+                    density="compact"
+                    color="teal"
+                    hide-details="auto"
+                  />
+                  <div class="form-section__input-hint">Maximum retry attempts</div>
+                </div>
+                <div>
+                  <label class="form-section__input-label">Retry Window (ms)</label>
+                  <v-text-field
+                    v-model="retryWindowMs"
+                    type="number"
+                    variant="outlined"
+                    density="compact"
+                    color="teal"
+                    hide-details="auto"
+                  />
+                  <div class="form-section__input-hint">Time window for retries</div>
+                </div>
+              </div>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </div>
 
-      <v-divider class="my-4 border-opacity-100" color="teal"></v-divider>
-      <v-row>
-        <v-col cols="12" md="6">
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Enabled</span>
+          <span class="form-section__row-desc">Process state changes and trigger linked effects / automations</span>
+        </div>
+        <v-switch v-model="enabled" color="teal" hide-details density="compact" />
+      </div>
+
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Invert State</span>
+          <span class="form-section__row-desc">Swap active/inactive readings</span>
+        </div>
+        <v-switch v-model="invertState" color="teal" hide-details density="compact" />
+      </div>
+
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Internal Pullup</span>
+          <span class="form-section__row-desc">Enable internal pull-up resistor</span>
+        </div>
+        <v-switch v-model="pullup" color="teal" hide-details density="compact" />
+      </div>
+
+      <div v-if="isAnalog" class="form-section__grid px-5 pb-4" style="grid-template-columns: 1fr">
+        <div>
+          <label class="form-section__input-label">Analog Threshold</label>
+          <v-text-field
+            v-model="analogThreshold"
+            type="number"
+            variant="outlined"
+            density="compact"
+            color="teal"
+            hide-details="auto"
+          />
+          <div class="form-section__input-hint">Activation threshold for analog input</div>
+        </div>
+      </div>
+
+      <div class="form-section__grid" style="grid-template-columns: 1fr 1fr">
+        <div>
+          <label class="form-section__input-label">Linked Effect ID</label>
           <v-text-field
             v-model="effectId"
-            label="Linked effect ID"
             variant="outlined"
-            hint="Effect to trigger when sensor activates"
-            persistent-hint
+            density="compact"
+            color="teal"
+            hide-details="auto"
           />
-        </v-col>
-        <v-col cols="12" md="6">
+          <div class="form-section__input-hint">Effect to trigger when sensor activates</div>
+        </div>
+        <div>
+          <label class="form-section__input-label">Linked Automation ID</label>
           <v-text-field
             v-model="automationId"
-            label="Linked automation ID"
             variant="outlined"
-            hint="Automation to run when sensor activates"
-            persistent-hint
+            density="compact"
+            color="teal"
+            hide-details="auto"
           />
-        </v-col>
-      </v-row>
+          <div class="form-section__input-hint">Automation to run when sensor activates</div>
+        </div>
+      </div>
 
-      <v-row class="items-center">
-        <v-col cols="12" md="6">
-          <v-textarea
-            v-model="description"
-            label="Description"
-            rows="3"
-            auto-grow
-            variant="outlined"
-          />
-        </v-col>
-        <v-col cols="12" md="6">
-          <!-- color -->
-          <section class="h-auto my-4">
-            <v-btn
-              class="min-h-48 min-w-48 border flex"
-              :color="color"
-              @click="editColor = true" >
-              <div class="relative flex flex-col justify-center items-center">
-                <v-icon size="64">mdi-palette</v-icon>
-                <div class="mt-4">Color [{{ color }}]</div>
-              </div>
-            </v-btn>
-          </section>
-          <v-dialog max-width="80vw" v-model="editColor">
-            <ColorPicker v-model="color" @select="editColor = false" @cancel="editColor = false; color = 'teal'"></ColorPicker>
-          </v-dialog>
-        </v-col>
-      </v-row>
-
-      <v-divider class="my-4 border-opacity-100" color="teal"></v-divider>
-      <TagPicker class="my-4" v-model="tags"></TagPicker>
-
+      <!-- ═══ ERROR + FOOTER ═══ -->
       <v-alert
         v-if="error"
         type="error"
-        class="mb-4"
+        class="mx-5 mb-4"
         :text="error"
       />
 
-      <div class="flex justify-end gap-2 mt-4">
-        <v-btn variant="text" @click="emit('close')">
-          Cancel
-        </v-btn>
-        <v-btn
-          color="teal"
-          type="submit"
-          :loading="loading"
-        >
-          Save Sensor
+      <div class="form-section__footer">
+        <v-btn variant="text" size="small" class="text-none" @click="emit('close')">Cancel</v-btn>
+        <v-btn variant="tonal" color="teal" size="small" type="submit" :loading="loading" class="text-none">
+          Save
         </v-btn>
       </div>
-    </v-form>
-  </div>
+    </div>
+  </v-form>
 </template>

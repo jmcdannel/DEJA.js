@@ -4,10 +4,14 @@ import { useStorage } from '@vueuse/core'
 import { useRouter, useRoute } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
+import { DEJA_APPS } from '@repo/ui'
 import { createLogger } from '@repo/utils'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { useMenu } from '@/Core/Menu/useMenu'
-import { useSubscription, PLAN_DISPLAY, usePromotions, PROMO_SLOTS } from '@repo/modules'
+import { useSubscription, PLAN_DISPLAY, useOnboarding, usePromotions, PROMO_SLOTS } from '@repo/modules'
+import { collection, query } from 'firebase/firestore'
+import { db } from '@repo/firebase-config'
+import { useCollection } from 'vuefire'
 import { Signout } from '@repo/auth'
 import { isNavigating } from '@/router'
 import { useFeedbackUser } from '@repo/modules/feedback'
@@ -18,7 +22,7 @@ const { feedbackUser } = useFeedbackUser()
 watch(feedbackUser, (u) => Sentry.setUser(u), { immediate: true })
 
 // Components
-import { AppHeader, NotificationContainer, provideNotifications, PageBackground, PromoBanner } from '@repo/ui'
+import { AppHeader, NotificationContainer, provideNotifications, PageBackground, DejaTracker, PromoBanner } from '@repo/ui'
 
 provideNotifications()
 const drawer = ref(true)
@@ -34,10 +38,6 @@ async function handleLayoutPowerToggle(newState: boolean) {
 }
 
 async function handleEmergencyStop() {
-}
-
-function handleDeviceSelect(deviceId: string) {
-  log.debug('Device selected:', deviceId)
 }
 
 
@@ -78,11 +78,21 @@ function handleLogoClick() {
 
 const { isTrialing, trialDaysLeft, plan } = useSubscription()
 const trialPlanName = computed(() => PLAN_DISPLAY[plan.value].name)
+
+const { state: onboardingState, isComplete: onboardingComplete } = useOnboarding()
+// Loco count for onboarding banner — guarded to avoid invalid Firestore path when layoutId is empty
+const locosQuery = computed(() =>
+  layoutId.value ? query(collection(db, `layouts/${layoutId.value}/locos`)) : null
+)
+const locos = useCollection(locosQuery, { ssrKey: 'app-locos-count' })
+const locoCount = computed(() => locos.value?.length ?? 0)
+const dismissedOnboarding = useStorage('@DEJA/dismissedOnboardingBanner', false)
+
+function openThrottle() {
+  window.open(DEJA_APPS.throttle.href, '_blank')
+}
+
 const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
-console.log('activePromos', activePromos.value)
-watch(activePromos, (val) => {
-  console.log('🚀 activePromos changed:', val, 'length:', val.length)
-}, { immediate: true })
 </script>
 <template>
   <v-app :theme="themePreference">
@@ -100,21 +110,21 @@ watch(activePromos, (val) => {
           color="blue"
           :show-layout-power="true"
           :show-emergency-stop="true"
-          :show-device-status="true"
-          :show-device-status-label="true"
           :show-user-profile="true"
           @track-power-toggle="handleTrackPowerToggle"
           @layout-power-toggle="handleLayoutPowerToggle"
           @emergency-stop="handleEmergencyStop"
-          @device-select="handleDeviceSelect"
           @logo-click="handleLogoClick"
           @drawer-toggle="drawer = !drawer"
         />
+        <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
+      <v-main>
         <v-banner
           v-if="!isFullscreen && isTrialing"
           lines="one"
           color="info"
           density="compact"
+          :sticky="false"
           class="text-body-2"
         >
           <template #text>
@@ -130,8 +140,6 @@ watch(activePromos, (val) => {
           :key="promo.id"
           :promotion="promo"
         />
-        <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="user ? menu : []" @handle-menu="handleMenu" />
-      <v-main>
         <v-progress-linear
           :active="isNavigating"
           indeterminate
@@ -139,6 +147,12 @@ watch(activePromos, (val) => {
           height="3"
           class="position-fixed top-0 left-0 right-0"
           style="z-index: 9999;"
+        />
+        <DejaTracker
+          v-if="!isFullscreen && !onboardingComplete && !dismissedOnboarding && !onboardingState.serverStarted"
+          :active-step="3"
+          :show-status="false"
+          compact
         />
         <v-container v-if="!isFullscreen" class="pa-6 pa-md-12 max-w-7xl mx-auto">
           <RouterView v-slot="{ Component, route: r }">

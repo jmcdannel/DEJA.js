@@ -5,7 +5,6 @@ import { GithubAuthProvider, GoogleAuthProvider, signInWithPopup, getRedirectRes
 import { useFirebaseAuth, useCurrentUser } from 'vuefire'
 import { createLogger } from '@repo/utils'
 import { useGuestStore } from '../stores/guest'
-import TourLogo from '../components/TourLogo.vue'
 import { TOUR_ASSETS } from '../assets/blob-urls'
 
 const log = createLogger('TourLogin')

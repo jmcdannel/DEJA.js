@@ -2,7 +2,8 @@
 import { computed } from 'vue'
 import { useDisplay } from 'vuetify'
 import { useRoute } from 'vue-router'
-import type { MenuItem, SuiteApp } from './types'
+import type { MenuItem } from './types'
+import AppSwitcher from '../AppSwitcher.vue'
 
 const props = defineProps<{
   drawer: boolean
@@ -58,15 +59,6 @@ const ungroupedItems = computed(() =>
   props.menu?.filter(item => !item.section) ?? []
 )
 
-// Pinned footer: icon-only links to other DEJA apps
-// Colors match each app's brand color from dejajs.com
-// Monitor has no production URL — it runs locally alongside the server
-const DEJA_SUITE_APPS = [
-  { label: 'Cloud',    icon: 'mdi-cloud',             href: 'https://cloud.dejajs.com/',    color: 'text-fuchsia-500' },
-  { label: 'Throttle', icon: 'mdi-train-variant',     href: 'https://throttle.dejajs.com/', color: 'text-lime-500' },
-  { label: 'Monitor',  icon: 'mdi-monitor-dashboard', href: 'http://localhost:4014/',        color: 'text-red-500' },
-  { label: 'Tour',     icon: 'mdi-map-marker-path',   href: 'https://www.dejajs.com/',      color: 'text-cyan-400' },
-]
 </script>
 
 <template>
@@ -78,87 +70,69 @@ const DEJA_SUITE_APPS = [
     class="menu-drawer backdrop-blur-sm"
   >
     <div class="flex flex-col h-full">
-      <v-list density="compact" class="py-1">
+      <!-- Scrollable menu area -->
+      <div class="flex-1 min-h-0 overflow-y-auto">
+        <v-list density="compact" class="py-0 menu-list">
 
-        <!-- Grouped sections (items with section field) -->
-        <template v-for="group in groupedMenu" :key="group.section">
-          <div class="text-xs uppercase tracking-wider opacity-50 px-3 pt-4 pb-1">
-            {{ group.label }}
-          </div>
+          <!-- Grouped sections (items with section field) -->
+          <template v-for="group in groupedMenu" :key="group.section">
+            <div class="text-[10px] uppercase tracking-wider opacity-50 px-3 pt-3 pb-0.5">
+              {{ group.label }}
+            </div>
+            <v-list-item
+              v-for="item in group.items"
+              :key="item.name"
+              :active="false"
+              :class="[
+                'min-h-0 transition-colors duration-150 menu-item',
+                isActive(item) ? 'menu-item--active' : '',
+              ]"
+              link
+              @click="onHandleMenu(item)"
+            >
+              <template #prepend>
+                <v-icon
+                  size="18"
+                  :class="`text-${item.color}-500 dark:text-${item.color}-400 stroke-none mr-1`"
+                >
+                  {{ item.icon }}
+                </v-icon>
+              </template>
+              <v-list-item-title :class="['text-sm leading-tight', isActive(item) ? 'menu-item__title--active' : '']">
+                {{ item.label }}
+              </v-list-item-title>
+            </v-list-item>
+          </template>
+
+          <!-- Ungrouped flat list (backward compat for other apps) -->
           <v-list-item
-            v-for="item in group.items"
+            v-for="item in ungroupedItems"
             :key="item.name"
-            :active="false"
-            :class="[
-              'py-0.5 min-h-8 transition-colors duration-150 menu-item',
-              isActive(item) ? 'menu-item--active' : '',
-            ]"
+            :title="item.label"
+            :color="item.color || 'primary'"
+            :active="route.name === item.name"
+            class="min-h-0 menu-item"
             link
             @click="onHandleMenu(item)"
           >
             <template #prepend>
               <v-icon
-                size="20"
-                :class="`text-${item.color}-500 dark:text-${item.color}-400 stroke-none mr-2`"
+                size="18"
+                :class="`text-${item.color}-500 dark:text-${item.color}-400 stroke-none mr-1`"
               >
                 {{ item.icon }}
               </v-icon>
             </template>
-            <v-list-item-title :class="isActive(item) ? 'menu-item__title--active' : ''">
-              {{ item.label }}
-            </v-list-item-title>
           </v-list-item>
-        </template>
 
-        <!-- Ungrouped flat list (backward compat for other apps) -->
-        <v-list-item
-          v-for="item in ungroupedItems"
-          :key="item.name"
-          :title="item.label"
-          :color="item.color || 'primary'"
-          :active="route.name === item.name"
-          class="py-0.5 min-h-8"
-          link
-          @click="onHandleMenu(item)"
-        >
-          <template #prepend>
-            <v-icon
-              size="20"
-              :class="`text-${item.color}-500 dark:text-${item.color}-400 stroke-none mr-2`"
-            >
-              {{ item.icon }}
-            </v-icon>
-          </template>
-        </v-list-item>
-
-      </v-list>
-
-      <!-- Spacer pushes footer to bottom -->
-      <div class="flex-1" />
+        </v-list>
+      </div>
 
       <!-- Pinned app switcher footer -->
       <div>
         <v-divider class="menu-divider" />
-        <div class="flex justify-around px-2 py-2">
-          <v-tooltip
-            v-for="app in DEJA_SUITE_APPS"
-            :key="app.label"
-            :text="app.label"
-            location="end"
-          >
-            <template #activator="{ props: tooltipProps }">
-              <v-btn
-                v-bind="tooltipProps"
-                variant="text"
-                :href="app.href"
-                target="_blank"
-                size="small"
-                :class="app.color"
-              >
-                <v-icon size="20">{{ app.icon }}</v-icon>
-              </v-btn>
-            </template>
-          </v-tooltip>
+        <div class="px-2 py-1">
+          <AppSwitcher />
         </div>
       </div>
     </div>
@@ -172,6 +146,22 @@ const DEJA_SUITE_APPS = [
 }
 :deep(.v-list-item--active > .v-list-item__overlay) {
   opacity: 0;
+}
+
+/* Tighten menu item vertical rhythm — override Vuetify's compact density defaults */
+.menu-list :deep(.v-list-item) {
+  min-height: 28px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.menu-list :deep(.v-list-item__prepend) {
+  align-self: center;
+}
+.menu-list :deep(.v-list-item__prepend > .v-icon) {
+  margin-inline-end: 8px;
+  opacity: 1;
 }
 
 /* ═══════ Dark mode (default) ═══════ */

@@ -1,0 +1,150 @@
+---
+title: Deploy to Devices
+description: Use the DEJA deploy script to push configuration and firmware to Arduino, ESP32, and Pico W devices.
+section: io
+order: 16
+---
+
+# 🚀 Deploy to Devices
+
+The DEJA IO deploy wizard fetches your device configuration from Firebase, generates the right config files for the device type, and (optionally) flashes the firmware. The same wizard handles all four IO device types — `deja-arduino`, `deja-esp32`, `deja-esp32-wifi`, and `deja-mqtt`.
+
+## 🎬 Running the Deploy Script
+
+```bash
+cd io
+pnpm deploy
+```
+
+The interactive wizard walks you through:
+
+1. 🗺️ **Layout selection** — pick the layout from your DEJA Cloud account
+2. 📟 **Device selection** — pick a registered device (auto-filtered to flashable types)
+3. 🔐 **WiFi/MQTT credentials** — only for `deja-esp32-wifi` and `deja-mqtt`: enter SSID, password, broker IP, optional username/password
+4. 📦 **Config generation** — fetches device config, effects, turnouts, sensors, and signals from Firebase and writes platform-specific config files
+5. ⬆️ **Build & flash** — compiles the firmware (or copies CircuitPython files) and uploads to the connected board
+
+> 🛠️ `arduino-cli` and the `esp32:esp32` core are **auto-installed** if not found on your system. Required Arduino libraries (`Adafruit PWM Servo Driver Library`, `ArduinoJson`, `TurnoutPulser`, and — for `deja-esp32-wifi` — `PubSubClient`) are also auto-installed.
+
+## 📦 What Gets Deployed
+
+### 🟢 deja-arduino (Arduino Mega over USB)
+
+Generates `config.h` with:
+
+- `DEVICE_ID` from your Cloud device entry
+- Feature flags based on what's configured (effects → `ENABLE_OUTPUTS`, turnouts → `ENABLE_TURNOUTS`, etc.)
+- `OUTPINS`, `SIGNALPINS`, `SENSORPINS` arrays from your device's pin mapping
+- `TurnoutPulser` definitions from your configured turnouts
+
+Then compiles + uploads via `arduino-cli` against the Mega FQBN.
+
+### 🟠 deja-esp32 (ESP32 over USB)
+
+Same `config.h` shape as `deja-arduino` (the sketch is shared) — only the build target changes. Compiles + uploads via `arduino-cli` against the ESP32 FQBN at 460800 baud upload speed.
+
+### 🛜 deja-esp32-wifi (ESP32 over WiFi/MQTT)
+
+Generates `config.h` with everything `deja-arduino` ships **plus** the WiFi/MQTT credentials baked in at build time:
+
+- `WIFI_SSID`, `WIFI_PASSWORD` — entered during the wizard
+- `MQTT_BROKER`, `MQTT_PORT`, `MQTT_USERNAME`, `MQTT_PASSWORD` — entered during the wizard
+- `LAYOUT_ID`, `DEVICE_ID`, `TOPIC_ID` — sourced from your Cloud config
+
+Then compiles + uploads against the ESP32 FQBN. After flashing, the device connects to WiFi, subscribes to `{TOPIC_ID}/{LAYOUT_ID}/{DEVICE_ID}`, and starts processing commands.
+
+### 🍓 deja-mqtt (Raspberry Pi Pico W)
+
+Generates:
+
+- `settings.toml` with WiFi credentials, MQTT broker address, layout ID, and device ID
+- `config.json` with the pin mapping from your device configuration
+
+Then copies `code.py`, `lib/`, `settings.toml`, and `config.json` to the mounted CIRCUITPY drive — no compilation required.
+
+## 🛠️ Manual Build & Flash (Arduino-family only)
+
+If you'd rather flash by hand, every Arduino-family build drops out a self-contained bundle at `io/dist/<layoutId>/arduino/<deviceId>/` that works with **PlatformIO**, **Arduino CLI**, or the **Arduino IDE**. The exact CLI commands depend on the device type — these come straight from `getCliDeployCommands()` in `packages/modules/device-config/cli-commands.ts` (the single source of truth shown in each bundle's `DEPLOYMENT.md` and on the Cloud app device details page):
+
+### 🟢 deja-arduino
+
+```bash
+# 1️⃣ Build the bundle
+pnpm --filter=@deja/io build:firmware -- --layout <layoutId> --device <deviceId>
+
+# 2️⃣ cd into the bundle
+cd io/dist/<layoutId>/arduino/<deviceId>
+
+# 3a️⃣ PlatformIO
+platformio run -e megaatmega2560 --target upload --upload-port /dev/cu.usbserial-*
+
+# 3b️⃣ Arduino CLI
+arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 deja-arduino && \
+  arduino-cli upload -p /dev/cu.usbserial-* --fqbn arduino:avr:mega:cpu=atmega2560 deja-arduino
+```
+
+### 🟠 deja-esp32
+
+```bash
+pnpm --filter=@deja/io build:firmware -- --layout <layoutId> --device <deviceId>
+cd io/dist/<layoutId>/arduino/<deviceId>
+
+# PlatformIO
+platformio run -e esp32dev --target upload --upload-port /dev/cu.usbserial-*
+
+# Arduino CLI
+arduino-cli compile --fqbn esp32:esp32:esp32 \
+  --build-property "compiler.cpp.extra_flags=-std=c++17" deja-arduino && \
+  arduino-cli upload -p /dev/cu.usbserial-* \
+  --fqbn esp32:esp32:esp32:UploadSpeed=460800 deja-arduino
+```
+
+### 🛜 deja-esp32-wifi
+
+```bash
+pnpm --filter=@deja/io build:firmware -- --layout <layoutId> --device <deviceId>
+cd io/dist/<layoutId>/arduino/<deviceId>
+
+# PlatformIO
+platformio run -e esp32dev --target upload --upload-port /dev/cu.usbserial-*
+
+# Arduino CLI
+arduino-cli compile --fqbn esp32:esp32:esp32 \
+  --build-property "compiler.cpp.extra_flags=-std=c++17" deja-esp32-wifi && \
+  arduino-cli upload -p /dev/cu.usbserial-* \
+  --fqbn esp32:esp32:esp32:UploadSpeed=460800 deja-esp32-wifi
+```
+
+> 🛜 If you ran `pnpm build:firmware` non-interactively, the WiFi/MQTT credentials in `deja-esp32-wifi/config.h` will be empty — edit them by hand before flashing or re-run the interactive wizard.
+
+`deja-mqtt` doesn't have a CLI build path because Pico W firmware is just CircuitPython files copied to the CIRCUITPY drive.
+
+## 🔥 Firebase Configuration Source
+
+The deploy script reads from Firestore:
+
+| Collection | Data |
+|---|---|
+| `layouts/{layoutId}/devices/{deviceId}` | Device type, connection, pin mapping |
+| `layouts/{layoutId}/effects` | Effects assigned to this device |
+| `layouts/{layoutId}/turnouts` | Turnouts assigned to this device |
+| `layouts/{layoutId}/sensors` | Sensors assigned to this device |
+| `layouts/{layoutId}/signals` | Signals assigned to this device |
+
+Your device must be registered in the Cloud app before deploying. See [Cloud → Devices](/docs/cloud/devices).
+
+## 🗂️ Layout-Specific Configs
+
+For Pico W layouts with customized wiring, place override configs at:
+
+```
+io/layouts/{layoutId}/deja-pico-w/{deviceId}/config.json
+```
+
+The deploy script checks for layout-specific configs first, falling back to the device's Cloud configuration.
+
+## 📚 Next Steps
+
+- 🔧 [Arduino & ESP32 Setup](/docs/io/arduino-setup) — hardware setup and `config.h` reference
+- 🍓 [Pico W Setup](/docs/io/pico-w-setup) — CircuitPython setup and `settings.toml` reference
+- ⚙️ [Configuration Reference](/docs/io/configuration) — all generated file formats per device type

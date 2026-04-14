@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { Device, Effect, Turnout } from '@repo/modules'
+import { isWifiDeviceType, type Device, type Effect, type Turnout } from '@repo/modules'
 import { useDeviceConfig } from './useDeviceConfig'
 
 const props = defineProps<{
@@ -18,14 +18,18 @@ const deviceRef = computed(() => props.device)
 const effectsRef = computed(() => props.effects as Effect[])
 const turnoutsRef = computed(() => props.turnouts as Turnout[])
 
-const { isArduino, isPicoW, arduinoConfigH, picoSettingsToml, picoConfigJson, downloadPackage } =
+const { isArduino, isPicoW, isEsp32Wifi, arduinoConfigH, picoSettingsToml, picoConfigJson, esp32WifiConfigH, downloadPackage } =
   useDeviceConfig({
     device: deviceRef,
     effects: effectsRef,
     turnouts: turnoutsRef,
   })
 
-const configTab = ref('config')
+// 📡 Both Pico W and ESP32 WiFi need WiFi credentials + an MQTT broker.
+const isWifi = computed(() => isWifiDeviceType(props.device?.type))
+
+// 🗂 Default tab depends on device type — esp32-wifi uses its own tab key
+const configTab = ref(isEsp32Wifi.value ? 'esp32wifi' : 'config')
 const wifiSsid = ref('')
 const wifiPassword = ref('')
 const mqttBroker = ref('')
@@ -57,7 +61,7 @@ function handleClose() {
   <v-dialog v-model="dialog" max-width="800" scrollable>
     <v-card color="grey-darken-4">
       <v-card-title class="d-flex align-center pa-4">
-        <v-icon :icon="isPicoW ? 'mdi-wifi' : 'mdi-usb'" class="mr-2" color="green" />
+        <v-icon :icon="isWifi ? 'mdi-wifi' : 'mdi-usb'" class="mr-2" color="green" />
         Deploy Code — {{ device?.id }}
         <v-spacer />
         <v-btn icon="mdi-close" variant="text" size="small" @click="handleClose" />
@@ -66,8 +70,8 @@ function handleClose() {
       <v-divider />
 
       <v-card-text class="pa-4">
-        <!-- 🍓 Pico W WiFi Credentials -->
-        <div v-if="isPicoW" class="mb-6">
+        <!-- 📡 WiFi / MQTT Credentials (Pico W + ESP32 WiFi) -->
+        <div v-if="isWifi" class="mb-6">
           <h4 class="text-body-1 font-weight-bold mb-3 text-blue-lighten-2">
             <v-icon icon="mdi-wifi-cog" class="mr-1" size="small" /> WiFi & MQTT Settings
           </h4>
@@ -105,7 +109,8 @@ function handleClose() {
                 variant="outlined"
                 prepend-inner-icon="mdi-server-network"
                 placeholder="192.168.1.x"
-                hide-details
+                hint="IP of the machine running DEJA.js server"
+                persistent-hint
               />
             </v-col>
             <v-col cols="12" sm="6">
@@ -123,14 +128,15 @@ function handleClose() {
 
         <!-- 📝 Config Preview Tabs -->
         <v-tabs v-model="configTab" density="compact" color="green" class="mb-3">
-          <v-tab v-if="isArduino" value="config">config.h</v-tab>
+          <v-tab v-if="isArduino && !isEsp32Wifi" value="config">config.h</v-tab>
+          <v-tab v-if="isEsp32Wifi" value="esp32wifi">config.h</v-tab>
           <v-tab v-if="isPicoW" value="settings">settings.toml</v-tab>
           <v-tab v-if="isPicoW" value="pins">config.json</v-tab>
         </v-tabs>
 
         <v-tabs-window v-model="configTab">
           <!-- Arduino config.h -->
-          <v-tabs-window-item v-if="isArduino" value="config">
+          <v-tabs-window-item v-if="isArduino && !isEsp32Wifi" value="config">
             <div class="relative">
               <v-btn
                 icon="mdi-content-copy"
@@ -141,6 +147,21 @@ function handleClose() {
                 @click="copyToClipboard(arduinoConfigH)"
               />
               <pre class="overflow-x-auto text-caption font-mono pa-3 bg-black/40 rounded-md ring-1 ring-white/10 text-grey-lighten-1" style="max-height: 400px;">{{ arduinoConfigH }}</pre>
+            </div>
+          </v-tabs-window-item>
+
+          <!-- 🛜 ESP32 WiFi config.h -->
+          <v-tabs-window-item v-if="isEsp32Wifi" value="esp32wifi">
+            <div class="relative">
+              <v-btn
+                icon="mdi-content-copy"
+                size="x-small"
+                variant="text"
+                class="position-absolute"
+                style="top: 8px; right: 8px; z-index: 1;"
+                @click="copyToClipboard(esp32WifiConfigH)"
+              />
+              <pre class="overflow-x-auto text-caption font-mono pa-3 bg-black/40 rounded-md ring-1 ring-white/10 text-grey-lighten-1" style="max-height: 400px;">{{ esp32WifiConfigH }}</pre>
             </div>
           </v-tabs-window-item>
 
@@ -181,7 +202,7 @@ function handleClose() {
             <template #title>
               <span class="font-weight-bold">✅ ZIP Downloaded!</span>
             </template>
-            <div v-if="isArduino" class="text-body-2 mt-2">
+            <div v-if="isArduino && !isEsp32Wifi" class="text-body-2 mt-2">
               <ol class="pl-4">
                 <li>Extract the ZIP file</li>
                 <li>Copy <code>config.h</code> into your Arduino sketch folder</li>
@@ -189,6 +210,16 @@ function handleClose() {
                 <li>Select <strong>Board: Arduino Mega 2560</strong></li>
                 <li>Select the correct serial port</li>
                 <li>Click <strong>Upload</strong> ⬆️</li>
+              </ol>
+            </div>
+            <div v-if="isEsp32Wifi" class="text-body-2 mt-2">
+              <ol class="pl-4">
+                <li>Extract the ZIP file</li>
+                <li>Copy <code>config.h</code> into your <code>deja-esp32-wifi</code> sketch folder</li>
+                <li>Open <code>deja-esp32-wifi.ino</code> in Arduino IDE</li>
+                <li>Select an <strong>ESP32</strong> board (e.g. ESP32 Dev Module)</li>
+                <li>Select the correct serial port</li>
+                <li>Click <strong>Upload</strong> ⬆️ — the device will join WiFi and connect via MQTT 🛜</li>
               </ol>
             </div>
             <div v-if="isPicoW" class="text-body-2 mt-2">
@@ -211,7 +242,7 @@ function handleClose() {
         <v-btn
           color="green"
           variant="elevated"
-          :prepend-icon="isPicoW ? 'mdi-wifi' : 'mdi-usb'"
+          :prepend-icon="isWifi ? 'mdi-wifi' : 'mdi-usb'"
           @click="handleDownload"
         >
           📦 Download ZIP

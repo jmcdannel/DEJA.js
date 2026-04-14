@@ -6,7 +6,6 @@ import { useSortableList } from '@/Core/composables/useSortableList'
 import TurnoutListItem from '@/Turnouts/TurnoutListItem.vue'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
-import EmptyState from '@/Core/UI/EmptyState.vue'
 
 defineEmits(['edit'])
 const props = defineProps({
@@ -32,7 +31,7 @@ const list = computed(() => props.filteredList ?? sortableList.value)
           @start="onDragStart"
           @end="onDragEnd"
         >
-          <template #header>
+          <template v-if="$slots.prepend" #header>
             <div>
               <slot name="prepend"></slot>
             </div>
@@ -63,16 +62,10 @@ const list = computed(() => props.filteredList ?? sortableList.value)
       </template>
   </v-container>
   <ViewJson :json="list" label="Turnouts"></ViewJson>
-  <EmptyState
-    v-if="!list?.length"
-    icon="mdi-call-split"
-    color="amber"
-    title="No Turnouts Yet"
-    description="Define your track switches and control them remotely. Map each turnout to its DCC address for seamless operation."
-    :use-cases="[{ icon: 'mdi-swap-horizontal', text: 'Yard switching' }, { icon: 'mdi-source-fork', text: 'Mainline junctions' }, { icon: 'mdi-warehouse', text: 'Staging areas' }]"
-    action-label="Add Your First Turnout"
-    action-to="/turnouts/new"
-  />
+  <div v-if="!list?.length" class="flex flex-col items-center justify-center py-12 px-4">
+    <v-icon size="48" class="opacity-30 mb-3">mdi-magnify-close</v-icon>
+    <p class="text-sm opacity-60">No turnouts match your filters.</p>
+  </div>
 </template>
 <style scoped>
 .ghost {

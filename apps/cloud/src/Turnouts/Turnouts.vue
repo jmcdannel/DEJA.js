@@ -1,21 +1,41 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTurnouts, type Turnout } from '@repo/modules'
-import { useLayout, type Tag } from '@repo/modules'
-import { PageHeader, ListControlBar, useListControls } from '@repo/ui'
+import { useLayout, type Tag, useSubscription, PLAN_DISPLAY } from '@repo/modules'
+import { ListControlBar, useListControls } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
+import ListPage from '@/Core/UI/ListPage.vue'
 import TurnoutsList from '@/Turnouts/TurnoutsList.vue'
+import { EmptyState } from '@repo/ui'
 
 const router = useRouter()
 const { getTurnouts } = useTurnouts()
 const { getDevices, getLayout } = useLayout()
+const { plan } = useSubscription()
 const devices = getDevices()
 const layout = getLayout()
 const turnouts = getTurnouts()
 
+// 🔄 Loading state
+const isLoaded = ref(false)
+let loadingTimeout: ReturnType<typeof setTimeout> | undefined
+onMounted(async () => {
+  loadingTimeout = setTimeout(() => { isLoaded.value = true }, 3000)
+  try {
+    await (turnouts as any).promise
+  } finally {
+    clearTimeout(loadingTimeout)
+    isLoaded.value = true
+  }
+})
+onUnmounted(() => clearTimeout(loadingTimeout))
+
+const isLoading = computed(() => !isLoaded.value)
+const isFreePlan = computed(() => plan.value === 'hobbyist')
+
 const turnoutsList = computed(() =>
-  turnouts?.value ? turnouts.value.map((t) => ({ ...t, id: t.id })) : []
+  turnouts?.value ? (turnouts.value as Turnout[]).map((t) => ({ ...t, id: t.id })) : []
 )
 
 const deviceOptions = computed(() =>
@@ -33,7 +53,6 @@ const filters = computed<ListFilter[]>(() => [
 ])
 
 const sortOptions = [
-  { value: 'order', label: 'Default' },
   { value: 'name', label: 'Name' },
   { value: 'device', label: 'Device' },
 ]
@@ -47,18 +66,18 @@ const controls = useListControls('cloud-turnouts', {
 function handleEdit(turnout: Turnout) {
   router.push({ name: 'Edit Turnout', params: { turnoutId: turnout.id } })
 }
-
-function handleAdd() {
-  router.push({ name: 'Add Turnout' })
-}
 </script>
 <template>
-  <PageHeader title="Turnouts" icon="mdi-call-split" color="amber" subtitle="Configure and control track switches across your layout.">
-    <template #actions>
-      <v-btn prepend-icon="mdi-plus" color="amber" variant="flat" @click="handleAdd">
-        New Turnout
-      </v-btn>
-    </template>
+  <ListPage
+    title="Turnouts"
+    icon="mdi-call-split"
+    color="amber"
+    subtitle="Configure and control track switches across your layout."
+    :add-to="{ name: 'Add Turnout' }"
+    add-label="New Turnout"
+    :loading="isLoading"
+    :empty="isLoaded && turnoutsList.length === 0"
+  >
     <template #controls>
       <ListControlBar
         :controls="controls"
@@ -69,7 +88,29 @@ function handleAdd() {
         search-placeholder="Search turnouts..."
       />
     </template>
-  </PageHeader>
 
-  <TurnoutsList :filtered-list="controls.filteredList.value" :viewAs="controls.viewAs.value" @edit="handleEdit" />
+    <TurnoutsList
+      :filtered-list="controls.filteredList.value"
+      :view-as="controls.viewAs.value"
+      @edit="handleEdit"
+    />
+
+    <template #empty-state>
+      <EmptyState
+        icon="mdi-call-split"
+        color="amber"
+        title="No Turnouts Yet"
+        :description="isFreePlan
+          ? `Upgrade to ${PLAN_DISPLAY.engineer.name} to add turnouts and manage track switches across your layout.`
+          : 'Define your track switches and control them remotely. Map each turnout to its DCC address for seamless operation.'"
+        :use-cases="[
+          { icon: 'mdi-swap-horizontal', text: 'Yard switching' },
+          { icon: 'mdi-source-fork', text: 'Mainline junctions' },
+          { icon: 'mdi-warehouse', text: 'Staging areas' },
+        ]"
+        :action-label="isFreePlan ? `Upgrade to ${PLAN_DISPLAY.engineer.name}` : 'Add Your First Turnout'"
+        :action-to="isFreePlan ? '/upgrade' : '/turnouts/new'"
+      />
+    </template>
+  </ListPage>
 </template>

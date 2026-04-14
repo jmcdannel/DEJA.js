@@ -9,9 +9,3 @@ export interface MenuItem {
   isFavorite?: boolean;
   feature?: FeatureName;
 }
-
-export interface SuiteApp {
-  label: string;
-  icon: string;
-  href: string;
-}
