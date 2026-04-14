@@ -7,6 +7,90 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **[server]** 🚀 Add `deja deploy` command for Arduino and Pico W firmware deployment with arduino-cli auto-install
+- **[cloud]** Bidirectional DCC-EX CommandStation roster sync — push locos to the CommandStation from the Roster page, import locos from the CommandStation into DEJA Cloud, and auto-sync on loco save
+- **[cloud]** ✨ Redesign all Cloud forms with form-section pattern — consistent hero headers, accent colors, and radial glow effects across Roster, Routes, Effects, Signals, Sensors, and Turnouts
+- **[cloud]** Add "Install" step (step 4) to the onboarding wizard using the QuickStart component, and refactor the Setup Complete page to use QuickStart in place of the bare install command card
+- **[cloud]** VueFlow-based track diagram editor with custom track nodes and edges, live SVG preview, CSS export, and Firebase Storage upload — create and save visual layout diagrams from the Cloud app
+- **[cloud]** Upgrade page for comparing and switching subscription plans
+- **[cli]** `deja start` now launches an interactive terminal UI — scrolling log pane, live status bar (pid + uptime), and a command input line supporting `restart`, `stop`, and `help`. Two implementations available: `blessed` (default, ncurses-style with real scrolling) and `ink` (React-based, set `DEJA_UI=ink` to use).
+- feat: complete homepage redesign with cinematic dark theme
+
+- Replaced Sanity CMS-driven carousel homepage with modular component architecture
+- Added 19+ new section components: HeroSection, ThrottleSpotlight, CloudSpotlight, MonitorSpotlight, ServerCLISection, GuidesSection, FAQSection, and more
+- Added FallingStars animation, DEJA brand color tokens, and glow utilities to globals.css
+- Added `/guides` section with sidebar navigation layout
+- Added `ThrottleLaunchQR` shared UI component for QR code throttle launch
+- Updated site metadata: "Run your railroad. From anywhere."
+- Updated documentation content for cloud, monitor, throttle apps and onboarding flows
+- **[cloud]** Firmware deploy dialog with config preview, WiFi credential input (Pico W), and ZIP download for Arduino and Pico W devices
+added: **[io]** Automated firmware config generation from Firebase device data — Arduino config.h and Pico W settings.toml/config.json
+added: **[io]** Interactive deploy CLI (`pnpm deploy`) with device selection, compile & upload (Arduino), and CIRCUITPY copy (Pico W)
+fixed: **[io]** Fix hardcoded empty turnouts array and sensor pins in Arduino config.h generation
+fixed: **[io]** Fix stray `*-` syntax error on line 201 of Pico W code.py
+fixed: **[io]** Fix typo "daja-arduino" → "deja-arduino" in config.default.h
+- **[modules]** 🔌 Add device-config generators for Arduino config.h, Pico W settings.toml/config.json — shared across io/ firmware and Cloud app
+- feat: **[cloud]** Migrate sound API from standalone `sound-api` app into cloud app
+
+- Added Vercel Serverless API endpoints (`api/sounds.ts`, `api/sounds/upload.ts`, `api/sounds/[pathname].ts`) with Firebase Auth verification for protected operations
+- Created full CRUD UI for sound management (`/sounds` route) with list, upload, and delete functionality
+- Added Sounds menu entry with `mdi-volume-high` icon
+- Updated `SoundFileService` to use relative `/api` URLs instead of cross-origin `localhost:3001`
+- Removed `apps/sound-api/` (Next.js app) entirely
+- Removed `http://localhost:3001` CORS origins from all Vite configs
+- **[ui]** OnboardingProgress train track component with animated steam locomotive that follows a winding SVG path between 5 onboarding stations
+- feat(ui): add QuickStart component — 2-step onboarding stepper with prop-driven completion state, composes ServerSetupInfo, includes Storybook stories
+- **[modules]** `remoteMonitoring` plan limit distinguishes paid (Engineer/Conductor) from free (Hobbyist) tier capabilities
+
+changed: **[cloud]** Onboarding plan cards and pricing page updated to highlight Remote Monitoring as a paid feature
+- **[ui]** 🚂 Add LocoRoster system — LocoNumberPlate, LocoCard, LocoListRow components with avatar/card/list views, railroad logos, and placeholder locomotive images
+- **[cloud, throttle]** Sentry user feedback widget — persistent floating button for general feedback plus automatic report dialog on unhandled errors, with user identity pre-filled from Firebase Auth
+- **[throttle]** **[cloud]** Add DEJA Server auto-detect status card to quick connect panels using same detection as header chip
+- **[ui]** Shared `NotFoundPage` component with brand-aligned design and configurable nav links, wired into all apps
+- **[ui]** Configurable SplashPage backgrounds with 9 options — starfield canvas, aurora animated glow, nebula, milky way, neon lines, railroad at night, dark tracks, steam locomotive, and train station; all registered in background system for app-wide use
+- **[ui]** 🎨 Light mode & high-contrast theme support with WCAG AA accessibility — new `color2k`-powered a11y utilities (`ensureContrast`, `meetsContrast`, `contrastReport`), automatic color adjustment for light backgrounds, pure black-and-white high-contrast mode, backgrounds disabled in non-dark themes, and 80+ components updated from hardcoded dark colors to theme-aware CSS variables
+- **[throttle]** Vercel Analytics for real-user page view and visitor tracking of train control interface
+- **[server]** Cloudflare tunnel auto-starts with server on Engineer and Conductor plans; add `deja tunnel [start|stop|status|logs]` commands for manual tunnel management
+- feat: redesign monitor header, device connection cards, and settings navigation
+
+- Redesign monitor app to use MonitorStatusBar globally with server status, layout selector, and user profile
+- Add deja-server device type support to connection cards with server status integration
+- Move settings navigation to right side with sticky positioning (fix v-responsive overflow)
+- Add server IP broadcasting from server to Firebase RTDB
+- Show device IDs in cloud app port list
+- Add size prop to UserProfile component
+- **[ui]** New `SplashPage` component — dark full-screen splash with ambient cyan/magenta/purple gradients, centered DEJA.js logo, and a row of color-coded app icons
+- **[www]** 📚 Add IO Guide, Cloud Guide, and Server Guide with CLI walkthroughs, video placeholders, shared guide components, and scroll-driven architecture page animations
+- **[www]** Integrate Sanity CMS for dynamic marketing content with embedded Studio, GROQ queries, and graceful fallback to hardcoded content when env vars are missing
+
+### Changed
+- **[cloud]** Redesign left nav with grouped sections and pinned app switcher
+
+Navigation items are now organized into three labeled sections (Modules, Hardware, System) with a Vercel-style neutral active state. The suite app links at the bottom are replaced with a compact icon-only row (Cloud, Throttle, Monitor, Tour) pinned to the drawer footer.
+- **[auth]** 🎮 Replace VITE_DEMO_MODE with runtime isDemoUser check — add ensureAutoLogin, Try Demo button on throttle login, and mock DCC-EX responses for demo mode
+- **[docs]** Update getting started, quick start, and installation docs for tarball-based distribution with `deja` CLI
+- **[cloud]** 🎯 Streamline onboarding — reorder wizard (NameLayout → Plan → Payment → Install), add 'Use Free for Now' skip option, DejaTracker railroad progress, and persistent onboarding banner
+- **[throttle]** Update login page to match cloud app layout with proper navigation event handling
+
+### Fixed
+- **[cloud]** Resolve `requireAuth is not defined` crash on track-diagram routes
+- **[server]** Fix release-server CI workflow upload format and add install.sh upload to Vercel Blob
+- **[ui]** Fix Storybook Tailwind CSS not generating utility classes by using absolute content paths in config
+- **[server]** Handle EADDRINUSE error on WebSocket startup with a clear "port already in use" message instead of a silent crash
+
+### Removed
+- **[cloud]** Remove pending approval gate — new layouts are automatically approved on signup
+added: **[cloud]** New "Setup Complete" page replaces pending approval with install script prompt, quick-add loco, and docs links
+
+### Technical Improvements
+- **[cloud]** Consolidate sound file API into cloud app as a Vercel Function, removing dependency on the standalone sound-api service
+- **[docs]** 🔐 Add comprehensive ENV.md environment variable guide with config.json mapping, per-app breakdowns, and worktree setup instructions
+- **[install-api]** Personalized install command with embedded UID and Layout ID — users copy one command with no manual entry required
+- **[ci]** Add preview branch staging workflow — feature PRs now target `preview`, staging domains auto-update on merge, and only `preview → main` PRs require changesets and docs review
+- **[server]** Clean up turnout command handling — separate device routing from command building, remove duplicate servo validation, move command types to shared package
+- **[throttle]** 🎛️ Polish throttle UI — standardize button variants, container queries, draggable quick menu with throttle controls, and roster cab view
+
 ---
 
 ## [1.5.0] - 2026-03-18
