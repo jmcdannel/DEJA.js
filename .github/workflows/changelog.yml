@@ -12,12 +12,13 @@ concurrency:
 
 jobs:
   process-changesets:
-    # Skip if the push was made by the changelog bot
+    # 🛑 Skip if the push was made by the changelog bot itself
     if: "!contains(github.event.head_commit.message, '[changelog-bot]')"
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout
@@ -35,11 +36,48 @@ jobs:
         if: steps.check.outputs.count != '0'
         run: node .github/scripts/process-changesets.mjs
 
-      - name: Commit changes
+      # 🤖 Open a PR with the changelog update. Direct push to main is blocked
+      # by branch protection (requires PR + successful preview deployments), so
+      # the bot commits on a temporary branch and opens a PR instead.
+      #
+      # The resulting PR skips `changeset-check` (see changeset-check.yml) and
+      # is marked auto-merge so it lands as soon as required checks pass.
+      - name: Create pull request
         if: steps.check.outputs.count != '0'
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: chore/changelog-bot-update
+          delete-branch: true
+          base: main
+          commit-message: 'docs: update changelog [changelog-bot]'
+          title: 'docs: update changelog [changelog-bot]'
+          body: |
+            🤖 **Automated changelog update**
+
+            This PR was opened by the `Process Changesets` workflow after detecting accumulated changesets on `main`. It:
+
+            - Moves all entries from `.changeset/*.md` into `CHANGELOG.md` under `[Unreleased]`
+            - Deletes the processed changeset files
+
+            ## Next steps
+            1. Wait for required checks to pass
+            2. Merge this PR
+            3. Run `/release-notes` on `main` to cut the next version
+
+            > This PR is exempt from `changeset-check` (see `.github/workflows/changeset-check.yml`).
+          labels: |
+            changelog-bot
+          author: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
+          committer: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
+
+      - name: Enable auto-merge
+        if: steps.cpr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md .changeset/
-          git diff --cached --quiet || git commit -m "docs: update changelog [changelog-bot]"
-          git push
+          gh pr merge ${{ steps.cpr.outputs.pull-request-number }} \
+            --auto \
+            --squash \
+            --repo ${{ github.repository }}
