@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [1.6.0] - 2026-04-13
+
 ### Added
 - **[server]** 🚀 Add `deja deploy` command for Arduino and Pico W firmware deployment with arduino-cli auto-install
 - **[cloud]** Bidirectional DCC-EX CommandStation roster sync — push locos to the CommandStation from the Roster page, import locos from the CommandStation into DEJA Cloud, and auto-sync on loco save
