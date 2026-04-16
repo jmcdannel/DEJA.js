@@ -133,6 +133,8 @@ export interface Device {
   config?: DeviceConfig
   connection?: 'usb' | 'wifi'
   description?: string
+  /** IP address or hostname for network-connected devices (e.g. WLED) */
+  host?: string
   id: string
   isConnected?: boolean
   lastConnected?: Date

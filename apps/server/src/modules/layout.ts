@@ -271,8 +271,8 @@ export async function connectDevice({
     }
     // WLED devices connect via WebSocket directly (not MQTT)
     if (device.type === 'wled' && device.connection === 'wifi') {
-      const host = (device as any).host
-      const port = (device as any).port ?? 80
+      const host = device.host
+      const port = 80
       if (host) {
         await wled.connectDevice({ id: device.id, host, port })
       } else {

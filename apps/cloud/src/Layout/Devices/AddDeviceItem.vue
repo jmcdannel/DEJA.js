@@ -36,6 +36,7 @@ watch(deviceType, (newType) => {
   }
 })
 const deviceId = ref('')
+const host = ref('')
 const autoConnect = ref(false)
 const rules:ValidationRules = {
   required: [(val) => !!val || 'Required.']
@@ -49,6 +50,7 @@ function resetForm() {
   deviceType.value = null
   connection.value = null
   deviceId.value = ''
+  host.value = ''
   autoConnect.value = false
 }
 
@@ -63,6 +65,7 @@ async function submit (e: Event) {
       name: deviceId.value,
       type: deviceType.value,
       autoConnect: autoConnect.value,
+      ...(host.value ? { host: host.value } : {}),
     }
     const ok = await createDevice(deviceId.value, device)
     if (ok) {
@@ -122,6 +125,17 @@ log.debug('deviceTypes', deviceTypes)
             label="ID"
             variant="outlined"
             density="compact"
+            :rules="rules.required"
+          ></v-text-field>
+          <v-text-field
+            v-if="deviceType === 'wled'"
+            v-model="host"
+            label="Host IP Address"
+            variant="outlined"
+            density="compact"
+            placeholder="192.168.86.35"
+            hint="IP address of the WLED device on your network"
+            persistent-hint
             :rules="rules.required"
           ></v-text-field>
           <v-switch
