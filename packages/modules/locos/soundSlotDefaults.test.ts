@@ -1,6 +1,7 @@
 // packages/modules/locos/soundSlotDefaults.test.ts
 import { describe, it, expect } from 'vitest'
-import { soundSlotDefaults, type SoundSlot } from './soundSlotDefaults'
+import { soundSlotDefaults } from './soundSlotDefaults'
+import { FUNCTION_ICONS } from './constants'
 
 describe('soundSlotDefaults', () => {
   it('exports exactly 8 slots', () => {
@@ -30,10 +31,9 @@ describe('soundSlotDefaults', () => {
   })
 
   it('icons are valid FUNCTION_ICONS keys', () => {
-    const validIcons = ['light', 'bell', 'horn', 'wifi', 'coupler', 'fan', 'brake',
-      'station', 'mute', 'quiet', 'sound', 'track', 'air', 'announce', 'dim']
+    const validIconNames = FUNCTION_ICONS.map(i => i.name)
     for (const slot of soundSlotDefaults) {
-      expect(validIcons).toContain(slot.icon)
+      expect(validIconNames).toContain(slot.icon)
     }
   })
 })
