@@ -12,6 +12,7 @@ import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import SoundFileList from '@/Effects/Sounds/SoundFileList.vue'
 import DevicePicker from '@/Layout/Devices/DevicePicker.vue'
+import { WledEffectForm } from '@repo/wled/components'
 
 const log = createLogger('EffectForm')
 // TODO: icon picker
@@ -77,6 +78,7 @@ const macroOff = ref(props.efx?.off || [])
 const pattern = ref(props.efx?.pattern || undefined)
 const range = ref(props.efx?.range || undefined)
 const config = ref(props.efx?.config || undefined)
+const wledConfig = ref(props.efx?.wled ?? undefined)
 const efxType = ref(props.efx?.type)
 const efxTypeObj = ref(props.efx?.type ? getEfxType(props.efx?.type) : undefined)
 const color = ref(props.efx?.color || efxTypeObj.value?.color || 'purple')
@@ -181,6 +183,11 @@ async function submit () {
   // set sound file for sound effects
   if (efxType.value === 'sound') {
     newEfx.sound = selectedSoundFile.value
+  }
+
+  // set wled config
+  if (efxType.value === 'wled' && wledConfig.value) {
+    newEfx.wled = wledConfig.value
   }
 
   await setEfx(props.efx?.id || '', newEfx)
@@ -384,6 +391,13 @@ function handleSoundFileSelect(soundFile: string) {
             :max-lines="10"
             class="mt-4"
           />
+        </div>
+      </template>
+
+      <!-- WLED form -->
+      <template v-if="efxType === 'wled'">
+        <div class="form-section__row form-section__row--block">
+          <WledEffectForm v-model="wledConfig" />
         </div>
       </template>
 
