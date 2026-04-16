@@ -1,0 +1,62 @@
+# Page snapshot
+
+```yaml
+- main [ref=e51]:
+  - generic [ref=e52]:
+    - generic [ref=e53]:
+      - link "dejajs.com" [ref=e54] [cursor=pointer]:
+        - /url: https://dejajs.com
+        - generic [ref=e55]: 󰁍
+        - text: dejajs.com
+      - link "Docs" [ref=e56] [cursor=pointer]:
+        - /url: https://dejajs.com/docs
+        - generic [ref=e57]: 󱓷
+        - text: Docs
+      - link "Sign In" [ref=e58] [cursor=pointer]:
+        - /url: /login
+      - link "Sign Up" [ref=e59] [cursor=pointer]:
+        - /url: /signup
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - img "DEJA.js" [ref=e66]
+          - generic [ref=e68]: DEJA.js
+        - paragraph [ref=e69]: Sign in to your control room
+      - generic [ref=e70]:
+        - heading "Sign In" [level=2] [ref=e71]
+        - generic [ref=e72]:
+          - text: Don't have an account?
+          - button "Sign up" [ref=e73] [cursor=pointer]:
+            - generic [ref=e74]: Sign up
+        - generic [ref=e75]:
+          - button "Continue with Google" [ref=e76] [cursor=pointer]:
+            - img [ref=e77]
+            - generic [ref=e82]: Continue with Google
+          - button "Continue with GitHub" [ref=e83] [cursor=pointer]:
+            - img [ref=e84]
+            - generic [ref=e86]: Continue with GitHub
+          - button "Continue with Facebook" [ref=e87] [cursor=pointer]:
+            - img [ref=e88]
+            - generic [ref=e90]: Continue with Facebook
+          - button "Continue with Apple" [ref=e91] [cursor=pointer]:
+            - img [ref=e92]
+            - generic [ref=e94]: Continue with Apple
+          - button "Continue with Microsoft" [ref=e95] [cursor=pointer]:
+            - img [ref=e96]
+            - generic [ref=e101]: Continue with Microsoft
+        - generic [ref=e103]:
+          - generic [ref=e104]:
+            - generic [ref=e107]:
+              - generic: Email
+              - textbox "Email Email" [ref=e108]
+            - alert [ref=e109]
+          - generic [ref=e111]:
+            - generic [ref=e114]:
+              - generic: Password
+              - textbox "Password Password" [ref=e115]
+            - alert [ref=e116]
+          - button "Forgot password?" [ref=e119] [cursor=pointer]:
+            - generic [ref=e120]: Forgot password?
+          - button "Sign In" [ref=e121] [cursor=pointer]:
+            - generic [ref=e122]: Sign In
+```
