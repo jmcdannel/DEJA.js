@@ -250,6 +250,15 @@ function handleBack() {
         >
           Topic: {{ device?.topic }}
         </v-chip>
+        <v-chip
+          v-if="device?.host"
+          size="small"
+          :color="color.value"
+          prepend-icon="mdi-ip-network"
+          variant="outlined"
+        >
+          Host: {{ device?.host }}
+        </v-chip>
         <!-- Connection Status -->
         <v-chip
           v-if="['usb', 'wifi'].includes(device?.connection || '')"
@@ -268,6 +277,36 @@ function handleBack() {
       </div>
       
       <v-divider class="mb-6"></v-divider>
+
+      <!-- 🌐 WLED Configuration -->
+      <template v-if="device?.type === 'wled'">
+        <div class="text-subtitle-2 font-weight-bold mb-2">
+          <v-icon icon="mdi-led-strip-variant" size="small" class="mr-1" />
+          WLED Configuration
+        </div>
+        <v-text-field
+          :model-value="device?.host || ''"
+          label="Host IP Address"
+          variant="outlined"
+          density="compact"
+          placeholder="192.168.86.35"
+          hint="IP address of the WLED device on your network"
+          persistent-hint
+          prepend-inner-icon="mdi-ip-network"
+          class="mb-4"
+          @update:model-value="updateDevice(deviceId, { host: $event })"
+        />
+        <v-chip
+          v-if="(device as any)?.wledInfo"
+          size="small"
+          prepend-icon="mdi-information"
+          variant="outlined"
+          class="mb-4"
+        >
+          {{ (device as any)?.wledInfo?.name }} · {{ (device as any)?.wledInfo?.ledCount }} LEDs · v{{ (device as any)?.wledInfo?.version }}
+        </v-chip>
+        <v-divider class="mb-6" />
+      </template>
 
       <!-- 🔧 Track Output Configuration (DCC-EX devices only) -->
       <TrackOutputConfig
