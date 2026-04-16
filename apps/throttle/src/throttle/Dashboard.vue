@@ -8,7 +8,7 @@ import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
 import { ConsistIndicator, LocoNumberPlate, FunctionsSpeedDial } from '@repo/ui'
 import { ROADNAMES } from '@repo/modules'
 import { useThrottle } from '@/throttle/useThrottle'
-import { useHaptics } from '@/composables/useHaptics'
+import { useHaptics } from '@repo/ui'
 
 const props = defineProps({
   address: { type: Number, required: true },
