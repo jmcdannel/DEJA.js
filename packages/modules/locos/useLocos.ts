@@ -169,16 +169,13 @@ export function useLocos() {
     log.debug('dejaCloud createLoco', address)
     try {
       const functions = hasSound ? soundLocoDefaultFunctions : silentLocoDefaultFunctions
-      const loco: Record<string, unknown> = {
+      const loco = {
         address,
         name,
         hasSound,
         functions,
-        meta: {},
+        meta: roadname ? { roadname } : {},
         timestamp: serverTimestamp(),
-      }
-      if (roadname) {
-        loco.meta = { roadname }
       }
       await setDoc(
         doc(db, `layouts/${layoutId.value}/locos`, address.toString()),
