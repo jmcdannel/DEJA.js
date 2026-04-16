@@ -14,6 +14,7 @@ import {
   writeOutputPowerState,
   writeAllOutputsPowerState,
 } from './trackOutputs.js'
+import wled from './wled.js'
 
 // Command pooling state for each connection
 interface CommandPool {
@@ -266,6 +267,17 @@ export async function connectDevice({
     const device = _devices.find((d) => d.id === deviceId)
     if (!device) {
       log.error('[LAYOUT] Device not found', device)
+      return
+    }
+    // WLED devices connect via WebSocket directly (not MQTT)
+    if (device.type === 'wled' && device.connection === 'wifi') {
+      const host = (device as any).host
+      const port = (device as any).port ?? 80
+      if (host) {
+        await wled.connectDevice({ id: device.id, host, port })
+      } else {
+        log.error('[LAYOUT] WLED device missing host:', device.id)
+      }
       return
     }
     if (device.connection === 'usb' && serial) {

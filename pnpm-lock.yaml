@@ -414,6 +414,9 @@ importers:
       '@repo/sounds':
         specifier: workspace:*
         version: link:../../packages/sounds
+      '@repo/wled':
+        specifier: workspace:*
+        version: link:../../packages/wled
       '@sentry/node':
         specifier: ^8.0.0
         version: 8.55.0
