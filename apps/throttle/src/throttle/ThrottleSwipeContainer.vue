@@ -79,7 +79,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="containerRef" class="swipe-container">
+  <div ref="containerRef" class="swipe-container" @touchstart.stop>
     <div
       v-for="(throttle, index) in throttles"
       :key="throttle.address"

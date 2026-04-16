@@ -167,7 +167,6 @@ async function clearLoco() {
         <section class="flex flex-col items-center justify-around flex-1 rounded-lg border border-white/10 bg-white/[0.03] py-2">
           <ConsistIndicator v-if="showConsist && loco" :loco="loco" />
           <FunctionsSpeedDial v-if="loco && showFunctions" :loco="loco" />
-          <RoadnameLogo v-if="loco" :roadname="loco.meta?.roadname" size="lg" />
         </section>
 
         <!-- Right col: Slider controls -->
