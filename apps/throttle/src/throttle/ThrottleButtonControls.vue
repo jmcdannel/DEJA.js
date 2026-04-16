@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { ref } from 'vue'
-  import { useHaptics } from '@/composables/useHaptics'
+  import { useHaptics } from '@repo/ui'
 
   const props = defineProps({
     disabled: {

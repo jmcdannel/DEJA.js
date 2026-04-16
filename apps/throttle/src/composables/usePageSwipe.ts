@@ -1,7 +1,7 @@
 import { type Ref } from 'vue'
 import { useSwipe, type UseSwipeDirection } from '@vueuse/core'
 import { useRoute } from 'vue-router'
-import { useHaptics } from './useHaptics'
+import { useHaptics } from '@repo/ui'
 import { useMenu } from '@/core/Menu/useMenu'
 
 export function usePageSwipe(
