@@ -1062,6 +1062,9 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
+      '@repo/wled':
+        specifier: workspace:*
+        version: link:../wled
       typescript:
         specifier: latest
         version: 5.9.3

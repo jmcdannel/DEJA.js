@@ -155,6 +155,7 @@ export interface Device {
     | 'deja-mqtt'
     | 'deja-mqtt-diy'
     | 'deja-server'
+    | 'wled'
   order?: number
 }
 

@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@repo/dccex": "workspace:*",
+    "@repo/wled": "workspace:*",
     "@repo/deja": "workspace:*",
     "@repo/eslint-config": "workspace:*",
     "@repo/firebase-config": "workspace:*",
