@@ -12,7 +12,7 @@ import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import SoundFileList from '@/Effects/Sounds/SoundFileList.vue'
 import DevicePicker from '@/Layout/Devices/DevicePicker.vue'
-import { WledEffectForm } from '@repo/wled/components'
+import { WledEffectForm } from '@repo/wled/src/components/index'
 
 const log = createLogger('EffectForm')
 // TODO: icon picker
