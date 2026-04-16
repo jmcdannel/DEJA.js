@@ -1,50 +1,99 @@
+<!-- packages/ui/src/Functions/SpeedDial.vue -->
 <script setup lang="ts">
-  import { ref, type PropType } from 'vue'
-  import FunctionButton from './FunctionButton.vue'
-  import FunctionList from './FunctionList.vue'
-  import type { Loco } from '@repo/modules/locos'
+import { ref, computed, type PropType } from 'vue'
+import { useDisplay } from 'vuetify'
+import FunctionButton from './FunctionButton.vue'
+import SoundButton from './SoundButton.vue'
+import FunctionList from './FunctionList.vue'
+import type { Loco, LocoFunction } from '@repo/modules/locos'
+import { soundSlotDefaults, type SoundSlot } from '@repo/modules/locos'
 
-defineProps({
-    loco: {
-      type: Object as PropType<Loco>,
-      required: true
-    }
-  })
-  const emit = defineEmits(['saveLoco'])
+type DccSlot = { kind: 'dcc'; func: LocoFunction }
+type SoundSlotItem = { kind: 'sound'; slot: SoundSlot }
+type SpeedDialSlot = DccSlot | SoundSlotItem
 
-  defineExpose({
-    openAll: () => listRef?.value?.showModal(),
-  })
+const props = defineProps({
+  loco: {
+    type: Object as PropType<Loco>,
+    required: true,
+  },
+})
 
-  const listRef = ref<HTMLDialogElement | null>(null)
-  
-  function openAllFunctions() {
-    listRef?.value?.showModal()
+defineEmits(['saveLoco'])
+
+const { mobile } = useDisplay()
+const listRef = ref<{ showModal: () => void } | null>(null)
+
+function openAllFunctions() {
+  listRef?.value?.showModal()
+}
+
+defineExpose({
+  openAll: () => listRef?.value?.showModal(),
+})
+
+const slots = computed<SpeedDialSlot[]>(() => {
+  const favorites = props.loco.functions?.filter(f => f.isFavorite) ?? []
+
+  if (props.loco.hasSound) {
+    // Sound loco: show all favorited DCC functions
+    return favorites.map(func => ({ kind: 'dcc' as const, func }))
   }
 
+  // Silent loco: DCC favorites + pad with sound slots up to 9 total
+  const dccSlots: SpeedDialSlot[] = favorites.map(func => ({ kind: 'dcc' as const, func }))
+  const soundPadding = Math.max(0, 9 - dccSlots.length)
+  const soundSlots: SpeedDialSlot[] = soundSlotDefaults
+    .slice(0, soundPadding)
+    .map(slot => ({ kind: 'sound' as const, slot }))
+  return [...dccSlots, ...soundSlots]
+})
 </script>
+
 <template>
   <template v-if="loco">
     <section class="flex flex-col flex-grow justify-center">
-      <!-- <pre>{{ functions }}</pre> -->
-      <ul class="grid grid-cols-3 justify-center mx-2 items-center gap-1">
-        <li v-for="(locoFunc, addressx) in loco.functions?.filter(lf => lf.isFavorite)" :key="locoFunc.id">
-          <!-- <pre>{{ locoFunc }}</pre> -->
-          <FunctionButton :func="locoFunc" :address="loco.address" class="w-full" />
+      <ul
+        :class="[
+          'grid',
+          mobile ? 'grid-cols-2' : 'grid-cols-3',
+          'justify-center',
+          'mx-2',
+          'items-center',
+          'gap-1',
+        ]"
+      >
+        <li v-for="(item, idx) in slots" :key="idx">
+          <FunctionButton
+            v-if="item.kind === 'dcc'"
+            :func="item.func"
+            :address="loco.address"
+            class="w-full"
+          />
+          <SoundButton
+            v-else
+            :sound-slot="item.slot"
+            class="w-full"
+          />
         </li>
-        <li class="col-span-3">
-          <v-btn @click="openAllFunctions()"
-            prepend-icon="mdi-more"
-            class="relative  w-full bg-gradient-to-br from-green-600 to-teal-600 w-full p-2">
-            View All
-          </v-btn>  
+
+        <!-- "..." button — col-span-2 on mobile, col-span-3 on desktop, centered -->
+        <li :class="mobile ? 'col-span-2 flex justify-center' : 'col-span-3 flex justify-center'">
+          <v-btn
+            icon="mdi-dots-horizontal"
+            class="rounded-full border border-cyan-400/60 fn-btn-bg w-12 h-12"
+            @click="openAllFunctions()"
+          />
         </li>
       </ul>
     </section>
-    <!-- <pre>{{ loco.functions?.filter(lf => lf.isFavorite) }}</pre> -->
-    <FunctionList
-      ref="listRef"
-      :loco="loco"
-    />
+
+    <FunctionList ref="listRef" :loco="loco" />
   </template>
 </template>
+
+<style scoped>
+.fn-btn-bg {
+  background: rgba(var(--v-theme-surface), 0.8);
+}
+</style>
