@@ -36,6 +36,12 @@ describe('soundLocoDefaultFunctions', () => {
     expect(soundLocoDefaultFunctions[8].isMomentary).toBe(false)
   })
 
+  it('F4 Dyn Brake, F5 Dim Lights, F6 Cab Light are not momentary', () => {
+    expect(soundLocoDefaultFunctions[4].isMomentary).toBe(false)
+    expect(soundLocoDefaultFunctions[5].isMomentary).toBe(false)
+    expect(soundLocoDefaultFunctions[6].isMomentary).toBe(false)
+  })
+
   it('F7 is bare (not a favorite)', () => {
     const f7 = soundLocoDefaultFunctions[7]
     expect(f7.label).toBe('F7')
