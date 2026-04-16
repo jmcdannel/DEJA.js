@@ -48,7 +48,7 @@ useSwipe(throttleNavRef, {
     },
   },)
 
-const { variant, showFunctions, showSpeedometer, showConsist } = useThrottleSettings()
+const { variant, speedDisplayType, showFunctions, showSpeedometer, showConsist } = useThrottleSettings()
 
 const variantMap = {
   buttons: ButtonsThrottle,
@@ -62,6 +62,7 @@ const settingsProps = computed(() => ({
   showFunctions: showFunctions.value,
   showSpeedometer: showSpeedometer.value,
   showConsist: showConsist.value,
+  speedDisplayType: speedDisplayType.value,
 }))
 
 watch(() => route.params.address, (newVal) => {

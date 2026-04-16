@@ -22,8 +22,8 @@ const { themePreference, setTheme } = useThemeSwitcher()
 const { mdAndUp } = useDisplay()
 
 const {
-  variant, showFunctions, showSpeedometer, showConsist,
-  setVariant, setShowFunctions, setShowSpeedometer, setShowConsist,
+  variant, speedDisplayType, showFunctions, showSpeedometer, showConsist,
+  setVariant, setSpeedDisplayType, setShowFunctions, setShowSpeedometer, setShowConsist,
 } = useThrottleSettings()
 
 const {
@@ -289,6 +289,25 @@ const backgroundPages = [
             </div>
             <div class="settings-row__value">
               <v-switch :model-value="showSpeedometer" @update:model-value="(v) => setShowSpeedometer(!!v)" color="primary" density="compact" hide-details />
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row__label">
+              <span class="settings-row__name">Speed Display</span>
+              <span class="settings-row__desc">Choose between round gauge dial or digital number readout</span>
+            </div>
+            <div class="settings-row__value">
+              <v-btn-toggle
+                :model-value="speedDisplayType"
+                @update:model-value="(v: string) => v && setSpeedDisplayType(v as 'dial' | 'digital')"
+                mandatory
+                density="compact"
+                color="primary"
+                variant="outlined"
+              >
+                <v-btn value="dial" size="small">🎛️ Dial</v-btn>
+                <v-btn value="digital" size="small">🔢 Digital</v-btn>
+              </v-btn-toggle>
             </div>
           </div>
           <div class="settings-row">

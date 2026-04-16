@@ -4,9 +4,11 @@ export interface AppBackgroundPrefs {
 }
 
 export type ThrottleVariant = 'buttons' | 'slider' | 'dashboard'
+export type SpeedDisplayType = 'dial' | 'digital'
 
 export interface ThrottleSettings {
   variant: ThrottleVariant
+  speedDisplayType: SpeedDisplayType
   showFunctions: boolean
   showSpeedometer: boolean
   showConsist: boolean
