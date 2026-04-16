@@ -15,7 +15,7 @@ import { useCollection, useDocument } from 'vuefire'
 import { db } from '@repo/firebase-config'
 import { createLogger } from '@repo/utils'
 import type { Loco, ConsistLoco, LocoFunction, LocoThrottle, Throttle } from './types'
-import { ROADNAMES } from './constants'
+import { ROADNAMES, soundLocoDefaultFunctions, silentLocoDefaultFunctions } from './constants'
 
 const log = createLogger('Locos')
 
@@ -168,24 +168,26 @@ export function useLocos() {
   ): Promise<number | undefined> {
     log.debug('dejaCloud createLoco', address)
     try {
-      const loco = {
+      const functions = hasSound ? soundLocoDefaultFunctions : silentLocoDefaultFunctions
+      const loco: Record<string, unknown> = {
         address,
         name,
         hasSound,
+        functions,
         meta: {},
         timestamp: serverTimestamp(),
       }
       if (roadname) {
         loco.meta = { roadname }
       }
-      const newLocoDoc =await setDoc(
+      await setDoc(
         doc(db, `layouts/${layoutId.value}/locos`, address.toString()),
         loco
       )
-      log.debug('loco written with ID: ', address, newLocoDoc)
+      log.debug('loco written with ID: ', address)
       return address
     } catch (e) {
-      log.error('Error adding throttle: ', e)
+      log.error('Error adding loco: ', e)
     }
   }
 
