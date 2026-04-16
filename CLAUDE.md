@@ -140,7 +140,7 @@ When the `preview` branch has been tested on staging and is ready to ship:
 1. **Update docs if UI changed** — run `/update-docs` to capture screenshots and update MDX docs
 2. **Create a changeset entry** — run `/changelog` on the `preview` branch (see below)
 3. **Use the `/commit-push-pr` slash command** — detects `preview` branch and targets `main`
-4. CI runs `changeset-check` + `docs-check` + `claude-code-review` — all must pass
+4. CI runs `changeset-check` + `claude-code-review` — all must pass
 5. Merge → production Vercel deploy + changelog bot processes all accumulated changesets
 
 ### Worktree & Branch Cleanup
@@ -222,7 +222,6 @@ When UI changes are made, update screenshots and MDX docs **before the `preview 
 
 - Run `/capture-screenshots [app]` to capture fresh screenshots of app views
 - Run `/update-docs` to auto-detect changed apps, capture screenshots, and update MDX docs
-- The CI `docs-check` workflow will block the `preview → main` PR if UI files changed without updated docs
 
 **Screenshots** are saved to `apps/dejajs-www/public/screenshots/` using the naming convention `{app}_{desktop|mobile}_{view-name}.png`.
 
