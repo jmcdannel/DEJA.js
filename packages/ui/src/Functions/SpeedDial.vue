@@ -19,28 +19,24 @@ const props = defineProps({
   },
 })
 
-defineEmits(['saveLoco'])
-
 const { mobile } = useDisplay()
 const listRef = ref<{ showModal: () => void } | null>(null)
 
-function openAllFunctions() {
+function openAll() {
   listRef?.value?.showModal()
 }
 
-defineExpose({
-  openAll: () => listRef?.value?.showModal(),
-})
+defineExpose({ openAll })
 
 const slots = computed<SpeedDialSlot[]>(() => {
   const favorites = props.loco.functions?.filter(f => f.isFavorite) ?? []
 
   if (props.loco.hasSound) {
-    // Sound loco: show all favorited DCC functions
+    // DCC sound decoder: show all favorited functions — user controls sounds via DCC
     return favorites.map(func => ({ kind: 'dcc' as const, func }))
   }
 
-  // Silent loco: DCC favorites + pad with sound slots up to 9 total
+  // No onboard sound: show DCC favorites + pad with software sound buttons up to 9 total
   const dccSlots: SpeedDialSlot[] = favorites.map(func => ({ kind: 'dcc' as const, func }))
   const soundPadding = Math.max(0, 9 - dccSlots.length)
   const soundSlots: SpeedDialSlot[] = soundSlotDefaults
@@ -63,7 +59,7 @@ const slots = computed<SpeedDialSlot[]>(() => {
           'gap-1',
         ]"
       >
-        <li v-for="(item, idx) in slots" :key="idx">
+        <li v-for="item in slots" :key="item.kind === 'dcc' ? `dcc-${item.func.id}` : `sound-${item.slot.soundKey}`">
           <FunctionButton
             v-if="item.kind === 'dcc'"
             :func="item.func"
@@ -82,7 +78,7 @@ const slots = computed<SpeedDialSlot[]>(() => {
           <v-btn
             icon="mdi-dots-horizontal"
             class="rounded-full border border-cyan-400/60 fn-btn-bg w-12 h-12"
-            @click="openAllFunctions()"
+            @click="openAll()"
           />
         </li>
       </ul>
