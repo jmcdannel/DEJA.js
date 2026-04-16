@@ -1,7 +1,6 @@
 <!-- packages/ui/src/Functions/SpeedDial.vue -->
 <script setup lang="ts">
 import { ref, computed, type PropType } from 'vue'
-import { useDisplay } from 'vuetify'
 import FunctionButton from './FunctionButton.vue'
 import SoundButton from './SoundButton.vue'
 import FunctionList from './FunctionList.vue'
@@ -19,7 +18,6 @@ const props = defineProps({
   },
 })
 
-const { mobile } = useDisplay()
 const listRef = ref<{ showModal: () => void } | null>(null)
 
 function openAll() {
@@ -49,16 +47,7 @@ const slots = computed<SpeedDialSlot[]>(() => {
 <template>
   <template v-if="loco">
     <section class="flex flex-col flex-grow justify-center">
-      <ul
-        :class="[
-          'grid',
-          mobile ? 'grid-cols-2' : 'grid-cols-3',
-          'justify-center',
-          'mx-2',
-          'items-center',
-          'gap-1',
-        ]"
-      >
+      <ul class="grid grid-cols-2 md:grid-cols-3 justify-center mx-2 items-center gap-1">
         <li v-for="item in slots" :key="item.kind === 'dcc' ? `dcc-${item.func.id}` : `sound-${item.slot.soundKey}`">
           <FunctionButton
             v-if="item.kind === 'dcc'"
@@ -73,8 +62,8 @@ const slots = computed<SpeedDialSlot[]>(() => {
           />
         </li>
 
-        <!-- "..." button — col-span-2 on mobile, col-span-3 on desktop, centered -->
-        <li :class="mobile ? 'col-span-2 flex justify-center' : 'col-span-3 flex justify-center'">
+        <!-- "..." button — plain on mobile, centered across all 3 cols on desktop -->
+        <li class="md:col-span-3 md:flex md:justify-center">
           <v-btn
             icon="mdi-dots-horizontal"
             class="rounded-full border border-cyan-400/60 fn-btn-bg w-12 h-12"
