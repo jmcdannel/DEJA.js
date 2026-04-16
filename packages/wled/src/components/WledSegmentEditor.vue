@@ -26,10 +26,6 @@ function segmentColor(index: number): string {
   return SEGMENT_COLORS[index % SEGMENT_COLORS.length]
 }
 
-function rgbToHex([r, g, b]: [number, number, number]): string {
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
-}
-
 // 📐 Calculate total LEDs for proportional strip
 const totalLeds = computed(() => {
   if (props.segments.length === 0) return 30

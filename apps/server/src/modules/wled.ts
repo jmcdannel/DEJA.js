@@ -1,5 +1,5 @@
 import { WledClient } from '@repo/wled/client'
-import type { WledEffectConfig, WledSegmentConfig } from '@repo/wled/types'
+import { rgbToTuple, type WledEffectConfig, type WledSegmentConfig } from '@repo/wled/types'
 import type { Effect } from '@repo/modules'
 import { db } from '@repo/firebase-config/firebase-admin-node'
 import { log } from '../utils/logger.js'
@@ -92,7 +92,7 @@ function buildWledPayload(effect: Effect): Record<string, unknown> {
       stop: seg.stop,
       fx: seg.effectId,
       pal: seg.paletteId,
-      col: seg.colors,
+      col: seg.colors.map(rgbToTuple),
       sx: seg.speed,
       ix: seg.intensity,
       bri: seg.brightness,

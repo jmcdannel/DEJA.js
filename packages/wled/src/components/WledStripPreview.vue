@@ -46,8 +46,8 @@ const segmentDisplays = computed<SegmentDisplay[]>(() => {
   })
 })
 
-function rgbToHex([r, g, b]: [number, number, number]): string {
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+function rgbToHex(c: { r: number; g: number; b: number }): string {
+  return `#${c.r.toString(16).padStart(2, '0')}${c.g.toString(16).padStart(2, '0')}${c.b.toString(16).padStart(2, '0')}`
 }
 </script>
 

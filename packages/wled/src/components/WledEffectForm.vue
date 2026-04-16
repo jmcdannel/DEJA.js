@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import type { WledEffectConfig, WledSegmentConfig } from '../types/config'
-import { createDefaultWledConfig } from '../types/config'
+import { ref, computed, watch, nextTick } from 'vue'
+import type { WledEffectConfig } from '../types/config'
+import { createDefaultWledConfig, type RgbColor } from '../types/config'
 import { useWledSegments } from '../composables/useWledSegments'
 import { WLED_EFFECTS } from '../constants/effects'
 import { WLED_PALETTES } from '../constants/palettes'
@@ -21,7 +21,8 @@ const emit = defineEmits<{
 }>()
 
 const config = ref<WledEffectConfig>(
-  props.modelValue ? { ...props.modelValue, segments: [...props.modelValue.segments] }
+  props.modelValue
+    ? JSON.parse(JSON.stringify(props.modelValue))
     : createDefaultWledConfig()
 )
 
@@ -36,24 +37,34 @@ const {
 
 const activeSeg = computed(() => segments.value[activeSegmentIndex.value])
 
-// Sync segments back to config and emit
-watch(
-  [segments, () => config.value.brightness, () => config.value.transition],
-  () => {
-    config.value.segments = [...segments.value]
-    emit('update:modelValue', { ...config.value })
-  },
-  { deep: true }
-)
+// Convert RgbColor[] → tuple[] for the color picker
+const activeSegColors = computed(() => {
+  if (!activeSeg.value) return [[255, 0, 128], [0, 0, 0], [0, 0, 0]] as [number, number, number][]
+  return activeSeg.value.colors.map((c: RgbColor) => [c.r, c.g, c.b] as [number, number, number])
+})
 
-// Initialize from prop changes
+// Guard against recursive emit loops
+let isUpdatingFromProp = false
+
+// Emit config changes (debounced via nextTick to batch updates)
+function emitConfig() {
+  if (isUpdatingFromProp) return
+  config.value.segments = [...segments.value]
+  emit('update:modelValue', JSON.parse(JSON.stringify(config.value)))
+}
+
+// Watch segments for changes and emit
+watch(segments, emitConfig, { deep: true })
+
+// Initialize from prop changes (external updates only)
 watch(
   () => props.modelValue,
   (newVal) => {
-    if (newVal) {
-      config.value = { ...newVal, segments: [...newVal.segments] }
-      segments.value = [...newVal.segments]
-    }
+    if (!newVal) return
+    isUpdatingFromProp = true
+    config.value = JSON.parse(JSON.stringify(newVal))
+    segments.value = [...config.value.segments]
+    nextTick(() => { isUpdatingFromProp = false })
   }
 )
 
@@ -67,7 +78,8 @@ function handlePaletteChange(paletteId: number) {
   updateSegment(activeSegmentIndex.value, { paletteId, paletteName })
 }
 
-function handleColorChange(colors: [number, number, number][]) {
+function handleColorChange(tuples: [number, number, number][]) {
+  const colors: RgbColor[] = tuples.map(([r, g, b]) => ({ r, g, b }))
   updateSegment(activeSegmentIndex.value, { colors })
 }
 
@@ -79,8 +91,14 @@ function handleIntensityChange(intensity: number) {
   updateSegment(activeSegmentIndex.value, { intensity })
 }
 
-function handleSegBrightnessChange(brightness: number) {
-  updateSegment(activeSegmentIndex.value, { brightness })
+function handleBrightnessChange(brightness: number) {
+  config.value.brightness = brightness
+  emitConfig()
+}
+
+function handleTransitionChange(transition: number) {
+  config.value.transition = transition
+  emitConfig()
 }
 
 function handleToggleOn(index: number) {
@@ -100,7 +118,7 @@ function handleToggleOn(index: number) {
           <div class="wled-form__section-label">Color</div>
           <WledColorPicker
             v-if="activeSeg"
-            :model-value="activeSeg.colors"
+            :model-value="activeSegColors"
             @update:model-value="handleColorChange"
           />
         </div>
@@ -113,7 +131,7 @@ function handleToggleOn(index: number) {
               icon="☀️"
               :model-value="config.brightness"
               accent-color="#ff0080"
-              @update:model-value="config.brightness = $event"
+              @update:model-value="handleBrightnessChange"
             />
             <WledSlider
               v-if="activeSeg"
@@ -175,7 +193,7 @@ function handleToggleOn(index: number) {
             :model-value="config.transition"
             :max="100"
             accent-color="#a78bfa"
-            @update:model-value="config.transition = $event"
+            @update:model-value="handleTransitionChange"
           />
           <div class="wled-form__transition-hint">
             {{ (config.transition * 0.1).toFixed(1) }}s crossfade

@@ -53,7 +53,12 @@ const { isConnected: deviceConnected, offlineReason } = useDeviceStatus(
 const hasDevice = computed(() => !!deviceIdRef.value)
 const isDeviceOffline = computed(() => hasDevice.value && !deviceConnected.value)
 
-const effectiveDisabled = computed(() => props.disabled || isDeviceOffline.value)
+/** Only force-disabled via prop (e.g. command in flight). Device offline
+ *  state is exposed so consumers can disable individual controls (like the
+ *  toggle switch) without disabling the whole card. */
+const effectiveDisabled = computed(() => props.disabled)
+
+defineExpose({ isDeviceOffline })
 </script>
 
 <template>
@@ -80,7 +85,7 @@ const effectiveDisabled = computed(() => props.disabled || isDeviceOffline.value
       </div>
 
       <div class="list-item-card__status">
-        <slot name="status" />
+        <slot name="status" :device-offline="isDeviceOffline" />
       </div>
     </div>
 

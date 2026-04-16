@@ -1,3 +1,20 @@
+/** RGB color object — Firestore-safe (no nested arrays) */
+export interface RgbColor {
+  r: number
+  g: number
+  b: number
+}
+
+/** Convert RgbColor to [r, g, b] tuple for WLED JSON API */
+export function rgbToTuple(c: RgbColor): [number, number, number] {
+  return [c.r, c.g, c.b]
+}
+
+/** Convert [r, g, b] tuple to RgbColor */
+export function tupleToRgb(t: [number, number, number]): RgbColor {
+  return { r: t[0], g: t[1], b: t[2] }
+}
+
 /** Stored on Effect.wled — the full WLED animation configuration */
 export interface WledEffectConfig {
   brightness: number
@@ -13,7 +30,7 @@ export interface WledSegmentConfig {
   effectName: string
   paletteId: number
   paletteName: string
-  colors: [number, number, number][]
+  colors: RgbColor[]
   speed: number
   intensity: number
   brightness: number
@@ -34,7 +51,7 @@ export function createDefaultSegmentConfig(
     effectName: 'Solid',
     paletteId: 0,
     paletteName: 'Default',
-    colors: [[255, 0, 128], [0, 0, 0], [0, 0, 0]],
+    colors: [{ r: 255, g: 0, b: 128 }, { r: 0, g: 0, b: 0 }, { r: 0, g: 0, b: 0 }],
     speed: 128,
     intensity: 128,
     brightness: 255,
