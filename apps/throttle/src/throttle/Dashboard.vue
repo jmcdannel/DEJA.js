@@ -234,7 +234,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main v-if="throttle" class="@container proto-throttle-wrapper flex flex-col gap-2 p-2 overflow-hidden w-full h-full flex-1 relative">
+  <main v-if="address" class="@container proto-throttle-wrapper flex flex-col gap-2 p-2 overflow-hidden w-full h-full flex-1 relative">
     <!-- Header -->
     <ThrottleHeader class="bg-gradient-to-r from-slate-700/20 to-blue-900/20">
       <template v-slot:left>
