@@ -104,6 +104,10 @@ function handleTransitionChange(transition: number) {
 function handleToggleOn(index: number) {
   updateSegment(index, { on: !segments.value[index].on })
 }
+
+function handleUpdateRange(index: number, start: number, stop: number) {
+  updateSegment(index, { start, stop })
+}
 </script>
 
 <template>
@@ -182,6 +186,7 @@ function handleToggleOn(index: number) {
             @add="addSegment"
             @remove="removeSegment"
             @toggle-on="handleToggleOn"
+            @update-range="handleUpdateRange"
           />
         </div>
 

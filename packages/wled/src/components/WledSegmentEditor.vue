@@ -14,6 +14,7 @@ const emit = defineEmits<{
   add: []
   remove: [index: number]
   toggleOn: [index: number]
+  updateRange: [index: number, start: number, stop: number]
 }>()
 
 // 🎨 Segment color palette — cycles through these
@@ -122,7 +123,26 @@ const ledLabels = computed(() => {
           />
           <div class="segment-text">
             <div class="segment-title">Segment {{ i }}</div>
-            <div class="segment-meta">
+            <!-- Editable range when active -->
+            <div v-if="i === activeIndex" class="segment-range" @click.stop>
+              <label class="range-label">Start</label>
+              <input
+                type="number"
+                class="range-input"
+                :value="seg.start"
+                min="0"
+                @change="emit('updateRange', i, Number(($event.target as HTMLInputElement).value), seg.stop)"
+              />
+              <label class="range-label">Stop</label>
+              <input
+                type="number"
+                class="range-input"
+                :value="seg.stop"
+                min="1"
+                @change="emit('updateRange', i, seg.start, Number(($event.target as HTMLInputElement).value))"
+              />
+            </div>
+            <div v-else class="segment-meta">
               LED {{ seg.start }}–{{ seg.stop }}
               · {{ seg.effectName }}
               · {{ seg.paletteName }}
@@ -272,6 +292,37 @@ const ledLabels = computed(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.segment-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.range-label {
+  font-size: 10px;
+  color: #8b8ba0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.range-input {
+  width: 56px;
+  padding: 3px 6px;
+  background: #1a1a2e;
+  border: 1px solid #2d2d44;
+  border-radius: 4px;
+  color: #e2e8f0;
+  font: 12px/1.2 monospace;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.range-input:focus {
+  border-color: #ff0080;
+  box-shadow: 0 0 6px rgba(255, 0, 128, 0.2);
 }
 
 /* Actions area */
