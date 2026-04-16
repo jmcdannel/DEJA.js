@@ -61,6 +61,35 @@ export const defaultFunctions: LocoFunction[] = Array.from({ length: 32 }, (_, i
   isMomentary: false,
 }))
 
+export const soundLocoDefaultFunctions: LocoFunction[] = Array.from({ length: 32 }, (_, id) => {
+  const presets: Record<number, Partial<LocoFunction>> = {
+    0: { label: 'Light',      icon: 'light',   isFavorite: true, isMomentary: false },
+    1: { label: 'Bell',       icon: 'bell',    isFavorite: true, isMomentary: true  },
+    2: { label: 'Horn',       icon: 'horn',    isFavorite: true, isMomentary: true  },
+    3: { label: 'Coupler',    icon: 'coupler', isFavorite: true, isMomentary: true  },
+    4: { label: 'Dyn Brake',  icon: 'brake',   isFavorite: true, isMomentary: false },
+    5: { label: 'Dim Lights', icon: 'dim',     isFavorite: true, isMomentary: false },
+    6: { label: 'Cab Light',  icon: 'light',   isFavorite: true, isMomentary: false },
+    8: { label: 'Mute',       icon: 'mute',    isFavorite: true, isMomentary: false },
+    9: { label: 'Start-Up',   icon: 'sound',   isFavorite: true, isMomentary: true  },
+  }
+  return {
+    id,
+    label:       presets[id]?.label       ?? `F${id}`,
+    icon:        presets[id]?.icon        ?? null,
+    isFavorite:  presets[id]?.isFavorite  ?? false,
+    isMomentary: presets[id]?.isMomentary ?? false,
+  }
+})
+
+export const silentLocoDefaultFunctions: LocoFunction[] = Array.from({ length: 32 }, (_, id) => ({
+  id,
+  label:       id === 0 ? 'Light' : `F${id}`,
+  icon:        id === 0 ? 'light' : null,
+  isFavorite:  id === 0,
+  isMomentary: false,
+}))
+
 export const FUNCTION_ICONS = [
   { name: 'light', icon: 'mdi-car-light-high' },
   { name: 'bell', icon: 'mdi-bell' },
