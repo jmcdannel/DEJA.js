@@ -53,6 +53,8 @@ async function activate() {
 async function deactivate() {
   if (!isActive.value) return
   isActive.value = false
+  // For momentary: send state: false to stop sound
+  // For latching: only send state: false when explicitly toggled off (not on pointerup)
   if (props.soundSlot.isMomentary) {
     await runEffect({
       id: props.soundSlot.label,
@@ -63,26 +65,61 @@ async function deactivate() {
   }
 }
 
+async function deactivateLatching() {
+  if (!isActive.value) return
+  isActive.value = false
+  await runEffect({
+    id: props.soundSlot.label,
+    type: 'sound',
+    soundBlobUrl: props.soundSlot.soundKey,
+    state: false,
+  })
+}
+
 function handlePointerDown(event: PointerEvent) {
   event.preventDefault()
   if (typeof event.pointerId === 'number') {
     (event.currentTarget as HTMLElement)?.setPointerCapture?.(event.pointerId)
   }
-  activate()
+  if (props.soundSlot.isMomentary) {
+    activate()
+  } else {
+    // Latching: toggle on press
+    if (isActive.value) {
+      deactivateLatching()
+    } else {
+      activate()
+    }
+  }
 }
 
 function handlePointerUp(event: PointerEvent) {
   if (typeof event.pointerId === 'number') {
     (event.currentTarget as HTMLElement)?.releasePointerCapture?.(event.pointerId)
   }
-  deactivate()
+  // Only deactivate on release for momentary sounds
+  if (props.soundSlot.isMomentary) {
+    deactivate()
+  }
+}
+
+function handlePointerLeave(_event: PointerEvent) {
+  if (props.soundSlot.isMomentary) {
+    deactivate()
+  }
+}
+
+function handlePointerCancel(_event: PointerEvent) {
+  if (props.soundSlot.isMomentary) {
+    deactivate()
+  }
 }
 
 const sharedListeners = {
   onPointerdown: handlePointerDown,
   onPointerup: handlePointerUp,
-  onPointerleave: deactivate,
-  onPointercancel: deactivate,
+  onPointerleave: handlePointerLeave,
+  onPointercancel: handlePointerCancel,
 }
 </script>
 
