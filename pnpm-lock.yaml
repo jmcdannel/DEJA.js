@@ -129,6 +129,9 @@ importers:
       '@mdi/font':
         specifier: ^7.4.47
         version: 7.4.47
+      '@playwright/test':
+        specifier: ^1.44.0
+        version: 1.58.2
       '@repo/auth':
         specifier: workspace:^0.0.1
         version: link:../../packages/auth
