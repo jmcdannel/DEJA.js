@@ -1,3 +1,14 @@
+/**
+ * Backfill loco function defaults in Firestore based on loco.hasSound.
+ *
+ * Usage:
+ *   tsx scripts/migrate-loco-function-defaults.ts [--force]
+ *
+ * --force  Overwrite even locos that have been customized (isFavorite or non-default labels).
+ *
+ * Requires in .env:
+ *   LAYOUT_ID, VITE_FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY
+ */
 // scripts/migrate-loco-function-defaults.ts
 import { initializeApp, cert } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
@@ -44,6 +55,10 @@ async function migrate(force: boolean): Promise<void> {
         console.log(`⏭️  Skipped (customized): ${data.name || docSnap.id}`)
         skipped++
         continue
+      }
+
+      if (data.hasSound === undefined) {
+        console.log(`⚠️  hasSound not set, using silent defaults: ${data.name || docSnap.id}`)
       }
 
       const defaults = data.hasSound
