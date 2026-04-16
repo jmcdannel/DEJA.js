@@ -31,6 +31,7 @@ function paletteGlow(palette: typeof WLED_PALETTES[0], isActive: boolean): strin
       <button
         v-for="palette in WLED_PALETTES"
         :key="palette.id"
+        type="button"
         class="palette-row"
         :class="{ active: modelValue === palette.id }"
         @click="selectPalette(palette.id)"

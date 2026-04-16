@@ -37,6 +37,7 @@ function selectEffect(id: number) {
       <button
         v-for="effect in filteredEffects"
         :key="effect.id"
+        type="button"
         class="effect-pill"
         :class="{ active: modelValue === effect.id }"
         @click="selectEffect(effect.id)"

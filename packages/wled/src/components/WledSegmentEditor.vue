@@ -134,6 +134,7 @@ const ledLabels = computed(() => {
         <div class="segment-actions" @click.stop>
           <!-- Toggle switch -->
           <button
+            type="button"
             class="toggle-switch"
             :class="{ on: seg.on }"
             :style="seg.on ? { background: segmentColor(i) } : {}"
@@ -144,6 +145,7 @@ const ledLabels = computed(() => {
           </button>
           <!-- Remove button -->
           <button
+            type="button"
             class="remove-btn"
             :aria-label="`Remove segment ${i}`"
             @click="emit('remove', i)"
@@ -155,7 +157,7 @@ const ledLabels = computed(() => {
     </div>
 
     <!-- Add Segment button -->
-    <button class="add-segment-btn" @click="emit('add')">
+    <button type="button" class="add-segment-btn" @click="emit('add')">
       + Add Segment
     </button>
   </div>

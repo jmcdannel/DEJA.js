@@ -183,6 +183,7 @@ onMounted(() => {
       <button
         v-for="(label, i) in SLOT_LABELS"
         :key="i"
+        type="button"
         class="slot-btn"
         :class="{ active: activeSlot === i }"
         :style="activeSlot === i ? {
@@ -202,6 +203,7 @@ onMounted(() => {
       <button
         v-for="(color, i) in SWATCHES"
         :key="i"
+        type="button"
         class="swatch"
         :style="{
           background: rgbToHex(color),
