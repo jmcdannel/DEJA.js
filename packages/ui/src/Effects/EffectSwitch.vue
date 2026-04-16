@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useEfx, efxTypes, type Effect } from '@repo/modules'
+import { useHaptics } from '../composables/useHaptics'
 
 const { runEffect } = useEfx()
 
@@ -13,6 +14,12 @@ const props = defineProps<Props>()
 const state = defineModel('state', {
   type: Boolean
 })
+const { vibrate } = useHaptics()
+
+watch(state, () => {
+  vibrate('light')
+})
+
 const efxType = computed(() => efxTypes.find((type) => type.value === props?.effect?.type))
 
 </script>
