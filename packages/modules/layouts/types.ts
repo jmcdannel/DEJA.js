@@ -136,6 +136,8 @@ export interface Device {
   /** IP address or hostname for network-connected devices (e.g. WLED) */
   host?: string
   id: string
+  /** Total number of LEDs on the strip (WLED devices) */
+  ledCount?: number
   isConnected?: boolean
   lastConnected?: Date
   maxOutputs?: number

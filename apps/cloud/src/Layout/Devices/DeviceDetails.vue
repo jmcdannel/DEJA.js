@@ -284,18 +284,33 @@ function handleBack() {
           <v-icon icon="mdi-led-strip-variant" size="small" class="mr-1" />
           WLED Configuration
         </div>
-        <v-text-field
-          :model-value="device?.host || ''"
-          label="Host IP Address"
-          variant="outlined"
-          density="compact"
-          placeholder="192.168.86.35"
-          hint="IP address of the WLED device on your network"
-          persistent-hint
-          prepend-inner-icon="mdi-ip-network"
-          class="mb-4"
-          @update:model-value="updateDevice(deviceId, { host: $event })"
-        />
+        <div class="d-flex gap-4 mb-4">
+          <v-text-field
+            :model-value="device?.host || ''"
+            label="Host IP Address"
+            variant="outlined"
+            density="compact"
+            placeholder="192.168.86.35"
+            hint="IP address of the WLED device"
+            persistent-hint
+            prepend-inner-icon="mdi-ip-network"
+            class="flex-grow-1"
+            @update:model-value="updateDevice(deviceId, { host: $event })"
+          />
+          <v-text-field
+            :model-value="device?.ledCount || ''"
+            label="LED Count"
+            variant="outlined"
+            density="compact"
+            type="number"
+            placeholder="60"
+            hint="Total LEDs on the strip"
+            persistent-hint
+            prepend-inner-icon="mdi-led-strip"
+            style="max-width: 140px;"
+            @update:model-value="updateDevice(deviceId, { ledCount: Number($event) || undefined })"
+          />
+        </div>
         <v-chip
           v-if="(device as any)?.wledInfo"
           size="small"
