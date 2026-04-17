@@ -1,4 +1,5 @@
 import type { FeatureStage, FeatureName, UserRole } from './types'
+import featureFlags from './feature-flags.json'
 
 /** Stage access hierarchy — each role can see stages at or above its access level. */
 export const STAGE_ACCESS: Record<UserRole, FeatureStage[]> = {
@@ -8,18 +9,11 @@ export const STAGE_ACCESS: Record<UserRole, FeatureStage[]> = {
 }
 
 /**
- * Feature flag registry — maps feature names to their current release stage.
- * Typed as Record<FeatureName, FeatureStage> so TypeScript catches mismatches
- * when the FeatureName union is updated.
+ * Feature flag registry — loaded from feature-flags.json.
+ * To add/change flags, edit feature-flags.json — TypeScript derives
+ * the FeatureName type from its keys automatically.
  */
-export const FEATURE_FLAGS: Record<FeatureName, FeatureStage> = {
-  sounds: 'dev',
-  trackDiagrams: 'dev',
-  routes: 'dev',
-  sensors: 'dev',
-  tourApp: 'dev',
-  quickMenuFavorites: 'dev',
-}
+export const FEATURE_FLAGS = featureFlags as Record<FeatureName, FeatureStage>
 
 /**
  * Pure function to check feature accessibility.

@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useDisplay } from 'vuetify'
 import { useRoute } from 'vue-router'
 import type { MenuItem, SuiteApp } from './types'
+import ComingSoonBadge from '../ComingSoonBadge.vue'
 
 const props = defineProps<{
   drawer: boolean
@@ -89,23 +90,27 @@ const DEJA_SUITE_APPS = [
             v-for="item in group.items"
             :key="item.name"
             :active="false"
+            :disabled="item.gated"
             :class="[
               'py-0.5 min-h-8 transition-colors duration-150 menu-item',
-              isActive(item) ? 'menu-item--active' : '',
+              isActive(item) && !item.gated ? 'menu-item--active' : '',
+              item.gated ? 'menu-item--gated' : '',
             ]"
             link
-            @click="onHandleMenu(item)"
+            @click="!item.gated && onHandleMenu(item)"
           >
             <template #prepend>
               <v-icon
                 size="20"
                 :class="`text-${item.color}-500 dark:text-${item.color}-400 stroke-none mr-2`"
+                :style="item.gated ? 'opacity: 0.35' : ''"
               >
                 {{ item.icon }}
               </v-icon>
             </template>
-            <v-list-item-title :class="isActive(item) ? 'menu-item__title--active' : ''">
-              {{ item.label }}
+            <v-list-item-title :class="isActive(item) ? 'menu-item__title--active' : ''" class="flex items-center gap-2">
+              <span :style="item.gated ? 'opacity: 0.45' : ''">{{ item.label }}</span>
+              <ComingSoonBadge v-if="item.gated" size="x-small" variant="outlined" />
             </v-list-item-title>
           </v-list-item>
         </template>
@@ -114,21 +119,27 @@ const DEJA_SUITE_APPS = [
         <v-list-item
           v-for="item in ungroupedItems"
           :key="item.name"
-          :title="item.label"
           :color="item.color || 'primary'"
-          :active="route.name === item.name"
+          :active="!item.gated && route.name === item.name"
+          :disabled="item.gated"
           class="py-0.5 min-h-8"
+          :class="{ 'menu-item--gated': item.gated }"
           link
-          @click="onHandleMenu(item)"
+          @click="!item.gated && onHandleMenu(item)"
         >
           <template #prepend>
             <v-icon
               size="20"
               :class="`text-${item.color}-500 dark:text-${item.color}-400 stroke-none mr-2`"
+              :style="item.gated ? 'opacity: 0.35' : ''"
             >
               {{ item.icon }}
             </v-icon>
           </template>
+          <v-list-item-title class="flex items-center gap-2">
+            <span :style="item.gated ? 'opacity: 0.45' : ''">{{ item.label }}</span>
+            <ComingSoonBadge v-if="item.gated" size="x-small" variant="outlined" />
+          </v-list-item-title>
         </v-list-item>
 
       </v-list>
@@ -172,6 +183,12 @@ const DEJA_SUITE_APPS = [
 }
 :deep(.v-list-item--active > .v-list-item__overlay) {
   opacity: 0;
+}
+
+/* 🚩 Gated items — visible but clearly not interactive */
+.menu-item--gated {
+  cursor: default !important;
+  pointer-events: auto;
 }
 
 /* ═══════ Dark mode (default) ═══════ */

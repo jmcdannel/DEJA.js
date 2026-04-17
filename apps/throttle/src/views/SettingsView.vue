@@ -5,10 +5,10 @@ import { useCurrentUser } from 'vuefire'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { getIdToken } from 'firebase/auth'
 import { db } from '@repo/firebase-config'
-import { useSubscription, PLAN_DISPLAY } from '@repo/modules'
+import { useSubscription, PLAN_DISPLAY, useFeatureFlags } from '@repo/modules'
 import type { Layout } from '@repo/modules'
 import SelectFavorites from '@/core/Menu/SelectFavorites.vue'
-import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
+import { BackgroundSettings, ServerSetupInfo, FeatureGate } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
 import { useServerDiscovery } from '@/composables/useServerDiscovery'
@@ -34,6 +34,9 @@ const {
 } = useConductorSettings()
 
 const { quickMenuVisible } = useQuickMenu()
+
+// 🚩 Feature flags (MVP launch gating)
+const { isEnabled } = useFeatureFlags()
 
 const { isScanning, discoveredServers, startScan, isAvailable, checkAvailability } = useServerDiscovery()
 onMounted(() => { checkAvailability() })
@@ -371,7 +374,8 @@ const backgroundPages = [
           </div>
         </div>
 
-        <!-- Connection -->
+        <!-- Connection 🚩 gated: throttleConnectionConfig -->
+        <FeatureGate feature="throttleConnectionConfig" mode="disable">
         <div id="connection" class="settings-section">
           <div class="settings-section__header">
             <v-icon size="20" class="settings-section__icon">mdi-server-network</v-icon>
@@ -459,6 +463,7 @@ const backgroundPages = [
             </v-btn>
           </div>
         </div>
+        </FeatureGate>
 
         <!-- Server Setup -->
         <div id="server-setup" class="settings-section">

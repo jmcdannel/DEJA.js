@@ -79,6 +79,7 @@ export { appIcons } from './assets/icons'
 export type { AppIconName } from './assets/icons'
 
 export { default as FeatureGate } from './FeatureGate.vue'
+export { default as ComingSoonBadge } from './ComingSoonBadge.vue'
 
 // Themes
 export { createVuetifyThemes, THEME_MODES, THEME_MODE_DEFINITIONS } from './themes'

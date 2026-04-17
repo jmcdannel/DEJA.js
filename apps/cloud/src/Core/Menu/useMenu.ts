@@ -24,7 +24,7 @@ export function useMenu() {
     // Hardware
     { color: 'teal',    icon: 'mdi-access-point',    label: 'Sensors',        name: 'sensors',        section: 'hardware', feature: 'sensors' },
     { color: 'cyan',    icon: 'mdi-developer-board', label: 'Devices',        name: 'devices',        section: 'hardware' },
-    { color: 'yellow',  icon: 'mdi-lightning-bolt',   label: 'Power Districts', name: 'power-districts', section: 'hardware' },
+    { color: 'yellow',  icon: 'mdi-lightning-bolt',   label: 'Power Districts', name: 'power-districts', section: 'hardware', feature: 'powerDistricts' },
     { color: 'lime',    icon: 'mdi-cpu-64-bit',      label: 'DCC-EX',         name: 'dcc-ex',         section: 'hardware' },
 
     // System
@@ -32,9 +32,13 @@ export function useMenu() {
     { color: 'blue',    icon: 'mdi-cog',             label: 'Settings',       name: 'settings',       section: 'system' },
   ]
 
-  // Show all nav items regardless of plan/role — locked items will show
-  // upgrade prompts on the page itself (see Plan 3: Free Tier UX)
-  const menu = computed(() => menuConfig)
+  // 🚩 All items visible — gated items show with badge in nav drawer
+  const menu = computed(() =>
+    menuConfig.map(item => ({
+      ...item,
+      gated: item.feature ? !isEnabled(item.feature) : false,
+    }))
+  )
 
   function handleMenu(item: MenuItem) {
     router.push({ name: item.label })
