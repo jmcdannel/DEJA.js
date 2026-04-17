@@ -504,6 +504,9 @@ async function handleSerialMessage(payload: string, device: Device): Promise<voi
 // Disconnect a device and clean up its command pool
 export async function disconnectDevice(deviceId: string): Promise<void> {
   try {
+    // WLED devices use their own client map, not _connections
+    await wled.disconnectDevice(deviceId)
+
     const connection = _connections[deviceId]
     if (connection) {
       // Flush any remaining commands before disconnecting
