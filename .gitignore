@@ -81,3 +81,5 @@ packages/ui/src/assets/backgrounds/*.jpg
 # Generated docs (synced from /docs/ at build time)
 apps/dejajs-www/content/docs/
 .superpowers/
+test-results/
+playwright-report/

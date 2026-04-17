@@ -71,4 +71,11 @@ export const efxTypes: EffectType[] = [
     icon: 'mdi-magic-staff',
     color: 'purple',
   },
+  {
+    value: 'wled',
+    label: 'WLED',
+    icon: 'mdi-led-strip-variant',
+    color: '#ff0080',
+    require: ['device'],
+  },
 ]

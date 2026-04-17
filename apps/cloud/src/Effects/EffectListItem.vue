@@ -94,7 +94,7 @@ function goToEdit() {
       {{ efxType?.label || efx?.type || 'effect' }}
     </template>
 
-    <template #status>
+    <template #status="{ deviceOffline }">
       <v-icon
         v-if="efx?.allowGuest"
         icon="mdi-account-check"
@@ -107,6 +107,7 @@ function goToEdit() {
         hide-details
         density="compact"
         :color="accentColor"
+        :disabled="deviceOffline"
         class="flex-shrink-0"
         @change="handleEfx"
       />
