@@ -117,7 +117,7 @@ export async function handleEffectChange(effect: Effect): Promise<void> {
 
   const payload = buildWledPayload(effect)
   log.log(`[WLED] Sending to ${effect.device}:`, JSON.stringify(payload))
-  client.setState(payload as any)
+  client.setState(payload as Partial<import('@repo/wled/types').WledState>)
 }
 
 export default {

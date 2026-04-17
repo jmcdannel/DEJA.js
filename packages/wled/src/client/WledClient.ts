@@ -136,11 +136,13 @@ export class WledClient {
   private attemptReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) return
     this.reconnectAttempts++
+    // Exponential backoff: 3s, 6s, 12s, 24s, 48s
+    const delay = this.reconnectDelayMs * Math.pow(2, this.reconnectAttempts - 1)
     this.reconnectTimer = setTimeout(() => {
       this.connect().catch(() => {
         // Will retry via onclose handler
       })
-    }, this.reconnectDelayMs)
+    }, delay)
   }
 
   private clearReconnect(): void {

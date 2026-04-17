@@ -286,8 +286,8 @@ export async function connectDevice({
     }
     if (device.connection === 'usb' && serial) {
       await connectUsbDevice(device, serial)
-    } else if (device.connection === 'wifi' && topic) {
-      device.topic = topic
+    } else if (device.connection === 'wifi') {
+      if (topic) device.topic = topic
       await connectMqttDevice(device)
     }
   } catch (err) {

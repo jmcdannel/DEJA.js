@@ -48,13 +48,11 @@ try {
 
 let setEfx: ReturnType<typeof useEfx>['setEfx']
 let getEfxType: ReturnType<typeof useEfx>['getEfxType']
-let runEffect: ReturnType<typeof useEfx>['runEffect']
 
 try {
   const efxHook = useEfx()
   setEfx = efxHook.setEfx
   getEfxType = efxHook.getEfxType
-  runEffect = efxHook.runEffect
   log.debug('EffectForm: useEfx hook loaded successfully')
 } catch (error) {
   log.error('EffectForm: Failed to load useEfx hook:', error)
