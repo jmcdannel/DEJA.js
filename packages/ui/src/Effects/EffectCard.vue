@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { efxTypes, type Effect } from '@repo/modules'
+import { useHaptics } from '../composables/useHaptics'
 import ListItemCard from '../DeviceConfig/ListItemCard.vue'
 
 interface Props {
@@ -15,6 +16,11 @@ const emit = defineEmits<{
 }>()
 const state = defineModel('state', {
   type: Boolean
+})
+const { vibrate } = useHaptics()
+
+watch(state, () => {
+  vibrate('light')
 })
 
 const efxType = computed(() =>

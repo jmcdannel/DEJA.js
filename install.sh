@@ -358,15 +358,20 @@ install_server_dev() {
 
   # Copy built output to ~/.deja/server
   mkdir -p "${SERVER_DIR}"
-  cp "${repo_dir}/apps/server/dist/index.mjs" "${SERVER_DIR}/index.js"
+  cp "${repo_dir}/apps/server/dist/index.js" "${SERVER_DIR}/index.js"
 
   # Write version from package.json
   local version
   version=$(node -e "console.log(require('${repo_dir}/apps/server/package.json').version)")
   echo "${version}-dev" > "${SERVER_DIR}/version.txt"
 
-  # Copy package.json for native dependency install
-  cp "${repo_dir}/apps/server/package.json" "${SERVER_DIR}/package.json"
+  # Generate a distribution package.json with only runtime externals.
+  # Workspace @repo/* deps are bundled into index.js and must NOT appear here
+  # (npm can't resolve "workspace:*" specifiers).
+  node -e "
+    const pkg = {name:'deja-server',version:'${version}-dev',private:true,type:'module',engines:{node:'>= 20'},dependencies:{'serialport':'^12.0.0','@serialport/parser-readline':'^12.0.0','firebase-admin':'^13.4.0','firebase':'^10.14.1','ws':'^8.13.0','mqtt':'^5.15.0','signale':'^1.4.0','dotenv':'^16.3.1','play-sound':'^1.1.6','wait-on':'^7.0.1','@sentry/node':'^8.0.0','vue':'^3.5.17','vuefire':'^3.2.1','@vueuse/core':'^11.0.3'}};
+    require('fs').writeFileSync('${SERVER_DIR}/package.json', JSON.stringify(pkg, null, 2));
+  "
 
   info "📦 Installing native dependencies..."
   (cd "${SERVER_DIR}" && npm install --production 2>&1 | tail -1)
@@ -396,6 +401,15 @@ install_cli() {
     if [ -d "${repo_dir}/apps/cli/tui" ]; then
       cp -r "${repo_dir}/apps/cli/tui" "${DEJA_BIN}/"
       [ -f "${repo_dir}/apps/cli/deja-ui-ink.mjs" ] && cp "${repo_dir}/apps/cli/deja-ui-ink.mjs" "${DEJA_BIN}/"
+
+      # Install TUI dependencies at ~/.deja/ so node_modules resolves from
+      # ~/.deja/bin/tui/**. The canonical list of TUI deps lives in
+      # apps/cli/package.json; copy it and run a plain npm install.
+      if [ -f "${repo_dir}/apps/cli/package.json" ]; then
+        cp "${repo_dir}/apps/cli/package.json" "${DEJA_DIR}/package.json"
+        info "📦 Installing TUI dependencies..."
+        (cd "${DEJA_DIR}" && npm install 2>&1 | tail -1)
+      fi
     fi
 
     ok "CLI installed from local repo 🛠️"

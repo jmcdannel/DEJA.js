@@ -18,9 +18,11 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
   const { enqueue } = useCommandQueue()
 
   const throttle = useDocument<Throttle>(
-    address.value
+    computed(() =>
+      address.value != null && !Number.isNaN(address.value)
         ? doc(db, `layouts/${layoutId.value}/throttles`, address.value.toString())
         : null
+    )
   )
 
   log.debug('throttle doc ref:', throttle)
