@@ -48,11 +48,13 @@ try {
 
 let setEfx: ReturnType<typeof useEfx>['setEfx']
 let getEfxType: ReturnType<typeof useEfx>['getEfxType']
+let runEffect: ReturnType<typeof useEfx>['runEffect']
 
 try {
   const efxHook = useEfx()
   setEfx = efxHook.setEfx
   getEfxType = efxHook.getEfxType
+  runEffect = efxHook.runEffect
   log.debug('EffectForm: useEfx hook loaded successfully')
 } catch (error) {
   log.error('EffectForm: Failed to load useEfx hook:', error)
@@ -220,6 +222,21 @@ function handleIALED(ialedEffectConfig: {
 function handleSoundFileSelect(soundFile: string) {
   selectedSoundFile.value = soundFile
   showSoundDialog.value = false
+}
+
+/** Save WLED config and toggle the effect on for live preview */
+async function handleWledRun() {
+  if (!props.efx?.id || !wledConfig.value) return
+  try {
+    await setEfx(props.efx.id, {
+      ...props.efx,
+      wled: wledConfig.value,
+      state: true,
+    })
+    log.debug('WLED Run: saved and toggled on', props.efx.id)
+  } catch (err) {
+    log.error('WLED Run failed:', err)
+  }
 }
 </script>
 <template>
@@ -404,7 +421,11 @@ function handleSoundFileSelect(soundFile: string) {
       <!-- WLED form -->
       <template v-if="efxType === 'wled'">
         <div class="form-section__row form-section__row--block">
-          <WledEffectForm v-model="wledConfig" :device-host="wledDeviceHost" />
+          <WledEffectForm
+            v-model="wledConfig"
+            :show-run="!!wledDeviceHost"
+            @run="handleWledRun"
+          />
         </div>
       </template>
 

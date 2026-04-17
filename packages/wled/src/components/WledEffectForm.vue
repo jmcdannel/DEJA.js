@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
-import type { WledEffectConfig, WledSegmentConfig } from '../types/config'
+import type { WledEffectConfig } from '../types/config'
 import { createDefaultWledConfig, rgbToTuple, type RgbColor } from '../types/config'
 import { useWledSegments } from '../composables/useWledSegments'
 import { WLED_EFFECTS } from '../constants/effects'
@@ -13,12 +13,14 @@ import WledPaletteList from './WledPaletteList.vue'
 
 const props = defineProps<{
   modelValue?: WledEffectConfig
-  /** WLED device host for live preview (optional) */
-  deviceHost?: string
+  /** Show the Run button */
+  showRun?: boolean
 }>()
 
 const emit = defineEmits<{
   'update:modelValue': [config: WledEffectConfig]
+  /** Emitted when user clicks Run — parent should save config + toggle effect on */
+  run: []
 }>()
 
 const config = ref<WledEffectConfig>(
@@ -38,19 +40,14 @@ const {
 
 const activeSeg = computed(() => segments.value[activeSegmentIndex.value])
 
-// Primary color as tuple for the color picker
 const activeColor = computed<[number, number, number]>(() => {
   if (!activeSeg.value?.colors?.[0]) return [255, 0, 128]
   return rgbToTuple(activeSeg.value.colors[0])
 })
 
-// Color tab: "color" or "palette"
 const colorTab = ref<'color' | 'palette'>('color')
-
-// Run state
 const runSending = ref(false)
 
-// Guard against recursive emit loops
 let isUpdatingFromProp = false
 
 function emitConfig() {
@@ -106,43 +103,13 @@ function handleSelectSegment(index: number) {
   setActiveSegment(index)
 }
 
-/** Send current segment config to the WLED device for live preview */
-async function handleRun(segIndex: number) {
-  if (!props.deviceHost) return
+function handleRun() {
   runSending.value = true
-  try {
-    const seg = segments.value[segIndex]
-    const payload = {
-      on: true,
-      bri: config.value.brightness,
-      transition: config.value.transition,
-      seg: [{
-        id: segIndex,
-        start: seg.start,
-        stop: seg.stop,
-        fx: seg.effectId,
-        pal: seg.paletteId,
-        col: seg.colors.map(rgbToTuple),
-        sx: seg.speed,
-        ix: seg.intensity,
-        bri: seg.brightness,
-        on: seg.on,
-      }],
-    }
-    const host = props.deviceHost.replace(/^https?:\/\//, '').replace(/\/+$/, '')
-    await fetch(`http://${host}/json/state`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-  } catch (err) {
-    console.error('[WLED] Run failed:', err)
-  } finally {
-    runSending.value = false
-  }
+  emitConfig()
+  emit('run')
+  setTimeout(() => { runSending.value = false }, 1000)
 }
 
-// Segment accent colors
 const SEGMENT_COLORS = ['#ff0080', '#00ccff', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#d946ef']
 function segColor(i: number) { return SEGMENT_COLORS[i % SEGMENT_COLORS.length] }
 </script>
@@ -206,14 +173,13 @@ function segColor(i: number) { return SEGMENT_COLORS[i % SEGMENT_COLORS.length] 
             <span class="wled-form__seg-effect">{{ activeSeg.effectName }}</span>
           </span>
           <div class="wled-form__seg-actions">
-            <!-- Run / Preview button -->
             <button
-              v-if="deviceHost"
+              v-if="showRun"
               type="button"
               class="wled-form__run-btn"
               :class="{ 'wled-form__run-btn--sending': runSending }"
               :disabled="runSending"
-              @click="handleRun(activeSegmentIndex)"
+              @click="handleRun"
             >
               ▶ Run
             </button>
