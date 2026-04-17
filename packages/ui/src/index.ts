@@ -59,7 +59,17 @@ export { default as DeviceStatusItem } from './DeviceStatus/DeviceStatusItem.vue
 export { default as DeviceStatusList } from './DeviceStatus/DeviceStatusList.vue'
 
 // Device Connection
-export { DeviceConnectCard, DeviceConnectionList, DeviceManageCard } from './DeviceConnection'
+export { DejaServerPanel, DeviceConnectCard, DeviceConnectionList, DeviceManageCard } from './DeviceConnection'
+
+// Device Config (advanced tuning + pinout diagram + pickers + badge + list shell)
+export {
+  ArduinoAdvancedConfig,
+  DeviceBadge,
+  DevicePickerChip,
+  DevicePickerGrid,
+  DevicePinoutDiagram,
+  ListItemCard,
+} from './DeviceConfig'
 
 // Dashboard widgets
 export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart, LayoutInfoCard, DashboardEmptyState } from './Dashboard'
@@ -97,6 +107,8 @@ export type { WcagLevel } from './themes'
 // Composables
 export { useThemeSwitcher } from './composables/useThemeSwitcher'
 export { useListControls } from './composables/useListControls'
+export { useHaptics } from './composables/useHaptics'
+export type { HapticPattern } from './composables/useHaptics'
 
 // PageHeader
 export { default as PageHeader } from './PageHeader/PageHeader.vue'

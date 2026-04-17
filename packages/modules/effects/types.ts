@@ -1,3 +1,5 @@
+import type { WledEffectConfig } from '@repo/wled/types'
+
 export interface Effect {
   device?: string // Required for sound effects, optional for others
   name?: string
@@ -18,6 +20,7 @@ export interface Effect {
   soundDuration?: number // Duration in seconds, optional
   tags?: string[]
   allowGuest?: boolean
+  wled?: WledEffectConfig
   id: string
 }
 

@@ -8,7 +8,6 @@ import TrackPower from '../TrackPower.vue'
 interface DeviceConnectCardProps {
   device: Device
   availablePorts: string[]
-  availableTopics?: string[]
   serverOnline: boolean
   showDetailsLink?: boolean
   // Server stats (deja-server only)
@@ -23,7 +22,6 @@ interface DeviceConnectCardProps {
 }
 
 const props = withDefaults(defineProps<DeviceConnectCardProps>(), {
-  availableTopics: () => [],
   showDetailsLink: true,
   serverUptime: '',
   connectedDeviceCount: 0,
@@ -45,7 +43,6 @@ const { deviceTypes } = useLayout()
 const { serverStatus } = useServerStatus()
 
 const selectedPort = defineModel<string>('selectedPort', { default: '' })
-const selectedTopic = defineModel<string>('selectedTopic', { default: '' })
 
 const copied = ref(false)
 
@@ -55,17 +52,6 @@ watch(
   (ports) => {
     if (!selectedPort.value && props.device.port && ports.includes(props.device.port)) {
       selectedPort.value = props.device.port
-    }
-  },
-  { immediate: true },
-)
-
-// 📡 Prepopulate topic from saved device value
-watch(
-  () => props.device.topic,
-  (topic) => {
-    if (!selectedTopic.value && topic) {
-      selectedTopic.value = topic
     }
   },
   { immediate: true },
@@ -97,12 +83,18 @@ const isUsbDevice = computed(
       isArduinoFamilyType(props.device.type)),
 )
 
+// 🌐 WLED device check
+const isWledDevice = computed(() => props.device.type === 'wled')
+
 // 📡 MQTT/WiFi device check — any WiFi device type OR explicit wifi connection.
 const isMqttDevice = computed(
   () =>
     !isDejaServer.value &&
+    !isWledDevice.value &&
     (props.device.connection === 'wifi' || isWifiDeviceType(props.device.type)),
 )
+
+const wledHost = ref(props.device.host ?? '')
 
 // 🏷️ Human-readable connection type label
 const connectionLabel = computed(() => {
@@ -112,9 +104,10 @@ const connectionLabel = computed(() => {
   return 'Unknown'
 })
 
-// 📍 Connection path (port, topic, or server IP)
+// 📍 Connection path (port, topic, host, or server IP)
 const connectionPath = computed(() => {
   if (isDejaServer.value) return serverStatus.value?.ip ?? ''
+  if (isWledDevice.value) return props.device.host ?? ''
   if (props.device.port) return props.device.port
   if (props.device.topic) return props.device.topic
   return ''
@@ -130,12 +123,15 @@ const borderColor = computed(() =>
 // 🚫 Non-server devices are dimmed when server is offline
 const isDimmed = computed(() => !isDejaServer.value && !props.serverOnline)
 
-// 🔗 Connect handler — dispatches USB serial or MQTT topic
+// 🔗 Connect handler — USB passes serial port; WLED passes host; MQTT topic is server-generated.
 function handleConnect() {
   if (isUsbDevice.value) {
     emit('connect', props.device.id, selectedPort.value, undefined)
+  } else if (isWledDevice.value) {
+    // For WLED, pass host as the serial param — the Connect page saves it to the device doc
+    emit('connect', props.device.id, wledHost.value, undefined)
   } else {
-    emit('connect', props.device.id, undefined, selectedTopic.value || props.device.topic)
+    emit('connect', props.device.id, undefined, undefined)
   }
 }
 
@@ -459,15 +455,16 @@ async function copyDejaStart() {
             no-data-text="No ports found — click Refresh Ports"
           />
 
-          <!-- 📡 WiFi/MQTT: topic text field -->
+          <!-- 🌐 WLED: host IP input -->
           <v-text-field
-            v-else-if="isMqttDevice"
-            v-model="selectedTopic"
-            :placeholder="device.topic || 'Enter MQTT topic...'"
-            label="MQTT topic"
+            v-if="isWledDevice"
+            v-model="wledHost"
+            label="Host IP Address"
             density="compact"
             variant="outlined"
             hide-details
+            placeholder="192.168.86.35"
+            prepend-inner-icon="mdi-ip-network"
             class="device-connect-card__port-select"
           />
 
@@ -477,7 +474,7 @@ async function copyDejaStart() {
               color="success"
               variant="flat"
               @click="handleConnect"
-              :disabled="isUsbDevice && !selectedPort"
+              :disabled="(isUsbDevice && !selectedPort) || (isWledDevice && !wledHost)"
             >
               Connect
             </v-btn>

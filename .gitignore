@@ -191,3 +191,5 @@ io/layouts/tj-thunder-city-pico/lib/adafruit_register/i2c_bit.mpy
 io/layouts/tj-thunder-city-pico/lib/adafruit_register/i2c_bits.mpy
 io/layouts/tj-thunder-city-pico/lib/adafruit_register/i2c_struct_array.mpy
 io/layouts/tj-thunder-city-pico/lib/adafruit_register/i2c_struct.mpy
+test-results/
+playwright-report/

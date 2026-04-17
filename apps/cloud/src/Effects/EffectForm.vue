@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, watch, onErrorCaptured, computed } from 'vue'
-import { useEfx, useLayout, type Effect, type EffectType, type MacroItem } from '@repo/modules'
+import { useEfx, useLayout, type Device, type Effect, type EffectType, type MacroItem } from '@repo/modules'
 import { efxTypes } from '@repo/modules/effects/constants'
 import { createLogger } from '@repo/utils'
+import { DevicePickerChip, DevicePickerGrid } from '@repo/ui'
 import ViewJson from '@/Core/UI/ViewJson.vue'
 import MacroForm from '@/Effects/MacroForm.vue'
 import IALEDForm from '@/Effects/IALEDForm.vue'
@@ -10,6 +11,8 @@ import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
 import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import SoundFileList from '@/Effects/Sounds/SoundFileList.vue'
+import DevicePicker from '@/Layout/Devices/DevicePicker.vue'
+import { WledEffectForm } from '@repo/wled/src/components/index'
 
 const log = createLogger('EffectForm')
 // TODO: icon picker
@@ -75,11 +78,18 @@ const macroOff = ref(props.efx?.off || [])
 const pattern = ref(props.efx?.pattern || undefined)
 const range = ref(props.efx?.range || undefined)
 const config = ref(props.efx?.config || undefined)
+const wledConfig = ref(props.efx?.wled ?? undefined)
 const efxType = ref(props.efx?.type)
 const efxTypeObj = ref(props.efx?.type ? getEfxType(props.efx?.type) : undefined)
 const color = ref(props.efx?.color || efxTypeObj.value?.color || 'purple')
 const tags = ref<string[]>(props.efx?.tags || [])
 const allowGuest = ref<boolean>(props.efx?.allowGuest || false)
+
+// 📦 Add-vs-edit drives the device picker presentation — grid inline for add
+// so the user can scan all options, compact chip + dialog for edit so the
+// (often long) effect form stays dense.
+const isEdit = computed(() => !!props.efx?.id)
+const showDevicePickerDialog = ref(false)
 const loading = ref(false)
 const selectedSoundFile = ref<string>(props.efx?.sound || '')
 const showSoundDialog = ref(false)
@@ -103,6 +113,13 @@ const soundFileRules = computed(() => {
   return []
 })
 const devices = getDevices()
+
+// Resolve the WLED device host for live preview
+const wledDeviceHost = computed(() => {
+  if (efxType.value !== 'wled' || !device.value) return undefined
+  const dev = devices.value?.find((d: Device) => d.id === device.value)
+  return dev?.host || undefined
+})
 log.debug('EffectForm initialized with:', {
   props: props.efx,
   devices,
@@ -175,6 +192,11 @@ async function submit () {
     newEfx.sound = selectedSoundFile.value
   }
 
+  // set wled config
+  if (efxType.value === 'wled' && wledConfig.value) {
+    newEfx.wled = wledConfig.value
+  }
+
   await setEfx(props.efx?.id || '', newEfx)
   loading.value = false
   emit('close')
@@ -198,6 +220,21 @@ function handleIALED(ialedEffectConfig: {
 function handleSoundFileSelect(soundFile: string) {
   selectedSoundFile.value = soundFile
   showSoundDialog.value = false
+}
+
+/** Save WLED config and toggle the effect on for live preview */
+async function handleWledRun() {
+  if (!props.efx?.id || !wledConfig.value) return
+  try {
+    await setEfx(props.efx.id, {
+      ...props.efx,
+      wled: wledConfig.value,
+      state: true,
+    })
+    log.debug('WLED Run: saved and toggled on', props.efx.id)
+  } catch (err) {
+    log.error('WLED Run failed:', err)
+  }
 }
 </script>
 <template>
@@ -289,24 +326,29 @@ function handleSoundFileSelect(soundFile: string) {
         </div>
       </template>
 
-      <!-- Device selector -->
+      <!-- Device selector — grid inline for add, chip + dialog for edit -->
       <template v-if="efxTypeObj?.require?.includes('device')">
         <div class="form-section__row form-section__row--block">
-          <div class="form-section__row-label mb-2">
-            <span class="form-section__row-name">Device</span>
-            <span v-if="efxTypeObj?.defaultDevice" class="form-section__row-desc">Default: {{ efxTypeObj.defaultDevice }}</span>
-          </div>
-          <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large" :rules="deviceRules">
-            <v-btn
-              v-for="deviceOpt in devices"
-              :value="deviceOpt.id"
-              :key="deviceOpt.id"
-              class="min-h-24 min-w-48 border"
-              :color="color"
-            >
-              {{ deviceOpt.id }}
-            </v-btn>
-          </v-btn-toggle>
+          <template v-if="!isEdit">
+            <div class="form-section__row-label mb-2">
+              <span class="form-section__row-name">Device</span>
+              <span v-if="efxTypeObj?.defaultDevice" class="form-section__row-desc">
+                Default: {{ efxTypeObj.defaultDevice }}
+              </span>
+            </div>
+            <DevicePickerGrid
+              v-model="device"
+              :devices="(devices ?? []) as Device[]"
+            />
+          </template>
+          <DevicePickerChip
+            v-else
+            :device-id="device"
+            :devices="(devices ?? []) as Device[]"
+            label="Device"
+            :description="efxTypeObj?.defaultDevice ? `Default: ${efxTypeObj.defaultDevice}` : 'Controller device'"
+            @click="showDevicePickerDialog = true"
+          />
         </div>
       </template>
 
@@ -374,6 +416,17 @@ function handleSoundFileSelect(soundFile: string) {
         </div>
       </template>
 
+      <!-- WLED form -->
+      <template v-if="efxType === 'wled'">
+        <div class="form-section__row form-section__row--block">
+          <WledEffectForm
+            v-model="wledConfig"
+            :show-run="!!wledDeviceHost"
+            @run="handleWledRun"
+          />
+        </div>
+      </template>
+
       <!-- Pin (when required, non-ialed) -->
       <template v-if="efxTypeObj?.require?.includes('pin') && efxType !== 'ialed'">
         <div class="form-section__grid" style="grid-template-columns: 160px 1fr">
@@ -426,4 +479,13 @@ function handleSoundFileSelect(soundFile: string) {
     <ViewJson :json="efxTypeObj" label="efxTypeObj" />
     <ViewJson :json="efxTypes" label="efxTypes" />
   </v-form>
+
+  <v-dialog v-model="showDevicePickerDialog" max-width="80vw">
+    <DevicePicker
+      v-model="device"
+      :color="color"
+      @select="showDevicePickerDialog = false"
+      @cancel="showDevicePickerDialog = false; device = props?.efx?.device ?? DEFAULT_DEVICE"
+    />
+  </v-dialog>
 </template>

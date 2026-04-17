@@ -8,13 +8,14 @@ import RoadnameLogo from '@/throttle/RoadnameLogo.vue'
 import { ConsistIndicator, LocoNumberPlate, FunctionsSpeedDial } from '@repo/ui'
 import { ROADNAMES } from '@repo/modules'
 import { useThrottle } from '@/throttle/useThrottle'
-import { useHaptics } from '@/composables/useHaptics'
+import { useHaptics } from '@repo/ui'
 
 const props = defineProps({
   address: { type: Number, required: true },
   showFunctions: { type: Boolean, default: true },
   showSpeedometer: { type: Boolean, default: true },
   showConsist: { type: Boolean, default: true },
+  speedDisplayType: { type: String, default: 'dial' },
 })
 
 const address = toRef(props, 'address')
@@ -233,20 +234,18 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main v-if="throttle" class="@container proto-throttle-wrapper flex flex-col gap-2 p-2 overflow-hidden w-full h-full flex-1 relative">
-    <!-- Header (consistent with other variants) -->
+  <main v-if="address" class="@container proto-throttle-wrapper flex flex-col gap-2 p-2 overflow-hidden w-full h-full flex-1 relative">
+    <!-- Header -->
     <ThrottleHeader class="bg-gradient-to-r from-slate-700/20 to-blue-900/20">
       <template v-slot:left>
-        <div class="flex flex-row items-center justify-center gap-1 px-4" style="background: rgba(var(--v-theme-surface), 0.6)">
+        <div class="flex flex-row items-center justify-center gap-1 px-1 @[640px]:px-4 min-w-0" style="background: rgba(var(--v-theme-surface), 0.6)">
           <LocoNumberPlate
             v-if="loco"
             :address="loco.address"
             :color="loco.meta?.roadname ? ROADNAMES.find(r => r.value === loco.meta?.roadname)?.color : undefined"
-            size="sm"
+            size="xs"
           />
-          <ConsistIndicator v-if="loco && showConsist" :loco="loco" />
-          <v-spacer class="w-2 md:w-6" />
-          <h1 class="text-xl md:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 drop-shadow-lg">
+          <h1 class="text-sm @[400px]:text-base @[640px]:text-xl @[960px]:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 drop-shadow-lg truncate">
             {{ loco?.name }}
           </h1>
         </div>
@@ -256,31 +255,21 @@ onBeforeUnmount(() => {
       </template>
     </ThrottleHeader>
 
-    <section class="w-full h-full flex flex-col @[640px]:flex-row justify-center @[640px]:items-center gap-4 flex-grow relative z-10">
-      <!-- Desktop left: Consist + Speedometer -->
-      <section v-if="loco" class="hidden @[640px]:flex flex-col gap-4 items-center justify-center flex-1">
-        <ConsistIndicator v-if="showConsist" :loco="loco" />
-        <Speedometer v-if="showSpeedometer" :speed="currentSpeed" :address="address" :size="200" :show-label="false" />
-        <div v-if="showConsist && loco.consist?.length" class="grid grid-cols-2 gap-3">
-          <Speedometer
-            v-for="cloco in loco.consist"
-            :key="cloco.address"
-            :speed="currentSpeed"
-            :address="cloco.address"
-            :size="120"
-            :show-label="true"
-          />
-        </div>
-      </section>
-
-      <!-- Desktop center: Logo + Functions -->
-      <section v-if="loco" class="hidden @[640px]:flex flex-col gap-2 items-center justify-center flex-1">
+    <!-- 🖥️ Desktop: 3-column layout -->
+    <section class="w-full hidden @[640px]:flex flex-row items-stretch justify-around flex-grow relative z-10" style="max-height: 800px;">
+      <!-- Left col: Functions + Logo -->
+      <section v-if="loco" class="flex flex-col items-center justify-around flex-1">
+        <FunctionsSpeedDial :loco="loco" />
         <RoadnameLogo :roadname="loco.meta?.roadname" size="2xl" />
-        <FunctionsSpeedDial v-if="showFunctions" :loco="loco" />
       </section>
 
-      <!-- Desktop right: Device body -->
-      <section class="proto-device mx-auto w-full max-w-[360px] flex flex-col items-center gap-0 @[640px]:flex-none overflow-y-auto">
+      <!-- Middle col: EZ Consist -->
+      <section v-if="loco" class="flex flex-col items-center justify-around flex-1">
+        <ConsistIndicator v-if="showConsist" :loco="loco" />
+      </section>
+
+      <!-- Right col: Device body -->
+      <section class="proto-device mx-auto w-full max-w-[360px] flex flex-col items-center gap-0 flex-none overflow-y-auto">
 
         <!-- 1. Status LED + Horn Handle -->
         <div class="device-top-row w-full flex items-center justify-between px-4 py-2">
@@ -436,14 +425,146 @@ onBeforeUnmount(() => {
         <!-- Bottom of device -->
         <div class="device-bottom-cap"></div>
       </section>
-
     </section>
 
-    <!-- Mobile-only: consist, functions, logo -->
-    <section v-if="loco" class="flex @[640px]:hidden flex-col items-center gap-2 mt-2">
-      <ConsistIndicator v-if="showConsist" :loco="loco" />
-      <FunctionsSpeedDial v-if="showFunctions" :loco="loco" />
-      <RoadnameLogo :roadname="loco.meta?.roadname" size="xl" />
+    <!-- 📱 Mobile: only the dashboard device -->
+    <section class="w-full flex @[640px]:hidden flex-col items-center flex-grow relative z-10 overflow-y-auto">
+      <section class="proto-device mx-auto w-full max-w-[360px] flex flex-col items-center gap-0">
+
+        <!-- 1. Status LED + Horn Handle -->
+        <div class="device-top-row w-full flex items-center justify-between px-4 py-2">
+          <div class="status-led" :class="{ 'led-on': statusLedOn }"></div>
+          <div class="horn-container">
+            <v-icon
+              size="32"
+              class="horn-icon select-none"
+              :class="{ 'horn-active': hornActive }"
+              @pointerdown="hornDown"
+              @pointerup="hornUp"
+              @pointercancel="(e) => hornUp(e as PointerEvent)"
+              @pointerleave="(e) => hornUp(e as PointerEvent)"
+              style="cursor: pointer; touch-action: none;"
+            >mdi-bugle</v-icon>
+          </div>
+        </div>
+
+        <!-- 2. LCD Screen -->
+        <div class="lcd-bezel">
+          <div class="lcd-screen">
+            <div class="lcd-row lcd-row-top">
+              <span class="lcd-dir">{{ displayDirection }}</span>
+              <span class="lcd-speed-label">SPD</span>
+              <span class="lcd-speed">{{ displaySpeed }}</span>
+            </div>
+            <div class="lcd-row lcd-row-mid">
+              <span class="lcd-loco-name">{{ displayLocoName }}</span>
+            </div>
+            <div class="lcd-row lcd-row-bottom">
+              <span class="lcd-addr">ADDR:{{ displayAddress }}</span>
+              <span class="lcd-notch">N:{{ displayNotch }}</span>
+            </div>
+            <div class="lcd-indicators">
+              <span class="lcd-indicator" :class="{ invisible: !bellActive }">🔔 BELL</span>
+              <span class="lcd-indicator" :class="{ invisible: !hornActive }">📯 HORN</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Speed Buttons -->
+        <div class="nav-buttons-grid">
+          <button class="nav-btn" :class="{ 'nav-btn-active': pressedButton === 'down5' }" @click="handleDown5Btn">-5</button>
+          <button class="nav-btn" :class="{ 'nav-btn-active': pressedButton === 'up5' }" @click="handleUp5Btn">+5</button>
+          <button class="nav-btn" :class="{ 'nav-btn-active': pressedButton === 'down' }" @click="handleDownBtn">-1</button>
+          <button class="nav-btn" :class="{ 'nav-btn-active': pressedButton === 'up' }" @click="handleUpBtn">+1</button>
+        </div>
+
+        <!-- 4. Notch Markings -->
+        <div class="notch-markings">
+          <span
+            v-for="(label, i) in NOTCH_LABELS"
+            :key="label"
+            class="notch-label"
+            :class="{ 'notch-active': i <= localNotch && i > 0, 'notch-current': localNotch === i }"
+          >{{ label }}</span>
+        </div>
+
+        <!-- 5. Throttle Slider -->
+        <div class="throttle-slider-area">
+          <div class="slider-track">
+            <input
+              type="range"
+              min="0"
+              max="8"
+              :value="localNotch"
+              @input="(e) => setNotch(Number((e.target as HTMLInputElement).value))"
+              class="throttle-range"
+              orient="vertical"
+            />
+          </div>
+        </div>
+
+        <!-- 6. Reverser -->
+        <div class="reverser-area">
+          <span class="reverser-end-label" :class="localDirection === 'REV' ? 'text-red-400' : 'opacity-40'">REV</span>
+          <v-switch
+            :model-value="localDirection === 'FWD'"
+            @update:model-value="toggleDirection"
+            :disabled="currentSpeed !== 0"
+            color="blue"
+            hide-details
+            density="compact"
+            inset
+            class="reverser-switch"
+          />
+          <span class="reverser-end-label" :class="localDirection === 'FWD' ? 'text-green-400' : 'opacity-40'">FWD</span>
+        </div>
+
+        <!-- 7. Bell Icon -->
+        <div class="bell-area">
+          <div class="bell-container">
+            <v-icon
+              size="32"
+              class="bell-icon select-none"
+              :class="{ 'bell-icon-active': bellActive }"
+              @click="toggleBell"
+              style="cursor: pointer;"
+            >mdi-bell</v-icon>
+          </div>
+        </div>
+
+        <!-- 8. Brake Slider -->
+        <div class="brake-slider-area">
+          <span class="brake-label">BRAKE</span>
+          <div class="brake-track">
+            <input
+              type="range"
+              min="0"
+              max="10"
+              v-model.number="brakeLevel"
+              class="brake-range"
+              :style="{ background: brakeGradient }"
+            />
+          </div>
+        </div>
+
+        <!-- 9. Headlight Knobs -->
+        <div class="headlight-knobs">
+          <div class="knob-group">
+            <span class="knob-label">REAR</span>
+            <button class="headlight-knob" :class="{ 'knob-on': rearHeadlight !== 'OFF' }" @click="cycleRearHeadlight">
+              <v-icon size="16" class="knob-value">{{ headlightIcon(rearHeadlight) }}</v-icon>
+            </button>
+          </div>
+          <div class="knob-group">
+            <span class="knob-label">FRONT</span>
+            <button class="headlight-knob" :class="{ 'knob-on': frontHeadlight !== 'OFF' }" @click="cycleFrontHeadlight">
+              <v-icon size="16" class="knob-value">{{ headlightIcon(frontHeadlight) }}</v-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="device-bottom-cap"></div>
+      </section>
     </section>
   </main>
 

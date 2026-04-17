@@ -24,178 +24,241 @@ const props = defineProps({
   },
 })
 
-// SVG coordinate system — everything centered at (100, 100) in a 200x200 viewBox
+// 🎯 SVG coordinate system — centered at (100, 100) in 200x200 viewBox
 const cx = 100
 const cy = 100
-const radius = 64
-const needleLen = radius * 0.8
+const outerRadius = 80
+const innerRadius = 62
+const needleLen = innerRadius - 4
 
+// 🔄 Needle rotation: -135° (min) → +135° (max) = 270° sweep
 const rotation = computed(() => {
-  const safeSpeed = Math.min(Math.max(props.speed, 0), props.max)
-  const ratio = safeSpeed / props.max
-  return -135 + ratio * 270
+  const safeSpeed = Math.min(Math.max(Math.abs(props.speed), 0), props.max)
+  return -135 + (safeSpeed / props.max) * 270
 })
 
+// 🎨 Speed-dependent color (green → amber → red)
 const speedColor = computed(() => {
-  const ratio = props.speed / props.max
-  if (ratio < 0.3) return '#10b981'
-  if (ratio < 0.7) return '#f59e0b'
-  return '#ef4444'
+  const ratio = Math.abs(props.speed) / props.max
+  if (ratio < 0.3) return '#10b981'  // emerald-500
+  if (ratio < 0.7) return '#f59e0b'  // amber-500
+  return '#ef4444'                     // red-500
 })
 
-// Generate tick marks
+// 📐 Generate tick marks — every unit of 10, with minor ticks at 5
 const tickMarks = computed(() => {
   const ticks = []
-  const minorTickCount = 20
-  const majorTickCount = 6
+  const step = 5
+  const count = Math.floor(props.max / step)
 
-  for (let i = 0; i <= minorTickCount; i++) {
-    const ratio = i / minorTickCount
+  for (let i = 0; i <= count; i++) {
+    const value = i * step
+    const ratio = value / props.max
     const angle = -135 + ratio * 270
-    const isMajor = i % (minorTickCount / (majorTickCount - 1)) === 0
-    const tickLength = isMajor ? 8 : 4
-    const tickRadius = radius + (isMajor ? 0 : 4)
+    const isMajor = value % 10 === 0
+    const tickOuter = outerRadius - 2
+    const tickInner = isMajor ? tickOuter - 10 : tickOuter - 5
 
-    const rad = angle * Math.PI / 180
-    const startX = cx + (tickRadius - tickLength) * Math.cos(rad)
-    const startY = cy + (tickRadius - tickLength) * Math.sin(rad)
-    const endX = cx + tickRadius * Math.cos(rad)
-    const endY = cy + tickRadius * Math.sin(rad)
+    const rad = (angle * Math.PI) / 180
+    const x1 = cx + tickInner * Math.cos(rad)
+    const y1 = cy + tickInner * Math.sin(rad)
+    const x2 = cx + tickOuter * Math.cos(rad)
+    const y2 = cy + tickOuter * Math.sin(rad)
 
-    ticks.push({ startX, startY, endX, endY, isMajor, value: Math.round(ratio * props.max) })
+    ticks.push({ x1, y1, x2, y2, isMajor, value })
   }
 
   return ticks
 })
 
-// Generate value labels for major ticks
-const valueLabels = computed(() => {
+// 🔢 Number labels at every 10
+const numberLabels = computed(() => {
   const labels = []
-  const majorTickCount = 6
+  const step = 10
+  const count = Math.floor(props.max / step)
+  const labelRadius = outerRadius - 18
 
-  for (let i = 0; i < majorTickCount; i++) {
-    const ratio = i / (majorTickCount - 1)
+  for (let i = 0; i <= count; i++) {
+    const value = i * step
+    const ratio = value / props.max
     const angle = -135 + ratio * 270
-    const value = Math.round(ratio * props.max)
-    const labelRadius = radius + 18
+    const rad = (angle * Math.PI) / 180
 
-    const rad = angle * Math.PI / 180
-    const x = cx + labelRadius * Math.cos(rad)
-    const y = cy + labelRadius * Math.sin(rad)
-
-    labels.push({ x, y, value, angle })
+    labels.push({
+      x: cx + labelRadius * Math.cos(rad),
+      y: cy + labelRadius * Math.sin(rad),
+      value,
+    })
   }
 
   return labels
 })
+
+// 💡 LED speed display — pad to 3 digits
+const ledSpeed = computed(() => String(Math.abs(props.speed)).padStart(3, '0'))
 </script>
 
 <template>
   <div class="flex flex-col items-center gap-2">
-    <!-- SVG Speedometer -->
     <svg
       :width="size"
       :height="size"
       class="drop-shadow-lg"
       viewBox="0 0 200 200"
     >
-      <!-- Background circle -->
+      <defs>
+        <!-- 🌑 Dark face gradient -->
+        <radialGradient id="dialFace" cx="50%" cy="45%" r="55%">
+          <stop offset="0%" stop-color="#1a1a2e" />
+          <stop offset="100%" stop-color="#0d0d1a" />
+        </radialGradient>
+        <!-- ✨ Needle glow -->
+        <filter id="needleGlow">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        <!-- 📺 LCD screen glow -->
+        <filter id="lcdGlow">
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- 🔲 Outer ring -->
       <circle
-        :cx="cx"
-        :cy="cy"
-        :r="radius + 2"
-        fill="white"
-        stroke="#374151"
-        stroke-width="3"
+        :cx="cx" :cy="cy" :r="outerRadius"
+        fill="none"
+        stroke="#4b5563"
+        stroke-width="2.5"
+        opacity="0.6"
       />
 
-      <!-- Inner circle for depth -->
+      <!-- ⚫ Dial face -->
       <circle
-        :cx="cx"
-        :cy="cy"
-        :r="radius - 2"
-        fill="#f8fafc"
-        stroke="#e2e8f0"
-        stroke-width="1"
+        :cx="cx" :cy="cy" :r="outerRadius - 1"
+        fill="url(#dialFace)"
       />
 
-      <!-- Tick marks -->
-      <g v-for="tick in tickMarks" :key="`tick-${tick.value}-${tick.startX}`">
-        <line
-          :x1="tick.startX"
-          :y1="tick.startY"
-          :x2="tick.endX"
-          :y2="tick.endY"
-          :stroke="tick.isMajor ? '#374151' : '#9ca3af'"
-          :stroke-width="tick.isMajor ? 2 : 1"
-          stroke-linecap="round"
+      <!-- 📏 Tick marks -->
+      <line
+        v-for="tick in tickMarks"
+        :key="`t-${tick.value}`"
+        :x1="tick.x1" :y1="tick.y1"
+        :x2="tick.x2" :y2="tick.y2"
+        :stroke="tick.isMajor ? '#e5e7eb' : '#4b5563'"
+        :stroke-width="tick.isMajor ? 2 : 1"
+        stroke-linecap="round"
+        :opacity="tick.isMajor ? 0.9 : 0.5"
+      />
+
+      <!-- 🔢 Number labels (every 10) -->
+      <text
+        v-for="label in numberLabels"
+        :key="`n-${label.value}`"
+        :x="label.x" :y="label.y"
+        text-anchor="middle"
+        dominant-baseline="central"
+        class="dial-number"
+      >
+        {{ label.value }}
+      </text>
+
+      <!-- 📍 Needle -->
+      <line
+        :x1="cx" :y1="cy"
+        :x2="cx + needleLen * Math.cos((rotation * Math.PI) / 180)"
+        :y2="cy + needleLen * Math.sin((rotation * Math.PI) / 180)"
+        :stroke="speedColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        filter="url(#needleGlow)"
+        class="dial-needle"
+      />
+
+      <!-- ⚙️ Center hub -->
+      <circle :cx="cx" :cy="cy" r="4" fill="#6b7280" />
+      <circle :cx="cx" :cy="cy" r="2" fill="#d1d5db" />
+
+      <!-- 📺 LCD speed readout at bottom -->
+      <g>
+        <!-- LCD bezel -->
+        <rect
+          :x="cx - 32" :y="cy + 22"
+          width="64" height="30"
+          rx="3"
+          fill="#111827"
+          stroke="#374151"
+          stroke-width="1.5"
         />
-      </g>
-
-      <!-- Value labels -->
-      <g v-for="label in valueLabels" :key="`label-${label.value}`">
+        <!-- LCD inner screen -->
+        <rect
+          :x="cx - 29" :y="cy + 25"
+          width="58" height="24"
+          rx="2"
+          fill="#0c1a0c"
+        />
+        <!-- LCD ghost digits (unlit segments) -->
         <text
-          :x="label.x"
-          :y="label.y"
+          :x="cx" :y="cy + 37.5"
           text-anchor="middle"
           dominant-baseline="central"
-          class="speedometer-label"
+          class="lcd-ghost"
         >
-          {{ label.value }}
+          888
+        </text>
+        <!-- LCD active digits -->
+        <text
+          :x="cx" :y="cy + 37.5"
+          text-anchor="middle"
+          dominant-baseline="central"
+          class="lcd-digits"
+          filter="url(#lcdGlow)"
+        >
+          {{ ledSpeed }}
         </text>
       </g>
-
-      <!-- Needle -->
-      <line
-        :x1="cx"
-        :y1="cy"
-        :x2="cx + needleLen * Math.cos(rotation * Math.PI / 180)"
-        :y2="cy + needleLen * Math.sin(rotation * Math.PI / 180)"
-        :stroke="speedColor"
-        stroke-width="3"
-        stroke-linecap="round"
-        class="speedometer-needle"
-      />
-
-      <!-- Center dot -->
-      <circle
-        :cx="cx"
-        :cy="cy"
-        r="4"
-        fill="#374151"
-      />
-
-      <!-- Current speed display -->
-      <text
-        :x="cx"
-        :y="cy + 24"
-        text-anchor="middle"
-        dominant-baseline="middle"
-        class="speedometer-speed"
-      >
-        {{ speed }}
-      </text>
     </svg>
 
-    <!-- Address label -->
-    <div v-if="showLabel" class="text-center bg-gray-400/20 px-2 py-1 rounded-md">
-      <v-label class="text-lg font-bold">#{{ address }}</v-label>
+    <!-- 🏷️ Address label -->
+    <div v-if="showLabel" class="text-center bg-gray-800/40 border border-gray-600/30 px-2 py-1 rounded">
+      <v-label class="text-lg font-bold text-gray-300">#{{ address }}</v-label>
     </div>
   </div>
 </template>
 
 <style scoped>
-.speedometer-needle {
+.dial-needle {
   transition: x2 0.3s ease-out, y2 0.3s ease-out;
 }
-.speedometer-label {
-  font-size: 10px;
-  font-weight: 500;
-  fill: #9ca3af;
+
+.dial-number {
+  font-size: 8px;
+  font-weight: 600;
+  fill: #d1d5db;
+  opacity: 0.85;
 }
-.speedometer-speed {
-  font-size: 14px;
-  font-weight: 700;
-  fill: #374151;
+
+/* 📺 LCD "888" ghost segments — dim unlit look */
+.lcd-ghost {
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: 18px;
+  font-weight: 900;
+  fill: #1a3a1a;
+  letter-spacing: 0.15em;
+}
+
+/* 📺 LCD active digits — green LED glow */
+.lcd-digits {
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: 18px;
+  font-weight: 900;
+  fill: #22c55e;
+  letter-spacing: 0.15em;
 }
 </style>

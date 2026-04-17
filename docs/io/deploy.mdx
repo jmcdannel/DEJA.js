@@ -70,7 +70,7 @@ If you'd rather flash by hand, every Arduino-family build drops out a self-conta
 
 ```bash
 # 1️⃣ Build the bundle
-pnpm --filter=@deja/io build -- --layout <layoutId> --device <deviceId>
+pnpm --filter=@deja/io build:firmware -- --layout <layoutId> --device <deviceId>
 
 # 2️⃣ cd into the bundle
 cd io/dist/<layoutId>/arduino/<deviceId>
@@ -86,7 +86,7 @@ arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 deja-arduino && \
 ### 🟠 deja-esp32
 
 ```bash
-pnpm --filter=@deja/io build -- --layout <layoutId> --device <deviceId>
+pnpm --filter=@deja/io build:firmware -- --layout <layoutId> --device <deviceId>
 cd io/dist/<layoutId>/arduino/<deviceId>
 
 # PlatformIO
@@ -102,7 +102,7 @@ arduino-cli compile --fqbn esp32:esp32:esp32 \
 ### 🛜 deja-esp32-wifi
 
 ```bash
-pnpm --filter=@deja/io build -- --layout <layoutId> --device <deviceId>
+pnpm --filter=@deja/io build:firmware -- --layout <layoutId> --device <deviceId>
 cd io/dist/<layoutId>/arduino/<deviceId>
 
 # PlatformIO
@@ -115,7 +115,7 @@ arduino-cli compile --fqbn esp32:esp32:esp32 \
   --fqbn esp32:esp32:esp32:UploadSpeed=460800 deja-esp32-wifi
 ```
 
-> 🛜 If you ran `pnpm build` non-interactively, the WiFi/MQTT credentials in `deja-esp32-wifi/config.h` will be empty — edit them by hand before flashing or re-run the interactive wizard.
+> 🛜 If you ran `pnpm build:firmware` non-interactively, the WiFi/MQTT credentials in `deja-esp32-wifi/config.h` will be empty — edit them by hand before flashing or re-run the interactive wizard.
 
 `deja-mqtt` doesn't have a CLI build path because Pico W firmware is just CircuitPython files copied to the CIRCUITPY drive.
 

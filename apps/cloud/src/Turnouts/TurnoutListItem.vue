@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useTimeoutFn } from '@vueuse/core'
-import { useEfx } from '@repo/modules/effects'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useTurnouts, type Turnout } from '@repo/modules'
+import { ListItemCard } from '@repo/ui'
 import { createLogger } from '@repo/utils'
 
 const log = createLogger('TurnoutListItem')
 
 const { setTurnout, deleteTurnout } = useTurnouts()
-const { runEffect, getEffect } = useEfx()
+const router = useRouter()
 
 defineEmits(['edit', 'delete'])
 
@@ -18,11 +18,22 @@ const props = defineProps<{
   turnoutId: string
 }>()
 
-const internalState = ref(props.state !== undefined ? props.state : props.turnout?.state)
+const internalState = ref(
+  props.state !== undefined ? props.state : props.turnout?.state,
+)
 const confirmDelete = ref(false)
 
+const accentColor = computed(() => props.turnout?.color || 'amber')
+const icon = computed(() =>
+  props.turnout?.type === 'servo' ? 'mdi-call-split' : 'mdi-directions-fork',
+)
+
 async function handleSwitch() {
-  await setTurnout(props.turnoutId, {...props.turnout, id: props.turnoutId, state: internalState.value })
+  await setTurnout(props.turnoutId, {
+    ...props.turnout,
+    id: props.turnoutId,
+    state: internalState.value,
+  })
 }
 
 async function handleDelete() {
@@ -35,76 +46,67 @@ async function handleDelete() {
   confirmDelete.value = false
 }
 
+function goToEdit() {
+  router.push({ name: 'Edit Turnout', params: { turnoutId: props.turnoutId } })
+}
 </script>
+
 <template>
-  <v-card
-    class="mx-auto w-full h-full justify-between flex flex-col"
-    density="compact"
+  <ListItemCard
+    :item-id="turnoutId"
+    :device-id="turnout?.device"
+    :color="accentColor"
   >
-    <v-card-item>
-      <v-card-title class="font-weight-black flex flex-nowrap items-center gap-3 !overflow-visible">
-        <v-icon class="drag-handle cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 flex-shrink-0" size="small">mdi-drag</v-icon>
-        <router-link :to="{ name: 'Edit Turnout', params: { turnoutId } }" class="flex items-center gap-3 min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
-          <v-icon
-            :icon="turnout?.type === 'servo' ? 'mdi-call-split' : 'mdi-directions-fork'"
-            :color="turnout?.color || 'yellow'"
-            class="flex-shrink-0"
-          />
-          <span class="truncate">{{ turnout?.name }}</span>
-        </router-link>
-        <v-spacer />
-        <v-switch
-          v-model="internalState"
-          @change="handleSwitch"
-          :color="turnout?.color || 'yellow'"
-          hide-details
-          density="compact"
-          class="flex-shrink-0"
-        />
-      </v-card-title>
-      <v-card-subtitle v-if="turnout?.desc" class="text-md">
-        {{ turnout?.desc }}
-      </v-card-subtitle>
-    </v-card-item>
-    <v-card-text class="min-h-8 flex py-2">
-      <div class="flex justify-between w-full items-start">
-        <v-chip-group column>
-          <v-chip
-            size="small"
-            variant="outlined"
-            prepend-icon="mdi-directions-fork"
-          >{{ turnout?.type || 'Turnout' }}</v-chip>
-          <v-chip v-for="tag in turnout?.tags" :key="tag"
-            size="small"
-            variant="outlined"
-            prepend-icon="mdi-tag"
-          >
-            {{ tag }}
-          </v-chip>
-        </v-chip-group>
-        <v-btn
-          v-if="turnout?.device"
-          size="small"
-          variant="outlined"
-          :color="turnout?.color || 'yellow'"
-          prepend-icon="mdi-memory"
-        >
-          {{ turnout?.device }}
-        </v-btn>
-      </div>
-    </v-card-text>
-    <v-spacer />
-    <v-divider />
-    <div class="flex items-center pa-1" style="background: rgba(var(--v-theme-on-surface), 0.04)">
-      <v-btn
-        v-if="!confirmDelete"
-        icon="mdi-delete-outline"
-        variant="text"
-        color="error"
-        size="small"
-        @click="confirmDelete = true"
+    <template #header-leading>
+      <v-avatar :color="accentColor" variant="tonal" size="32" rounded="lg">
+        <v-icon :icon="icon" :color="accentColor" size="18" />
+      </v-avatar>
+    </template>
+
+    <template #title>
+      <button
+        type="button"
+        class="text-sm font-semibold text-[#f8fafc] truncate text-left hover:opacity-80 transition-opacity"
+        @click="goToEdit"
+      >
+        {{ turnout?.name || turnoutId }}
+      </button>
+    </template>
+
+    <template #subtitle>
+      {{ turnout?.type || 'turnout' }}
+    </template>
+
+    <template #status>
+      <v-switch
+        v-model="internalState"
+        :color="accentColor"
+        hide-details
+        density="compact"
+        class="flex-shrink-0"
+        @change="handleSwitch"
       />
-      <template v-else>
+    </template>
+
+    <div v-if="turnout?.desc" class="text-xs text-slate-400">
+      {{ turnout.desc }}
+    </div>
+
+    <div v-if="(turnout?.tags?.length ?? 0) > 0" class="flex flex-wrap gap-1">
+      <v-chip
+        v-for="tag in turnout?.tags"
+        :key="tag"
+        class="text-xs"
+        prepend-icon="mdi-tag"
+        variant="outlined"
+        size="x-small"
+      >
+        {{ tag }}
+      </v-chip>
+    </div>
+
+    <template #footer>
+      <template v-if="confirmDelete">
         <v-btn
           text="Cancel"
           variant="outlined"
@@ -120,14 +122,22 @@ async function handleDelete() {
           @click="handleDelete"
         />
       </template>
+      <v-btn
+        v-else
+        icon="mdi-delete-outline"
+        variant="text"
+        color="error"
+        size="small"
+        @click="confirmDelete = true"
+      />
       <v-spacer />
       <v-btn
         icon="mdi-pencil-outline"
         variant="text"
-        :color="turnout?.color || 'yellow'"
+        :color="accentColor"
         size="small"
         @click="$emit('edit', turnout)"
       />
-    </div>
-  </v-card>
+    </template>
+  </ListItemCard>
 </template>
