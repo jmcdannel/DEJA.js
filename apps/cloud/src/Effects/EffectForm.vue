@@ -113,6 +113,13 @@ const soundFileRules = computed(() => {
   return []
 })
 const devices = getDevices()
+
+// Resolve the WLED device host for live preview
+const wledDeviceHost = computed(() => {
+  if (efxType.value !== 'wled' || !device.value) return undefined
+  const dev = devices.value?.find((d: Device) => d.id === device.value)
+  return dev?.host || undefined
+})
 log.debug('EffectForm initialized with:', {
   props: props.efx,
   devices,
@@ -397,7 +404,7 @@ function handleSoundFileSelect(soundFile: string) {
       <!-- WLED form -->
       <template v-if="efxType === 'wled'">
         <div class="form-section__row form-section__row--block">
-          <WledEffectForm v-model="wledConfig" />
+          <WledEffectForm v-model="wledConfig" :device-host="wledDeviceHost" />
         </div>
       </template>
 
