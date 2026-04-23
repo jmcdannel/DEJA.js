@@ -9,8 +9,6 @@ import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
 import { useThrottleSettings } from '@/throttle/useThrottleSettings'
-import { useConductorSettings } from '@/conductor/useConductorSettings'
-import { useQuickMenu } from '@/quick-menu/useQuickMenu'
 
 const user = useCurrentUser()
 const { plan, status, isTrialing, trialDaysLeft, subscription } = useSubscription()
@@ -18,18 +16,10 @@ const { themePreference, setTheme } = useThemeSwitcher()
 const { mdAndUp } = useDisplay()
 
 const {
-  variant, speedDisplayType, showFunctions, showSpeedometer, showConsist,
-  setVariant, setSpeedDisplayType, setShowFunctions, setShowSpeedometer, setShowConsist,
+  variant, speedDisplayType, showFunctions, showConsist,
+  rightPanel, setVariant, setSpeedDisplayType, setShowFunctions,
+  setShowConsist, setRightPanel,
 } = useThrottleSettings()
-
-const {
-  variant: conductorVariant,
-  rightPanel: conductorRightPanel,
-  setVariant: setConductorVariant,
-  setRightPanel: setConductorRightPanel,
-} = useConductorSettings()
-
-const { quickMenuVisible } = useQuickMenu()
 
 const planName = computed(() => PLAN_DISPLAY[plan.value].name)
 const planPrice = computed(() => {
@@ -89,8 +79,7 @@ const sections = [
   { id: 'account', label: 'Account', icon: 'mdi-account-circle-outline' },
   { id: 'billing', label: 'Billing', icon: 'mdi-credit-card-outline' },
   { id: 'appearance', label: 'Appearance', icon: 'mdi-palette-outline' },
-  { id: 'throttle', label: 'Throttle & Quick Menu', icon: 'mdi-speedometer' },
-  { id: 'conductor', label: 'Conductor', icon: 'mdi-account-hard-hat' },
+  { id: 'throttle', label: 'Throttle', icon: 'mdi-speedometer' },
   { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'favorites', label: 'Favorites', icon: 'mdi-star-outline' },
   { id: 'backgrounds', label: 'Backgrounds', icon: 'mdi-image-outline' },
@@ -231,15 +220,6 @@ const backgroundPages = [
           </div>
           <div class="settings-row">
             <div class="settings-row__label">
-              <span class="settings-row__name">Speedometer</span>
-              <span class="settings-row__desc">Show speed gauge on desktop, auto-hide on small screens</span>
-            </div>
-            <div class="settings-row__value">
-              <v-switch :model-value="showSpeedometer" @update:model-value="(v) => setShowSpeedometer(!!v)" color="primary" density="compact" hide-details />
-            </div>
-          </div>
-          <div class="settings-row">
-            <div class="settings-row__label">
               <span class="settings-row__name">Speed Display</span>
               <span class="settings-row__desc">Choose between round gauge dial or digital number readout</span>
             </div>
@@ -268,50 +248,11 @@ const backgroundPages = [
           </div>
           <div class="settings-row">
             <div class="settings-row__label">
-              <span class="settings-row__name">Quick Menu</span>
-              <span class="settings-row__desc">Show draggable quick-access menu for throttles and cloud navigation</span>
+              <span class="settings-row__name">Conductor Right Panel</span>
+              <span class="settings-row__desc">Which module to show in the Conductor's right column</span>
             </div>
             <div class="settings-row__value">
-              <v-switch v-model="quickMenuVisible" color="primary" density="compact" hide-details />
-            </div>
-          </div>
-        </div>
-
-        <!-- Conductor -->
-        <div id="conductor" class="settings-section">
-          <div class="settings-section__header">
-            <v-icon size="20" class="settings-section__icon">mdi-account-hard-hat</v-icon>
-            <h2 class="settings-section__title">Conductor</h2>
-          </div>
-          <div class="settings-row">
-            <div class="settings-row__label">
-              <span class="settings-row__name">Throttle Style</span>
-              <span class="settings-row__desc">Throttle control style used inside the Conductor view</span>
-            </div>
-            <div class="settings-row__value">
-              <v-btn-toggle :model-value="conductorVariant" @update:model-value="(v) => setConductorVariant(v)" mandatory divided density="compact" variant="outlined" color="primary">
-                <v-btn value="buttons" size="small" class="text-none">
-                  <v-icon start size="16">mdi-gesture-tap-button</v-icon>
-                  <span class="hidden sm:inline">Buttons</span>
-                </v-btn>
-                <v-btn value="slider" size="small" class="text-none">
-                  <v-icon start size="16">mdi-tune-vertical</v-icon>
-                  <span class="hidden sm:inline">Slider</span>
-                </v-btn>
-                <v-btn value="dashboard" size="small" class="text-none">
-                  <v-icon start size="16">mdi-train</v-icon>
-                  <span class="hidden sm:inline">Dashboard</span>
-                </v-btn>
-              </v-btn-toggle>
-            </div>
-          </div>
-          <div class="settings-row">
-            <div class="settings-row__label">
-              <span class="settings-row__name">Right Panel</span>
-              <span class="settings-row__desc">Which component to load in the Conductor's right column</span>
-            </div>
-            <div class="settings-row__value">
-              <v-btn-toggle :model-value="conductorRightPanel" @update:model-value="(v) => setConductorRightPanel(v)" mandatory divided density="compact" variant="outlined" color="primary">
+              <v-btn-toggle :model-value="rightPanel" @update:model-value="(v) => setRightPanel(v)" mandatory divided density="compact" variant="outlined" color="primary">
                 <v-btn value="turnouts" size="small" class="text-none">
                   <v-icon start size="16">mdi-directions-fork</v-icon>
                   <span class="hidden sm:inline">Turnouts</span>

@@ -4,21 +4,19 @@ export interface AppBackgroundPrefs {
 }
 
 export type ThrottleVariant = 'buttons' | 'slider' | 'dashboard'
+export type TileVariant = 'default' | 'dashboard'
 export type SpeedDisplayType = 'dial' | 'digital'
+
+export type ConductorRightPanel = 'turnouts' | 'effects' | 'signals' | 'devices' | 'routes'
 
 export interface ThrottleSettings {
   variant: ThrottleVariant
+  tileVariant?: TileVariant
   speedDisplayType: SpeedDisplayType
   showFunctions: boolean
   showSpeedometer: boolean
   showConsist: boolean
-}
-
-export type ConductorRightPanel = 'turnouts' | 'effects' | 'signals' | 'devices' | 'routes'
-
-export interface ConductorSettings {
-  variant: ThrottleVariant
-  rightPanel: ConductorRightPanel
+  rightPanel?: ConductorRightPanel
 }
 
 export interface UserPreferences {
@@ -26,5 +24,4 @@ export interface UserPreferences {
     [appName: string]: AppBackgroundPrefs
   }
   throttleSettings?: ThrottleSettings
-  conductorSettings?: ConductorSettings
 }
