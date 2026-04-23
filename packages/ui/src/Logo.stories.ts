@@ -110,9 +110,10 @@ export const NoIcon: Story = {
 
 export const Stacked: Story = {
   args: {
-    size: 'sm',
+    size: 'md',
     variant: 'throttle',
     appTitle: 'Throttle',
+    markStyle: 'logo',
     stacked: true,
   },
 }
@@ -162,16 +163,16 @@ export const StackedVsInline: Story = {
       <div class="flex flex-col gap-8 p-6">
         <div>
           <p class="text-sm text-white/60 mb-2 font-mono">Inline (desktop)</p>
-          <Logo size="md" variant="throttle" app-title="Throttle" />
+          <Logo size="md" variant="throttle" app-title="Throttle" mark-style="logo" />
         </div>
         <div>
           <p class="text-sm text-white/60 mb-2 font-mono">Stacked (mobile)</p>
-          <Logo size="sm" variant="throttle" app-title="Throttle" :stacked="true" />
+          <Logo size="sm" variant="throttle" app-title="Throttle" mark-style="logo" :stacked="true" />
         </div>
         <div>
           <p class="text-sm text-white/60 mb-2 font-mono">Stacked — all variants</p>
           <div class="flex flex-col gap-4">
-            <Logo v-for="a in APPS" :key="a" size="sm" :variant="a" :app-title="appTitleOf(a)" :stacked="true" />
+            <Logo v-for="a in APPS" :key="a" size="sm" :variant="a" :app-title="appTitleOf(a)" mark-style="logo" :stacked="true" />
           </div>
         </div>
       </div>
