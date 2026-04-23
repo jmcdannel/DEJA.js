@@ -5,8 +5,9 @@ import { useHaptics } from '../composables/useHaptics'
 import ListItemCard from '../DeviceConfig/ListItemCard.vue'
 
 interface Props {
-  effect: Effect,
-  isRunning: boolean,
+  effect: Effect
+  isRunning: boolean
+  progress?: number
 }
 
 const props = defineProps<Props>()
@@ -30,6 +31,7 @@ const accentColor = computed(
   () => props.effect?.color || efxType.value?.color || 'purple',
 )
 const icon = computed(() => efxType.value?.icon || 'mdi-lightbulb')
+const isSound = computed(() => props.effect?.type === 'sound')
 </script>
 
 <template>
@@ -65,7 +67,28 @@ const icon = computed(() => efxType.value?.icon || 'mdi-lightbulb')
     </template>
 
     <div class="flex items-center gap-2 flex-wrap">
+      <!-- Sound: play/stop button with progress ring -->
+      <div v-if="isSound" class="relative inline-flex items-center justify-center w-[48px] h-[48px]">
+        <v-progress-circular
+          :model-value="isRunning ? progress : 0"
+          :size="48"
+          :width="3"
+          :color="accentColor"
+          bg-color="transparent"
+          class="absolute inset-0 pointer-events-none"
+        />
+        <v-btn
+          :icon="isRunning ? 'mdi-stop' : 'mdi-play'"
+          :color="isRunning ? 'red-lighten-2' : accentColor"
+          variant="text"
+          size="small"
+          @click="state = !state; vibrate('light')"
+        />
+      </div>
+
+      <!-- Non-sound: standard toggle switch -->
       <v-switch
+        v-else
         v-model="state"
         :color="accentColor"
         hide-details
