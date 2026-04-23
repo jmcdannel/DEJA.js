@@ -8,7 +8,11 @@ import TamarackJunction from './maps/tam/TamarackJunction.vue'
 import PayetteSub from './maps/tam/PayetteSub.vue'
 import './route-styles.css'
 
-const activeMap = ref('PayetteSub')
+const props = defineProps({
+  compact: { type: Boolean, default: false },
+})
+
+const activeMap = ref(props.compact ? 'RoutesList' : 'PayetteSub')
 
 const { runRoute, isRunning, percentComplete } = useLayoutRoutes()
 const {
@@ -34,24 +38,27 @@ const handleMapClickWithHaptic = (event: Event) => {
   <div class="relative">
     <PageHeader title="Routes" icon="mdi-routes" color="blue">
       <template #actions>
-        <v-btn
-          v-for="map in ['TamarackJunction', 'PayetteSub']"
-          :key="map"
-          :variant="activeMap === map ? 'flat' : 'outlined'"
-          color="primary"
-          prepend-icon="mdi-map"
-          size="small"
-          @click="activeMap = map; vibrate('light')"
-        >
-        {{ map }}
-        </v-btn>
-        <v-btn
-          :variant="activeMap === 'RoutesList' ? 'flat' : 'outlined'"
-          prepend-icon="mdi-format-list-bulleted"
-          color="primary"
-          size="small"
-          @click="activeMap = 'RoutesList'; vibrate('light')"
-        >Routes List</v-btn>
+        <div class="flex flex-wrap gap-1">
+          <v-btn
+            v-if="!compact"
+            v-for="map in ['TamarackJunction', 'PayetteSub']"
+            :key="map"
+            :variant="activeMap === map ? 'flat' : 'outlined'"
+            color="primary"
+            prepend-icon="mdi-map"
+            size="x-small"
+            @click="activeMap = map; vibrate('light')"
+          >
+          {{ map }}
+          </v-btn>
+          <v-btn
+            :variant="activeMap === 'RoutesList' ? 'flat' : 'outlined'"
+            prepend-icon="mdi-format-list-bulleted"
+            color="primary"
+            :size="compact ? 'x-small' : 'small'"
+            @click="activeMap = 'RoutesList'; vibrate('light')"
+          >Routes</v-btn>
+        </div>
       </template>
     </PageHeader>
     <main>

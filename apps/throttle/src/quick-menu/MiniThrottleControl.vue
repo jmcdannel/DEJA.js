@@ -62,7 +62,7 @@ const emit = defineEmits<{
         color="amber"
         @click.stop="emit('park', address)"
       >
-        <v-icon size="16">mdi-parking</v-icon>
+        <v-icon size="16">mdi-eject</v-icon>
       </v-btn>
     </div>
   </div>

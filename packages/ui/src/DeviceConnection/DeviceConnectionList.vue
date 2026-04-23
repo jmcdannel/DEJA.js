@@ -6,14 +6,16 @@ import { useDejaJS } from '@repo/deja'
 import DeviceConnectCard from './DeviceConnectCard.vue'
 
 interface Props {
-  devices: Device[]
-  availablePorts: string[]
+  devices?: Device[]
+  availablePorts?: string[]
   showHeader?: boolean
   showDetailsLink?: boolean
   serverOnline?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  devices: () => [],
+  availablePorts: () => [],
   showHeader: true,
   showDetailsLink: true,
   serverOnline: false,
@@ -27,7 +29,7 @@ const emit = defineEmits<{
   trackPowerToggle: [deviceId: string, newState: boolean]
 }>()
 
-const { getLayout } = useLayout()
+const { getLayout, getDevices } = useLayout()
 const { getTurnouts } = useTurnouts()
 const { getEffects } = useEfx()
 const { sendDejaCommand } = useDejaJS()
@@ -37,6 +39,14 @@ function handleRefreshPorts() {
 }
 
 const layout = getLayout()
+const layoutDevices = getDevices()
+
+// Use prop devices if provided, otherwise fall back to layout devices
+const resolvedDevices = computed(() =>
+  props.devices.length > 0
+    ? props.devices
+    : (layoutDevices?.value as Device[] ?? [])
+)
 
 // Fetch all turnouts and effects once during setup (proper VueFire composable usage)
 const allTurnouts = getTurnouts()
@@ -45,7 +55,7 @@ const allEffects = getEffects()
 const trackPower = computed(() => layout?.value?.dccEx?.power ?? null)
 
 const sortedDevices = computed(() => {
-  return [...props.devices].sort((a, b) => {
+  return [...resolvedDevices.value].sort((a, b) => {
     // deja-server always first
     if (a.type === 'deja-server') return -1
     if (b.type === 'deja-server') return 1
@@ -145,7 +155,7 @@ function getEffectCount(deviceId: string): number {
 
     <!-- Empty state -->
     <v-card
-      v-if="devices.length === 0"
+      v-if="resolvedDevices.length === 0"
       variant="tonal"
       class="text-center pa-8"
     >
