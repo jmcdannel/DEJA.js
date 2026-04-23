@@ -65,7 +65,7 @@ async function clearLoco() {
 </script>
 
 <template>
-  <main v-if="throttle" class="@container flex flex-col gap-2 p-2 overflow-hidden w-full h-full flex-1 shadow-xl relative">
+  <main v-if="address" class="@container flex flex-col gap-2 p-2 overflow-hidden w-full h-full flex-1 shadow-xl relative">
     <ThrottleHeader class="bg-gradient-to-r from-slate-700/20 to-blue-900/20">
       <template v-slot:left>
         <div class="flex flex-row items-center justify-center gap-1 px-1 @[640px]:px-4 min-w-0" style="background: rgba(var(--v-theme-surface), 0.6)">
@@ -167,7 +167,6 @@ async function clearLoco() {
         <section class="flex flex-col items-center justify-around flex-1 rounded-lg border border-white/10 bg-white/[0.03] py-2">
           <ConsistIndicator v-if="showConsist && loco" :loco="loco" />
           <FunctionsSpeedDial v-if="loco && showFunctions" :loco="loco" />
-          <RoadnameLogo v-if="loco" :roadname="loco.meta?.roadname" size="lg" />
         </section>
 
         <!-- Right col: Slider controls -->

@@ -37,7 +37,7 @@ const isFullscreen = computed(() => {
 })
 
 const mainContentRef = useTemplateRef('mainContentRef')
-usePageSwipe(mainContentRef as any, { disabledRoutes: ['throttle'] })
+usePageSwipe(mainContentRef as any, { disabledRoutes: ['throttle', 'conductor'] })
 
 const { isDark, themePreference } = useThemeSwitcher()
 

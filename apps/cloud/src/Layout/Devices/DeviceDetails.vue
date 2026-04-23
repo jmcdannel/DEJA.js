@@ -33,11 +33,34 @@ const locos = getLocos()
 const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
 const device = ref(null as Device | null)
 
+// WLED config local refs — initialized after device loads
+const wledHostLocal = ref('')
+const wledLedCountLocal = ref<number | null>(null)
+
 onMounted(async () => {
   if (deviceId) {
     device.value = await getDevice(deviceId) as Device
+    // Initialize WLED fields from saved device data
+    if (device.value?.type === 'wled') {
+      const rawHost = device.value.host || ''
+      wledHostLocal.value = rawHost.replace(/^https?:\/\//, '').replace(/\/+$/, '')
+      wledLedCountLocal.value = device.value.ledCount || null
+    }
   }
 })
+
+async function handleSaveWledConfig() {
+  const host = wledHostLocal.value.replace(/^https?:\/\//, '').replace(/\/+$/, '')
+  await updateDevice(deviceId, {
+    host,
+    ...(wledLedCountLocal.value ? { ledCount: wledLedCountLocal.value } : {}),
+  })
+  // Update local device ref so chips reflect the change
+  if (device.value) {
+    device.value = { ...device.value, host, ledCount: wledLedCountLocal.value || undefined }
+  }
+  notify?.success('WLED configuration saved')
+}
 
 const deviceType = computed(() => deviceTypes.find((type) => type.value === device.value?.type))
 
@@ -275,6 +298,15 @@ function openDeleteDialog() {
         >
           Topic: {{ device?.topic }}
         </v-chip>
+        <v-chip
+          v-if="device?.host"
+          size="small"
+          :color="color.value"
+          prepend-icon="mdi-ip-network"
+          variant="outlined"
+        >
+          Host: {{ device?.host }}
+        </v-chip>
         <!-- Connection Status -->
         <v-chip
           v-if="['usb', 'wifi'].includes(device?.connection || '')"
@@ -293,6 +325,59 @@ function openDeleteDialog() {
       </div>
       
       <v-divider class="mb-6"></v-divider>
+
+      <!-- 🌐 WLED Configuration -->
+      <template v-if="device?.type === 'wled'">
+        <div class="text-subtitle-2 font-weight-bold mb-2">
+          <v-icon icon="mdi-led-strip-variant" size="small" class="mr-1" />
+          WLED Configuration
+        </div>
+        <div class="d-flex gap-4 mb-2">
+          <v-text-field
+            v-model="wledHostLocal"
+            label="Host IP Address"
+            variant="outlined"
+            density="compact"
+            placeholder="192.168.86.35"
+            hint="IP address of the WLED device (without http://)"
+            persistent-hint
+            prepend-inner-icon="mdi-ip-network"
+            class="flex-grow-1"
+          />
+          <v-text-field
+            v-model.number="wledLedCountLocal"
+            label="LED Count"
+            variant="outlined"
+            density="compact"
+            type="number"
+            placeholder="60"
+            hint="Total LEDs on the strip"
+            persistent-hint
+            prepend-inner-icon="mdi-led-strip"
+            style="max-width: 140px;"
+          />
+        </div>
+        <div class="d-flex align-center gap-2 mb-4">
+          <v-btn
+            color="pink"
+            variant="tonal"
+            size="small"
+            prepend-icon="mdi-content-save"
+            @click="handleSaveWledConfig"
+          >
+            Save WLED Config
+          </v-btn>
+          <v-chip
+            v-if="(device as any)?.wledInfo"
+            size="small"
+            prepend-icon="mdi-information"
+            variant="outlined"
+          >
+            {{ (device as any)?.wledInfo?.name }} · {{ (device as any)?.wledInfo?.ledCount }} LEDs · v{{ (device as any)?.wledInfo?.version }}
+          </v-chip>
+        </div>
+        <v-divider class="mb-6" />
+      </template>
 
       <!-- 🔧 Track Output Configuration (DCC-EX devices only) -->
       <TrackOutputConfig

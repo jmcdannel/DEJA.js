@@ -12,6 +12,7 @@ import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import SoundFileList from '@/Effects/Sounds/SoundFileList.vue'
 import DevicePicker from '@/Layout/Devices/DevicePicker.vue'
+import { WledEffectForm } from '@repo/wled/src/components/index'
 
 const log = createLogger('EffectForm')
 // TODO: icon picker
@@ -77,6 +78,7 @@ const macroOff = ref(props.efx?.off || [])
 const pattern = ref(props.efx?.pattern || undefined)
 const range = ref(props.efx?.range || undefined)
 const config = ref(props.efx?.config || undefined)
+const wledConfig = ref(props.efx?.wled ?? undefined)
 const efxType = ref(props.efx?.type)
 const efxTypeObj = ref(props.efx?.type ? getEfxType(props.efx?.type) : undefined)
 const color = ref(props.efx?.color || efxTypeObj.value?.color || 'purple')
@@ -111,6 +113,13 @@ const soundFileRules = computed(() => {
   return []
 })
 const devices = getDevices()
+
+// Resolve the WLED device host for live preview
+const wledDeviceHost = computed(() => {
+  if (efxType.value !== 'wled' || !device.value) return undefined
+  const dev = devices.value?.find((d: Device) => d.id === device.value)
+  return dev?.host || undefined
+})
 log.debug('EffectForm initialized with:', {
   props: props.efx,
   devices,
@@ -183,6 +192,11 @@ async function submit () {
     newEfx.sound = selectedSoundFile.value
   }
 
+  // set wled config
+  if (efxType.value === 'wled' && wledConfig.value) {
+    newEfx.wled = wledConfig.value
+  }
+
   await setEfx(props.efx?.id || '', newEfx)
   loading.value = false
   emit('close')
@@ -206,6 +220,21 @@ function handleIALED(ialedEffectConfig: {
 function handleSoundFileSelect(soundFile: string) {
   selectedSoundFile.value = soundFile
   showSoundDialog.value = false
+}
+
+/** Save WLED config and toggle the effect on for live preview */
+async function handleWledRun() {
+  if (!props.efx?.id || !wledConfig.value) return
+  try {
+    await setEfx(props.efx.id, {
+      ...props.efx,
+      wled: wledConfig.value,
+      state: true,
+    })
+    log.debug('WLED Run: saved and toggled on', props.efx.id)
+  } catch (err) {
+    log.error('WLED Run failed:', err)
+  }
 }
 </script>
 <template>
@@ -383,6 +412,17 @@ function handleSoundFileSelect(soundFile: string) {
             size="sm"
             :max-lines="10"
             class="mt-4"
+          />
+        </div>
+      </template>
+
+      <!-- WLED form -->
+      <template v-if="efxType === 'wled'">
+        <div class="form-section__row form-section__row--block">
+          <WledEffectForm
+            v-model="wledConfig"
+            :show-run="!!wledDeviceHost"
+            @run="handleWledRun"
           />
         </div>
       </template>

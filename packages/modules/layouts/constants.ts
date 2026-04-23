@@ -18,6 +18,7 @@ export const WIFI_DEVICE_TYPES: Device['type'][] = [
   'deja-mqtt',
   'deja-mqtt-diy',
   'deja-esp32-wifi',
+  'wled',
 ]
 
 /** Check whether a device type uses WiFi/MQTT (and therefore needs WiFi creds + MQTT broker config). */
@@ -113,6 +114,12 @@ export const deviceTypes = [
     label: 'deja-server',
     icon: 'mdi-console',
     color: 'purple',
+  },
+  {
+    value: 'wled',
+    label: 'WLED',
+    icon: 'mdi-led-strip-variant',
+    color: 'pink',
   },
 ]
 

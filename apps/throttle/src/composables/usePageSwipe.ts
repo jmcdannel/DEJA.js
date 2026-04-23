@@ -13,7 +13,7 @@ export function usePageSwipe(
   const { vibrate } = useHaptics()
 
   useSwipe(targetRef, {
-    passive: false,
+    passive: true,
     onSwipe() {
       // Reserved for visual drag feedback if desired later
     },

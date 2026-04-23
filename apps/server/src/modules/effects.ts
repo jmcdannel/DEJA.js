@@ -5,6 +5,7 @@ import { log } from '../utils/logger.js'
 import { dcc, type OutputPayload } from '../lib/dcc.js'
 import { layout } from './layout.js'
 import { soundCommand } from '../lib/sound.js'
+import wled from './wled.js'
 
 export interface EffectCommand {
   action: string
@@ -201,7 +202,17 @@ export async function handleEffect(payload: Effect): Promise<void> {
     }
     return
   }
-  
+
+  // Handle WLED effects
+  if (payload.type === 'wled') {
+    try {
+      await wled.handleEffectChange(payload)
+    } catch (error) {
+      log.error('[EFFECTS] Error handling WLED effect:', error)
+    }
+    return
+  }
+
   const conn = payload.device
     ? layout.connections()?.[payload.device]
     : undefined
