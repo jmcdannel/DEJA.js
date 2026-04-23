@@ -13,7 +13,8 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "preview": "vite preview",
     "start": "vite --host",
-    "type-check": "vue-tsc --noEmit --composite false --skipLibCheck "
+    "type-check": "vue-tsc --noEmit --composite false --skipLibCheck ",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@sentry/vue": "^8.0.0",
@@ -37,6 +38,7 @@
   "devDependencies": {
     "@formkit/auto-animate": "^0.8.2",
     "@mdi/font": "^7.4.47",
+    "@playwright/test": "^1.44.0",
     "@repo/auth": "workspace:^0.0.1",
     "@repo/dccex": "workspace:*",
     "@repo/deja": "workspace:*",
@@ -48,6 +50,8 @@
     "@repo/typescript-config": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
+    "@repo/wled": "workspace:*",
+    "@tailwindcss/container-queries": "^0.1.1",
     "@vitejs/plugin-vue": "^4.4.0",
     "@vue/tsconfig": "^0.7.0",
     "@vueuse/core": "^11.0.3",

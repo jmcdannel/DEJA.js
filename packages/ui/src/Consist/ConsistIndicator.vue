@@ -43,12 +43,12 @@ function arrowColor(cloco: ConsistLoco): string {
     <!-- Lead loco badge (only when consist has members) -->
     <div
       v-if="loco.consist?.length"
-      class="flex items-center gap-1 rounded-full py-1 pl-2.5 pr-1.5 flex-shrink-0"
+      class="flex items-center gap-1 rounded-full py-1 pl-2.5 pr-1 flex-shrink-0"
       style="background: rgba(124,58,237,0.3)"
     >
-      <span class="text-sm" style="color: #c4b5fd">◀</span>
+      <span class="text-sm leading-none" style="color: #c4b5fd">◀</span>
       <div
-        class="w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-bold text-white"
+        class="h-7 min-w-7 px-2 rounded-full flex items-center justify-center text-[13px] font-bold text-white tabular-nums tracking-tight"
         style="background: #7c3aed"
       >{{ loco.address }}</div>
     </div>
@@ -58,15 +58,15 @@ function arrowColor(cloco: ConsistLoco): string {
       v-for="cloco in loco.consist"
       :key="cloco.address"
       class="flex items-center gap-1 rounded-full py-1 flex-shrink-0"
-      :class="cloco.direction ? 'pl-2.5 pr-1.5' : 'pl-1.5 pr-2.5'"
+      :class="cloco.direction ? 'pl-2.5 pr-1' : 'pl-1 pr-2.5'"
       :style="{ background: badgeBg(cloco) }"
     >
-      <span v-if="cloco.direction" class="text-sm" :style="{ color: arrowColor(cloco) }">◀</span>
+      <span v-if="cloco.direction" class="text-sm leading-none" :style="{ color: arrowColor(cloco) }">◀</span>
       <div
-        class="w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-semibold text-white"
+        class="h-7 min-w-7 px-2 rounded-full flex items-center justify-center text-[13px] font-semibold text-white tabular-nums tracking-tight"
         :style="{ background: badgeColor(cloco) }"
       >{{ cloco.address }}</div>
-      <span v-if="!cloco.direction" class="text-sm" :style="{ color: arrowColor(cloco) }">▶</span>
+      <span v-if="!cloco.direction" class="text-sm leading-none" :style="{ color: arrowColor(cloco) }">▶</span>
     </div>
 
     <!-- Edit pencil -->

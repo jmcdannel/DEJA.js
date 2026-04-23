@@ -7,7 +7,7 @@ import { ListControlBar, useListControls } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
 import ListPage from '@/Core/UI/ListPage.vue'
 import TurnoutsList from '@/Turnouts/TurnoutsList.vue'
-import EmptyState from '@/Core/UI/EmptyState.vue'
+import { EmptyState } from '@repo/ui'
 
 const router = useRouter()
 const { getTurnouts } = useTurnouts()
@@ -53,7 +53,6 @@ const filters = computed<ListFilter[]>(() => [
 ])
 
 const sortOptions = [
-  { value: 'order', label: 'Default' },
   { value: 'name', label: 'Name' },
   { value: 'device', label: 'Device' },
 ]

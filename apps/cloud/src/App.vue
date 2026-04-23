@@ -4,6 +4,7 @@ import { useStorage } from '@vueuse/core'
 import { useRouter, useRoute } from 'vue-router'
 import { useCurrentUser } from 'vuefire'
 import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
+import { DEJA_APPS } from '@repo/ui'
 import { createLogger } from '@repo/utils'
 import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { useMenu } from '@/Core/Menu/useMenu'
@@ -83,12 +84,12 @@ const { state: onboardingState, isComplete: onboardingComplete } = useOnboarding
 const locosQuery = computed(() =>
   layoutId.value ? query(collection(db, `layouts/${layoutId.value}/locos`)) : null
 )
-const locos = useCollection(locosQuery)
+const locos = useCollection(locosQuery, { ssrKey: 'app-locos-count' })
 const locoCount = computed(() => locos.value?.length ?? 0)
 const dismissedOnboarding = useStorage('@DEJA/dismissedOnboardingBanner', false)
 
 function openThrottle() {
-  window.open('https://throttle.dejajs.com', '_blank')
+  window.open(DEJA_APPS.throttle.href, '_blank')
 }
 
 const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)

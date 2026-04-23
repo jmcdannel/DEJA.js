@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useAutomations, type SensorAutomation } from '@repo/modules/sensors'
-import EmptyState from '@/Core/UI/EmptyState.vue'
+import { EmptyState } from '@repo/ui'
 
 defineEmits(['edit'])
 

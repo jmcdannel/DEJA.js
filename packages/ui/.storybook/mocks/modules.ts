@@ -63,6 +63,32 @@ export const routeType = {
   color: 'purple',
 } as const
 
+// Promotions constants (from packages/modules/promotions/constants.ts)
+export const PROMO_SLOTS = {
+  BANNER_TOP: 'banner-top',
+  HERO_SECTION: 'hero-section',
+} as const
+export type PromoSlot = (typeof PROMO_SLOTS)[keyof typeof PROMO_SLOTS]
+
+export const VARIANT_COLORS: Record<string, string> = {
+  info: 'info',
+  success: 'success',
+  launch: 'success',
+  warning: 'warning',
+} as const
+
+export interface Promotion {
+  id: string
+  title?: string
+  description?: string
+  variant?: string
+  slot?: PromoSlot
+}
+
+export const usePromotions = fn(() => ({
+  promotions: ref([] as Promotion[]),
+})).mockName('usePromotions')
+
 // Re-export effect type constants
 export const efxTypes = [
   { value: 'ialed', label: 'IALED', icon: 'mdi-led-strip-variant', color: 'teal', require: ['device', 'strip', 'pattern', 'range', 'config'] },
@@ -132,9 +158,15 @@ export const deviceTypes = [
   { value: 'dcc-ex', label: 'DCC-EX CommandStation', icon: 'mdi-memory', color: 'yellow' },
   { value: 'deja-arduino', label: 'DEJA Arduino (MEGA)', icon: 'mdi-usb', color: 'lime' },
   { value: 'deja-arduino-led', label: 'DEJA LED Arduino', icon: 'mdi-led-strip', color: 'teal' },
+  { value: 'deja-esp32', label: 'DEJA ESP32', icon: 'mdi-chip', color: 'orange' },
   { value: 'deja-mqtt', label: 'DEJA MQTT (Pico W)', icon: 'mdi-wifi', color: 'blue' },
-  { value: 'deja-server', label: 'DEJA Server', icon: 'mdi-server', color: 'purple' },
+  { value: 'deja-server', label: 'DEJA Server', icon: 'mdi-console', color: 'purple' },
 ]
+
+export const ARDUINO_FAMILY_TYPES = ['deja-arduino', 'deja-arduino-led', 'deja-esp32'] as const
+export const isArduinoFamilyType = fn((type: unknown) =>
+  typeof type === 'string' && (ARDUINO_FAMILY_TYPES as readonly string[]).includes(type),
+).mockName('isArduinoFamilyType')
 
 // Re-export CV types (plans module types and constants are pass-through)
 export type CvProgrammingMode = 'service' | 'pom'
@@ -245,7 +277,7 @@ export const useLayout = fn(() => ({
     { value: 'deja-arduino', label: 'DEJA Arduino (MEGA)', icon: 'mdi-usb', color: 'lime' },
     { value: 'deja-arduino-led', label: 'DEJA LED Arduino', icon: 'mdi-led-strip', color: 'teal' },
     { value: 'deja-mqtt', label: 'DEJA MQTT (Pico W)', icon: 'mdi-wifi', color: 'blue' },
-    { value: 'deja-server', label: 'DEJA Server', icon: 'mdi-laptop', color: 'purple' },
+    { value: 'deja-server', label: 'DEJA Server', icon: 'mdi-console', color: 'purple' },
   ],
   connectDevice: fn().mockName('connectDevice').mockResolvedValue(undefined),
   disconnectDevice: fn().mockName('disconnectDevice').mockResolvedValue(undefined),

@@ -7,7 +7,7 @@ import { useRouter } from 'vue-router'
 import { ListControlBar, useListControls } from '@repo/ui'
 import type { ListFilter } from '@repo/ui'
 import SensorList from '@/Sensors/SensorList.vue'
-import EmptyState from '@/Core/UI/EmptyState.vue'
+import { EmptyState } from '@repo/ui'
 import ListPage from '@/Core/UI/ListPage.vue'
 
 const router = useRouter()

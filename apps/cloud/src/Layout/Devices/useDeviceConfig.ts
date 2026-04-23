@@ -5,6 +5,7 @@ import { computed, type Ref, type ComputedRef } from 'vue'
 import {
   generateArduinoConfig,
   generateDccExAutomation,
+  generateEsp32WifiConfig,
   generatePicoSettings,
   generatePicoConfig,
   isArduinoFamilyType,
@@ -25,6 +26,10 @@ export function useDeviceConfig({ device, effects, turnouts, sensors, signals, l
   const isArduino = computed(() => isArduinoFamilyType(device.value?.type))
 
   const isPicoW = computed(() => device.value?.type === 'deja-mqtt')
+
+  // 🛜 ESP32 WiFi is a member of ARDUINO_FAMILY_TYPES (so isArduino is also true),
+  // but it has its own generator that bakes in WiFi/MQTT credentials at build time.
+  const isEsp32Wifi = computed(() => device.value?.type === 'deja-esp32-wifi')
 
   const isDccEx = computed(() => device.value?.type === 'dcc-ex')
 
@@ -54,6 +59,19 @@ export function useDeviceConfig({ device, effects, turnouts, sensors, signals, l
       turnouts: turnouts.value,
       sensorPins: sensorPins.value,
       signalPins: signalPins.value,
+    })
+  })
+
+  // 🛜 ESP32 WiFi config.h preview (WiFi/MQTT creds left empty — filled at download time)
+  const esp32WifiConfigH = computed(() => {
+    if (!device.value) return ''
+    return generateEsp32WifiConfig({
+      device: device.value,
+      effects: effects.value,
+      turnouts: turnouts.value,
+      sensorPins: sensorPins.value,
+      signalPins: signalPins.value,
+      layoutId: layoutId?.value ?? '',
     })
   })
 
@@ -99,7 +117,22 @@ export function useDeviceConfig({ device, effects, turnouts, sensors, signals, l
     const zip = new JSZip()
     const folder = zip.folder(device.value.id)!
 
-    if (isArduino.value) {
+    if (isEsp32Wifi.value) {
+      // 🛜 ESP32 WiFi: bake WiFi/MQTT creds into config.h at download time so the
+      // sketch flashes with everything it needs to join the network.
+      const esp32Config = generateEsp32WifiConfig({
+        device: device.value,
+        effects: effects.value,
+        turnouts: turnouts.value,
+        sensorPins: sensorPins.value,
+        signalPins: signalPins.value,
+        layoutId: layoutId ?? '',
+        wifiSsid,
+        wifiPassword,
+        mqttBroker,
+      })
+      folder.file('config.h', esp32Config)
+    } else if (isArduino.value) {
       folder.file('config.h', arduinoConfigH.value)
     } else if (isPicoW.value) {
       // Generate settings.toml with user-provided WiFi creds
@@ -130,8 +163,10 @@ export function useDeviceConfig({ device, effects, turnouts, sensors, signals, l
   return {
     isArduino,
     isPicoW,
+    isEsp32Wifi,
     isDccEx,
     arduinoConfigH,
+    esp32WifiConfigH,
     picoSettingsToml,
     picoConfigJson,
     dccExAutomationH,

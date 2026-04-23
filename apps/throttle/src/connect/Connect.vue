@@ -6,7 +6,8 @@ import { useStorage } from '@vueuse/core'
 import { rtdb } from '@repo/firebase-config'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { useLayout, useServerStatus, type Device } from '@repo/modules'
-import { DeviceConnectionList, DeviceStatusItem, StatusPulse, SelectLayout } from '@repo/ui'
+import { useDcc, DCC_POWER_ON, DCC_POWER_OFF } from '@repo/dccex'
+import { DeviceConnectionList, StatusPulse, SelectLayout } from '@repo/ui'
 import { useDisplay } from 'vuetify'
 
 const user = useCurrentUser()
@@ -63,19 +64,14 @@ async function handleDisconnect(deviceId: string) {
   await disconnectDevice(deviceId)
 }
 
-// Device detail modal
-const selectedDeviceId = ref<string | null>(null)
-const showDeviceModal = ref(false)
-
-function openDeviceModal(deviceId: string) {
-  selectedDeviceId.value = deviceId
-  showDeviceModal.value = true
+function openDeviceInCloud(deviceId: string) {
+  window.open(`https://cloud.dejajs.com/devices/${deviceId}`, 'deja-cloud')
 }
 
-const selectedDevice = computed(() => {
-  if (!selectedDeviceId.value || !devices.value) return null
-  return devices.value.find((d: Device) => d.id === selectedDeviceId.value) ?? null
-})
+const { sendDccCommand } = useDcc()
+async function handleTrackPowerToggle(_deviceId: string, newState: boolean) {
+  await sendDccCommand({ action: 'dcc', payload: newState ? DCC_POWER_ON : DCC_POWER_OFF })
+}
 
 // Jump-to sections
 const sections = computed(() => {
@@ -157,11 +153,13 @@ function scrollTo(id: string) {
               <DeviceConnectionList
                 :devices="devices ?? []"
                 :available-ports="ports"
-                link-mode="modal"
                 :show-header="false"
+                :show-details-link="false"
+                :server-online="serverStatus?.online ?? false"
                 @connect="handleConnect"
                 @disconnect="handleDisconnect"
-                @navigate="openDeviceModal"
+                @navigate="openDeviceInCloud"
+                @track-power-toggle="handleTrackPowerToggle"
               />
             </div>
           </div>
@@ -185,19 +183,6 @@ function scrollTo(id: string) {
       </nav>
     </div>
 
-    <!-- Device Detail Modal -->
-    <v-dialog v-model="showDeviceModal" max-width="600">
-      <v-card v-if="selectedDevice">
-        <v-card-title>Device Details</v-card-title>
-        <v-card-text>
-          <DeviceStatusItem :device="selectedDevice" />
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn @click="showDeviceModal = false">Close</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-container>
 </template>
 

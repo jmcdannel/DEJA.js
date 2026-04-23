@@ -6,6 +6,12 @@ on:
 
 jobs:
   check-changeset:
+    # 🤖 Skip for the changelog bot — its PR only deletes changesets, so it
+    # can't satisfy "every PR must add a changeset" by design.
+    if: |
+      github.event.pull_request.user.login != 'github-actions[bot]' &&
+      !contains(github.event.pull_request.title, '[changelog-bot]') &&
+      !contains(github.event.pull_request.labels.*.name, 'changelog-bot')
     runs-on: ubuntu-latest
 
     steps:

@@ -16,7 +16,7 @@ const user = useCurrentUser()
           type="button"
           v-bind="activatorProps"
           :size="size"
-          class="shadow-md border-2 border-white/20 mx-3"
+          class="shadow-md border-2 border-white/20"
         >
           <v-img
             v-if="user?.photoURL"

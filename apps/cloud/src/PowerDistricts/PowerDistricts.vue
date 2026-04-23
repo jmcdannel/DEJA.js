@@ -5,7 +5,7 @@ import { useTrackOutputs, type TrackOutput } from '@repo/dccex'
 import { PowerDistrictCard } from '@repo/ui'
 import { useNotification } from '@repo/ui'
 import ListPage from '@/Core/UI/ListPage.vue'
-import EmptyState from '@/Core/UI/EmptyState.vue'
+import { EmptyState } from '@repo/ui'
 
 const { getPowerDistricts, setPowerDistrict, deletePowerDistrict } = usePowerDistricts()
 const { getDevices } = useLayout()

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { deviceTypes, useLayout, type Device } from '@repo/modules'
+import { ref, watch } from 'vue'
+import { deviceTypes, isWifiDeviceType, useLayout, type Device } from '@repo/modules'
 import { createLogger } from '@repo/utils'
 
 const log = createLogger('AddDeviceItem')
@@ -9,7 +9,10 @@ interface ValidationRules {
   required: ((val: unknown) => boolean | string)[];
 }
 
-const emit = defineEmits(['close'])
+const emit = defineEmits<{
+  close: []
+  created: [device: Device]
+}>()
 const props = defineProps({
   show: {
     type: Boolean,
@@ -19,9 +22,22 @@ const props = defineProps({
 const reveal = ref(false)
 const loading = ref(false)
 const connection = ref<'usb' | 'wifi' | null>(null)
-const deviceType = ref(null)
+const deviceType = ref<Device['type'] | null>(null)
+
+// 📡 Auto-default connection based on device type — WiFi devices (Pico W, ESP32 WiFi)
+// must use connection: 'wifi' so the server's MQTT publish branch is used.
+// Server modules in apps/server/src/modules/effects.ts gate WiFi publish on
+// `connection === 'wifi'`, so this default is load-bearing.
+watch(deviceType, (newType) => {
+  if (isWifiDeviceType(newType ?? undefined)) {
+    connection.value = 'wifi'
+  } else if (newType) {
+    connection.value = 'usb'
+  }
+})
 const deviceId = ref('')
-const topic = ref('')
+const host = ref('')
+const ledCount = ref<number | null>(null)
 const autoConnect = ref(false)
 const rules:ValidationRules = {
   required: [(val) => !!val || 'Required.']
@@ -30,6 +46,15 @@ const rules:ValidationRules = {
 const { createDevice } = useLayout()
 
 const connectionTypes = ['usb', 'wifi']
+
+function resetForm() {
+  deviceType.value = null
+  connection.value = null
+  deviceId.value = ''
+  host.value = ''
+  ledCount.value = null
+  autoConnect.value = false
+}
 
 async function submit (e: Event) {
   loading.value = true
@@ -42,15 +67,23 @@ async function submit (e: Event) {
       name: deviceId.value,
       type: deviceType.value,
       autoConnect: autoConnect.value,
-      ...(connection.value === 'wifi' && topic.value ? { topic: topic.value } : {}),
+      ...(host.value ? { host: host.value } : {}),
+      ...(ledCount.value ? { ledCount: ledCount.value } : {}),
     }
-    await createDevice(deviceId.value, device)
+    const ok = await createDevice(deviceId.value, device)
+    if (ok) {
+      emit('created', device)
+      resetForm()
+      reveal.value = false
+      emit('close')
+    }
   }
 
   loading.value = false
 }
 
 function handleClose() {
+  resetForm()
   reveal.value = false
   emit('close')
 }
@@ -98,13 +131,25 @@ log.debug('deviceTypes', deviceTypes)
             :rules="rules.required"
           ></v-text-field>
           <v-text-field
-            v-if="connection === 'wifi'"
-            v-model="topic"
-            label="MQTT Topic"
+            v-if="deviceType === 'wled'"
+            v-model="host"
+            label="Host IP Address"
             variant="outlined"
             density="compact"
-            placeholder="deja/layout/device"
-            hint="MQTT topic this device subscribes to"
+            placeholder="192.168.86.35"
+            hint="IP address of the WLED device on your network"
+            persistent-hint
+            :rules="rules.required"
+          ></v-text-field>
+          <v-text-field
+            v-if="deviceType === 'wled'"
+            v-model.number="ledCount"
+            label="LED Count"
+            variant="outlined"
+            density="compact"
+            type="number"
+            placeholder="60"
+            hint="Total number of LEDs on the strip"
             persistent-hint
           ></v-text-field>
           <v-switch

@@ -7,6 +7,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./AppHeader": "./src/AppHeader.vue",
+    "./AppSwitcher": "./src/AppSwitcher.vue",
+    "./StatusIndicator": "./src/StatusIndicator.vue",
     "./ConsistIndicator": "./src/Consist/ConsistIndicator.vue",
     "./ConsistEditor": "./src/Consist/ConsistEditor.vue",
     "./Functions": "./src/Functions/Functions.vue",
@@ -44,7 +46,8 @@
     "./tailwind/animation-preset": "./src/tailwind/animation-preset.ts",
     "./SplashPage": "./src/SplashPage.vue",
     "./NotFoundPage": "./src/NotFoundPage.vue",
-    "./QuickStart": "./src/QuickStart/QuickStart.vue"
+    "./QuickStart": "./src/QuickStart/QuickStart.vue",
+    "./composables/useHaptics": "./src/composables/useHaptics.ts"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.8.2",

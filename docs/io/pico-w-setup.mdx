@@ -5,9 +5,11 @@ section: io
 order: 12
 ---
 
-# Pico W Setup
+# 🍓 Pico W Setup
 
-The Raspberry Pi Pico W connects to your layout wirelessly over WiFi and communicates via MQTT — ideal for devices placed inside scenery or buildings.
+The Raspberry Pi Pico W (`deja-mqtt`) connects to your layout wirelessly over WiFi and communicates via MQTT — ideal for devices placed inside scenery or buildings.
+
+> 🛜 **See also:** [`deja-esp32-wifi`](/docs/io/arduino-setup) — the ESP32-based WiFi/MQTT alternative. It uses the **same MQTT topology** (`{TOPIC_ID}/{LAYOUT_ID}/{DEVICE_ID}` for commands, `…/messages` for sensor events) and the **same single-object command format** as the Pico W. Pick whichever hardware you have on hand: Pico W if you prefer CircuitPython and a smaller board, ESP32 if you prefer the Arduino C++ toolchain and more GPIOs.
 
 ## Hardware Requirements
 

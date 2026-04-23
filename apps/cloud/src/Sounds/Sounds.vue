@@ -4,7 +4,7 @@ import { useSubscription, PLAN_DISPLAY } from '@repo/modules'
 import ListPage from '@/Core/UI/ListPage.vue'
 import { soundFileService, type SoundFile } from '@/Effects/Sounds/SoundFileService'
 import SoundList from '@/Sounds/SoundList.vue'
-import EmptyState from '@/Core/UI/EmptyState.vue'
+import { EmptyState } from '@repo/ui'
 
 const { plan } = useSubscription()
 

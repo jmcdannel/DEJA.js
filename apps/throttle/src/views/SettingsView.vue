@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useCurrentUser } from 'vuefire'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { getIdToken } from 'firebase/auth'
-import { db } from '@repo/firebase-config'
 import { useSubscription, PLAN_DISPLAY, useFeatureFlags } from '@repo/modules'
-import type { Layout } from '@repo/modules'
 import SelectFavorites from '@/core/Menu/SelectFavorites.vue'
 import { BackgroundSettings, ServerSetupInfo, FeatureGate } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
-import { useServerDiscovery } from '@/composables/useServerDiscovery'
 import { useThrottleSettings } from '@/throttle/useThrottleSettings'
 import { useConductorSettings } from '@/conductor/useConductorSettings'
 import { useQuickMenu } from '@/quick-menu/useQuickMenu'
@@ -22,8 +18,8 @@ const { themePreference, setTheme } = useThemeSwitcher()
 const { mdAndUp } = useDisplay()
 
 const {
-  variant, showFunctions, showSpeedometer, showConsist,
-  setVariant, setShowFunctions, setShowSpeedometer, setShowConsist,
+  variant, speedDisplayType, showFunctions, showSpeedometer, showConsist,
+  setVariant, setSpeedDisplayType, setShowFunctions, setShowSpeedometer, setShowConsist,
 } = useThrottleSettings()
 
 const {
@@ -40,6 +36,7 @@ const { isEnabled } = useFeatureFlags()
 
 const { isScanning, discoveredServers, startScan, isAvailable, checkAvailability } = useServerDiscovery()
 onMounted(() => { checkAvailability() })
+
 
 const planName = computed(() => PLAN_DISPLAY[plan.value].name)
 const planPrice = computed(() => {
@@ -85,52 +82,7 @@ async function openBillingPortal() {
   }
 }
 
-// Speed steps
-// Speed steps removed — replaced by throttle variant settings
-
-// DEJA server config
-const wsServerUrl = useStorage('@DEJA/wsServerUrl', '')
-const mqttBrokerUrl = useStorage('@DEJA/mqttBrokerUrl', '')
-const serverSaved = ref(false)
-function saveServerSettings() {
-  serverSaved.value = true
-  setTimeout(() => { serverSaved.value = false }, 2000)
-}
-
-// Layout throttle connection
 const layoutId = useStorage<string>('@DEJA/layoutId', '').value
-const connectionType = ref<'deja-server' | 'withrottle'>('deja-server')
-const connectionHost = ref('')
-const connectionPort = ref(44444)
-const isLayoutLoading = ref(true)
-const isLayoutSaving = ref(false)
-
-if (layoutId) {
-  getDoc(doc(db, 'layouts', layoutId)).then((snap) => {
-    if (snap.exists()) {
-      const data = snap.data() as Layout
-      if (data.throttleConnection) {
-        connectionType.value = data.throttleConnection.type || 'deja-server'
-        connectionHost.value = data.throttleConnection.host || ''
-        connectionPort.value = data.throttleConnection.port || 44444
-      }
-    }
-    isLayoutLoading.value = false
-  })
-}
-
-async function saveLayoutConnectionSettings() {
-  if (!layoutId) return
-  isLayoutSaving.value = true
-  try {
-    await setDoc(doc(db, 'layouts', layoutId), {
-      throttleConnection: { type: connectionType.value, host: connectionHost.value, port: connectionPort.value }
-    }, { merge: true })
-  } catch (e) {
-    console.error('Error saving throttle connection:', e)
-  }
-  isLayoutSaving.value = false
-}
 
 // Theme options
 const themeOptions: { value: ThemeMode; label: string; icon: string }[] = [
@@ -146,7 +98,6 @@ const sections = [
   { id: 'appearance', label: 'Appearance', icon: 'mdi-palette-outline' },
   { id: 'throttle', label: 'Throttle & Quick Menu', icon: 'mdi-speedometer' },
   { id: 'conductor', label: 'Conductor', icon: 'mdi-account-hard-hat' },
-  { id: 'connection', label: 'Connection', icon: 'mdi-server-network' },
   { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'favorites', label: 'Favorites', icon: 'mdi-star-outline' },
   { id: 'backgrounds', label: 'Backgrounds', icon: 'mdi-image-outline' },
@@ -292,6 +243,25 @@ const backgroundPages = [
             </div>
             <div class="settings-row__value">
               <v-switch :model-value="showSpeedometer" @update:model-value="(v) => setShowSpeedometer(!!v)" color="primary" density="compact" hide-details />
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row__label">
+              <span class="settings-row__name">Speed Display</span>
+              <span class="settings-row__desc">Choose between round gauge dial or digital number readout</span>
+            </div>
+            <div class="settings-row__value">
+              <v-btn-toggle
+                :model-value="speedDisplayType"
+                @update:model-value="(v: string) => v && setSpeedDisplayType(v as 'dial' | 'digital')"
+                mandatory
+                density="compact"
+                color="primary"
+                variant="outlined"
+              >
+                <v-btn value="dial" size="small">🎛️ Dial</v-btn>
+                <v-btn value="digital" size="small">🔢 Digital</v-btn>
+              </v-btn-toggle>
             </div>
           </div>
           <div class="settings-row">
@@ -465,6 +435,7 @@ const backgroundPages = [
         </div>
         </FeatureGate>
 
+
         <!-- Server Setup -->
         <div id="server-setup" class="settings-section">
           <div class="settings-section__header">
@@ -605,26 +576,6 @@ const backgroundPages = [
 .settings-row__name { font-size: 0.875rem; font-weight: 500; color: rgba(var(--v-theme-on-surface), 0.8); }
 .settings-row__desc { font-size: 0.75rem; color: rgba(var(--v-theme-on-surface), 0.45); }
 .settings-row__value { flex-shrink: 0; }
-
-.server-option {
-  flex: 1;
-  padding: 16px;
-  border-radius: 10px;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.15);
-  background: rgba(var(--v-theme-surface), 0.4);
-  cursor: pointer;
-  transition: border-color 150ms ease, background 150ms ease;
-  text-align: center;
-}
-.server-option:hover {
-  border-color: rgba(var(--v-theme-primary), 0.3);
-  background: rgba(var(--v-theme-primary), 0.05);
-}
-.server-option--selected {
-  border-color: rgba(var(--v-theme-primary), 0.5);
-  background: rgba(var(--v-theme-primary), 0.08);
-  box-shadow: 0 0 12px rgba(var(--v-theme-primary), 0.1);
-}
 
 .settings-version {
   text-align: center;

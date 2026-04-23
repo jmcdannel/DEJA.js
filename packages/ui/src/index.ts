@@ -1,4 +1,9 @@
 export { default as AppHeader } from './AppHeader.vue'
+export { default as AppSwitcher } from './AppSwitcher.vue'
+export { DEJA_APPS } from './appConfig'
+export type { DejaAppKey } from './appConfig'
+export { default as StatusIndicator } from './StatusIndicator.vue'
+export type { IndicatorStatus } from './StatusIndicator.vue'
 export { default as ConnectionStatus } from './ConnectionStatus.vue'
 export { default as ThrottleLaunchQR } from './ThrottleLaunchQR.vue'
 export { default as Logo } from './Logo.vue'
@@ -25,6 +30,8 @@ export { default as TurnoutButton } from './Turnouts/TurnoutButton.vue'
 export { default as TurnoutRaw } from './Turnouts/TurnoutRaw.vue'
 export { default as TurnoutTable } from './Turnouts/TurnoutTable.vue'
 export { default as TrackPower } from './TrackPower.vue'
+export { default as Power } from './Power.vue'
+export { default as EmergencyStop } from './EmergencyStop.vue'
 export { default as TrackOutputConfig } from './TrackOutputs/TrackOutputConfig.vue'
 export { default as PowerDistrictCard } from './TrackOutputs/PowerDistrictCard.vue'
 export { default as SignalList } from './SignalList.vue'
@@ -52,10 +59,20 @@ export { default as DeviceStatusItem } from './DeviceStatus/DeviceStatusItem.vue
 export { default as DeviceStatusList } from './DeviceStatus/DeviceStatusList.vue'
 
 // Device Connection
-export { DeviceConnectionCard, DeviceConnectionList } from './DeviceConnection'
+export { DejaServerPanel, DeviceConnectCard, DeviceConnectionList, DeviceManageCard } from './DeviceConnection'
+
+// Device Config (advanced tuning + pinout diagram + pickers + badge + list shell)
+export {
+  ArduinoAdvancedConfig,
+  DeviceBadge,
+  DevicePickerChip,
+  DevicePickerGrid,
+  DevicePinoutDiagram,
+  ListItemCard,
+} from './DeviceConfig'
 
 // Dashboard widgets
-export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart, DeviceTile, QuickConnectPanel, LayoutInfoCard, DashboardEmptyState } from './Dashboard'
+export { SystemOverviewStats, CommandActivityChart, DeviceConnectionChart, LayoutInfoCard, DashboardEmptyState } from './Dashboard'
 
 // DejaTracker — SVG railroad progress tracker
 export { DejaTracker } from './DejaTracker'
@@ -91,6 +108,8 @@ export type { WcagLevel } from './themes'
 // Composables
 export { useThemeSwitcher } from './composables/useThemeSwitcher'
 export { useListControls } from './composables/useListControls'
+export { useHaptics } from './composables/useHaptics'
+export type { HapticPattern } from './composables/useHaptics'
 
 // PageHeader
 export { default as PageHeader } from './PageHeader/PageHeader.vue'

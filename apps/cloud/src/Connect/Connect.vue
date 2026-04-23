@@ -56,6 +56,13 @@ watch(layoutId, (id) => {
 async function handleConnect(deviceId: string, serial?: string, topic?: string) {
   const device = devices.value?.find((d: Device) => d.id === deviceId)
   if (!device) return
+
+  // For WLED devices, save the host IP before connecting
+  if (device.type === 'wled' && serial) {
+    const { updateDevice } = useLayout()
+    await updateDevice(deviceId, { host: serial })
+  }
+
   await connectDevice(device, serial, topic)
 }
 
@@ -157,8 +164,8 @@ function scrollTo(id: string) {
               <DeviceConnectionList
                 :devices="devices ?? []"
                 :available-ports="ports"
-                link-mode="modal"
                 :show-header="false"
+                :server-online="serverStatus?.online ?? false"
                 @connect="handleConnect"
                 @disconnect="handleDisconnect"
                 @navigate="openDeviceModal"

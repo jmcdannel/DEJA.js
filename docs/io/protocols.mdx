@@ -9,9 +9,9 @@ order: 15
 
 DEJA IO supports three communication protocols. All use JSON messages.
 
-## Serial USB
+## 🔌 Serial USB
 
-Direct wired connection between an Arduino and the DEJA Server.
+Direct wired connection between the DEJA Server and any of the USB-serial Arduino-family device types: **`deja-arduino`** (Arduino Mega) or **`deja-esp32`** (ESP32 Dev Module). Both share the same `io/src/deja-arduino/` sketch and identical wire format.
 
 | Parameter | Value |
 |---|---|
@@ -19,48 +19,75 @@ Direct wired connection between an Arduino and the DEJA Server.
 | Data bits | 8 |
 | Stop bits | 1 |
 | Parity | None |
-| Encoding | UTF-8 JSON |
+| Encoding | UTF-8 JSON array |
 
 ### How It Works
 
-1. Arduino connects via USB to the server machine
+1. The board connects via USB to the server machine
 2. DEJA Server auto-detects the serial port
 3. Server opens the port at 115200 baud via the `serialport` Node.js package
-4. JSON commands are written to the port; responses are read line-by-line
+4. JSON command **arrays** are written to the port; responses are read line-by-line
 5. Auto-reconnect with exponential backoff (1s → 30s max) on disconnect
+
+### Wire Format
+
+Commands arrive as a **JSON array** (multiple commands can be batched per write):
+
+```json
+[
+  { "action": "pin", "payload": { "pin": 8, "state": 1 } },
+  { "action": "servo", "payload": { "servo": 0, "value": 90, "current": 45 } }
+]
+```
+
+Sensor state changes are published back over the same serial line as single objects (e.g. `{ "sensor": 0, "state": 1 }`), debounced with a 500ms minimum between state changes.
 
 ### Port Detection
 
 The server lists available serial ports and matches them to registered devices. You can also manually specify a port path in your device configuration.
 
-## MQTT over WiFi
+## 📬 MQTT over WiFi
 
-Wireless publish/subscribe messaging via an MQTT broker (Mosquitto recommended).
+Wireless publish/subscribe messaging via an MQTT broker (Mosquitto recommended). Used by both wireless device types: **`deja-mqtt`** (Raspberry Pi Pico W, CircuitPython) and **`deja-esp32-wifi`** (ESP32, Arduino C++). Both share the **same topic scheme and the same single-object command format** — the DEJA Server treats them identically on the wire.
 
 | Parameter | Value |
 |---|---|
 | Default port | 1883 (unencrypted) |
 | Protocol | MQTT v3.1.1 |
 | QoS | 0 (at most once) |
-| Encoding | UTF-8 JSON |
+| Encoding | UTF-8 JSON object |
 
 ### Topic Structure
 
 ```
-{topicId}/{layoutId}/{deviceId}          ← device subscribes (receives commands)
-{topicId}/{layoutId}/{deviceId}/messages ← device publishes (sends status)
+{TOPIC_ID}/{LAYOUT_ID}/{DEVICE_ID}          ← device subscribes (receives commands)
+{TOPIC_ID}/{LAYOUT_ID}/{DEVICE_ID}/messages ← device publishes (sensor events, status)
 ```
 
-Default `topicId` is `DEJA`. Example for a device on the "tam" layout:
+Default `TOPIC_ID` is `DEJA`. Example for a device on the "tam" layout:
 
 ```
 DEJA/tam/tj-eagle-nest-pico          ← commands IN
-DEJA/tam/tj-eagle-nest-pico/messages ← status OUT
+DEJA/tam/tj-eagle-nest-pico/messages ← sensor events / status OUT
 ```
+
+### Wire Format
+
+Commands arrive as **single JSON objects** (one command per MQTT message) with a `device` field for filtering:
+
+```json
+{
+  "action": "pin",
+  "device": "my-esp32-wifi",
+  "payload": { "pin": 18, "state": 1 }
+}
+```
+
+Sensor events the device publishes back to `…/messages` flow through the same Firestore pipeline as USB-serial sensors via the server's `writeSensorState()` helper.
 
 ### Device Filtering
 
-Multiple devices can share the same MQTT topic prefix. Each message includes a `device` field, and devices only process messages matching their own `DEVICE_ID`.
+Multiple devices can share the same MQTT topic prefix. Each message includes a `device` field, and devices only process messages matching their own `DEVICE_ID`. This is true for both `deja-mqtt` and `deja-esp32-wifi`.
 
 ### Broker Setup
 

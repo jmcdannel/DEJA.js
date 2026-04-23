@@ -11,9 +11,3 @@ export interface MenuItem {
   /** Set at runtime by useMenu — true when the feature flag is off for the current user */
   gated?: boolean;
 }
-
-export interface SuiteApp {
-  label: string;
-  icon: string;
-  href: string;
-}

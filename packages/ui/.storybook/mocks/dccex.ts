@@ -22,6 +22,25 @@ export const requiresCabAddress = fn((mode: unknown) =>
   typeof mode === 'string' && DC_MODES.includes(mode),
 ).mockName('requiresCabAddress')
 
+// 🚂 Stub for trackConstants.isBoostMode — ESP32 booster modes.
+const BOOST_MODES = ['BOOST', 'BOOST_INV', 'BOOST_AUTO']
+export const isBoostMode = fn((mode: unknown) =>
+  typeof mode === 'string' && BOOST_MODES.includes(mode),
+).mockName('isBoostMode')
+
+// 🚂 Type re-exports — type-only aliases used by components.
+export type TrackOutputLetter = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H'
+export type TrackMode =
+  | 'MAIN' | 'MAIN_INV' | 'MAIN_AUTO'
+  | 'PROG'
+  | 'DC' | 'DCX'
+  | 'BOOST' | 'BOOST_INV' | 'BOOST_AUTO'
+  | 'NONE'
+export interface TrackOutput {
+  mode: TrackMode
+  cabAddress?: number
+}
+
 // 🚂 Track output letter constants — keep in sync with packages/dccex/trackConstants.ts
 export const TRACK_OUTPUT_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] as const
 

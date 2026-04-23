@@ -1,7 +1,5 @@
 export { default as SystemOverviewStats } from './SystemOverviewStats.vue'
 export { default as CommandActivityChart } from './CommandActivityChart.vue'
 export { default as DeviceConnectionChart } from './DeviceConnectionChart.vue'
-export { default as DeviceTile } from './DeviceTile.vue'
-export { default as QuickConnectPanel } from './QuickConnectPanel.vue'
 export { default as LayoutInfoCard } from './LayoutInfoCard.vue'
 export { default as DashboardEmptyState } from './DashboardEmptyState.vue'

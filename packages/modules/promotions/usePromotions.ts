@@ -13,7 +13,10 @@ export function usePromotions(slotId: string) {
     )
   })
 
-  const allActive = useCollection<Promotion>(promotionsRef)
+  // ssrKey silences [VueFire SSR] "Could not get the path of the data source" —
+  // VueFire can't derive a unique cache key from a computed query ref, so we
+  // provide one explicitly. Stable per-app-boot because the query is constant.
+  const allActive = useCollection<Promotion>(promotionsRef, { ssrKey: 'promotions-active' })
 
   const promotions = computed(() => {
     const now = new Date()

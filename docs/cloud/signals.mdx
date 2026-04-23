@@ -44,7 +44,7 @@ Three pin fields map each signal aspect to an output pin on the selected device:
 | **Yellow pin** | Yellow circle icon | Pin number for the yellow LED |
 | **Green pin** | Green circle icon | Pin number for the green LED |
 
-Each field accepts a numeric pin number corresponding to the output pin on your hardware device. Pin numbers depend on your hardware -- for Arduino-based devices, these are typically digital output pins. For expansion boards, they may be I2C or shift-register addresses.
+Each field accepts a numeric pin number corresponding to the output pin on your hardware device. Pin numbers depend on your hardware -- for Arduino and ESP32 devices (`deja-arduino`, `deja-esp32`, `deja-esp32-wifi`), these are typically digital output pins. For Pico W devices (`deja-mqtt`), they map to GPIO numbers via `config.json`. For expansion boards, they may be I2C or shift-register addresses.
 
 All three pins are optional -- you can configure a two-aspect signal by leaving one pin blank (for example, omitting yellow for a simple red/green block signal).
 

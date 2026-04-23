@@ -45,6 +45,7 @@ export default defineConfig({
   noExternal: [
     '@repo/modules',
     '@repo/sounds',
+    '@repo/dccex',
     // @repo/firebase-config is inlined; its firebase-admin/* imports stay external
     '@repo/firebase-config',
   ],

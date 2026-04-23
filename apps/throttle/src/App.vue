@@ -7,10 +7,7 @@ import { Signout } from '@repo/auth'
 import type { AppBackgroundPrefs } from '@repo/modules'
 import Footer from '@/core/Footer.vue'
 import ConnectionStatusBanner from '@/core/ConnectionStatusBanner.vue'
-import useMenu from '@/core/Menu/useMenu'
-import Menu from '@repo/ui/src/Menu/Menu.vue'
 import { usePageSwipe } from '@/composables/usePageSwipe'
-import QuickMenu from '@/quick-menu/QuickMenu.vue'
 import CommandPalette from '@/command-palette/CommandPalette.vue'
 import CommandPaletteTrigger from '@/command-palette/CommandPaletteTrigger.vue'
 import CommandPaletteChordChip from '@/command-palette/CommandPaletteChordChip.vue'
@@ -26,8 +23,6 @@ const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
 
 const { feedbackUser } = useFeedbackUser()
 watch(feedbackUser, (u) => Sentry.setUser(u), { immediate: true })
-const drawer = ref(false)
-const { handleMenu, menuConfig } = useMenu()
 
 const user = useCurrentUser()
 const route = useRoute()
@@ -43,7 +38,7 @@ const isFullscreen = computed(() => {
 })
 
 const mainContentRef = useTemplateRef('mainContentRef')
-usePageSwipe(mainContentRef as any, { disabledRoutes: ['throttle'] })
+usePageSwipe(mainContentRef as any, { disabledRoutes: ['throttle', 'conductor'] })
 
 const { isDark, themePreference } = useThemeSwitcher()
 
@@ -76,15 +71,14 @@ const throttleDefaults: AppBackgroundPrefs = {
           app-icon="mdi-gamepad-variant"
           variant="throttle"
           color="blue"
-          :drawer="drawer"
+          :show-nav-drawer="false"
+          mobile-layout="expanded"
           :show-layout-power="true"
           :show-emergency-stop="true"
           :show-user-profile="true"
-          @drawer-toggle="drawer = !drawer"
         >
           <CommandPaletteTrigger />
         </AppHeader>
-        <Menu v-if="!isFullscreen" v-model:drawer="drawer" :menu="menuConfig" @handle-menu="handleMenu" />
         <v-main>
           <!-- Normal (non-fullscreen) layout -->
           <v-container v-if="!isFullscreen" ref="mainContentRef" class="p-0 flex flex-col flex-1 h-full relative" style="min-height: calc(100vh - var(--v-layout-top, 64px) - var(--v-layout-bottom, 56px))" fluid>
@@ -124,7 +118,6 @@ const throttleDefaults: AppBackgroundPrefs = {
           </div>
         </v-main>
         <Footer v-if="!isFullscreen" />
-        <QuickMenu v-if="!isFullscreen" />
         <CommandPalette v-if="!isFullscreen" />
         <CommandPaletteChordChip v-if="!isFullscreen" />
         <ConnectionStatusBanner v-if="!isFullscreen" />

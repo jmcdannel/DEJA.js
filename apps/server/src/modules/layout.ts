@@ -14,6 +14,7 @@ import {
   writeOutputPowerState,
   writeAllOutputsPowerState,
 } from './trackOutputs.js'
+import wled from './wled.js'
 
 // Command pooling state for each connection
 interface CommandPool {
@@ -196,13 +197,13 @@ export async function initialize(): Promise<Layout | undefined> {
 async function autoConnect(devices: Device[]): Promise<void> {
   devices.forEach((device) => {
     if (device.autoConnect && device.port) {
-      log.start('Auto connect device', device.autoConnect, {
+      log.start('[LAYOUT] Auto connect device', device.autoConnect, {
         device: device.id,
         serial: device.port,
       })
       connectDevice({ device: device.id, serial: device.port, topic: device.topic })
-    } else if (device.autoConnect && device.connection === 'wifi' && device.topic) {  
-      log.start('Auto connect device', device.autoConnect, {
+    } else if (device.autoConnect && device.connection === 'wifi' && device.topic) {
+      log.start('[LAYOUT] Auto connect device', device.autoConnect, {
         device: device.id,
         topic: device.topic,
       })
@@ -221,12 +222,12 @@ async function loadLayout(): Promise<Layout | undefined> {
     const layoutData = await db.collection('layouts').doc(layoutId).get()
     const layoutDoc = layoutData.exists ? layoutData.data() : undefined
     if (layoutDoc) {
-      log.complete('Layout loaded', layoutId)
+      log.complete('[LAYOUT] Layout loaded', layoutId)
       return { ...layoutDoc, id: layoutData.id } as Layout
     }
-    log.error('No such layout found!', layoutId)
+    log.error('[LAYOUT] No such layout found!', layoutId)
   } catch (error) {
-    log.error('Error loading layout', error)
+    log.error('[LAYOUT] Error loading layout', error)
   }
 }
 
@@ -236,7 +237,7 @@ async function loadDevices(): Promise<Device[]> {
     const devices = devicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Device))
     return devices
   } catch (error) {
-    log.error('Error loading devices', error)
+    log.error('[LAYOUT] Error loading devices', error)
     return []
   }
 }
@@ -247,7 +248,7 @@ async function loadSensors(): Promise<LayoutSensor[]> {
     const sensors = sensorsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LayoutSensor))
     return sensors
   } catch (error) {
-    log.error('Error loading sensors', error)
+    log.error('[LAYOUT] Error loading sensors', error)
     return []
   }
 }
@@ -262,20 +263,35 @@ export async function connectDevice({
   topic?: string
 }): Promise<void> {
   try {
-    log.start('Connecting device', serial, deviceId)
+    log.start('[LAYOUT] Connecting device', serial, deviceId)
     const device = _devices.find((d) => d.id === deviceId)
     if (!device) {
-      log.error('Device not found', device)
+      log.error('[LAYOUT] Device not found', device)
+      return
+    }
+    // WLED devices connect via WebSocket directly (not MQTT)
+    if (device.type === 'wled') {
+      // Host comes from the connect flow (serial param) or the cached device
+      const rawHost = serial || device.host || ''
+      // Strip protocol and trailing slash if user entered a URL
+      const host = rawHost.replace(/^https?:\/\//, '').replace(/\/+$/, '')
+      const port = 80
+      if (host) {
+        device.host = host
+        await wled.connectDevice({ id: device.id, host, port })
+      } else {
+        log.error('[LAYOUT] WLED device missing host:', device.id)
+      }
       return
     }
     if (device.connection === 'usb' && serial) {
       await connectUsbDevice(device, serial)
-    } else if (device.connection === 'wifi' && topic) {
-      device.topic = topic
+    } else if (device.connection === 'wifi') {
+      if (topic) device.topic = topic
       await connectMqttDevice(device)
     }
   } catch (err) {
-    log.fatal('Error connectDevice: ', err)
+    log.fatal('[LAYOUT] Error connectDevice: ', err)
   }
 }
 
@@ -321,7 +337,7 @@ async function connectUsbDevice(
       await configureTrackOutputs(device.id)
     }
   } catch (err) {
-    log.fatal('Error connectUsbDevice: ', err)
+    log.fatal('[LAYOUT] Error connectUsbDevice: ', err)
     return undefined
   }
 }
@@ -335,7 +351,13 @@ async function connectMqttDevice(device: Device): Promise<void> {
       })
     } else {
       const topic = `DEJA/${layoutId}/${device.id}`
+      const messagesTopic = `${topic}/messages`
+      // 📡 Subscribe to both the command topic (server → device) and the
+      // events topic (device → server) used by WiFi firmware (Pico W, ESP32)
+      // to publish sensor state changes and other event payloads.
       mqtt.subscribe(topic)
+      mqtt.subscribe(messagesTopic)
+      log.note('[LAYOUT] MQTT device subscribed:', { command: topic, events: messagesTopic })
 
       db.doc(`layouts/${layoutId}/devices/${device.id}`)
         .set(
@@ -357,14 +379,64 @@ async function connectMqttDevice(device: Device): Promise<void> {
       }
     }
   } catch (err) {
-    log.fatal('Error connectMqttDevice: ', err)
+    log.fatal('[LAYOUT] Error connectMqttDevice: ', err)
   }
+}
+
+/**
+ * 📡 Write a sensor state to Firestore by looking up the sensor doc that
+ * matches `deviceId` + `index`. Used by both the serial-message path
+ * (Arduino-family firmware) and the MQTT-message path (WiFi-connected
+ * devices like Pico W and ESP32). The Firestore listener in sensors.ts
+ * handles debounce, linked effects, automations, and broadcast downstream.
+ */
+export async function writeSensorState({
+  deviceId,
+  index,
+  state,
+}: {
+  deviceId: string
+  index: number
+  state: boolean
+}): Promise<void> {
+  const snap = await db
+    .collection('layouts').doc(layoutId)
+    .collection('sensors')
+    .where('device', '==', deviceId)
+    .where('index', '==', index)
+    .limit(1)
+    .get()
+  if (snap.empty) {
+    log.warn(`[SENSORS] No sensor found for device "${deviceId}" at index ${index}`)
+    return
+  }
+  const doc = snap.docs[0]
+  if (!doc) return
+  log.log(`[SENSORS] ${deviceId}[${index}] → ${state ? 'active' : 'inactive'} (${doc.id})`)
+  await doc.ref.update({ state, timestamp: FieldValue.serverTimestamp() })
 }
 
 async function handleSerialMessage(payload: string, device: Device): Promise<void> {
   try {
+    // 📡 Sensor state updates from Arduino-family firmware.
+    // Format: { "sensor": <index>, "state": <0|1> } where index maps to the
+    // position in the firmware's SENSORPINS[] array. We delegate the lookup
+    // and Firestore write to the shared writeSensorState helper.
     if (payload?.startsWith('{ "sensor')) {
-      // Sensor handling omitted
+      let parsed: { sensor?: number; state?: number }
+      try {
+        parsed = JSON.parse(payload)
+      } catch (err) {
+        log.error('[SENSORS] Failed to parse sensor payload:', payload, err)
+        return
+      }
+      const index = parsed.sensor
+      if (typeof index !== 'number') {
+        log.warn('[SENSORS] Missing sensor index in payload:', payload)
+        return
+      }
+      const state = Boolean(parsed.state)
+      await writeSensorState({ deviceId: device.id, index, state })
       return
     }
 
@@ -432,6 +504,9 @@ async function handleSerialMessage(payload: string, device: Device): Promise<voi
 // Disconnect a device and clean up its command pool
 export async function disconnectDevice(deviceId: string): Promise<void> {
   try {
+    // WLED devices use their own client map, not _connections
+    await wled.disconnectDevice(deviceId)
+
     const connection = _connections[deviceId]
     if (connection) {
       // Flush any remaining commands before disconnecting

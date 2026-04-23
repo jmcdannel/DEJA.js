@@ -27,7 +27,6 @@ import { OnboardingScreen } from './components/OnboardingScreen.mjs'
 import { CommandInput } from './components/CommandInput.mjs'
 import { DeviceList } from './components/DeviceList.mjs'
 import { DccExReference } from './components/DccExReference.mjs'
-import { TopicInput } from './components/TopicInput.mjs'
 
 // Hooks
 import { useLogger } from './hooks/useLogger.mjs'
@@ -94,7 +93,6 @@ export function App() {
 
   const configRef       = useRef(readConfig())
   const inputRef        = useRef(null)
-  const topicInputRef   = useRef(null)
   const editingDeviceRef = useRef(null)
   const devicesRef      = useRef([])
   const prevModeRef     = useRef('logs')
@@ -137,8 +135,9 @@ export function App() {
 
   const connectDevice = useCallback((device) => {
     if (!rtdb || !layoutId) return
-    const payload = device.topic
-      ? { device: device.id, topic: device.topic }
+    // 📡 MQTT devices use a server-generated topic — only USB devices carry a port.
+    const payload = device.type === 'deja-mqtt'
+      ? { device: device.id }
       : { device: device.id, serial: device.port }
     rtdb.ref(`dejaCommands/${layoutId}`).push({
       action: 'connect',
@@ -146,13 +145,6 @@ export function App() {
       timestamp: ServerValue.TIMESTAMP,
     })
   }, [rtdb, layoutId])
-
-  const saveDeviceTopic = useCallback((deviceId, topic) => {
-    if (!db || !layoutId) return
-    db.collection('layouts').doc(layoutId).collection('devices').doc(deviceId)
-      .update({ topic })
-      .catch(() => {})
-  }, [db, layoutId])
 
   const disconnectDevice = useCallback((device) => {
     if (!rtdb || !layoutId) return
@@ -303,17 +295,11 @@ export function App() {
       if (key.upArrow)   { setDeviceIndex(i => Math.max(0, i - 1)); return }
       if (key.downArrow) { setDeviceIndex(i => Math.min(Math.max(0, devices.length - 1), i + 1)); return }
       if (key.escape)    { transitionMode('logs'); return }
-      // [p] — context-aware: serial port selector for serial devices, topic input for MQTT
+      // [p] — serial port selector (MQTT topics are auto-generated, not user-editable)
       if (input === 'p' && devices.length > 0) {
         const device = devices[deviceIndex]
-        if (device) {
-          const isMqtt = device.type === 'deja-mqtt'
-          if (isMqtt) {
-            editingDeviceRef.current = device
-            transitionMode('topic-input')
-          } else {
-            transitionMode('ports')
-          }
+        if (device && device.type !== 'deja-mqtt') {
+          transitionMode('ports')
         }
         return
       }
@@ -327,14 +313,9 @@ export function App() {
           disconnectDevice(device)
           showHint(`Disconnecting ${device.id}...`)
         } else {
-          // No endpoint configured — open the right editor
-          if (!device.port && !device.topic && device.type !== 'deja-server') {
-            if (device.type === 'deja-mqtt') {
-              editingDeviceRef.current = device
-              transitionMode('topic-input')
-            } else {
-              showHint(`No port assigned to ${device.id}. Press [p] to assign one.`)
-            }
+          // USB devices need a port; MQTT devices connect straight through.
+          if (device.type !== 'deja-mqtt' && device.type !== 'deja-server' && !device.port) {
+            showHint(`No port assigned to ${device.id}. Press [p] to assign one.`)
             return
           }
           connectDevice(device)
@@ -342,25 +323,6 @@ export function App() {
         }
         return
       }
-      return
-    }
-
-    // Topic input mode
-    if (mode === 'topic-input') {
-      if (key.escape) { transitionMode('devices'); return }
-      if (key.return) {
-        const topic = topicInputRef.current?.getText()?.trim()
-        const device = editingDeviceRef.current
-        if (topic && device) {
-          saveDeviceTopic(device.id, topic)
-          showHint(`Topic saved for ${device.id}: ${topic}`)
-        }
-        editingDeviceRef.current = null
-        transitionMode('devices')
-        return
-      }
-      if (key.backspace || key.delete) { topicInputRef.current?.handleBackspace(); return }
-      if (!key.ctrl && !key.meta && input) { topicInputRef.current?.handleChar(input); return }
       return
     }
 
@@ -559,7 +521,6 @@ export function App() {
             ports:    () => h(PortSelector, { ports: availablePorts, portIndex, currentPort: cfg.serialPort || null, cols }),
             devices:  () => h(DeviceList, { devices, selectedIndex: deviceIndex, cols, serverStatus: status }),
             'dcc-ref': () => h(DccExReference, { cols }),
-            'topic-input': () => h(TopicInput, { ref: topicInputRef, deviceName: editingDeviceRef.current?.id || '', currentTopic: editingDeviceRef.current?.topic || '' }),
           }[mode] ?? (() => h(LogPane, { visibleLines, paddingLines, logHeight, filter: logFilter })))(),
 
           // Contextual hint row — system hints take priority, tips shown as fallback

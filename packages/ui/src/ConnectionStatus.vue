@@ -8,6 +8,7 @@ const props = defineProps<{
   layoutId?: string
   serverStatus?: ServerStatus | null
   devices: Device[]
+  expanded?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -15,6 +16,8 @@ const emit = defineEmits<{
 }>()
 
 const { mdAndUp } = useDisplay()
+
+const showDetails = computed(() => mdAndUp.value || props.expanded)
 
 const connectedCount = computed(() =>
   props.devices.filter(d => d.isConnected).length
@@ -64,13 +67,13 @@ const deviceStatusColor = computed(() => {
       <span class="status-dot" :style="{ background: statusColor }" />
     </span>
 
-    <!-- Layout name (desktop only) -->
-    <span v-if="mdAndUp" class="layout-name">
+    <!-- Layout name -->
+    <span v-if="showDetails" class="layout-name">
       {{ layoutName || 'No Layout' }}
     </span>
 
-    <!-- Device count pill (desktop only, when devices exist) -->
-    <span v-if="mdAndUp && devices.length > 0" class="device-pill">
+    <!-- Device count pill -->
+    <span v-if="showDetails && devices.length > 0" class="device-pill">
       <span class="device-dot" :style="{ color: deviceStatusColor }">●</span>
       {{ connectedCount }}/{{ devices.length }}
     </span>

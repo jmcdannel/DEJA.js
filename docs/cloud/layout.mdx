@@ -7,7 +7,7 @@ order: 8
 
 # Layout Configuration
 
-The Layout section is where you manage the hardware infrastructure behind your model railroad. This includes registering hardware devices (CommandStations, Arduino boards, Raspberry Pi Pico W controllers), viewing available serial ports, reviewing loaded firmware modules, and organizing your layout with tags. Layout data is stored in Firebase Firestore at `layouts/{layoutId}`.
+The Layout section is where you manage the hardware infrastructure behind your model railroad. This includes registering hardware devices (CommandStations, Arduino Mega boards, ESP32 boards over USB or WiFi, and Raspberry Pi Pico W controllers), viewing available serial ports, reviewing loaded firmware modules, and organizing your layout with tags. Layout data is stored in Firebase Firestore at `layouts/{layoutId}`.
 
 ![Layout configuration page](/screenshots/cloud_desktop_dashboard.png)
 
@@ -26,7 +26,7 @@ The Devices section displays all hardware controllers registered in your layout 
 Click the **Add** tile to expand the device registration form. The form lets you register a new hardware device by specifying:
 
 - **Device ID** -- A unique identifier for the device (e.g., `commandstation-1`, `turnout-board-east`).
-- **Device Type** -- The type of hardware. Supported device types include DCC-EX CommandStation, DEJA Arduino boards, Raspberry Pi Pico W, and others defined in the `deviceTypes` constant.
+- **Device Type** -- The type of hardware. Supported device types include DCC-EX CommandStation (`dcc-ex`), DEJA Arduino Mega (`deja-arduino`), ESP32 over USB (`deja-esp32`), ESP32 over WiFi/MQTT (`deja-esp32-wifi`), Raspberry Pi Pico W (`deja-mqtt`), and others defined in the `deviceTypes` constant.
 - **Connection** -- How the device connects to the server (USB serial, WiFi/MQTT, etc.).
 - **Port** -- The serial port path (for USB-connected devices).
 - **Topic** -- The MQTT topic (for WiFi-connected devices).
@@ -71,7 +71,7 @@ A table lists all effects assigned to this device with columns for:
 
 #### Developer Configuration
 
-For DCC-EX and DEJA Arduino devices, an expandable "Developer Configuration" panel generates a `config.h` code snippet that can be used in the Arduino firmware. This auto-generated configuration includes:
+For DCC-EX, DEJA Arduino, and ESP32 devices (`deja-arduino`, `deja-esp32`, `deja-esp32-wifi`), an expandable "Developer Configuration" panel generates a `config.h` code snippet that can be used in the Arduino/ESP32 firmware. For `deja-esp32-wifi` it also bakes in `WIFI_SSID`, `WIFI_PASSWORD`, `MQTT_BROKER`, and the rest of the MQTT credentials. The panel also surfaces the exact PlatformIO and Arduino CLI build/upload commands for the device's FQBN, pulled from `getCliDeployCommands()` so they always match what `deja deploy` runs under the hood. This auto-generated configuration includes:
 
 - Device ID definition
 - Feature enable/disable flags based on assigned turnouts and effects
@@ -88,7 +88,7 @@ LCD-style display panels show additional developer-friendly views:
 - **TURNOUT LABELS** -- Turnout names for labeling in firmware.
 - **EFFECT LABELS** -- Effect names for reference.
 
-This section is designed to help firmware developers quickly generate the configuration code needed when flashing new Arduino or Pico W boards.
+This section is designed to help firmware developers quickly generate the configuration code needed when flashing new Arduino, ESP32, or Pico W boards. See [Arduino & ESP32 Setup](/docs/io/arduino-setup) and [Pico W Setup](/docs/io/pico-w-setup) for the full firmware setup walkthroughs.
 
 ![Device details page](/screenshots/cloud_desktop_dashboard.png)
 
@@ -140,7 +140,7 @@ Each device document has:
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | string | Unique device identifier |
-| `type` | string | Device type (`dcc-ex`, `deja-arduino`, `pico-w`, etc.) |
+| `type` | string | Device type (`dcc-ex`, `deja-arduino`, `deja-esp32`, `deja-esp32-wifi`, `deja-mqtt`, etc.) |
 | `connection` | string | Connection method (`usb`, `wifi`) |
 | `port` | string | Serial port path (for USB connections) |
 | `topic` | string | MQTT topic (for WiFi connections) |

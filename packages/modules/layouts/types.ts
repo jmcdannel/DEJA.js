@@ -61,13 +61,83 @@ export interface ServerStatus {
   ip?: string | null
 }
 
+/**
+ * 🛠️ Advanced Arduino-family firmware tuning that users can override via the
+ * device details "Advanced Configuration" panel. Every field is optional —
+ * missing fields fall back to the defaults baked into the firmware/generator,
+ * so untouched devices produce byte-identical config.h output.
+ *
+ * Values here flow into `packages/modules/device-config/arduino-config.ts` at
+ * generation time and land in the emitted `config.h` as `#define`s consumed by
+ * `io/src/deja-arduino/deja-arduino.ino`.
+ */
+export interface ArduinoAdvancedConfig {
+  // Serial
+  /** `Serial.begin(BAUD_RATE)` — default 115200 */
+  baudRate?: number
+
+  // Servo pulse range (PCA9685 ticks, 0–4095)
+  /** `SERVOMIN` — default 150 */
+  servoMin?: number
+  /** `SERVOMAX` — default 600 */
+  servoMax?: number
+
+  // Servo pulse width (microseconds) — used by getPulseWidth() angle mapping
+  /** `MIN_PULSE_WIDTH` — default 650 */
+  minPulseWidth?: number
+  /** `MAX_PULSE_WIDTH` — default 2350 */
+  maxPulseWidth?: number
+
+  // Rounded microsecond min/max — kept for parity with upstream Adafruit example
+  /** `USMIN` — default 600 */
+  usMin?: number
+  /** `USMAX` — default 2400 */
+  usMax?: number
+
+  /** `SERVO_FREQ` Hz — default 50 (analog servos) */
+  servoFreq?: number
+  /** `SERVO_COUNT` — default 16 (PCA9685 channel count) */
+  servoCount?: number
+
+  /** `pwm.setOscillatorFrequency()` — default 27_000_000 */
+  pwmOscillatorFreq?: number
+
+  // PCA9685 I²C overrides
+  /** Custom I²C SDA pin — only honored on ESP32/RP2040 boards */
+  pca9685SdaPin?: number
+  /** Custom I²C SCL pin — only honored on ESP32/RP2040 boards */
+  pca9685SclPin?: number
+  /** PCA9685 address on the I²C bus — default 0x40 */
+  pca9685Address?: number
+
+  // Sensors
+  /** Debounce window in ms for digital sensor reads — default 500 */
+  sensorDebounceMs?: number
+}
+
+/**
+ * 🔧 Per-device, user-editable configuration that persists to Firestore.
+ * Extends `Record<string, unknown>` so old flat fields (e.g. `enablePwm` used
+ * by Pico W) keep working while we gradually migrate to typed sub-sections.
+ */
+export interface DeviceConfig extends Record<string, unknown> {
+  /** Arduino-family tuning — see ArduinoAdvancedConfig */
+  arduino?: ArduinoAdvancedConfig
+  /** @deprecated — Pico W flat flag; keep for backward compat */
+  enablePwm?: boolean
+}
+
 export interface Device {
   autoConnect?: boolean
   client?: string
-  config?: Record<string, unknown>
+  config?: DeviceConfig
   connection?: 'usb' | 'wifi'
   description?: string
+  /** IP address or hostname for network-connected devices (e.g. WLED) */
+  host?: string
   id: string
+  /** Total number of LEDs on the strip (WLED devices) */
+  ledCount?: number
   isConnected?: boolean
   lastConnected?: Date
   maxOutputs?: number
@@ -78,7 +148,18 @@ export interface Device {
   timestamp?: Date
   topic?: string
   trackOutputs?: Record<string, import('@repo/dccex').TrackOutput>
-  type: 'dcc-ex' | 'deja-arduino' | 'deja-arduino-led' | 'deja-esp32' | 'deja-mqtt' | 'deja-server'
+  type:
+    | 'dcc-ex'
+    | 'deja-arduino'
+    | 'deja-arduino-led'
+    | 'deja-esp32'
+    | 'deja-esp32-wifi'
+    // 🪪 `deja-mqtt` holds the Pico W id for backward compat (see comment in
+    // constants.ts); `deja-mqtt-diy` is the new generic DIY MQTT type.
+    | 'deja-mqtt'
+    | 'deja-mqtt-diy'
+    | 'deja-server'
+    | 'wled'
   order?: number
 }
 

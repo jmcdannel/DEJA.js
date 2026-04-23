@@ -15,12 +15,6 @@ const firebaseConfig = {
   appId: env.VITE_FIREBASE_APP_ID || ''
 }
 
-// Check if required config values are present
-if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-  // Using console.warn directly here to avoid circular dependency with @repo/utils
-  console.warn('[Firebase] Firebase configuration incomplete. Some environment variables may be missing.')
-}
-
 export const firebaseApp = initializeApp(firebaseConfig)
 export const db = getFirestore(firebaseApp)
 export const rtdb = getDatabase(firebaseApp)

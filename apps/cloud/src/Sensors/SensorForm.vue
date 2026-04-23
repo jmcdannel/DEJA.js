@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useLayout } from '@repo/modules'
+import { useLayout, type Device } from '@repo/modules'
 import { useSensors, type Sensor, sensorTypes, sensorInputTypes } from '@repo/modules/sensors'
 import { createLogger } from '@repo/utils'
-import { useNotification } from '@repo/ui'
+import { DevicePickerChip, DevicePickerGrid, useNotification } from '@repo/ui'
 import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
+import DevicePicker from '@/Layout/Devices/DevicePicker.vue'
 
 const log = createLogger('SensorForm')
 
@@ -28,6 +29,7 @@ const debounceMs = ref<number | string | undefined>(props.sensor?.debounceMs)
 const cooldownMs = ref<number | string | undefined>(props.sensor?.cooldownMs)
 const maxRetries = ref<number | string | undefined>(props.sensor?.maxRetries)
 const retryWindowMs = ref<number | string | undefined>(props.sensor?.retryWindowMs)
+const enabled = ref(props.sensor?.enabled ?? true)
 const invertState = ref(Boolean(props.sensor?.invertState))
 const pullup = ref(Boolean(props.sensor?.pullup))
 const analogThreshold = ref<number | string | undefined>(props.sensor?.analogThreshold)
@@ -37,6 +39,10 @@ const description = ref(props.sensor?.description ?? '')
 const tags = ref<string[]>(props.sensor?.tags ?? [])
 const color = ref((props.sensor as Sensor & { color?: string })?.color ?? 'teal')
 const loading = ref(false)
+
+// 📦 Add-vs-edit drives the device picker presentation.
+const isEdit = computed(() => !!props.sensor)
+const showDevicePickerDialog = ref(false)
 const error = ref<string | null>(null)
 
 const deviceRules = computed(() => {
@@ -54,6 +60,7 @@ watch(() => props.sensor, (next) => {
   cooldownMs.value = next?.cooldownMs
   maxRetries.value = next?.maxRetries
   retryWindowMs.value = next?.retryWindowMs
+  enabled.value = next?.enabled ?? true
   invertState.value = Boolean(next?.invertState)
   pullup.value = Boolean(next?.pullup)
   analogThreshold.value = next?.analogThreshold
@@ -99,6 +106,7 @@ async function submit() {
       device: device.value,
       type: type.value,
       inputType: inputType.value,
+      enabled: enabled.value,
       invertState: invertState.value,
       pullup: pullup.value,
     }
@@ -228,19 +236,22 @@ async function submit() {
       </div>
 
       <div class="px-5 py-4">
-        <label class="form-section__input-label">Select Device</label>
-        <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="x-large" :rules="deviceRules">
-          <v-btn
-            v-for="deviceOpt in devices"
-            :value="deviceOpt.id"
-            :key="deviceOpt.id"
-            class="min-h-24 min-w-48 border"
-            color="teal"
-          >
-            {{ deviceOpt.id }}
-          </v-btn>
-        </v-btn-toggle>
-        <div class="form-section__input-hint">Select the hardware device that reads this sensor</div>
+        <template v-if="!isEdit">
+          <label class="form-section__input-label">Device</label>
+          <DevicePickerGrid
+            v-model="device"
+            :devices="(devices ?? []) as Device[]"
+          />
+          <div class="form-section__input-hint mt-1">Hardware device that reads this sensor</div>
+        </template>
+        <DevicePickerChip
+          v-else
+          :device-id="device"
+          :devices="(devices ?? []) as Device[]"
+          label="Device"
+          description="Hardware device that reads this sensor"
+          @click="showDevicePickerDialog = true"
+        />
       </div>
 
       <div class="form-section__grid" style="grid-template-columns: 1fr 1fr">
@@ -337,6 +348,14 @@ async function submit() {
 
       <div class="form-section__row">
         <div class="form-section__row-label">
+          <span class="form-section__row-name">Enabled</span>
+          <span class="form-section__row-desc">Process state changes and trigger linked effects / automations</span>
+        </div>
+        <v-switch v-model="enabled" color="teal" hide-details density="compact" />
+      </div>
+
+      <div class="form-section__row">
+        <div class="form-section__row-label">
           <span class="form-section__row-name">Invert State</span>
           <span class="form-section__row-desc">Swap active/inactive readings</span>
         </div>
@@ -407,4 +426,13 @@ async function submit() {
       </div>
     </div>
   </v-form>
+
+  <v-dialog v-model="showDevicePickerDialog" max-width="80vw">
+    <DevicePicker
+      v-model="device"
+      :color="color"
+      @select="showDevicePickerDialog = false"
+      @cancel="showDevicePickerDialog = false; device = props?.sensor?.device ?? ''"
+    />
+  </v-dialog>
 </template>

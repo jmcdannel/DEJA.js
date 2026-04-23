@@ -1,7 +1,10 @@
 // 💬 Interactive CLI prompts for deploy script
 
+import fs from 'fs-extra'
+import * as path from 'path'
 import { input, select, password, confirm } from '@inquirer/prompts'
-import type { Device } from '@repo/modules'
+import type { Device, DccExMotorShield } from '@repo/modules'
+import { DCC_EX_MOTOR_SHIELD_LABELS } from '@repo/modules'
 import type { ArduinoBoard } from './detect.js'
 
 /**
@@ -24,6 +27,8 @@ export async function promptDeviceSelection(devices: Device[]): Promise<Device> 
     'dcc-ex': '🖥️',
     'deja-arduino': '🔧',
     'deja-arduino-led': '💡',
+    'deja-esp32': '🛠️',
+    'deja-esp32-wifi': '🛜',
     'deja-mqtt': '🍓',
     'deja-server': '🌐',
   }
@@ -37,6 +42,48 @@ export async function promptDeviceSelection(devices: Device[]): Promise<Device> 
   })
 
   return devices.find(d => d.id === selected)!
+}
+
+export type WifiStrategy = 'enter' | 'skip'
+
+/**
+ * Ask whether to enter WiFi/MQTT creds now, or skip and hand-edit later.
+ * Used by `pnpm build` when a wifi-capable device is about to be bundled.
+ */
+export async function promptWifiStrategy(): Promise<WifiStrategy> {
+  return select({
+    message: '🛜 WiFi/MQTT credentials for wifi-capable devices:',
+    choices: [
+      { name: '🔑 Enter credentials now (I will type them in)', value: 'enter' as const },
+      { name: "📝 Skip — I'll edit the generated config file myself", value: 'skip' as const },
+    ],
+  })
+}
+
+export type DeployWifiStrategy = 'keep' | 'enter' | 'skip'
+
+/**
+ * Ask how to handle WiFi/MQTT creds at deploy time. When a prior bundle with
+ * usable creds is found, "keep" is the default — nothing gets wiped. Use
+ * `existingSsid` to show the SSID so the user can confirm what's being reused.
+ */
+export async function promptDeployWifiStrategy(existingSsid?: string): Promise<DeployWifiStrategy> {
+  const choices = []
+  if (existingSsid) {
+    choices.push({
+      name: `♻️  Keep existing credentials (SSID: ${existingSsid})`,
+      value: 'keep' as const,
+    })
+  }
+  choices.push(
+    { name: '🔑 Enter new credentials now', value: 'enter' as const },
+    { name: "📝 Skip — I'll edit the config file myself after rebuild", value: 'skip' as const },
+  )
+  return select({
+    message: '🛜 WiFi/MQTT credentials for this deploy:',
+    choices,
+    default: existingSsid ? 'keep' : 'enter',
+  })
 }
 
 /**
@@ -118,6 +165,62 @@ export async function promptArduinoBoard(defaultFqbn?: string): Promise<string> 
   }
 
   return selected
+}
+
+/**
+ * Prompt for the local filesystem path to a clone of the DCC-EX
+ * CommandStation-EX source. Validates the path exists and contains the
+ * `CommandStation-EX.ino` entrypoint. Supports `~` expansion.
+ */
+export async function promptDccExSourcePath(defaultPath?: string): Promise<string> {
+  const resolvedDefault =
+    defaultPath || process.env.DCC_EX_SOURCE || ''
+
+  const raw = await input({
+    message: '🚂 Path to your DCC-EX CommandStation-EX checkout:',
+    default: resolvedDefault || undefined,
+    validate: (val) => {
+      const trimmed = val.trim()
+      if (!trimmed) return 'Path is required'
+      const expanded = trimmed.startsWith('~')
+        ? path.join(process.env.HOME || '', trimmed.slice(1))
+        : path.resolve(trimmed)
+      if (!fs.existsSync(expanded)) {
+        return `Path does not exist: ${expanded}`
+      }
+      if (!fs.existsSync(path.join(expanded, 'CommandStation-EX.ino'))) {
+        return 'Directory must contain CommandStation-EX.ino (expected a DCC-EX source checkout)'
+      }
+      return true
+    },
+  })
+
+  const trimmed = raw.trim()
+  return trimmed.startsWith('~')
+    ? path.join(process.env.HOME || '', trimmed.slice(1))
+    : path.resolve(trimmed)
+}
+
+/**
+ * Prompt for which motor shield is attached to the Arduino Mega.
+ */
+export async function promptDccExMotorShield(
+  defaultShield?: DccExMotorShield,
+): Promise<DccExMotorShield> {
+  return select<DccExMotorShield>({
+    message: '⚡ Motor shield:',
+    default: defaultShield || 'standard',
+    choices: [
+      {
+        name: `🔵 ${DCC_EX_MOTOR_SHIELD_LABELS.standard}`,
+        value: 'standard',
+      },
+      {
+        name: `🟣 ${DCC_EX_MOTOR_SHIELD_LABELS.ex8874}`,
+        value: 'ex8874',
+      },
+    ],
+  })
 }
 
 /**

@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
-import { QuickConnectPanel, StatusPulse, OnboardingBanner } from '@repo/ui'
+import { DeviceConnectionList, StatusPulse, OnboardingBanner, DEJA_APPS } from '@repo/ui'
 import { useOnboarding } from '@repo/modules'
 import Speedometer from '@/throttle/Speedometer.vue'
 import {
@@ -82,6 +82,10 @@ async function handleDisconnect(deviceId: string) {
   await disconnectDevice(deviceId)
 }
 
+function openDeviceInCloud(deviceId: string) {
+  window.open(`https://cloud.dejajs.com/devices/${deviceId}`, 'deja-cloud')
+}
+
 function handleThrottleClick(address: number) {
   router.push({ name: 'throttle', params: { address } })
 }
@@ -92,7 +96,7 @@ function handleLayoutDisconnect() {
 }
 
 function openCloudSetup() {
-  window.open('https://cloud.dejajs.com', '_blank')
+  window.open(DEJA_APPS.cloud.href, '_blank')
 }
 
 const navItems = [
@@ -105,7 +109,7 @@ const navItems = [
 ]
 </script>
 <template>
-  <main class="flex flex-col flex-grow w-full overflow-auto gap-6">
+  <main class="flex flex-col flex-grow w-full overflow-auto gap-6 px-4 pt-4 pb-8">
 
     <!-- 🎨 Big Gradient Title -->
     <header>
@@ -137,13 +141,17 @@ const navItems = [
       @open-cloud-setup="openCloudSetup"
     />
 
-    <!-- ⚡ Quick Connect (prominent) -->
-    <QuickConnectPanel
+    <!-- ⚡ Device Connection -->
+    <DeviceConnectionList
       v-if="devices?.length"
       :devices="devices ?? []"
       :available-ports="ports"
+      :show-header="false"
+      :show-details-link="false"
+      :server-online="serverStatus?.online ?? false"
       @connect="handleConnect"
-      @navigate="router.push('/connect')"
+      @disconnect="handleDisconnect"
+      @navigate="openDeviceInCloud"
     />
 
     <!-- 🧭 Navigation Grid -->

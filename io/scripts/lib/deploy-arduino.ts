@@ -16,7 +16,7 @@ export interface ArduinoDeployOptions {
  */
 export async function compileAndUpload(options: ArduinoDeployOptions): Promise<void> {
   const { sketchPath, port, boardConfig } = options
-  const { fqbn, needsCpp17 } = boardConfig
+  const { fqbn, needsCpp17, uploadSpeed } = boardConfig
 
   const available = await ensureArduinoCli()
   if (!available) {
@@ -28,6 +28,12 @@ export async function compileAndUpload(options: ArduinoDeployOptions): Promise<v
   }
 
   ensureArduinoLibs(ARDUINO_LIB_DEPS.map(l => l.name))
+
+  // 🎯 ESP32 upload baud rate is passed as a board option suffix on the FQBN,
+  // e.g. `esp32:esp32:esp32:UploadSpeed=460800`. Many USB-serial adapters
+  // (CH340/CP2102 clones) can't sustain the 921600 default and fail mid-flash.
+  const uploadFqbn =
+    uploadSpeed && fqbn.startsWith('esp32:') ? `${fqbn}:UploadSpeed=${uploadSpeed}` : fqbn
 
   console.log(`🔨 Compiling sketch at ${sketchPath}...`)
   console.log(`   Board: ${fqbn}`)
@@ -48,10 +54,10 @@ export async function compileAndUpload(options: ArduinoDeployOptions): Promise<v
   }
 
   console.log('')
-  console.log(`⬆️ Uploading to ${port}...`)
+  console.log(`⬆️ Uploading to ${port}${uploadSpeed ? ` @ ${uploadSpeed} baud` : ''}...`)
 
   try {
-    execSync(`arduino-cli upload --fqbn ${fqbn} --port ${port} "${sketchPath}"`, {
+    execSync(`arduino-cli upload --fqbn ${uploadFqbn} --port ${port} "${sketchPath}"`, {
       stdio: 'inherit',
     })
     console.log('')

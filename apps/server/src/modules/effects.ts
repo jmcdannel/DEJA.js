@@ -5,6 +5,7 @@ import { log } from '../utils/logger.js'
 import { dcc, type OutputPayload } from '../lib/dcc.js'
 import { layout } from './layout.js'
 import { soundCommand } from '../lib/sound.js'
+import wled from './wled.js'
 
 export interface EffectCommand {
   action: string
@@ -201,7 +202,17 @@ export async function handleEffect(payload: Effect): Promise<void> {
     }
     return
   }
-  
+
+  // Handle WLED effects
+  if (payload.type === 'wled') {
+    try {
+      await wled.handleEffectChange(payload)
+    } catch (error) {
+      log.error('[EFFECTS] Error handling WLED effect:', error)
+    }
+    return
+  }
+
   const conn = payload.device
     ? layout.connections()?.[payload.device]
     : undefined
@@ -213,7 +224,7 @@ export async function handleEffect(payload: Effect): Promise<void> {
   const layoutDevice = layout.devices().find(({ id }) => id === payload.device)
   if (
     layoutDevice?.connection === 'usb' &&
-    layoutDevice?.type === 'deja-arduino' &&
+    (layoutDevice?.type === 'deja-arduino' || layoutDevice?.type === 'deja-esp32') &&
     conn.send &&
     conn.port
   ) {
@@ -236,8 +247,7 @@ export async function handleEffect(payload: Effect): Promise<void> {
       pin: parseInt((command as EffectCommand).payload.pin?.toString() || '0'),
       state: Boolean((command as EffectCommand).payload.state),
     }
-    // log.log('dcc sendOutput', outputCommand)
-    await dcc.sendOutput(outputCommand)
+    await dcc.sendOutput(outputCommand, payload.device)
   }
 }
 

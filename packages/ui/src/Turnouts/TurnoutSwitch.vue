@@ -1,52 +1,22 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { computed } from 'vue'
 import { type Turnout } from '@repo/modules'
+import ItemSwitch from '../ModuleList/ItemSwitch.vue'
 
 interface Props {
-  turnout: Turnout,
+  turnout: Turnout
   isRunning: boolean
 }
 
 const props = defineProps<Props>()
-const state = defineModel('state', {
-  type: Boolean
-})
+const state = defineModel('state', { type: Boolean })
 
+const item = computed(() => ({
+  ...props.turnout,
+  icon: props.turnout?.type === 'servo' ? 'mdi-call-split' : 'mdi-electric-switch',
+}))
 </script>
 
 <template>
-  <v-card 
-    class="shadow-xl p-[1px] rounded-full"
-    :class="isRunning ? 'bg-gradient-to-r from-indigo-400 to-pink-900 ' : ''"
-    :color="turnout?.color || 'primary'"
-  >
-    <v-card-title 
-      class="flex flex-row items-center gap-2 justify-between rounded-full pl-2 pr-8"
-      style="background: rgba(var(--v-theme-surface), 0.75)"
-      :class="isRunning ? 'shadow-inner shadow-pink-500' : ''"
-    >
-      <v-icon :icon="turnout?.type === 'servo' ? 'mdi-call-split' : 'mdi-electric-switch'" class="w-6 h-6" />
-      <h4 class="text-md font-bold mr-2 text-center">
-        {{turnout?.name}}
-        <span class="hidden md:inline text-sm font-normal ml-2 opacity-60">
-          <br />
-          <v-chip 
-          v-if="turnout?.device" 
-          class="ml-2 text-xs"
-          prepend-icon="mdi-memory"
-          variant="outlined"
-        >
-          {{turnout?.device}}
-        </v-chip>
-        </span>
-      </h4>
-      <v-switch 
-        v-model="state" 
-        :color="turnout?.color || 'primary'" 
-        :disabled="isRunning" 
-        :loading="isRunning" 
-        hide-details 
-      />
-    </v-card-title>
-  </v-card>
-</template> 
+  <ItemSwitch :item="item" :is-running="isRunning" v-model:state="state" />
+</template>
