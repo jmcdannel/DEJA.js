@@ -20,6 +20,13 @@
     "VITE_WS_PORT",
     "WS_ID",
     "VITE_SENTRY_DSN",
+    "SENTRY_ORG",
+    "SENTRY_PROJECT",
+    "SENTRY_AUTH_TOKEN",
+    "SENTRY_VERCEL_LOG_DRAIN_URL",
+    "SENTRY_OTLP_TRACES_URL",
+    "SENTRY_PUBLIC_KEY",
+    "SANITY_API_TOKEN",
     "VITE_BILLING_API_URL",
     "VITE_STRIPE_PUBLISHABLE_KEY",
     "VITE_AUTO_LOGIN",
@@ -35,7 +42,7 @@
   "ui": "tui",
   "tasks": {
     "build": {
-      "outputs": ["dist/**", ".next/**"]
+      "outputs": ["dist/**", ".next/**", "content/docs/**"]
     },
     "test": {
       "dependsOn": ["^build"],

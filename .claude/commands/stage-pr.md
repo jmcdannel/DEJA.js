@@ -2,7 +2,7 @@
  
 Alias all 4 DEJA.js staging domains to the latest Vercel preview deployment for a given PR number or branch name.
 
-> **Auto-staging:** Staging domains now automatically update on every push to the `preview` branch via the `staging.yml` GitHub Actions workflow. Use this command when you need to point staging to a **specific feature branch** for early review before it merges to `preview`.
+> **Auto-staging:** Staging domains now automatically update on every push to the `staging` branch via the `staging.yml` GitHub Actions workflow. Use this command when you need to point staging to a **specific feature branch** for early review before it merges to `staging`.
 
 **Usage:**
 - `/stage-pr 42` — use PR number

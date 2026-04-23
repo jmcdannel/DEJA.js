@@ -85,15 +85,15 @@ Worktrees don't inherit `.env` files. **Always copy** (don't symlink — symlink
 > This repo uses a bare-repo + sibling-worktrees layout: bare at `/Users/jmcdannel/TTT/DEJA.js.git/.bare`, worktrees are siblings inside `/Users/jmcdannel/TTT/DEJA.js.git/`.
 
 ```bash
-PREVIEW=/Users/jmcdannel/TTT/DEJA.js.git/preview
+STAGING=/Users/jmcdannel/TTT/DEJA.js.git/staging
 WT=/Users/jmcdannel/TTT/DEJA.js.git/<your-worktree>
 
 # Root (for Turborepo)
-cp "$PREVIEW/.env" "$WT/.env"
+cp "$STAGING/.env" "$WT/.env"
 
 # Per-app (for Vite)
 for app in throttle cloud monitor tour server; do
-  cp "$PREVIEW/.env" "$WT/apps/$app/.env"
+  cp "$STAGING/.env" "$WT/apps/$app/.env"
 done
 ```
 
