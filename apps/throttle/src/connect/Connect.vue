@@ -7,7 +7,7 @@ import { rtdb } from '@repo/firebase-config'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { useLayout, useServerStatus, type Device } from '@repo/modules'
 import { useDcc, DCC_POWER_ON, DCC_POWER_OFF } from '@repo/dccex'
-import { DeviceConnectionList, StatusPulse, SelectLayout } from '@repo/ui'
+import { DejaServerPanel, DeviceConnectionList, SelectLayout } from '@repo/ui'
 import { useDisplay } from 'vuetify'
 
 const user = useCurrentUser()
@@ -114,33 +114,10 @@ function scrollTo(id: string) {
 
         <!-- Server Status -->
         <template v-if="layoutId">
-          <div id="server" class="settings-section">
-            <div class="settings-section__header">
-              <v-icon size="20" class="settings-section__icon">mdi-server-network</v-icon>
-              <h2 class="settings-section__title">DEJA Server</h2>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row__label">
-                <span class="settings-row__name">Status</span>
-                <span v-if="serverStatus?.version" class="settings-row__desc">v{{ serverStatus.version }}</span>
-              </div>
-              <div class="settings-row__value flex items-center gap-3">
-                <StatusPulse :status="serverStatus?.online ? 'connected' : 'disconnected'" size="sm" />
-                <v-chip
-                  :color="serverStatus?.online ? 'success' : 'error'"
-                  size="small"
-                  variant="tonal"
-                >
-                  {{ serverStatus?.online ? 'Online' : 'Offline' }}
-                </v-chip>
-              </div>
-            </div>
-            <div v-if="serverUptime" class="settings-row">
-              <div class="settings-row__label">
-                <span class="settings-row__name">Uptime</span>
-              </div>
-              <div class="settings-row__value opacity-60">{{ serverUptime }}</div>
-            </div>
+          <div id="server">
+            <DejaServerPanel
+              :devices="devices ?? []"
+            />
           </div>
 
           <!-- Devices -->

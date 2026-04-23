@@ -40,7 +40,7 @@ export function useLocos() {
       : null
 
   function getThrottles() {
-    const throttles = useCollection(throttlesCol)
+    const throttles = useCollection<Throttle>(throttlesCol)
     return throttles
   }
 

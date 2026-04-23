@@ -11,12 +11,14 @@ interface Props {
   showHeader?: boolean
   showDetailsLink?: boolean
   serverOnline?: boolean
+  hideServer?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   showHeader: true,
   showDetailsLink: true,
   serverOnline: false,
+  hideServer: false,
 })
 
 const emit = defineEmits<{
@@ -45,15 +47,15 @@ const allEffects = getEffects()
 const trackPower = computed(() => layout?.value?.dccEx?.power ?? null)
 
 const sortedDevices = computed(() => {
-  return [...props.devices].sort((a, b) => {
-    // deja-server always first
-    if (a.type === 'deja-server') return -1
-    if (b.type === 'deja-server') return 1
-    // then connected before disconnected
-    const aConnected = a.isConnected ? 0 : 1
-    const bConnected = b.isConnected ? 0 : 1
-    return aConnected - bConnected
-  })
+  return [...props.devices]
+    .filter(d => !(props.hideServer && d.type === 'deja-server'))
+    .sort((a, b) => {
+      if (a.type === 'deja-server') return -1
+      if (b.type === 'deja-server') return 1
+      const aConnected = a.isConnected ? 0 : 1
+      const bConnected = b.isConnected ? 0 : 1
+      return aConnected - bConnected
+    })
 })
 
 // Compute counts from already-loaded collections (no useCollection in render)
