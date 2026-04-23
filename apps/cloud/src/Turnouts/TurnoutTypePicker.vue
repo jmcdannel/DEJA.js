@@ -1,70 +1,64 @@
 <script setup lang="ts">
+import TypePickerGrid, { type TypeOption } from '@/Core/UI/TypePickerGrid.vue'
 
 defineEmits(['select', 'cancel'])
 const model = defineModel<string>()
-
-const types = [
-  {
-    id: 'kato',
-    name: 'Kato'
-  },
-  {
-    id: 'servo',
-    name: 'Servo'
-  },
-  {
-    id: 'tortise',
-    name: 'Tortise',
-    disabled: true
-  },
-  {
-    id: 'dcc',
-    name: 'DCC',
-    disabled: true
-  }
-]
 
 defineProps({
   color: String
 })
 
+const types: TypeOption[] = [
+  {
+    value: 'kato',
+    label: 'Kato',
+    icon: 'mdi-directions-fork',
+    color: 'yellow',
+    description: 'Snap-action solenoid',
+  },
+  {
+    value: 'servo',
+    label: 'Servo',
+    icon: 'mdi-rotate-right',
+    color: 'blue',
+    description: 'Servo motor control',
+  },
+  {
+    value: 'tortise',
+    label: 'Tortise',
+    icon: 'mdi-swap-horizontal',
+    color: 'green',
+    description: 'Slow-motion machine',
+    disabled: true,
+  },
+  {
+    value: 'dcc',
+    label: 'DCC',
+    icon: 'mdi-chip',
+    color: 'indigo',
+    description: 'DCC accessory decoder',
+    disabled: true,
+  },
+]
 </script>
+
 <template>
-  <v-card class="mx-auto w-full h-full justify-between flex flex-col bg-zinc-500  bg-opacity-20"
-    variant="tonal"
-    density="compact"
-    :color="color">
-    <v-card-item class="font-weight-black">
-      <v-card-title class="font-weight-black">
-        Turnout Type
-      </v-card-title>
+  <v-card class="mx-auto w-full h-full justify-between flex flex-col" color="surface">
+    <v-card-item>
+      <v-card-title>Turnout Type</v-card-title>
+      <v-card-subtitle>Select the turnout mechanism</v-card-subtitle>
     </v-card-item>
+
     <v-card-text>
-      <v-btn-toggle v-model="model" divided class="flex-wrap h-auto" size="x-large">
-        <v-btn v-for="turnoutType in types" :value="turnoutType.id" :key="turnoutType.id"
-          class="min-h-48 min-w-48 border"
-          variant="flat"
-          :disabled="turnoutType?.disabled ?? false"
-          :color="color">
-          <div class="flex flex-col justify-center items-center">
-            <v-icon color="white" size="64">mdi-directions-fork</v-icon>
-            <div class="mt-4">{{ turnoutType.name }}</div>
-          </div> 
-        </v-btn>
-      </v-btn-toggle>
+      <TypePickerGrid v-model="model" :options="types" />
     </v-card-text>
+
     <v-card-actions>
-      <v-btn
-        prepend-icon="mdi-cancel"
-        variant="outlined"
-        @click="$emit('cancel')">
-        Cacnel
+      <v-btn prepend-icon="mdi-cancel" variant="outlined" @click="$emit('cancel')">
+        Cancel
       </v-btn>
-      <v-btn
-        prepend-icon="mdi-check"
-        :color="model"
-        variant="flat"
-        @click="$emit('select')">
+      <v-spacer />
+      <v-btn prepend-icon="mdi-check" color="primary" variant="flat" @click="$emit('select')">
         Save
       </v-btn>
     </v-card-actions>
