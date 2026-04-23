@@ -3,8 +3,10 @@ import {
   doc,
   collection,
   getDoc,
+  getDocs,
   query,
   setDoc,
+  deleteDoc,
   serverTimestamp,
   where,
 } from 'firebase/firestore'
@@ -197,6 +199,27 @@ export const useLayout = () => {
     }
   }
 
+  async function deleteDevice(id: string) {
+    if (!layoutId.value) {
+      log.error('No layoutId set, cannot delete device')
+      return false
+    }
+    try {
+      const base = `layouts/${layoutId.value}`
+      const collections = ['effects', 'turnouts', 'signals', 'sensors']
+      for (const col of collections) {
+        const q = query(collection(db, `${base}/${col}`), where('device', '==', id))
+        const snap = await getDocs(q)
+        await Promise.all(snap.docs.map(d => deleteDoc(d.ref)))
+      }
+      await deleteDoc(doc(db, `${base}/devices`, id))
+      return true
+    } catch (e) {
+      log.error('Error deleting device: ', e)
+      return false
+    }
+  }
+
   async function autoConnectDevice(id: string, autoConnect: boolean) {
     if (!layoutId.value) {
       log.error('No layoutId set, cannot auto-connect device')
@@ -290,6 +313,7 @@ export const useLayout = () => {
     getDevices,
     createDevice,
     updateDevice,
+    deleteDevice,
     autoConnectDevice,
     deviceTypes,
     connectDevice,

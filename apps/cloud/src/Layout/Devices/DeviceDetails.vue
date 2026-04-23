@@ -12,7 +12,7 @@ import { useTrackOutputs, type TrackOutput } from '@repo/dccex'
 import { useNotification } from '@repo/ui'
 import { useDeviceConfig } from './useDeviceConfig'
 
-const { getDevice, getDevices, updateDevice } = useLayout()
+const { getDevice, getDevices, updateDevice, deleteDevice } = useLayout()
 const { getTurnoutsByDevice } = useTurnouts()
 const { getEffectsByDevice } = useEfx()
 const { getSensorsByDevice } = useSensors()
@@ -214,6 +214,31 @@ function getEffectDetails(type: string | undefined) {
 
 function handleBack() {
   route.push({ name: 'Devices' })
+}
+
+const showDeleteDialog = ref(false)
+const deleteConfirmInput = ref('')
+const deleteExpectedText = computed(() => `delete ${deviceId}`)
+const deleteConfirmMatch = computed(() => deleteConfirmInput.value === deleteExpectedText.value)
+const isDeleting = ref(false)
+
+async function handleDelete() {
+  if (!deleteConfirmMatch.value) return
+  isDeleting.value = true
+  try {
+    await deleteDevice(deviceId)
+    route.push({ name: 'Devices' })
+  } catch {
+    notify?.error('Failed to delete device')
+  } finally {
+    isDeleting.value = false
+    showDeleteDialog.value = false
+  }
+}
+
+function openDeleteDialog() {
+  deleteConfirmInput.value = ''
+  showDeleteDialog.value = true
 }
 </script>
 
@@ -734,13 +759,62 @@ function handleBack() {
         @click="handleBack"
         color="grey-lighten-1"
         variant="tonal"
-        valigned="center"
         prepend-icon="mdi-arrow-left"
       >
         Back to Devices
       </v-btn>
       <v-spacer></v-spacer>
+      <v-btn
+        v-if="device?.type !== 'deja-server'"
+        color="error"
+        variant="tonal"
+        prepend-icon="mdi-delete"
+        @click="openDeleteDialog"
+      >
+        Delete Device
+      </v-btn>
     </v-card-actions>
   </v-card>
+
+  <!-- Delete Confirmation Dialog -->
+  <v-dialog v-model="showDeleteDialog" max-width="480" persistent>
+    <v-card variant="elevated" class="border border-error/30">
+      <v-card-title class="d-flex align-center ga-2 pa-4">
+        <v-icon icon="mdi-alert" color="error" />
+        Delete Device
+      </v-card-title>
+      <v-card-text class="pa-4">
+        <v-alert type="error" variant="tonal" class="mb-4">
+          <strong>This cannot be undone.</strong> Deleting <strong>{{ deviceId }}</strong> will permanently remove all associated effects, turnouts, signals, and sensors tied to this device.
+        </v-alert>
+        <p class="text-body-2 mb-3">
+          Type <code class="font-mono bg-grey-darken-3 px-1 rounded">{{ deleteExpectedText }}</code> to confirm:
+        </p>
+        <v-text-field
+          v-model="deleteConfirmInput"
+          variant="outlined"
+          density="compact"
+          :placeholder="deleteExpectedText"
+          autofocus
+          hide-details
+          @keyup.enter="handleDelete"
+        />
+      </v-card-text>
+      <v-card-actions class="pa-4">
+        <v-btn variant="text" @click="showDeleteDialog = false">Cancel</v-btn>
+        <v-spacer />
+        <v-btn
+          color="error"
+          variant="flat"
+          prepend-icon="mdi-delete"
+          :disabled="!deleteConfirmMatch"
+          :loading="isDeleting"
+          @click="handleDelete"
+        >
+          Delete Forever
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 

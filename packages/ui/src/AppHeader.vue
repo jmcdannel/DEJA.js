@@ -23,7 +23,7 @@ const emit = defineEmits<{
   drawerToggle: [newState: boolean]
 }>()
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   appName?: string
   appIcon?: string
   drawer?: boolean
@@ -36,7 +36,9 @@ const props = defineProps<{
   color?: string
   dark?: boolean
   layoutPowerState?: boolean
-}>()
+}>(), {
+  showNavDrawer: true,
+})
 
 // const { runEffect, getEffectsByType } = useEfx()
 const { sendDccCommand } = useDcc()
@@ -161,13 +163,20 @@ const defaultProps = {
     :dark="dark !== undefined ? dark : defaultProps.dark">
     <BackgroundDecor variant="blurred-bubbles-1" />
     <template v-if="showNavDrawer !== false" v-slot:prepend>
-      <v-app-bar-nav-icon variant="text" @click.stop="handleDrawerToggle" class="!h-10 !w-10 ml-4"></v-app-bar-nav-icon>
+      <button
+        type="button"
+        class="nav-toggle-btn"
+        aria-label="Toggle navigation"
+        @click.stop="handleDrawerToggle"
+      >
+        <v-icon size="28" color="white">mdi-menu</v-icon>
+      </button>
     </template>
     <template v-slot:title>
       <div class="header-brand">
         <Logo
-          :size="mdAndUp ? 'md' : 'sm'"
-          :stacked="stackedLogo"
+          :size="mdAndUp ? 'lg' : 'sm'"
+          layout="inline"
           :app-title="appName || defaultProps.appName"
           :variant="variant || defaultProps.variant"
           @click="handleLogoClick"
@@ -213,8 +222,11 @@ const defaultProps = {
           <TrackPower :power-state="effectiveTrackPower" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
           <Power v-if="showLayoutPower" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />
         </div>
-        <!-- Mobile: just emergency stop -->
-        <EmergencyStop v-else-if="showEmergencyStop !== false" class="ml-2" @stop="handleEmergencyStop" />
+        <!-- Mobile: track power + emergency stop -->
+        <div v-else class="flex items-center gap-1 ml-1">
+          <TrackPower :power-state="effectiveTrackPower" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
+          <EmergencyStop v-if="showEmergencyStop !== false" @stop="handleEmergencyStop" />
+        </div>
       </template>
       <!-- Standard layout: all controls in one row -->
       <template v-else-if="!showExtension">
@@ -257,6 +269,27 @@ const defaultProps = {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 40px;
   height: 40px;
+}
+
+/* Nav toggle — native button, zero Vuetify interference */
+.nav-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: 4px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: background 150ms ease, opacity 150ms ease;
+}
+.nav-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 1;
 }
 
 :deep(.v-chip) {
@@ -344,35 +377,33 @@ const defaultProps = {
 }
 
 /* Padded header edges */
-:deep(.v-app-bar .v-toolbar__content) {
-  padding-left: 20px;
-  padding-right: 20px;
-  gap: 16px;
+.header-gradient :deep(.v-toolbar__content) {
+  padding-inline: 4px 12px;
 }
 
-/* Nudge the Menu button away from the grid */
-:deep(.v-toolbar__content) > button.cp-trigger {
-  margin-right: 4px;
-}
-
-/* 📱 Mobile: tighten everything */
+/* 📱 Mobile: hamburger flush left, tight gap */
 @media (max-width: 959px) {
-  :deep(.v-app-bar .v-toolbar__content) {
-    padding-left: 8px;
-    padding-right: 8px;
-    gap: 6px;
+  .header-gradient :deep(.v-toolbar__content) {
+    padding-inline: 0 6px;
+  }
+  .header-gradient :deep(.v-toolbar__prepend) {
+    margin-inline-end: 0;
+  }
+  /* .v-toolbar-title is the VToolbarTitle component — it owns the 20px left margin */
+  .header-gradient :deep(.v-toolbar-title) {
+    margin-inline-start: 4px;
+  }
+  .nav-toggle-btn {
+    margin-left: 0;
+    width: 40px;
   }
   .header-button-grid {
-    margin-left: 4px;
     padding: 4px;
     gap: 4px;
   }
   .header-brand {
     gap: 4px;
     padding: 4px 0;
-  }
-  :deep(.v-toolbar__content) > button.cp-trigger {
-    margin-right: 0;
   }
 }
 
@@ -389,6 +420,7 @@ const defaultProps = {
   background: rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
+/* Light mode: icon is explicitly white via Vuetify color prop — no override needed */
 
 :root:not(.dark) :deep(.v-chip) {
   background: rgba(0, 0, 0, 0.04);
