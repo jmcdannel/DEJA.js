@@ -342,16 +342,16 @@ async function copyDejaStart() {
             <v-chip
               v-if="turnoutCount > 0"
               size="x-small"
-              variant="tonal"
-              color="surface-variant"
+              variant="outlined"
+              color="on-surface"
             >
               {{ turnoutCount }} turnouts
             </v-chip>
             <v-chip
               v-if="effectCount > 0"
               size="x-small"
-              variant="tonal"
-              color="surface-variant"
+              variant="outlined"
+              color="on-surface"
             >
               {{ effectCount }} effects
             </v-chip>
@@ -366,7 +366,6 @@ async function copyDejaStart() {
               @toggle="(newState) => emit('trackPowerToggle', device.id, newState)"
             />
             <v-btn
-              size="small"
               variant="tonal"
               color="error"
               @click="emit('disconnect', device.id)"
@@ -375,7 +374,6 @@ async function copyDejaStart() {
             </v-btn>
             <v-btn
               v-if="showDetailsLink"
-              size="small"
               variant="tonal"
               color="primary"
               @click="emit('navigate', device.id)"
@@ -385,7 +383,6 @@ async function copyDejaStart() {
             </v-btn>
             <v-btn
               v-else
-              size="small"
               variant="text"
               color="primary"
               icon="mdi-open-in-new"
@@ -446,7 +443,7 @@ async function copyDejaStart() {
           />
 
           <!-- Action buttons -->
-          <div class="d-flex ga-2">
+          <div class="d-flex ga-2 ml-auto">
             <v-btn
               color="success"
               variant="flat"
@@ -466,7 +463,6 @@ async function copyDejaStart() {
             </v-btn>
             <v-btn
               v-else
-              size="small"
               variant="text"
               color="primary"
               icon="mdi-open-in-new"
