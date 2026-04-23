@@ -45,9 +45,9 @@ async function togglePower() {
 }
 
 const actualDotColor = computed(() => {
-  if (props.powerState === true) return 'success'
+  if (props.powerState === true) return 'primary'
   if (props.powerState === false) return 'error'
-  return 'grey'
+  return 'warning'
 })
 
 const titleText = computed(() => {
