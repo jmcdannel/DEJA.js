@@ -9,6 +9,7 @@
 set -euo pipefail
 
 DEJA_DIR="${DEJA_DIR:-$HOME/.deja}"
+DEJA_BIN="${DEJA_DIR}/bin"
 SERVER_DIR="${DEJA_DIR}/server"
 PID_FILE="${DEJA_DIR}/server.pid"
 LOG_DIR="${DEJA_DIR}/logs"
@@ -268,7 +269,7 @@ cmd_start_interactive() {
   # Defaults to ink; set DEJA_UI to use a different renderer.
   local script_dir
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  local ui="${DEJA_UI:-ink}"
+  local ui="${DEJA_UI:-blessed}"
   exec node "${script_dir}/deja-ui-${ui}.mjs"
 }
 
