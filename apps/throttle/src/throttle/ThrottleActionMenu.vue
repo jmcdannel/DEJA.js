@@ -5,7 +5,7 @@ defineEmits(['consist', 'functions', 'park'])
   <v-btn-group color="light-blue">
     <v-btn 
       @click="$emit('park')"
-      icon="mdi-parking"
+      icon="mdi-eject"
       variant="tonal"
     />
   </v-btn-group>

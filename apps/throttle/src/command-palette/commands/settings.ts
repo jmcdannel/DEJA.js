@@ -1,13 +1,8 @@
 import { computed, type ComputedRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { backgrounds, useThemeSwitcher, type ThemeMode } from '@repo/ui'
-import { useUserPreferences } from '@repo/modules'
+import { useThemeSwitcher, type ThemeMode } from '@repo/ui'
 import type { Command, CycleControl, ToggleControl } from '../types'
 import { useThrottleSettings } from '@/throttle/useThrottleSettings'
-import { useConductorSettings } from '@/conductor/useConductorSettings'
-import { useQuickMenu } from '@/quick-menu/useQuickMenu'
-
-const APP_NAME = 'throttle'
 
 type ThrottleVariant = 'buttons' | 'slider' | 'dashboard'
 type ConductorRightPanel =
@@ -50,31 +45,17 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
   const route = useRoute()
 
   const { themePreference, setTheme } = useThemeSwitcher()
-  const { getBackground, setAppBackground } = useUserPreferences()
-  // 🖼️ Reactive to both the current route and the stored preference.
-  const currentBackground = computed(() =>
-    getBackground(APP_NAME, route.path).value,
-  )
 
   const {
     variant: throttleVariant,
     showFunctions,
-    showSpeedometer,
     showConsist,
+    rightPanel: conductorRightPanel,
     setVariant: setThrottleVariant,
     setShowFunctions,
-    setShowSpeedometer,
     setShowConsist,
-  } = useThrottleSettings()
-
-  const {
-    variant: conductorVariant,
-    rightPanel: conductorRightPanel,
-    setVariant: setConductorVariant,
     setRightPanel: setConductorRightPanel,
-  } = useConductorSettings()
-
-  const { quickMenuVisible } = useQuickMenu()
+  } = useThrottleSettings()
 
   function buildThemeCommand(): Command {
     const control: CycleControl<ThemeMode> = {
@@ -89,31 +70,6 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
       icon: 'mdi-palette',
       category: 'settings',
       keywords: ['dark', 'light', 'high contrast', 'appearance'],
-      keepOpen: true,
-      run: () => {},
-      control,
-    }
-  }
-
-  function buildBackgroundCommand(): Command {
-    const options: CycleControl<string>['options'] = [
-      { value: 'none', label: 'None' },
-      ...backgrounds.map((bg) => ({ value: bg.id, label: bg.name })),
-    ]
-    const control: CycleControl<string> = {
-      kind: 'cycle',
-      options,
-      value: currentBackground.value || 'none',
-      set: async (next) => {
-        await setAppBackground(APP_NAME, next)
-      },
-    }
-    return {
-      id: 'settings.background',
-      title: 'Background',
-      icon: 'mdi-image-multiple',
-      category: 'settings',
-      keywords: ['wallpaper', 'scene', 'backdrop'],
       keepOpen: true,
       run: () => {},
       control,
@@ -178,10 +134,10 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
     const commands: Command[] = []
 
     // 🎨 Always-visible core items
-    commands.push(buildThemeCommand(), buildBackgroundCommand())
+    commands.push(buildThemeCommand())
 
-    // 🏎️ Throttle-route contextual items
-    if (routeName === 'throttle' || routeName === 'throttles') {
+    // 🏎️ Throttle-route contextual items (also shown on conductor)
+    if (routeName === 'throttle' || routeName === 'throttles' || routeName === 'conductor') {
       commands.push(
         buildVariantCommand(
           'settings.throttle.variant',
@@ -198,27 +154,11 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
           setShowFunctions,
         ),
         buildToggleCommand(
-          'settings.toggle.speedometer',
-          'Show speedometer',
-          'mdi-speedometer',
-          showSpeedometer.value,
-          setShowSpeedometer,
-        ),
-        buildToggleCommand(
           'settings.toggle.consist',
           'Show consist',
           'mdi-train-car-flatbed-car',
           showConsist.value,
           setShowConsist,
-        ),
-        buildToggleCommand(
-          'settings.toggle.quickMenu',
-          'Quick menu visible',
-          'mdi-menu',
-          quickMenuVisible.value,
-          (next) => {
-            quickMenuVisible.value = next
-          },
         ),
       )
     }
@@ -226,13 +166,6 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
     // 🎛️ Conductor-route contextual items
     if (routeName === 'conductor') {
       commands.push(
-        buildVariantCommand(
-          'settings.conductor.variant',
-          'Conductor variant',
-          VARIANT_OPTIONS,
-          conductorVariant.value,
-          setConductorVariant,
-        ),
         {
           id: 'settings.conductor.rightPanel',
           title: 'Right panel',

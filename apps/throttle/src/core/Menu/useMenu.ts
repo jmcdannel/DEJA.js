@@ -77,9 +77,10 @@ const defaultFavorites = [
     'conductor',
     'throttle',
     'effects',
-    'routes',
+    'roster',
     'turnouts',
-    'signals'    
+    'signals',
+    'settings'
 ]
 
 export function useMenu() {

@@ -185,10 +185,12 @@ watch(displayedCommands, () => {
   }
 })
 
+const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
+
 watch(isOpen, async (open) => {
   if (open) {
     await nextTick()
-    inputRef.value?.focus()
+    if (!isTouchDevice) inputRef.value?.focus()
   } else {
     errorText.value = null
   }
@@ -204,7 +206,7 @@ async function runCommand(cmd: Command) {
   if (cmd.children) {
     push(cmd.id)
     await nextTick()
-    inputRef.value?.focus()
+    if (!isTouchDevice) inputRef.value?.focus()
     return
   }
   errorText.value = null
@@ -367,6 +369,37 @@ function cycleCurrentIndex(control: CycleControl): number {
     @update:model-value="onDialogUpdate"
   >
     <v-card class="cp-card pa-0">
+      <!-- 🔍 Search input — pinned at top -->
+      <div class="cp-input-row">
+        <v-icon size="20" class="cp-chevron">mdi-chevron-right</v-icon>
+        <div v-if="headerLabel" class="cp-breadcrumb">{{ headerLabel }}</div>
+        <input
+          ref="inputRef"
+          v-model="query"
+          type="text"
+          class="cp-input"
+          placeholder="Search or type #42 to open throttle…"
+          @keydown="onKeydown"
+        />
+        <span class="cp-esc-hint">Esc</span>
+      </div>
+
+      <!-- 📜 Scrollable content below search -->
+      <div class="cp-scroll-area">
+
+      <!-- 🧭 Quick nav grid -->
+      <div v-if="showInlineThrottles" class="cp-nav-grid">
+        <button
+          v-for="item in DEFAULT_MENU_CONFIG"
+          :key="item.name"
+          class="cp-nav-item"
+          @click="navigateToMenuItem(item)"
+        >
+          <v-icon size="22" :class="`text-${item.color}-400`">{{ item.icon }}</v-icon>
+          <span class="cp-nav-item__label">{{ item.label }}</span>
+        </button>
+      </div>
+
       <!-- 📱 Mobile-only connection status -->
       <div v-if="showMobileStatus" class="cp-mobile-status">
         <ConnectionStatus
@@ -381,31 +414,6 @@ function cycleCurrentIndex(control: CycleControl): number {
       <div v-if="showPaletteControls" class="cp-controls">
         <UserProfile />
         <TrackPower @toggle="paletteTrackPowerToggle" />
-      </div>
-      <!-- 🧭 Quick nav grid — always visible at root level -->
-      <div v-if="showInlineThrottles" class="cp-nav-grid">
-        <button
-          v-for="item in DEFAULT_MENU_CONFIG"
-          :key="item.name"
-          class="cp-nav-item"
-          @click="navigateToMenuItem(item)"
-        >
-          <v-icon size="22" :class="`text-${item.color}-400`">{{ item.icon }}</v-icon>
-          <span class="cp-nav-item__label">{{ item.label }}</span>
-        </button>
-      </div>
-      <div class="cp-input-row">
-        <v-icon size="20" class="cp-chevron">mdi-chevron-right</v-icon>
-        <div v-if="headerLabel" class="cp-breadcrumb">{{ headerLabel }}</div>
-        <input
-          ref="inputRef"
-          v-model="query"
-          type="text"
-          class="cp-input"
-          placeholder="Search or type #42 to open throttle…"
-          @keydown="onKeydown"
-        />
-        <span class="cp-esc-hint">Esc</span>
       </div>
 
       <div class="cp-results" role="listbox">
@@ -521,6 +529,8 @@ function cycleCurrentIndex(control: CycleControl): number {
 
       <div v-if="errorText" class="cp-error">{{ errorText }}</div>
 
+      </div><!-- /cp-scroll-area -->
+
       <div class="cp-footer">
         <span><kbd>↑↓</kbd> navigate</span>
         <span><kbd>←→</kbd> adjust</span>
@@ -540,6 +550,14 @@ function cycleCurrentIndex(control: CycleControl): number {
   max-height: 70vh;
   display: flex;
   flex-direction: column;
+}
+
+.cp-scroll-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
 }
 
 .cp-mobile-status {

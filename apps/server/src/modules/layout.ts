@@ -14,6 +14,7 @@ import {
   writeOutputPowerState,
   writeAllOutputsPowerState,
 } from './trackOutputs.js'
+import wled from './wled.js'
 
 // Command pooling state for each connection
 interface CommandPool {
@@ -268,10 +269,25 @@ export async function connectDevice({
       log.error('[LAYOUT] Device not found', device)
       return
     }
-    if (device.connection === 'usb' && (serial || device.port)) {
-      await connectUsbDevice(device, serial || device.port!)
-    } else if (device.connection === 'wifi' && (topic || device.topic)) {
-      device.topic = topic || device.topic
+    // WLED devices connect via WebSocket directly (not MQTT)
+    if (device.type === 'wled') {
+      // Host comes from the connect flow (serial param) or the cached device
+      const rawHost = serial || device.host || ''
+      // Strip protocol and trailing slash if user entered a URL
+      const host = rawHost.replace(/^https?:\/\//, '').replace(/\/+$/, '')
+      const port = 80
+      if (host) {
+        device.host = host
+        await wled.connectDevice({ id: device.id, host, port })
+      } else {
+        log.error('[LAYOUT] WLED device missing host:', device.id)
+      }
+      return
+    }
+    if (device.connection === 'usb' && serial) {
+      await connectUsbDevice(device, serial)
+    } else if (device.connection === 'wifi') {
+      if (topic) device.topic = topic
       await connectMqttDevice(device)
     }
   } catch (err) {
@@ -488,6 +504,9 @@ async function handleSerialMessage(payload: string, device: Device): Promise<voi
 // Disconnect a device and clean up its command pool
 export async function disconnectDevice(deviceId: string): Promise<void> {
   try {
+    // WLED devices use their own client map, not _connections
+    await wled.disconnectDevice(deviceId)
+
     const connection = _connections[deviceId]
     if (connection) {
       // Flush any remaining commands before disconnecting

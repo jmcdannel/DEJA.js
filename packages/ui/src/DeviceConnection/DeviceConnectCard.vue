@@ -83,12 +83,18 @@ const isUsbDevice = computed(
       isArduinoFamilyType(props.device.type)),
 )
 
+// 🌐 WLED device check
+const isWledDevice = computed(() => props.device.type === 'wled')
+
 // 📡 MQTT/WiFi device check — any WiFi device type OR explicit wifi connection.
 const isMqttDevice = computed(
   () =>
     !isDejaServer.value &&
+    !isWledDevice.value &&
     (props.device.connection === 'wifi' || isWifiDeviceType(props.device.type)),
 )
+
+const wledHost = ref(props.device.host ?? '')
 
 // 🏷️ Human-readable connection type label
 const connectionLabel = computed(() => {
@@ -98,9 +104,10 @@ const connectionLabel = computed(() => {
   return 'Unknown'
 })
 
-// 📍 Connection path (port, topic, or server IP)
+// 📍 Connection path (port, topic, host, or server IP)
 const connectionPath = computed(() => {
   if (isDejaServer.value) return serverStatus.value?.ip ?? ''
+  if (isWledDevice.value) return props.device.host ?? ''
   if (props.device.port) return props.device.port
   if (props.device.topic) return props.device.topic
   return ''
@@ -116,10 +123,13 @@ const borderColor = computed(() =>
 // 🚫 Non-server devices are dimmed when server is offline
 const isDimmed = computed(() => !isDejaServer.value && !props.serverOnline)
 
-// 🔗 Connect handler — USB passes serial port; MQTT topic is server-generated.
+// 🔗 Connect handler — USB passes serial port; WLED passes host; MQTT topic is server-generated.
 function handleConnect() {
   if (isUsbDevice.value) {
     emit('connect', props.device.id, selectedPort.value, undefined)
+  } else if (isWledDevice.value) {
+    // For WLED, pass host as the serial param — the Connect page saves it to the device doc
+    emit('connect', props.device.id, wledHost.value, undefined)
   } else {
     emit('connect', props.device.id, undefined, undefined)
   }
@@ -342,16 +352,16 @@ async function copyDejaStart() {
             <v-chip
               v-if="turnoutCount > 0"
               size="x-small"
-              variant="tonal"
-              color="surface-variant"
+              variant="outlined"
+              color="on-surface"
             >
               {{ turnoutCount }} turnouts
             </v-chip>
             <v-chip
               v-if="effectCount > 0"
               size="x-small"
-              variant="tonal"
-              color="surface-variant"
+              variant="outlined"
+              color="on-surface"
             >
               {{ effectCount }} effects
             </v-chip>
@@ -366,7 +376,6 @@ async function copyDejaStart() {
               @toggle="(newState) => emit('trackPowerToggle', device.id, newState)"
             />
             <v-btn
-              size="small"
               variant="tonal"
               color="error"
               @click="emit('disconnect', device.id)"
@@ -375,7 +384,6 @@ async function copyDejaStart() {
             </v-btn>
             <v-btn
               v-if="showDetailsLink"
-              size="small"
               variant="tonal"
               color="primary"
               @click="emit('navigate', device.id)"
@@ -385,7 +393,6 @@ async function copyDejaStart() {
             </v-btn>
             <v-btn
               v-else
-              size="small"
               variant="text"
               color="primary"
               icon="mdi-open-in-new"
@@ -445,13 +452,26 @@ async function copyDejaStart() {
             no-data-text="No ports found — click Refresh Ports"
           />
 
+          <!-- 🌐 WLED: host IP input -->
+          <v-text-field
+            v-if="isWledDevice"
+            v-model="wledHost"
+            label="Host IP Address"
+            density="compact"
+            variant="outlined"
+            hide-details
+            placeholder="192.168.86.35"
+            prepend-inner-icon="mdi-ip-network"
+            class="device-connect-card__port-select"
+          />
+
           <!-- Action buttons -->
-          <div class="d-flex ga-2">
+          <div class="d-flex ga-2 ml-auto">
             <v-btn
               color="success"
               variant="flat"
               @click="handleConnect"
-              :disabled="isUsbDevice && !selectedPort"
+              :disabled="(isUsbDevice && !selectedPort) || (isWledDevice && !wledHost)"
             >
               Connect
             </v-btn>
@@ -466,7 +486,6 @@ async function copyDejaStart() {
             </v-btn>
             <v-btn
               v-else
-              size="small"
               variant="text"
               color="primary"
               icon="mdi-open-in-new"

@@ -12,7 +12,7 @@ import { useTrackOutputs, type TrackOutput } from '@repo/dccex'
 import { useNotification } from '@repo/ui'
 import { useDeviceConfig } from './useDeviceConfig'
 
-const { getDevice, getDevices, updateDevice } = useLayout()
+const { getDevice, getDevices, updateDevice, deleteDevice } = useLayout()
 const { getTurnoutsByDevice } = useTurnouts()
 const { getEffectsByDevice } = useEfx()
 const { getSensorsByDevice } = useSensors()
@@ -33,11 +33,34 @@ const locos = getLocos()
 const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
 const device = ref(null as Device | null)
 
+// WLED config local refs — initialized after device loads
+const wledHostLocal = ref('')
+const wledLedCountLocal = ref<number | null>(null)
+
 onMounted(async () => {
   if (deviceId) {
     device.value = await getDevice(deviceId) as Device
+    // Initialize WLED fields from saved device data
+    if (device.value?.type === 'wled') {
+      const rawHost = device.value.host || ''
+      wledHostLocal.value = rawHost.replace(/^https?:\/\//, '').replace(/\/+$/, '')
+      wledLedCountLocal.value = device.value.ledCount || null
+    }
   }
 })
+
+async function handleSaveWledConfig() {
+  const host = wledHostLocal.value.replace(/^https?:\/\//, '').replace(/\/+$/, '')
+  await updateDevice(deviceId, {
+    host,
+    ...(wledLedCountLocal.value ? { ledCount: wledLedCountLocal.value } : {}),
+  })
+  // Update local device ref so chips reflect the change
+  if (device.value) {
+    device.value = { ...device.value, host, ledCount: wledLedCountLocal.value || undefined }
+  }
+  notify?.success('WLED configuration saved')
+}
 
 const deviceType = computed(() => deviceTypes.find((type) => type.value === device.value?.type))
 
@@ -192,6 +215,31 @@ function getEffectDetails(type: string | undefined) {
 function handleBack() {
   route.push({ name: 'Devices' })
 }
+
+const showDeleteDialog = ref(false)
+const deleteConfirmInput = ref('')
+const deleteExpectedText = computed(() => `delete ${deviceId}`)
+const deleteConfirmMatch = computed(() => deleteConfirmInput.value === deleteExpectedText.value)
+const isDeleting = ref(false)
+
+async function handleDelete() {
+  if (!deleteConfirmMatch.value) return
+  isDeleting.value = true
+  try {
+    await deleteDevice(deviceId)
+    route.push({ name: 'Devices' })
+  } catch {
+    notify?.error('Failed to delete device')
+  } finally {
+    isDeleting.value = false
+    showDeleteDialog.value = false
+  }
+}
+
+function openDeleteDialog() {
+  deleteConfirmInput.value = ''
+  showDeleteDialog.value = true
+}
 </script>
 
 <template>
@@ -250,6 +298,15 @@ function handleBack() {
         >
           Topic: {{ device?.topic }}
         </v-chip>
+        <v-chip
+          v-if="device?.host"
+          size="small"
+          :color="color.value"
+          prepend-icon="mdi-ip-network"
+          variant="outlined"
+        >
+          Host: {{ device?.host }}
+        </v-chip>
         <!-- Connection Status -->
         <v-chip
           v-if="['usb', 'wifi'].includes(device?.connection || '')"
@@ -268,6 +325,59 @@ function handleBack() {
       </div>
       
       <v-divider class="mb-6"></v-divider>
+
+      <!-- 🌐 WLED Configuration -->
+      <template v-if="device?.type === 'wled'">
+        <div class="text-subtitle-2 font-weight-bold mb-2">
+          <v-icon icon="mdi-led-strip-variant" size="small" class="mr-1" />
+          WLED Configuration
+        </div>
+        <div class="d-flex gap-4 mb-2">
+          <v-text-field
+            v-model="wledHostLocal"
+            label="Host IP Address"
+            variant="outlined"
+            density="compact"
+            placeholder="192.168.86.35"
+            hint="IP address of the WLED device (without http://)"
+            persistent-hint
+            prepend-inner-icon="mdi-ip-network"
+            class="flex-grow-1"
+          />
+          <v-text-field
+            v-model.number="wledLedCountLocal"
+            label="LED Count"
+            variant="outlined"
+            density="compact"
+            type="number"
+            placeholder="60"
+            hint="Total LEDs on the strip"
+            persistent-hint
+            prepend-inner-icon="mdi-led-strip"
+            style="max-width: 140px;"
+          />
+        </div>
+        <div class="d-flex align-center gap-2 mb-4">
+          <v-btn
+            color="pink"
+            variant="tonal"
+            size="small"
+            prepend-icon="mdi-content-save"
+            @click="handleSaveWledConfig"
+          >
+            Save WLED Config
+          </v-btn>
+          <v-chip
+            v-if="(device as any)?.wledInfo"
+            size="small"
+            prepend-icon="mdi-information"
+            variant="outlined"
+          >
+            {{ (device as any)?.wledInfo?.name }} · {{ (device as any)?.wledInfo?.ledCount }} LEDs · v{{ (device as any)?.wledInfo?.version }}
+          </v-chip>
+        </div>
+        <v-divider class="mb-6" />
+      </template>
 
       <!-- 🔧 Track Output Configuration (DCC-EX devices only) -->
       <TrackOutputConfig
@@ -649,13 +759,62 @@ function handleBack() {
         @click="handleBack"
         color="grey-lighten-1"
         variant="tonal"
-        valigned="center"
         prepend-icon="mdi-arrow-left"
       >
         Back to Devices
       </v-btn>
       <v-spacer></v-spacer>
+      <v-btn
+        v-if="device?.type !== 'deja-server'"
+        color="error"
+        variant="tonal"
+        prepend-icon="mdi-delete"
+        @click="openDeleteDialog"
+      >
+        Delete Device
+      </v-btn>
     </v-card-actions>
   </v-card>
+
+  <!-- Delete Confirmation Dialog -->
+  <v-dialog v-model="showDeleteDialog" max-width="480" persistent>
+    <v-card variant="elevated" class="border border-error/30">
+      <v-card-title class="d-flex align-center ga-2 pa-4">
+        <v-icon icon="mdi-alert" color="error" />
+        Delete Device
+      </v-card-title>
+      <v-card-text class="pa-4">
+        <v-alert type="error" variant="tonal" class="mb-4">
+          <strong>This cannot be undone.</strong> Deleting <strong>{{ deviceId }}</strong> will permanently remove all associated effects, turnouts, signals, and sensors tied to this device.
+        </v-alert>
+        <p class="text-body-2 mb-3">
+          Type <code class="font-mono bg-grey-darken-3 px-1 rounded">{{ deleteExpectedText }}</code> to confirm:
+        </p>
+        <v-text-field
+          v-model="deleteConfirmInput"
+          variant="outlined"
+          density="compact"
+          :placeholder="deleteExpectedText"
+          autofocus
+          hide-details
+          @keyup.enter="handleDelete"
+        />
+      </v-card-text>
+      <v-card-actions class="pa-4">
+        <v-btn variant="text" @click="showDeleteDialog = false">Cancel</v-btn>
+        <v-spacer />
+        <v-btn
+          color="error"
+          variant="flat"
+          prepend-icon="mdi-delete"
+          :disabled="!deleteConfirmMatch"
+          :loading="isDeleting"
+          @click="handleDelete"
+        >
+          Delete Forever
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 

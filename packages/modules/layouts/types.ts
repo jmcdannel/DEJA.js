@@ -59,6 +59,9 @@ export interface ServerStatus {
   lastSeen: Date | number
   version?: string
   ip?: string | null
+  mqttEnabled?: boolean
+  wsEnabled?: boolean
+  wsPort?: number
 }
 
 /**
@@ -133,7 +136,11 @@ export interface Device {
   config?: DeviceConfig
   connection?: 'usb' | 'wifi'
   description?: string
+  /** IP address or hostname for network-connected devices (e.g. WLED) */
+  host?: string
   id: string
+  /** Total number of LEDs on the strip (WLED devices) */
+  ledCount?: number
   isConnected?: boolean
   lastConnected?: Date
   maxOutputs?: number
@@ -155,6 +162,7 @@ export interface Device {
     | 'deja-mqtt'
     | 'deja-mqtt-diy'
     | 'deja-server'
+    | 'wled'
   order?: number
 }
 

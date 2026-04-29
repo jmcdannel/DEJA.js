@@ -107,6 +107,8 @@ export type { WcagLevel } from './themes'
 // Composables
 export { useThemeSwitcher } from './composables/useThemeSwitcher'
 export { useListControls } from './composables/useListControls'
+export { useHaptics } from './composables/useHaptics'
+export type { HapticPattern } from './composables/useHaptics'
 
 // PageHeader
 export { default as PageHeader } from './PageHeader/PageHeader.vue'

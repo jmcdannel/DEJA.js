@@ -53,14 +53,14 @@ const { isConnected: deviceConnected, offlineReason } = useDeviceStatus(
 const hasDevice = computed(() => !!deviceIdRef.value)
 const isDeviceOffline = computed(() => hasDevice.value && !deviceConnected.value)
 
-const effectiveDisabled = computed(() => props.disabled || isDeviceOffline.value)
+defineExpose({ isDeviceOffline })
 </script>
 
 <template>
   <v-card
     class="list-item-card w-full h-full flex flex-col transition-all duration-200 hover:-translate-y-0.5"
     :class="{ 'list-item-card--offline': isDeviceOffline }"
-    :disabled="effectiveDisabled"
+    :disabled="disabled"
     :loading="loading"
     variant="flat"
   >
@@ -80,7 +80,7 @@ const effectiveDisabled = computed(() => props.disabled || isDeviceOffline.value
       </div>
 
       <div class="list-item-card__status">
-        <slot name="status" />
+        <slot name="status" :device-offline="isDeviceOffline" />
       </div>
     </div>
 

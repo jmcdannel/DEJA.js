@@ -1,6 +1,6 @@
 <script setup lang="ts">
-  import { ref } from 'vue'
-  import { useHaptics } from '@/composables/useHaptics'
+  import { ref, computed } from 'vue'
+  import { useHaptics } from '@repo/ui'
 
   const props = defineProps({
     disabled: {
@@ -8,6 +8,10 @@
       default: false
     },
     horizontal: {
+      type: Boolean,
+      default: false
+    },
+    compact: {
       type: Boolean,
       default: false
     }
@@ -61,8 +65,9 @@
     const isActive = pressedButton.value === buttonId
     return [
       'btn btn-accent relative h-auto mx-auto',
-      '@[960px]:w-24 p-3 @[400px]:p-3 @[640px]:p-4 @[1024px]:py-3 @[1024px]:px-8',
-      'min-h-[48px] min-w-[48px]',
+      props.compact
+        ? 'p-1 min-h-[32px] min-w-[32px]'
+        : '@[960px]:w-24 p-3 @[400px]:p-3 @[640px]:p-4 @[1024px]:py-3 @[1024px]:px-8 min-h-[48px] min-w-[48px]',
       'transition-all duration-deja-fast ease-deja-standard',
       'select-none',
       isActive
@@ -75,7 +80,9 @@
   function getStopBtnClasses() {
     const isActive = pressedButton.value === 'stop'
     return [
-      'rounded-3xl min-w-[48px] min-h-[48px] @[960px]:py-4 @[960px]:min-w-16',
+      props.compact
+        ? 'rounded-2xl min-w-[36px] min-h-[40px]'
+        : 'rounded-3xl min-w-[48px] min-h-[48px] @[960px]:py-4 @[960px]:min-w-16',
       'h-auto mx-auto relative z-10',
       'transition-all duration-deja-fast ease-deja-standard',
       'select-none',
@@ -85,12 +92,19 @@
     ].join(' ')
   }
 
-  const iconClasses = 'h-5 w-10 @[400px]:h-6 @[400px]:w-6 @[960px]:h-8 @[960px]:w-14 relative'
+  const iconClasses = computed(() =>
+    props.compact
+      ? 'h-3 w-6 relative'
+      : 'h-5 w-10 @[400px]:h-6 @[400px]:w-6 @[960px]:h-8 @[960px]:w-14 relative'
+  )
 
 </script>
 <template>
-  <div class="p-2 @[400px]:py-2 @[400px]:px-4 @[640px]:py-2 @[640px]:px-12 flex justify-stretch items-center flex-grow relative z-20"
-    :class="`${horizontal ? 'flex-row px-1' : 'flex-col '}`">
+  <div class="flex justify-stretch items-center flex-grow relative z-20"
+    :class="[
+      horizontal ? 'flex-row px-1' : 'flex-col',
+      compact ? 'p-0' : 'p-2 @[400px]:py-2 @[400px]:px-4 @[640px]:py-2 @[640px]:px-12'
+    ]">
     <v-btn
       class="flex-grow"
       :class="`${getBtnClasses('up5')} ${horizontal ? 'rounded-r-none rounded-l-3xl py-3' : 'rounded-b-none rounded-t-3xl'}`"
@@ -122,7 +136,7 @@
       />
     </v-btn>
     <v-btn
-      :class="`${getStopBtnClasses()} ${horizontal ? '@[960px]:h-36 rounded-none py-3 px-4' : 'w-28 py-6 @[960px]:w-36 rounded-3xl'}`"
+      :class="`${getStopBtnClasses()} ${compact ? (horizontal ? 'rounded-none py-1 px-2' : 'w-16 py-2 rounded-2xl') : (horizontal ? '@[960px]:h-36 rounded-none py-3 px-4' : 'w-28 py-6 @[960px]:w-36 rounded-3xl')}`"
       color="red"
       @click="handleStop"
       @pointerdown="(e: PointerEvent) => handlePointerDown(e, 'stop')"

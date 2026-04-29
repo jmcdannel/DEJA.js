@@ -3,12 +3,16 @@
 import { ref, watch }  from 'vue'
 import { useLayoutRoutes } from '@repo/modules'
 import { useLayoutRoutesMap } from './useLayoutRoutesMap'
-import { PageHeader } from '@repo/ui'
+import { PageHeader, useHaptics } from '@repo/ui'
 import TamarackJunction from './maps/tam/TamarackJunction.vue'
 import PayetteSub from './maps/tam/PayetteSub.vue'
 import './route-styles.css'
 
-const activeMap = ref('PayetteSub')
+const props = defineProps({
+  compact: { type: Boolean, default: false },
+})
+
+const activeMap = ref(props.compact ? 'RoutesList' : 'PayetteSub')
 
 const { runRoute, isRunning, percentComplete } = useLayoutRoutes()
 const {
@@ -22,29 +26,39 @@ const {
   routeTurnouts
 } = useLayoutRoutesMap()
 
+const { vibrate } = useHaptics()
+
+const handleMapClickWithHaptic = (event: Event) => {
+  vibrate('light')
+  handleMapClick(event)
+}
+
 </script>
 <template>
   <div class="relative">
     <PageHeader title="Routes" icon="mdi-routes" color="blue">
       <template #actions>
-        <v-btn
-          v-for="map in ['TamarackJunction', 'PayetteSub']"
-          :key="map"
-          :variant="activeMap === map ? 'flat' : 'outlined'"
-          color="primary"
-          prepend-icon="mdi-map"
-          size="small"
-          @click="activeMap = map"
-        >
-        {{ map }}
-        </v-btn>
-        <v-btn
-          :variant="activeMap === 'RoutesList' ? 'flat' : 'outlined'"
-          prepend-icon="mdi-format-list-bulleted"
-          color="primary"
-          size="small"
-          @click="activeMap = 'RoutesList'"
-        >Routes List</v-btn>
+        <div class="flex flex-wrap gap-1">
+          <v-btn
+            v-if="!compact"
+            v-for="map in ['TamarackJunction', 'PayetteSub']"
+            :key="map"
+            :variant="activeMap === map ? 'flat' : 'outlined'"
+            color="primary"
+            prepend-icon="mdi-map"
+            size="x-small"
+            @click="activeMap = map; vibrate('light')"
+          >
+          {{ map }}
+          </v-btn>
+          <v-btn
+            :variant="activeMap === 'RoutesList' ? 'flat' : 'outlined'"
+            prepend-icon="mdi-format-list-bulleted"
+            color="primary"
+            :size="compact ? 'x-small' : 'small'"
+            @click="activeMap = 'RoutesList'; vibrate('light')"
+          >Routes</v-btn>
+        </div>
       </template>
     </PageHeader>
     <main>
@@ -54,7 +68,7 @@ const {
           <template #opposite>
             <v-chip 
               v-if="p1"
-              @click="p1 = undefined"
+              @click="p1 = undefined; vibrate('light')"
               color="primary" 
               prepend-icon="mdi-map-marker"
               append-icon="mdi-close"
@@ -106,7 +120,7 @@ const {
           <template #opposite>
             <v-chip 
               v-if="p2"
-              @click="p2 = undefined"
+              @click="p2 = undefined; vibrate('light')"
               color="secondary" 
               append-icon="mdi-close"
               prepend-icon="mdi-map-marker"
@@ -125,10 +139,10 @@ const {
       </v-timeline>
       <!-- <pre>{{ routeTurnouts }}</pre> -->
     </main>
-    <TamarackJunction v-if="activeMap === 'TamarackJunction'" @click="handleMapClick" />
+    <TamarackJunction v-if="activeMap === 'TamarackJunction'" @click="handleMapClickWithHaptic" />
     <PayetteSub 
       v-if="activeMap === 'PayetteSub'" 
-      @click="handleMapClick" 
+      @click="handleMapClickWithHaptic"
       :class="getMapClasses()"
     />
     <v-container v-if="activeMap === 'RoutesList'" class="overflow-y-auto" >
@@ -157,7 +171,7 @@ const {
             </v-card-text>
             <v-card-actions>
               <v-btn 
-                @click="runRoute(r)"
+                @click="runRoute(r); vibrate('medium')"
                 color="primary"
                 variant="outlined"
               >Run</v-btn>

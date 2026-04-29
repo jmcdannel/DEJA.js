@@ -76,15 +76,15 @@ function handleClick() {
   line-height: 1;
 }
 
-/* Non-touch: show the kbd hint */
+/* Non-touch (any width): show the ⌘K hint */
 @media (hover: hover) and (pointer: fine) {
   .cp-trigger__kbd {
     display: inline-block;
   }
 }
 
-/* 📱 Mobile / narrow: shrink to just an icon-only pill */
-@media (max-width: 959px) {
+/* Touch narrow screens: collapse to icon-only pill */
+@media (max-width: 959px) and (hover: none) {
   .cp-trigger {
     min-width: 40px;
     padding: 0;
@@ -93,6 +93,21 @@ function handleClick() {
   }
   .cp-trigger__label {
     display: none;
+  }
+}
+
+/* Non-touch small screens: compact [icon] [⌘K] — drop the label text */
+@media (max-width: 959px) and (hover: hover) and (pointer: fine) {
+  .cp-trigger {
+    min-width: auto;
+    padding: 0 10px;
+    gap: 6px;
+  }
+  .cp-trigger__label {
+    display: none;
+  }
+  .cp-trigger__kbd {
+    display: inline-block;
   }
 }
 </style>

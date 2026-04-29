@@ -32,7 +32,10 @@ const { serverStatus } = useServerStatus()
 // ── Local State ────────────────────────────────────────────────────
 
 const serial = ref(props.device?.port || '')
+const wledHost = ref(props.device?.host || '')
 const autoConnect = ref(props.device?.autoConnect || false)
+
+const isWledDevice = computed(() => props.device?.type === 'wled')
 
 /** 'idle' | 'connecting' | 'error' — drives button + error state */
 const connectState = ref<'idle' | 'connecting' | 'error'>('idle')
@@ -105,6 +108,7 @@ const canConnect = computed(() => {
   if (isDejaServer.value) return false
   if (!serverOnline.value) return false
   if (isUsbDevice.value && !serial.value) return false
+  if (isWledDevice.value && !wledHost.value) return false
   return true
 })
 const connectDisabledReason = computed(() => {
@@ -113,6 +117,9 @@ const connectDisabledReason = computed(() => {
   }
   if (isUsbDevice.value && !serial.value) {
     return 'Select a USB port to connect.'
+  }
+  if (isWledDevice.value && !wledHost.value) {
+    return 'Enter the WLED device IP address.'
   }
   return ''
 })
@@ -134,6 +141,7 @@ const connectionIcon = computed(() => {
 /** The path/topic/IP to display under the status line — read-only. */
 const connectionPath = computed(() => {
   if (isDejaServer.value) return serverStatus.value?.ip ?? null
+  if (isWledDevice.value) return props.device?.host || null
   if (isUsbDevice.value) return props.device?.port || null
   if (isMqttDevice.value) return props.device?.topic || null
   return null
@@ -175,6 +183,9 @@ function handleConnect() {
 
   if (isUsbDevice.value) {
     emit('connect', props.device.id, serial.value, undefined)
+  } else if (isWledDevice.value) {
+    // Pass host as serial param — Connect page saves it to Firestore
+    emit('connect', props.device.id, wledHost.value, undefined)
   } else {
     // 🔕 topic is server-generated — always pass undefined
     emit('connect', props.device.id, undefined, undefined)
@@ -312,6 +323,19 @@ async function handleAutoConnect(checked: boolean | null) {
         clearable
         hide-details
         @click:clear="handleClearPort"
+      />
+
+      <!-- 🌐 WLED host IP (only when disconnected WLED device) -->
+      <v-text-field
+        v-if="!isConnected && isWledDevice"
+        v-model="wledHost"
+        label="Host IP Address"
+        variant="outlined"
+        density="compact"
+        placeholder="192.168.86.35"
+        prepend-inner-icon="mdi-ip-network"
+        :disabled="connectState === 'connecting'"
+        hide-details
       />
 
       <!-- ⚠️ Connection error / timeout message -->

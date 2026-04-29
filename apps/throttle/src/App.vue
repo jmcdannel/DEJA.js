@@ -9,7 +9,6 @@ import Footer from '@/core/Footer.vue'
 import ConnectionStatusBanner from '@/core/ConnectionStatusBanner.vue'
 import { usePageSwipe } from '@/composables/usePageSwipe'
 import CommandPalette from '@/command-palette/CommandPalette.vue'
-import CommandPaletteTrigger from '@/command-palette/CommandPaletteTrigger.vue'
 import CommandPaletteChordChip from '@/command-palette/CommandPaletteChordChip.vue'
 import { useGlobalKeybindings } from '@/command-palette/useGlobalKeybindings'
 import { useThemeSwitcher } from '@repo/ui/src/composables/useThemeSwitcher'
@@ -38,7 +37,7 @@ const isFullscreen = computed(() => {
 })
 
 const mainContentRef = useTemplateRef('mainContentRef')
-usePageSwipe(mainContentRef as any, { disabledRoutes: ['throttle'] })
+usePageSwipe(mainContentRef as any, { disabledRoutes: ['throttle', 'conductor'] })
 
 const { isDark, themePreference } = useThemeSwitcher()
 
@@ -76,9 +75,7 @@ const throttleDefaults: AppBackgroundPrefs = {
           :show-layout-power="true"
           :show-emergency-stop="true"
           :show-user-profile="true"
-        >
-          <CommandPaletteTrigger />
-        </AppHeader>
+        />
         <v-main>
           <!-- Normal (non-fullscreen) layout -->
           <v-container v-if="!isFullscreen" ref="mainContentRef" class="p-0 flex flex-col flex-1 h-full relative" style="min-height: calc(100vh - var(--v-layout-top, 64px) - var(--v-layout-bottom, 56px))" fluid>

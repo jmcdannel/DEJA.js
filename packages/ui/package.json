@@ -46,10 +46,12 @@
     "./tailwind/animation-preset": "./src/tailwind/animation-preset.ts",
     "./SplashPage": "./src/SplashPage.vue",
     "./NotFoundPage": "./src/NotFoundPage.vue",
-    "./QuickStart": "./src/QuickStart/QuickStart.vue"
+    "./QuickStart": "./src/QuickStart/QuickStart.vue",
+    "./composables/useHaptics": "./src/composables/useHaptics.ts"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.8.2",
+    "@repo/deja": "workspace:*",
     "@repo/dccex": "workspace:^0.0.0",
     "@repo/firebase-config": "workspace:*",
     "@repo/modules": "workspace:*",

@@ -1,20 +1,14 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useCurrentUser } from 'vuefire'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { getIdToken } from 'firebase/auth'
-import { db } from '@repo/firebase-config'
 import { useSubscription, PLAN_DISPLAY } from '@repo/modules'
-import type { Layout } from '@repo/modules'
 import SelectFavorites from '@/core/Menu/SelectFavorites.vue'
 import { BackgroundSettings, ServerSetupInfo } from '@repo/ui'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui/src/composables/useThemeSwitcher'
 import { useDisplay } from 'vuetify'
-import { useServerDiscovery } from '@/composables/useServerDiscovery'
 import { useThrottleSettings } from '@/throttle/useThrottleSettings'
-import { useConductorSettings } from '@/conductor/useConductorSettings'
-import { useQuickMenu } from '@/quick-menu/useQuickMenu'
 
 const user = useCurrentUser()
 const { plan, status, isTrialing, trialDaysLeft, subscription } = useSubscription()
@@ -22,21 +16,10 @@ const { themePreference, setTheme } = useThemeSwitcher()
 const { mdAndUp } = useDisplay()
 
 const {
-  variant, showFunctions, showSpeedometer, showConsist,
-  setVariant, setShowFunctions, setShowSpeedometer, setShowConsist,
+  variant, speedDisplayType, showFunctions, showConsist,
+  rightPanel, setVariant, setSpeedDisplayType, setShowFunctions,
+  setShowConsist, setRightPanel,
 } = useThrottleSettings()
-
-const {
-  variant: conductorVariant,
-  rightPanel: conductorRightPanel,
-  setVariant: setConductorVariant,
-  setRightPanel: setConductorRightPanel,
-} = useConductorSettings()
-
-const { quickMenuVisible } = useQuickMenu()
-
-const { isScanning, discoveredServers, startScan, isAvailable, checkAvailability } = useServerDiscovery()
-onMounted(() => { checkAvailability() })
 
 const planName = computed(() => PLAN_DISPLAY[plan.value].name)
 const planPrice = computed(() => {
@@ -82,52 +65,7 @@ async function openBillingPortal() {
   }
 }
 
-// Speed steps
-// Speed steps removed — replaced by throttle variant settings
-
-// DEJA server config
-const wsServerUrl = useStorage('@DEJA/wsServerUrl', '')
-const mqttBrokerUrl = useStorage('@DEJA/mqttBrokerUrl', '')
-const serverSaved = ref(false)
-function saveServerSettings() {
-  serverSaved.value = true
-  setTimeout(() => { serverSaved.value = false }, 2000)
-}
-
-// Layout throttle connection
 const layoutId = useStorage<string>('@DEJA/layoutId', '').value
-const connectionType = ref<'deja-server' | 'withrottle'>('deja-server')
-const connectionHost = ref('')
-const connectionPort = ref(44444)
-const isLayoutLoading = ref(true)
-const isLayoutSaving = ref(false)
-
-if (layoutId) {
-  getDoc(doc(db, 'layouts', layoutId)).then((snap) => {
-    if (snap.exists()) {
-      const data = snap.data() as Layout
-      if (data.throttleConnection) {
-        connectionType.value = data.throttleConnection.type || 'deja-server'
-        connectionHost.value = data.throttleConnection.host || ''
-        connectionPort.value = data.throttleConnection.port || 44444
-      }
-    }
-    isLayoutLoading.value = false
-  })
-}
-
-async function saveLayoutConnectionSettings() {
-  if (!layoutId) return
-  isLayoutSaving.value = true
-  try {
-    await setDoc(doc(db, 'layouts', layoutId), {
-      throttleConnection: { type: connectionType.value, host: connectionHost.value, port: connectionPort.value }
-    }, { merge: true })
-  } catch (e) {
-    console.error('Error saving throttle connection:', e)
-  }
-  isLayoutSaving.value = false
-}
 
 // Theme options
 const themeOptions: { value: ThemeMode; label: string; icon: string }[] = [
@@ -141,9 +79,7 @@ const sections = [
   { id: 'account', label: 'Account', icon: 'mdi-account-circle-outline' },
   { id: 'billing', label: 'Billing', icon: 'mdi-credit-card-outline' },
   { id: 'appearance', label: 'Appearance', icon: 'mdi-palette-outline' },
-  { id: 'throttle', label: 'Throttle & Quick Menu', icon: 'mdi-speedometer' },
-  { id: 'conductor', label: 'Conductor', icon: 'mdi-account-hard-hat' },
-  { id: 'connection', label: 'Connection', icon: 'mdi-server-network' },
+  { id: 'throttle', label: 'Throttle', icon: 'mdi-speedometer' },
   { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'favorites', label: 'Favorites', icon: 'mdi-star-outline' },
   { id: 'backgrounds', label: 'Backgrounds', icon: 'mdi-image-outline' },
@@ -284,11 +220,21 @@ const backgroundPages = [
           </div>
           <div class="settings-row">
             <div class="settings-row__label">
-              <span class="settings-row__name">Speedometer</span>
-              <span class="settings-row__desc">Show speed gauge on desktop, auto-hide on small screens</span>
+              <span class="settings-row__name">Speed Display</span>
+              <span class="settings-row__desc">Choose between round gauge dial or digital number readout</span>
             </div>
             <div class="settings-row__value">
-              <v-switch :model-value="showSpeedometer" @update:model-value="(v) => setShowSpeedometer(!!v)" color="primary" density="compact" hide-details />
+              <v-btn-toggle
+                :model-value="speedDisplayType"
+                @update:model-value="(v: string) => v && setSpeedDisplayType(v as 'dial' | 'digital')"
+                mandatory
+                density="compact"
+                color="primary"
+                variant="outlined"
+              >
+                <v-btn value="dial" size="small">🎛️ Dial</v-btn>
+                <v-btn value="digital" size="small">🔢 Digital</v-btn>
+              </v-btn-toggle>
             </div>
           </div>
           <div class="settings-row">
@@ -302,50 +248,11 @@ const backgroundPages = [
           </div>
           <div class="settings-row">
             <div class="settings-row__label">
-              <span class="settings-row__name">Quick Menu</span>
-              <span class="settings-row__desc">Show draggable quick-access menu for throttles and cloud navigation</span>
+              <span class="settings-row__name">Conductor Right Panel</span>
+              <span class="settings-row__desc">Which module to show in the Conductor's right column</span>
             </div>
             <div class="settings-row__value">
-              <v-switch v-model="quickMenuVisible" color="primary" density="compact" hide-details />
-            </div>
-          </div>
-        </div>
-
-        <!-- Conductor -->
-        <div id="conductor" class="settings-section">
-          <div class="settings-section__header">
-            <v-icon size="20" class="settings-section__icon">mdi-account-hard-hat</v-icon>
-            <h2 class="settings-section__title">Conductor</h2>
-          </div>
-          <div class="settings-row">
-            <div class="settings-row__label">
-              <span class="settings-row__name">Throttle Style</span>
-              <span class="settings-row__desc">Throttle control style used inside the Conductor view</span>
-            </div>
-            <div class="settings-row__value">
-              <v-btn-toggle :model-value="conductorVariant" @update:model-value="(v) => setConductorVariant(v)" mandatory divided density="compact" variant="outlined" color="primary">
-                <v-btn value="buttons" size="small" class="text-none">
-                  <v-icon start size="16">mdi-gesture-tap-button</v-icon>
-                  <span class="hidden sm:inline">Buttons</span>
-                </v-btn>
-                <v-btn value="slider" size="small" class="text-none">
-                  <v-icon start size="16">mdi-tune-vertical</v-icon>
-                  <span class="hidden sm:inline">Slider</span>
-                </v-btn>
-                <v-btn value="dashboard" size="small" class="text-none">
-                  <v-icon start size="16">mdi-train</v-icon>
-                  <span class="hidden sm:inline">Dashboard</span>
-                </v-btn>
-              </v-btn-toggle>
-            </div>
-          </div>
-          <div class="settings-row">
-            <div class="settings-row__label">
-              <span class="settings-row__name">Right Panel</span>
-              <span class="settings-row__desc">Which component to load in the Conductor's right column</span>
-            </div>
-            <div class="settings-row__value">
-              <v-btn-toggle :model-value="conductorRightPanel" @update:model-value="(v) => setConductorRightPanel(v)" mandatory divided density="compact" variant="outlined" color="primary">
+              <v-btn-toggle :model-value="rightPanel" @update:model-value="(v) => setRightPanel(v)" mandatory divided density="compact" variant="outlined" color="primary">
                 <v-btn value="turnouts" size="small" class="text-none">
                   <v-icon start size="16">mdi-directions-fork</v-icon>
                   <span class="hidden sm:inline">Turnouts</span>
@@ -368,95 +275,6 @@ const backgroundPages = [
                 </v-btn>
               </v-btn-toggle>
             </div>
-          </div>
-        </div>
-
-        <!-- Connection -->
-        <div id="connection" class="settings-section">
-          <div class="settings-section__header">
-            <v-icon size="20" class="settings-section__icon">mdi-server-network</v-icon>
-            <h2 class="settings-section__title">Connection</h2>
-          </div>
-
-          <div class="settings-row settings-row--block">
-            <div class="settings-row__label mb-3">
-              <span class="settings-row__name">DEJA Server</span>
-              <span class="settings-row__desc">Configure your local server connection. Required for mobile apps.</span>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-              <v-text-field v-model="wsServerUrl" label="WebSocket Server URL" placeholder="ws://192.168.1.100:8082" hint="Leave blank for default" persistent-hint clearable density="compact" variant="outlined" hide-details="auto" />
-              <v-text-field v-model="mqttBrokerUrl" label="MQTT Broker URL" placeholder="mqtt://192.168.1.100:1883" hint="Leave blank to disable" persistent-hint clearable density="compact" variant="outlined" hide-details="auto" />
-            </div>
-            <v-btn color="primary" variant="tonal" size="small" :prepend-icon="serverSaved ? 'mdi-check' : 'mdi-content-save'" class="text-none" @click="saveServerSettings">
-              {{ serverSaved ? 'Saved!' : 'Save' }}
-            </v-btn>
-          </div>
-
-          <div class="settings-row settings-row--block">
-            <div class="settings-row__label mb-3">
-              <span class="settings-row__name">Throttle Protocol</span>
-              <span class="settings-row__desc">How this app connects to your command station</span>
-            </div>
-            <div class="flex flex-col sm:flex-row gap-3 mb-3">
-              <div
-                v-for="opt in [
-                  { value: 'deja-server', label: 'DEJA.js Server', desc: 'USB-connected to your DCC-EX Command Station', icon: 'mdi-console' },
-                  { value: 'withrottle', label: 'WiThrottle Server', desc: 'Existing WiThrottle on your network', icon: 'mdi-wifi' },
-                ]"
-                :key="opt.value"
-                class="server-option"
-                :class="{ 'server-option--selected': connectionType === opt.value }"
-                @click="connectionType = opt.value as 'deja-server' | 'withrottle'"
-              >
-                <v-icon size="24" :color="connectionType === opt.value ? 'primary' : undefined" class="mb-2">{{ opt.icon }}</v-icon>
-                <div class="font-medium text-sm">{{ opt.label }}</div>
-                <div class="text-xs opacity-50 mt-1">{{ opt.desc }}</div>
-              </div>
-            </div>
-            <template v-if="connectionType === 'withrottle'">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                <v-text-field v-model="connectionHost" label="Host IP" placeholder="192.168.1.50" density="compact" variant="outlined" hide-details="auto" />
-                <v-text-field v-model.number="connectionPort" label="Port" type="number" placeholder="44444" density="compact" variant="outlined" hide-details="auto" />
-              </div>
-              <!-- mDNS server discovery -->
-              <div class="mb-3">
-                <v-btn
-                  v-if="isAvailable !== false"
-                  size="small"
-                  variant="tonal"
-                  color="cyan"
-                  :loading="isScanning"
-                  prepend-icon="mdi-magnify"
-                  class="text-none mb-2"
-                  @click="startScan"
-                >
-                  {{ isScanning ? 'Scanning...' : 'Scan for WiThrottle Servers' }}
-                </v-btn>
-                <p v-else class="text-xs text-slate-400 mb-2">
-                  Server discovery requires the native app (iOS/Android).
-                </p>
-                <div v-if="discoveredServers.length > 0" class="flex flex-col gap-2 mt-2">
-                  <div
-                    v-for="server in discoveredServers"
-                    :key="`${server.host}:${server.port}`"
-                    class="flex items-center justify-between p-2 rounded border border-cyan-500/30 bg-cyan-500/5 cursor-pointer hover:bg-cyan-500/10 transition-colors"
-                    @click="connectionHost = server.host; connectionPort = server.port"
-                  >
-                    <div>
-                      <div class="text-sm font-medium text-cyan-300">{{ server.name }}</div>
-                      <div class="text-xs text-slate-400">{{ server.host }}:{{ server.port }}</div>
-                    </div>
-                    <v-icon size="18" color="cyan">mdi-arrow-right-circle</v-icon>
-                  </div>
-                </div>
-                <p v-else-if="!isScanning && isAvailable === true" class="text-xs text-slate-400">
-                  No servers found yet. Make sure JMRI or DCC-EX WiThrottle is running.
-                </p>
-              </div>
-            </template>
-            <v-btn color="primary" variant="tonal" size="small" :loading="isLayoutSaving" prepend-icon="mdi-content-save" class="text-none" @click="saveLayoutConnectionSettings">
-              Save Connection
-            </v-btn>
           </div>
         </div>
 
@@ -600,26 +418,6 @@ const backgroundPages = [
 .settings-row__name { font-size: 0.875rem; font-weight: 500; color: rgba(var(--v-theme-on-surface), 0.8); }
 .settings-row__desc { font-size: 0.75rem; color: rgba(var(--v-theme-on-surface), 0.45); }
 .settings-row__value { flex-shrink: 0; }
-
-.server-option {
-  flex: 1;
-  padding: 16px;
-  border-radius: 10px;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.15);
-  background: rgba(var(--v-theme-surface), 0.4);
-  cursor: pointer;
-  transition: border-color 150ms ease, background 150ms ease;
-  text-align: center;
-}
-.server-option:hover {
-  border-color: rgba(var(--v-theme-primary), 0.3);
-  background: rgba(var(--v-theme-primary), 0.05);
-}
-.server-option--selected {
-  border-color: rgba(var(--v-theme-primary), 0.5);
-  background: rgba(var(--v-theme-primary), 0.08);
-  box-shadow: 0 0 12px rgba(var(--v-theme-primary), 0.1);
-}
 
 .settings-version {
   text-align: center;

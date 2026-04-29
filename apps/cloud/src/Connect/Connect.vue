@@ -6,7 +6,7 @@ import { useStorage } from '@vueuse/core'
 import { rtdb } from '@repo/firebase-config'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { useLayout, useServerStatus, type Device } from '@repo/modules'
-import { DeviceConnectionList, DeviceStatusItem, StatusPulse, SelectLayout } from '@repo/ui'
+import { DejaServerPanel, DeviceConnectionList, DeviceStatusItem, SelectLayout } from '@repo/ui'
 import { useDisplay } from 'vuetify'
 
 const user = useCurrentUser()
@@ -56,6 +56,13 @@ watch(layoutId, (id) => {
 async function handleConnect(deviceId: string, serial?: string, topic?: string) {
   const device = devices.value?.find((d: Device) => d.id === deviceId)
   if (!device) return
+
+  // For WLED devices, save the host IP before connecting
+  if (device.type === 'wled' && serial) {
+    const { updateDevice } = useLayout()
+    await updateDevice(deviceId, { host: serial })
+  }
+
   await connectDevice(device, serial, topic)
 }
 
@@ -118,33 +125,10 @@ function scrollTo(id: string) {
 
         <!-- Server Status -->
         <template v-if="layoutId">
-          <div id="server" class="settings-section">
-            <div class="settings-section__header">
-              <v-icon size="20" class="settings-section__icon">mdi-server-network</v-icon>
-              <h2 class="settings-section__title">DEJA Server</h2>
-            </div>
-            <div class="settings-row">
-              <div class="settings-row__label">
-                <span class="settings-row__name">Status</span>
-                <span v-if="serverStatus?.version" class="settings-row__desc">v{{ serverStatus.version }}</span>
-              </div>
-              <div class="settings-row__value flex items-center gap-3">
-                <StatusPulse :status="serverStatus?.online ? 'connected' : 'disconnected'" size="sm" />
-                <v-chip
-                  :color="serverStatus?.online ? 'success' : 'error'"
-                  size="small"
-                  variant="tonal"
-                >
-                  {{ serverStatus?.online ? 'Online' : 'Offline' }}
-                </v-chip>
-              </div>
-            </div>
-            <div v-if="serverUptime" class="settings-row">
-              <div class="settings-row__label">
-                <span class="settings-row__name">Uptime</span>
-              </div>
-              <div class="settings-row__value opacity-60">{{ serverUptime }}</div>
-            </div>
+          <div id="server">
+            <DejaServerPanel
+              :devices="devices ?? []"
+            />
           </div>
 
           <!-- Devices -->
@@ -158,6 +142,7 @@ function scrollTo(id: string) {
                 :devices="devices ?? []"
                 :available-ports="ports"
                 :show-header="false"
+                :hide-server="true"
                 :server-online="serverStatus?.online ?? false"
                 @connect="handleConnect"
                 @disconnect="handleDisconnect"
