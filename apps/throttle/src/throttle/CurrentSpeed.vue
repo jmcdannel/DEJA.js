@@ -6,6 +6,10 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  compact: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const isForward = computed(() => props.speed >= 0)
@@ -14,7 +18,7 @@ const displaySpeed = computed(() => Math.abs(props.speed))
 
 <template>
   <div class="flex justify-center">
-    <div class="speed-panel">
+    <div class="speed-panel" :class="{ 'speed-panel--compact': compact }">
       <!-- ⚡ Purple accent stripe -->
       <div class="speed-panel__accent" />
       <!-- 🚂 Speed readout -->
@@ -75,6 +79,25 @@ const displaySpeed = computed(() => Math.abs(props.speed))
   line-height: 1.1;
   color: #e9d5ff;
   text-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
+}
+
+/* 🔹 Compact mode — horizontal, smaller */
+.speed-panel--compact {
+  min-width: auto;
+}
+.speed-panel--compact .speed-panel__body {
+  flex-direction: row;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+}
+.speed-panel--compact .speed-panel__direction {
+  font-size: 0.5rem;
+}
+.speed-panel--compact .speed-panel__value {
+  font-size: 1rem;
+}
+.speed-panel--compact .speed-panel__accent {
+  width: 3px;
 }
 
 /* 📱 Container query scaling */
