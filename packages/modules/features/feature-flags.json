@@ -1,0 +1,11 @@
+{
+  "sounds": "ga",
+  "sensors": "ga",
+  "trackDiagrams": "dev",
+  "routes": "dev",
+  "tourApp": "dev",
+  "quickMenuFavorites": "dev",
+  "cvProgramming": "dev",
+  "throttleConnectionConfig": "dev",
+  "powerDistricts": "dev"
+}
