@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { toRef } from 'vue'
+import { toRef, unref } from 'vue'
 import { useThrottle } from './useThrottle'
 import { useLocos } from '@repo/modules/locos'
 
@@ -15,7 +15,10 @@ const addressRef = toRef(props, 'address')
 const { loco, currentSpeed } = useThrottle(addressRef)
 const { getRoadname } = useLocos()
 
-const locoColor = () => loco?.meta?.color || getRoadname(loco?.meta?.roadname || '')?.color || 'green'
+const locoColor = () => {
+  const l = unref(loco)
+  return l?.meta?.color || getRoadname(l?.meta?.roadname || '')?.color || 'green'
+}
 </script>
 
 <template>

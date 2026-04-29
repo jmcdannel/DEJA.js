@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useLayout, type Device } from '@repo/modules'
+import { useLayout, type Device, efxTypes } from '@repo/modules'
+import { useEfx } from '@repo/modules/effects'
 import { useSensors, type Sensor, sensorTypes, sensorInputTypes } from '@repo/modules/sensors'
 import { createLogger } from '@repo/utils'
 import { DevicePickerChip, DevicePickerGrid, useNotification } from '@repo/ui'
 import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
 import DevicePicker from '@/Layout/Devices/DevicePicker.vue'
+import EffectPicker from '@/Effects/EffectPicker.vue'
+import FeatureGate from '@/Core/UI/FeatureGate.vue'
 
 const log = createLogger('SensorForm')
 
@@ -16,8 +19,15 @@ const emit = defineEmits(['close'])
 const { getDevices } = useLayout()
 const { setSensor } = useSensors()
 const { notify } = useNotification()
+const { getEffects } = useEfx()
 
 const devices = getDevices()
+const effects = getEffects()
+const selectedEffect = computed(() => effects.value?.find((e) => e.id === effectId.value) ?? null)
+const selectedEffectName = computed(() => selectedEffect.value?.name ?? effectId.value ?? null)
+const selectedEffectIcon = computed(() =>
+  efxTypes.find((t) => t.value === selectedEffect.value?.type)?.icon ?? 'mdi-lightning-bolt'
+)
 
 const name = ref(props.sensor?.name ?? '')
 const device = ref(props.sensor?.device ?? '')
@@ -43,6 +53,7 @@ const loading = ref(false)
 // 📦 Add-vs-edit drives the device picker presentation.
 const isEdit = computed(() => !!props.sensor)
 const showDevicePickerDialog = ref(false)
+const showEffectPickerDialog = ref(false)
 const error = ref<string | null>(null)
 
 const deviceRules = computed(() => {
@@ -385,30 +396,38 @@ async function submit() {
         </div>
       </div>
 
-      <div class="form-section__grid" style="grid-template-columns: 1fr 1fr">
-        <div>
-          <label class="form-section__input-label">Linked Effect ID</label>
-          <v-text-field
-            v-model="effectId"
-            variant="outlined"
-            density="compact"
-            color="teal"
-            hide-details="auto"
-          />
-          <div class="form-section__input-hint">Effect to trigger when sensor activates</div>
+      <!-- Linked Effect -->
+      <div class="form-section__row">
+        <div class="form-section__row-label">
+          <span class="form-section__row-name">Effect</span>
+          <span class="form-section__row-desc">Trigger when sensor activates</span>
         </div>
-        <div>
-          <label class="form-section__input-label">Linked Automation ID</label>
-          <v-text-field
-            v-model="automationId"
-            variant="outlined"
-            density="compact"
-            color="teal"
-            hide-details="auto"
-          />
-          <div class="form-section__input-hint">Automation to run when sensor activates</div>
+        <div
+          class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border cursor-pointer"
+          style="border-color: rgba(var(--v-theme-on-surface), 0.08); background: rgba(var(--v-theme-on-surface), 0.03)"
+          @click="showEffectPickerDialog = true"
+        >
+          <v-icon v-if="selectedEffectName" :icon="selectedEffectIcon" size="14" class="text-white/40" />
+          <span class="text-sm text-white/60 truncate max-w-[140px]">{{ selectedEffectName || 'None' }}</span>
+          <v-icon size="14" class="text-white/25">mdi-chevron-right</v-icon>
         </div>
       </div>
+
+      <!-- Linked Automation ID — gated behind Automation Studio -->
+      <FeatureGate feature="Automation Studio" description="Automation to run when sensor activates">
+        <div class="form-section__grid" style="grid-template-columns: 1fr">
+          <div>
+            <label class="form-section__input-label">Linked Automation ID</label>
+            <v-text-field
+              v-model="automationId"
+              variant="outlined"
+              density="compact"
+              color="teal"
+              hide-details="auto"
+            />
+          </div>
+        </div>
+      </FeatureGate>
 
       <!-- ═══ ERROR + FOOTER ═══ -->
       <v-alert
@@ -433,6 +452,14 @@ async function submit() {
       :color="color"
       @select="showDevicePickerDialog = false"
       @cancel="showDevicePickerDialog = false; device = props?.sensor?.device ?? ''"
+    />
+  </v-dialog>
+
+  <v-dialog v-model="showEffectPickerDialog" max-width="80vw">
+    <EffectPicker
+      v-model="effectId"
+      @select="showEffectPickerDialog = false"
+      @cancel="showEffectPickerDialog = false; effectId = props?.sensor?.effectId ?? ''"
     />
   </v-dialog>
 </template>

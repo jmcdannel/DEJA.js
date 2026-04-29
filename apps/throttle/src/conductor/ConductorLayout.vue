@@ -13,12 +13,12 @@ import {
   SignalList,
   DeviceConnectionList,
 } from '@repo/ui'
-import { useConductorSettings } from '@/conductor/useConductorSettings'
+import { useThrottleSettings } from '@/throttle/useThrottleSettings'
 
 const { getThrottles } = useLocos()
 const throttles = getThrottles()
 
-const { variant, rightPanel } = useConductorSettings()
+const { variant, rightPanel, speedDisplayType, showFunctions, showSpeedometer, showConsist } = useThrottleSettings()
 
 const variantMap = {
   buttons: ButtonsThrottle,
@@ -51,33 +51,33 @@ watch(throttles, (newThrottles) => {
   <main class="@container relative">
     <div class="conductor-layout grid grid-cols-1 @[960px]:grid-cols-3 gap-2 w-full">
 
-      <!-- Column 1: Throttle list -->
-      <div class="rounded border-1 border-green-500 border-opacity-50 order-2 @[960px]:!order-1 overflow-hidden min-h-[70vh] @[960px]:min-h-0" style="background: rgba(var(--v-theme-surface), 0.2)">
-        <div class="@container h-full overflow-hidden p-4">
+      <!-- Column 1: Throttle list (compact) -->
+      <div class="rounded border-1 border-green-500 border-opacity-50 order-2 @[960px]:!order-1 overflow-hidden min-h-[40vh] @[960px]:min-h-0" style="background: rgba(var(--v-theme-surface), 0.2)">
+        <div class="@container h-full overflow-hidden p-2">
           <div v-if="throttles?.length" class="relative h-full w-full">
             <ThrottleList />
           </div>
         </div>
       </div>
 
-      <!-- Column 2: Swipeable throttle controls -->
-      <div class="order-1 @[960px]:!order-2 overflow-hidden min-h-[90vh] @[960px]:min-h-0" style="background: rgba(var(--v-theme-surface), 0.2)">
+      <!-- Column 2: Swipeable throttle controls (compact) -->
+      <div class="order-1 @[960px]:!order-2 overflow-hidden min-h-[60vh] @[960px]:min-h-0" style="background: rgba(var(--v-theme-surface), 0.2)">
         <div class="@container h-full overflow-hidden">
           <ThrottleSwipeContainer
             v-if="throttles && throttles.length > 0"
             :throttles="throttles"
             :model-value="activeThrottleAddress"
             :variant-component="variantComponent"
-            :variant-props="{ showSpeedometer: false, showConsist: false }"
+            :variant-props="{ showSpeedometer: showSpeedometer, showConsist: showConsist, showFunctions: showFunctions, speedDisplayType: speedDisplayType }"
             @update:model-value="activeThrottleAddress = $event"
           />
         </div>
       </div>
 
-      <!-- Column 3: Right panel -->
-      <div class="order-3 overflow-hidden min-h-[70vh] @[960px]:min-h-0" style="background: rgba(var(--v-theme-surface), 0.2)">
-        <div class="@container h-full overflow-y-auto p-4">
-          <component :is="rightPanelComponent" />
+      <!-- Column 3: Right panel (full-width items) -->
+      <div class="order-3 overflow-hidden min-h-[40vh] @[960px]:min-h-0 conductor-right-panel" style="background: rgba(var(--v-theme-surface), 0.2)">
+        <div class="@container h-full overflow-y-auto p-2">
+          <component :is="rightPanelComponent" compact />
         </div>
       </div>
 
@@ -104,5 +104,32 @@ watch(throttles, (newThrottles) => {
   .conductor-layout {
     height: calc(100vh - var(--v-layout-bottom) - var(--v-layout-top));
   }
+}
+</style>
+
+<!-- 🔀 Unscoped styles to override Vuetify's @media responsive grid inside conductor right panel -->
+<style>
+/* Force all list items to full width in conductor right panel */
+.conductor-right-panel .v-col,
+.conductor-right-panel .v-col-12,
+.conductor-right-panel [class*="v-col-sm"],
+.conductor-right-panel [class*="v-col-md"],
+.conductor-right-panel [class*="v-col-lg"],
+.conductor-right-panel [class*="v-col-xl"],
+.conductor-right-panel [class*="v-col-xxl"] {
+  flex: 0 0 100% !important;
+  max-width: 100% !important;
+}
+
+/* CTC switches — 2 per row, centered */
+.conductor-right-panel .v-col-auto {
+  flex: 0 0 50% !important;
+  max-width: 50% !important;
+  display: flex;
+  justify-content: center;
+}
+
+.conductor-right-panel .v-row {
+  justify-content: center;
 }
 </style>

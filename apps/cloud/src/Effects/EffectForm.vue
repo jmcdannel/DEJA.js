@@ -5,6 +5,7 @@ import { efxTypes } from '@repo/modules/effects/constants'
 import { createLogger } from '@repo/utils'
 import { DevicePickerChip, DevicePickerGrid } from '@repo/ui'
 import ViewJson from '@/Core/UI/ViewJson.vue'
+import TypePickerGrid, { type TypeOption } from '@/Core/UI/TypePickerGrid.vue'
 import MacroForm from '@/Effects/MacroForm.vue'
 import IALEDForm from '@/Effects/IALEDForm.vue'
 import LcdDisplay from '@/Core/UI/LcdDisplay.vue'
@@ -93,6 +94,16 @@ const showDevicePickerDialog = ref(false)
 const loading = ref(false)
 const selectedSoundFile = ref<string>(props.efx?.sound || '')
 const showSoundDialog = ref(false)
+
+const efxTypeOptions = computed<TypeOption[]>(() =>
+  efxTypes.map((t) => ({
+    value: t.value,
+    label: t.label,
+    icon: t.icon,
+    color: t.color,
+  }))
+)
+
 const rules: ValidationRules = {
   required: [(val) => !!val || 'Required.']
 }
@@ -309,20 +320,7 @@ async function handleWledRun() {
           <div class="form-section__row-label mb-2">
             <span class="form-section__row-name">Effect Type</span>
           </div>
-          <v-btn-toggle v-model="efxType" divided class="flex-wrap h-auto" size="x-large">
-            <v-btn
-              v-for="efxOpt in efxTypes"
-              :value="efxOpt.value"
-              :key="efxOpt.value"
-              class="min-h-48 min-w-48 border"
-              :color="color"
-            >
-              <div class="flex flex-col">
-                <v-icon v-if="efxOpt.icon" size="32" :color="efxOpt.color" class="stroke-none">{{ efxOpt.icon }}</v-icon>
-                <div class="mt-4">{{ efxOpt.label }}</div>
-              </div>
-            </v-btn>
-          </v-btn-toggle>
+          <TypePickerGrid v-model="efxType" :options="efxTypeOptions" />
         </div>
       </template>
 
