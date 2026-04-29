@@ -1,43 +1,35 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useEfx } from '@repo/modules/effects'
-import { efxTypes } from '@repo/modules'
+import { useTurnouts } from '@repo/modules'
 
 defineEmits(['select', 'cancel'])
-defineProps({
-  color: String,
-})
 const model = defineModel<string>()
-const { getEffects } = useEfx()
-const effects = getEffects()
+const { getTurnouts } = useTurnouts()
+const turnouts = getTurnouts()
 const search = ref('')
 
 const filtered = computed(() => {
   const q = search.value.trim().toLowerCase()
-  if (!q) return effects.value ?? []
-  return (effects.value ?? []).filter((e) =>
-    e.name?.toLowerCase().includes(q) ||
-    e.type?.toLowerCase().includes(q) ||
-    e.id?.toLowerCase().includes(q),
+  if (!q) return turnouts.value ?? []
+  return (turnouts.value ?? []).filter((t) =>
+    t.name?.toLowerCase().includes(q) ||
+    t.device?.toLowerCase().includes(q) ||
+    t.id?.toLowerCase().includes(q),
   )
 })
-
-function iconFor(type: string) {
-  return efxTypes.find((t) => t.value === type)?.icon ?? 'mdi-rocket'
-}
 </script>
 
 <template>
   <v-card class="mx-auto w-full h-full justify-between flex flex-col" color="surface">
     <v-card-item>
-      <v-card-title>Effect</v-card-title>
-      <v-card-subtitle>Select an effect to trigger on throw</v-card-subtitle>
+      <v-card-title>Turnout</v-card-title>
+      <v-card-subtitle>Select a turnout to link</v-card-subtitle>
     </v-card-item>
 
     <v-card-text class="flex flex-col gap-3">
       <v-text-field
         v-model="search"
-        placeholder="Search effects…"
+        placeholder="Search turnouts…"
         prepend-inner-icon="mdi-magnify"
         variant="outlined"
         density="compact"
@@ -47,20 +39,23 @@ function iconFor(type: string) {
       />
 
       <div v-if="filtered.length === 0" class="text-sm opacity-40 py-2 text-center">
-        No effects match "{{ search }}"
+        No turnouts match "{{ search }}"
       </div>
 
       <div class="flex flex-wrap gap-1">
         <v-btn
-          v-for="efx in filtered"
-          :key="efx.id"
-          :prepend-icon="iconFor(efx.type)"
-          :color="model === efx.id ? 'primary' : undefined"
-          :variant="model === efx.id ? 'flat' : 'tonal'"
+          v-for="t in filtered"
+          :key="t.id"
+          prepend-icon="mdi-directions-fork"
+          :color="model === t.id ? 'primary' : undefined"
+          :variant="model === t.id ? 'flat' : 'tonal'"
           class="m-1"
-          @click="model = efx.id"
+          @click="model = t.id"
         >
-          {{ efx.name }}
+          {{ t.name }}
+          <template #append>
+            <span class="text-xs opacity-50 ml-1">{{ t.device }}</span>
+          </template>
         </v-btn>
       </div>
     </v-card-text>
