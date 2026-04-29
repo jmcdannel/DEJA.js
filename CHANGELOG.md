@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [1.7.0] - 2026-04-29
+
 ### Added
 - **[cloud]** 🎴 Unified glassmorphic device/item cards with live connection state, server panel, and redesigned mobile header and device connection UI
 - **[throttle]** 🎛️ Effect controls — sound play/stop ring buttons, turnout `effectId` binding, and UX improvements to the throttle effects panel
