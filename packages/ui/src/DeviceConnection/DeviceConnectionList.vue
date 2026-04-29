@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import type { Device, Turnout, Effect } from '@repo/modules'
 import { useLayout, useTurnouts, useEfx } from '@repo/modules'
 import { useDejaJS } from '@repo/deja'
+import { useDcc, DCC_POWER_ON, DCC_POWER_OFF } from '@repo/dccex'
 import DeviceConnectCard from './DeviceConnectCard.vue'
 
 interface Props {
@@ -35,9 +36,15 @@ const { getLayout, getDevices } = useLayout()
 const { getTurnouts } = useTurnouts()
 const { getEffects } = useEfx()
 const { sendDejaCommand } = useDejaJS()
+const { sendDccCommand } = useDcc()
 
 function handleRefreshPorts() {
   sendDejaCommand({ action: 'listPorts', payload: {} })
+}
+
+async function handleTrackPowerToggle(deviceId: string, newState: boolean) {
+  await sendDccCommand({ action: 'dcc', payload: newState ? DCC_POWER_ON : DCC_POWER_OFF })
+  emit('trackPowerToggle', deviceId, newState)
 }
 
 const layout = getLayout()
@@ -152,7 +159,7 @@ function getEffectCount(deviceId: string): number {
       @connect="(id, serial, topic) => emit('connect', id, serial, topic)"
       @disconnect="(id) => emit('disconnect', id)"
       @navigate="(id) => emit('navigate', id)"
-      @track-power-toggle="(id, state) => emit('trackPowerToggle', id, state)"
+      @track-power-toggle="handleTrackPowerToggle"
     />
 
     <!-- Empty state -->
