@@ -19,8 +19,7 @@ import type {
 } from './types'
 import QuickMenuThrottles from '@/quick-menu/QuickMenuThrottles.vue'
 import QuickMenuFavorites from '@/quick-menu/QuickMenuFavorites.vue'
-import { BackgroundThumbnail, ConnectionStatus, UserProfile, TrackPower } from '@repo/ui'
-import { useDcc, DCC_POWER_ON, DCC_POWER_OFF } from '@repo/dccex'
+import { BackgroundThumbnail, ConnectionStatus } from '@repo/ui'
 import { DEFAULT_MENU_CONFIG } from '@/core/Menu/useMenu'
 import { useStorage } from '@vueuse/core'
 
@@ -46,12 +45,6 @@ const cpCurrentLayout = computed(() =>
     : { id: layoutId.value, name: layoutId.value }
 )
 const showMobileStatus = computed(() => !mdAndUp.value && !!user.value)
-const showPaletteControls = computed(() => !!user.value && !!layoutId.value)
-
-const { sendDccCommand: sendPaletteDcc } = useDcc()
-async function paletteTrackPowerToggle(newState: boolean) {
-  await sendPaletteDcc({ action: 'dcc', payload: newState ? DCC_POWER_ON : DCC_POWER_OFF })
-}
 
 const inputRef = ref<HTMLInputElement | null>(null)
 const errorText = ref<string | null>(null)
@@ -185,10 +178,12 @@ watch(displayedCommands, () => {
   }
 })
 
+const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
+
 watch(isOpen, async (open) => {
   if (open) {
     await nextTick()
-    inputRef.value?.focus()
+    if (!isTouchDevice) inputRef.value?.focus()
   } else {
     errorText.value = null
   }
@@ -204,7 +199,7 @@ async function runCommand(cmd: Command) {
   if (cmd.children) {
     push(cmd.id)
     await nextTick()
-    inputRef.value?.focus()
+    if (!isTouchDevice) inputRef.value?.focus()
     return
   }
   errorText.value = null
@@ -367,33 +362,7 @@ function cycleCurrentIndex(control: CycleControl): number {
     @update:model-value="onDialogUpdate"
   >
     <v-card class="cp-card pa-0">
-      <!-- 📱 Mobile-only connection status -->
-      <div v-if="showMobileStatus" class="cp-mobile-status">
-        <ConnectionStatus
-          expanded
-          :layout-name="cpCurrentLayout?.name"
-          :layout-id="layoutId"
-          :server-status="serverStatus"
-          :devices="cpDevices"
-          @navigate="() => { router.push('/connect'); close() }"
-        />
-      </div>
-      <div v-if="showPaletteControls" class="cp-controls">
-        <UserProfile />
-        <TrackPower @toggle="paletteTrackPowerToggle" />
-      </div>
-      <!-- 🧭 Quick nav grid — always visible at root level -->
-      <div v-if="showInlineThrottles" class="cp-nav-grid">
-        <button
-          v-for="item in DEFAULT_MENU_CONFIG"
-          :key="item.name"
-          class="cp-nav-item"
-          @click="navigateToMenuItem(item)"
-        >
-          <v-icon size="22" :class="`text-${item.color}-400`">{{ item.icon }}</v-icon>
-          <span class="cp-nav-item__label">{{ item.label }}</span>
-        </button>
-      </div>
+      <!-- 🔍 Search input — pinned at top -->
       <div class="cp-input-row">
         <v-icon size="20" class="cp-chevron">mdi-chevron-right</v-icon>
         <div v-if="headerLabel" class="cp-breadcrumb">{{ headerLabel }}</div>
@@ -406,6 +375,34 @@ function cycleCurrentIndex(control: CycleControl): number {
           @keydown="onKeydown"
         />
         <span class="cp-esc-hint">Esc</span>
+      </div>
+
+      <!-- 📜 Scrollable content below search -->
+      <div class="cp-scroll-area">
+
+      <!-- 🧭 Quick nav grid -->
+      <div v-if="showInlineThrottles" class="cp-nav-grid">
+        <button
+          v-for="item in DEFAULT_MENU_CONFIG"
+          :key="item.name"
+          class="cp-nav-item"
+          @click="navigateToMenuItem(item)"
+        >
+          <v-icon size="22" :class="`text-${item.color}-400`">{{ item.icon }}</v-icon>
+          <span class="cp-nav-item__label">{{ item.label }}</span>
+        </button>
+      </div>
+
+      <!-- 📱 Mobile-only connection status -->
+      <div v-if="showMobileStatus" class="cp-mobile-status">
+        <ConnectionStatus
+          expanded
+          :layout-name="cpCurrentLayout?.name"
+          :layout-id="layoutId"
+          :server-status="serverStatus"
+          :devices="cpDevices"
+          @navigate="() => { router.push('/connect'); close() }"
+        />
       </div>
 
       <div class="cp-results" role="listbox">
@@ -521,6 +518,8 @@ function cycleCurrentIndex(control: CycleControl): number {
 
       <div v-if="errorText" class="cp-error">{{ errorText }}</div>
 
+      </div><!-- /cp-scroll-area -->
+
       <div class="cp-footer">
         <span><kbd>↑↓</kbd> navigate</span>
         <span><kbd>←→</kbd> adjust</span>
@@ -542,20 +541,19 @@ function cycleCurrentIndex(control: CycleControl): number {
   flex-direction: column;
 }
 
+.cp-scroll-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
+}
+
 .cp-mobile-status {
   display: flex;
   justify-content: center;
   padding: 14px 16px 10px;
 }
-.cp-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-}
-
 .cp-nav-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

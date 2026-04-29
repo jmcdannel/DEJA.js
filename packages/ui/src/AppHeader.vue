@@ -23,7 +23,7 @@ const emit = defineEmits<{
   drawerToggle: [newState: boolean]
 }>()
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   appName?: string
   appIcon?: string
   drawer?: boolean
@@ -36,18 +36,20 @@ const props = defineProps<{
   color?: string
   dark?: boolean
   layoutPowerState?: boolean
-}>()
+}>(), {
+  showNavDrawer: true,
+})
 
 // const { runEffect, getEffectsByType } = useEfx()
 const { sendDccCommand } = useDcc()
-const { getLayouts, getDevices } = useLayout()
+const { getLayout, getLayouts, getDevices } = useLayout()
 const layoutId = useStorage('@DEJA/layoutId', '')
+const layout = getLayout()
 const user = useCurrentUser()
 const router = useRouter()
 const { mdAndUp } = useDisplay()
 
 const { serverStatus } = useServerStatus()
-const stackedLogo = computed(() => !mdAndUp.value)
 
 const showExtension = computed(() =>
   props.mobileLayout === 'expanded'
@@ -130,16 +132,8 @@ const effectiveTrackPower = computed<boolean>(() => {
   if (wiThrottleConnected.value) {
     return wiThrottlePower.value === 1
   }
-  return props.layoutPowerState ?? false
+  return layout?.value?.dccEx?.power ?? false
 })
-
-// 📱 Mini status indicators for mobile
-const serverDotColor = computed(() =>
-  serverStatus.value?.online ? '#22c55e' : '#ef4444'
-)
-const trackPowerDotColor = computed(() =>
-  effectiveTrackPower.value ? '#22c55e' : '#6b7280'
-)
 
 const defaultProps = {
   appName: 'DEJA',
@@ -157,69 +151,37 @@ const defaultProps = {
 <template>
   <v-app-bar
     class="header-gradient relative overflow-hidden"
-    :height="showExtension ? (mdAndUp ? 88 : 64) : undefined"
     :dark="dark !== undefined ? dark : defaultProps.dark">
     <BackgroundDecor variant="blurred-bubbles-1" />
     <template v-if="showNavDrawer !== false" v-slot:prepend>
-      <v-app-bar-nav-icon variant="text" @click.stop="handleDrawerToggle" class="!h-10 !w-10 ml-4"></v-app-bar-nav-icon>
+      <button
+        type="button"
+        class="nav-toggle-btn"
+        aria-label="Toggle navigation"
+        @click.stop="handleDrawerToggle"
+      >
+        <v-icon size="28" color="white">mdi-menu</v-icon>
+      </button>
     </template>
     <template v-slot:title>
       <div class="header-brand">
         <Logo
-          :size="mdAndUp ? 'md' : 'sm'"
-          :stacked="stackedLogo"
-          :app-title="appName || defaultProps.appName"
+          :size="mdAndUp ? 'lg' : 'sm'"
+          layout="inline"
+          :app-title="mdAndUp ? (appName || defaultProps.appName) : undefined"
+          :show-text="mdAndUp"
+          mark-style="logo"
           :variant="variant || defaultProps.variant"
           @click="handleLogoClick"
           class="cursor-pointer"
         />
-        <ConnectionStatus
-          v-if="showExtension && user && mdAndUp"
-          class="header-brand__status"
-          :layout-name="currentLayout?.name"
-          :layout-id="layoutId"
-          :server-status="serverStatus"
-          :devices="devices"
-          @navigate="router.push('/connect')"
-        />
       </div>
     </template>
-    <!-- 📱 Mobile mini-status: server + track power dots, left of Menu -->
-    <button
-      v-if="showExtension && user && !mdAndUp"
-      type="button"
-      class="mini-status"
-      aria-label="Connection status"
-      @click="router.push('/connect')"
-    >
-      <span class="mini-status__item">
-        <v-icon size="12">mdi-console</v-icon>
-        <span class="mini-status__dot" :style="{ background: serverDotColor }" />
-      </span>
-      <span class="mini-status__divider" />
-      <span class="mini-status__item">
-        <v-icon size="12">mdi-fence-electric</v-icon>
-        <span class="mini-status__dot" :style="{ background: trackPowerDotColor }" />
-      </span>
-    </button>
     <slot></slot>
     <template v-slot:append>
-      <!-- Expanded: 2×2 grid on desktop, e-stop only on mobile -->
-      <template v-if="showExtension && layoutId && user">
-        <!-- Desktop: full 2×2 grid -->
-        <div v-if="mdAndUp" class="header-button-grid">
-          <UserProfile v-if="showUserProfile !== false" />
-          <EmergencyStop v-if="showEmergencyStop !== false" @stop="handleEmergencyStop" />
-          <TrackPower :power-state="effectiveTrackPower" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
-          <Power v-if="showLayoutPower" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />
-        </div>
-        <!-- Mobile: just emergency stop -->
-        <EmergencyStop v-else-if="showEmergencyStop !== false" class="ml-2" @stop="handleEmergencyStop" />
-      </template>
-      <!-- Standard layout: all controls in one row -->
-      <template v-else-if="!showExtension">
+      <!-- Single row for both expanded and standard layouts -->
+      <template v-if="user">
         <ConnectionStatus
-          v-if="user"
           class="ma-1"
           :layout-name="currentLayout?.name"
           :layout-id="layoutId"
@@ -227,9 +189,13 @@ const defaultProps = {
           :devices="devices"
           @navigate="router.push('/connect')"
         />
-        <v-spacer v-if="mdAndUp" class="ma-2" />
-        <UserProfile v-if="showUserProfile !== false && user" class="mx-2" />
-        <template v-if="layoutId && user">
+        <UserProfile v-if="showUserProfile !== false" class="mx-1" />
+        <template v-if="layoutId && showExtension">
+          <TrackPower class="ma-1" :power-state="effectiveTrackPower" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
+          <Power class="ma-1" v-if="showLayoutPower && mdAndUp" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />
+          <EmergencyStop class="ma-1" v-if="showEmergencyStop !== false" @stop="handleEmergencyStop" />
+        </template>
+        <template v-else-if="!showExtension && layoutId">
           <TrackPower class="ma-1" :power-state="effectiveTrackPower" :is-connected="dccexConnected" @toggle="handleTrackPowerToggle" />
           <Power class="ma-1" v-if="showLayoutPower" :power-state="layoutPowerState" @toggle="handleLayoutPowerToggle" />
           <EmergencyStop class="ma-1" v-if="showEmergencyStop" @stop="handleEmergencyStop" />
@@ -259,6 +225,27 @@ const defaultProps = {
   height: 40px;
 }
 
+/* Nav toggle — native button, zero Vuetify interference */
+.nav-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: 4px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: background 150ms ease, opacity 150ms ease;
+}
+.nav-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 1;
+}
+
 :deep(.v-chip) {
   backdrop-filter: blur(16px);
   background: rgba(255, 255, 255, 0.05);
@@ -285,94 +272,30 @@ const defaultProps = {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.header-controls {
-  gap: 8px;
-}
-
-/* 2×2 button grid for expanded header layout */
-.header-button-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  margin-left: 16px;
-}
-
-/* Brand block: logo stacked above connection chip */
 .header-brand {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 8px 0;
-}
-.header-brand__status {
-  align-self: flex-start;
-}
-
-/* Mini status — compact mobile-only indicator for server + track power */
-.mini-status {
-  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 4px 6px;
-  margin: 0 10px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  opacity: 0.75;
-  transition: opacity 150ms ease;
-}
-.mini-status:hover {
-  opacity: 1;
-}
-.mini-status__item {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: rgba(226, 232, 240, 0.75);
-}
-.mini-status__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  box-shadow: 0 0 4px currentColor;
-}
-.mini-status__divider {
-  width: 1px;
-  height: 10px;
-  background: rgba(148, 163, 184, 0.3);
 }
 
 /* Padded header edges */
-:deep(.v-app-bar .v-toolbar__content) {
-  padding-left: 20px;
-  padding-right: 20px;
-  gap: 16px;
+.header-gradient :deep(.v-toolbar__content) {
+  padding-inline: 4px 12px;
 }
 
-/* Nudge the Menu button away from the grid */
-:deep(.v-toolbar__content) > button.cp-trigger {
-  margin-right: 4px;
-}
-
-/* 📱 Mobile: tighten everything */
+/* 📱 Mobile: hamburger flush left, tight gap */
 @media (max-width: 959px) {
-  :deep(.v-app-bar .v-toolbar__content) {
-    padding-left: 8px;
-    padding-right: 8px;
-    gap: 6px;
+  .header-gradient :deep(.v-toolbar__content) {
+    padding-inline: 0 6px;
   }
-  .header-button-grid {
-    margin-left: 4px;
-    padding: 4px;
-    gap: 4px;
+  .header-gradient :deep(.v-toolbar__prepend) {
+    margin-inline-end: 0;
   }
-  .header-brand {
-    gap: 4px;
-    padding: 4px 0;
+  .header-gradient :deep(.v-toolbar-title) {
+    margin-inline-start: 4px;
   }
-  :deep(.v-toolbar__content) > button.cp-trigger {
-    margin-right: 0;
+  .nav-toggle-btn {
+    margin-left: 0;
+    width: 40px;
   }
 }
 
@@ -389,6 +312,7 @@ const defaultProps = {
   background: rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
+/* Light mode: icon is explicitly white via Vuetify color prop — no override needed */
 
 :root:not(.dark) :deep(.v-chip) {
   background: rgba(0, 0, 0, 0.04);

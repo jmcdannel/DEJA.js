@@ -2,4 +2,4 @@
 "deja-throttle": minor
 ---
 
-added: **[throttle]** Native swipe navigation between throttles using CSS scroll-snap — swipe left/right to switch locos with smooth, iOS-native feel
+added: **[throttle]** 🎯 Native CSS scroll-snap swipe navigation between throttles on mobile, with ad-hoc throttle loading and iOS-compatible scroll behavior

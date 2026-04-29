@@ -19,7 +19,7 @@ import {
   resolvePlatform,
   writeDeviceBundle,
 } from './lib/bundle.js'
-import { findArduinoBoards, findCircuitPyMount } from './lib/detect.js'
+import { findArduinoBoards, findCircuitPyMount, ensureArduinoCli } from './lib/detect.js'
 import { compileAndUpload } from './lib/deploy-arduino.js'
 import { copyToCircuitPy } from './lib/deploy-pico.js'
 import type { DccExMotorShield } from '@repo/modules'
@@ -240,6 +240,7 @@ async function deploy() {
   }
 
   if (useArduinoDeploy) {
+    await ensureArduinoCli()
     const boards = findArduinoBoards()
     const port = await promptSerialPort(boards)
     const defaultBoardConfig = resolveBoardConfig(device.type) ?? {

@@ -153,19 +153,19 @@ async function clearLoco() {
       </section>
     </section>
 
-    <!-- 📱 Mobile: speedometer top, then 2-column below -->
-    <section class="w-full flex @[640px]:hidden flex-col flex-grow relative z-10 gap-1">
-      <!-- 🎛️ Speedometer at top -->
-      <div v-if="showSpeedometer" class="flex justify-center py-2 mx-2 rounded-lg border border-white/10 bg-white/[0.03]">
-        <Speedometer v-if="speedDisplayType === 'dial'" :speed="currentSpeed" :address="address" :size="140" :show-label="false" />
+    <!-- 📱 Mobile: speedometer + consist top, then 2-column below -->
+    <section class="w-full flex @[640px]:hidden flex-col flex-1 min-h-0 relative z-10 gap-1">
+      <!-- 🎛️ Speedometer + Consist at top -->
+      <div v-if="showSpeedometer" class="flex flex-col items-center gap-1 py-2 mx-2 rounded-lg border border-white/10 bg-white/[0.03]">
+        <Speedometer v-if="speedDisplayType === 'dial'" :speed="currentSpeed" :address="address" :size="180" :show-label="false" />
         <CurrentSpeed v-else :speed="currentSpeed" />
+        <ConsistIndicator v-if="showConsist && loco" :loco="loco" />
       </div>
 
       <!-- 📱 Two columns -->
-      <div class="flex flex-row flex-grow min-h-0 gap-1 mx-2">
-        <!-- Left col: EZ Consist + Functions -->
+      <div class="flex flex-row flex-1 min-h-0 gap-1 mx-2">
+        <!-- Left col: Functions -->
         <section class="flex flex-col items-center justify-around flex-1 rounded-lg border border-white/10 bg-white/[0.03] py-2">
-          <ConsistIndicator v-if="showConsist && loco" :loco="loco" />
           <FunctionsSpeedDial v-if="loco && showFunctions" :loco="loco" />
         </section>
 

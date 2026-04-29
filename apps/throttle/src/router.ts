@@ -1,8 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { getCurrentUser } from 'vuefire'
 import type { User } from 'firebase/auth'
-import { requireLayout, createTryDemoRoute, isDemoUser, ensureAutoLogin, LogoutView } from '@repo/auth'
+import { requireLayout, createTryDemoRoute, isDemoUser, ensureAutoLogin, checkRequireFeature, LogoutView } from '@repo/auth'
 import { createLogger } from '@repo/utils'
+import { doc, getDoc } from 'firebase/firestore'
+import { db } from '@repo/firebase-config'
+import type { FeatureName, UserRole } from '@repo/modules'
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
 
@@ -21,10 +24,16 @@ declare module 'vue-router' {
     requireLayout?: boolean
     /** Require a DCC-EX device on the selected layout */
     requireDccEx?: boolean
+    /** Require a feature flag to be enabled for the current user */
+    requireFeature?: FeatureName
     /** Fullscreen mode – hides nav chrome (header, menu, footer) */
     fullscreen?: boolean
   }
 }
+
+// 🚩 Cache user role between navigations so we don't re-fetch on every click.
+let cachedUserRole: UserRole | null = null
+let cachedUserId: string | null = null
 
 // ---------------------------------------------------------------------------
 // Route definitions
@@ -90,7 +99,7 @@ const router = createRouter({
       path: '/routes',
       name: 'routes',
       component: () => import('./views/RoutesView.vue'),
-      meta: { requireAuth: true, requireLayout: true },
+      meta: { requireAuth: true, requireLayout: true, requireFeature: 'routes' },
     },
     {
       path: '/turnouts',
@@ -132,7 +141,7 @@ const router = createRouter({
       path: '/programming',
       name: 'programming',
       component: () => import('./views/ProgrammingView.vue'),
-      meta: { requireAuth: true, requireLayout: true, requireDccEx: true },
+      meta: { requireAuth: true, requireLayout: true, requireDccEx: true, requireFeature: 'cvProgramming' },
     },
     {
       path: '/settings',
@@ -199,6 +208,21 @@ router.beforeEach(async (to) => {
     // 4. Require DCC-EX device — skip for demo user (no real hardware)
     if (meta.requireDccEx && !isDemoUser()) {
       // TODO: re-enable when DCC-EX device check is fully implemented
+    }
+
+    // 5. 🚩 Require feature flag
+    if (meta.requireFeature) {
+      if (!cachedUserRole || cachedUserId !== user.uid) {
+        const userSnap = await getDoc(doc(db, 'users', user.uid))
+        cachedUserRole = (userSnap.data()?.role as UserRole) ?? 'user'
+        cachedUserId = user.uid
+      }
+      const devFeaturesEnv = import.meta.env.VITE_DEV_FEATURES === 'true'
+      const redirect = checkRequireFeature(meta.requireFeature, cachedUserRole, devFeaturesEnv)
+      if (redirect) {
+        log.debug('requireFeature → redirecting (feature not enabled)')
+        return redirect
+      }
     }
 
     // All guards passed — allow navigation.

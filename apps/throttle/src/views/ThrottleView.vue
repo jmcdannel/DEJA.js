@@ -1,13 +1,12 @@
-<script async setup lang="ts">
-import { computed, watch } from 'vue'
-import { useStorage } from '@vueuse/core'
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLocos } from '@repo/modules/locos'
 import ThrottleNavItem from '@/throttle/ThrottleNavItem.vue'
+import ThrottleSwipeContainer from '@/throttle/ThrottleSwipeContainer.vue'
 import ButtonsThrottle from '@/throttle/ButtonsThrottle.vue'
 import SliderThrottle from '@/throttle/SliderThrottle.vue'
 import Dashboard from '@/throttle/Dashboard.vue'
-import ThrottleSwipeContainer from '@/throttle/ThrottleSwipeContainer.vue'
 import { useThrottleSettings } from '@/throttle/useThrottleSettings'
 import SaveToRosterChip from '@/throttle/SaveToRosterChip.vue'
 
@@ -15,15 +14,21 @@ const route = useRoute()
 const router = useRouter()
 const { getThrottles } = useLocos()
 const throttles = getThrottles()
-const lastThrottleAddress = useStorage<number>('@DEJA/lastThrottleAddress', throttles.value[0]?.address || 3)
 
 const routeAddr = computed(() => route.params.address ? parseInt(route.params.address.toString()) : NaN)
+const activeAddress = ref<number | null>(Number.isNaN(routeAddr.value) ? (throttles.value[0]?.address ?? null) : routeAddr.value)
 
-if (!Number.isNaN(routeAddr.value)) {
-  lastThrottleAddress.value = routeAddr.value
-} else if (lastThrottleAddress.value === undefined || Number.isNaN(lastThrottleAddress.value)) {
-  lastThrottleAddress.value = 3
-}
+// Sync route → activeAddress
+watch(routeAddr, (addr) => {
+  if (!Number.isNaN(addr)) activeAddress.value = addr
+})
+
+// Sync activeAddress → route (when swipe changes it)
+watch(activeAddress, (addr) => {
+  if (addr != null && addr !== routeAddr.value) {
+    router.replace({ name: 'throttle', params: { address: addr } })
+  }
+})
 
 const { variant, speedDisplayType, showFunctions, showSpeedometer, showConsist } = useThrottleSettings()
 
@@ -42,18 +47,8 @@ const settingsProps = computed(() => ({
   speedDisplayType: speedDisplayType.value,
 }))
 
-watch(() => route.params.address, (newVal) => {
-  lastThrottleAddress.value = parseInt(newVal?.toString())
-})
-
-function handleSwipeChange(newAddress: number) {
-  lastThrottleAddress.value = newAddress
-  router.replace({ name: 'throttle', params: { address: newAddress } })
-}
-
 function handleSelect(newAddress: number) {
-  lastThrottleAddress.value = newAddress
-  router.push({ name: 'throttle', params: { address: newAddress } })
+  activeAddress.value = newAddress
 }
 </script>
 
@@ -67,16 +62,28 @@ function handleSelect(newAddress: number) {
     <div class="absolute top-2 left-2 z-10">
       <SaveToRosterChip v-if="!Number.isNaN(routeAddr)" :address="routeAddr" />
     </div>
+
+    <!-- 🚂 Swipeable throttle controls -->
     <ThrottleSwipeContainer
-      v-if="throttles?.length"
+      v-if="throttles && throttles.length > 0"
       :throttles="throttles"
-      :model-value="routeAddr"
+      :model-value="activeAddress"
       :variant-component="variantComponent"
       :variant-props="settingsProps"
       class="flex-1 min-h-0"
-      @update:model-value="handleSwipeChange"
+      @update:model-value="activeAddress = $event"
     />
-    <v-slide-group show-arrows selected-class="bg-success">
+
+    <!-- No throttle fallback -->
+    <div v-else class="flex flex-col items-center justify-center flex-1 gap-4">
+      <h2 class="text-2xl font-bold opacity-50">No Throttle Assigned</h2>
+      <v-btn color="pink" variant="outlined" @click="$router.push({ name: 'throttle-list' })">
+        Go to Throttle List
+      </v-btn>
+    </div>
+
+    <!-- 🚂 Nav chips -->
+    <v-slide-group selected-class="bg-success" show-arrows>
       <v-slide-group-item v-for="item in throttles" :key="item.id">
         <ThrottleNavItem v-if="item.address" :address="item.address" @select="handleSelect(item.address)" />
       </v-slide-group-item>

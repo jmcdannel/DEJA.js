@@ -24,21 +24,16 @@
 
 #if ENABLE_PWM
 #include <Adafruit_PWMServoDriver.h>
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(PCA9685_ADDRESS);
 #endif
 
 WiFiClient wifiClient;
 PubSubClient mqtt(wifiClient);
 
-StaticJsonDocument<512> doc;
+JsonDocument doc;
 
 char subTopic[128];
 char pubTopic[128];
-
-#if ENABLE_SENSORS
-static int lastSensorValues[sizeof(SENSORPINS) / sizeof(SENSORPINS[0])] = {HIGH};
-static unsigned long lastChangeTime[sizeof(SENSORPINS) / sizeof(SENSORPINS[0])] = {0};
-#endif
 
 void connectWifi() {
   Serial.print("[wifi] connecting to ");
@@ -100,15 +95,28 @@ void handleServo(JsonObject payload) {
   int current = payload["current"];
   int pulseTarget = getPulseWidth(angle);
   int pulseOrigin = getPulseWidth(current);
+  Serial.print("[servo] angle=");
+  Serial.print(angle);
+  Serial.print(" servo=");
+  Serial.print(servo);
+  Serial.print(" current=");
+  Serial.print(current);
+  Serial.print(" pulseTarget=");
+  Serial.print(pulseTarget);
+  Serial.print(" pulseOrigin=");
+  Serial.println(pulseOrigin);
   if (pulseTarget < pulseOrigin) {
+    Serial.println("[servo] moving down");
     for (uint16_t p = pulseOrigin; p > pulseTarget; p--) {
       pwm.setPWM(servo, 0, p);
     }
   } else {
+    Serial.println("[servo] moving up");
     for (uint16_t p = pulseOrigin; p < pulseTarget; p++) {
       pwm.setPWM(servo, 0, p);
     }
   }
+  Serial.println("[servo] done");
 #endif
 }
 
@@ -181,6 +189,8 @@ void setup() {
   Serial.print("[boot] ");
   Serial.println(DEVICE_ID);
 
+  Wire.begin();  // Initialize I2C
+
   snprintf(subTopic, sizeof(subTopic), "%s/%s/%s", TOPIC_ID, LAYOUT_ID, DEVICE_ID);
   snprintf(pubTopic, sizeof(pubTopic), "%s/%s/%s/messages", TOPIC_ID, LAYOUT_ID, DEVICE_ID);
 
@@ -213,6 +223,14 @@ void setup() {
   pwm.begin();
   pwm.setOscillatorFrequency(27000000);
   pwm.setPWMFreq(SERVO_FREQ);
+  // Check if PWM device is responding
+  Wire.beginTransmission(PCA9685_ADDRESS);
+  uint8_t error = Wire.endTransmission();
+  if (error == 0) {
+    Serial.println("[pwm] initialized successfully");
+  } else {
+    Serial.println("[pwm] initialization failed, I2C error: " + String(error));
+  }
 #endif
 
   connectWifi();
@@ -237,6 +255,8 @@ void loop() {
 #endif
 
 #if ENABLE_SENSORS
+  static int lastSensorValues[sizeof(SENSORPINS) / sizeof(SENSORPINS[0])] = {HIGH};
+  static unsigned long lastChangeTime[sizeof(SENSORPINS) / sizeof(SENSORPINS[0])] = {0};
   unsigned long now = millis();
   for (unsigned int i = 0; i < sizeof(SENSORPINS) / sizeof(SENSORPINS[0]); i++) {
     int value = digitalRead(SENSORPINS[i]);
