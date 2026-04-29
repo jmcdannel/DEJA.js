@@ -19,8 +19,7 @@ import type {
 } from './types'
 import QuickMenuThrottles from '@/quick-menu/QuickMenuThrottles.vue'
 import QuickMenuFavorites from '@/quick-menu/QuickMenuFavorites.vue'
-import { BackgroundThumbnail, ConnectionStatus, UserProfile, TrackPower } from '@repo/ui'
-import { useDcc, DCC_POWER_ON, DCC_POWER_OFF } from '@repo/dccex'
+import { BackgroundThumbnail, ConnectionStatus } from '@repo/ui'
 import { DEFAULT_MENU_CONFIG } from '@/core/Menu/useMenu'
 import { useStorage } from '@vueuse/core'
 
@@ -46,12 +45,6 @@ const cpCurrentLayout = computed(() =>
     : { id: layoutId.value, name: layoutId.value }
 )
 const showMobileStatus = computed(() => !mdAndUp.value && !!user.value)
-const showPaletteControls = computed(() => !!user.value && !!layoutId.value)
-
-const { sendDccCommand: sendPaletteDcc } = useDcc()
-async function paletteTrackPowerToggle(newState: boolean) {
-  await sendPaletteDcc({ action: 'dcc', payload: newState ? DCC_POWER_ON : DCC_POWER_OFF })
-}
 
 const inputRef = ref<HTMLInputElement | null>(null)
 const errorText = ref<string | null>(null)
@@ -411,10 +404,6 @@ function cycleCurrentIndex(control: CycleControl): number {
           @navigate="() => { router.push('/connect'); close() }"
         />
       </div>
-      <div v-if="showPaletteControls" class="cp-controls">
-        <UserProfile />
-        <TrackPower @toggle="paletteTrackPowerToggle" />
-      </div>
 
       <div class="cp-results" role="listbox">
           <template v-if="showInlineThrottles">
@@ -565,15 +554,6 @@ function cycleCurrentIndex(control: CycleControl): number {
   justify-content: center;
   padding: 14px 16px 10px;
 }
-.cp-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-}
-
 .cp-nav-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
