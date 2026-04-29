@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.1] - 2026-04-29
+
+### Fixed
+- **[cli]** `deja update` no longer crashes with `DEJA_BIN: unbound variable` — variable is now defined at the top of the CLI script
+- **[cli]** `deja start` no longer crashes with `Cannot find package 'react'` — TUI defaults to `blessed` instead of `ink`; use `DEJA_UI=ink` to opt into the Ink renderer
+
+---
+
 ## [1.7.0] - 2026-04-29
 
 ### Added
