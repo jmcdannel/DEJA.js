@@ -268,10 +268,10 @@ export async function connectDevice({
       log.error('[LAYOUT] Device not found', device)
       return
     }
-    if (device.connection === 'usb' && serial) {
-      await connectUsbDevice(device, serial)
-    } else if (device.connection === 'wifi' && topic) {
-      device.topic = topic
+    if (device.connection === 'usb' && (serial || device.port)) {
+      await connectUsbDevice(device, serial || device.port!)
+    } else if (device.connection === 'wifi' && (topic || device.topic)) {
+      device.topic = topic || device.topic
       await connectMqttDevice(device)
     }
   } catch (err) {
