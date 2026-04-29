@@ -61,20 +61,27 @@ const props = withDefaults(defineProps<Props>(), {
 const layoutMode = computed<LogoLayout>(() => (props.stacked ? 'stacked' : props.layout))
 
 const sizeMap = {
-  xs:    { brand: 'text-sm',  js: 'text-[0.55rem]', icon: 'w-4 h-4',   logo: 'w-8 h-8',   gap: 'gap-1',   title: 'text-xs' },
-  sm:    { brand: 'text-lg',  js: 'text-[0.7rem]',  icon: 'w-6 h-6',   logo: 'w-12 h-12', gap: 'gap-1.5', title: 'text-sm' },
-  md:    { brand: 'text-2xl', js: 'text-[1rem]',    icon: 'w-8 h-8',   logo: 'w-16 h-16', gap: 'gap-2',   title: 'text-lg' },
-  lg:    { brand: 'text-3xl', js: 'text-[1.2rem]',  icon: 'w-10 h-10', logo: 'w-20 h-20', gap: 'gap-2',   title: 'text-xl' },
-  xl:    { brand: 'text-4xl', js: 'text-[1.5rem]',  icon: 'w-12 h-12', logo: 'w-24 h-24', gap: 'gap-3',   title: 'text-2xl' },
-  '2xl': { brand: 'text-5xl', js: 'text-[1.8rem]',  icon: 'w-14 h-14', logo: 'w-28 h-28', gap: 'gap-3',   title: 'text-3xl' },
-  '3xl': { brand: 'text-6xl', js: 'text-[2.2rem]',  icon: 'w-16 h-16', logo: 'w-32 h-32', gap: 'gap-4',   title: 'text-4xl' },
+  xs:    { brand: 'text-sm',  js: 'text-[0.55rem]', icon: 'w-4 h-4',   logo: 'w-5 h-5',   stackedLogo: 'w-8 h-8',   productLogo: 'w-8 h-8',   gap: 'gap-1',   title: 'text-sm' },
+  sm:    { brand: 'text-lg',  js: 'text-[0.7rem]',  icon: 'w-6 h-6',   logo: 'w-7 h-7',   stackedLogo: 'w-10 h-10', productLogo: 'w-10 h-10', gap: 'gap-1.5', title: 'text-lg' },
+  md:    { brand: 'text-2xl', js: 'text-[1rem]',    icon: 'w-8 h-8',   logo: 'w-8 h-8',   stackedLogo: 'w-14 h-14', productLogo: 'w-12 h-12', gap: 'gap-2',   title: 'text-2xl' },
+  lg:    { brand: 'text-3xl', js: 'text-[1.2rem]',  icon: 'w-10 h-10', logo: 'w-9 h-9',   stackedLogo: 'w-16 h-16', productLogo: 'w-16 h-16', gap: 'gap-2',   title: 'text-3xl' },
+  xl:    { brand: 'text-4xl', js: 'text-[1.5rem]',  icon: 'w-12 h-12', logo: 'w-10 h-10', stackedLogo: 'w-20 h-20', productLogo: 'w-20 h-20', gap: 'gap-3',   title: 'text-4xl' },
+  '2xl': { brand: 'text-5xl', js: 'text-[1.8rem]',  icon: 'w-14 h-14', logo: 'w-12 h-12', stackedLogo: 'w-24 h-24', productLogo: 'w-24 h-24', gap: 'gap-3',   title: 'text-5xl' },
+  '3xl': { brand: 'text-6xl', js: 'text-[2.2rem]',  icon: 'w-16 h-16', logo: 'w-16 h-16', stackedLogo: 'w-28 h-28', productLogo: 'w-32 h-32', gap: 'gap-4',   title: 'text-6xl' },
 } as const
 
 const s = computed(() => sizeMap[props.size])
 
 const markVisible = computed(() => props.showMark !== false)
 
-const markClass = computed(() => (props.markStyle === 'logo' ? s.value.logo : s.value.icon))
+const markClass = computed(() => {
+  if (props.markStyle === 'logo') {
+    if (layoutMode.value === 'product') return s.value.productLogo
+    if (layoutMode.value === 'stacked') return s.value.stackedLogo
+    return s.value.logo
+  }
+  return s.value.icon
+})
 
 /** The app key used to look up assets — 'default' falls back to 'deja'. */
 const appKey = computed<AppIconName>(
@@ -160,10 +167,10 @@ const productTitleClass = computed(() => {
       <!-- Product layout: small DEJA.JS kicker over big app title -->
       <template v-if="layoutMode === 'product' && appTitle">
         <span
-          class="font-mono uppercase tracking-[0.25em] text-gray-500 leading-none whitespace-nowrap"
+          class="font-bold tracking-[0.08em] leading-none whitespace-nowrap font-mono uppercase"
           :class="kickerClass"
         >
-          DEJA.JS
+          <span class="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">DEJA</span><span class="text-lime-400">.</span><span class="text-fuchsia-500">JS</span>
         </span>
         <span
           class="font-bold leading-none whitespace-nowrap"

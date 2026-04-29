@@ -238,4 +238,63 @@ describe('generateArduinoConfig', () => {
     })
     expect(result).toContain('#include <TurnoutPulser.h>')
   })
+
+  it('emits baked-in defaults when device has no advanced config', () => {
+    const result = generateArduinoConfig({
+      device: makeDevice(),
+      effects: [],
+      turnouts: [],
+    })
+    expect(result).toContain('#define BAUD_RATE 115200')
+    expect(result).toContain('#define PWM_OSCILLATOR_FREQ 27000000L')
+    expect(result).toContain('#define PCA9685_ADDRESS 0x40')
+    expect(result).toContain('#define SENSOR_DEBOUNCE_MS 500')
+    expect(result).not.toContain('#define PCA9685_SDA_PIN')
+  })
+
+  it('honors advanced config overrides', () => {
+    const result = generateArduinoConfig({
+      device: makeDevice({
+        config: {
+          arduino: {
+            baudRate: 57600,
+            servoMin: 125,
+            servoMax: 575,
+            servoFreq: 60,
+            pwmOscillatorFreq: 25_000_000,
+            pca9685Address: 0x41,
+            sensorDebounceMs: 250,
+          },
+        },
+      }),
+      effects: [],
+      turnouts: [],
+    })
+    expect(result).toContain('#define BAUD_RATE 57600')
+    expect(result).toContain('#define SERVOMIN 125')
+    expect(result).toContain('#define SERVOMAX 575')
+    expect(result).toContain('#define SERVO_FREQ 60')
+    expect(result).toContain('#define PWM_OSCILLATOR_FREQ 25000000L')
+    expect(result).toContain('#define PCA9685_ADDRESS 0x41')
+    expect(result).toContain('#define SENSOR_DEBOUNCE_MS 250')
+  })
+
+  it('emits custom PCA9685 I²C pins only when both SDA and SCL are set', () => {
+    const both = generateArduinoConfig({
+      device: makeDevice({
+        config: { arduino: { pca9685SdaPin: 21, pca9685SclPin: 22 } },
+      }),
+      effects: [],
+      turnouts: [],
+    })
+    expect(both).toContain('#define PCA9685_SDA_PIN 21')
+    expect(both).toContain('#define PCA9685_SCL_PIN 22')
+
+    const onlySda = generateArduinoConfig({
+      device: makeDevice({ config: { arduino: { pca9685SdaPin: 21 } } }),
+      effects: [],
+      turnouts: [],
+    })
+    expect(onlySda).not.toContain('#define PCA9685_SDA_PIN')
+  })
 })

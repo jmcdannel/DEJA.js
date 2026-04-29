@@ -2,8 +2,10 @@
 import { computed, ref, watch } from 'vue'
 import { useDebounce } from '@vueuse/core'
 import { createLogger } from '@repo/utils'
+import { useHaptics } from '@repo/ui'
 
 const log = createLogger('SliderControls')
+const { vibrate } = useHaptics()
   
 const ticks: Record<number, string> = {
   0: 'IDLE',
@@ -174,6 +176,10 @@ const sliderModel = computed<number>({
     localSpeed.value = v
     // here you can emit/update parent or other state, e.g. pendingSpeed.value = v
   }
+})
+
+watch(sliderModel, () => {
+  vibrate('light')
 })
 
 const dirModel = computed<number>({

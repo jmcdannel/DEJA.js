@@ -10,7 +10,8 @@
 #endif
 
 #if ENABLE_PWM
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+// 🎛️ Optional non-default PCA9685 I²C address (defaults to 0x40 in config.h).
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(PCA9685_ADDRESS);
 #endif
 
 StaticJsonDocument<256> doc;
@@ -22,7 +23,15 @@ static unsigned long lastChangeTime[sizeof(SENSORPINS) / sizeof(SENSORPINS[0])] 
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(BAUD_RATE);
+
+  // 🧭 Custom PCA9685 I²C pins — only honored on boards that support the
+  // Wire.begin(sda, scl) 2-arg signature (ESP32, RP2040). Classic AVR boards
+  // (Uno, Mega) stay on their hardwired default pins even if the generator
+  // emits PCA9685_SDA_PIN / PCA9685_SCL_PIN.
+#if defined(PCA9685_SDA_PIN) && defined(PCA9685_SCL_PIN) && (defined(ESP32) || defined(ARDUINO_ARCH_RP2040))
+  Wire.begin(PCA9685_SDA_PIN, PCA9685_SCL_PIN);
+#endif
 
   Serial.println(DEVICE_ID);
 
@@ -57,7 +66,7 @@ void setup()
 
 #if ENABLE_PWM
   pwm.begin();
-  pwm.setOscillatorFrequency(27000000);
+  pwm.setOscillatorFrequency(PWM_OSCILLATOR_FREQ);
   pwm.setPWMFreq(SERVO_FREQ);
   //  pwm.setPWMFreq(1200);  // This is the maximum PWM frequency
 #endif
@@ -86,7 +95,7 @@ void loop()
   for (int i = 0; i < (sizeof(SENSORPINS) / sizeof(SENSORPINS[0])); i++)
   {
     int sensorValue = digitalRead(SENSORPINS[i]); // Read current sensor value
-    if (sensorValue != lastSensorValues[i] && (currentTime - lastChangeTime[i] >= 500))
+    if (sensorValue != lastSensorValues[i] && (currentTime - lastChangeTime[i] >= SENSOR_DEBOUNCE_MS))
     {
       Serial.print("{ \"sensor\": ");
       Serial.print(i);

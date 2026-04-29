@@ -139,7 +139,7 @@ pnpm --filter=deja-tour dev         # 🎭 Tour
 
 ## 🚀 Release Process
 
-Releases are managed via [Changesets](https://github.com/changesets/changesets). Feature PRs target the `preview` branch; only `preview → main` PRs require a changeset. Tag a release with `git tag v1.x.x && git push --tags` — CI builds the server tarball and creates a GitHub Release. Users update via `deja update`.
+Releases are managed via [Changesets](https://github.com/changesets/changesets). Feature PRs target the `staging` branch; only `staging → main` PRs require a changeset. Tag a release with `git tag v1.x.x && git push --tags` — CI builds the server tarball and creates a GitHub Release. Users update via `deja update`.
 
 ---
 

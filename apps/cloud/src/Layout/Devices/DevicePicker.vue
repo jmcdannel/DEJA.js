@@ -1,50 +1,46 @@
 <script setup lang="ts">
 import { useLayout } from '@repo/modules'
+import { DevicePickerGrid } from '@repo/ui'
 
+defineProps<{ color?: string }>()
 defineEmits(['select', 'cancel'])
-defineProps({
-  color: String
-})
+
 const model = defineModel<string>()
 const { getDevices } = useLayout()
 const devices = getDevices()
-
 </script>
+
 <template>
-  <v-card class="mx-auto w-full h-full justify-between flex flex-col bg-zinc-500  bg-opacity-20"
+  <v-card
+    class="mx-auto w-full h-full flex flex-col"
     variant="tonal"
     density="compact"
-    :color="color">
-    <v-card-item class="font-weight-black">
-      <v-card-title class="font-weight-black">
-        Turnout Type
-      </v-card-title>
+    :color="color"
+  >
+    <v-card-item>
+      <v-card-title class="font-weight-black">Select Device</v-card-title>
+      <v-card-subtitle>Pick the hardware this item is attached to</v-card-subtitle>
     </v-card-item>
+
     <v-card-text>
-      <v-btn-toggle v-model="model" divided class="flex-wrap h-auto" size="x-large">
-        <v-btn v-for="device in devices" :value="device.id" :key="device.id"
-          class="min-h-48 min-w-48 border"
-          variant="flat"
-          :color="color">
-          <div class="flex flex-col justify-center items-center">
-            <v-icon color="white" size="64">mdi-memory</v-icon>
-            <div class="mt-4">{{ device.id }}</div>
-          </div> 
-        </v-btn>
-      </v-btn-toggle>
+      <DevicePickerGrid
+        v-model="model"
+        :devices="(devices ?? []) as []"
+      />
     </v-card-text>
+
     <v-card-actions>
-      <v-btn
-        prepend-icon="mdi-cancel"
-        variant="outlined"
-        @click="$emit('cancel')">
-        Cacnel
+      <v-btn prepend-icon="mdi-cancel" variant="outlined" @click="$emit('cancel')">
+        Cancel
       </v-btn>
+      <v-spacer />
       <v-btn
         prepend-icon="mdi-check"
-        :color="model"
+        :color="color || 'primary'"
         variant="flat"
-        @click="$emit('select')">
+        :disabled="!model"
+        @click="$emit('select')"
+      >
         Save
       </v-btn>
     </v-card-actions>

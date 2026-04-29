@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import type { DocumentData } from 'firebase/firestore'
+import { useHaptics } from '../composables/useHaptics'
 
 interface Props {
   item: DocumentData
@@ -9,6 +10,9 @@ interface Props {
 
 const props = defineProps<Props>()
 const state = defineModel('state', { type: Boolean })
+const { vibrate } = useHaptics()
+
+watch(state, () => { vibrate('light') })
 
 const icon = computed(() => props.item?.icon || 'mdi-help')
 const accent = computed(() => props.item?.color || 'primary')

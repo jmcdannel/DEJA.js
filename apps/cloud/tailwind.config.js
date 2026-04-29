@@ -25,6 +25,7 @@ module.exports = {
     'text-red-500',
   ],
   presets: [require('../../packages/ui/src/tailwind/animation-preset').default],
+  plugins: [require('@tailwindcss/container-queries')],
   theme: {
     extend: {
       fontFamily: {

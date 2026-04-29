@@ -27,8 +27,7 @@ const {
 const plateColor = computed(() => loco?.meta?.color || undefined)
 
 function openThrottle() {
-  if (!loco?.address) return
-  $router.push({ name: 'throttle', params: { address: loco.address } })
+  $router.push({ name: 'throttle', params: { address: props.address } })
 }
 </script>
 <template>
@@ -53,15 +52,14 @@ function openThrottle() {
       </div>
       <div class="order-2 basis-1/3 pr-2 flex justify-end">
         <component
-          v-if="loco"
-          :is="loco.consist?.length ? 'v-badge' : 'div'"
-          :color="loco.consist?.length ? 'primary' : undefined"
-          :content="loco.consist?.length"
+          :is="loco?.consist?.length ? 'v-badge' : 'div'"
+          :color="loco?.consist?.length ? 'primary' : undefined"
+          :content="loco?.consist?.length"
           class="cursor-pointer"
           @click="openThrottle"
         >
           <LocoNumberPlate
-            :address="loco.address"
+            :address="loco?.address ?? props.address"
             :color="plateColor"
             size="sm"
           />

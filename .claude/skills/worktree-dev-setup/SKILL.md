@@ -12,7 +12,7 @@ Sets up a git worktree for development by **copying** `.env` and running `pnpm i
 
 Git worktrees are isolated checkouts. They share the same `package.json`, `pnpm-workspace.yaml`, and `pnpm-lock.yaml` (all tracked in git), but **do not inherit**:
 
-- `.env` — must be **copied** (not symlinked) from the preview worktree
+- `.env` — must be **copied** (not symlinked) from the staging worktree
 - `node_modules/` — must be installed via `pnpm install` (symlinks don't work with pnpm's per-package virtual store)
 
 ## Usage
@@ -26,15 +26,15 @@ Git worktrees are isolated checkouts. They share the same `package.json`, `pnpm-
 
 ## Procedure
 
-### Step 1 — Detect Preview Worktree
+### Step 1 — Detect Staging Worktree
 
-The canonical `.env` lives in the `preview` worktree:
+The canonical `.env` lives in the `staging` worktree:
 
 ```bash
-PREVIEW=/Users/jmcdannel/TTT/DEJA.js.git/preview
+STAGING=/Users/jmcdannel/TTT/DEJA.js.git/staging
 ```
 
-Verify it exists: `ls "$PREVIEW/.env"`
+Verify it exists: `ls "$STAGING/.env"`
 
 ### Step 2 — Copy `.env` (NOT symlink)
 
@@ -44,16 +44,16 @@ Copy `.env` to the worktree root, ALL app directories, AND ALL package directori
 
 ```bash
 # Root copy (for Turborepo cache hashing)
-cp "$PREVIEW/.env" .env
+cp "$STAGING/.env" .env
 
 # App-level copies (Vite reads .env from the app directory, not monorepo root)
 for app in apps/*/; do
-  cp "$PREVIEW/.env" "$app/.env"
+  cp "$STAGING/.env" "$app/.env"
 done
 
 # Package-level copies (packages like @repo/firebase-config, @repo/dccex need env vars at runtime)
 for pkg in packages/*/; do
-  cp "$PREVIEW/.env" "$pkg/.env"
+  cp "$STAGING/.env" "$pkg/.env"
 done
 ```
 

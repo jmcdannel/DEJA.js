@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { DocumentData } from 'firebase/firestore'
+import { useHaptics } from '../composables/useHaptics'
 
 interface Props {
   item: DocumentData
@@ -10,6 +11,7 @@ defineProps<Props>()
 const state = defineModel('state', {
   type: Boolean
 })
+const { vibrate } = useHaptics()
 
 </script>
 <template>
@@ -19,7 +21,7 @@ const state = defineModel('state', {
         :disabled="isRunning"
         :loading="isRunning"
         variant="tonal"
-        @click="state = !state"
+        @click="state = !state; vibrate('light')"
         :prepend-icon="item?.icon || 'mdi-help'"
     >
         {{item?.name}}

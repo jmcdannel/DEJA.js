@@ -7,12 +7,14 @@ import PageHeader from './PageHeader/PageHeader.vue'
 import ListControlBar from './ListControls/ListControlBar.vue'
 import { useListControls } from './composables/useListControls'
 import type { ListFilter } from './ListControls/types'
+import { useHaptics } from './composables/useHaptics'
 
 const { getSignals, setSignalAspect } = useSignals()
 const { getDevices, getLayout } = useLayout()
 const signals = getSignals()
 const devices = getDevices()
 const layout = getLayout()
+const { vibrate } = useHaptics()
 
 const signalsList = computed(() =>
   signals.value
@@ -66,6 +68,7 @@ function canToggle(signal: Signal, aspect: Exclude<SignalAspect, null>): boolean
 
 async function toggleAspect(signal: Signal, aspect: Exclude<SignalAspect, null>) {
   if (!canToggle(signal, aspect)) return
+  vibrate('light')
   const nextAspect: SignalAspect = signal.aspect === aspect ? null : aspect
   await setSignalAspect(signal.id, nextAspect)
 }

@@ -12,11 +12,20 @@ export function useSortableList<T extends Sortable>(
   const list = ref<T[]>([]) as Ref<T[]>
   const dragging = ref(false)
 
-  watch(() => (source as Ref<T[] | null | undefined>).value, (newVal) => {
-    if (!newVal) return
-    if (dragging.value) return
-    list.value = ([...newVal] as T[]).sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
-  }, { immediate: true })
+  // 🔎 deep watch so in-place VueFire updates (e.g. isConnected flipping on a
+  // device doc) rebuild the local list with fresh item refs — otherwise cards
+  // hold stale objects until a full page reload.
+  watch(
+    () => (source as Ref<T[] | null | undefined>).value,
+    (newVal) => {
+      if (!newVal) return
+      if (dragging.value) return
+      list.value = ([...newVal] as T[]).sort(
+        (a, b) => (a.order ?? Infinity) - (b.order ?? Infinity),
+      )
+    },
+    { immediate: true, deep: true },
+  )
 
   async function onDragEnd() {
     dragging.value = false

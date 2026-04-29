@@ -23,6 +23,7 @@
     "promo:push": "tsx scripts/push-promo.ts",
     "promo:deactivate": "tsx scripts/push-promo.ts --deactivate",
     "demo:seed": "tsx scripts/demo/seed-firestore.ts",
+    "migrate:loco-functions": "tsx scripts/migrate-loco-function-defaults.ts",
     "dev:demo": "VITE_AUTO_LOGIN=true turbo run dev"
   },
   "devDependencies": {

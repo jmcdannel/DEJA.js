@@ -5,9 +5,8 @@
   "private": true,
   "scripts": {
     "sync-docs": "node scripts/sync-docs.mjs",
-    "prebuild": "pnpm run sync-docs",
     "dev": "pnpm run sync-docs && next dev -p 3051",
-    "build": "next build",
+    "build": "pnpm run sync-docs && next build",
     "start": "next start -p 3051"
   },
   "dependencies": {

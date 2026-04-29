@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useLayout } from '@repo/modules'
+import { useLayout, type Device } from '@repo/modules'
 import { useSignals, type Signal } from '@repo/modules/signals'
 import { createLogger } from '@repo/utils'
-import { useNotification } from '@repo/ui'
+import { DevicePickerChip, DevicePickerGrid, useNotification } from '@repo/ui'
 import ColorPickerRow from '@/Common/Color/ColorPickerRow.vue'
 import TagPicker from '@/Common/Tags/TagPicker.vue'
+import DevicePicker from '@/Layout/Devices/DevicePicker.vue'
 
 const log = createLogger('SignalForm')
 
@@ -34,6 +35,12 @@ const tags = ref<string[]>(props.signal?.tags ?? [])
 const loading = ref(false)
 const error = ref<string | null>(null)
 const color = ref('cyan')
+
+// 📦 Add-vs-edit mode drives the device picker presentation: grid inline
+// for add so the user can see all options at once, chip + dialog for edit
+// so the form stays compact.
+const isEdit = computed(() => !!props.signal)
+const showDevicePickerDialog = ref(false)
 
 // Validation for device when required
 const deviceRules = computed(() => {
@@ -162,21 +169,24 @@ async function submit() {
         </div>
       </div>
 
-      <!-- Device row -->
+      <!-- Device row — grid inline for add, compact chip → dialog for edit -->
       <div class="form-section__row form-section__row--block">
-        <span class="form-section__row-name mb-2">Device</span>
-        <v-btn-toggle v-model="device" divided class="flex-wrap h-auto" size="large" :rules="deviceRules">
-          <v-btn
-            v-for="deviceOpt in devices"
-            :value="deviceOpt.id"
-            :key="deviceOpt.id"
-            class="min-h-14 min-w-36 border text-none"
-            color="emerald"
-          >
-            {{ deviceOpt.id }}
-          </v-btn>
-        </v-btn-toggle>
-        <div class="form-section__input-hint mt-1">Hardware device that controls this signal</div>
+        <template v-if="!isEdit">
+          <span class="form-section__row-name mb-2">Device</span>
+          <DevicePickerGrid
+            v-model="device"
+            :devices="(devices ?? []) as Device[]"
+          />
+          <div class="form-section__input-hint mt-1">Hardware device that controls this signal</div>
+        </template>
+        <DevicePickerChip
+          v-else
+          :device-id="device"
+          :devices="(devices ?? []) as Device[]"
+          label="Device"
+          description="Hardware device that controls this signal"
+          @click="showDevicePickerDialog = true"
+        />
       </div>
 
       <!-- Description row -->
@@ -294,6 +304,14 @@ async function submit() {
         </v-btn>
       </div>
     </div>
-
   </v-form>
+
+  <v-dialog v-model="showDevicePickerDialog" max-width="80vw">
+    <DevicePicker
+      v-model="device"
+      :color="color"
+      @select="showDevicePickerDialog = false"
+      @cancel="showDevicePickerDialog = false; device = props?.signal?.device ?? ''"
+    />
+  </v-dialog>
 </template>

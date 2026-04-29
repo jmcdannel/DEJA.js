@@ -6,13 +6,13 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
 import { useStorage, useClipboard } from '@vueuse/core'
 import { useColors } from '@/Core/UI/useColors'
-import { deviceTypes, getCliDeployCommands, useTurnouts, useEfx, useLayout, useLocos, useSignals, useSensors, type CliDeployCommands, type Device, type Effect, type Loco, type Turnout, type Signal, type Sensor, efxTypes } from '@repo/modules'
-import { StatusPulse, TrackOutputConfig } from '@repo/ui'
+import { deviceTypes, getCliDeployCommands, isArduinoFamilyType, useTurnouts, useEfx, useLayout, useLocos, useSignals, useSensors, type ArduinoAdvancedConfig as ArduinoAdvancedConfigType, type CliDeployCommands, type Device, type DeviceConfig, type Effect, type Loco, type Turnout, type Signal, type Sensor, efxTypes } from '@repo/modules'
+import { ArduinoAdvancedConfig, DevicePinoutDiagram, StatusPulse, TrackOutputConfig } from '@repo/ui'
 import { useTrackOutputs, type TrackOutput } from '@repo/dccex'
 import { useNotification } from '@repo/ui'
 import { useDeviceConfig } from './useDeviceConfig'
 
-const { getDevice, getDevices } = useLayout()
+const { getDevice, getDevices, updateDevice } = useLayout()
 const { getTurnoutsByDevice } = useTurnouts()
 const { getEffectsByDevice } = useEfx()
 const { getSensorsByDevice } = useSensors()
@@ -33,11 +33,34 @@ const locos = getLocos()
 const layoutId = useStorage<string | null>('@DEJA/layoutId', null)
 const device = ref(null as Device | null)
 
+// WLED config local refs — initialized after device loads
+const wledHostLocal = ref('')
+const wledLedCountLocal = ref<number | null>(null)
+
 onMounted(async () => {
   if (deviceId) {
     device.value = await getDevice(deviceId) as Device
+    // Initialize WLED fields from saved device data
+    if (device.value?.type === 'wled') {
+      const rawHost = device.value.host || ''
+      wledHostLocal.value = rawHost.replace(/^https?:\/\//, '').replace(/\/+$/, '')
+      wledLedCountLocal.value = device.value.ledCount || null
+    }
   }
 })
+
+async function handleSaveWledConfig() {
+  const host = wledHostLocal.value.replace(/^https?:\/\//, '').replace(/\/+$/, '')
+  await updateDevice(deviceId, {
+    host,
+    ...(wledLedCountLocal.value ? { ledCount: wledLedCountLocal.value } : {}),
+  })
+  // Update local device ref so chips reflect the change
+  if (device.value) {
+    device.value = { ...device.value, host, ledCount: wledLedCountLocal.value || undefined }
+  }
+  notify?.success('WLED configuration saved')
+}
 
 const deviceType = computed(() => deviceTypes.find((type) => type.value === device.value?.type))
 
@@ -82,6 +105,30 @@ const isDevice1 = computed(() => {
     .sort((a: Device, b: Device) => a.id.localeCompare(b.id))
   return dccExDevices.length > 0 && dccExDevices[0].id === deviceId
 })
+
+// 🧩 Arduino-family devices (including ESP32 WiFi) get the advanced config
+// panel + pinout diagram. Pico W and dcc-ex have their own config models.
+const isArduinoFamily = computed(() => isArduinoFamilyType(device.value?.type))
+
+async function handleSaveArduinoConfig(arduinoConfig: ArduinoAdvancedConfigType) {
+  if (!layoutId.value || !deviceId || !device.value) return
+  try {
+    // Merge into existing device.config so unrelated keys (e.g. Pico W's flat
+    // enablePwm) aren't clobbered.
+    const nextConfig: DeviceConfig = {
+      ...(device.value.config ?? {}),
+      arduino: Object.keys(arduinoConfig).length > 0 ? arduinoConfig : undefined,
+    }
+    // Strip undefined so Firestore doesn't reject the write.
+    if (nextConfig.arduino === undefined) delete nextConfig.arduino
+    await updateDevice(deviceId, { config: nextConfig })
+    // Keep the local ref in sync so the preview regenerates immediately.
+    device.value = { ...device.value, config: nextConfig }
+    notify?.success('Advanced configuration saved. Re-deploy firmware to apply.')
+  } catch (err) {
+    notify?.error('Failed to save advanced configuration')
+  }
+}
 
 async function handleSaveTrackOutputs(outputs: Record<string, TrackOutput>) {
   if (!layoutId.value || !deviceId) return
@@ -226,6 +273,15 @@ function handleBack() {
         >
           Topic: {{ device?.topic }}
         </v-chip>
+        <v-chip
+          v-if="device?.host"
+          size="small"
+          :color="color.value"
+          prepend-icon="mdi-ip-network"
+          variant="outlined"
+        >
+          Host: {{ device?.host }}
+        </v-chip>
         <!-- Connection Status -->
         <v-chip
           v-if="['usb', 'wifi'].includes(device?.connection || '')"
@@ -245,6 +301,59 @@ function handleBack() {
       
       <v-divider class="mb-6"></v-divider>
 
+      <!-- 🌐 WLED Configuration -->
+      <template v-if="device?.type === 'wled'">
+        <div class="text-subtitle-2 font-weight-bold mb-2">
+          <v-icon icon="mdi-led-strip-variant" size="small" class="mr-1" />
+          WLED Configuration
+        </div>
+        <div class="d-flex gap-4 mb-2">
+          <v-text-field
+            v-model="wledHostLocal"
+            label="Host IP Address"
+            variant="outlined"
+            density="compact"
+            placeholder="192.168.86.35"
+            hint="IP address of the WLED device (without http://)"
+            persistent-hint
+            prepend-inner-icon="mdi-ip-network"
+            class="flex-grow-1"
+          />
+          <v-text-field
+            v-model.number="wledLedCountLocal"
+            label="LED Count"
+            variant="outlined"
+            density="compact"
+            type="number"
+            placeholder="60"
+            hint="Total LEDs on the strip"
+            persistent-hint
+            prepend-inner-icon="mdi-led-strip"
+            style="max-width: 140px;"
+          />
+        </div>
+        <div class="d-flex align-center gap-2 mb-4">
+          <v-btn
+            color="pink"
+            variant="tonal"
+            size="small"
+            prepend-icon="mdi-content-save"
+            @click="handleSaveWledConfig"
+          >
+            Save WLED Config
+          </v-btn>
+          <v-chip
+            v-if="(device as any)?.wledInfo"
+            size="small"
+            prepend-icon="mdi-information"
+            variant="outlined"
+          >
+            {{ (device as any)?.wledInfo?.name }} · {{ (device as any)?.wledInfo?.ledCount }} LEDs · v{{ (device as any)?.wledInfo?.version }}
+          </v-chip>
+        </div>
+        <v-divider class="mb-6" />
+      </template>
+
       <!-- 🔧 Track Output Configuration (DCC-EX devices only) -->
       <TrackOutputConfig
         v-if="isDccEx"
@@ -254,6 +363,26 @@ function handleBack() {
         :disabled="false"
         @save="handleSaveTrackOutputs"
       />
+
+      <!-- 📌 Pinout diagram + Advanced Configuration (Arduino-family only) -->
+      <template v-if="isArduinoFamily && device">
+        <DevicePinoutDiagram
+          :device="device"
+          :effects="(effects ?? []) as Effect[]"
+          :sensors="sortedSensors"
+          :signals="sortedSignals"
+          :turnouts="(turnouts ?? []) as Turnout[]"
+          :color="color.value"
+          class="mb-6"
+        />
+
+        <ArduinoAdvancedConfig
+          :device="device"
+          :color="color.value"
+          class="mb-6"
+          @save="handleSaveArduinoConfig"
+        />
+      </template>
 
       <!-- 📦 Deployment — always visible, above the Turnouts/Effects lists -->
       <div v-if="deploymentConfig" class="mb-6 border rounded bg-grey-darken-4/60 pa-4">
