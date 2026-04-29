@@ -52,6 +52,7 @@
   "dependencies": {
     "@formkit/auto-animate": "^0.8.2",
     "@repo/dccex": "workspace:^0.0.0",
+    "@repo/deja": "workspace:*",
     "@repo/firebase-config": "workspace:*",
     "@repo/modules": "workspace:*",
     "@repo/utils": "workspace:*",

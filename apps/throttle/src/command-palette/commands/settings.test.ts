@@ -191,12 +191,11 @@ describe('useSettingsCommands', () => {
     expect(commands).toEqual([])
   })
 
-  it('returns only Theme, Background and Open Settings on a generic route (turnouts)', () => {
+  it('returns only Theme and Open Settings on a generic route (turnouts)', () => {
     const commands = useSettingsCommands().value
-    expect(commands).toHaveLength(3)
+    expect(commands).toHaveLength(2)
     expect(commands.map((c) => c.id)).toEqual([
       'settings.theme',
-      'settings.background',
       'settings.open-page',
     ])
   })
@@ -208,7 +207,6 @@ describe('useSettingsCommands', () => {
     const ids = commands.map((c) => c.id)
     expect(ids).toEqual([
       'settings.theme',
-      'settings.background',
       'settings.throttle.variant',
       'settings.toggle.functions',
       'settings.toggle.speedometer',
@@ -236,7 +234,6 @@ describe('useSettingsCommands', () => {
     const ids = commands.map((c) => c.id)
     expect(ids).toEqual([
       'settings.theme',
-      'settings.background',
       'settings.conductor.variant',
       'settings.conductor.rightPanel',
       'settings.open-page',
@@ -275,36 +272,6 @@ describe('useSettingsCommands', () => {
       (c) => c.id === 'settings.theme',
     )!
     expect(asCycle(theme).value).toBe('light')
-  })
-
-  it('background cycle control starts with None, then registry entries, and calls setAppBackground', async () => {
-    const bg = useSettingsCommands().value.find(
-      (c) => c.id === 'settings.background',
-    )!
-    const control = asCycle<string>(bg)
-    expect(control.options[0]).toEqual({ value: 'none', label: 'None' })
-    expect(control.options.slice(1).map((o) => o.value)).toEqual([
-      'northernlights',
-      'tracks',
-    ])
-    expect(control.value).toBe('none')
-    await control.set('none')
-    expect(mocks.setAppBackgroundMock).toHaveBeenCalledWith('throttle', 'none')
-    await control.set('northernlights')
-    expect(mocks.setAppBackgroundMock).toHaveBeenCalledWith(
-      'throttle',
-      'northernlights',
-    )
-    await control.set('tracks')
-    expect(mocks.setAppBackgroundMock).toHaveBeenCalledWith('throttle', 'tracks')
-  })
-
-  it('background control value tracks currentBackground', () => {
-    mocks.currentBackgroundRef.value = 'tracks'
-    const bg = useSettingsCommands().value.find(
-      (c) => c.id === 'settings.background',
-    )!
-    expect(asCycle(bg).value).toBe('tracks')
   })
 
   it('Open Settings command pushes { name: "settings" } and has no control', async () => {
@@ -402,10 +369,4 @@ describe('useSettingsCommands', () => {
     expect(mocks.setConductorRightPanelMock).toHaveBeenCalledWith('devices')
   })
 
-  it('passes the current route path into getBackground', () => {
-    mocks.routePath.value = '/turnouts'
-    const commands = useSettingsCommands().value
-    expect(commands.length).toBeGreaterThan(0)
-    expect(mocks.getBackgroundMock).toHaveBeenCalledWith('throttle', '/turnouts')
-  })
 })

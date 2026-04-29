@@ -28,9 +28,9 @@ Stage all changes, create a descriptive commit, push to the current branch, and 
    ```
 7. Determine the PR base branch:
    - Check the current branch name: `git rev-parse --abbrev-ref HEAD`
-   - **Case 1 — current branch is `preview`:** use `--base main` (release PR promoting staging to production)
-   - **Case 2 — current branch is a feature branch** (anything except `preview`, `main`, or `claude/*`): use `--base preview` (feature PR targeting staging)
-   - **Case 3 — current branch matches `claude/*`** (worktree branch): ask the user: "This looks like a worktree branch. Should this PR target `preview` (feature) or `main` (release)?" — use their answer.
+   - **Case 1 — current branch is `staging`:** use `--base main` (release PR promoting staging to production)
+   - **Case 2 — current branch is a feature branch** (anything except `staging`, `main`, or `claude/*`): use `--base staging` (feature PR targeting staging)
+   - **Case 3 — current branch matches `claude/*`** (worktree branch): ask the user: "This looks like a worktree branch. Should this PR target `staging` (feature) or `main` (release)?" — use their answer.
 
 8. Create a pull request using `gh`:
    ```bash
@@ -44,5 +44,5 @@ Stage all changes, create a descriptive commit, push to the current branch, and 
 - Run `pnpm lint && pnpm check-types` first if you haven't already — use `/verify-changes` for a full check.
 - Never force-push to `main` or `master`.
 - If the push fails due to a network error, retry up to 3 times with a short wait between attempts.
-- **For feature work:** PRs target `preview` (staging). Only `preview → main` PRs are release PRs.
-- **For releases:** Run `/update-docs` and `/changelog` on the `preview` branch before creating the `preview → main` PR.
+- **For feature work:** PRs target `staging`. Only `staging → main` PRs are release PRs.
+- **For releases:** Run `/update-docs` and `/changelog` on the `staging` branch before creating the `staging → main` PR.

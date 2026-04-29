@@ -124,22 +124,22 @@ pnpm deps:fix         # syncpack: fix mismatches
 
 ## Development Workflow
 
-### Feature branch → preview (day-to-day development)
+### Feature branch → staging (day-to-day development)
 
 1. **Plan before coding** — Use Plan Mode (Shift+Tab twice) for non-trivial changes
 2. **Lint and type-check before committing** — run `pnpm lint && pnpm check-types`
 3. **Use the `/verify-changes` slash command** to confirm nothing is broken
-4. **Use the `/commit-push-pr` slash command** — PR targets `preview` automatically (not `main`)
+4. **Use the `/commit-push-pr` slash command** — PR targets `staging` automatically (not `main`)
 5. CI runs `claude-code-review` only — no changeset or docs required for feature PRs
 6. Staging domains auto-update 3–6 minutes after merge (via `staging.yml` CI job)
 
-### preview → main (releasing to production)
+### staging → main (releasing to production)
 
-When the `preview` branch has been tested on staging and is ready to ship:
+When the `staging` branch has been tested on staging and is ready to ship:
 
 1. **Update docs if UI changed** — run `/update-docs` to capture screenshots and update MDX docs
-2. **Create a changeset entry** — run `/changelog` on the `preview` branch (see below)
-3. **Use the `/commit-push-pr` slash command** — detects `preview` branch and targets `main`
+2. **Create a changeset entry** — run `/changelog` on the `staging` branch (see below)
+3. **Use the `/commit-push-pr` slash command** — detects `staging` branch and targets `main`
 4. CI runs `changeset-check` + `claude-code-review` — all must pass
 5. Merge → production Vercel deploy + changelog bot processes all accumulated changesets
 
@@ -147,7 +147,7 @@ When the `preview` branch has been tested on staging and is ready to ship:
 
 After completing work, keep worktrees and branches tidy. **Remove merged worktrees and branches, except those merged in the last 3 days** (to allow for quick reverts).
 
-> **Layout note:** This repo uses a bare-repo + sibling-worktrees layout. The bare repo lives at `/Users/jmcdannel/TTT/DEJA.js.git/.bare`, and each worktree is a sibling directory alongside it (e.g. `/Users/jmcdannel/TTT/DEJA.js.git/main`, `/preview`, `/io-build-fix`).
+> **Layout note:** This repo uses a bare-repo + sibling-worktrees layout. The bare repo lives at `/Users/jmcdannel/TTT/DEJA.js.git/.bare`, and each worktree is a sibling directory alongside it (e.g. `/Users/jmcdannel/TTT/DEJA.js.git/main`, `/staging`, `/io-build-fix`).
 
 ```bash
 # From the main worktree, list merged branches with merge dates:
@@ -155,10 +155,10 @@ cd /Users/jmcdannel/TTT/DEJA.js.git/main
 git fetch origin
 for d in /Users/jmcdannel/TTT/DEJA.js.git/*/; do
   name=$(basename "$d")
-  [[ "$name" == "main" || "$name" == "preview" || "$name" == ".bare" ]] && continue
+  [[ "$name" == "main" || "$name" == "staging" || "$name" == ".bare" ]] && continue
   branch=$(git -C "$d" branch --show-current 2>/dev/null)
   [[ -z "$branch" ]] && continue
-  merged=$(git branch -a --merged origin/preview 2>/dev/null | grep -F "$branch")
+  merged=$(git branch -a --merged origin/staging 2>/dev/null | grep -F "$branch")
   if [[ -n "$merged" ]]; then
     date=$(git log --format="%ai" -1 "origin/$branch" 2>/dev/null | cut -d' ' -f1)
     echo "MERGED|$name|$branch|$date"
@@ -172,27 +172,27 @@ git worktree prune
 ```
 
 **Rules:**
-- Always keep `main` and `preview` worktrees
+- Always keep `main` and `staging` worktrees
 - Keep unmerged/open branches (active work)
 - Keep merged branches from the last 3 days (safety window)
 - Remove everything else to keep disk usage low
 - Run `git worktree prune` after bulk removals
 
-### After merging preview → main — sync back
+### After merging staging → main — sync back
 
-After each merge to `main` (including the changelog bot's automated commit), sync `main` back into `preview`:
+After each merge to `main` (including the changelog bot's automated commit), sync `main` back into `staging`:
 
 ```bash
-git checkout preview
+git checkout staging
 git merge main
 git push
 ```
 
-This keeps `preview` in sync with the changelog bot's cleanup commits. Use `/resolve-conflicts` if merge conflicts arise.
+This keeps `staging` in sync with the changelog bot's cleanup commits. Use `/resolve-conflicts` if merge conflicts arise.
 
 ### Staging Domains
 
-After merging to `preview`, the following staging URLs automatically reflect the latest build:
+After merging to `staging`, the following staging URLs automatically reflect the latest build:
 
 | App | Staging URL |
 |---|---|
@@ -205,9 +205,9 @@ Use `/stage-pr <branch>` to manually point staging to a specific feature branch 
 
 ### Changeset Requirement
 
-**Changesets are required on `preview → main` PRs only.** Feature PRs to `preview` do not need changesets.
+**Changesets are required on `staging → main` PRs only.** Feature PRs to `staging` do not need changesets.
 
-Changesets accumulate on the `preview` branch across multiple feature merges. When you run `/changelog` before the release PR, it captures all unreleased changes at once.
+Changesets accumulate on the `staging` branch across multiple feature merges. When you run `/changelog` before the release PR, it captures all unreleased changes at once.
 
 To create a changeset:
 - Run `/changelog` in Claude Code — it analyzes the branch diff and creates the file automatically
@@ -218,7 +218,7 @@ To create a changeset:
 
 ### Screenshot & Documentation Updates
 
-When UI changes are made, update screenshots and MDX docs **before the `preview → main` PR**:
+When UI changes are made, update screenshots and MDX docs **before the `staging → main` PR**:
 
 - Run `/capture-screenshots [app]` to capture fresh screenshots of app views
 - Run `/update-docs` to auto-detect changed apps, capture screenshots, and update MDX docs
@@ -231,7 +231,7 @@ When UI changes are made, update screenshots and MDX docs **before the `preview 
 
 **Demo user login:** Set `VITE_DEMO_EMAIL` and `VITE_DEMO_PASSWORD` in `.env` for realistic email/password login during automated testing and demo mode.
 
-**Worktree dev setup:** Git worktrees don't inherit `.env` or `node_modules/`. Run `/worktree-dev-setup [app]` before starting any dev server in a worktree — it installs `node_modules/` via `pnpm install` and **copies** `.env` into the root, all `apps/*/` directories, and all `packages/*/` directories, then starts the server. **Important:** `.env` must be **copied** (not symlinked) — symlinks fail to load reliably in some environments. Vite reads `.env` from the **app directory** (e.g., `apps/cloud/`), not the monorepo root. Packages like `@repo/firebase-config` and `@repo/dccex` also need `.env` at runtime. The canonical `.env` lives in the `preview` worktree. If you change `.env`, restart the dev server (Vite doesn't hot-reload env vars).
+**Worktree dev setup:** Git worktrees don't inherit `.env` or `node_modules/`. Run `/worktree-dev-setup [app]` before starting any dev server in a worktree — it installs `node_modules/` via `pnpm install` and **copies** `.env` into the root, all `apps/*/` directories, and all `packages/*/` directories, then starts the server. **Important:** `.env` must be **copied** (not symlinked) — symlinks fail to load reliably in some environments. Vite reads `.env` from the **app directory** (e.g., `apps/cloud/`), not the monorepo root. Packages like `@repo/firebase-config` and `@repo/dccex` also need `.env` at runtime. The canonical `.env` lives in the `staging` worktree. If you change `.env`, restart the dev server (Vite doesn't hot-reload env vars).
 
 ---
 
