@@ -1,6 +1,7 @@
 import { computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
+import { useFeatureFlags } from '@repo/modules'
 import type { MenuItem } from '@repo/ui/src/Menu/types'
 
 export const DEFAULT_MENU_CONFIG: MenuItem[] = [
@@ -39,6 +40,7 @@ export const DEFAULT_MENU_CONFIG: MenuItem[] = [
     icon: 'mdi-map',
     color: 'purple',
     name: 'routes',
+    feature: 'routes',
   },
   {
     label: "Turnouts",
@@ -57,12 +59,14 @@ export const DEFAULT_MENU_CONFIG: MenuItem[] = [
     icon: 'mdi-chip',
     color: 'orange',
     name: 'programming',
+    feature: 'cvProgramming',
   },
   {
     label: 'Connections',
     icon: 'mdi-server-network',
     color: 'teal',
     name: 'connect',
+    feature: 'throttleConnectionConfig',
   },
   {
     label: 'Settings',
@@ -77,24 +81,34 @@ const defaultFavorites = [
     'conductor',
     'throttle',
     'effects',
-    'routes',
+    'roster',
     'turnouts',
-    'signals'    
+    'signals',
+    'settings'
 ]
 
 export function useMenu() {
   const router = useRouter()
   const route = useRoute()
+  const { isEnabled } = useFeatureFlags()
   const savedFavorites = useStorage<string[]>('@DEJA/throttle/footerMenuFavorites', defaultFavorites)
 
   const lastThrottleAddress = useStorage<number>('@DEJA/lastThrottleAddress', parseInt(route.params.address?.toString()) || 3)
 
+  // 🚩 All items with gated flag set at runtime — visible in nav drawer with badge
   const menuConfig = computed(() =>
-    DEFAULT_MENU_CONFIG.map(item => ({ ...item, isFavorite: savedFavorites.value.includes(item.name) }))
+    DEFAULT_MENU_CONFIG.map(item => ({
+      ...item,
+      gated: item.feature ? !isEnabled(item.feature) : false,
+      isFavorite: savedFavorites.value.includes(item.name),
+    }))
   )
 
+  // 🚩 Footer only shows non-gated favorites (icon-only, no room for badges)
   const menuFavorites = computed(() =>
-    DEFAULT_MENU_CONFIG.filter(item => savedFavorites.value.includes(item.name))
+    DEFAULT_MENU_CONFIG
+      .filter(item => !item.feature || isEnabled(item.feature))
+      .filter(item => savedFavorites.value.includes(item.name))
   )
 
   function handleMenu(item: MenuItem) {

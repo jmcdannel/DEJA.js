@@ -8,4 +8,6 @@ export interface MenuItem {
   section?: 'modules' | 'hardware' | 'system';
   isFavorite?: boolean;
   feature?: FeatureName;
+  /** Set at runtime by useMenu — true when the feature flag is off for the current user */
+  gated?: boolean;
 }

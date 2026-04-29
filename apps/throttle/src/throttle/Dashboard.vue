@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, toRef, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, toRef, unref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ThrottleHeader from '@/throttle/ThrottleHeader.vue'
 import ThrottleActionMenu from '@/throttle/ThrottleActionMenu.vue'
@@ -32,12 +32,12 @@ const {
 const { vibrate } = useHaptics()
 const $router = useRouter()
 
-// 🎛️ Notch-to-speed mapping (IDLE + 8 notches)
-const NOTCH_SPEEDS = [0, 16, 32, 48, 64, 80, 96, 112, 126]
-const NOTCH_LABELS = ['IDLE', '1', '2', '3', '4', '5', '6', '7', '8']
+// 🎛️ Notch labels for the speed bar
+const NOTCH_LABELS = ['0', '16', '32', '48', '64', '80', '96', '112', '126']
 
 // 🔧 Local state
-const localNotch = ref(0)
+const localSpeed = ref(0)
+const functionsOpen = ref(false)
 const localDirection = ref<'FWD' | 'REV'>('FWD')
 const brakeLevel = ref(0)
 const bellActive = ref(false)
@@ -64,20 +64,9 @@ const brakeGradient = computed(() => {
   return `linear-gradient(90deg, #eab308 0%, #ef4444 ${pct}%, #374151 ${pct}%, #374151 100%)`
 })
 
-// Sync localNotch from external speed changes
+// Sync localSpeed from external speed changes
 watch(currentSpeed, (speed) => {
-  const absSpeed = Math.abs(speed)
-  // Find the closest notch
-  let closest = 0
-  let minDiff = Infinity
-  NOTCH_SPEEDS.forEach((ns, i) => {
-    const diff = Math.abs(absSpeed - ns)
-    if (diff < minDiff) {
-      minDiff = diff
-      closest = i
-    }
-  })
-  localNotch.value = closest
+  localSpeed.value = Math.abs(speed)
   if (speed < 0) {
     localDirection.value = 'REV'
   } else if (speed > 0) {
@@ -91,17 +80,18 @@ const displaySpeed = computed(() => {
   return String(absSpeed).padStart(3, '0')
 })
 
-const displayNotch = computed(() => NOTCH_LABELS[localNotch.value])
+const displayNotch = computed(() => {
+  if (localSpeed.value === 0) return 'IDLE'
+  return String(localSpeed.value)
+})
 const displayDirection = computed(() => localDirection.value)
-const displayLocoName = computed(() => loco?.name ?? '---')
+const displayLocoName = computed(() => unref(loco)?.name ?? '---')
 const displayAddress = computed(() => String(props.address).padStart(4, '0'))
 
-// 🎚️ Throttle notch control
-function setNotch(notch: number) {
-  if (notch < 0 || notch > 8) return
-  localNotch.value = notch
-  vibrate('medium')
-  const speed = NOTCH_SPEEDS[notch]
+// 🎚️ Throttle slider control (direct speed 0–126)
+function setThrottleSpeed(speed: number) {
+  if (speed < 0 || speed > 126) return
+  localSpeed.value = speed
   const signedSpeed = localDirection.value === 'REV' ? -speed : speed
   setSpeed(signedSpeed)
 }
@@ -202,7 +192,7 @@ watch(brakeLevel, (level) => {
   }
 
   if (level > 0) {
-    localNotch.value = 0
+    localSpeed.value = 0
 
     if (Math.abs(currentSpeed.value) < 1) return
 
@@ -271,23 +261,26 @@ onBeforeUnmount(() => {
       <!-- Right col: Device body -->
       <section class="proto-device mx-auto w-full max-w-[360px] flex flex-col items-center gap-0 flex-none overflow-y-auto">
 
-        <!-- 1. Status LED + Horn Handle -->
-        <div class="device-top-row w-full flex items-center justify-between px-4 py-2">
-          <!-- Status LED -->
+        <!-- 1. Status LED + Stop/Eject + Functions + Horn -->
+        <div class="device-top-row w-full flex items-center gap-2 px-4 py-1">
           <div class="status-led" :class="{ 'led-on': statusLedOn }"></div>
-          <!-- Horn icon -->
+          <div class="flex-grow" />
+          <v-btn icon size="x-small" color="red" variant="tonal" @click="handleStop" title="Stop"><v-icon size="14">mdi-stop</v-icon></v-btn>
+          <v-btn icon size="x-small" variant="text" color="red-lighten-1" @click="clearLoco" title="Eject"><v-icon size="14">mdi-eject</v-icon></v-btn>
+          <v-btn v-if="loco && showFunctions" icon size="x-small" variant="text" color="grey-lighten-1" @click="functionsOpen = !functionsOpen"><v-icon size="16">mdi-train</v-icon></v-btn>
           <div class="horn-container">
-            <v-icon
-              size="32"
-              class="horn-icon select-none"
-              :class="{ 'horn-active': hornActive }"
-              @pointerdown="hornDown"
-              @pointerup="hornUp"
-              @pointercancel="(e) => hornUp(e as PointerEvent)"
-              @pointerleave="(e) => hornUp(e as PointerEvent)"
-              style="cursor: pointer; touch-action: none;"
-            >mdi-bugle</v-icon>
+            <v-icon size="24" class="horn-icon select-none" :class="{ 'horn-active': hornActive }" @pointerdown="hornDown" @pointerup="hornUp" @pointercancel="(e) => hornUp(e as PointerEvent)" @pointerleave="(e) => hornUp(e as PointerEvent)" style="cursor: pointer; touch-action: none;">mdi-bugle</v-icon>
           </div>
+        </div>
+
+        <!-- Functions panel (toggleable) -->
+        <div v-if="functionsOpen && loco" class="px-4 py-1">
+          <FunctionsSpeedDial :loco="loco" />
+        </div>
+
+        <!-- EZ Consist (own row above LCD) -->
+        <div v-if="showConsist && loco?.consist?.length" class="w-full px-4 py-1">
+          <ConsistIndicator :loco="loco" />
         </div>
 
         <!-- 2. LCD Screen -->
@@ -313,51 +306,36 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <!-- 3. Speed Buttons: Row 1: -5, +5 | Row 2: -1, +1 -->
-        <div class="nav-buttons-grid">
-          <button
-            class="nav-btn"
-            :class="{ 'nav-btn-active': pressedButton === 'down5' }"
-            @click="handleDown5Btn"
-          >-5</button>
-          <button
-            class="nav-btn"
-            :class="{ 'nav-btn-active': pressedButton === 'up5' }"
-            @click="handleUp5Btn"
-          >+5</button>
-          <button
-            class="nav-btn"
-            :class="{ 'nav-btn-active': pressedButton === 'down' }"
-            @click="handleDownBtn"
-          >-1</button>
-          <button
-            class="nav-btn"
-            :class="{ 'nav-btn-active': pressedButton === 'up' }"
-            @click="handleUpBtn"
-          >+1</button>
+        <!-- 3. Speed Buttons: single row -->
+        <div class="nav-buttons-row">
+          <button class="nav-btn-sm" :class="{ 'nav-btn-active': pressedButton === 'down5' }" @click="handleDown5Btn">-5</button>
+          <button class="nav-btn-sm" :class="{ 'nav-btn-active': pressedButton === 'down' }" @click="handleDownBtn">-1</button>
+          <button class="nav-btn-sm" :class="{ 'nav-btn-active': pressedButton === 'up' }" @click="handleUpBtn">+1</button>
+          <button class="nav-btn-sm" :class="{ 'nav-btn-active': pressedButton === 'up5' }" @click="handleUp5Btn">+5</button>
         </div>
 
-        <!-- 4. Notch Markings -->
+        <!-- 4. Notch markers -->
         <div class="notch-markings">
           <span
             v-for="(label, i) in NOTCH_LABELS"
-            :key="label"
+            :key="i"
             class="notch-label"
-            :class="{ 'notch-active': i <= localNotch && i > 0, 'notch-current': localNotch === i }"
-          >{{ label }}</span>
+            :class="{ 'notch-active': localSpeed >= Number(label) && Number(label) > 0 }"
+          >{{ i === 0 ? 'IDLE' : i }}</span>
         </div>
 
-        <!-- 5. Throttle Slider (vertical, 9 positions) -->
-        <div class="throttle-slider-area">
+        <!-- 5. Throttle Slider (0–126, step=1) -->
+        <div class="throttle-slider-area" @touchstart.stop @pointerdown.stop>
           <div class="slider-track">
             <input
               type="range"
               min="0"
-              max="8"
-              :value="localNotch"
-              @input="(e) => setNotch(Number((e.target as HTMLInputElement).value))"
+              max="126"
+              step="1"
+              :value="localSpeed"
+              @input="(e) => setThrottleSpeed(Number((e.target as HTMLInputElement).value))"
               class="throttle-range"
-              orient="vertical"
+              style="touch-action: none;"
             />
           </div>
         </div>
@@ -369,11 +347,11 @@ onBeforeUnmount(() => {
             :model-value="localDirection === 'FWD'"
             @update:model-value="toggleDirection"
             :disabled="currentSpeed !== 0"
-            color="blue"
+            color="purple"
             hide-details
             density="compact"
             inset
-            class="reverser-switch"
+            class="lever-switch"
           />
           <span class="reverser-end-label" :class="localDirection === 'FWD' ? 'text-green-400' : 'opacity-40'">FWD</span>
         </div>
@@ -427,25 +405,28 @@ onBeforeUnmount(() => {
       </section>
     </section>
 
-    <!-- 📱 Mobile: only the dashboard device -->
-    <section class="w-full flex @[640px]:hidden flex-col items-center flex-grow relative z-10 overflow-y-auto">
-      <section class="proto-device mx-auto w-full max-w-[360px] flex flex-col items-center gap-0">
+    <!-- 📱 Mobile: dashboard device -->
+    <section class="w-full flex @[640px]:hidden flex-col flex-1 min-h-0 relative z-10">
+      <section class="proto-device mx-auto w-full max-w-[360px] flex flex-col items-center gap-0 flex-1 min-h-0 overflow-y-auto">
 
-        <!-- 1. Status LED + Horn Handle -->
-        <div class="device-top-row w-full flex items-center justify-between px-4 py-2">
+        <!-- 1. Status LED + Functions + Horn -->
+        <div class="device-top-row w-full flex items-center gap-2 px-4 py-1">
           <div class="status-led" :class="{ 'led-on': statusLedOn }"></div>
+          <div class="flex-grow" />
+          <v-btn v-if="loco && showFunctions" icon size="x-small" variant="text" color="grey-lighten-1" @click="functionsOpen = !functionsOpen"><v-icon size="16">mdi-train</v-icon></v-btn>
           <div class="horn-container">
-            <v-icon
-              size="32"
-              class="horn-icon select-none"
-              :class="{ 'horn-active': hornActive }"
-              @pointerdown="hornDown"
-              @pointerup="hornUp"
-              @pointercancel="(e) => hornUp(e as PointerEvent)"
-              @pointerleave="(e) => hornUp(e as PointerEvent)"
-              style="cursor: pointer; touch-action: none;"
-            >mdi-bugle</v-icon>
+            <v-icon size="24" class="horn-icon select-none" :class="{ 'horn-active': hornActive }" @pointerdown="hornDown" @pointerup="hornUp" @pointercancel="(e) => hornUp(e as PointerEvent)" @pointerleave="(e) => hornUp(e as PointerEvent)" style="cursor: pointer; touch-action: none;">mdi-bugle</v-icon>
           </div>
+        </div>
+
+        <!-- Functions panel -->
+        <div v-if="functionsOpen && loco" class="px-4 py-1">
+          <FunctionsSpeedDial :loco="loco" />
+        </div>
+
+        <!-- EZ Consist (own row) -->
+        <div v-if="showConsist && loco?.consist?.length" class="w-full px-4 py-1">
+          <ConsistIndicator :loco="loco" />
         </div>
 
         <!-- 2. LCD Screen -->
@@ -470,80 +451,45 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <!-- 3. Speed Buttons -->
-        <div class="nav-buttons-grid">
-          <button class="nav-btn" :class="{ 'nav-btn-active': pressedButton === 'down5' }" @click="handleDown5Btn">-5</button>
-          <button class="nav-btn" :class="{ 'nav-btn-active': pressedButton === 'up5' }" @click="handleUp5Btn">+5</button>
-          <button class="nav-btn" :class="{ 'nav-btn-active': pressedButton === 'down' }" @click="handleDownBtn">-1</button>
-          <button class="nav-btn" :class="{ 'nav-btn-active': pressedButton === 'up' }" @click="handleUpBtn">+1</button>
+        <!-- 3. Speed buttons (single row, full width) -->
+        <div class="nav-buttons-row">
+          <button class="nav-btn-sm" :class="{ 'nav-btn-active': pressedButton === 'down5' }" @click="handleDown5Btn">-5</button>
+          <button class="nav-btn-sm" :class="{ 'nav-btn-active': pressedButton === 'down' }" @click="handleDownBtn">-1</button>
+          <button class="nav-btn-sm" :class="{ 'nav-btn-active': pressedButton === 'up' }" @click="handleUpBtn">+1</button>
+          <button class="nav-btn-sm" :class="{ 'nav-btn-active': pressedButton === 'up5' }" @click="handleUp5Btn">+5</button>
         </div>
 
-        <!-- 4. Notch Markings -->
+        <!-- 4. Notch markers -->
         <div class="notch-markings">
-          <span
-            v-for="(label, i) in NOTCH_LABELS"
-            :key="label"
-            class="notch-label"
-            :class="{ 'notch-active': i <= localNotch && i > 0, 'notch-current': localNotch === i }"
-          >{{ label }}</span>
+          <span v-for="(label, i) in NOTCH_LABELS" :key="i" class="notch-label" :class="{ 'notch-active': localSpeed >= Number(label) && Number(label) > 0 }">{{ i === 0 ? 'IDLE' : i }}</span>
         </div>
 
-        <!-- 5. Throttle Slider -->
-        <div class="throttle-slider-area">
+        <!-- 5. Throttle Slider (0–126, step=1) -->
+        <div class="throttle-slider-area" @touchstart.stop @pointerdown.stop>
           <div class="slider-track">
-            <input
-              type="range"
-              min="0"
-              max="8"
-              :value="localNotch"
-              @input="(e) => setNotch(Number((e.target as HTMLInputElement).value))"
-              class="throttle-range"
-              orient="vertical"
-            />
+            <input type="range" min="0" max="126" step="1" :value="localSpeed" @input="(e) => setThrottleSpeed(Number((e.target as HTMLInputElement).value))" class="throttle-range" style="touch-action: none;" />
           </div>
         </div>
 
         <!-- 6. Reverser -->
         <div class="reverser-area">
           <span class="reverser-end-label" :class="localDirection === 'REV' ? 'text-red-400' : 'opacity-40'">REV</span>
-          <v-switch
-            :model-value="localDirection === 'FWD'"
-            @update:model-value="toggleDirection"
-            :disabled="currentSpeed !== 0"
-            color="blue"
-            hide-details
-            density="compact"
-            inset
-            class="reverser-switch"
-          />
+          <v-switch :model-value="localDirection === 'FWD'" @update:model-value="toggleDirection" :disabled="currentSpeed !== 0" color="purple" hide-details density="compact" inset class="lever-switch" />
           <span class="reverser-end-label" :class="localDirection === 'FWD' ? 'text-green-400' : 'opacity-40'">FWD</span>
         </div>
 
-        <!-- 7. Bell Icon -->
+        <!-- 7. Bell -->
         <div class="bell-area">
           <div class="bell-container">
-            <v-icon
-              size="32"
-              class="bell-icon select-none"
-              :class="{ 'bell-icon-active': bellActive }"
-              @click="toggleBell"
-              style="cursor: pointer;"
-            >mdi-bell</v-icon>
+            <v-icon size="28" class="bell-icon select-none" :class="{ 'bell-icon-active': bellActive }" @click="toggleBell" style="cursor: pointer;">mdi-bell</v-icon>
           </div>
         </div>
 
-        <!-- 8. Brake Slider -->
+        <!-- 8. Brake -->
         <div class="brake-slider-area">
           <span class="brake-label">BRAKE</span>
           <div class="brake-track">
-            <input
-              type="range"
-              min="0"
-              max="10"
-              v-model.number="brakeLevel"
-              class="brake-range"
-              :style="{ background: brakeGradient }"
-            />
+            <input type="range" min="0" max="10" v-model.number="brakeLevel" class="brake-range" :style="{ background: brakeGradient }" style="touch-action: none;" />
           </div>
         </div>
 
@@ -740,26 +686,24 @@ onBeforeUnmount(() => {
   to { opacity: 1; }
 }
 
-/* ── Navigation Buttons ───────────────────────────────────── */
-.nav-buttons-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 6px;
-  padding: 8px 24px;
+/* ── Navigation Buttons (single row) ──────────────────────── */
+.nav-buttons-row {
+  display: flex;
+  gap: 4px;
+  padding: 4px 16px;
   width: 100%;
 }
 
-.nav-btn {
-  width: 100%;
-  height: 36px;
+.nav-btn-sm {
+  flex: 1;
+  height: 28px;
   border-radius: 6px;
   background: linear-gradient(180deg, #3d4f6a 0%, #2a3a52 100%);
   border: 1px solid #4a5f7a;
   color: #c8d6e5;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   cursor: pointer;
   box-shadow:
     0 2px 4px rgba(0,0,0,0.3),
@@ -769,12 +713,10 @@ onBeforeUnmount(() => {
   user-select: none;
 }
 
-.nav-btn:active,
-.nav-btn.nav-btn-active {
+.nav-btn-sm:active,
+.nav-btn-sm.nav-btn-active {
   transform: translateY(1px);
-  box-shadow:
-    0 1px 2px rgba(0,0,0,0.3),
-    inset 0 2px 4px rgba(0,0,0,0.3);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3), inset 0 2px 4px rgba(0,0,0,0.3);
   background: linear-gradient(180deg, #2a3a52 0%, #1e2d40 100%);
 }
 
@@ -798,12 +740,7 @@ onBeforeUnmount(() => {
 
 .notch-label.notch-active {
   color: #4ade80;
-}
-
-.notch-label.notch-current {
-  color: #4ade80;
-  text-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
-  font-size: 12px;
+  text-shadow: 0 0 4px rgba(74, 222, 128, 0.3);
 }
 
 /* ── Throttle Slider ──────────────────────────────────────── */
@@ -1073,19 +1010,18 @@ onBeforeUnmount(() => {
   20%, 40%, 60%, 80% { transform: translateX(2px); }
 }
 
-/* ── Reverser switch lever styling ───────────────────────── */
-.reverser-switch :deep(.v-switch__track) {
-  height: 40px;
-  width: 80px;
-  border-radius: 20px;
+/* ── Reverser switch lever styling (matches SliderThrottle) */
+.lever-switch :deep(.v-switch__track) {
+  height: 28px;
+  border-radius: 14px;
   opacity: 1;
   background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
   border: 2px solid #475569;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
 }
-.reverser-switch :deep(.v-switch__thumb) {
-  width: 36px;
-  height: 36px;
+.lever-switch :deep(.v-switch__thumb) {
+  width: 24px;
+  height: 24px;
   background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
   border: 1px solid #cbd5e1;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);

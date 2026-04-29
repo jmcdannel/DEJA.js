@@ -3,8 +3,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useThemeSwitcher, type ThemeMode } from '@repo/ui'
 import type { Command, CycleControl, ToggleControl } from '../types'
 import { useThrottleSettings } from '@/throttle/useThrottleSettings'
-import { useConductorSettings } from '@/conductor/useConductorSettings'
-import { useQuickMenu } from '@/quick-menu/useQuickMenu'
 
 type ThrottleVariant = 'buttons' | 'slider' | 'dashboard'
 type ConductorRightPanel =
@@ -51,22 +49,13 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
   const {
     variant: throttleVariant,
     showFunctions,
-    showSpeedometer,
     showConsist,
+    rightPanel: conductorRightPanel,
     setVariant: setThrottleVariant,
     setShowFunctions,
-    setShowSpeedometer,
     setShowConsist,
-  } = useThrottleSettings()
-
-  const {
-    variant: conductorVariant,
-    rightPanel: conductorRightPanel,
-    setVariant: setConductorVariant,
     setRightPanel: setConductorRightPanel,
-  } = useConductorSettings()
-
-  const { quickMenuVisible } = useQuickMenu()
+  } = useThrottleSettings()
 
   function buildThemeCommand(): Command {
     const control: CycleControl<ThemeMode> = {
@@ -147,8 +136,8 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
     // 🎨 Always-visible core items
     commands.push(buildThemeCommand())
 
-    // 🏎️ Throttle-route contextual items
-    if (routeName === 'throttle' || routeName === 'throttles') {
+    // 🏎️ Throttle-route contextual items (also shown on conductor)
+    if (routeName === 'throttle' || routeName === 'throttles' || routeName === 'conductor') {
       commands.push(
         buildVariantCommand(
           'settings.throttle.variant',
@@ -165,27 +154,11 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
           setShowFunctions,
         ),
         buildToggleCommand(
-          'settings.toggle.speedometer',
-          'Show speedometer',
-          'mdi-speedometer',
-          showSpeedometer.value,
-          setShowSpeedometer,
-        ),
-        buildToggleCommand(
           'settings.toggle.consist',
           'Show consist',
           'mdi-train-car-flatbed-car',
           showConsist.value,
           setShowConsist,
-        ),
-        buildToggleCommand(
-          'settings.toggle.quickMenu',
-          'Quick menu visible',
-          'mdi-menu',
-          quickMenuVisible.value,
-          (next) => {
-            quickMenuVisible.value = next
-          },
         ),
       )
     }
@@ -193,13 +166,6 @@ export function useSettingsCommands(): ComputedRef<Command[]> {
     // 🎛️ Conductor-route contextual items
     if (routeName === 'conductor') {
       commands.push(
-        buildVariantCommand(
-          'settings.conductor.variant',
-          'Conductor variant',
-          VARIANT_OPTIONS,
-          conductorVariant.value,
-          setConductorVariant,
-        ),
         {
           id: 'settings.conductor.rightPanel',
           title: 'Right panel',
