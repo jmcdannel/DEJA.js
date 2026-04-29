@@ -42,8 +42,9 @@ const props = withDefaults(defineProps<{
 
 // const { runEffect, getEffectsByType } = useEfx()
 const { sendDccCommand } = useDcc()
-const { getLayouts, getDevices } = useLayout()
+const { getLayout, getLayouts, getDevices } = useLayout()
 const layoutId = useStorage('@DEJA/layoutId', '')
+const layout = getLayout()
 const user = useCurrentUser()
 const router = useRouter()
 const { mdAndUp } = useDisplay()
@@ -131,7 +132,7 @@ const effectiveTrackPower = computed<boolean>(() => {
   if (wiThrottleConnected.value) {
     return wiThrottlePower.value === 1
   }
-  return props.layoutPowerState ?? false
+  return layout?.value?.dccEx?.power ?? false
 })
 
 const defaultProps = {

@@ -14,6 +14,7 @@ import {
   writeOutputPowerState,
   writeAllOutputsPowerState,
 } from './trackOutputs.js'
+import { togglePowerEffects } from './effects.js'
 import wled from './wled.js'
 
 // Command pooling state for each connection
@@ -476,6 +477,8 @@ async function handleSerialMessage(payload: string, device: Device): Promise<voi
       dccExUpdates['power'] = power
       // Update all outputs on this device
       await writeAllOutputsPowerState(device.id, power)
+      // Keep power-type effects in sync with track power state
+      await togglePowerEffects(power)
     }
 
     // Pattern: @ 0 2 "Power On|Off" (quoted form)
