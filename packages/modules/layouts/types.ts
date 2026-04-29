@@ -59,6 +59,9 @@ export interface ServerStatus {
   lastSeen: Date | number
   version?: string
   ip?: string | null
+  mqttEnabled?: boolean
+  wsEnabled?: boolean
+  wsPort?: number
 }
 
 /**

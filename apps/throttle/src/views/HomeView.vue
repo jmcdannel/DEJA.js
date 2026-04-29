@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import { ref as rtdbRef, onValue, off } from 'firebase/database'
 import { rtdb } from '@repo/firebase-config'
-import { DeviceConnectionList, StatusPulse, OnboardingBanner, DEJA_APPS } from '@repo/ui'
+import { DejaServerPanel, DeviceConnectionList, OnboardingBanner, DEJA_APPS } from '@repo/ui'
 import { useOnboarding } from '@repo/modules'
 import Speedometer from '@/throttle/Speedometer.vue'
 import {
@@ -141,6 +141,11 @@ const navItems = [
       @open-cloud-setup="openCloudSetup"
     />
 
+    <!-- 🖥️ DEJA Server Panel -->
+    <DejaServerPanel
+      :devices="devices ?? []"
+    />
+
     <!-- ⚡ Device Connection -->
     <DeviceConnectionList
       v-if="devices?.length"
@@ -148,6 +153,7 @@ const navItems = [
       :available-ports="ports"
       :show-header="false"
       :show-details-link="false"
+      :hide-server="true"
       :server-online="serverStatus?.online ?? false"
       @connect="handleConnect"
       @disconnect="handleDisconnect"

@@ -24,6 +24,7 @@ const boundDrawer = computed({
 
 const { mobile } = useDisplay()
 const route = useRoute()
+const isDev = import.meta.env.DEV
 
 function onHandleMenu(item: MenuItem) {
   emit('handleMenu', item)
@@ -99,8 +100,9 @@ const ungroupedItems = computed(() =>
                   {{ item.icon }}
                 </v-icon>
               </template>
-              <v-list-item-title :class="['text-sm leading-tight', isActive(item) ? 'menu-item__title--active' : '']">
+              <v-list-item-title :class="['text-sm leading-tight flex items-center gap-1.5', isActive(item) ? 'menu-item__title--active' : '']">
                 {{ item.label }}
+                <span v-if="item.feature && isDev" class="feature-badge">DEV</span>
               </v-list-item-title>
             </v-list-item>
           </template>
@@ -212,6 +214,20 @@ const ungroupedItems = computed(() =>
 }
 :root:not(.dark) .menu-divider {
   border-color: rgb(226, 232, 240);
+}
+
+.feature-badge {
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: rgba(139, 92, 246, 0.25);
+  color: rgb(167, 139, 250);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  line-height: 1.4;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 /* ═══════ ⬛⬜ High-contrast ═══════ */
