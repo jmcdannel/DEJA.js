@@ -6,6 +6,7 @@ export interface Turnout {
   device: string
   divergent?: number
   effectId?: string
+  invertEffect?: boolean
   id: string
   lastUpdated?: string
   name: string

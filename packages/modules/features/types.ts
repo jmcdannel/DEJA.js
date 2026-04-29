@@ -1,8 +1,8 @@
-// No imports from other feature files — this is the base type module.
+import featureFlags from './feature-flags.json'
 
 export type FeatureStage = 'dev' | 'alpha' | 'beta' | 'ga'
 
-/** Explicit union of all feature flag keys. Update when adding new flags. */
-export type FeatureName = 'sounds' | 'trackDiagrams' | 'routes' | 'sensors' | 'tourApp' | 'quickMenuFavorites'
+/** Derived from feature-flags.json keys — add new flags there, not here. */
+export type FeatureName = keyof typeof featureFlags
 
 export type UserRole = 'admin' | 'user' | 'demo'

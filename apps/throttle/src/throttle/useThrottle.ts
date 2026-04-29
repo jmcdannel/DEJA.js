@@ -1,4 +1,4 @@
-import { computed, watch, type Ref } from 'vue'
+import { computed, watch, type Ref, type MaybeRef } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { deleteDoc, doc, setDoc } from 'firebase/firestore'
 import { useDocument } from 'vuefire'
@@ -17,13 +17,12 @@ export const useThrottle = (address: Ref<number | null | undefined>) => {
   const layoutId = useStorage('@DEJA/layoutId', '')
   const { enqueue } = useCommandQueue()
 
-  const throttle = useDocument<Throttle>(
-    computed(() =>
-      address.value != null && !Number.isNaN(address.value)
-        ? doc(db, `layouts/${layoutId.value}/throttles`, address.value.toString())
-        : null
-    )
+  const docRef = computed(() =>
+    address.value
+      ? doc(db, `layouts/${layoutId.value}/throttles`, address.value.toString())
+      : null
   )
+  const throttle = useDocument<Throttle>(docRef)
 
   log.debug('throttle doc ref:', throttle)
 

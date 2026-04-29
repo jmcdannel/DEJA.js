@@ -18,6 +18,7 @@ const props = defineProps({
   showSpeedometer: { type: Boolean, default: true },
   showConsist: { type: Boolean, default: true },
   speedDisplayType: { type: String as () => SpeedDisplayType, default: 'dial' },
+  compact: { type: Boolean, default: false },
 })
 
 const address = toRef(props, 'address')
@@ -58,7 +59,10 @@ async function clearLoco() {
             size="xs"
             class="@[400px]:hidden"
           />
-          <h1 class="text-sm @[400px]:text-base @[640px]:text-xl @[960px]:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 drop-shadow-lg truncate">
+          <h1
+            class="font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 drop-shadow-lg truncate min-w-0"
+            :class="compact ? 'text-sm' : 'text-sm @[400px]:text-base @[640px]:text-xl @[960px]:text-4xl'"
+          >
             {{ loco?.name }}
           </h1>
         </div>
@@ -68,8 +72,8 @@ async function clearLoco() {
       </template>
     </ThrottleHeader>
 
-    <!-- 🖥️ Desktop: 3-column layout -->
-    <section class="w-full hidden @[640px]:flex flex-row items-stretch justify-around flex-grow relative z-10" style="max-height: 800px;">
+    <!-- 🖥️ Desktop: 3-column layout (hidden in compact/conductor mode) -->
+    <section v-if="!compact" class="w-full hidden @[640px]:flex flex-row items-stretch justify-around flex-grow relative z-10" style="max-height: 800px;">
       <!-- Left col: Function buttons + Logo -->
       <section v-if="loco" class="flex flex-col items-center justify-around flex-1">
         <FunctionsSpeedDial v-if="showFunctions" :loco="loco" />
@@ -78,13 +82,11 @@ async function clearLoco() {
 
       <!-- Middle col: Speedometer + EZ Consist -->
       <section class="flex flex-col items-center justify-around flex-1">
-        <!-- 🎛️ Speed display: dial or digital based on setting -->
         <template v-if="showSpeedometer">
           <Speedometer v-if="speedDisplayType === 'dial'" :speed="currentSpeed" :address="address" :size="200" :show-label="false" />
           <CurrentSpeed v-else :speed="currentSpeed" />
         </template>
         <ConsistIndicator v-if="showConsist && loco" :loco="loco" />
-        <!-- 🚂 Consist speedometers -->
         <div v-if="showConsist && loco?.consist?.length" class="grid grid-cols-2 gap-3">
           <Speedometer
             v-for="cloco in loco.consist"
@@ -103,24 +105,25 @@ async function clearLoco() {
       </section>
     </section>
 
-    <!-- 📱 Mobile: speedometer top, then 2-column below -->
-    <section class="w-full flex @[640px]:hidden flex-col flex-grow relative z-10 gap-1">
-      <!-- 🎛️ Speedometer at top -->
-      <div v-if="showSpeedometer" class="flex justify-center py-2 mx-2 rounded-lg border border-white/10 bg-white/[0.03]">
-        <Speedometer v-if="speedDisplayType === 'dial'" :speed="currentSpeed" :address="address" :size="140" :show-label="false" />
+    <!-- 📱 Mobile layout (or compact/conductor mode) -->
+    <section class="w-full flex flex-col flex-1 min-h-0 relative z-10 gap-1" :class="compact ? '' : '@[640px]:hidden'">
+      <!-- 🎛️ Speedometer + EZ Consist at top (not in compact) -->
+      <div v-if="showSpeedometer && !compact" class="flex flex-col items-center gap-1 py-2 mx-2 rounded-lg border border-white/10 bg-white/[0.03]">
+        <Speedometer v-if="speedDisplayType === 'dial'" :speed="currentSpeed" :address="address" :size="180" :show-label="false" />
         <CurrentSpeed v-else :speed="currentSpeed" />
+        <ConsistIndicator v-if="showConsist && loco" :loco="loco" />
       </div>
 
-      <!-- 📱 Two columns -->
-      <div class="flex flex-row flex-grow min-h-0 gap-1 mx-2">
-        <!-- Left col: EZ Consist + Functions -->
-        <section class="flex flex-col items-center justify-around flex-1 rounded-lg border border-white/10 bg-white/[0.03] py-2">
-          <ConsistIndicator v-if="showConsist && loco" :loco="loco" />
+      <!-- Two columns (or single column in compact) -->
+      <div class="flex flex-row flex-1 min-h-0 overflow-hidden gap-1 mx-2">
+        <!-- Left col: Functions + Logo (hidden in compact) -->
+        <section v-if="!compact" class="flex flex-col items-center justify-around flex-1 rounded-lg border border-white/10 bg-white/[0.03] py-2">
           <FunctionsSpeedDial v-if="loco && showFunctions" :loco="loco" />
         </section>
 
-        <!-- Right col: Throttle controls -->
+        <!-- Right col (or full width in compact): Throttle controls -->
         <section class="flex flex-col items-center justify-around flex-1 rounded-lg border border-white/10 bg-white/[0.03] py-2">
+          <CurrentSpeed v-if="compact" :speed="currentSpeed" />
           <ThrottleButtonControls @update:currentSpeed="handleAdjustSpeed" @stop="handleStop" />
         </section>
       </div>

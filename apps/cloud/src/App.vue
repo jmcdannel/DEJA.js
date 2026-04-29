@@ -108,6 +108,7 @@ const { promotions: activePromos } = usePromotions(PROMO_SLOTS.BANNER_TOP)
           app-icon="mdi-cloud"
           variant="cloud"
           color="blue"
+          mobile-layout="expanded"
           :show-layout-power="true"
           :show-emergency-stop="true"
           :show-user-profile="true"

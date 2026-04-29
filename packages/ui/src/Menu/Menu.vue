@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useDisplay } from 'vuetify'
 import { useRoute } from 'vue-router'
 import type { MenuItem } from './types'
+import ComingSoonBadge from '../ComingSoonBadge.vue'
 import AppSwitcher from '../AppSwitcher.vue'
 
 const props = defineProps<{
@@ -23,6 +24,7 @@ const boundDrawer = computed({
 
 const { mobile } = useDisplay()
 const route = useRoute()
+const isDev = import.meta.env.DEV
 
 function onHandleMenu(item: MenuItem) {
   emit('handleMenu', item)
@@ -98,8 +100,9 @@ const ungroupedItems = computed(() =>
                   {{ item.icon }}
                 </v-icon>
               </template>
-              <v-list-item-title :class="['text-sm leading-tight', isActive(item) ? 'menu-item__title--active' : '']">
+              <v-list-item-title :class="['text-sm leading-tight flex items-center gap-1.5', isActive(item) ? 'menu-item__title--active' : '']">
                 {{ item.label }}
+                <span v-if="item.feature && isDev" class="feature-badge">DEV</span>
               </v-list-item-title>
             </v-list-item>
           </template>
@@ -108,21 +111,29 @@ const ungroupedItems = computed(() =>
           <v-list-item
             v-for="item in ungroupedItems"
             :key="item.name"
-            :title="item.label"
-            :color="item.color || 'primary'"
-            :active="route.name === item.name"
-            class="min-h-0 menu-item"
+            :active="false"
+            :disabled="item.gated"
+            :class="[
+              'py-0.5 min-h-8 transition-colors duration-150 menu-item',
+              isActive(item) && !item.gated ? 'menu-item--active' : '',
+              item.gated ? 'menu-item--gated' : '',
+            ]"
             link
-            @click="onHandleMenu(item)"
+            @click="!item.gated && onHandleMenu(item)"
           >
             <template #prepend>
               <v-icon
-                size="18"
-                :class="`text-${item.color}-500 dark:text-${item.color}-400 stroke-none mr-1`"
+                size="20"
+                :class="`text-${item.color}-500 dark:text-${item.color}-400 stroke-none mr-2`"
+                :style="item.gated ? 'opacity: 0.35' : ''"
               >
                 {{ item.icon }}
               </v-icon>
             </template>
+            <v-list-item-title :class="isActive(item) ? 'menu-item__title--active' : ''" class="flex items-center gap-2">
+              <span :style="item.gated ? 'opacity: 0.45' : ''">{{ item.label }}</span>
+              <ComingSoonBadge v-if="item.gated" size="x-small" variant="outlined" />
+            </v-list-item-title>
           </v-list-item>
 
         </v-list>
@@ -164,6 +175,12 @@ const ungroupedItems = computed(() =>
   opacity: 1;
 }
 
+/* 🚩 Gated items — visible but clearly not interactive */
+.menu-item--gated {
+  cursor: default !important;
+  pointer-events: auto;
+}
+
 /* ═══════ Dark mode (default) ═══════ */
 .menu-drawer {
   background: rgba(15, 23, 42, 0.95);
@@ -197,6 +214,20 @@ const ungroupedItems = computed(() =>
 }
 :root:not(.dark) .menu-divider {
   border-color: rgb(226, 232, 240);
+}
+
+.feature-badge {
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: rgba(139, 92, 246, 0.25);
+  color: rgb(167, 139, 250);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  line-height: 1.4;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 /* ═══════ ⬛⬜ High-contrast ═══════ */
