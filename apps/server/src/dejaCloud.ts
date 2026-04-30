@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import os from 'node:os'
-import { db, rtdb } from '@repo/firebase-config/firebase-admin-node'
+import { db, rtdb } from '@repo/firebase-config/firebase-user-node'
 import type { Effect } from '@repo/modules'
 import { dejaEmitter, type BroadcastMessage } from './broadcast'
 import { initialize } from './modules/layout'

@@ -1,6 +1,6 @@
 import { SerialPort } from 'serialport'
 import { FieldValue } from 'firebase-admin/firestore'
-import { db, rtdb } from '@repo/firebase-config/firebase-admin-node'
+import { db, rtdb } from '@repo/firebase-config/firebase-user-node'
 import type { BroadcastMessage } from '../broadcast'
 import { layout } from '../modules/layout'
 import { broadcast } from '../broadcast'

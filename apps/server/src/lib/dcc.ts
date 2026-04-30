@@ -1,7 +1,7 @@
 import { SerialPort } from 'serialport'
 import { FieldValue } from 'firebase-admin/firestore'
 import { ServerValue } from 'firebase-admin/database'
-import { rtdb, db } from '@repo/firebase-config/firebase-admin-node'
+import { rtdb, db } from '@repo/firebase-config/firebase-user-node'
 import { broadcast } from '../broadcast'
 import { createRosterModule } from '../modules/roster.js'
 import { log } from '../utils/logger'

@@ -1,4 +1,4 @@
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import { db } from '@repo/firebase-config/firebase-user-node'
 import { log } from '../utils/logger'
 import { layout } from './layout'
 import type { Device } from '@repo/modules'

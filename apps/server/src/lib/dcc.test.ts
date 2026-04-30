@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // Mock heavy dependencies before importing the module under test so that
 // vitest doesn't try to load Firebase Admin, SerialPort, etc.
 // ---------------------------------------------------------------------------
-vi.mock('@repo/firebase-config/firebase-admin-node', () => ({
+vi.mock('@repo/firebase-config/firebase-user-node', () => ({
   rtdb: { ref: vi.fn(() => ({ remove: vi.fn() })) },
   db: {
     collection: vi.fn(() => ({

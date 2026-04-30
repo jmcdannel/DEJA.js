@@ -1,6 +1,6 @@
 import { ServerValue } from 'firebase-admin/database'
 import { FieldValue } from 'firebase-admin/firestore'
-import { rtdb, db } from '@repo/firebase-config/firebase-admin-node'
+import { rtdb, db } from '@repo/firebase-config/firebase-user-node'
 import { log } from '../utils/logger.js'
 
 const layoutId = process.env.LAYOUT_ID

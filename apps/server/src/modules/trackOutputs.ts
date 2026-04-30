@@ -1,5 +1,5 @@
 import { FieldValue } from 'firebase-admin/firestore'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import { db } from '@repo/firebase-config/firebase-user-node'
 import {
   buildTrackConfigCommand,
   buildQueryTracksCommand,

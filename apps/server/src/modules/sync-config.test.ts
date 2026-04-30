@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { startDeviceConfigSync, stopDeviceConfigSync } from './sync-config'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import { db } from '@repo/firebase-config/firebase-user-node'
 import { layout } from './layout'
 
 // Mock dependencies
-vi.mock('@repo/firebase-config/firebase-admin-node', () => ({
+vi.mock('@repo/firebase-config/firebase-user-node', () => ({
   db: {
     collection: vi.fn().mockReturnThis(),
     doc: vi.fn().mockReturnThis(),

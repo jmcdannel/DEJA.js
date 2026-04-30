@@ -1,4 +1,4 @@
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import { db } from '@repo/firebase-config/firebase-user-node'
 import { FieldValue } from 'firebase-admin/firestore'
 import { log } from '../utils/logger.js'
 

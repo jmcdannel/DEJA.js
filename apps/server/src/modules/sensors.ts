@@ -1,5 +1,5 @@
 import { FieldValue, type DocumentData } from 'firebase-admin/firestore'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import { db } from '@repo/firebase-config/firebase-user-node'
 import { log } from '../utils/logger'
 import { broadcast } from '../broadcast'
 import { handleMacro } from './effects.js'

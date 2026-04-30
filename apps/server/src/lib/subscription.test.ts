@@ -17,7 +17,7 @@ vi.mock('node:os', () => ({
 }))
 
 // Mock Firebase Admin SDK
-vi.mock('@repo/firebase-config/firebase-admin-node', () => ({
+vi.mock('@repo/firebase-config/firebase-user-node', () => ({
   db: {
     collection: vi.fn(() => ({
       doc: vi.fn(() => ({
@@ -45,7 +45,7 @@ import {
   validateSubscription,
   SubscriptionError,
 } from './subscription'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import { db } from '@repo/firebase-config/firebase-user-node'
 
 // --- Task 2: Config file read/write ---
 

@@ -1,7 +1,7 @@
 import { WledClient } from '@repo/wled/client'
 import { rgbToTuple, type WledEffectConfig, type WledSegmentConfig } from '@repo/wled/types'
 import type { Effect } from '@repo/modules'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import { db } from '@repo/firebase-config/firebase-user-node'
 import { log } from '../utils/logger.js'
 
 const layoutId = process.env.LAYOUT_ID || 'betatrack'

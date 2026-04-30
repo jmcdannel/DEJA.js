@@ -1,6 +1,6 @@
 import type { Effect, MacroItem } from '@repo/modules'
 import { FieldValue, type DocumentData } from 'firebase-admin/firestore'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import { db } from '@repo/firebase-config/firebase-user-node'
 import { log } from '../utils/logger.js'
 import { dcc, type OutputPayload } from '../lib/dcc.js'
 import { layout } from './layout.js'
