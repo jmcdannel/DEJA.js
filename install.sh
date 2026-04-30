@@ -471,8 +471,10 @@ start_and_verify() {
   echo -e "    📊 ${DIM}Status${NC}    ${CYAN}deja status${NC}"
   echo ""
   echo -e "  ${BOLD}🎯 Next steps:${NC}"
-  echo -e "    1️⃣  Open ${CYAN}https://monitor.dejajs.com${NC} to verify connection"
-  echo -e "    2️⃣  Open ${CYAN}https://throttle.dejajs.com${NC} to drive trains"
+  echo -e "    1️⃣  Log in to your DEJA account:"
+  echo -e "       ${CYAN}deja login${NC}"
+  echo -e "    2️⃣  Open ${CYAN}https://monitor.dejajs.com${NC} to verify connection"
+  echo -e "    3️⃣  Open ${CYAN}https://throttle.dejajs.com${NC} to drive trains"
   echo ""
 }
 

@@ -123,6 +123,11 @@ done
 
 ### 🔑 Firebase (Admin)
 
+> **🔐 As of v1.8: end users no longer need service-account credentials.**
+> Run `deja login` on your server to authenticate with your DEJA account. The
+> service-account env vars below are deprecated for user installs and will be
+> removed in v1.9. Cloud Functions (apps/install-api) still use them.
+
 | Variable | Used By | Description |
 |----------|---------|-------------|
 | `FIREBASE_CLIENT_EMAIL` | cloud API, server, io scripts | Service account email |
