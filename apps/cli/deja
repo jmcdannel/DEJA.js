@@ -747,7 +747,7 @@ cmd_help() {
 cmd_login() {
   local node_helper="${SERVER_DIR}/login.mjs"
   if [ ! -f "${node_helper}" ]; then
-    node_helper="$(dirname "$0")/../tui/lib/login.mjs"
+    node_helper="$(dirname "$0")/tui/lib/login.mjs"
   fi
   if [ ! -f "${node_helper}" ]; then
     err "login.mjs helper not found"
