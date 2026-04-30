@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import type { SubscriptionStatus } from '@repo/modules/plans/types'
-import { db } from '@repo/firebase-config/firebase-admin-node'
+import { db } from '@repo/firebase-config/firebase-user-node'
 import { log } from '../utils/logger.js'
 
 // --- Types ---
@@ -18,6 +18,8 @@ interface CachedSubscription {
 export interface DejaConfig {
   uid: string
   layoutId: string
+  refreshToken?: string
+  serverId?: string
   subscription?: CachedSubscription
   onboardingComplete?: boolean
   mqtt?: {

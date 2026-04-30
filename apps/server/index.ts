@@ -21,6 +21,8 @@ import type { DejaConfig } from './src/lib/subscription.js'
 import { getServerConfig } from './src/lib/server-config.js'
 import type { ServerConfig } from './src/lib/server-config.js'
 import { markServerStarted } from './src/lib/onboarding.js'
+import { bootstrapAuth, stopAuthRefresh } from './src/lib/auth-bootstrap.js'
+import { AuthMissingError } from '@repo/firebase-config/firebase-user-node'
 
 let serverConfig: ServerConfig
 
@@ -32,6 +34,17 @@ let isShuttingDown = false
 async function main(): Promise<void> {
   try {
     log.start('Running', '[MAIN]')
+
+    // --- User auth bootstrap (before subscription check) ---
+    try {
+      await bootstrapAuth()
+    } catch (err) {
+      if (err instanceof AuthMissingError) {
+        log.fatal(`[AUTH] ${err.message}`)
+        process.exit(1)
+      }
+      throw err
+    }
 
     // --- Subscription gate (before any subsystem starts) ---
     let config: DejaConfig
@@ -126,8 +139,9 @@ async function shutdown(): Promise<void> {
   forceExitTimer.unref()
 
   try {
-    // 0. Stop subscription re-check timer
+    // 0. Stop timers
     stopPeriodicRecheck()
+    stopAuthRefresh()
 
     // 1. WebSocket server — close all client connections with a proper close message
     if (serverConfig?.ws.enabled && wsServer.isConnected()) {
