@@ -129,6 +129,47 @@ Additionally, **local development** currently relies on the same service-account
 
 ---
 
+### 1️⃣b Cloud Function: `POST /api/cli-auth/refresh`
+
+**Location:** `apps/install-api/app/api/cli-auth/refresh/route.ts`
+
+**Purpose:** Server cold-start re-mint. The server holds a long-lived Firebase refresh token but the Firebase JS SDK doesn't have a public `signInWithRefreshToken`. This endpoint converts the refresh token into a fresh **custom token** the SDK can consume via `signInWithCustomToken`.
+
+**Auth:** No bearer header — the refresh token in the body IS the auth (it proves the caller is the user the token was minted for).
+
+**Request:**
+```json
+{ "refreshToken": "AMf-vBy..." }
+```
+
+**Logic:**
+1. Validate body shape (refresh token present and string)
+2. Exchange refresh token → ID token via Firebase Auth REST: `POST https://securetoken.googleapis.com/v1/token?key=<API_KEY>` with `{ grant_type: 'refresh_token', refresh_token }`
+   - 400/401 from Firebase → return 401 ("refresh token invalid or revoked — run `deja login` again")
+3. `admin.auth().verifyIdToken(id_token)` → confirm authenticity, get `uid` and existing claims (`serverId`, `kind`)
+4. If `serverId` claim missing → reject (this token wasn't minted for a server)
+5. Read `users/{uid}/servers/{serverId}` → if `revoked == true`, return 403 ("this server has been revoked")
+6. Update `users/{uid}/servers/{serverId}.lastSeenAt = serverTimestamp()` (best-effort; don't fail the request on write error)
+7. Mint a fresh custom token: `admin.auth().createCustomToken(uid, { serverId, kind: 'server' })`
+8. Return `{ customToken, expiresIn: 3600, refreshToken: <rotated_refresh_token_from_step_2> }`
+
+**Response:**
+```json
+{ "customToken": "eyJhbGci...", "expiresIn": 3600, "refreshToken": "AMf-vBy..." }
+```
+
+**Why return the refresh token:** Firebase rotates refresh tokens on use. The server persists the new one back to `~/.deja/config.json` to avoid stale-token failures.
+
+**Errors:**
+- 400 invalid body shape
+- 401 refresh token invalid/expired/revoked at Firebase Auth
+- 403 server revoked in Firestore
+- 500 unexpected Admin SDK / Firestore failure
+
+**Rate-limit consideration:** Each connected server hits this endpoint ~26x/day under normal operation. No tight rate-limit needed for v1, but log structured for future abuse detection.
+
+---
+
 ### 2️⃣ CLI: `deja login` subcommand
 
 **Location:** `apps/cli/src/commands/login.ts`
@@ -137,9 +178,10 @@ Additionally, **local development** currently relies on the same service-account
 ```bash
 deja login                       # interactive: prompts for token paste
 deja login --token <customToken> # non-interactive (used by docs / CI bootstrap)
+deja login --output-token        # CI mode: prints refresh token to stdout, no config write
 ```
 
-**Logic:**
+**Logic (default + `--token`):**
 1. Read `customToken` (from `--token` flag or interactive prompt)
 2. Initialize Firebase client SDK (`initializeApp` + `initializeAuth` with `inMemoryPersistence`)
 3. Call `signInWithCustomToken(auth, customToken)` → `userCredential`
@@ -156,6 +198,20 @@ deja login --token <customToken> # non-interactive (used by docs / CI bootstrap)
    ```
 6. Print `✅ Logged in as <email>. Server: <name>`
 
+**Logic (`--output-token` for CI bootstrap):**
+1. Same steps 1–4 as above
+2. Print **only** the refresh token to stdout (suitable for piping into `gh secret set DEJA_REFRESH_TOKEN`)
+3. Print human-readable hints to stderr (so they don't pollute the piped value)
+4. Do NOT write `~/.deja/config.json` (CI environment doesn't need it; running with `DEJA_REFRESH_TOKEN` env var is enough)
+
+**Workflow for CI setup:**
+```bash
+# On developer machine, with a CI-dedicated Firebase user:
+deja login --output-token > /tmp/token
+gh secret set DEJA_REFRESH_TOKEN < /tmp/token
+rm /tmp/token
+```
+
 **`serverId` extraction:** decode the custom token JWT (no verification needed — it's our own token) to read the `serverId` claim and persist it. Used for `lastSeenAt` updates and revocation lookup.
 
 **Errors:**
@@ -171,34 +227,29 @@ deja login --token <customToken> # non-interactive (used by docs / CI bootstrap)
 
 **Exports:** `firebaseApp`, `db`, `rtdb`, `auth` — same shape as the existing `firebase-admin-node.ts` so call sites only change their import path.
 
-**Initialization flow:**
+**Initialization flow (decided: `signInWithCustomToken` for cold starts):**
 1. Read config: `refreshToken` from `~/.deja/config.json` OR `DEJA_REFRESH_TOKEN` env var
 2. If neither present → throw `AuthMissingError` with instruction `Run "deja login" first.`
-3. Exchange refresh token → ID token via `POST https://securetoken.googleapis.com/v1/token?key=<API_KEY>`
-   - Body: `{ grant_type: 'refresh_token', refresh_token: <token> }`
-   - Response: `{ id_token, refresh_token, expires_in, user_id }`
-4. Persist any rotated `refresh_token` back to `~/.deja/config.json` (Firebase rotates on use)
-5. Initialize Firebase client SDK: `initializeApp` + `initializeAuth({ persistence: inMemoryPersistence })`
-6. Sign in: use `signInWithCustomToken` after fetching a fresh custom token via the install-api endpoint... 
+3. `POST /api/cli-auth/refresh` with `{ refreshToken }` → returns `{ customToken, expiresIn }`
+   - Endpoint internally exchanges refresh token via Firebase Auth REST API, verifies via Admin SDK, re-mints a custom token with the same `serverId` + `kind: 'server'` claims (see Cloud Function section below)
+4. Initialize Firebase client SDK: `initializeApp` + `initializeAuth({ persistence: inMemoryPersistence })`
+5. `signInWithCustomToken(auth, customToken)` → fully authenticated session
+6. Capture `userCredential.user.refreshToken` and persist back to `~/.deja/config.json` if rotated
+7. Set up auto-refresh: timer at `(token expiry) - 5min` repeats step 3–6 (transparently rotates the SDK's auth state)
 
-> **🔬 Spike required:** The Firebase JS SDK's Node.js auth module supports `signInWithCustomToken` (public API), but doesn't have a public `signInWithIdToken` or `signInWithRefreshToken`. Two viable implementation paths:
->
-> - **Path A:** Add a `POST /api/cli-auth/refresh` endpoint that takes the user's refresh token, exchanges via Admin SDK token verification, and mints a fresh custom token. Server calls this on every startup. Adds a network round-trip but uses 100% public APIs.
-> - **Path B:** Use the Firebase Auth REST API directly for token exchange + the Firestore/RTDB REST APIs for all reads/writes (skip the JS client SDK for runtime). More refactoring (rewrite `dejaCloud.ts` listeners as RTDB SSE streams), but no Cloud Function dependency at runtime.
->
-> Implementation phase will spike Path A first (less code change). If `signInWithIdToken` proves stable as an internal API, that's a Path C shortcut.
+This path uses 100% public Firebase JS SDK APIs (`signInWithCustomToken`, `initializeAuth`, `inMemoryPersistence`) — no internal SDK methods, no REST-API rewrite of Firestore/RTDB call sites.
 
-7. Set up auto-refresh: timer at `expires_in - 5min` to repeat steps 3–4 (transparently rotates the SDK's auth state)
+**Network dependency:** Each cold start and each ~55-min refresh requires a round-trip to `apps/install-api`. For a 24/7 server that's ~26 calls/day — well within Vercel's free-tier limits. If install-api is unreachable at startup, the server fails fast with a clear error. If unreachable mid-session, the existing ID token continues working until expiry (~1h grace).
 
 **`lastSeenAt` update:** On successful startup, write `users/{uid}/servers/{serverId}.lastSeenAt = serverTimestamp()`. Best-effort — failure is logged but doesn't block startup.
 
 ---
 
-### 4️⃣ Settings UI: Connected Servers view
+### 4️⃣ Settings UI: Connected Servers section
 
-**Location:** `apps/cloud/src/Settings/CliAuthView.vue` (or similar — fits existing Settings structure)
+**Location:** New child component `apps/cloud/src/Settings/ConnectedServers.vue`, mounted as a card within the existing single-page `apps/cloud/src/Settings/Settings.vue` at `/settings`.
 
-**Route:** `/settings/cli-auth` (or `/settings/servers` — match existing settings naming pattern)
+**Why a card, not a sub-route:** The existing `Settings.vue` is a single page composed of cards (subscription, theme, layout tags, port list, server-setup info). The CLI Auth UI fits the same pattern — slot in another card, no router change needed.
 
 **Data binding:** `useCollection(collection(db, 'users', uid, 'servers'))` — VueFire reactive list.
 
@@ -383,15 +434,16 @@ Next: log in to your DEJA account:
 
 ---
 
-## 🚧 Open Implementation Questions
+## ✅ Resolved Implementation Questions
 
-These will be resolved during the implementation spike — flagging now:
+1. **Firebase JS SDK auth-state restoration on Node.js across cold starts.**
+   → **Decided: `signInWithCustomToken` for cold starts** (Path A). Adds a `/api/cli-auth/refresh` endpoint that re-mints custom tokens from refresh tokens. Uses 100% public Firebase APIs.
 
-1. **Firebase JS SDK auth-state restoration on Node.js across cold starts.** The recommended path (`signInWithCustomToken` only, with refresh via a new Cloud Function) is robust but adds a network round-trip per server start. Alternative paths (REST APIs, internal SDK methods) trade complexity for fewer dependencies. Pick after a 1-day spike at the start of implementation.
+2. **CI refresh-token generation tooling.**
+   → **Decided: `deja login --output-token`** prints the refresh token to stdout (no config write). Pipe into `gh secret set DEJA_REFRESH_TOKEN`.
 
-2. **CI refresh-token generation tooling.** Does `deja login --output-token` write the token to stdout (for piping into a CI secret)? Or use a separate `deja auth export` command? Decide during CLI implementation.
-
-3. **Whether the cloud app already has a `/settings` route structure.** If yes, slot the new view in. If no, this design adds the structure.
+3. **Cloud app `/settings` route structure.**
+   → **Confirmed: route exists at `/settings`** (`apps/cloud/src/Settings/Settings.vue`). Single-page card layout. New CLI Auth UI slots in as another card via a child component.
 
 ---
 
