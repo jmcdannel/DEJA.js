@@ -4,14 +4,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@vercel/blob": "^0.27.1",
-    "@vercel/node": "^5.0.0"
+    "@vercel/node": "^5.0.0",
+    "firebase-admin": "^13.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.5"
   }
 }
