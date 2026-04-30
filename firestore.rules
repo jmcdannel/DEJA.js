@@ -14,34 +14,45 @@ service cloud.firestore {
         get(/databases/$(database)/documents/layouts/$(layoutId)).data.owner == request.auth.token.email;
     }
 
+    // Helper: Soft-revoke check for server credentials.
+    // When a token carries a serverId claim (i.e. minted via /api/cli-auth/mint),
+    // verify that the server doc still exists and isn't revoked.
+    function isServerRevoked() {
+      return request.auth.token.serverId != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)/servers/$(request.auth.token.serverId)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)/servers/$(request.auth.token.serverId)).data.revoked == true;
+    }
+
     // Layouts collection
     match /layouts/{layoutId} {
       // Anyone authenticated can list layouts (filtered client-side by owner)
       allow read: if isAuth();
       // Only the owner can write their layout
       allow create: if isAuth() && request.resource.data.owner == request.auth.token.email;
-      allow update, delete: if isLayoutOwner(layoutId);
+      allow update, delete: if isLayoutOwner(layoutId) && !isServerRevoked();
 
       // Locos - only layout owner can read/write
       match /locos/{locoId} {
-        allow read, write: if isLayoutOwner(layoutId);
+        allow read: if isLayoutOwner(layoutId);
+        allow write: if isLayoutOwner(layoutId) && !isServerRevoked();
       }
 
       // Throttles - layout owner can read/write
       match /throttles/{throttleId} {
-        allow read, write: if isLayoutOwner(layoutId);
+        allow read: if isLayoutOwner(layoutId);
+        allow write: if isLayoutOwner(layoutId) && !isServerRevoked();
       }
 
       // Turnouts - layout owner can read/write
       match /turnouts/{turnoutId} {
         allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
+        allow write: if isLayoutOwner(layoutId) && !isServerRevoked();
       }
 
       // Signals - layout owner can read/write
       match /signals/{signalId} {
         allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
+        allow write: if isLayoutOwner(layoutId) && !isServerRevoked();
       }
 
       // Effects - guests can read effects with allowGuest=true
@@ -52,56 +63,63 @@ service cloud.firestore {
           && resource.data.allowGuest == true
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['state', 'timestamp']);
         // Full write for layout owner
-        allow create, delete: if isLayoutOwner(layoutId);
-        allow update: if isLayoutOwner(layoutId);
+        allow create, delete: if isLayoutOwner(layoutId) && !isServerRevoked();
+        allow update: if isLayoutOwner(layoutId) && !isServerRevoked();
       }
 
       // Routes - layout owner can manage, authenticated can read
       match /routes/{routeId} {
         allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
+        allow write: if isLayoutOwner(layoutId) && !isServerRevoked();
       }
 
       // Devices - layout owner only
       match /devices/{deviceId} {
         allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
+        allow write: if isLayoutOwner(layoutId) && !isServerRevoked();
       }
 
       // Tags - layout owner only
       match /tags/{tagId} {
         allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
+        allow write: if isLayoutOwner(layoutId) && !isServerRevoked();
       }
 
       // Track diagrams - layout owner only
       match /trackDiagrams/{diagramId} {
         allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
+        allow write: if isLayoutOwner(layoutId) && !isServerRevoked();
       }
 
       // Sensors - layout owner only
       match /sensors/{sensorId} {
         allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
+        allow write: if isLayoutOwner(layoutId) && !isServerRevoked();
       }
 
       // Blocks - layout owner only
       match /blocks/{blockId} {
         allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
+        allow write: if isLayoutOwner(layoutId) && !isServerRevoked();
       }
 
       // Automations - layout owner only
       match /automations/{automationId} {
         allow read: if isAuth();
-        allow write: if isLayoutOwner(layoutId);
+        allow write: if isLayoutOwner(layoutId) && !isServerRevoked();
       }
     }
 
     // User preferences (backgrounds, settings, subscription) — each user owns their doc
     match /users/{userId} {
       allow read, write: if isAuth() && request.auth.uid == userId;
+
+      // Connected DEJA servers — managed by the user from Settings → Connected Servers.
+      // Each entry pairs a serverId (ULID, set as a custom claim on server tokens) to
+      // a name + lastSeenAt + revoked flag. Used by isServerRevoked() above.
+      match /servers/{serverId} {
+        allow read, write: if isAuth() && request.auth.uid == userId;
+      }
     }
 
     // Approval requests — authenticated users can create/read their own
