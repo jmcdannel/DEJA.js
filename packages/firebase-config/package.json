@@ -10,7 +10,8 @@
     ".": "./src/index.ts",
     "./firebase": "./src/firebase.ts",
     "./firebase-node": "./src/firebase-node.ts",
-    "./firebase-admin-node": "./src/firebase-admin-node.ts"
+    "./firebase-admin-node": "./src/firebase-admin-node.ts",
+    "./firebase-user-node": "./src/firebase-user-node.ts"
   },
   "dependencies": {
     "firebase": "^10.14.1"
@@ -24,6 +25,7 @@
     "@repo/typescript-config": "workspace:*",
     "dotenv": "^16.3.1",
     "firebase-admin": "^13.4.0",
-    "typescript": "*"
+    "typescript": "*",
+    "vitest": "^4.1.5"
   }
 }
