@@ -10,6 +10,7 @@ import { useDisplay } from 'vuetify'
 import { PageHeader } from '@repo/ui'
 import LayoutTags from '@/Layout/LayoutTags.vue'
 import PortList from '@/Layout/PortList.vue'
+import ConnectedServers from './ConnectedServers.vue'
 
 const user = useCurrentUser()
 const { plan, status, isTrialing, trialDaysLeft, subscription } = useSubscription()
@@ -95,6 +96,7 @@ const sections = [
   { id: 'account', label: 'Account', icon: 'mdi-account-circle-outline' },
   { id: 'billing', label: 'Billing', icon: 'mdi-credit-card-outline' },
   { id: 'appearance', label: 'Appearance', icon: 'mdi-palette-outline' },
+  { id: 'servers', label: 'Connected Servers', icon: 'mdi-server-network' },
   { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'layout', label: 'Layout', icon: 'mdi-floor-plan' },
   { id: 'backgrounds', label: 'Backgrounds', icon: 'mdi-image-outline' },
@@ -183,6 +185,11 @@ function scrollTo(id: string) {
               </v-btn-toggle>
             </div>
           </div>
+        </div>
+
+        <!-- Connected Servers -->
+        <div id="servers" class="settings-section">
+          <ConnectedServers />
         </div>
 
         <!-- Server Setup -->
