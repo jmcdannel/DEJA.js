@@ -720,6 +720,7 @@ cmd_help() {
   echo -e "    ${CYAN}status${NC}         📊 Show server status and connections"
   echo -e "    ${CYAN}logs${NC} [-f]      📋 View server logs (-f to follow)"
   echo -e "    ${CYAN}update${NC}         ⬇️  Update to the latest version"
+  echo -e "    ${CYAN}login${NC}          🔑 Connect this server to your DEJA account"
   echo ""
   echo -e "  ${BOLD}📟 Device Deployment${NC}"
   echo -e "    ${CYAN}deploy${NC}         📟 Deploy firmware to Arduino or Pico W device"
@@ -743,6 +744,25 @@ cmd_help() {
   echo ""
 }
 
+cmd_login() {
+  local node_helper="${SERVER_DIR}/login.mjs"
+  if [ ! -f "${node_helper}" ]; then
+    node_helper="$(dirname "$0")/../tui/lib/login.mjs"
+  fi
+  if [ ! -f "${node_helper}" ]; then
+    err "login.mjs helper not found"
+    return 1
+  fi
+  print_banner
+  echo ""
+  info "🔑 Connect this server to your DEJA account"
+  info "   1. Visit https://cloud.dejajs.com/settings"
+  info "   2. Click 'Connect a new server'"
+  info "   3. Copy the token and paste below"
+  echo ""
+  node "${node_helper}" "$@"
+}
+
 # ======================================================================
 # 🚂 Main
 # ======================================================================
@@ -754,6 +774,7 @@ case "${1:-}" in
   status)   shift; cmd_status "$@" ;;
   logs)     shift; cmd_logs "$@" ;;
   update)   shift; cmd_update "$@" ;;
+  login)    shift; cmd_login "$@" ;;
   tunnel)   shift; cmd_tunnel "$@" ;;
   deploy)   shift; cmd_deploy "$@" ;;
   --version|-v)
