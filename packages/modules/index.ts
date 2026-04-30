@@ -57,6 +57,9 @@ export * from './onboarding'
 // Promotions
 export * from './promotions'
 
+// Servers (connected DEJA servers per user)
+export * from './servers'
+
 // CV module
 export * from './cv/types'
 export * from './cv/constants'
