@@ -19,7 +19,6 @@ service cloud.firestore {
     // verify that the server doc still exists and isn't revoked.
     function isServerRevoked() {
       return request.auth.token.serverId != null &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)/servers/$(request.auth.token.serverId)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)/servers/$(request.auth.token.serverId)).data.revoked == true;
     }
 

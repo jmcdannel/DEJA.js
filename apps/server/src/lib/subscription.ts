@@ -113,11 +113,11 @@ export async function readConfig(): Promise<DejaConfig> {
   return config as unknown as DejaConfig
 }
 
-export async function writeConfigCache(subscription: CachedSubscription): Promise<void> {
+export async function writeConfigCache(updates: Partial<DejaConfig>): Promise<void> {
   const configPath = getConfigPath()
   const raw = await readFile(configPath, 'utf8')
   const config = JSON.parse(raw) as DejaConfig
-  config.subscription = subscription
+  Object.assign(config, updates)
   const dir = join(homedir(), '.deja')
   if (!existsSync(dir)) {
     await mkdir(dir, { recursive: true })
@@ -174,7 +174,7 @@ export async function validateSubscription(): Promise<void> {
         plan: result.plan,
         validatedAt: new Date().toISOString(),
       }
-      await writeConfigCache(cache)
+      await writeConfigCache({ subscription: cache })
       log.success(`Subscription valid: ${result.status} (${result.plan})`)
       return
     }
@@ -221,7 +221,7 @@ export function startPeriodicRecheck(uid: string): void {
           plan: result.plan,
           validatedAt: new Date().toISOString(),
         }
-        await writeConfigCache(cache)
+        await writeConfigCache({ subscription: cache })
         log.info(`Subscription re-check passed: ${result.status}`)
       } else {
         // Denied — warn but do NOT shut down mid-session
@@ -231,9 +231,11 @@ export function startPeriodicRecheck(uid: string): void {
           'Visit https://dejajs.com to renew.',
         )
         await writeConfigCache({
-          status: result.status,
-          plan: result.plan,
-          validatedAt: new Date().toISOString(),
+          subscription: {
+            status: result.status,
+            plan: result.plan,
+            validatedAt: new Date().toISOString(),
+          },
         })
       }
     } catch {

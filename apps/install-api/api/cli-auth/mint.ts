@@ -51,20 +51,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const serverId = generateUlid()
 
   try {
-    await db
-      .collection('users').doc(uid)
-      .collection('servers').doc(serverId)
-      .set({
-        name,
-        createdAt: FieldValue.serverTimestamp(),
-        lastSeenAt: null,
-        revoked: false,
-      })
-
-    const customToken = await auth.createCustomToken(uid, {
-      serverId,
-      kind: 'server',
-    })
+    const [, customToken] = await Promise.all([
+      db
+        .collection('users').doc(uid)
+        .collection('servers').doc(serverId)
+        .set({
+          name,
+          createdAt: FieldValue.serverTimestamp(),
+          lastSeenAt: null,
+          revoked: false,
+        }),
+      auth.createCustomToken(uid, {
+        serverId,
+        kind: 'server',
+      }),
+    ])
 
     return res.status(200).json({ customToken, serverId })
   } catch (err) {

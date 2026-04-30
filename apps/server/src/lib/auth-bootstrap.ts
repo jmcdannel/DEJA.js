@@ -67,7 +67,7 @@ export async function bootstrapAuth(): Promise<{ uid: string }> {
 
   if (rotated && rotated !== refreshToken) {
     try {
-      await writeConfigCache({ refreshToken: rotated } as never)
+      await writeConfigCache({ refreshToken: rotated })
     } catch (err) {
       log.warn('Failed to persist rotated refresh token (non-fatal):', err)
     }

@@ -94,7 +94,7 @@ describe('writeConfigCache', () => {
         layoutId: 'my-layout',
       }),
     })
-    await writeConfigCache({ status: 'active', plan: 'engineer', validatedAt: '2026-03-12T10:00:00Z' })
+    await writeConfigCache({ subscription: { status: 'active', plan: 'engineer', validatedAt: '2026-03-12T10:00:00Z' } })
     const raw = vol.readFileSync('/home/testuser/.deja/config.json', 'utf8') as string
     const config = JSON.parse(raw)
     expect(config.subscription.status).toBe('active')

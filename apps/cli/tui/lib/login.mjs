@@ -1,27 +1,9 @@
 import { initializeApp, getApps } from 'firebase/app'
 import { initializeAuth, inMemoryPersistence, signInWithCustomToken } from 'firebase/auth'
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
-import { homedir } from 'node:os'
-import { join, dirname } from 'node:path'
 import { createInterface } from 'node:readline/promises'
 import { stdin, stdout, stderr, argv, exit } from 'node:process'
-
-const DEJA_DIR = process.env.DEJA_DIR || join(homedir(), '.deja')
-const CONFIG_FILE = join(DEJA_DIR, 'config.json')
-const ENV_FILE = join(DEJA_DIR, '.env')
-
-function loadEnv() {
-  if (!existsSync(ENV_FILE)) return
-  for (const line of readFileSync(ENV_FILE, 'utf8').split('\n')) {
-    const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('#')) continue
-    const eq = trimmed.indexOf('=')
-    if (eq === -1) continue
-    const key = trimmed.slice(0, eq).trim()
-    const val = trimmed.slice(eq + 1).trim().replace(/^["']|["']$/g, '')
-    if (!process.env[key]) process.env[key] = val
-  }
-}
+import { join } from 'node:path'
+import { loadEnvFile, DEJA_DIR, readConfig, writeConfig } from './config.mjs'
 
 function parseArgs(args) {
   const result = { token: null, outputToken: false }
@@ -50,19 +32,8 @@ async function readTokenFromStdin() {
   return answer.trim()
 }
 
-function readConfig() {
-  try { return JSON.parse(readFileSync(CONFIG_FILE, 'utf8')) }
-  catch { return {} }
-}
-
-function writeConfig(updates) {
-  const merged = { ...readConfig(), ...updates }
-  if (!existsSync(dirname(CONFIG_FILE))) mkdirSync(dirname(CONFIG_FILE), { recursive: true })
-  writeFileSync(CONFIG_FILE, JSON.stringify(merged, null, 2))
-}
-
 async function main() {
-  loadEnv()
+  loadEnvFile(join(DEJA_DIR, '.env'))
   const { token: tokenArg, outputToken } = parseArgs(argv.slice(2))
 
   const apiKey = process.env.VITE_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY
