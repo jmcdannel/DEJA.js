@@ -45,8 +45,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ error: 'Invalid or expired ID token' })
   }
 
-  const name = normalizeName((req.body as { name?: unknown } | null)?.name)
+  const body = req.body as { name?: unknown; layoutId?: unknown } | null
+  const name = normalizeName(body?.name)
   if (!name) return res.status(400).json({ error: 'name is required (1-60 chars)' })
+
+  const layoutId = typeof body?.layoutId === 'string' ? body.layoutId.trim() : null
+  if (!layoutId) return res.status(400).json({ error: 'layoutId is required' })
 
   const serverId = generateUlid()
 
@@ -57,6 +61,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .collection('servers').doc(serverId)
         .set({
           name,
+          layoutId,
           createdAt: FieldValue.serverTimestamp(),
           lastSeenAt: null,
           revoked: false,

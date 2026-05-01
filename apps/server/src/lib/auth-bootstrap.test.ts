@@ -1,18 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const { mockExchange, mockInit, mockReadConfig, mockWriteConfigCache } = vi.hoisted(() => ({
+const { mockExchange, mockInit, mockReadConfig, mockWriteConfigCache, mockGetDb } = vi.hoisted(() => ({
   mockExchange: vi.fn(),
   mockInit: vi.fn(),
   mockReadConfig: vi.fn(),
   mockWriteConfigCache: vi.fn(),
+  mockGetDb: vi.fn(),
 }))
 
 vi.mock('@repo/firebase-config/firebase-user-node', () => ({
   exchangeRefreshTokenForCustomToken: mockExchange,
   initFirebaseUserAuth: mockInit,
+  getDb: mockGetDb,
   AuthMissingError: class AuthMissingError extends Error {
     constructor(m: string) { super(m); this.name = 'AuthMissingError' }
   },
+}))
+
+vi.mock('firebase/firestore', () => ({
+  doc: vi.fn(),
+  getDoc: vi.fn().mockResolvedValue({ data: () => ({ layoutId: 'test-layout' }) }),
 }))
 vi.mock('./subscription.js', () => ({
   readConfig: mockReadConfig,
@@ -36,7 +43,7 @@ describe('bootstrapAuth', () => {
   it('uses DEJA_REFRESH_TOKEN env var when present', async () => {
     process.env.DEJA_REFRESH_TOKEN = 'env-token'
     mockExchange.mockResolvedValueOnce({ customToken: 'ct', expiresIn: 3600, refreshToken: 'rt' })
-    mockInit.mockResolvedValueOnce({ uid: 'u', refreshToken: 'rt' })
+    mockInit.mockResolvedValueOnce({ uid: 'u', refreshToken: 'rt', claims: { serverId: 'srv-1', kind: 'server' } })
     await bootstrapAuth()
     expect(mockExchange).toHaveBeenCalledWith(
       expect.objectContaining({ refreshToken: 'env-token' }),
@@ -48,7 +55,7 @@ describe('bootstrapAuth', () => {
     delete process.env.DEJA_REFRESH_TOKEN
     mockReadConfig.mockResolvedValueOnce({ uid: 'u', refreshToken: 'cfg-token' })
     mockExchange.mockResolvedValueOnce({ customToken: 'ct', expiresIn: 3600, refreshToken: 'rt' })
-    mockInit.mockResolvedValueOnce({ uid: 'u', refreshToken: 'rt' })
+    mockInit.mockResolvedValueOnce({ uid: 'u', refreshToken: 'rt', claims: { serverId: 'srv-1', kind: 'server' } })
     await bootstrapAuth()
     expect(mockExchange).toHaveBeenCalledWith(
       expect.objectContaining({ refreshToken: 'cfg-token' }),
@@ -59,7 +66,7 @@ describe('bootstrapAuth', () => {
     delete process.env.DEJA_REFRESH_TOKEN
     mockReadConfig.mockResolvedValueOnce({ uid: 'u', refreshToken: 'old' })
     mockExchange.mockResolvedValueOnce({ customToken: 'ct', expiresIn: 3600, refreshToken: 'new-rt' })
-    mockInit.mockResolvedValueOnce({ uid: 'u', refreshToken: 'new-rt' })
+    mockInit.mockResolvedValueOnce({ uid: 'u', refreshToken: 'new-rt', claims: { serverId: 'srv-1', kind: 'server' } })
     await bootstrapAuth()
     expect(mockWriteConfigCache).toHaveBeenCalledWith(
       expect.objectContaining({ refreshToken: 'new-rt' }),

@@ -4,6 +4,31 @@ import { db } from './lib/firebase'
 import { stripe, getPriceId } from './lib/stripe'
 import { verifyFirebaseAuth } from './lib/verifyFirebaseAuth'
 
+async function findOrCreateCustomer(
+  uid: string,
+  email: string | undefined,
+  cachedCustomerId: string | undefined,
+): Promise<string> {
+  if (cachedCustomerId) {
+    const existing = await stripe.customers.retrieve(cachedCustomerId)
+    if (!existing.deleted) return cachedCustomerId
+  }
+
+  // catches orphaned customers whose Firestore ref was lost
+  const byMetadata = await stripe.customers.search({
+    query: `metadata["firebaseUid"]:"${uid}"`,
+  })
+  if (byMetadata.data.length > 0 && !byMetadata.data[0].deleted) {
+    return byMetadata.data[0].id
+  }
+
+  const customer = await stripe.customers.create({
+    email,
+    metadata: { firebaseUid: uid },
+  })
+  return customer.id
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -29,26 +54,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Invalid plan. Must be engineer or conductor.' })
   }
 
-  // Get user email from Firestore
+  // Check if user already has an active subscription (prevents double-charge on retry)
   const userDoc = await db.doc(`users/${uid}`).get()
-  const email = userDoc.data()?.email as string | undefined
+  const existingSub = userDoc.data()?.subscription
+  if (existingSub?.stripeSubscriptionId && existingSub?.status !== 'canceled') {
+    return res.status(200).json({
+      subscriptionId: existingSub.stripeSubscriptionId,
+      status: existingSub.status,
+      clientSecret: null,
+    })
+  }
 
-  let customer: { id: string } | null = null
+  const email = userDoc.data()?.email as string | undefined
+  let customerId: string | null = null
 
   try {
-    customer = await stripe.customers.create({
-      email,
-      metadata: { firebaseUid: uid },
-    })
+    customerId = await findOrCreateCustomer(uid, email, existingSub?.stripeCustomerId)
 
-    await stripe.paymentMethods.attach(paymentMethodId, { customer: customer.id })
-    await stripe.customers.update(customer.id, {
+    await stripe.paymentMethods.attach(paymentMethodId, { customer: customerId })
+    await stripe.customers.update(customerId, {
       invoice_settings: { default_payment_method: paymentMethodId },
     })
 
     const priceId = getPriceId(plan, billingCycle)
     const subscription = await stripe.subscriptions.create({
-      customer: customer.id,
+      customer: customerId,
       items: [{ price: priceId }],
       trial_period_days: 14,
       payment_settings: {
@@ -65,7 +95,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       plan,
       status: subscription.status,
       billingCycle,
-      stripeCustomerId: customer.id,
+      stripeCustomerId: customerId,
       stripeSubscriptionId: subscription.id,
       trialEndsAt: trialEnd,
       currentPeriodEnd: periodEnd,
@@ -88,9 +118,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       clientSecret,
     })
   } catch (err) {
-    if (customer) {
-      try { await stripe.customers.del(customer.id) } catch { /* ignore cleanup errors */ }
-    }
     const message = err instanceof Error ? err.message : 'Subscription creation failed'
     return res.status(400).json({ error: message })
   }

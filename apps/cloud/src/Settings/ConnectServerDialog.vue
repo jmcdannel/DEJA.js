@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useCurrentUser } from 'vuefire'
 import { getIdToken } from 'firebase/auth'
 
-const props = defineProps<{ modelValue: boolean }>()
+const props = defineProps<{ modelValue: boolean; layoutId?: string }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
 const user = useCurrentUser()
 
 const step = ref<1 | 2>(1)
-const name = ref('My Server')
+const name = ref(`${props.layoutId || 'server'}-deja`)
 const customToken = ref('')
 const loading = ref(false)
 const errorMsg = ref('')
@@ -19,7 +19,7 @@ const apiBase = import.meta.env.VITE_INSTALL_API_BASE || 'https://install.dejajs
 watch(() => props.modelValue, (open) => {
   if (open) {
     step.value = 1
-    name.value = 'My Server'
+    name.value = `${props.layoutId || 'server'}-deja`
     customToken.value = ''
     errorMsg.value = ''
   }
@@ -37,7 +37,7 @@ async function generate() {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${idToken}`,
       },
-      body: JSON.stringify({ name: name.value }),
+      body: JSON.stringify({ name: name.value, layoutId: props.layoutId }),
     })
     if (!res.ok) {
       const data = await res.json().catch(() => ({}))
@@ -53,10 +53,15 @@ async function generate() {
   }
 }
 
-const cliCommand = () => `deja login --token ${customToken.value}`
+const installCommand = computed(() => `curl -fsSL https://install.dejajs.com | bash -s -- --token ${customToken.value}`)
+const loginCommand = computed(() => `deja login --token ${customToken.value}`)
 
-async function copyCommand() {
-  await navigator.clipboard.writeText(cliCommand())
+async function copyInstall() {
+  await navigator.clipboard.writeText(installCommand.value)
+}
+
+async function copyLogin() {
+  await navigator.clipboard.writeText(loginCommand.value)
 }
 
 function close() {
@@ -89,11 +94,19 @@ function close() {
           </v-alert>
         </template>
         <template v-else>
-          <p class="mb-2">Paste this command into your server's terminal:</p>
+          <p class="mb-2 font-weight-medium">New install? Run this on your server:</p>
           <v-textarea
-            :model-value="cliCommand()"
+            :model-value="installCommand"
             readonly
-            rows="3"
+            rows="2"
+            variant="outlined"
+            class="font-mono mb-4"
+          />
+          <p class="mb-2 text-medium-emphasis text-body-2">Already installed? Just log in:</p>
+          <v-textarea
+            :model-value="loginCommand"
+            readonly
+            rows="1"
             variant="outlined"
             class="font-mono"
           />
@@ -116,7 +129,8 @@ function close() {
           </v-btn>
         </template>
         <template v-else>
-          <v-btn variant="text" @click="copyCommand">Copy command</v-btn>
+          <v-btn variant="text" @click="copyInstall">Copy install</v-btn>
+          <v-btn variant="text" @click="copyLogin">Copy login</v-btn>
           <v-btn color="primary" @click="close">Done</v-btn>
         </template>
       </v-card-actions>

@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 
 const props = defineProps<{
+  token?: string
   uid?: string | null
   layoutId?: string
 }>()
@@ -9,6 +10,9 @@ const props = defineProps<{
 const copiedInstall = ref(false)
 
 const installCommand = computed(() => {
+  if (props.token) {
+    return `curl -fsSL https://install.dejajs.com | bash -s -- --token ${props.token}`
+  }
   const params = new URLSearchParams()
   if (props.uid) params.set('uid', props.uid)
   if (props.layoutId) params.set('layout', props.layoutId)

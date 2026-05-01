@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCurrentUser, useCollection } from 'vuefire'
 import { doc, setDoc, serverTimestamp, collection, query, where } from 'firebase/firestore'
@@ -16,7 +16,15 @@ const router = useRouter()
 const route = useRoute()
 const user = useCurrentUser()
 const currentStep = ref(1)
-const { state: onboardingState, setLayoutNamed, setPlanSelected, setInstallStarted } = useOnboarding()
+const stateLoading = ref(true)
+const {
+  state: onboardingState,
+  ready: onboardingReady,
+  setLayoutNamed,
+  setPlanSelected,
+  setPaymentComplete,
+  setInstallStarted,
+} = useOnboarding()
 
 const userLayouts = useCollection(
   computed(() =>
@@ -34,15 +42,28 @@ const pendingLayoutId = ref('')
 const selectedPlan = ref<PlanTier>('hobbyist')
 const selectedBillingCycle = ref<BillingCycle>('monthly')
 
-// Restore state from Firestore if user returns mid-onboarding
-onMounted(() => {
+// Restore state from Firestore once the document loads.
+// VueFire's useDocument starts as undefined, then resolves — onMounted is too early.
+watch(onboardingReady, (isReady) => {
+  if (!isReady) return
+
   const os = onboardingState.value
+
   if (os.layoutNamed && os.pendingLayoutName && os.pendingLayoutId) {
     pendingLayoutName.value = os.pendingLayoutName
     pendingLayoutId.value = os.pendingLayoutId
 
-    if (os.planSelected) {
+    if (os.pendingPlan && TIER_ORDER.includes(os.pendingPlan)) {
+      selectedPlan.value = os.pendingPlan
+    }
+    if (os.pendingBillingCycle) {
+      selectedBillingCycle.value = os.pendingBillingCycle
+    }
+
+    if (os.planSelected && (os.paymentComplete || selectedPlan.value === 'hobbyist')) {
       currentStep.value = 4
+    } else if (os.planSelected && !os.paymentComplete && selectedPlan.value !== 'hobbyist') {
+      currentStep.value = 3
     } else {
       currentStep.value = 2
     }
@@ -57,7 +78,9 @@ onMounted(() => {
       selectedBillingCycle.value = billingParam
     }
   }
-})
+
+  stateLoading.value = false
+}, { once: true })
 
 // Smooth scroll to top + mark install step on step change
 watch(currentStep, (step) => {
@@ -79,7 +102,7 @@ function handleNameComplete(payload: { name: string; id: string }) {
 function handlePlanComplete(payload: { plan: PlanTier; billingCycle: BillingCycle | null }) {
   selectedPlan.value = payload.plan
   selectedBillingCycle.value = payload.billingCycle ?? 'monthly'
-  setPlanSelected()
+  setPlanSelected(payload.plan, payload.billingCycle ?? 'monthly')
 
   if (payload.plan === 'hobbyist') {
     if (user.value) {
@@ -99,6 +122,7 @@ function handlePlanComplete(payload: { plan: PlanTier; billingCycle: BillingCycl
           updatedAt: serverTimestamp(),
         },
       }, { merge: true })
+      setPaymentComplete()
     }
     currentStep.value = 4
   } else {
@@ -108,6 +132,7 @@ function handlePlanComplete(payload: { plan: PlanTier; billingCycle: BillingCycl
 
 // Step 3: Payment complete
 function handlePaymentComplete() {
+  setPaymentComplete()
   currentStep.value = 4
 }
 
@@ -143,44 +168,54 @@ const trackerStep = computed(() => {
       </p>
     </div>
 
-    <DejaTracker
-      v-if="currentStep < 4"
-      :active-step="trackerStep"
-      compact
-      class="mb-8"
-    />
-
-    <Transition name="step-fade" mode="out-in">
-      <div :key="currentStep">
-        <!-- Step 1: Name your layout -->
-        <NameLayoutStep v-if="currentStep === 1" @complete="handleNameComplete" />
-
-        <!-- Step 2: Choose a plan (or skip) -->
-        <PlanStep v-else-if="currentStep === 2" @complete="handlePlanComplete" />
-
-        <!-- Step 3: Payment (paid plans only) -->
-        <template v-else-if="currentStep === 3">
-          <PaymentStep
-            v-if="selectedPlan !== 'hobbyist'"
-            :plan="selectedPlan"
-            :billing-cycle="selectedBillingCycle"
-            @complete="handlePaymentComplete"
-          />
-          <div v-else class="text-center py-8 opacity-60">
-            No payment required for the Hobbyist plan.
-          </div>
-        </template>
-
-        <!-- Step 4: Install (creates layout + starts server detection) -->
-        <InstallStep
-          v-else-if="currentStep === 4"
-          :uid="user?.uid"
-          :layout-id="pendingLayoutId || primaryLayoutId"
-          :layout-name="pendingLayoutName"
-          @complete="handleInstallComplete"
-        />
+    <!-- Loading state while Firestore hydrates -->
+    <template v-if="stateLoading">
+      <div class="flex flex-col items-center justify-center py-16 gap-4">
+        <v-progress-circular size="40" width="3" indeterminate color="primary" />
+        <p class="text-sm opacity-50">Loading your progress...</p>
       </div>
-    </Transition>
+    </template>
+
+    <template v-else>
+      <DejaTracker
+        v-if="currentStep < 4"
+        :active-step="trackerStep"
+        compact
+        class="mb-8"
+      />
+
+      <Transition name="step-fade" mode="out-in">
+        <div :key="currentStep">
+          <!-- Step 1: Name your layout -->
+          <NameLayoutStep v-if="currentStep === 1" @complete="handleNameComplete" />
+
+          <!-- Step 2: Choose a plan (or skip) -->
+          <PlanStep v-else-if="currentStep === 2" @complete="handlePlanComplete" />
+
+          <!-- Step 3: Payment (paid plans only) -->
+          <template v-else-if="currentStep === 3">
+            <PaymentStep
+              v-if="selectedPlan !== 'hobbyist'"
+              :plan="selectedPlan"
+              :billing-cycle="selectedBillingCycle"
+              @complete="handlePaymentComplete"
+            />
+            <div v-else class="text-center py-8 opacity-60">
+              No payment required for the Hobbyist plan.
+            </div>
+          </template>
+
+          <!-- Step 4: Install (creates layout + starts server detection) -->
+          <InstallStep
+            v-else-if="currentStep === 4"
+            :uid="user?.uid"
+            :layout-id="pendingLayoutId || primaryLayoutId"
+            :layout-name="pendingLayoutName"
+            @complete="handleInstallComplete"
+          />
+        </div>
+      </Transition>
+    </template>
   </v-container>
 </template>
 

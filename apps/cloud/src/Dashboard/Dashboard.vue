@@ -17,6 +17,7 @@ import { rtdb } from '@repo/firebase-config'
 import { useStorage } from '@vueuse/core'
 import { formatUptime } from '@repo/utils'
 import { useCommandActivity } from '@/DCCEX/composables/useCommandActivity'
+import ConnectServerDialog from '@/Settings/ConnectServerDialog.vue'
 
 const router = useRouter()
 const user = useCurrentUser()
@@ -101,6 +102,8 @@ function navigateToAddDevice() {
 async function handleAddLoco(address: number, name: string) {
   await createLoco(address, name, undefined, true)
 }
+
+const connectDialogOpen = ref(false)
 </script>
 
 <template>
@@ -126,6 +129,7 @@ async function handleAddLoco(address: number, name: string) {
       :layout-id="layoutId"
       :server-online="serverStatus?.online ?? false"
       @add-loco="handleAddLoco"
+      @connect-server="connectDialogOpen = true"
     />
 
     <!-- Active Dashboard -->
@@ -169,4 +173,5 @@ async function handleAddLoco(address: number, name: string) {
       </v-col>
     </v-row>
   </v-container>
+  <ConnectServerDialog v-model="connectDialogOpen" :layout-id="layoutId" />
 </template>

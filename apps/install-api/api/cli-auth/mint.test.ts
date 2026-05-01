@@ -35,7 +35,7 @@ function makeReq(overrides: Partial<VercelRequest> = {}): VercelRequest {
   return {
     method: 'POST',
     headers: { authorization: 'Bearer fake-id-token' },
-    body: { name: 'Basement Pi' },
+    body: { name: 'Basement Pi', layoutId: 'my-layout' },
     ...overrides,
   } as VercelRequest
 }
@@ -76,10 +76,18 @@ describe('POST /api/cli-auth/mint', () => {
   })
 
   it('returns 400 when name is missing or invalid', async () => {
-    const req = makeReq({ body: { name: '' } })
+    const req = makeReq({ body: { name: '', layoutId: 'my-layout' } })
     const res = makeRes()
     await handler(req, res)
     expect(res._status).toBe(400)
+  })
+
+  it('returns 400 when layoutId is missing', async () => {
+    const req = makeReq({ body: { name: 'Test' } })
+    const res = makeRes()
+    await handler(req, res)
+    expect(res._status).toBe(400)
+    expect((res._body as { error: string }).error).toContain('layoutId')
   })
 
   it('mints a custom token with serverId and kind=server claims', async () => {
@@ -96,13 +104,14 @@ describe('POST /api/cli-auth/mint', () => {
     expect(body.serverId).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/)
   })
 
-  it('writes a server doc with name, createdAt, lastSeenAt=null, revoked=false', async () => {
+  it('writes a server doc with name, layoutId, createdAt, lastSeenAt=null, revoked=false', async () => {
     const req = makeReq()
     const res = makeRes()
     await handler(req, res)
     expect(mockSet).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'Basement Pi',
+        layoutId: 'my-layout',
         lastSeenAt: null,
         revoked: false,
       })
@@ -111,7 +120,7 @@ describe('POST /api/cli-auth/mint', () => {
 
   it('truncates names longer than 60 chars', async () => {
     const longName = 'x'.repeat(80)
-    const req = makeReq({ body: { name: longName } })
+    const req = makeReq({ body: { name: longName, layoutId: 'my-layout' } })
     const res = makeRes()
     await handler(req, res)
     expect(mockSet).toHaveBeenCalledWith(

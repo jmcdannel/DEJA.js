@@ -4,6 +4,7 @@ import { useDocument, useCurrentUser, useFirestore } from 'vuefire'
 import { useStorage } from '@vueuse/core'
 import { DEFAULT_ONBOARDING_STATE } from './constants'
 import type { OnboardingState } from './types'
+import type { PlanTier, BillingCycle } from '../plans/types'
 
 interface UserDocWithOnboarding {
   onboarding?: Partial<OnboardingState>
@@ -20,6 +21,9 @@ export function useOnboarding() {
   })
 
   const userDoc = useDocument<UserDocWithOnboarding>(userDocRef)
+
+  // `useDocument` returns `undefined` while loading, then the data (or null if missing)
+  const ready = computed(() => userDoc.value !== undefined)
 
   const state = computed<OnboardingState>(() => ({
     ...DEFAULT_ONBOARDING_STATE,
@@ -61,11 +65,26 @@ export function useOnboarding() {
     )
   }
 
-  async function setPlanSelected(): Promise<void> {
+  async function setPlanSelected(plan: PlanTier, billingCycle: BillingCycle | null): Promise<void> {
     if (!user.value || state.value.planSelected) return
     await setDoc(
       doc(db, 'users', user.value.uid),
-      { onboarding: { planSelected: true } },
+      {
+        onboarding: {
+          planSelected: true,
+          pendingPlan: plan,
+          pendingBillingCycle: billingCycle,
+        },
+      },
+      { merge: true }
+    )
+  }
+
+  async function setPaymentComplete(): Promise<void> {
+    if (!user.value || state.value.paymentComplete) return
+    await setDoc(
+      doc(db, 'users', user.value.uid),
+      { onboarding: { paymentComplete: true } },
       { merge: true }
     )
   }
@@ -95,12 +114,14 @@ export function useOnboarding() {
 
   return {
     state,
+    ready,
     needsInstall,
     needsLocos,
     isComplete,
     currentStepIndex,
     setLayoutNamed,
     setPlanSelected,
+    setPaymentComplete,
     setLayoutCreated,
     setInstallStarted,
   }

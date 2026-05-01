@@ -22,6 +22,7 @@ INSTALL_BASE_URL="https://install.dejajs.com"
 # --- Mode ---
 DEV_MODE=false
 DEV_REPO=""
+DEJA_TOKEN=""
 
 # --- Colors & Styles ---
 RED='\033[0;31m'
@@ -111,6 +112,18 @@ link_account() {
   echo -e "  ${BOLD}🔗 Linking account...${NC}"
   mkdir -p "${DEJA_DIR}"
 
+  # Token-based flow — write token to config, skip manual prompts
+  if [ -n "${DEJA_TOKEN}" ]; then
+    cat > "${CONFIG_FILE}" <<JSONEOF
+{
+  "customToken": "${DEJA_TOKEN}"
+}
+JSONEOF
+    chmod 600 "${CONFIG_FILE}"
+    ok "Server token saved"
+    return
+  fi
+
   # Skip if valid config already exists
   if [ -f "${CONFIG_FILE}" ]; then
     local existing_uid
@@ -165,10 +178,10 @@ setup_environment() {
   fi
 
   local layout_id
-  layout_id=$(grep -o '"layoutId"[[:space:]]*:[[:space:]]*"[^"]*"' "${CONFIG_FILE}" | sed 's/.*"layoutId"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' 2>/dev/null)
+  layout_id=$(grep -o '"layoutId"[[:space:]]*:[[:space:]]*"[^"]*"' "${CONFIG_FILE}" 2>/dev/null | sed 's/.*"layoutId"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' 2>/dev/null || echo "")
 
-  # Firebase client config — these are public client-side keys, safe to embed.
-  # Injected by CI at release time; placeholders here for development.
+  # Firebase client config — public client-side keys, safe to embed.
+  # CI replaces these placeholders at release time.
   local fb_api_key="__FIREBASE_API_KEY__"
   local fb_auth_domain="__FIREBASE_AUTH_DOMAIN__"
   local fb_project_id="__FIREBASE_PROJECT_ID__"
@@ -177,50 +190,76 @@ setup_environment() {
   local fb_messaging_id="__FIREBASE_MESSAGING_SENDER_ID__"
   local fb_app_id="__FIREBASE_APP_ID__"
 
-  # If placeholders are still present (dev/unreleased build), prompt for them
   if [[ "${fb_api_key}" == __* ]]; then
-    warn "Firebase config not embedded (development build). Prompting..."
-    echo ""
-    info "🔥 Enter your Firebase configuration"
-    info "   (from ${CYAN}https://cloud.dejajs.com → Settings → Install${NC})"
-    echo ""
-    read -rp "  VITE_FIREBASE_API_KEY: " fb_api_key < /dev/tty
-    read -rp "  VITE_FIREBASE_AUTH_DOMAIN: " fb_auth_domain < /dev/tty
-    read -rp "  VITE_FIREBASE_PROJECT_ID: " fb_project_id < /dev/tty
-    read -rp "  VITE_FIREBASE_DATABASE_URL: " fb_database_url < /dev/tty
-    read -rp "  VITE_FIREBASE_STORAGE_BUCKET: " fb_storage_bucket < /dev/tty
-    read -rp "  VITE_FIREBASE_MESSAGING_SENDER_ID: " fb_messaging_id < /dev/tty
-    read -rp "  VITE_FIREBASE_APP_ID: " fb_app_id < /dev/tty
+    # Dev build — try to read from repo .env file
+    local repo_env=""
+    if [ "${DEV_MODE}" = true ]; then
+      local repo_dir="${DEV_REPO}"
+      [ -z "${repo_dir}" ] && repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+      for ef in "${repo_dir}/.env" "${repo_dir}/.env.local"; do
+        [ -f "${ef}" ] && repo_env="${ef}" && break
+      done
+    fi
+
+    if [ -n "${repo_env}" ]; then
+      read_env_var() { grep "^${1}=" "${repo_env}" 2>/dev/null | head -1 | cut -d= -f2- | sed 's/^["'"'"']//;s/["'"'"']$//' || echo ""; }
+      fb_api_key=$(read_env_var VITE_FIREBASE_API_KEY)
+      fb_auth_domain=$(read_env_var VITE_FIREBASE_AUTH_DOMAIN)
+      fb_project_id=$(read_env_var VITE_FIREBASE_PROJECT_ID)
+      fb_database_url=$(read_env_var VITE_FIREBASE_DATABASE_URL)
+      fb_storage_bucket=$(read_env_var VITE_FIREBASE_STORAGE_BUCKET)
+      fb_messaging_id=$(read_env_var VITE_FIREBASE_MESSAGING_SENDER_ID)
+      fb_app_id=$(read_env_var VITE_FIREBASE_APP_ID)
+      ok "Firebase config loaded from ${repo_env}"
+    else
+      warn "Firebase config not embedded (development build). Prompting..."
+      echo ""
+      info "🔥 Enter your Firebase configuration"
+      info "   (from ${CYAN}https://cloud.dejajs.com → Settings → Install${NC})"
+      echo ""
+      read -rp "  VITE_FIREBASE_API_KEY: " fb_api_key < /dev/tty
+      read -rp "  VITE_FIREBASE_AUTH_DOMAIN: " fb_auth_domain < /dev/tty
+      read -rp "  VITE_FIREBASE_PROJECT_ID: " fb_project_id < /dev/tty
+      read -rp "  VITE_FIREBASE_DATABASE_URL: " fb_database_url < /dev/tty
+      read -rp "  VITE_FIREBASE_STORAGE_BUCKET: " fb_storage_bucket < /dev/tty
+      read -rp "  VITE_FIREBASE_MESSAGING_SENDER_ID: " fb_messaging_id < /dev/tty
+      read -rp "  VITE_FIREBASE_APP_ID: " fb_app_id < /dev/tty
+    fi
   else
     ok "Firebase client config embedded"
   fi
 
-  # Service account credentials — injected by CI at release time
-  local fb_client_email="__FIREBASE_CLIENT_EMAIL__"
-  local fb_private_key="__FIREBASE_PRIVATE_KEY__"
+  # Service account credentials — only needed for legacy (non-token) installs
+  local fb_client_email=""
+  local fb_private_key=""
 
-  if [[ "${fb_client_email}" == __* ]]; then
-    warn "Service account not embedded (development build)."
-    info "📄 Download your service account JSON from: ${CYAN}https://cloud.dejajs.com → Settings → Install${NC}"
-    echo ""
-    read -rp "  Path to service account JSON file (or press Enter to skip): " sa_json_path < /dev/tty
+  if [ -z "${DEJA_TOKEN}" ]; then
+    fb_client_email="__FIREBASE_CLIENT_EMAIL__"
+    fb_private_key="__FIREBASE_PRIVATE_KEY__"
 
-    fb_client_email=""
-    fb_private_key=""
+    if [[ "${fb_client_email}" == __* ]]; then
+      warn "Service account not embedded (development build)."
+      info "📄 Download your service account JSON from: ${CYAN}https://cloud.dejajs.com → Settings → Install${NC}"
+      echo ""
+      read -rp "  Path to service account JSON file (or press Enter to skip): " sa_json_path < /dev/tty
 
-    if [ -n "${sa_json_path}" ] && [ -f "${sa_json_path}" ]; then
-      fb_client_email=$(grep -o '"client_email"[[:space:]]*:[[:space:]]*"[^"]*"' "${sa_json_path}" | sed 's/.*"client_email"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
-      fb_private_key=$(grep -o '"private_key"[[:space:]]*:[[:space:]]*"[^"]*"' "${sa_json_path}" | sed 's/.*"private_key"[[:space:]]*:[[:space:]]*"\(.*\)".*/\1/')
-      ok "Service account loaded from ${sa_json_path}"
-    elif [ -n "${sa_json_path}" ]; then
-      err "File not found: ${sa_json_path}"
-      exit 1
+      fb_client_email=""
+      fb_private_key=""
+
+      if [ -n "${sa_json_path}" ] && [ -f "${sa_json_path}" ]; then
+        fb_client_email=$(grep -o '"client_email"[[:space:]]*:[[:space:]]*"[^"]*"' "${sa_json_path}" | sed 's/.*"client_email"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
+        fb_private_key=$(grep -o '"private_key"[[:space:]]*:[[:space:]]*"[^"]*"' "${sa_json_path}" | sed 's/.*"private_key"[[:space:]]*:[[:space:]]*"\(.*\)".*/\1/')
+        ok "Service account loaded from ${sa_json_path}"
+      elif [ -n "${sa_json_path}" ]; then
+        err "File not found: ${sa_json_path}"
+        exit 1
+      else
+        warn "Skipping service account setup."
+        warn "You can add these later to ${ENV_FILE}"
+      fi
     else
-      warn "Skipping service account setup. Server features requiring admin access will not work."
-      warn "You can add these later to ${ENV_FILE}"
+      ok "Service account config embedded"
     fi
-  else
-    ok "Service account config embedded"
   fi
 
   cat > "${ENV_FILE}" <<ENVEOF
@@ -456,6 +495,16 @@ install_cli() {
 start_and_verify() {
   export PATH="${DEJA_BIN}:${PATH}"
 
+  # Token-based: authenticate automatically before starting
+  if [ -n "${DEJA_TOKEN}" ]; then
+    echo ""
+    info "🔑 Authenticating server..."
+    "${DEJA_BIN}/deja" login --token "${DEJA_TOKEN}" || {
+      err "Authentication failed. Check your token and try again."
+      exit 1
+    }
+  fi
+
   echo ""
   info "🚀 Starting DEJA.js server..."
   "${DEJA_BIN}/deja" start
@@ -471,10 +520,8 @@ start_and_verify() {
   echo -e "    📊 ${DIM}Status${NC}    ${CYAN}deja status${NC}"
   echo ""
   echo -e "  ${BOLD}🎯 Next steps:${NC}"
-  echo -e "    1️⃣  Log in to your DEJA account:"
-  echo -e "       ${CYAN}deja login${NC}"
-  echo -e "    2️⃣  Open ${CYAN}https://monitor.dejajs.com${NC} to verify connection"
-  echo -e "    3️⃣  Open ${CYAN}https://throttle.dejajs.com${NC} to drive trains"
+  echo -e "    1️⃣  Open ${CYAN}https://monitor.dejajs.com${NC} to verify connection"
+  echo -e "    2️⃣  Open ${CYAN}https://throttle.dejajs.com${NC} to drive trains"
   echo ""
 }
 
@@ -504,6 +551,8 @@ main() {
 # Parse arguments
 while [ $# -gt 0 ]; do
   case "$1" in
+    --token)    shift; DEJA_TOKEN="${1:-}" ;;
+    --token=*)  DEJA_TOKEN="${1#*=}" ;;
     --uid=*)    DEJA_UID="${1#*=}" ;;
     --layout=*) DEJA_LAYOUT_ID="${1#*=}" ;;
     --dev)      DEV_MODE=true ;;

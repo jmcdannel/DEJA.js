@@ -7,6 +7,7 @@ interface Props {
   completed?: number[]
   uid?: string | null
   layoutId?: string
+  token?: string
   serverOnline?: boolean
 }
 
@@ -14,11 +15,13 @@ const props = withDefaults(defineProps<Props>(), {
   completed: () => [],
   uid: undefined,
   layoutId: undefined,
+  token: undefined,
   serverOnline: false,
 })
 
 const emit = defineEmits<{
   addLoco: [address: number, name: string]
+  connectServer: []
 }>()
 
 const isComplete = (step: number) => props.completed.includes(step)
@@ -111,7 +114,12 @@ const ctaLinks = [
         >
           <p class="empty-state__title">Install the DEJA Server</p>
           <p class="empty-state__desc">Run on Raspberry Pi, Mac, or Linux</p>
-          <ServerSetupInfo v-if="!step2Complete" :uid="uid" :layout-id="layoutId" />
+          <template v-if="!step2Complete">
+            <ServerSetupInfo v-if="token" :token="token" />
+            <v-btn v-else color="primary" variant="flat" size="small" prepend-icon="mdi-server-plus" @click="emit('connectServer')">
+              Connect a Server
+            </v-btn>
+          </template>
           <p v-else class="empty-state__hint">Server connected!</p>
         </div>
       </div>

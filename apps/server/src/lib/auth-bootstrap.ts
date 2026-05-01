@@ -1,8 +1,10 @@
 import {
   exchangeRefreshTokenForCustomToken,
   initFirebaseUserAuth,
+  getDb,
   AuthMissingError,
 } from '@repo/firebase-config/firebase-user-node'
+import { doc, getDoc } from 'firebase/firestore'
 import { readConfig, writeConfigCache } from './subscription.js'
 import { log } from '../utils/logger.js'
 
@@ -51,7 +53,7 @@ async function getStoredRefreshToken(): Promise<string | null> {
   }
 }
 
-export async function bootstrapAuth(): Promise<{ uid: string }> {
+export async function bootstrapAuth(): Promise<{ uid: string; layoutId?: string }> {
   const refreshToken = await getStoredRefreshToken()
   if (!refreshToken) {
     throw new AuthMissingError(
@@ -78,9 +80,30 @@ export async function bootstrapAuth(): Promise<{ uid: string }> {
     customToken,
   })
 
+  const serverId = result.claims.serverId as string | undefined
+  let layoutId: string | undefined
+
+  if (serverId) {
+    try {
+      const cached = await readConfig().catch(() => ({})) as { layoutId?: string }
+      if (cached.layoutId) {
+        layoutId = cached.layoutId
+      } else {
+        const serverDoc = await getDoc(doc(getDb(), 'users', result.uid, 'servers', serverId))
+        layoutId = serverDoc.data()?.layoutId as string | undefined
+        if (layoutId) {
+          await writeConfigCache({ layoutId, uid: result.uid })
+          log.success(`[AUTH] Layout resolved from server doc: ${layoutId}`)
+        }
+      }
+    } catch (err) {
+      log.warn('[AUTH] Failed to read server doc for layoutId (non-fatal):', err)
+    }
+  }
+
   scheduleNextRefresh(expiresIn)
   log.success(`[AUTH] Authenticated as ${result.uid}`)
-  return { uid: result.uid }
+  return { uid: result.uid, layoutId }
 }
 
 function scheduleNextRefresh(expiresInSec: number): void {

@@ -2,11 +2,13 @@
 import { ref, computed } from 'vue'
 import { useCurrentUser, useCollection } from 'vuefire'
 import { collection, doc, updateDoc, deleteDoc } from 'firebase/firestore'
-import { db } from '@repo/firebase-config/firebase-node'
+import { useStorage } from '@vueuse/core'
+import { db } from '@repo/firebase-config'
 import type { ServerRecordWithId } from '@repo/modules'
 import ConnectServerDialog from './ConnectServerDialog.vue'
 
 const user = useCurrentUser()
+const storedLayoutId = useStorage('@DEJA/layoutId', '')
 
 const serversRef = computed(() =>
   user.value ? collection(db, 'users', user.value.uid, 'servers') : null,
@@ -43,54 +45,49 @@ async function deleteServer(server: ServerRecordWithId) {
 </script>
 
 <template>
-  <v-card class="mb-4">
-    <v-card-title class="d-flex align-center">
-      <v-icon icon="mdi-server-network" class="mr-2" />
-      Connected Servers
-    </v-card-title>
-    <v-card-text>
-      <v-list v-if="servers && servers.length > 0">
-        <v-list-item v-for="server in servers" :key="server.id" lines="two">
-          <template #prepend>
-            <v-icon :color="statusOf(server).color" icon="mdi-circle" size="small" />
-          </template>
-          <v-list-item-title>{{ server.name }}</v-list-item-title>
-          <v-list-item-subtitle>
-            {{ statusOf(server).label }} · {{ lastSeenLabel(server) }}
-          </v-list-item-subtitle>
-          <template #append>
-            <v-btn
-              v-if="!server.revoked"
-              variant="text"
-              size="small"
-              color="warning"
-              @click="revokeServer(server)"
-            >
-              Revoke
-            </v-btn>
-            <v-btn
-              v-else
-              variant="text"
-              size="small"
-              color="error"
-              @click="deleteServer(server)"
-            >
-              Delete
-            </v-btn>
-          </template>
-        </v-list-item>
-      </v-list>
-      <v-alert v-else type="info" variant="tonal" class="mb-4">
-        No servers connected yet. Click below to connect your first server.
-      </v-alert>
-      <v-btn
-        color="primary"
-        prepend-icon="mdi-plus"
-        @click="dialogOpen = true"
-      >
-        Connect a new server
-      </v-btn>
-    </v-card-text>
-    <ConnectServerDialog v-model="dialogOpen" />
-  </v-card>
+  <div>
+    <v-list v-if="servers && servers.length > 0" density="compact" class="bg-transparent">
+      <v-list-item v-for="server in servers" :key="server.id" lines="two">
+        <template #prepend>
+          <v-icon :color="statusOf(server).color" icon="mdi-circle" size="small" />
+        </template>
+        <v-list-item-title>{{ server.name }}</v-list-item-title>
+        <v-list-item-subtitle>
+          {{ statusOf(server).label }} · {{ lastSeenLabel(server) }}
+        </v-list-item-subtitle>
+        <template #append>
+          <v-btn
+            v-if="!server.revoked"
+            variant="text"
+            size="small"
+            color="warning"
+            @click="revokeServer(server)"
+          >
+            Revoke
+          </v-btn>
+          <v-btn
+            v-else
+            variant="text"
+            size="small"
+            color="error"
+            @click="deleteServer(server)"
+          >
+            Delete
+          </v-btn>
+        </template>
+      </v-list-item>
+    </v-list>
+    <v-alert v-else type="info" variant="tonal" class="mb-3">
+      No servers connected yet. Click below to connect your first server.
+    </v-alert>
+    <v-btn
+      color="primary"
+      size="small"
+      prepend-icon="mdi-plus"
+      @click="dialogOpen = true"
+    >
+      Connect a new server
+    </v-btn>
+    <ConnectServerDialog v-model="dialogOpen" :layout-id="storedLayoutId" />
+  </div>
 </template>

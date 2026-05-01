@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
-// Note: computed is still used for serverConnected and currentPhrase
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '@repo/firebase-config'
+import { useCurrentUser } from 'vuefire'
+import { getIdToken } from 'firebase/auth'
 import { useStorage } from '@vueuse/core'
 import { ServerSetupInfo, DEJA_APPS } from '@repo/ui'
 import { useOnboarding, useLayout, INSTALL_TIPS } from '@repo/modules'
@@ -17,11 +18,17 @@ const emit = defineEmits<{
   complete: []
 }>()
 
+const user = useCurrentUser()
 const { state: onboardingState, setLayoutCreated, setInstallStarted } = useOnboarding()
 const { createLayout } = useLayout()
 const layoutCreating = ref(false)
 const layoutCreateError = ref<string | null>(null)
 const storedLayoutId = useStorage('@DEJA/layoutId', '')
+
+const apiBase = import.meta.env.VITE_INSTALL_API_BASE || 'https://install.dejajs.com'
+const serverToken = ref('')
+const tokenError = ref<string | null>(null)
+const tokenLoading = ref(false)
 
 // Server detection
 const serverConnected = computed(() => onboardingState.value.serverStarted)
@@ -43,26 +50,62 @@ onMounted(() => {
   }, 6000)
 })
 
+onBeforeUnmount(() => {
+  if (tipInterval) clearInterval(tipInterval)
+})
+
+async function mintServerToken() {
+  if (!user.value) return
+  const lid = props.layoutId || storedLayoutId.value
+  if (!lid) return
+
+  tokenLoading.value = true
+  tokenError.value = null
+  try {
+    const idToken = await getIdToken(user.value)
+    const res = await fetch(`${apiBase}/api/cli-auth/mint`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({ name: 'My Server', layoutId: lid }),
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.error ?? `Server returned ${res.status}`)
+    }
+    const data = (await res.json()) as { customToken: string; serverId: string }
+    serverToken.value = data.customToken
+  } catch (err) {
+    tokenError.value = err instanceof Error ? err.message : 'Failed to generate server token'
+  } finally {
+    tokenLoading.value = false
+  }
+}
+
 onMounted(async () => {
   const lid = props.layoutId || storedLayoutId.value
   const lname = props.layoutName || lid
   if (!lid) return
 
-  // Skip if layout already created (e.g., user returned to this step)
-  if (onboardingState.value.layoutCreated) return
-
-  layoutCreating.value = true
-  try {
-    await createLayout(lid, { name: lname, id: lid })
-    storedLayoutId.value = lid
-    setLayoutCreated()
-    setInstallStarted()
-  } catch (err: unknown) {
-    const fbErr = err as { message?: string }
-    layoutCreateError.value = fbErr.message || 'Failed to create layout'
-  } finally {
-    layoutCreating.value = false
+  if (!onboardingState.value.layoutCreated) {
+    layoutCreating.value = true
+    try {
+      await createLayout(lid, { name: lname, id: lid })
+      storedLayoutId.value = lid
+      setLayoutCreated()
+      setInstallStarted()
+    } catch (err: unknown) {
+      const fbErr = err as { message?: string }
+      layoutCreateError.value = fbErr.message || 'Failed to create layout'
+      return
+    } finally {
+      layoutCreating.value = false
+    }
   }
+
+  await mintServerToken()
 })
 
 // Loco form
@@ -188,7 +231,17 @@ function handleComplete() {
           <v-icon size="16" style="opacity: 0.5">mdi-usb-port</v-icon>
           <span class="text-xs opacity-50">Make sure your DCC-EX CommandStation is connected via USB.</span>
         </div>
-        <ServerSetupInfo :uid="uid" :layout-id="layoutId" />
+        <v-alert v-if="tokenError" type="error" variant="tonal" class="mb-4" closable @click:close="tokenError = null">
+          {{ tokenError }}
+          <template #append>
+            <v-btn variant="text" size="small" @click="mintServerToken">Retry</v-btn>
+          </template>
+        </v-alert>
+        <div v-if="tokenLoading" class="d-flex align-center gap-3 pa-4">
+          <v-progress-circular indeterminate size="20" width="2" />
+          <span class="text-sm opacity-60">Generating server credentials...</span>
+        </div>
+        <ServerSetupInfo v-else :token="serverToken" />
       </div>
 
       <!-- Add Locomotives — Productive Wait -->

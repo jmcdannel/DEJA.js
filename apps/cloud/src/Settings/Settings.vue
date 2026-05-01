@@ -96,8 +96,6 @@ const sections = [
   { id: 'account', label: 'Account', icon: 'mdi-account-circle-outline' },
   { id: 'billing', label: 'Billing', icon: 'mdi-credit-card-outline' },
   { id: 'appearance', label: 'Appearance', icon: 'mdi-palette-outline' },
-  { id: 'servers', label: 'Connected Servers', icon: 'mdi-server-network' },
-  { id: 'server-setup', label: 'Server Setup', icon: 'mdi-download-outline' },
   { id: 'layout', label: 'Layout', icon: 'mdi-floor-plan' },
   { id: 'backgrounds', label: 'Backgrounds', icon: 'mdi-image-outline' },
 ]
@@ -187,25 +185,25 @@ function scrollTo(id: string) {
           </div>
         </div>
 
-        <!-- Connected Servers -->
-        <div id="servers" class="settings-section">
-          <ConnectedServers />
-        </div>
-
-        <!-- Server Setup -->
-        <div id="server-setup" class="settings-section">
-          <div class="settings-section__header">
-            <v-icon size="20" class="settings-section__icon">mdi-download-outline</v-icon>
-            <h2 class="settings-section__title">Server Setup</h2>
-          </div>
-          <ServerSetupInfo :uid="user?.uid" :layout-id="storedLayoutId" />
-        </div>
-
         <!-- Layout Configuration -->
         <div id="layout" class="settings-section">
           <div class="settings-section__header">
             <v-icon size="20" class="settings-section__icon">mdi-floor-plan</v-icon>
             <h2 class="settings-section__title">Layout — {{ layout?.name }}</h2>
+          </div>
+          <div class="settings-row settings-row--block">
+            <div class="settings-row__label mb-3">
+              <span class="settings-row__name">Connected Servers</span>
+              <span class="settings-row__desc">Servers authorized to control this layout</span>
+            </div>
+            <ConnectedServers />
+          </div>
+          <div class="settings-row settings-row--block">
+            <div class="settings-row__label mb-3">
+              <span class="settings-row__name">Server Setup</span>
+              <span class="settings-row__desc">Install DEJA.js on a new device</span>
+            </div>
+            <ServerSetupInfo :uid="user?.uid" :layout-id="storedLayoutId" />
           </div>
           <div class="settings-row settings-row--block">
             <div class="settings-row__label mb-3">

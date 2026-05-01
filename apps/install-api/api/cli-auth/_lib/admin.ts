@@ -11,7 +11,7 @@ let cached: { auth: Auth; db: Firestore } | null = null
 export function getAdmin(): { auth: Auth; db: Firestore } {
   if (cached) return cached
 
-  const projectId = process.env.FIREBASE_PROJECT_ID
+  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL
   const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
 
@@ -21,7 +21,7 @@ export function getAdmin(): { auth: Auth; db: Firestore } {
 
   const app =
     getApps()[0] ??
-    initializeApp({ credential })
+    initializeApp({ credential, projectId })
 
   cached = {
     auth: getAuth(app),

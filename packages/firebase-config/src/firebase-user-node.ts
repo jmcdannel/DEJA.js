@@ -69,6 +69,7 @@ export async function initFirebaseUserAuth(opts: InitOptions): Promise<{
   rtdb: Database
   uid: string
   refreshToken: string
+  claims: Record<string, unknown>
 }> {
   if (firebaseApp) {
     throw new Error('initFirebaseUserAuth already called — Firebase app is already initialized')
@@ -86,6 +87,8 @@ export async function initFirebaseUserAuth(opts: InitOptions): Promise<{
   _db = getFirestore(firebaseApp)
   _rtdb = getDatabase(firebaseApp)
 
+  const tokenResult = await credential.user.getIdTokenResult()
+
   return {
     firebaseApp,
     auth: _auth,
@@ -93,6 +96,7 @@ export async function initFirebaseUserAuth(opts: InitOptions): Promise<{
     rtdb: _rtdb,
     uid: credential.user.uid,
     refreshToken: credential.user.refreshToken,
+    claims: tokenResult.claims as Record<string, unknown>,
   }
 }
 
