@@ -108,16 +108,9 @@ const showFilterSheet = ref(false)
     </div>
   </div>
 
-  <!-- Mobile: search bar + icon buttons (shown when container < 640px) -->
+  <!-- Mobile: icon buttons only, no search (shown when container < 640px) -->
   <div class="block @[640px]:hidden px-2 py-2">
     <div class="flex items-center gap-2">
-      <ListSearch
-        v-if="showSearch"
-        :model-value="controls.searchQuery.value"
-        @update:model-value="controls.searchQuery.value = $event"
-        :placeholder="searchPlaceholder"
-        :collapsible="false"
-      />
 
       <v-btn
         v-if="showView && viewOptions.length"

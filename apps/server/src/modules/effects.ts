@@ -262,10 +262,44 @@ export async function handleEffectChange(
   })
 }
 
+/**
+ * Toggle all effects with type "power" to match the given power state.
+ * Called when a global DCC-EX power state change is received from serial.
+ * Updating Firestore state triggers handleEffectChange which dispatches
+ * hardware pin commands to the appropriate IO devices.
+ */
+export async function togglePowerEffects(power: boolean): Promise<void> {
+  if (!layoutId) {
+    log.error('[EFFECTS] No LAYOUT_ID configured')
+    return
+  }
+
+  try {
+    const snapshot = await db
+      .collection('layouts')
+      .doc(layoutId)
+      .collection('effects')
+      .where('type', '==', 'power')
+      .get()
+
+    if (snapshot.empty) return
+
+    const batch = db.batch()
+    for (const doc of snapshot.docs) {
+      batch.set(doc.ref, { state: power, timestamp: FieldValue.serverTimestamp() }, { merge: true })
+    }
+    await batch.commit()
+    log.star('[EFFECTS] Toggled', snapshot.size, 'power effect(s):', power ? 'ON' : 'OFF')
+  } catch (err) {
+    log.error('[EFFECTS] Error toggling power effects:', err)
+  }
+}
+
 export default {
   getEffect,
   getEffectCommand,
   handleEffect,
   handleEffectChange,
   handleMacro,
+  togglePowerEffects,
 }

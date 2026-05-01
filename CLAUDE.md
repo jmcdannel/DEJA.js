@@ -66,7 +66,7 @@ DEJA.js/
 
 ## Key Commands
 
-> **In a Claude worktree?** Run `/worktree-dev-setup [app]` first — it copies `.env` and symlinks `node_modules/` from the preview worktree, then starts the server.
+> **In a Claude worktree?** Run `/worktree-dev-setup [app]` first — it copies `.env` and symlinks `node_modules/` from the staging worktree, then starts the server.
 
 ```bash
 # Run all at once
@@ -343,7 +343,7 @@ Internal packages use the `@repo/` scope (e.g. `@repo/modules`, `@repo/ui`). The
 
 ## Key Commands
 
-> **In a Claude worktree?** Run `/worktree-dev-setup [app]` first — it copies `.env` and symlinks `node_modules/` from the preview worktree, then starts the server.
+> **In a Claude worktree?** Run `/worktree-dev-setup [app]` first — it copies `.env` and symlinks `node_modules/` from the staging worktree, then starts the server.
 
 Run from the repo root using `turbo` (or `pnpm`):
 

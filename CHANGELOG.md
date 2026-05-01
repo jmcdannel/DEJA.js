@@ -9,6 +9,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.1] - 2026-04-29
+
+### Fixed
+- **[cli]** `deja update` no longer crashes with `DEJA_BIN: unbound variable` — variable is now defined at the top of the CLI script
+- **[cli]** `deja start` no longer crashes with `Cannot find package 'react'` — TUI defaults to `blessed` instead of `ink`; use `DEJA_UI=ink` to opt into the Ink renderer
+
+---
+
+## [1.7.0] - 2026-04-29
+
+### Added
+- **[cloud]** 🎴 Unified glassmorphic device/item cards with live connection state, server panel, and redesigned mobile header and device connection UI
+- **[throttle]** 🎛️ Effect controls — sound play/stop ring buttons, turnout `effectId` binding, and UX improvements to the throttle effects panel
+- **[throttle]** 📳 Haptic feedback on slider ticks, turnout toggles, effect switches, signal buttons, and route controls; `useHaptics` composable moved to `@repo/ui` for shared use
+- **[modules]** 🚂 Loco function defaults — sound and silent presets (`soundLocoDefaultFunctions`, `silentLocoDefaultFunctions`) applied automatically at loco creation time
+- **[cloud]** MVP feature gates — JSON-driven `FeatureGate` component with `ComingSoonBadge` for soft-launching unreleased features
+- **[ui]** 🎛️ Speed dial redesign — dynamic function slots, responsive 3×3/2×5 grid layout, and '…' overflow button for extra functions
+- **[throttle]** 🏎️ Speedometer redesign — 3-column layout with toggleable speed display setting and redesigned CurrentSpeed component
+- **[throttle]** 🎯 Native CSS scroll-snap swipe navigation between throttles on mobile, with ad-hoc throttle loading and iOS-compatible scroll behavior
+- **[cloud]** 🔌 WLED integration — connect LED strips by IP, control effects, palettes, colors, and segments from the Cloud effect form; new `@repo/wled` package with WebSocket client, composables, and UI components
+
+### Changed
+- **[cloud]** Unified device and list item cards with a shared glassmorphic tile design — device management page shows live connection state, server panel, and offline-gated controls
+- **[ci]** 🤖 Changelog bot now opens a PR instead of pushing directly to `main` — works around branch protection that rejected the previous direct-push approach. `changeset-check` skips PRs authored by the bot so the automated flow doesn't deadlock.
+- **[ci]** Recover the v1.6 changelog update after the `Process Changesets` workflow failed to push directly to `main` (blocked by branch protection on PR #300 merge)
+
+### Fixed
+- **[server]** 🔧 Bundle `@repo/dccex` into server build and fix dev install to resolve missing module errors
+- **[throttle]** 📱 Mobile UI CSS fixes — conductor layout, settings consolidation, and pointer event corrections for SoundButton
+
+---
+
 ## [1.6.0] - 2026-04-13
 
 ### Added

@@ -29,6 +29,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Lint CLI script
+        run: |
+          bash -n apps/cli/deja
+          shellcheck --severity=error apps/cli/deja
+
       - name: Build server bundle
         run: cd apps/server && pnpm build:docker
 

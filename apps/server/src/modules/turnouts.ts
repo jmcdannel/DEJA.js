@@ -1,5 +1,5 @@
-import { type DocumentData } from 'firebase/firestore'
-import { db } from '@repo/firebase-config/firebase-user-node'
+import { FieldValue, type DocumentData } from 'firebase-admin/firestore'
+import { db } from '@repo/firebase-config/firebase-admin-node'
 import type { Turnout, KatoCommand, ServoCommand } from '@repo/modules'
 import { log } from '../utils/logger.js'
 import { dcc, type TurnoutPayload } from '../lib/dcc.js'
@@ -160,8 +160,23 @@ export async function handleTurnoutChange(
     }
     if (change.type === 'modified') {
       if (turnoutStates[change.doc.id] !== change.doc.data()?.state) {
-        turnoutStates[change.doc.id] = change.doc.data()?.state
-        await handleTurnout(change.doc.data())
+        const turnoutData = change.doc.data() as Turnout
+        turnoutStates[change.doc.id] = turnoutData.state
+        await handleTurnout(turnoutData)
+        if (turnoutData.effectId && layoutId) {
+          try {
+            const effectState = turnoutData.invertEffect ? !turnoutData.state : turnoutData.state
+            await db
+              .collection('layouts')
+              .doc(layoutId)
+              .collection('effects')
+              .doc(turnoutData.effectId)
+              .set({ state: effectState, timestamp: FieldValue.serverTimestamp() }, { merge: true })
+            log.success(`[TURNOUTS] Triggered effect ${turnoutData.effectId} for turnout ${change.doc.id}`)
+          } catch (error) {
+            log.error(`[TURNOUTS] Failed to trigger effect for turnout ${change.doc.id}:`, error)
+          }
+        }
       }
     }
   })

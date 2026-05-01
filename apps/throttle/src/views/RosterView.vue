@@ -3,12 +3,25 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLocos, ROADNAMES, type Loco } from '@repo/modules/locos'
 import { LocoRoster, PageHeader, ListControlBar, useListControls } from '@repo/ui'
-import RosterQuickAdd from '@/roster/RosterQuickAdd.vue'
+import QuickAddLoco from '@/throttle/QuickAddLoco.vue'
+import { useStorage } from '@vueuse/core'
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { db } from '@repo/firebase-config'
 import type { ListFilter } from '@repo/ui'
 
 const router = useRouter()
 const { getLocos } = useLocos()
 const locos = getLocos()
+const layoutId = useStorage('@DEJA/layoutId', '')
+
+async function handleQuickAddToRoster(address: number) {
+  if (!layoutId.value) return
+  await setDoc(
+    doc(db, `layouts/${layoutId.value}/locos`, String(address)),
+    { address, name: `Loco ${address}`, meta: { roadname: '' }, timestamp: serverTimestamp() },
+    { merge: true },
+  )
+}
 
 const locosList = computed(() =>
   locos.value ? (locos.value as Loco[]).map((l) => ({
@@ -71,7 +84,9 @@ function handleLocoSelect(loco: Loco) {
       </template>
     </PageHeader>
 
-    <RosterQuickAdd class="mx-4 mt-4" />
+    <div class="mx-4 mt-4">
+      <QuickAddLoco @add="handleQuickAddToRoster" />
+    </div>
 
     <LocoRoster
       :locos="rosterControls.filteredList.value"

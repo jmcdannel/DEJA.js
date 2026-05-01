@@ -5,6 +5,7 @@ import { useCurrentUser } from 'vuefire'
 import { useLayout, useServerStatus, useLocos } from '@repo/modules'
 import { useDejaJS } from '@repo/deja'
 import {
+  DejaServerPanel,
   DeviceConnectionList,
   CommandActivityChart,
   LayoutInfoCard,
@@ -131,9 +132,15 @@ async function handleAddLoco(address: number, name: string) {
     <v-row v-else>
       <!-- Left Column: Devices -->
       <v-col cols="12" md="8">
+        <DejaServerPanel
+          :devices="devices ?? []"
+          class="mb-4"
+          @navigate="navigateToDevice"
+        />
         <DeviceConnectionList
           :devices="devices ?? []"
           :available-ports="ports"
+          :hide-server="true"
           :server-online="serverStatus?.online ?? false"
           @connect="handleConnect"
           @disconnect="handleDisconnect"

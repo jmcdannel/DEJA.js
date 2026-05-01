@@ -73,7 +73,7 @@ const deviceStatusColor = computed(() => {
     </span>
 
     <!-- Device count pill -->
-    <span v-if="showDetails && devices.length > 0" class="device-pill">
+    <span v-if="devices.length > 0" class="device-pill">
       <span class="device-dot" :style="{ color: deviceStatusColor }">●</span>
       {{ connectedCount }}/{{ devices.length }}
     </span>

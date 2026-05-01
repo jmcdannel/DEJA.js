@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { useMenu } from '@/core/Menu/useMenu'
+import { ComingSoonBadge } from '@repo/ui'
 
 const { menuConfig, saveFavorite, removeFavorite } = useMenu()
 
-function toggle(item: { name: string; isFavorite: boolean }) {
+function toggle(item: { name: string; isFavorite: boolean; gated?: boolean }) {
+  if (item.gated) return
   item.isFavorite ? removeFavorite(item.name) : saveFavorite(item.name)
 }
 </script>
@@ -14,12 +16,17 @@ function toggle(item: { name: string; isFavorite: boolean }) {
       v-for="item in menuConfig"
       :key="item.name"
       class="favorite-item"
-      :class="{ 'favorite-item--active': item.isFavorite }"
+      :class="{
+        'favorite-item--active': item.isFavorite && !item.gated,
+        'favorite-item--gated': item.gated,
+      }"
+      :disabled="item.gated"
       @click="toggle(item)"
     >
-      <v-icon :size="20" :color="item.isFavorite ? item.color : undefined">{{ item.icon }}</v-icon>
+      <v-icon :size="20" :color="!item.gated && item.isFavorite ? item.color : undefined" :style="item.gated ? 'opacity: 0.35' : ''">{{ item.icon }}</v-icon>
       <span class="favorite-item__label">{{ item.label }}</span>
-      <v-icon size="14" class="favorite-item__star">
+      <ComingSoonBadge v-if="item.gated" size="x-small" variant="outlined" />
+      <v-icon v-else size="14" class="favorite-item__star">
         {{ item.isFavorite ? 'mdi-star' : 'mdi-star-outline' }}
       </v-icon>
     </button>
@@ -74,5 +81,11 @@ function toggle(item: { name: string; isFavorite: boolean }) {
 
 .favorite-item--active .favorite-item__star {
   color: #fbbf24;
+}
+
+.favorite-item--gated {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
 }
 </style>
