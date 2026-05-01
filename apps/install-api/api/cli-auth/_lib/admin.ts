@@ -1,12 +1,12 @@
-import { getApps, initializeApp, cert } from 'firebase-admin/app'
+import { getApps, initializeApp, cert, applicationDefault } from 'firebase-admin/app'
 import { getAuth, type Auth } from 'firebase-admin/auth'
 import { getFirestore, type Firestore } from 'firebase-admin/firestore'
 
 let cached: { auth: Auth; db: Firestore } | null = null
 
 /**
- * Lazy-init firebase-admin from env vars. Cached across warm invocations.
- * Throws a clear error if required env vars are missing.
+ * Lazy-init firebase-admin. Uses service-account env vars if available,
+ * otherwise falls back to Application Default Credentials (gcloud ADC).
  */
 export function getAdmin(): { auth: Auth; db: Firestore } {
   if (cached) return cached
@@ -15,17 +15,13 @@ export function getAdmin(): { auth: Auth; db: Firestore } {
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL
   const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
 
-  if (!projectId || !clientEmail || !privateKey) {
-    throw new Error(
-      'Missing FIREBASE_PROJECT_ID / FIREBASE_CLIENT_EMAIL / FIREBASE_PRIVATE_KEY env vars',
-    )
-  }
+  const credential = (clientEmail && privateKey && projectId)
+    ? cert({ projectId, clientEmail, privateKey })
+    : applicationDefault()
 
   const app =
     getApps()[0] ??
-    initializeApp({
-      credential: cert({ projectId, clientEmail, privateKey }),
-    })
+    initializeApp({ credential })
 
   cached = {
     auth: getAuth(app),
