@@ -18,7 +18,14 @@ export function useSubscription() {
 
   const subscription = computed(() => userDoc.value?.subscription ?? null)
 
-  const plan = computed<PlanTier>(() => subscription.value?.plan ?? 'hobbyist')
+  // Firestore data is untyped at runtime — guard against legacy/unknown plan
+  // values (e.g. a stale Stripe price id or an empty string) so that lookups
+  // like PLAN_DISPLAY[plan.value] / PLAN_LIMITS[plan.value] never resolve to
+  // undefined and throw during render. Falls back to the free tier.
+  const plan = computed<PlanTier>(() => {
+    const value = subscription.value?.plan
+    return value && TIER_ORDER.includes(value) ? value : 'hobbyist'
+  })
 
   const status = computed<SubscriptionStatus>(() => subscription.value?.status ?? 'active')
 

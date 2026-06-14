@@ -35,30 +35,19 @@ const mocks = vi.hoisted(() => {
   const getBackgroundMock = vi.fn(() => currentBackgroundRef)
   const setAppBackgroundMock = vi.fn(async () => {})
 
-  // throttle settings
+  // throttle settings (conductor settings are consolidated here — rightPanel)
   const throttleVariantRef = makeRef<'buttons' | 'slider' | 'dashboard'>(
     'buttons',
   )
   const showFunctionsRef = makeRef(true)
-  const showSpeedometerRef = makeRef(true)
   const showConsistRef = makeRef(true)
-  const setThrottleVariantMock = vi.fn(async () => {})
-  const setShowFunctionsMock = vi.fn(async () => {})
-  const setShowSpeedometerMock = vi.fn(async () => {})
-  const setShowConsistMock = vi.fn(async () => {})
-
-  // conductor settings
-  const conductorVariantRef = makeRef<'buttons' | 'slider' | 'dashboard'>(
-    'buttons',
-  )
-  const conductorRightPanelRef = makeRef<
+  const rightPanelRef = makeRef<
     'turnouts' | 'effects' | 'signals' | 'devices' | 'routes'
   >('turnouts')
-  const setConductorVariantMock = vi.fn(async () => {})
-  const setConductorRightPanelMock = vi.fn(async () => {})
-
-  // quick menu
-  const quickMenuVisibleRef = makeRef(true)
+  const setThrottleVariantMock = vi.fn(async () => {})
+  const setShowFunctionsMock = vi.fn(async () => {})
+  const setShowConsistMock = vi.fn(async () => {})
+  const setRightPanelMock = vi.fn(async () => {})
 
   return {
     routeName,
@@ -72,17 +61,12 @@ const mocks = vi.hoisted(() => {
     setAppBackgroundMock,
     throttleVariantRef,
     showFunctionsRef,
-    showSpeedometerRef,
     showConsistRef,
+    rightPanelRef,
     setThrottleVariantMock,
     setShowFunctionsMock,
-    setShowSpeedometerMock,
     setShowConsistMock,
-    conductorVariantRef,
-    conductorRightPanelRef,
-    setConductorVariantMock,
-    setConductorRightPanelMock,
-    quickMenuVisibleRef,
+    setRightPanelMock,
   }
 })
 
@@ -117,27 +101,12 @@ vi.mock('@/throttle/useThrottleSettings', () => ({
   useThrottleSettings: () => ({
     variant: mocks.throttleVariantRef,
     showFunctions: mocks.showFunctionsRef,
-    showSpeedometer: mocks.showSpeedometerRef,
     showConsist: mocks.showConsistRef,
+    rightPanel: mocks.rightPanelRef,
     setVariant: mocks.setThrottleVariantMock,
     setShowFunctions: mocks.setShowFunctionsMock,
-    setShowSpeedometer: mocks.setShowSpeedometerMock,
     setShowConsist: mocks.setShowConsistMock,
-  }),
-}))
-
-vi.mock('@/conductor/useConductorSettings', () => ({
-  useConductorSettings: () => ({
-    variant: mocks.conductorVariantRef,
-    rightPanel: mocks.conductorRightPanelRef,
-    setVariant: mocks.setConductorVariantMock,
-    setRightPanel: mocks.setConductorRightPanelMock,
-  }),
-}))
-
-vi.mock('@/quick-menu/useQuickMenu', () => ({
-  useQuickMenu: () => ({
-    quickMenuVisible: mocks.quickMenuVisibleRef,
+    setRightPanel: mocks.setRightPanelMock,
   }),
 }))
 
@@ -166,11 +135,8 @@ describe('useSettingsCommands', () => {
     mocks.currentBackgroundRef.value = 'none'
     mocks.throttleVariantRef.value = 'buttons'
     mocks.showFunctionsRef.value = true
-    mocks.showSpeedometerRef.value = true
     mocks.showConsistRef.value = true
-    mocks.conductorVariantRef.value = 'buttons'
-    mocks.conductorRightPanelRef.value = 'turnouts'
-    mocks.quickMenuVisibleRef.value = true
+    mocks.rightPanelRef.value = 'turnouts'
 
     mocks.pushMock.mockClear()
     mocks.setThemeMock.mockClear()
@@ -178,10 +144,8 @@ describe('useSettingsCommands', () => {
     mocks.setAppBackgroundMock.mockClear()
     mocks.setThrottleVariantMock.mockClear()
     mocks.setShowFunctionsMock.mockClear()
-    mocks.setShowSpeedometerMock.mockClear()
     mocks.setShowConsistMock.mockClear()
-    mocks.setConductorVariantMock.mockClear()
-    mocks.setConductorRightPanelMock.mockClear()
+    mocks.setRightPanelMock.mockClear()
   })
 
   it('returns an empty list on the settings route', () => {
@@ -200,7 +164,7 @@ describe('useSettingsCommands', () => {
     ])
   })
 
-  it('adds throttle variant + 4 toggles on the throttle route', () => {
+  it('adds throttle variant + 2 toggles on the throttle route', () => {
     mocks.routeName.value = 'throttle'
     mocks.routePath.value = '/throttle/3'
     const commands = useSettingsCommands().value
@@ -209,9 +173,7 @@ describe('useSettingsCommands', () => {
       'settings.theme',
       'settings.throttle.variant',
       'settings.toggle.functions',
-      'settings.toggle.speedometer',
       'settings.toggle.consist',
-      'settings.toggle.quickMenu',
       'settings.open-page',
     ])
   })
@@ -222,19 +184,19 @@ describe('useSettingsCommands', () => {
     const ids = commands.map((c) => c.id)
     expect(ids).toContain('settings.throttle.variant')
     expect(ids).toContain('settings.toggle.functions')
-    expect(ids).toContain('settings.toggle.speedometer')
     expect(ids).toContain('settings.toggle.consist')
-    expect(ids).toContain('settings.toggle.quickMenu')
   })
 
-  it('adds conductor variant + right panel on the conductor route', () => {
+  it('adds throttle variant, toggles + right panel on the conductor route', () => {
     mocks.routeName.value = 'conductor'
     mocks.routePath.value = '/conductor'
     const commands = useSettingsCommands().value
     const ids = commands.map((c) => c.id)
     expect(ids).toEqual([
       'settings.theme',
-      'settings.conductor.variant',
+      'settings.throttle.variant',
+      'settings.toggle.functions',
+      'settings.toggle.consist',
       'settings.conductor.rightPanel',
       'settings.open-page',
     ])
@@ -302,7 +264,6 @@ describe('useSettingsCommands', () => {
   it('throttle toggle controls flip via their underlying setters', async () => {
     mocks.routeName.value = 'throttle'
     mocks.showFunctionsRef.value = true
-    mocks.showSpeedometerRef.value = false
     mocks.showConsistRef.value = true
 
     const commands = useSettingsCommands().value
@@ -315,37 +276,12 @@ describe('useSettingsCommands', () => {
     await fToggle.set(!fToggle.value)
     expect(mocks.setShowFunctionsMock).toHaveBeenCalledWith(false)
 
-    const speedometerCmd = commands.find(
-      (c) => c.id === 'settings.toggle.speedometer',
-    )!
-    const sToggle = asToggle(speedometerCmd)
-    expect(sToggle.value).toBe(false)
-    await sToggle.set(!sToggle.value)
-    expect(mocks.setShowSpeedometerMock).toHaveBeenCalledWith(true)
-
     const consistCmd = commands.find(
       (c) => c.id === 'settings.toggle.consist',
     )!
     const cToggle = asToggle(consistCmd)
     await cToggle.set(!cToggle.value)
     expect(mocks.setShowConsistMock).toHaveBeenCalledWith(false)
-  })
-
-  it('quickMenu toggle control flips quickMenuVisible directly', async () => {
-    mocks.routeName.value = 'throttle'
-    mocks.quickMenuVisibleRef.value = true
-    const commands = useSettingsCommands().value
-    const qm = commands.find((c) => c.id === 'settings.toggle.quickMenu')!
-    const qmToggle = asToggle(qm)
-    expect(qmToggle.value).toBe(true)
-    await qmToggle.set(false)
-    expect(mocks.quickMenuVisibleRef.value).toBe(false)
-    // Grab a fresh snapshot because the control captured the old value.
-    const qm2 = useSettingsCommands().value.find(
-      (c) => c.id === 'settings.toggle.quickMenu',
-    )!
-    await asToggle(qm2).set(true)
-    expect(mocks.quickMenuVisibleRef.value).toBe(true)
   })
 
   it('conductor right-panel cycle control calls setRightPanel with each value', async () => {
@@ -364,9 +300,8 @@ describe('useSettingsCommands', () => {
       'routes',
     ])
     await control.set('effects')
-    expect(mocks.setConductorRightPanelMock).toHaveBeenCalledWith('effects')
+    expect(mocks.setRightPanelMock).toHaveBeenCalledWith('effects')
     await control.set('devices')
-    expect(mocks.setConductorRightPanelMock).toHaveBeenCalledWith('devices')
+    expect(mocks.setRightPanelMock).toHaveBeenCalledWith('devices')
   })
-
 })
