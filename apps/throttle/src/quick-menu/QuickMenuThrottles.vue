@@ -20,7 +20,9 @@ function handleRowClick(address: number) {
   emit('navigate', address)
 }
 
-const showRoster = ref(false)
+type Mode = 'list' | 'roster' | 'address'
+const mode = ref<Mode>('list')
+const quickAddress = ref('')
 
 interface ThrottleWithLoco {
   address: number
@@ -74,14 +76,22 @@ function handlePark(address: number) {
 
 async function handleAcquire(address: number) {
   await acquireThrottle(address)
-  showRoster.value = false
+  mode.value = 'list'
+}
+
+async function handleAcquireByAddress() {
+  const addr = parseInt(quickAddress.value.trim())
+  if (!addr || isNaN(addr) || addr < 1) return
+  await acquireThrottle(addr)
+  quickAddress.value = ''
+  mode.value = 'list'
 }
 </script>
 
 <template>
   <div class="quick-throttles">
-    <!-- Active throttles -->
-    <template v-if="!showRoster">
+    <!-- Active throttles + add actions -->
+    <template v-if="mode === 'list'">
       <template v-if="activeThrottles.length > 0">
         <div
           v-for="t in activeThrottles"
@@ -105,20 +115,58 @@ async function handleAcquire(address: number) {
         </div>
       </template>
       <div v-else class="quick-throttles__empty">
-        <v-icon size="24" class="opacity-20 mb-1">mdi-speedometer</v-icon>
+        <v-icon size="32" color="green" class="opacity-60 mb-1">mdi-train</v-icon>
         <span class="quick-throttles__empty-title">No locos running</span>
-        <span class="quick-throttles__empty-hint">Tap + to add a loco</span>
+        <span class="quick-throttles__empty-hint">Enter a DCC address or pick one from your roster</span>
       </div>
-      <button class="quick-throttles__add" @click="showRoster = true">
-        <v-icon size="14">mdi-plus</v-icon>
-        <span>Add Loco</span>
+
+      <!-- Add actions — consistent with the throttle list page -->
+      <div class="quick-throttles__actions">
+        <button class="quick-throttles__action" @click="mode = 'address'">
+          <v-icon size="16">mdi-pound</v-icon>
+          <span>Enter Loco #</span>
+        </button>
+        <button class="quick-throttles__action" @click="mode = 'roster'">
+          <v-icon size="16">mdi-train</v-icon>
+          <span>Roster</span>
+        </button>
+      </div>
+    </template>
+
+    <!-- Enter loco number -->
+    <template v-else-if="mode === 'address'">
+      <button class="quick-throttles__back" @click="mode = 'list'; quickAddress = ''">
+        <v-icon size="18">mdi-arrow-left</v-icon>
+        <v-icon size="18">mdi-pound</v-icon>
+        <span>Enter Loco #</span>
       </button>
+      <form class="quick-throttles__address" @submit.prevent="handleAcquireByAddress">
+        <input
+          v-model="quickAddress"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          placeholder="DCC #"
+          class="quick-throttles__input"
+          autofocus
+        />
+        <v-btn
+          size="default"
+          color="green"
+          variant="tonal"
+          :disabled="!quickAddress.trim()"
+          @click="handleAcquireByAddress"
+        >
+          <v-icon size="20">mdi-plus</v-icon>
+        </v-btn>
+      </form>
     </template>
 
     <!-- Roster picker -->
     <template v-else>
-      <button class="quick-throttles__back" @click="showRoster = false">
-        <v-icon size="16">mdi-arrow-left</v-icon>
+      <button class="quick-throttles__back" @click="mode = 'list'">
+        <v-icon size="18">mdi-arrow-left</v-icon>
+        <v-icon size="18">mdi-train</v-icon>
         <span>Select Loco</span>
       </button>
       <div v-if="availableLocos.length > 0" class="quick-throttles__roster">
@@ -133,8 +181,9 @@ async function handleAcquire(address: number) {
         </button>
       </div>
       <div v-else class="quick-throttles__empty">
-        <v-icon size="20" class="opacity-20 mb-1">mdi-train</v-icon>
+        <v-icon size="28" color="amber" class="opacity-60 mb-1">mdi-train</v-icon>
         <span class="quick-throttles__empty-title">All locos are active</span>
+        <span class="quick-throttles__empty-hint">Enter a DCC address to add another</span>
       </div>
     </template>
   </div>
@@ -144,15 +193,15 @@ async function handleAcquire(address: number) {
 .quick-throttles {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 8px;
-  max-height: 220px;
+  gap: 5px;
+  padding: 10px;
+  max-height: 300px;
   overflow-y: auto;
 }
 
 .quick-throttles__row {
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 8px;
   transition: background 120ms ease;
   outline: none;
 }
@@ -168,81 +217,122 @@ async function handleAcquire(address: number) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px 12px;
-  gap: 2px;
+  padding: 16px 12px;
+  gap: 3px;
   text-align: center;
 }
 .quick-throttles__empty-title {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: rgba(var(--v-theme-on-surface), 0.4);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(var(--v-theme-on-surface), 0.6);
 }
 .quick-throttles__empty-hint {
-  font-size: 0.6rem;
-  color: rgba(var(--v-theme-on-surface), 0.25);
+  font-size: 0.68rem;
+  color: rgba(var(--v-theme-on-surface), 0.4);
   line-height: 1.4;
+  max-width: 200px;
 }
 
-/* Add button */
-.quick-throttles__add {
+/* Add actions — two affordances, easy to tap */
+.quick-throttles__actions {
+  display: flex;
+  gap: 6px;
+}
+.quick-throttles__action {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 5px 8px;
-  border-radius: 6px;
-  border: 1px dashed rgba(var(--v-theme-on-surface), 0.12);
+  gap: 5px;
+  padding: 10px 8px;
+  border-radius: 8px;
+  border: 1px dashed rgba(var(--v-theme-on-surface), 0.14);
   background: none;
   cursor: pointer;
-  font-size: 0.65rem;
-  font-weight: 500;
-  color: rgba(var(--v-theme-on-surface), 0.4);
-  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(var(--v-theme-on-surface), 0.55);
+  transition:
+    background 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
 }
-.quick-throttles__add:hover {
+.quick-throttles__action:hover {
   background: rgba(var(--v-theme-on-surface), 0.06);
-  color: rgba(var(--v-theme-on-surface), 0.6);
-  border-color: rgba(var(--v-theme-on-surface), 0.2);
+  color: rgba(var(--v-theme-on-surface), 0.85);
+  border-color: rgba(var(--v-theme-on-surface), 0.25);
 }
 
-/* Roster picker */
+/* Back button (address + roster modes) */
 .quick-throttles__back {
   display: flex;
   align-items: center;
   gap: 6px;
   width: 100%;
-  padding: 6px 4px;
+  padding: 8px 4px;
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: rgba(var(--v-theme-on-surface), 0.8);
   transition: background 150ms ease;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 .quick-throttles__back:hover {
   background: rgba(var(--v-theme-on-surface), 0.06);
 }
 
+/* Address entry */
+.quick-throttles__address {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0 4px;
+}
+.quick-throttles__input {
+  flex: 1;
+  background: rgba(2, 6, 23, 0.8);
+  border: 1.5px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: rgba(74, 222, 128, 0.85);
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 16px;
+  outline: none;
+  min-width: 0;
+}
+.quick-throttles__input:focus {
+  border-color: rgba(74, 222, 128, 0.5);
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.1);
+}
+.quick-throttles__input::placeholder {
+  color: rgba(148, 163, 184, 0.3);
+}
+.quick-throttles__input::-webkit-outer-spin-button,
+.quick-throttles__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .quick-throttles__roster {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .quick-throttles__loco {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  padding: 6px 8px;
+  padding: 10px 10px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: rgba(var(--v-theme-on-surface), 0.03);
   cursor: pointer;
   transition: background 150ms ease;
-  color: rgba(var(--v-theme-on-surface), 0.7);
+  color: rgba(var(--v-theme-on-surface), 0.8);
 }
 .quick-throttles__loco:hover {
   background: rgba(var(--v-theme-on-surface), 0.08);
@@ -252,11 +342,11 @@ async function handleAcquire(address: number) {
 }
 
 .quick-throttles__plate {
-  font-size: 0.6rem;
+  font-size: 0.7rem;
   font-weight: 700;
   font-family: monospace;
   letter-spacing: 0.04em;
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: 3px;
   background: #111;
   color: #e8e8e8;
@@ -268,7 +358,7 @@ async function handleAcquire(address: number) {
 }
 
 .quick-throttles__loco-name {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;

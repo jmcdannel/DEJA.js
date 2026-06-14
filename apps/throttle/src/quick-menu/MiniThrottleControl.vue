@@ -20,23 +20,23 @@ const emit = defineEmits<{
     <div class="mini-throttle__controls">
       <v-btn
         icon
-        density="compact"
+        density="comfortable"
         variant="text"
-        size="x-small"
+        size="small"
         color="red"
         @click.stop="emit('stop', address)"
       >
-        <v-icon size="16">mdi-stop</v-icon>
+        <v-icon size="20">mdi-stop</v-icon>
       </v-btn>
       <v-btn
-        density="compact"
+        density="comfortable"
         variant="tonal"
-        size="x-small"
+        size="small"
         color="green"
         class="mini-throttle__speed-btn"
         @click.stop="emit('speedDown', address, 5)"
       >
-        <v-icon size="14">mdi-minus</v-icon>
+        <v-icon size="18">mdi-minus</v-icon>
       </v-btn>
       <span
         class="mini-throttle__speed"
@@ -45,24 +45,24 @@ const emit = defineEmits<{
         {{ speed }}
       </span>
       <v-btn
-        density="compact"
+        density="comfortable"
         variant="tonal"
-        size="x-small"
+        size="small"
         color="green"
         class="mini-throttle__speed-btn"
         @click.stop="emit('speedUp', address, 5)"
       >
-        <v-icon size="14">mdi-plus</v-icon>
+        <v-icon size="18">mdi-plus</v-icon>
       </v-btn>
       <v-btn
         icon
-        density="compact"
+        density="comfortable"
         variant="text"
-        size="x-small"
+        size="small"
         color="amber"
         @click.stop="emit('park', address)"
       >
-        <v-icon size="16">mdi-eject</v-icon>
+        <v-icon size="20">mdi-eject</v-icon>
       </v-btn>
     </div>
   </div>
@@ -72,10 +72,10 @@ const emit = defineEmits<{
 .mini-throttle {
   display: flex;
   align-items: center;
-  padding: 5px 8px;
-  border-radius: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
   background: rgba(var(--v-theme-on-surface), 0.04);
-  gap: 6px;
+  gap: 8px;
 }
 .mini-throttle:hover {
   background: rgba(var(--v-theme-on-surface), 0.08);
@@ -83,11 +83,11 @@ const emit = defineEmits<{
 
 /* DCC address — locomotive number plate style */
 .mini-throttle__plate {
-  font-size: 0.6rem;
+  font-size: 0.7rem;
   font-weight: 700;
   font-family: monospace;
   letter-spacing: 0.04em;
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: 3px;
   background: #111;
   color: #e8e8e8;
@@ -99,34 +99,34 @@ const emit = defineEmits<{
 }
 
 .mini-throttle__name {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
   min-width: 0;
-  color: rgba(var(--v-theme-on-surface), 0.7);
+  color: rgba(var(--v-theme-on-surface), 0.85);
 }
 
 .mini-throttle__controls {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   flex-shrink: 0;
 }
 
 .mini-throttle__speed-btn {
-  min-width: 28px !important;
-  padding: 0 4px !important;
-  border-radius: 4px !important;
+  min-width: 34px !important;
+  padding: 0 6px !important;
+  border-radius: 6px !important;
 }
 
 .mini-throttle__speed {
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   font-family: monospace;
   font-weight: 700;
-  min-width: 24px;
+  min-width: 28px;
   text-align: center;
 }
 </style>

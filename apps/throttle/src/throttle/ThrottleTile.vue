@@ -96,9 +96,9 @@ function handleEject() {
           <CurrentSpeed compact class="drag-handle cursor-grab active:cursor-grabbing select-none shrink-0" :speed="currentSpeed" />
           <span class="tile__name">{{ loco?.name || address }}</span>
           <div class="tile__actions">
-            <v-btn icon size="x-small" variant="text" color="red-lighten-1" @click.stop="handleEject" title="Eject"><v-icon size="14">mdi-eject</v-icon></v-btn>
+            <v-btn icon size="small" variant="text" color="red-lighten-1" @click.stop="handleEject" title="Eject"><v-icon size="20">mdi-eject</v-icon></v-btn>
             <component v-if="loco" :is="loco.consist?.length ? 'v-badge' : 'div'" :color="loco.consist?.length ? 'primary' : undefined" :content="loco.consist?.length" class="cursor-pointer" @click.stop="openThrottle">
-              <LocoNumberPlate :address="loco.address" :color="locoColor" size="sm" />
+              <LocoNumberPlate :address="loco.address" :color="locoColor" size="md" />
             </component>
           </div>
         </div>
@@ -116,14 +116,14 @@ function handleEject() {
           <CurrentSpeed compact class="drag-handle cursor-grab active:cursor-grabbing select-none shrink-0" :speed="currentSpeed" />
           <span class="tile__name">{{ loco?.name || address }}</span>
           <div class="tile__actions">
-            <v-btn icon size="x-small" variant="text" color="red-lighten-1" @click.stop="handleEject" title="Eject"><v-icon size="14">mdi-eject</v-icon></v-btn>
+            <v-btn icon size="small" variant="text" color="red-lighten-1" @click.stop="handleEject" title="Eject"><v-icon size="20">mdi-eject</v-icon></v-btn>
             <component v-if="loco" :is="loco.consist?.length ? 'v-badge' : 'div'" :color="loco.consist?.length ? 'primary' : undefined" :content="loco.consist?.length" class="cursor-pointer" @click.stop="openThrottle">
-              <LocoNumberPlate :address="loco.address" :color="locoColor" size="sm" />
+              <LocoNumberPlate :address="loco.address" :color="locoColor" size="md" />
             </component>
           </div>
         </div>
         <div class="tile-slider">
-          <v-btn size="x-small" color="red" variant="tonal" class="shrink-0" @click.stop="handleStop"><v-icon size="14">mdi-stop</v-icon></v-btn>
+          <v-btn size="small" color="red" variant="tonal" class="shrink-0" @click.stop="handleStop"><v-icon size="18">mdi-stop</v-icon></v-btn>
           <input type="range" min="0" max="126" step="1" :value="localSpeed" @input="(e) => setThrottleSpeed(Number((e.target as HTMLInputElement).value))" class="tile-slider__range" />
           <div class="tile-slider__rev">
             <span class="text-[9px] font-bold" :class="localDirection === 'REV' ? 'text-red-400' : 'opacity-30'">R</span>
@@ -154,7 +154,7 @@ function handleEject() {
       </div>
       <!-- Slider -->
       <div class="proto-tile__slider-row">
-        <v-btn size="x-small" color="red" variant="tonal" class="shrink-0 rounded-lg" @click.stop="handleStop"><v-icon size="14">mdi-stop</v-icon></v-btn>
+        <v-btn size="small" color="red" variant="tonal" class="shrink-0 rounded-lg" @click.stop="handleStop"><v-icon size="18">mdi-stop</v-icon></v-btn>
         <input type="range" min="0" max="126" step="1" :value="localSpeed" @input="(e) => setThrottleSpeed(Number((e.target as HTMLInputElement).value))" class="proto-tile__range" />
       </div>
       <!-- Reverser -->
@@ -181,26 +181,26 @@ function handleEject() {
   box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
 }
 .tile__accent { width: 4px; flex-shrink: 0; }
-.tile__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 6px 6px 4px; }
-.tile__info { display: flex; align-items: center; gap: 6px; }
-.tile__name { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: rgba(226,232,240,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-.tile__actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
-.tile--loading { justify-content: center; align-items: center; min-height: 60px; }
+.tile__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 10px 10px 8px; }
+.tile__info { display: flex; align-items: center; gap: 8px; }
+.tile__name { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; color: rgba(226,232,240,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+.tile__actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.tile--loading { justify-content: center; align-items: center; min-height: 84px; }
 
 /* ── Slider variant controls ─────────────────────────── */
-.tile-slider { display: flex; align-items: center; gap: 4px; padding: 2px 0; }
+.tile-slider { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
 .tile-slider__range {
-  -webkit-appearance: none; appearance: none; flex: 1; height: 14px;
-  background: linear-gradient(180deg, #111827, #1a202c); border-radius: 7px;
+  -webkit-appearance: none; appearance: none; flex: 1; height: 20px;
+  background: linear-gradient(180deg, #111827, #1a202c); border-radius: 10px;
   border: 1px solid #374151; box-shadow: inset 0 1px 3px rgba(0,0,0,0.4); outline: none; cursor: pointer;
 }
 .tile-slider__range::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+  -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%;
   background: linear-gradient(180deg, #6b7280, #4b5563 40%, #374151); border: 2px solid #9ca3af;
   box-shadow: 0 1px 4px rgba(0,0,0,0.4); cursor: grab;
 }
 .tile-slider__range::-moz-range-thumb {
-  width: 20px; height: 20px; border-radius: 50%;
+  width: 28px; height: 28px; border-radius: 50%;
   background: linear-gradient(180deg, #6b7280, #4b5563 40%, #374151); border: 2px solid #9ca3af; cursor: grab;
 }
 .tile-slider__rev { display: flex; align-items: center; gap: 1px; flex-shrink: 0; }
@@ -211,41 +211,41 @@ function handleEject() {
   background: linear-gradient(180deg, #2e4268 0%, #263752 40%, #1e2d45 100%);
   border: 2px solid #3a506e;
   box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
-  padding: 8px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
-.proto-tile__info { display: flex; align-items: center; gap: 6px; }
+.proto-tile__info { display: flex; align-items: center; gap: 8px; }
 .proto-tile__lcd {
-  display: flex; align-items: baseline; gap: 3px; flex-shrink: 0;
-  padding: 2px 6px; border-radius: 4px;
+  display: flex; align-items: baseline; gap: 4px; flex-shrink: 0;
+  padding: 4px 8px; border-radius: 5px;
   background: #0a1a0a; border: 1px solid #333;
   font-family: 'Courier New', monospace;
 }
-.proto-tile__dir { font-size: 8px; font-weight: 800; letter-spacing: 0.5px; }
+.proto-tile__dir { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; }
 .proto-tile__speed {
-  font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums;
+  font-size: 20px; font-weight: 900; font-variant-numeric: tabular-nums;
   color: #4ade80; text-shadow: 0 0 6px rgba(74,222,128,0.4); line-height: 1;
 }
 .proto-tile__name {
-  flex: 1; min-width: 0; font-size: 11px; font-weight: 600;
-  color: rgba(226,232,240,0.7); white-space: nowrap; overflow: hidden;
+  flex: 1; min-width: 0; font-size: 14px; font-weight: 600;
+  color: rgba(226,232,240,0.75); white-space: nowrap; overflow: hidden;
   text-overflow: ellipsis; text-align: center;
 }
-.proto-tile__slider-row { display: flex; align-items: center; gap: 4px; }
+.proto-tile__slider-row { display: flex; align-items: center; gap: 8px; }
 .proto-tile__range {
-  -webkit-appearance: none; appearance: none; flex: 1; height: 18px;
-  background: linear-gradient(180deg, #111827, #1a202c); border-radius: 9px;
+  -webkit-appearance: none; appearance: none; flex: 1; height: 24px;
+  background: linear-gradient(180deg, #111827, #1a202c); border-radius: 12px;
   border: 2px solid #374151; box-shadow: inset 0 2px 4px rgba(0,0,0,0.4); outline: none; cursor: pointer;
 }
 .proto-tile__range::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%;
+  -webkit-appearance: none; width: 32px; height: 32px; border-radius: 50%;
   background: linear-gradient(180deg, #6b7280, #4b5563 40%, #374151); border: 2px solid #9ca3af;
   box-shadow: 0 2px 6px rgba(0,0,0,0.4); cursor: grab;
 }
 .proto-tile__range::-moz-range-thumb {
-  width: 24px; height: 24px; border-radius: 50%;
+  width: 32px; height: 32px; border-radius: 50%;
   background: linear-gradient(180deg, #6b7280, #4b5563 40%, #374151); border: 2px solid #9ca3af; cursor: grab;
 }
 .proto-tile__rev-row { display: flex; align-items: center; justify-content: center; gap: 4px; }

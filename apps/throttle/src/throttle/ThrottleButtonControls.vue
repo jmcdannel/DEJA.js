@@ -66,7 +66,7 @@
     return [
       'btn btn-accent relative h-auto mx-auto',
       props.compact
-        ? 'p-1 min-h-[32px] min-w-[32px]'
+        ? 'p-2 min-h-[44px] min-w-[44px]'
         : '@[960px]:w-24 p-3 @[400px]:p-3 @[640px]:p-4 @[1024px]:py-3 @[1024px]:px-8 min-h-[48px] min-w-[48px]',
       'transition-all duration-deja-fast ease-deja-standard',
       'select-none',
@@ -81,7 +81,7 @@
     const isActive = pressedButton.value === 'stop'
     return [
       props.compact
-        ? 'rounded-2xl min-w-[36px] min-h-[40px]'
+        ? 'rounded-2xl min-w-[48px] min-h-[48px]'
         : 'rounded-3xl min-w-[48px] min-h-[48px] @[960px]:py-4 @[960px]:min-w-16',
       'h-auto mx-auto relative z-10',
       'transition-all duration-deja-fast ease-deja-standard',
@@ -94,7 +94,7 @@
 
   const iconClasses = computed(() =>
     props.compact
-      ? 'h-3 w-6 relative'
+      ? 'h-5 w-8 relative'
       : 'h-5 w-10 @[400px]:h-6 @[400px]:w-6 @[960px]:h-8 @[960px]:w-14 relative'
   )
 
