@@ -1,3 +1,11 @@
+> [!IMPORTANT]
+> **This project has moved.** Active development of DEJA.js and the Track & Trestle model
+> railroad platform now happens in private repositories under
+> [**Track and Trestle Technology, LLC**](https://github.com/trackandtrestle).
+> This repository stays public as a historical snapshot and is no longer maintained.
+>
+> **Current product, docs, and downloads → [dejajs.com](https://dejajs.com)**
+
 # 🚂 DEJA.js — DCC-EX JavaScript API
 
 <!-- trigger deploy 5 -->
@@ -66,24 +74,18 @@ This downloads the server, installs it to `~/.deja/`, and starts it. No GitHub a
 
 ---
 
-## 🚀 Quick Dev Setup
+## 🔒 Source Access
 
-```bash
-git clone https://github.com/jmcdannel/DEJA.js.git
-cd DEJA.js
-pnpm install
-pnpm dev
-```
+The DEJA.js source now lives in a private repository under
+[Track and Trestle Technology, LLC](https://github.com/trackandtrestle). This repo is a
+public snapshot and no longer tracks the shipping codebase.
 
-> **Prerequisites:** Node.js 20+, pnpm 9+
-
-Copy `.env.example` to `.env` at the root and fill in your Firebase credentials. See [CONTRIBUTING.md](CONTRIBUTING.md) for full environment setup.
-
-To test the production CLI from local source: `./install.sh --dev` (builds with tsup and installs to `~/.deja/`).
+Running the platform does not require source access — the installer above pulls a signed
+release tarball. For source or consulting enquiries, see [dejajs.com](https://dejajs.com).
 
 ---
 
-## 🛠️ Key Commands
+## 🛠️ Key Commands *(reference)*
 
 ```bash
 pnpm dev                # 🚀 Start all apps in dev mode
@@ -153,3 +155,7 @@ DEJA.js is proprietary software distributed under a subscription license. See yo
   <strong>🚂 Happy Railroading!</strong><br>
   <em>Built with ❤️ for the model railroad community</em>
 </p>
+
+---
+
+<sub>Built by [Josh McDannel](https://github.com/jmcdannel) · [dejajs.com](https://dejajs.com) · [LinkedIn](https://www.linkedin.com/in/jmcdannel)</sub>
