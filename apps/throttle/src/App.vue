@@ -41,18 +41,11 @@ const mainContentRef = useTemplateRef('mainContentRef')
 const { isDark, themePreference } = useThemeSwitcher()
 const { open: openCommandPalette } = useCommandPalette()
 
+// All pages share the same app-level default background (Ambient Glow).
+// Users can override the default or set per-page backgrounds in Settings.
 const throttleDefaults: AppBackgroundPrefs = {
-  default: 'none',
-  pages: {
-    '/': 'viaduct',
-    '/turnouts': 'forest',
-    '/roster': 'forest',
-    '/routes': 'forest',
-    '/signals': 'forest',
-    '/effects': 'viaduct',
-    '/conductor': 'viaduct',
-    '/connect': 'viaduct',
-  },
+  default: 'decor',
+  pages: {},
 }
 </script>
 
